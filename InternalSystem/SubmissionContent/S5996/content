@@ -1,0 +1,440 @@
+13
+[p 
+	"YouTube video:
+	$LF
+	(youtube|v=JWoia6zLf6Q|w=512|h=448)
+	$LF
+]p
+[p 
+	"Twitch video: https://www.twitch.tv/videos/272529279
+	$LF
+]p
+[h3 
+	" What and Why
+	$LF
+]h3
+[p 
+	"The Magic of Scheherazade is a hidden gem for the NES that contains a mixture of adventure and RPG elements.  I had done numerous speedruns of the game normally before ever considering making a TAS of it.  One day, I started messing around with the TAS editor feature of FCEUX 2.2.2, and it ultimately led to making this run over the next few months, in addition to improving the route I use in normal speedruns. Though the TAS was made entirely using FCEUX 2.2.2, it also runs properly in FCEUX 2.2.3 (and the compact save file was made in 2.2.3).
+	$LF
+]p
+[p 
+	"The goal of this TAS was to beat The Magic of Scheherazade from start to finish as quickly as possible, making substantial use of both luck manipulation and snapping mechanics to finish with a time far lower than any human playing could reasonably do.  I made virtually no effort to find credit warps or other game-breaking glitches.  Rather, the purpose was to make a near-optimal speedrun using the game’s normal mechanics (and a few minor glitches, mentioned later).
+	$LF
+]p
+[p 
+	"When making this TAS, I did not look directly at the game’s code, but I used RAM watch in some demon fights to keep track of enemy HP.  Special thanks to ct187 and synthpopisback for help with FCEUX (including memory locations for RAM watch) as well as some route suggestions.
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	" Snapping
+	$LF
+]h3
+[p 
+	"This run makes extensive use of the game’s snapping mechanics to cut corners and shorten distances. These include:
+	$LF
+]p
+[ul 
+	[li 
+		" Jump snaps – When landing after a jump, the player will snap forward or backward to the nearest grid line.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Screen transitions – After walking off a screen, the player will snap to the nearest grid spot when emerging onto the next screen. Also, once close enough to the edge of the screen to cause a screen transition, it is fastest to let off the D-pad and transition immediately rather than finish walking to the very edge of the screen.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Snaps to objects (trees, walls, etc.) – Done by newly pressing in the direction of the object once close enough to snap to it.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Snaps out of/away from objects – Done by pressing in the direction of the object when overlapping with it.  For instance, after jumping and landing in the top of a tree, pushing down on the D-pad will snap up out of the treetop.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Snaps into staircases
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" NPC snaps (more complicated than ordinary snaps, and often individual NPC's could be snapped to multiple times effectively)
+		$LF
+	]li
+]ul
+[p 
+	"I knew of the existence of some snapping mechanics when starting the TAS, but for the most part I did not figure out the specific mechanics until actually making the TAS.  I redid the beginning of Ch. 1 several times at first as I gradually figured out additional snapping mechanics.
+	$LF
+]p
+[p 
+	"In general, I sought to optimize snaps completely (at least to the point of getting optimal framerules – see below).  This included making sure all individual snaps were properly placed as well as planning out the snaps that would be used on each screen.  When there were multiple reasonable ways of handling a screen, I often charted the screen each way and chose the method that used the fewest frames.
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	" Framerules
+	$LF
+]h3
+[p 
+	"After any transition where the screen gradually darkens (entering or leaving a town or palace, entering a shop/mosque/staircase/demon's room, emerging from a carpet ride/time door, etc.), the screen reappears according to a 16-frame framerule.  Entering one of these transitions on a slightly different frame has no effect on when the screen reappears unless the change is enough to move the transition to the previous or next framerule, in which case the screen will reappear exactly 16 frames earlier or later.
+	$LF
+]p
+[p 
+	"The existence of these framerules played a significant part in the making of this TAS.  For one thing, it meant that a missed snap or an otherwise slightly suboptimal walk might not make the run take any extra frames overall.  In some cases, this let me use extra frames to avoid taking damage or kill a few more enemies without penalty.  In many cases, I found a way to cut out a framerule and ultimately save 16 frames by finding a slight improvement or killing fewer enemies/taking more damage.
+	$LF
+]p
+[p 
+	"At each framerule transition, I checked how many frames there were to spare before being pushed back to the next framerule, and if I saw I was in a situation where I only needed to save a few frames in order to make the next screen appear 16 frames earlier, I looked for ways to save those frames.  These “framerule battles” occasionally led to discovering or figuring out mechanics, such as the shimmy into the staircase first used in Ch. 3.
+	$LF
+]p
+[p 
+	"The ends of spell casts such as Bolttor, Flamol, and Thunder also follow a 16-frame framerule.
+	$LF
+]p
+[p 
+	"(Ordinary screen transitions are not on a framerule – they simply take 14 frames.  Leaving a screen a frame later means entering the next one a frame later, etc.  After turn-based encounters, the screen reappears on an 8-frame framerule.)
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	" Turn-Based Encounters
+	$LF
+]h3
+[p 
+	"In addition to the usual overworld enemies, this game contains turn-based encounters (similar to Dragon Warrior or Final Fantasy) which occur at screen transitions.  More specifically, some screens are flagged as encounter screens, and walking off one of these screens has a chance to spawn a turn-based battle before entering the next screen.
+	$LF
+]p
+[p 
+	"When an encounter appeared, it typically could not be avoided trivially by leaving the screen at a different frame or pixel, though the exact frame affected which enemy formation showed up.  Escaping from the battle on the first try was trivial (just needed to select “Escape” on a frame that works), but it still cost about 4 seconds to have a fight appear and immediately escape from it.
+	$LF
+]p
+[p 
+	"Encounters appearing typically led to long sessions of trying to manipulate them away, sometimes successfully.  Usually when I was able to avoid an encounter I initially got, it was by taking damage on an earlier screen, possibly to a specific enemy.  Making changes to other stats such as MP or coins did not seem to have any effect.  Also, before getting Ramipas (a spell which temporarily reduces the rate of both overworld enemies and turn-based encounters), every fourth encounter seemed particularly difficult to avoid.  In the first 3 chapters, I ended up taking the encounters from precisely the 4th, 8th, 12th, 16th, 20th, and 24th encounter screens, each time manipulating it to be the enemy formation which used the fewest frames.  (I actually found a way out of the 24th one but then got both the 25th and 26th possible encounters, so I ended up putting myself back in the 24th encounter to avoid the next two.)  In the last two chapters, with access to Ramipas, there was only one encounter I could not successfully avoid.
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	" Luck Manipulation
+	$LF
+]h3
+[p 
+	"Luck manipulation is used regularly throughout the run, including:
+	$LF
+]p
+[ul 
+	[li 
+		" Waiting frames before entering a screen in order to spawn/despawn the enemies there (sometimes in order to alter RNG for a later screen).  In some cases, the RNG was stubborn, and the enemies would always show up (or always not show up) regardless of how many frames were burned before entering
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Waiting frames before entering a screen in order to alter enemy movement
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Deliberately taking damage when it avoids a turn-based battle
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulation of demon fights (see chapter overviews)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Drop manipulation – The items dropped by ordinary enemies in this game follow a specific sequence, but whether or not the enemy drops an item and progresses the item sequence is frame-based.  Many times throughout the run, enemies are killed on specific frames which cause them to drop their items.  In some cases, important drops (money bags, HP drinks) were manipulated away so a more convenient enemy would drop them shortly.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	" Glitches and Quirks
+	$LF
+]h3
+[p 
+	"This run used the following minor glitches/quirks:
+	$LF
+]p
+[ul 
+	[li 
+		" The “Loan Trick” - There is supposed to be a limit of 400 rupias that you can borrow from the shopkeeper, but the player can get around this limit and borrow an extra 100 (but no more) by accumulating a debt of exactly 350 rupias, then asking for 150 more.  (This trick is also used in human speedruns of this game.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" When hitting certain levels, including Lv. 5, the game gives you a free key if you currently have zero keys in your inventory.  Two keys were needed in this run, and rather than buying any in Ch. 1, I got the free key from Lv. 5 and then bought a second key in Ch. 3, saving 40 rupias relative to paying for both keys.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" On the pillar screen near the end of the game, the player is supposed to shoot the wall when the star shines blue.  By standing where the hero just overlaps the star horizontally by one or two pixels, the player can shoot the rod once and make the star quickly cycle through all its colors, leading to the wall being destroyed when the star turns blue.  This cuts out the need for three rod shots to change the star’s color one by one.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" By casting Defenee (a spell which temporarily halves damage taken) right at the screen transition near the end of the Ch. 3 palace, I was able to skip the usual animation where the hero disappears in a puff and reappears (in addition to saving needed HP).  He simply has the red armor already at the start of the next screen.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" The duration of the “I won’t meet any more enemies” text when casting Ramipas varies, and every 16 frames, there are two back-to-back frames where the delay is 16 frames shorter.  Each Ramipas cast in the TAS is timed to fall on one of these better frames.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	" Chapter Overviews
+	$LF
+]h3
+[p 
+	"The game is divided into five chapters, each of which finishes with a demon fight. An overview of the considerations of each chapter is given below.
+	$LF
+]p
+[h4 
+	" Ch. 1 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Needed to reach Lv. 3 (80 Exp.) to learn Bolttor1 for the Gilga fight. This involved deliberately burning frames on several early screens to spawn enemies on the next screen
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Needed enough HP to survive the Gilga fight (including taking 30 damage from the stone magic)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Bought enough items (5 mashroob, 2 carpets, and a set of horns) to last midway through Ch. 3, when the next visit to a shop would be
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Avoided a turn-based battle just before leaving the past by taking damage (the first damage taken in the run)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulated a favorable Gilga eye setup by waiting 16 frames before dismissing the “Gilga Appeared!” message
+		$LF
+	]li
+]ul
+[h4 
+	" Ch. 2 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Needed to reach Lv. 7 (780 Exp.) to learn Flamol1 for the Curly fight
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Skipped most of the chapter by knowing the way through the maze desert without recruiting the allies who show you the way (a trick also used in human speedruns)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Avoided the first possible turn-based battle in the palace by taking damage on an antlion outside a few screens earlier; also avoided one encounter later in the palace by taking damage inside
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" When doing Ch. 4 later, went back and jettisoned two horns before the Curly fight in this chapter so the B button would automatically revert to “Jump” after the final horn use in Ch. 4.  This did not mess up any RNG, though it turned out not to save any frames either.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" During the 2nd phase of the Curly fight, cast Flamol1 on frames which caused her to counter by healing the same arm every time (leading to 5 out of the 6 arms being killed on the fifth cast).  Also, by accident, I lucked into a situation where Curly’s final heal did not update her HP in time, causing the last arm to take only two rod hits to kill (instead of 4).
+		$LF
+	]li
+]ul
+[h4 
+	" Ch. 3 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Needed to reach Lv. 11 (2000 Exp.) for the increase in rod strength; ideally no later than the Changarl fight so the dragons afterward would take only 3 rod hits to kill instead of 4
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Needed to be above 110 HP to survive the Troll fight, ideally without stopping to heal.  Getting the Cimaron rod refilled HP, but after this point it was critical to avoid damage when possible.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Bought a key and 4 carpets, enough to last the rest of the run
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Avoided one early encounter by spawning overworld enemies and taking damage from them; avoided another encounter (the Fire Squad fight) by taking damage but put myself back in it to avoid the next two encounters instead (one of which also required taking damage in the maze to avoid)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulated Troll to appear in favorable spots during his first stage by hitting him on specific frames.  (The Troll fight in this run is completely optimal for Lv. 11, even though not every rod hit was on the first possible frame.  All of Troll’s Thunder counters ended exactly 272 frames apart, or 17 framerules, and in his 2nd form, all the rod hits are exactly 32 frames apart, the length of his invincibility frames.)
+		$LF
+	]li
+]ul
+[h4 
+	" Ch. 4 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Did not need to gain any levels.  (Reaching Lv. 17, or 6000 Exp., would have made it possible to 1-cycle Salamander, but it would have taken too long to gain this experience to be worth it.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Needed enough money to afford changing class to Fighter (60 rupias), then back to Magician (100 rupias).  (Money bags and convenient coin drops were picked up in the first 3 chapters with this in mind. After the Magician class change in Ch. 4, money was no longer needed.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" With access to Ramipas, I was able to avoid all turn-based encounters this chapter.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" In the Salamander fight, all rod shots hit.  (The fact that this is possible eliminates the need for grinding for experience and makes this fight and this chapter much shorter than it is in human speedruns.)
+		$LF
+	]li
+]ul
+[h4 
+	" Ch. 5 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Wanted to hit Lv. 21 (11300 Exp.) before the 2nd trip through the fire palace.  This way, the three dragon fights there, along with 3 others later, would each take only 3 rod hits to kill (instead of 4), and the Goragora fight at the end of the game would take 11 rod hits instead of 13.  (It would have been about as fast to avoid killing enemies and not gain this level, skipping the level up fanfare text but having dragons and Goragora take more rod hits to kill.  I chose to gain the level in order to make the TAS more interesting to make and watch.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Avoided the first possible turn-based battle in the maze by both taking damage to an ifrit (blue fire-ring enemy) outside and taking extra damage to a dragon in the fire palace.  Used Ramipas to avoid a few other encounters, but could not avoid one encounter (the Gilas Division fight) shortly after getting the Legend sword, during a gauntlet of encounter screens.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Made use of Bolttor framerules in the first phase of the Goragora fight.  Instead of always casting Bolttor3 on the first frame possible, I waited until the last frame which would still make it end on the same framerule, and in the meantime walked left or up.  This put me in a better position at the start of the 2nd phase of the fight without using any extra frames.  (A similar idea could have saved frames in the Ch. 1 Gilga fight.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" In the ending, the last input could technically be made 8 frames earlier by removing the final input (frame 180552) dismissing the last dialogue screen and instead waiting for it to disappear on its own, but this would be slower getting to the rest of the ending.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	" Possible Improvements
+	$LF
+]h3
+[p 
+	"Some minor improvements are or may be possible, including the following:
+	$LF
+]p
+[ul 
+	[li 
+		" It would have been possible to shoot one additional eye and cut out one Bolttor cast from the Gilga fight at the end of Ch. 1 (making the fight 96 frames shorter) if I had discovered Bolttor framerules by then.  I actually went back and improved this fight in a separate branch after finishing Ch. 3, but it broke RNG as expected, including immediately causing worse RNG in the sandbeast grinding at the beginning of Ch. 2.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Occasional snaps are missed in the first few chapters, in some cases because I had not yet figured out certain snapping patterns.  Trying to go back and fix these snaps broke RNG and would only have saved a trivial number of frames anyway.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" It may have been possible to avoid more turn-based battles by working out how exactly the game determines them.  Each additional battle avoided would have saved up to 4 seconds.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	"With all that said, enjoy!  It took a long time to make, but it was quite fun.
+	$LF
+]p
+[p 
+	"[Suggested screenshot frame: 4663, as long as the frame number is not displayed where FCEUX puts it...]
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": Removed 5918 blank input frames at the end of the movie file.
+	$LF
+]p
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": This run is enough optimized for our standards, thanks to the work that has been put in the routing and the usage of the tricks.
+	$LF
+]p
+[p 
+	"On the other side, the movie turned out quite entertaining also thanks to the diversity and charm of the game itself, which is a very high quality title for the NES console. The audience reception was also good.
+	$LF
+]p
+[p 
+	"With that said, accepting this movie for Moons.
+	$LF
+]p
+[p 
+	(__wikiLink|Stovent)
+	": Processing...
+]p

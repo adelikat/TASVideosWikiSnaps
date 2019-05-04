@@ -1,0 +1,1056 @@
+1
+[p 
+	"First of all, C002AB is multiplication routine. It takes m23*m24 and stores it in m26-27 (2 bytes). C002E2 is the division routine.
+	$LF
+]p
+[p 
+	"Here's how the RNG works:
+	$LF
+]p
+[p 
+	"The RNG is stored in 7E0038-7E003B.
+	$LF
+]p
+[p 
+	"The RNG is modified by functions like these (not exhaustive):
+	$LF
+]p
+[p 
+	"Address C00342
+	$LF
+	"STA $23
+	$LF
+	"REP #$20
+	$LF
+	"LDA $3A
+	$LF
+	"EOR #$8020
+	$LF
+	"STA $3A
+	$LF
+	"LDA $38
+	$LF
+	"ASL A
+	$LF
+	"ASL A
+	$LF
+	"CLC
+	$LF
+	"ADC $38
+	$LF
+	"ADC $3A
+	$LF
+	"STA $38
+	$LF
+	"SEP #$20
+	$LF
+	"XBA
+	$LF
+	"STA $24
+	$LF
+	"JSR $02AB 
+	(__wikiLink|multiplication)
+	$LF
+	"LDA $27
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+	"(16 bits)
+	$LF
+	"m23:=A AND 0xFF
+	$LF
+	"m3A:=m3A XOR 0x8020
+	$LF
+	"A:=4*m38 AND 0xFFFF
+	$LF
+	"A:=A+m38
+	$LF
+	"if A>0xFFFF then C:=1 else C:=0
+	$LF
+	"m38:=(A+m3A+C) AND 0xFFFF
+	$LF
+	"m24:=m38 >> 8
+	$LF
+	"m26:=m23*m24
+	$LF
+	"return (m26 >> 8)  
+	(__wikiLink|A)
+	$LF
+]p
+[p 
+	"The function calculates a random number between 0 and (A AND 0xFF)-1. We'll call this function rand(X), for a random number between 0 and X-1.
+	$LF
+]p
+[p 
+	"All jumps to this routine use "JSR $0342"
+	$LF
+]p
+[h3 
+	"Encounters
+	$LF
+]h3
+[p 
+	"Address C02A89
+	$LF
+	"LDA #$FA
+	$LF
+	"JSR $0342 
+	(__wikiLink|rand)
+	$LF
+	"CMP #$96
+	$LF
+	"BCS $18 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"CMP #$8E
+	$LF
+	"BCC $02 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"BRA $08 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"CMP #$32
+	$LF
+	"BCS $0E 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"CMP #$2A
+	$LF
+	"BCC $0A 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"LDA #$01
+	$LF
+	"STA $07F9
+	$LF
+	"LDA #$06
+	$LF
+	"STA $07EA
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+	"A:=rand(250)
+	$LF
+	"if 142<=A<150 or 42<=A<50 then 
+	(__wikiLink|encounter)
+	$LF
+]p
+[p 
+	"This determines encounters.
+	$LF
+]p
+[h3 
+	"Pre-emptive attack on encounter
+	$LF
+]h3
+[p 
+	"Address C086DC
+	$LF
+	"LDA $07F9
+	$LF
+	"CMP #$02
+	$LF
+	"BEQ $12 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"LDA #$C8
+	$LF
+	"JSR $0342 
+	(__wikiLink|rand)
+	$LF
+	"LDX #$0002
+	$LF
+	"CMP #$BE
+	$LF
+	"BCS $06
+	$LF
+	"DEX
+	$LF
+	"CMP #$AA
+	$LF
+	"BCS $01
+	$LF
+	"DEX
+	$LF
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"TXA
+	$LF
+	"STA $159A
+	$LF
+	"BEQ $0D
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+	"if m7F9==2 
+	(__wikiLink|boss battle)
+	" then Type:=0 exit
+	$LF
+	"A:=rand(200)
+	$LF
+	"if 190<=A<200 then Type:=2 exit
+	$LF
+	"if 170<=A<190 then Type:=1 exit
+	$LF
+	"Type:=0
+	$LF
+]p
+[p 
+	"Type 0: no pre-empt
+	$LF
+	"Type 1: ally pre-empt
+	$LF
+	"Type 2: enemy pre-empt
+	$LF
+]p
+[p 
+	"The function determines whether or not a pre-empt occurs. If an ally pre-empt occurs, all allies get a free round to attack first. If an enemy pre-empt occurs, all enemies get a free round to attack first. Boss battles cannot have pre-empts.
+	$LF
+]p
+[h3 
+	"Accuracy of physical attacks
+	$LF
+]h3
+[p 
+	"Address C08B9D
+	$LF
+	"LDA $12,x
+	$LF
+	"AND #$00FF
+	$LF
+	"PHA
+	$LF
+	"LDX $15A1
+	$LF
+	"LDA $12,x
+	$LF
+	"AND #$00FF
+	$LF
+	"ADC #$0028
+	$LF
+	"SEC
+	$LF
+	"SBC $01,s 
+	(__wikiLink|push value)
+	$LF
+	"BCS $03 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"LDA #$0000
+	$LF
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"STA $2C
+	$LF
+	"PLA
+	$LF
+	"SEP #$20
+	$LF
+	"LDA #$05
+	$LF
+	"STA $30
+	$LF
+	"JSR $02E2 
+	"[division m32:=int(m2C/m30)]
+	$LF
+	"INC $32
+	$LF
+	"INC $32
+	$LF
+	"LDA $32
+	$LF
+	"JSR $0342
+	$LF
+	"DEC $32
+	$LF
+	"CMP $32
+	$LF
+	"BCC $09 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"LDX $15B0
+	$LF
+	"LDA $35,x
+	$LF
+	"ORA #$10
+	$LF
+	"STA $35,x
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+]p
+[p 
+	"A:=DefAgl AND 0xFF
+	$LF
+	"S:=A
+	$LF
+	"A:=AtkAgl AND 0xFF
+	$LF
+	"A:=A+40
+	$LF
+	"A:=A-S
+	$LF
+	"if A<0 then A:=0
+	$LF
+	"m2C:=A
+	$LF
+	"m30:=5
+	$LF
+	"m32:=int(m2C/m30)+2
+	$LF
+	"A:=rand(m32)
+	$LF
+	"if A==m32-1 then 
+	(__wikiLink|attack miss)
+	" else 
+	(__wikiLink|attack hit)
+	$LF
+]p
+[h3 
+	"Another RNG-related routine
+	$LF
+]h3
+[p 
+	"Address C00363
+	$LF
+	"STY $2A
+	$LF
+	"REP #$20
+	$LF
+	"LDA $38
+	$LF
+	"ASL A
+	$LF
+	"ASL A
+	$LF
+	"CLC
+	$LF
+	"ADC $38
+	$LF
+	"ADC $3A
+	$LF
+	"STA $38
+	$LF
+	"STA $24
+	$LF
+	"SEP #$20
+	$LF
+	"JSR $025F 
+	(__wikiLink|multiplication)
+	$LF
+	"LDY $28
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Y:=m2A AND 0xFFFF
+	$LF
+	"A:=4*m38 AND 0xFFFF
+	$LF
+	"A:=A+m38
+	$LF
+	"if A>0xFFFF then C:=1 else C:=0
+	$LF
+	"m38:=(A+m3A+C) AND 0xFFFF
+	$LF
+	"m24:=m38
+	$LF
+	"return m24*Y >> 16 
+	(__wikiLink|Y)
+	$LF
+]p
+[p 
+	"This is another rng-modifying function. The only difference between this function and rand(X) is that address m3A does not XOR by 0x8020, and that the multiplication uses 16-bits of RNG, rather than 8-bit.
+	$LF
+	"Call this function rand2(Y)
+	$LF
+]p
+[h3 
+	"Initial damage routine
+	$LF
+]h3
+[p 
+	"Address C08BDB
+	$LF
+	"REP #$20
+	$LF
+	"STZ $0554
+	$LF
+	"LDA $054E 
+	(__wikiLink|atk)
+	$LF
+	"SEC
+	$LF
+	"SBC $0550 
+	(__wikiLink|def)
+	$LF
+	"BCS $06 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"LDY #$0001
+	$LF
+	"JMP $8C1F 
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	$LF
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"STA $2A
+	$LF
+	"SEP #$20
+	$LF
+	"LDA #$0A
+	$LF
+	"STA $24
+	$LF
+	"LDA $15AB
+	$LF
+	"BIT #$80
+	$LF
+	"BNE $02 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"LSR $24
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"JSR $0288 
+	"[multiplication  m26:=m2A(16bit)*m24]
+	$LF
+	"LDA #$00
+	$LF
+	"XBA
+	$LF
+	"LDA $24
+	$LF
+	"TAY
+	$LF
+	"LDX $26
+	$LF
+	"STX $0554
+	$LF
+	"BEQ $0B   
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"STX $2C
+	$LF
+	"LDA #$0A
+	$LF
+	"STA $30
+	$LF
+	"JSR $02E2 
+	"[division m32:=int(m2C/m30)]
+	$LF
+	"LDY $32
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"JSR $0363 
+	(__wikiLink|rand2)
+	$LF
+	"INY
+	$LF
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	$LF
+	"LDX $15B0
+	$LF
+	"REP #$21
+	$LF
+	"TYA
+	$LF
+	"ADC $0554
+	$LF
+	"STA $0554
+	$LF
+	"CMP #$270F
+	$LF
+	"BCC $03 
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	$LF
+	"LDA #$270F
+	$LF
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	$LF
+	"STA $0554
+	$LF
+	"SEP #$20
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+	"m554:=0
+	$LF
+	"A:=m54E 
+	(__wikiLink|atk)
+	$LF
+	"A:=A-m550 
+	(__wikiLink|def)
+	$LF
+	"if A<0 then Damage:=1 exit
+	$LF
+	"m2A:=A
+	$LF
+	"if 
+	(__wikiLink|enemy attack)
+	" then m24:=5 else m24:=10
+	$LF
+	"m26:=m24*m2A
+	$LF
+	"if m26==0 then Damage:=rand2(m24)+1 exit
+	$LF
+	"m554:=m26
+	$LF
+	"m2C:=m26
+	$LF
+	"m30:=10
+	$LF
+	"Y:=int(m2C/m30)
+	$LF
+	"m554:=m554+rand2(Y)+1
+	$LF
+	"if m554>9999 then m554:=9999
+	$LF
+	"Damage:=m554
+	$LF
+]p
+[p 
+	"This routine calculates the initial damage. This is the final damage if it is magic/item attack. If it is physical attack, there may be critical hit applied later.
+	$LF
+]p
+[p 
+	"This routine only executes if the attack does not miss.
+	$LF
+]p
+[h3 
+	"Magic damage (attack value)
+	$LF
+]h3
+[p 
+	"Address C0964C
+	$LF
+	"LDX $15A1
+	$LF
+	"LDA $13,X
+	$LF
+	"JSR $97D1 
+	"[?]
+	$LF
+	"REP #$20
+	$LF
+	"AND #$00FF
+	$LF
+	"PHA
+	$LF
+	"LDA $0546
+	$LF
+	"AND #$00FF
+	$LF
+	"CLC
+	$LF
+	"ADC $01,S 
+	(__wikiLink|push value)
+	$LF
+	"STA $054E
+	$LF
+	"LSR A
+	$LF
+	"CLC
+	$LF
+	"ADC $054E
+	$LF
+	"STA $054E
+	$LF
+	"PLA
+	$LF
+	"SEP #$20
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+]p
+[p 
+	"S:=Wisdom 
+	(__wikiLink|cannot exceed 255)
+	$LF
+	"A:=m546  
+	(__wikiLink|basepower of spell/item)
+	" 
+	(__wikiLink|cannot exceed 255)
+	$LF
+	"A:=A+S
+	$LF
+	"A:=A+int(A/2)
+	$LF
+	"AtkValue:=A
+	$LF
+]p
+[p 
+	"This routine calculates the attack value of a spell/item.
+	$LF
+]p
+[h3 
+	" Critical hit
+	$LF
+]h3
+[p 
+	"Address C08A69
+	$LF
+	"LDA #$1E
+	$LF
+	"STA $02
+	$LF
+	"LDA $159E 
+	"[?]
+	$LF
+	"BIT #$80
+	$LF
+	"BEQ $02 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"ASL $02
+	$LF
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	$LF
+	"LDX $15A1
+	$LF
+	"LDA $3C,X
+	$LF
+	"LSR A
+	$LF
+	"BCC $02 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"LSR $02
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	$LF
+	"LDA $02
+	$LF
+	"JSR $0342 
+	(__wikiLink|RAND)
+	$LF
+	"LSR $02
+	$LF
+	"CMP $02
+	$LF
+	"BNE $1C 
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	$LF
+	"REP #$20
+	$LF
+	"LDA $0554 
+	(__wikiLink|DMG)
+	$LF
+	"ASL A
+	$LF
+	"ADC $0554 
+	(__wikiLink|DMG)
+	$LF
+	"CMP #$270F
+	$LF
+	"BCC $03 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"LDA #$270F
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	$LF
+	"STA $0554
+	$LF
+	"SEP #$20
+	$LF
+	"LDA #$00
+	$LF
+	"JSR $AAD2 
+	"[GREATEST ATTACK?]
+	$LF
+	"RTS
+	$LF
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	$LF
+	"LDA #$14
+	$LF
+	"STA $02
+	$LF
+	"LDA $159E
+	$LF
+	"BIT #$80
+	$LF
+	"BEQ $02
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	$LF
+	"ASL $02
+	$LF
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	$LF
+	"LDX $15A1
+	$LF
+	"LDA $3C,X
+	$LF
+	"LSR A
+	$LF
+	"LSR A
+	$LF
+	"BCC $02
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	$LF
+	"LSR $02
+	$LF
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	$LF
+	"LDA $02
+	$LF
+	"JSR $0342 
+	(__wikiLink|RAND)
+	$LF
+	"LSR $02
+	$LF
+	"CMP $02
+	$LF
+	"BNE $18 
+	"[
+	[a id=8 
+	]a
+	[a href=#r8 
+		"8
+	]a
+	"]
+	$LF
+	"REP #$20
+	$LF
+	"LDA $0054 
+	(__wikiLink|DMG)
+	$LF
+	"ASL A
+	$LF
+	"CMP #$270F
+	$LF
+	"BCC $03 
+	"[
+	[a id=7 
+	]a
+	[a href=#r7 
+		"7
+	]a
+	"]
+	$LF
+	"LDA #$270F
+	$LF
+	"[
+	[a id=7 
+	]a
+	[a href=#r7 
+		"7
+	]a
+	"]
+	$LF
+	"STA $0554
+	$LF
+	"SEP #$20
+	$LF
+	"LDA #$01
+	$LF
+	"JSR $AAD2 
+	"[CRUSHING ATTACK?]
+	$LF
+	"[
+	[a id=8 
+	]a
+	[a href=#r8 
+		"8
+	]a
+	"]
+	$LF
+	"RTS
+	$LF
+]p
+[p 
+	"Translation:
+	$LF
+]p
+[p 
+	"m2:=30
+	$LF
+	"if 
+	(__wikiLink|unknown thing)
+	" then m2:=2*m2
+	$LF
+	"if 
+	(__wikiLink|modifier)
+	" then m2:=int(m2/2)
+	$LF
+	"A:=rand(m2)
+	$LF
+	"if A==int(m2/2) then m554:=max(3*m554,9999) exit 
+	(__wikiLink|greatest attack)
+	$LF
+	"m2:=20
+	$LF
+	"if 
+	(__wikiLink|unknown thing)
+	" then m2:=2*m2
+	$LF
+	"if 
+	(__wikiLink|modifier2)
+	" then m2:=int(m2/2)
+	$LF
+	"A:=rand(m2)
+	$LF
+	"if A==int(m2/2) then m554:=max(2*m554,9999) exit 
+	(__wikiLink|crushing attack)
+	$LF
+]p
+[p 
+	"This routine first determines whether an attack is a GREATEST ATTACK (1/30 probability). If it is, damage is multiplied by 3, max damage 9999. If an attack is not a GREATEST ATTACK, the routine determines whether an attack is a CRUSHING ATTACK (1/20 probability). If so, damage is multiplied by 2.
+	$LF
+]p
+[p 
+	"This routine only executes if the attack does not miss. The CRUSHING ATTACK part only executes if the attack is not a GREATEST ATTACK.
+]p

@@ -1,0 +1,501 @@
+27
+[p 
+	"This resources page showcases how to shatter and make cry the game 'Brain Age: Train Your Brain In Minutes A Day' for TASing use. The U ROM is used. - xy2_
+	$LF
+]p
+[hr 
+]hr
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-3008 
+				" Introduction
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-3009 
+						" Basic concepts
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-3010 
+				" Bias
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-3011 
+						" Long and short answers
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-3012 
+				" Input
+				$LF
+			]a
+		]li
+		[li 
+			[a href=#heading-3013 
+				" The Trinity of Major Glitches
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-3014 
+						" Edge breaking
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-3015 
+						" Godspots
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-3016 
+						" Out of bounds drawing
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-3017 
+						" '?'
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-3018 
+				" Minor tricks
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-3019 
+						" Judging delay
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-3020 
+						" Submit cancel
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[hr 
+]hr
+[h2 
+	" Introduction
+	$LF
+	[a id=heading-3008 
+	]a
+]h2
+[p 
+	"Brain Age needs no introduction for many. The mode used and the most abusable one by far is 
+	(__wikiLink|1734M|the calculations x20/x100 mode.)
+	" The aim of this resources page is to be an assistance in making Brain Age your personal image editing tool.
+	$LF
+]p
+[p 
+	"For the purpose of keeping this page short, the term 
+	[a class=extlink href=https://en.wikipedia.org/wiki/Optical_character_recognition rel=nofollow 
+		""optical character recognition"
+	]a
+	", which Brain Age uses to transform inputs to answers, will be simply nicknamed 'recon' in the rest of this page.
+	$LF
+]p
+[p 
+	"For transforming any Brain Age valid pictures you draw into input, this is not the right page. Please check 
+	[a href=/forum/t/17016 
+		"this thread
+	]a
+	" and micro500's 
+	[a class=extlink href=https://github.com/pjgat09/BrainAgeTools rel=nofollow 
+		"Brain Age Tools
+	]a
+	" to get started.
+	$LF
+]p
+[h3 
+	" Basic concepts
+	$LF
+	[a id=heading-3009 
+	]a
+]h3
+[p 
+	"The most basic concepts to grasp are how Brain Age recons input and transforms it into answers. There are four basic concepts: 
+	[b 
+		"segments
+	]b
+	", 
+	[b 
+		"models
+	]b
+	", 
+	[b 
+		"keypoints
+	]b
+	" and 
+	[b 
+		"edges
+	]b
+	".
+	$LF
+]p
+[p 
+	"The concept of a 
+	[b 
+		"segment
+	]b
+	" is a line drawn without interrupting input (lifting the stylus). Each segment has a start and an end: your initial input, and your last input without lifting the pen. As such, in normal play, a segment would be a line drawn without interruption. 
+	$LF
+]p
+[p 
+	[img class=embedright src=http://imgur.com/BugIHyu.png 
+	]img
+	$LF
+]p
+[p 
+	"Every single input of your segment is a 
+	[b 
+		"keypoint
+	]b
+	". The start and end of your segment are special kinds of keypoints: they are 
+	[b 
+		"edges
+	]b
+	". These keypoints and edges assemble to create what is called a 
+	[b 
+		"model
+	]b
+	", which is then assigned a specific number based on the model and given an answer.
+	$LF
+]p
+[p 
+	"To the right is an example of the simplest model in the game: the 1. The 1 is made with a straight line, with edges being positioned at the start and the end of the segment. Note that edges from different segment do not go togheter to make a model.
+	$LF
+]p
+[p 
+	"Note that every single model has two edges. A model, no matter what, cannot be made with only one edge: this is the reason the out of bounds drawing glitch exists.
+	$LF
+	[a href=/forum/p/414614#414614 
+		" The full list of models is here (see the pictures.)
+	]a
+	$LF
+]p
+[p 
+	"How does Brain Age define which model it recons is first based on the position of your current edges. From two edges, it will then try to assemble a model based on the most convenient set of keypoints it can find. If multiple ways to assemble a model are found, Brain Age will prioritize:
+	$LF
+]p
+[p 
+	[b 
+		"1.
+	]b
+	" Bias (single digit only, see section 'Bias')
+	$LF
+	[br 
+	]br
+	" 
+	[b 
+		"2.
+	]b
+	" The biggest model it can find within the allocated edge placement
+	$LF
+	[br 
+	]br
+	" 
+	[b 
+		"3.
+	]b
+	" If there are multiple segments that generate models with about the same size, the models with the last drawn segments are prioritized 
+	[em 
+		"{to investigate..}
+	]em
+	$LF
+]p
+[p 
+	"No matter how long is your segment, or how skewed it is, Brain Age will always try to find a model given these set conditions.
+	$LF
+]p
+[p 
+	"If you have multiple segments and if too many models from different segments overlap, Brain Age will simply refuse the whole answer and give an '?'. 
+	$LF
+]p
+[p 
+	[img class=embedright src=http://imgur.com/jFD5JY4.png 
+	]img
+	$LF
+]p
+[h2 
+	" Bias
+	$LF
+	[a id=heading-3010 
+	]a
+]h2
+[p 
+	"Bias is a 'recovery mechanic' that allows very skewed drawings to be successfully recon as the correct answer. In a 
+	[b 
+		"single-digit answer,
+	]b
+	" when there are multiple models possible with varying sizes, Brain Age will suddenly, from the detected models, prioritize the model 
+	[b 
+		"with the right answer
+	]b
+	". If the question was a 4 and the question is '1+3', Brain Age will try to detect a 
+	[b 
+		"reasonably sized
+	]b
+	" 4 model (this won't work with too small models) and register it successfully.
+	$LF
+]p
+[h3 
+	" Long and short answers
+	$LF
+	[a id=heading-3011 
+	]a
+]h3
+[p 
+	"There are two types of answers in this game: 
+	[b 
+		"short
+	]b
+	", which appear instantanely (you only have to pause for 1 frame for these) and 
+	[b 
+		"long
+	]b
+	", where you have to wait over 45+ frames for the answer to appear. Long answers only happens when two conditions are met:
+	$LF
+]p
+[p 
+	[b 
+		"1.
+	]b
+	" Bias is present (so a single digit answer)
+	$LF
+	[br 
+	]br
+	" 
+	[b 
+		"2.
+	]b
+	" You write an wrong answer
+	$LF
+]p
+[p 
+	[b 
+		"OR
+	]b
+	$LF
+]p
+[p 
+	[b 
+		"@
+	]b
+	" You trigger an '?'
+	$LF
+]p
+[p 
+	"This is the most consistent way to trigger long answers (not that you'd want to do it..) Long answers are very problematic when manipulating, because you can't effectively manipulate answers to appear without waiting a lot, rendering manipulation useless.
+	$LF
+]p
+[h2 
+	" Input
+	$LF
+	[a id=heading-3012 
+	]a
+]h2
+[p 
+	[em 
+		"{still some uncertain info: this is a theory, but it's the most accurate one on the way the game handles input..}
+	]em
+	" To avoid having to remember a ton of input data for an answer, the game remember three specific inputs: the first edge of each segment (as in, the first input of a segment), the last edge of each segment and every single keypoint of the segment you're currently drawing, up to a certain limit which is unknown. Once this is done, Brain Age will remember the relevant keypoints then discard irrelevant input. This phenomenon can be most observed with making a 
+	[b 
+		"lot
+	]b
+	" of segments: after a while, since the game has so much to 'remember', it will not accept any more input and the stylus will make no more noise.
+	$LF
+]p
+[h2 
+	" The Trinity of Major Glitches
+	$LF
+	[a id=heading-3013 
+	]a
+]h2
+[p 
+	"Now that we know how Brain Age handles input, the next step is breaking it. This means drawing whatever you want and manipulating it into whatever answer you want, even manipulating multiple answers before getting the right one with enough practice. Before explaining how these glitches work, one thing needs to be understood. There are two areas in the touch screen: the 
+	[b 
+		"drawable field
+	]b
+	" or the inbounds section; and the 
+	[b 
+		"edges
+	]b
+	" of the field or out of bounds. 
+	$LF
+]p
+[h3 
+	" Edge breaking
+	$LF
+	[a id=heading-3014 
+	]a
+]h3
+[p 
+	"If you do an input starting from an edge back in bounds, the game will not be able to draw the line you just drew, because its initial coordinate is out of bounds. However, this input 
+	[b 
+		"will be registered
+	]b
+	"! This does not make the input appear on screen, but makes the input register. Such technique is known as 
+	[b 
+		"edge breaking
+	]b
+	", and is a fundamental technique for manipulation. However, it has two main drawbacks:
+	$LF
+]p
+[p 
+	[img class=embedright src=http://imgur.com/omlznDV.png 
+	]img
+	$LF
+	[b 
+		"1.
+	]b
+	" You can only edge break for 1 frame, after which you are forced to go back in bounds to 'prepare' for your next edge break.
+	$LF
+	[br 
+	]br
+	" 
+	[b 
+		"2.
+	]b
+	" Input that is done out of bounds is still registered.
+	$LF
+]p
+[p 
+	"An example of edge breaking is illustrated to the right. The out of bounds is colored in red. Note that the last input exists, but is not visually displayed..
+	$LF
+]p
+[p 
+	"Edge breaking is the all-around glitch: it can be used while drawing to draw in a single segment without having more than 2 edges (or 4 edges if you have a dual-digit answer); placing your second edge in such a way that you manipulate the resulting answer of your first segment (this segment will be your entire drawing, thanks to edge breaking); and creating a second segment for further manipulation (if you want to create targeted displayed answers on the topscreen before the right one, for example.)
+	$LF
+]p
+[p 
+	"The recommended use of edge breaking is as follows:
+	$LF
+]p
+[p 
+	[b 
+		"1.
+	]b
+	" Draw your entire drawing in 1 segment using edge breaking
+	$LF
+	[br 
+	]br
+	" 
+	[b 
+		"2.
+	]b
+	" After drawing, use edge breaking to create extra keypoints to form the model you want, then place the second edge in the corresponding position
+	$LF
+]p
+[p 
+	"For more complicated manipulation, you have almonst full control. As you draw more segments, manipulation gets harder and harder, but you can draw at least 3 different displayed answers before it can get really complicated.
+	$LF
+]p
+[h3 
+	" Godspots
+	$LF
+	[a id=heading-3015 
+	]a
+]h3
+[p 
+	[img class=embedright src=http://imgur.com/tN0Qtjy.png 
+	]img
+	$LF
+	"We have stated earlier that any input that even touches out of bounds will be not registered. Abusing this mecahnic again, there is two very specific spots where you can draw without the drawing showing up: in the row at 
+	[b 
+		"X:246
+	]b
+	" and column at 
+	[b 
+		"Y:182
+	]b
+	" (if DeSmuMe is tilted sideways.) This has two very clear and distinct advantages over edge breaking: first off, you can use godspots for more than one frame, and second, you can start a segment within a godspot with no problem, since it will not be displayed; something that is not doable with edge breaking alone. With edge breaking alone, you have to hide the first input of another segment in the drawing. The obivious drawback of godspots are that.. they are limited to two spots.
+	$LF
+]p
+[p 
+	"The picture shows the location of the godspots.
+	$LF
+]p
+[h3 
+	" Out of bounds drawing
+	$LF
+	[a id=heading-3016 
+	]a
+]h3
+[p 
+	"Out of bounds drawing is a glitch derived from edge breaking. It is edge breaking but starting your segment out of bounds. As we stated before, a model needs two edges from the same segment for a model to be recon; however, just starting out of bounds completely nullifies the existence of the first edge of your segment, allowing to draw visually on the screen, without any input of your 
+	[b 
+		"entire segment
+	]b
+	" being recon. After long debate, 
+	[a href=/forum/t/17045 
+		"the TASvideos community unianimously agrees for this glitch
+	]a
+	" to be banned in all future Brain Age runs, as it is nothing more than very subtle trickery.
+	$LF
+]p
+[h3 
+	" '?'
+	$LF
+	[a id=heading-3017 
+	]a
+]h3
+[p 
+	"? answers appear when Brain Age succesfully recons a full number (instead of a modification of an existing number on screen) while there is another number on screen. For example, drawing 9 then a 5 with another segment will give an '?'. In low segment drawings, this usually does not happen.
+	$LF
+]p
+[h2 
+	" Minor tricks
+	$LF
+	[a id=heading-3018 
+	]a
+]h2
+[h3 
+	" Judging delay
+	$LF
+	[a id=heading-3019 
+	]a
+]h3
+[p 
+	"After having finished drawing the current segment you are drawing, Brain Age will start the recon process. This can be delayed infinitely by simply holding your last input.
+	$LF
+]p
+[h3 
+	" Submit cancel
+	$LF
+	[a id=heading-3020 
+	]a
+]h3
+[p 
+	"In the date of birth section after having finished the tutorial Calculations x20, finishing your current input then hitting Submit 2 frames after will skip the judging  part of your drawing, allowing you to draw whatever you want in the date of birth fields.
+]p

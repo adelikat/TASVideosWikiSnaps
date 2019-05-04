@@ -1,0 +1,110 @@
+7
+[p 
+	(dailymotion|v=xgcp0y|w=300|h=224)
+	$LF
+]p
+[p 
+	"This is an improvement of 147 frames over the current Final Fantasy run.
+	$LF
+]p
+[p 
+	"There are several changes that lead to this improvement:
+	$LF
+]p
+[ul 
+	[li 
+		" The biggest change is in the first boss fight against Garland. I finish the battle faster but don't get a point of luck. This saves over 200 frames and finishes the battle in 3 rounds. But over half of that time is lost throughout the run due to missing that point of luck.
+		$LF
+	]li
+	[li 
+		" It is possible to initiate dialog one frame faster by pressing dir+A. You will walk a step and then interact with whatever is in front of you. It won't work when you need to turn and then talk. Similarly, dir+start saves a frame when I need to go to the menu.
+		$LF
+	]li
+	[li 
+		" I analyzed the NPC movement movement algorithms. As a result, I was able to get the NPC behavior I needed while using fewer frames.
+		$LF
+	]li
+	[li 
+		" Picking Continue instead of Start at the beginning saves one frame.
+		$LF
+	]li
+]ul
+[p 
+	"As a secondary objective the input is as sparse as possible. Over 96% of the frames in this movie have no input. I don't know if anyone has ever considered tracking this, but it has to be some sort of record. I calculated this as frames with input vs frames with no input, so it doesn't matter how many buttons are pressed at once.
+	$LF
+]p
+[h3 
+	"Battle Luck
+	$LF
+]h3
+[p 
+	"Final Fantasy has a very simple RNG. It simply loops through a list of 256 numbers. Now there are times when I need to be at a certain point on that loop. If I need to wait in battle for it to loop completely around, it would take 512 frames! That is way more than the time saved by skipping luck on Garland. In order to avoid this, I need to manipulate more preemptive battles. This gives more control over the RNG since I can run at any time. However, the "Chance to strike first" message eats up about 20 frames. So that is how missing a point of luck costs time. A smaller factor is the number of enemies; each enemy in the battle takes a frame to draw.
+	$LF
+]p
+[p 
+	"I tried skipping luck again on the Eye. That was too much and led to an extra loop.
+	$LF
+]p
+[p 
+	"The counter that determines your battle luck is at 688A, so if you memwatch that you'll see how the RNG works.
+	$LF
+]p
+[p 
+	"I was able to devise an O(N) algorithm for optimizing the flow of running from each battle. This was nice because I needed to run this a lot to check different possibilities.
+	$LF
+]p
+[h3 
+	"NPC Luck
+	$LF
+]h3
+[p 
+	"The algorithms that randomize NPC movement are much more random than the battle RNG. There is a counter ($00F0) and an accumulator ($00F4). Every time someone moves, the value of the counter gets added to the accumulator. The direction of movement is determined by the low 2 bits of that sum, so every 4 frames you get the same luck. But there is also an initialization factor where some NPCs may be initialized before others when you enter a room. This is more difficult to control.
+	$LF
+]p
+[p 
+	"The counter counts up when you are in walking mode regardless of whether there are NPCs there. But if there aren't any NPCs then the accumulator won't be changed. When you get into battle it goes up by one and then stops until the battle ends.
+	$LF
+]p
+[p 
+	"There are a few ways to affect things by moving around the NPCs. If you happen to be where they want to move, they will try to move again, changing the accumulator. If you move into the place they are moving from, they move faster. This will cause their next step to be sooner, changing luck later on. Each NPC has a counter that counts down every 15 frames. He moves when it reaches 0. If you bump into them when the counter is 4 or higher, the counter decrements by 4 immediately. This takes a frame, but is the most powerful way to manipulate things since there are limited opportunities for the other methods.
+	$LF
+]p
+[p 
+	"Additionally, the counter counts while you are paused, but NPCs don't move. I can often vary when I go to the menu by some range of steps. So by changing that I can affect luck as well. This is done in Earth Cave when I equip the dragon sword and in Gaia when I use the bottle (for the robot in the waterfall).
+	$LF
+]p
+[p 
+	"This manipulation took a lot of trial and error so I used lua scripting to try a lot of possibilities quickly.
+	$LF
+]p
+[h3 
+	"Other Comments
+	$LF
+]h3
+[p 
+	"This ended up being a pretty small improvement, but technically it was a big accomplishment. The few frames from NPC manipulation were especially hard-won. I hope all the Final Fantasy fans out there enjoy this!
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mister Epic)
+	": Added Dailymotion module.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:DarkKobold)
+	": I'm going to be watching this anyway, so I might as well judge it. 
+	$LF
+]p
+[p 
+	(__wikiLink|user:DarkKobold)
+	": While ~3 seconds over the course of an hour are impossible to spot, I'd been meaning to re-watch Final Fantasy anyway. Nice minor improvement. Accepting as an improvement to the published movie.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mister Epic)
+	": Will publish this later.
+]p

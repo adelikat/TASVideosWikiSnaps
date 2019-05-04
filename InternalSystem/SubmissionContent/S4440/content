@@ -1,0 +1,423 @@
+7
+[p 
+	"This submission is an improvement over the last by more than nine minutes and is intended to completely supersede it.  Time has been saved in almost every single room thanks to much more rigorous optimization.  Unfortunately the ending cutscene still gets stuck in the exact same manner as before.
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Reach the ending faster than the previous submission
+		$LF
+	]li
+	[li 
+		" Be more entertaining than the previous submission
+		$LF
+	]li
+]ul
+[h3 
+	" Common Optimizations
+	$LF
+]h3
+[ul 
+	[li 
+		" Dialogue has been sped up substantially.  In my previous submission I simply mashed B through dialogue 2 frames on, 2 frames off.  Aside from frequently missing the soonest input frame this way, dialogue boxes also progress much faster when alternating between two buttons such as Start and B.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Most scenery in towns and dungeons can provide you a small boost of speed for about 3-4 frames if you push up or down against a corner while walking past.  This has been abused more consistently than last time.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" In general, it takes about three frames to turn around while walking left/right or down and left/right, but walking up and left/right you will flip instantly.  The game also remembers your direction from the previous room, which will cause this delay if you begin to walk the opposite direction in the next room.  By changing direction on the last input frame before entering a door, you can change your direction for the next room without any turning time.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" It can take several frames longer to process an enemy death when they drop something.  Additionally, there is a one-frame delay every time you pick up an enemy drop.  Hence, effort has been made to minimize the appearance and collection of unneeded enemy drops.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" The one-byte address $0000A5 stores the RNG seed value for seemingly all random events in the game.  When it is required it is updated by adding in the Horizontal and Vertical Scanline Counters $00213C and $00213D.  The outcome of an RNG update can be influenced by controller input whenever controller input is being accepted - which means it cannot be manipulated during sword techniques and other events where you lose control.  This manipulation is essential to optimizing all combat in the game.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Accessing the game's menu takes an average of 200 frames.  As a result menu accesses have been minimized as much as possible.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Speed of World Map travel is determined by two things:  Direction and the amount of scenery on screen.  Direction is stored in $001909 and is used to look up a set of X- and Y-axis speed values from a table in ROM at $80/9F84.  The furthest you can travel along one axis in one "step" is 8, but the number of frames between steps is determined by scenery on screen.  For more information on the World Map in game, see the FAQ I created 
+		[a class=extlink href=http://www.gamefaqs.com/snes/588294-dragon-view/faqs/69745 rel=nofollow 
+			"here
+		]a
+		".
+		$LF
+	]li
+]ul
+[h3 
+	" Step by Step Commentary
+	$LF
+]h3
+[h4 
+	" Title / Introduction / Arsenal / Hujia
+	$LF
+]h4
+[p 
+	"There is a very small window of opportunity for the first input to skip the opening cutscene entirely before it begins loading.  The previous submission missed this and lost a second or two to the loading time.
+	$LF
+]p
+[p 
+	"To save time in the Arsenal I manipulate the lizard knight into immediately jump-attacking in order to land the first hit sooner.
+	$LF
+]p
+[p 
+	"Before moving on to Hujia the warp star near Rysis must be activated by walking over it, so you can use it to return for the Serpent Scales later.  
+	$LF
+]p
+[h4 
+	" Storehouse
+	$LF
+]h4
+[p 
+	"In the first combat room I lose 176 frames to kill one scorpion and the moth, which is enough to reach level 2.  This saves about 140 frames of combat in the following two rooms.  By killing the sentries in the second room again on the way back, however, I reach level 4 by Piercia making that fight end four hits sooner.   In the end this makes the Storehouse about 270 frames faster.
+	$LF
+]p
+[p 
+	"As an interesting note, Alex does not touch the floor once from the moment the boss fight begins until Piercia is dead.
+	$LF
+]p
+[h4 
+	" Hujia / Galys Pass
+	$LF
+]h4
+[p 
+	"I skip purchasing an extra potion while in the shop as it's not needed.  You still must visit the shop in order for the bombs to be finished.
+	$LF
+]p
+[p 
+	"No fruit is collected in Galys Pass this time as the chest game MP upgrade is skipped altogether.  Moths would require four hits at this point and so can't simply be killed in passing for extra EXP.  The EXP would not make an appreciable difference to begin with.  Since this run never comes back through Galys pass later we don't need to collect the HP upgrade to release the switch, but the max health is still extremely important later.
+	$LF
+]p
+[h4 
+	" Lake Area
+	$LF
+]h4
+[p 
+	"Unlike the previous run I collect the sword technique first to better suit my intended path.  Upon leaving the stump, it is slightly faster to walk backwards to Rodister's cave by about 20-30 frames.  Despite the rotation time at the end to get in the door, it saves overall by keeping the walls out of your field of view while travelling to decrease scenery-rendering lag.
+	$LF
+]p
+[p 
+	"Inside the cave I skip collecting the Crystal in the chest to the left, as it is unnecessary.  If you walk directly to a chest immediately following the dialogue it will not open, the small delay is required.
+	$LF
+]p
+[h4 
+	" Swamp / Random Encounters
+	$LF
+]h4
+[p 
+	"The travel to the swamp is unfortunately one of the most sloppy-looking parts of this run.  The goal is to reach the swamp then enter a random encounter as quickly as possible.  The random encounters follow you around the map and periodically respawn in a new location on a timer.  When you walk too far from them, their timer is forced to expire and they respawn immediately.  When taking a more direct path to the swamp the encounters will spawn further in, resulting in more time consumed to walk back out again.  This was the best compromise I could manage.
+	$LF
+]p
+[p 
+	"The encounters themselves are rather painful.  To begin with you have to manipulate an encounter with three of the green bug enemies, which is a rare occurrence.  Secondly, some luck manipulation was needed to move them together so they can all be hit at once.  They have varying invincibility timers following hits depending on their follow-up actions, resulting in some delays between hits.  These enemies can thankfully be "herded" by walking or jumping into them, which will force them to jump away from you.  They can only damage you during their attack animation, or by landing on you in a certain way.
+	$LF
+]p
+[p 
+	"Finally, the drops from these enemies had to be specific.  They each drop two items, including at most one heart.  In the first encounter all three had to drop one heart to maintain enough health to finish the second encounter.  In the second encounter, one of the enemies had to give the "Jade Bounty" (a 1/64 chance for a world-map encountered enemy to drop 85 jade instead of their normal loot) to provide enough jade to purchase the Max HP upgrade from the wandering merchant in Casdra.  Additionally one more heart was required for a sword technique to save time at the start of the Fire Cave.
+	$LF
+]p
+[p 
+	"These two fights replace the much more time-consuming visit to the Wet Cavern and give a 3020 EXP advantage over the previous route.  The only real sacrifice is the 1000 Jade mostly used to purchase the Miraj HP Upgrade, which is not needed.  Unfortunately a small amount of time is also lost thanks to this new strategy:  The timer to end the encounter and return to the world map (address $006D3C) begins counting down as soon as the fight ends, but each time Alex gains a level the counter is reset and begins again.  While this loss is totally insignificant compared to the time saved by the new route, the delay does not exist when levelling up indoors.
+	$LF
+]p
+[p 
+	"As the next destination is the Casdra-Rysis warp star which can simply be backed onto, there is no reason to turn around and walk forwards after the two random encounters.
+	$LF
+]p
+[h4 
+	" Rysis Again
+	$LF
+]h4
+[p 
+	"One notable event here:  Accessing the menu while exiting an area to the world map somehow prevents the perspective shift that normally occurs, leaving you facing the door you just emerged from.  While facing this direction does not save walking time in this case, it saves the time required for the perspective shift itself (as a menu access to select the Serpent Scales was required anyways).
+	$LF
+]p
+[p 
+	"Taking the warp star back to the Fire Cave is substantially faster than crossing Galys Pass again.
+	$LF
+]p
+[h4 
+	" Fire Cave
+	$LF
+]h4
+[p 
+	"The fire cave is largely similar to the previous run.  One new addition is the damage boosts off the small fires into the left door.  Taking damage generally wastes time in Dragon View, but the long post-hit delay is skipped when the damage pushes you into a doorway, allowing this trick to save 20-30 frames.
+	$LF
+]p
+[p 
+	"It was necessary to manipulate enough jade drops to reach 300 by the end of the Fire Cave so as to purchase the HP Upgrade in Casdra.  The room with 4 enemies before the boss was crucial to this, and required extensive manipulation as those particular enemies are heavily biased to drop hearts instead of jade.
+	$LF
+]p
+[p 
+	"The boss, Efreet, requires 4 bombs to kill at level 13 and can be finished very quickly thanks to luck manipulation keeping him from using his charge-attack (during which he is invincible and after which he must be chased down).  He can alternately be killed with 8 normal attacks or 6 sword techniques at this level.  As the serpent scales are no longer needed, switching to bombs costs only one menu access instead of two and is therefore a viable option.
+	$LF
+]p
+[h4 
+	" Casdra / Snowfield
+	$LF
+]h4
+[p 
+	"No major changes from previous run until exiting the "Snowfield".  As a menu access is required to select the fire ring the trick used at Rysis is done again to walk backwards to the Fortress, mostly saving just the perspective-shift time.  The chest game is skipped altogether as the extra MP capacity is not needed.
+	$LF
+]p
+[h4 
+	" Fortress
+	$LF
+]h4
+[p 
+	"Extra time is taken along the way to kill gargoyles for MP stars.  Five stars are needed to fight the Frozen Horror without a Crystal (saves two menu accesses as well as picking up the crystal at all).  The sixth star is required to reach the Sword Upgrade in the Kiere region.  As the Ice Golems never seem to drop more than one star and can only be killed quickly by spending a star, the Gargoyles are the only option to recover enough MP along the way.
+	$LF
+]p
+[p 
+	"The Frozen Horror could be killed in fewer hits by using bombs again, but there is no concievable way to save enough time to balance out the two extra menu accesses required to switch to bombs.
+	$LF
+]p
+[h4 
+	" Keire
+	$LF
+]h4
+[p 
+	"Only the minimum amount of health was collected from the Ice Fortress to finish the fight before the Giza encounter, as you are fully healed following it.  The second mandatory fight in Keire is slightly slower than the previous run in order to collect enemy drops that are required this time around.
+	$LF
+]p
+[h4 
+	" Journey to the Desert
+	$LF
+]h4
+[p 
+	"Mostly unchanged aside from slightly better world map travel.  In the Landslide the pillars are melted before taking the HP Upgrade so that the melting animation can continue through the dialogue, saving time.
+	$LF
+]p
+[p 
+	"On exiting the Landslide the no-perspective-shift trick is used one more time as the switch from Fire Ring to Ice Ring is needed anyways.  Walking backwards initially saves a few seconds off the trip up to the bridge across the river, but this gain is entirely lost if you continue backwards the rest of the way.  However, by turning around at this point, the rest of the trip to the Quicksand Cave takes the same amount of time as it normally would and the earlier savings are almost entirely preserved.
+	$LF
+]p
+[h4 
+	" Quicksand Cave / Sandworm Hunt
+	$LF
+]h4
+[p 
+	"The NPC in the basement of the Quicksand Cave must be spoken to to initiate the hunt for the Golden Sandworm.  This NPC is not present until after speaking to Methraton in Keire.
+	$LF
+]p
+[p 
+	"Following the Quicksand Cave this run foregoes the trip to the Ancient Forest (to get an extra 8037 EXP and MP UP).  This is one of the three largest time savings in this new run, along with the swamp emcounters and the sandworm hunt itself.
+	$LF
+]p
+[p 
+	"The Golden Sandworm can be found on the seventh encounter after initiating the hunt, at the earliest.  Options to encounter on the first 6 fights are 1 Scorpion, 2 Scorpions, or 1 Sandworm.  The Sandworms cannot be killed on the first pass at the current level, making them very slow to fight.  The previous run recreated a specific series of random encounters from another playthrough that achieved the game end glitch, which consumed a large amount of time.
+	$LF
+]p
+[p 
+	"The six scorpion fights abuse what seems to be a bug:  The specific combination of attacks used (Sword Technique up, Down-Air attack while falling and Ice Ring immediately upon landing) for whatever reason causes the Scorpion to be hit by the Ice Ring twice, which normally should not happen.  As the Ice Ring does 16 or 17 damage per hit and Sword Techniques do 11 minimum (and all normal enemies have 40HP), this combo will always kill a desert Scorpion completely independent of the player's level or weapon upgrades.  At level 16 (with lv. 3 sword) this combo can be done slightly faster yet by replacing the Sword Technique with a normal jump-attack, but that savings is much smaller than the time required to level to 16 by this point.
+	$LF
+]p
+[p 
+	"There is an embarassing delay in the middle of the string of encounters where both clouds have spawned inside the wall, and the only option is to wait for them to emerge.  While it is possible to manipulate them to spawn elsewhere and avoid this, the alignment of the fights was generally convenient and I was unable to beat this time through trial-and-error.
+	$LF
+]p
+[p 
+	"The Golden Sandworm, unlike normal Sandworms, is not weak to the Ice Ring and so must be killed with four sword techniques.  The timer to end the encounter and return to the world map (address $006D3C) does not begin counting until the chest containing the Horn is opened.
+	$LF
+]p
+[h4 
+	" Quicksand Cave / Miraj / Under Miraj
+	$LF
+]h4
+[p 
+	"The Wandering Merchant in Miraj is skipped this run as the extra HP capacity is not needed.  Another omission is the walking-down-and-back-up-again on the left side of town before the dungeon.  This was done in the previous run to deliberately set $7EBB46 to 48 to match a previous successful run.  $7EBB46 stores your horizontal position in town while walking down from one screen to another and was previously found to influence the glitch.
+	$LF
+]p
+[p 
+	"No major changes in the rest of this segment aside from better optimization of fights and movement.
+	$LF
+]p
+[h4 
+	" Ortah
+	$LF
+]h4
+[p 
+	"Some parts of Ortah have lost time over the previous submission due to arriving at a lower level, most notably the first fight against the two Warlock enemies to get the Key.  These losses were small and a definite improvement over clearing the first basement room in the Quicksand Cave for additional EXP, which would have taken approximately 700 frames.
+	$LF
+]p
+[p 
+	"The boss in Ortah requires 17 sword techniques to kill.  As you do 1 damage with normal sword attacks until level 23, this is the only practical way to fight him.  Performing 17 sword techniques requires you to spend 136 health and Alex's max health at this point is 80.  By reaching the fight with no available health remaining and using both potions collected, we are just barely able to finish it.  In theory this could be accomplished with an even lower HP capacity and two potions, but the lower HP capacity would complicate other parts of the run.
+	$LF
+]p
+[p 
+	"The boss will dodge your attacks nearly every time unless you wait for him to attack first, but he can still be hit in the air before he begins to land.  At one point I manage to cut a cycle short by forcing him against a wall and then walking behind him, but this is difficult to reproduce.
+	$LF
+]p
+[h4 
+	" The Glitch
+	$LF
+]h4
+[p 
+	"Testing the glitch for the ending is definitely the most time-consuming and irritating part of the entire TAS.  The plus side is thanks to some fixes in the more recent versions of BizHawk it is far less painstaking than it used to be.
+	$LF
+]p
+[p 
+	"Upon reaching the final room you have at least 24 possible glitch progressions, one for each possible value of $00BB37 (the timer for the torch-flicker background animation).  Upon pressing a button to advance past the first text box the program will derail, eventually resulting in one of four outcomes:
+	$LF
+]p
+[ul 
+	[li 
+		" The emulator will freeze (By far the most likely outcome)
+		$LF
+	]li
+	[li 
+		" The program will get stuck in an infinite loop branching on a condition that never changes (Common)
+		$LF
+	]li
+	[li 
+		" The program will get stuck in some other arbitrary loop that may or may not be infinite, but can go on for several minutes (rare)
+		$LF
+	]li
+	[li 
+		" The "wrong warp"/Game End Glitch will occur and the ending cutscene will play (obscenely rare / requires some unknown setup)
+		$LF
+	]li
+]ul
+[p 
+	"If no ending was achieved after testing the final input on all values of $00BB37, the only recourse is to go back to an earlier savestate and change something prior to entering the room.  Extremely subtle changes can have a tremendous impact on the progression of the glitch (eg/ jumping or attacking before entering the room, opening the menu in a different spot, using an item, or fighting the boss differently).  However, the exact mechanism by which the glitch produces the ending cutscene is still not fully understood.
+	$LF
+]p
+[p 
+	"In order to produce this particular Game End Glitch I employed a brute-force approach of small changes to the last few rooms of Ortah.  The combination of deliberate changes that succeeded included changing the screen position of the last menu access, collecting more health from the boss fight and jump-attacking the wall shortly afterward.  Still, the key to this succeess could just as easily be luck as any of these things.
+	$LF
+]p
+[h3 
+	" RAM Watch Addresses
+	$LF
+]h3
+[ul 
+	[li 
+		" 0000a5 - RNG Seed from H/V Scanline Counters
+		$LF
+	]li
+	[li 
+		" 001C14 - World Map X Position (East-West)  (2 bytes)
+		$LF
+	]li
+	[li 
+		" 001C16 - World Map Y Position (North-South)  (2 bytes)
+		$LF
+	]li
+	[li 
+		" 001909 - World Map Orientation
+		$LF
+	]li
+	[li 
+		" 006D3C - Timer to End Random Encounter
+		$LF
+	]li
+	[li 
+		" 006F9D - Alex's X (horizontal) position on screen
+		$LF
+	]li
+	[li 
+		" 006FA1 - Alex's Y (depth) position on screen
+		$LF
+	]li
+	[li 
+		" 009BAA - Causes Ortah Glitch, set to 7F on killing Piercia
+		$LF
+	]li
+	[li 
+		" 00BB37 - Background Torch Flicker Timer
+		$LF
+	]li
+	[li 
+		" 00FBC9 - Random Encounter Cloud 1 X Posn (Coarse)
+		$LF
+	]li
+	[li 
+		" 00FBC2 - Random Encounter Cloud 1 X Posn (Fine)
+		$LF
+	]li
+	[li 
+		" 00FBCB - Random Encounter Cloud 1 Y Posn (Coarse)
+		$LF
+	]li
+	[li 
+		" 00FBC4 - Random Encounter Cloud 1 Y Posn (Fine)
+		$LF
+	]li
+	[li 
+		" 00FBDA - Random Encounter Cloud 1 Timer
+		$LF
+	]li
+	[li 
+		" 00FBE9 - Random Encounter Cloud 2 X Posn (Coarse)
+		$LF
+	]li
+	[li 
+		" 00FBE2 - Random Encounter Cloud 2 X Posn (Fine)
+		$LF
+	]li
+	[li 
+		" 00FBEB - Random Encounter Cloud 2 Y Posn (Coarse)
+		$LF
+	]li
+	[li 
+		" 00FBE4 - Random Encounter Cloud 2 Y Posn (Fine)
+		$LF
+	]li
+	[li 
+		" 00FBFA - Random Encounter Cloud 2 Timer
+		$LF
+	]li
+]ul
+[h3 
+	" Opportunities for Improvement
+	$LF
+]h3
+[p 
+	"It was discovered shortly after submitting that the boss fight in Ortah can be about 940 frames faster than this submission by manipulating the AI to skip the horizontal-spinning-through-the-air that normally follows every hit.
+	$LF
+]p
+[p 
+	"The wall on the right side of the room is not actually flat - it's wider at the bottom than at the top, and widens out in maybe two or three increments as you go down. What you need to do first is lure the Joker up a bit so that he's in line with the further-out wall, so that after you hit him against it you can then walk behind him by walking lower.  If you take the first opportunity to land a hit when the fight starts, you'll be forced to wait a cycle or two to align this trick and lose time.  The most efficient method I can tell is to have him immediately shift upwards and back toward the wall allowing you to start right away.
+	$LF
+]p
+[p 
+	"For whatever reason, being behind him while he's against the wall at his key decision-making frame (the moment he spins up to full height from the ground) will keep him from flying away horizontally like normal and he will try to attack again. With a bit of manipulation to keep him using the right attacks, you can keep smacking him into the wall theoretically indefinitely.  It's also easy to accidentally lure the boss back down again between hits, this needs to be avoided to keep the combo going.
+	$LF
+]p
+[p 
+	"You can watch an example of this new technique here:
+	$LF
+]p
+[p 
+	(youtube|v=b6sglie5k_w)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": Acceblishing...
+]p

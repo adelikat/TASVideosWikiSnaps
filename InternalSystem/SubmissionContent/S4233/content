@@ -1,0 +1,950 @@
+5
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"Generation II of the Pokémon games seen a lot of TASes over the last few month (
+	(__wikiLink|4084S|1)
+	", 
+	(__wikiLink|4126S|2)
+	", 
+	(__wikiLink|2504M|3)
+	", 
+	(__wikiLink|4205S|4)
+	", 
+	(__wikiLink|4213S|5)
+	"), and none of them lasted very long before being beaten.
+	$LF
+	"The fact that only one of them made it to a publication at all is a good indicator on how fast the TAS strategies for this game evolved lately.
+	$LF
+	"So, here comes another attempt I guess.
+	$LF
+]p
+[p 
+	"This submission uses the same basic route I used in my 
+	(__wikiLink|4205S|previous run)
+	", but with several improvements, some of which 
+	(__wikiLink|user:FractalFusion)
+	" introduced in 
+	(__wikiLink|4213S|his submission)
+	", and some of which are new.
+	$LF
+	"Most of the basic game and route information is explained in detail in my previous submission text and remains valid for this run, I encourage you to read it if you haven't seen a run using the Coin Case glitch before.
+	$LF
+	"In this submission text, I will merely point out the differences and improvements compared to FractalFusion's submission, which is the fastest submitted route at the time of writing.
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Aims for the fastest completion time
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 1.5.3
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[p 
+	"Most basic information can be found in my 
+	(__wikiLink|4205S|previous submission text)
+	".
+	$LF
+]p
+[h4 
+	" Version choice
+	$LF
+]h4
+[p 
+	"There is virtually no inherent time difference between the Gold and Silver version.
+	$LF
+	"The largest inherent time difference that I'm aware of is the title screen loading 2 frames slower in Silver compared to Gold.
+	$LF
+	"That means whether Gold or Silver is faster depends completely on the route.
+	$LF
+]p
+[p 
+	"This run uses the Silver Version for a couple of reasons:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			"Faster luck manipulation of the Trainer ID:
+		]em
+		" This run depends on having a specific Trainer ID, which is faster to get in Silver by 14 frames.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Different sprites:
+		]em
+		" Pokémon sprites are different in Gold and Silver, which has no real time implications (some load a frame faster than others, but nothing significant), but helps making the run more enjoyable to watch for everyone who saw the previous submissions and doesn't want to see the exact same images all over again.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""Because I can":
+		]em
+		" Silver has been ignored to an extend where some people asked whether the Coin Case glitch is even possible in Silver. Here is your answer.
+		$LF
+	]li
+]ul
+[h3 
+	" Coin Case Glitch improvements
+	$LF
+]h3
+[p 
+	"While the Coin Case glitch setup is pretty much fixed up to the point where your program counter lands in the party Pokémon data, you have multiple options from there on.
+	$LF
+	"This run uses the same basic idea as FractalFusion's run, namely using the move Tackle, which conveniently corresponds to 
+	[tt 
+		"ld hl,d16
+	]tt
+	", to load a jump to the Box names which are set up to spell out our program.
+	$LF
+	"It uses some improvements, though, the biggest one is skip teaching Mud-Slap, but instead exploit that an empty move slot has the value 00.
+	$LF
+	"That means, instead of
+	$LF
+]p
+[pre 
+	"Move 3  Move 4  Trainer ID    Code
+	$LF
+	"  21      BD      D8 E9       ld hl,D8BD; jp (hl)
+	$LF
+]pre
+[p 
+	"we use
+	$LF
+]p
+[pre 
+	"  21      00      D9 E9       ld hl,D900; jp (hl)
+	$LF
+]pre
+[p 
+	"which puts us in Box 8 instead. The time saved by not learning Mud-Slap outweighs the additional time needed to scroll down when renaming the boxes.
+	$LF
+]p
+[p 
+	"Another improvement is the written program itself, now only requiring two box names instead of three.
+	$LF
+]p
+[p 
+	[b 
+		"Disclaimer:
+	]b
+	" The explanation of the inner workings of the arbitrary code execution follows, which is lengthy, technical an maybe boring to you. So if you're not interested you can just call it magic and skip the rest of this section.
+	$LF
+]p
+[p 
+	"The program itself is a simple interpreter loop, it reads joypad inputs and executes them as opcodes:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes           
+			]th
+			[th 
+				"Instruction    
+			]th
+			[th 
+				" Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Box 7
+				]b
+				"       
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" aa              
+			]td
+			[td 
+				" 
+				[tt 
+					"xor d
+				]tt
+				"          
+			]td
+			[td 
+				" d stores last joypad input: find out differences to current input 
+			]td
+		]tr
+		[tr 
+			[td 
+				" ea fd f8        
+			]td
+			[td 
+				" 
+				[tt 
+					"ld (f8fd),a
+				]tt
+				"    
+			]td
+			[td 
+				" Write difference; will be executed as opcode later in the cycle 
+			]td
+		]tr
+		[tr 
+			[td 
+				" aa              
+			]td
+			[td 
+				" 
+				[tt 
+					"xor d
+				]tt
+				"          
+			]td
+			[td 
+				" Restore current joypad input value 
+			]td
+		]tr
+		[tr 
+			[td 
+				" f5              
+			]td
+			[td 
+				" 
+				[tt 
+					"push af
+				]tt
+				"        
+			]td
+			[td 
+				" Copy current joypad input from a... 
+			]td
+		]tr
+		[tr 
+			[td 
+				" d1              
+			]td
+			[td 
+				" 
+				[tt 
+					"pop de
+				]tt
+				"         
+			]td
+			[td 
+				" ... to d (store it as last joypad input) 
+			]td
+		]tr
+		[tr 
+			[td 
+				" f1              
+			]td
+			[td 
+				" 
+				[tt 
+					"pop af
+				]tt
+				"         
+			]td
+			[td 
+				" Restore a and f from the previous cycle 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 50 ($f8fd)      
+			]td
+			[td 
+				" (any)              
+			]td
+			[td 
+				" Execute opcode written earlier this cycle 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Box 8
+				]b
+				"       
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" f5              
+			]td
+			[td 
+				" 
+				[tt 
+					"push af
+				]tt
+				"        
+			]td
+			[td 
+				" Save a and f for next cycle 
+			]td
+		]tr
+		[tr 
+			[td 
+				" a4              
+			]td
+			[td 
+				" 
+				[tt 
+					"and h
+				]tt
+				"          
+			]td
+			[td 
+				" Clears carry flag, needed for the jump 
+			]td
+		]tr
+		[tr 
+			[td 
+				" fa a6 ff        
+			]td
+			[td 
+				" 
+				[tt 
+					"ld a,(ffa6)
+				]tt
+				"    
+			]td
+			[td 
+				" 
+				[b 
+					"Entry point
+				]b
+				"; reads current joypad inputs into a 
+			]td
+		]tr
+		[tr 
+			[td 
+				" d2 f5 f8        
+			]td
+			[td 
+				" 
+				[tt 
+					"jp nc,f8f5
+				]tt
+				"     
+			]td
+			[td 
+				" Loop back to start of Box 7; carry will never be set 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Since this loop will run hundreds of times per frame, but we can only give it one input per frame, we need to prevent it from running the same opcode over and over again.
+	$LF
+	"This is done by not using the input directly as the opcode, but the difference of the input from the previous one.
+	$LF
+	"This means that for all cycles in a frame after the first one, the executed opcode is 0, which conveniently is 
+	[tt 
+		"nop
+	]tt
+	".
+	$LF
+]p
+[p 
+	"Note that there is no way to give the opcodes additional data, so you are limited to using opcodes that don't require any (using other opcodes doesn't break the program, but messes with the stack since the 
+	[tt 
+		"push af
+	]tt
+	" is not executed but used as data instead).
+	$LF
+	"This may seem quite limiting at first, since there is no way to set a register to a value you want directly, but it's possible to circumvent this using the properties of the xor operation.
+	$LF
+]p
+[p 
+	"It's easiest to see in an example from the actual inputs used in this run:
+	$LF
+	"Our goal is to set l to 0x22 (the current value is 0x83), and the last input (stored in d) is set to 0xB3.
+	$LF
+	"This can be done using only 2 frame cycles:
+	$LF
+]p
+[pre 
+	"Input    opcode                     operation    comment
+	$LF
+	"0x48     (0xb3 xor 0x48 = ) 0xfb    ei           Does nothing important.
+	$LF
+	"0x22     (0x48 xor 0x22 = ) 0x6a    ld l,d       loads d=0x22 into l
+	$LF
+]pre
+[p 
+	"The trick is to set it up so that the pressed buttons are your data while the difference is your desired opcode.
+	$LF
+	"Because of the properties of xor, there is always such a number to achieve this and it takes only 1 frame to set it up.
+	$LF
+	"The opcode executed during the setup cycle is irrelevant, as long is does not crash the program or corrupt the values you currently care about.
+	$LF
+]p
+[p 
+	"The inputs used in this run make use this technique extensively:
+	$LF
+]p
+[pre 
+	"Joypad     Command
+	$LF
+	"e1                           // Initial value of d when entering the loop
+	$LF
+	"e8         09 (add hl,bc)    // d900 + 00a4 = d9a4
+	$LF
+	"cd         25 (dec h)
+	$LF
+	"e0         2d (dec l)
+	$LF
+	"97         77 (ld (hl),a)    // d8a3 <- 0; Enable Red in Mt. Silver
+	$LF
+	"b3         24 (inc h)
+	$LF
+	"48         fb (ei)           // setup cycle
+	$LF
+	"22         6a (ld l,d)
+	$LF
+	"06         24 (inc h)
+	$LF
+	"71         77 (ld (hl),a)    // da22 <- 0; Having no Pokémon in your party wins all battles instantly
+	$LF
+	"b0         c1 (pop bc)       // setup cycle
+	$LF
+	"d2         62 (ld h,d)
+	$LF
+	"61         b3 (or e)         // setup cycle
+	$LF
+	"0b         6a (ld l,d)
+	$LF
+	"04         0f (rrca)         // setup cycle
+	$LF
+	"76         72 (ld (hl),d)    // d20b <- 76; Change tile the character stands on, needed for warping
+	$LF
+	"63         15 (dec d)        // setup cycle; This temporarily corrupts d, but it is fixed in the next cycle
+	$LF
+	"19         7a (ld a,d)
+	$LF
+	"bb         a2 (and d)        // setup cycle; 0xbb and 0x19 = 0x19
+	$LF
+	"d9         62 (ld h,d)
+	$LF
+	"fb         22 (ld (hl+),a)   // d90b <- 19; Y coordinate of the character position
+	$LF
+	"79         82 (add d)        // setup cycle
+	$LF
+	"03         7a (ld a,d)
+	$LF
+	"21         22 (ld (hl+),a)   // d90c <- 03; X coordinate of the character position
+	$LF
+	"65         44 (ld b,h)       // setup cycle
+	$LF
+	"17         72 (ld (hl),d)    // d90d <- 17; (Glitch) map entrance 0x17, directly in front of Red
+	$LF
+	"34         23 (inc hl)
+	$LF
+	"16         22 (ld (hl+),a)   // d90e <- 03; Map group
+	$LF
+	"0c         1a (ld a,(de) )   // setup cycle
+	$LF
+	"46         4a (ld c,d)
+	$LF
+	"36         70 (ld (hl),b)    // setup cycle
+	$LF
+	"44         72 (ld (hl),d)    // d90f <- 44; Map index: In Mt. Silver
+	$LF
+	"2d         69 (ld l,c)
+	$LF
+	"71         5c (ld e,h)       // setup cycle
+	$LF
+	"0b         7a (ld a,d)
+	$LF
+	"29         22 (ld (hl+),a)   // d946 <- 0b; Set warp pointer to our fake warp data
+	$LF
+	"5d         74 (ld (hl),h)    // d947 <- d9
+	$LF
+	"79         24 (inc h)        // setup cycle
+	$LF
+	"81         f8 (ld hl, sp+f5)
+	$LF
+	"eb         6a (ld l,d)
+	$LF
+	"12         f9 (ld sp,hl)     // Fix the stack pointer; leave directly to the overworld
+	$LF
+	"db         c9 (ret)          // Return to normal game code
+	$LF
+]pre
+[h3 
+	" Route details and improvements
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" I set the text speed to fast, turn off battle animations and set the battle style to "SET" to make the overall game play faster.
+		$LF
+	]li
+	[li 
+		" The Trainer ID is manipulated to be 0xD9E9, which is important for the Coin Case glitch setup.
+		$LF
+	]li
+	[li 
+		" Date and time are irrelevant to the route, using the defaults is the fastest.
+		$LF
+	]li
+	[li 
+		" I name the player "A". Like in Gen I, each character printed on the screen cost one frame, making shorter names faster. Also, "A" and all characters which are only one button press away (namely "B", "I", "J" and "a") cost no extra frames to input.
+		$LF
+	]li
+]ul
+[h4 
+	" New Bark Town
+	$LF
+]h4
+[ul 
+	[li 
+		" Totodile's DVs don't need to be very specific for this run, 14 Attack, 6 Defense, 8 Speed and 15 Special suffice to kill everything as fast as possible. I got 10 Defense and 15 Speed instead, oh well.
+		$LF
+	]li
+]ul
+[h4 
+	" Cherrygrove City
+	$LF
+]h4
+[ul 
+	[li 
+		" Rival's Chikorita has 21 HP, Scratch does 5 HP and a critical hit 8 HP of damage. That means it can be killed with two crits and a non-crit (doing non-crits is faster since the "Critcal Hit!" message costs time). Like in Gen I, however, getting max damage out of a move has a significantly lower chance (1/39) than any other value, due to the way integer rounding is done. That means that max crits have a 1/624 (= 1/16 * 1/39) chance of happening. Being able to perform these max damage attacks will save time in multiple fights throughout the run.
+		$LF
+	]li
+	[li 
+		" Poison warping is not used, since is costs more time than it gains. It saves 
+		(frames|amount=222|fps=59.7275)
+		"s to do, but you miss out on getting Pokéballs, which are important and take longer to pick up (
+		(frames|amount=344|fps=59.7275)
+		"s) later or buy in a mart (
+		(frames|amount=810|fps=59.7275)
+		"s).
+		$LF
+	]li
+]ul
+[h4 
+	" Violet City
+	$LF
+]h4
+[ul 
+	[li 
+		" The AI of Bird Keepers forces them to use a damaging move whenever possible, so taking damage from Spearow's Peck and Pidgeotto's Gust is unavoidable.
+		$LF
+	]li
+	[li 
+		" Falkner's Pidgey could be killed using only two Rage crits, but using three noncrits allows a OHKO on Pidgeotto and is therefore faster.
+		$LF
+	]li
+	[li 
+		" After beating Falkner, the Boxes are renamed to spell out the program for the Coin Case glitch.
+		$LF
+	]li
+	[li 
+		" Togepi's DVs are manipulated to be 0x18A9, which sets up a relative jump (
+		[tt 
+			"jr a9
+		]tt
+		") needed in the Coin Case glitch. There are plenty of other values that would work as well, since it's not important where we land exactly.
+		$LF
+	]li
+	[li 
+		" I skip visiting the mart; again, it costs more time than using X-Attack in battles save. I also don't need to buy a Pokéball since I skipped poison warping.
+		$LF
+	]li
+]ul
+[h4 
+	" Route 32
+	$LF
+]h4
+[ul 
+	[li 
+		" After beating Albert, a wild Bellsprout is encoutered to create its PokéDex entry. It is later needed to trigger the Coin Case glitch.
+		$LF
+	]li
+]ul
+[h4 
+	" Union Cave
+	$LF
+]h4
+[ul 
+	[li 
+		" Using Rage is the fastest way to beat Russell's Geodudes without X-Attacks.
+		$LF
+	]li
+]ul
+[h4 
+	" Slowpoke Well
+	$LF
+]h4
+[ul 
+	[li 
+		" I catch a Slowpoke in Slowpoke Well, since it (along with Rattata) knows exactly 3 moves including Tackle, which is needed for the Coin Case glitch setup. Because of very technical details (a carry flag being set or not at the right time), Rattata does not work with the setup I'm using.
+		$LF
+	]li
+	[li 
+		" The final Rocket's Koffing is another example of saving a crit and therefore time by hitting max crits.
+		$LF
+	]li
+]ul
+[h4 
+	" Azalea City
+	$LF
+]h4
+[ul 
+	[li 
+		" Without X-Attacks, beating the arena before the rival is way faster (it may even be faster when using X-Attacks as well).
+		$LF
+	]li
+]ul
+[h4 
+	" Ilex Forest
+	$LF
+]h4
+[ul 
+	[li 
+		" When hunting Farfetch'd, the route used here is not the shortest route in terms of steps, but it is faster by around 1.5 seconds (assuming you get no encounters of course).
+		$LF
+	]li
+	[li 
+		" Cut is taught to Croconaw. Ideally, you would want to teach it to your caught Pokémon which hasn't got four moves already, but there is no convenient Pokémon that can learn both Tackle and Cut (Sentret is the closest to it, but it has only one move when caught and teaching it 2 moves takes longer than teaching Cut to Croconaw).
+		$LF
+	]li
+	[li 
+		" Slowpoke's moves are swapped and it is switched with Togepi while we are in the menu for using Cut anyway, which saves time.
+		$LF
+	]li
+]ul
+[h4 
+	" Goldenrod City
+	$LF
+]h4
+[ul 
+	[li 
+		" Super Nerd Eric is the last trainer before finally getting the Coin Case and performing the glitch. Cut is used to OHKO the Grimers, its shorter name makes it faster than the other moves.
+		$LF
+	]li
+	[li 
+		" The text box for picking up the Coin Case resets the BG map window, so taking 3 steps to the left puts us in the right position to enable the needed jump when activating the Coin Case.
+		$LF
+	]li
+	[li 
+		" Bellsprout's cry is played by checking the PokéDex and the Coin Case glitch is triggered.
+		$LF
+	]li
+	[li 
+		" Due to the executed code, there now is a warp to Mt. Silver directly to our left, so by walking to the left we end up in Mt. Silver right in front of Red. Also, because we returned directly to the overworld without leaving the item menu first, the screen is not redrawn and we see the item menu instead of the overworld until the map transition is done.
+		$LF
+	]li
+	[li 
+		" When talking to Red, the fight is skipped since the game thinks we have no Pokémon in our party, and the credits roll.
+		$LF
+	]li
+]ul
+[h3 
+	" Route frame differences
+	$LF
+]h3
+[p 
+	"Here is an exact section-by-section breakdown of the amount of frames gained or lost, compared to FractalFusion's run.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Section                  
+			]th
+			[th 
+				" Time difference 
+			]th
+			[th 
+				" Comment 
+			]th
+		]tr
+		[tr 
+			[td 
+				" Title screen              
+			]td
+			[td 
+				" -
+				(frames|amount=45|fps=59.7275)
+				"s   
+			]td
+			[td 
+				" Faster luck manipulation of the Trainer ID 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Oak's introduction        
+			]td
+			[td 
+				" -
+				(frames|amount=142|fps=59.7275)
+				"s  
+			]td
+			[td 
+				" Leaving the default time of day and using a faster name 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Get starter               
+			]td
+			[td 
+				" -
+				(frames|amount=67|fps=59.7275)
+				"s   
+			]td
+			[td 
+				" Faster DV manipulation 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Cherrygrove Rival         
+			]td
+			[td 
+				" -
+				(frames|amount=31|fps=59.7275)
+				"s   
+			]td
+			[td 
+				" Using 2 max crits + max noncrit instead of three crits 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Finish Mystery Egg errant 
+			]td
+			[td 
+				" +
+				(frames|amount=222|fps=59.7275)
+				"s  
+			]td
+			[td 
+				" Not using the poison warp 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Youngster Mikey           
+			]td
+			[td 
+				" -
+				(frames|amount=22|fps=59.7275)
+				"s   
+			]td
+			[td 
+				"  
+			]td
+		]tr
+		[tr 
+			[td 
+				" Violet City Gym           
+			]td
+			[td 
+				" -
+				(frames|amount=22|fps=59.7275)
+				"s   
+			]td
+			[td 
+				"  
+			]td
+		]tr
+		[tr 
+			[td 
+				" Leave Violet City         
+			]td
+			[td 
+				" -
+				(frames|amount=957|fps=59.7275)
+				"s  
+			]td
+			[td 
+				" Not visiting the mart 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Enter Union Cave          
+			]td
+			[td 
+				" -
+				(frames|amount=30|fps=59.7275)
+				"s   
+			]td
+			[td 
+				"  
+			]td
+		]tr
+		[tr 
+			[td 
+				" Hiker Russell             
+			]td
+			[td 
+				" +
+				(frames|amount=99|fps=59.7275)
+				"s   
+			]td
+			[td 
+				" No X-Items results in a slower fight 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Slowpoke Well             
+			]td
+			[td 
+				" +
+				(frames|amount=1753|fps=59.7275)
+				"s 
+			]td
+			[td 
+				" Catching a Slowpoke 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Slowpoke Well cleared     
+			]td
+			[td 
+				" -
+				(frames|amount=31|fps=59.7275)
+				"s   
+			]td
+			[td 
+				" Max crit + max noncrit against Koffing 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Azalea Gym and Rival      
+			]td
+			[td 
+				" +
+				(frames|amount=24|fps=59.7275)
+				"s   
+			]td
+			[td 
+				" No X-Items results in a slower fight 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Enter Goldenrod City      
+			]td
+			[td 
+				" -
+				(frames|amount=1400|fps=59.7275)
+				"s 
+			]td
+			[td 
+				" Skip catching Rattata; doing Coin Case glitch setup
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" Coin Case used            
+			]td
+			[td 
+				" -
+				(frames|amount=876|fps=59.7275)
+				"s  
+			]td
+			[td 
+				" All Coin Case glitch setup already done 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Sum
+				]b
+				"                   
+			]td
+			[td 
+				" 
+				[b 
+					"-
+					(frames|amount=1525|fps=59.7275)
+					"s
+				]b
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": It's time to see if we finally can get a really good glitched Gold/Silver run published. Accepting as an improvement to the 
+	(__wikiLink|2504M|published movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Guga)
+	": Processing...
+]p

@@ -1,0 +1,356 @@
+9
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Bizhawk 1.13.1
+		$LF
+	]li
+	[li 
+		" Primary objective: speed
+		$LF
+	]li
+	[li 
+		" Uses fastest version: JP
+		$LF
+	]li
+	[li 
+		" Uses fastest difficulty: Hero (hardest difficulty)
+		$LF
+	]li
+]ul
+[h3 
+	" Improvements
+	$LF
+]h3
+[p 
+	"While this TAS uses a different version than 
+	(__wikiLink|5990S)
+	", it's an objective improvement on top of the time saved from the version differences. The improvements can be summarized as follows:
+	$LF
+]p
+[ul 
+	[li 
+		" Frequent manipulation of spawning/de-spawning enemies to allow for less waiting time.
+		$LF
+	]li
+	[li 
+		" Route improvements (further detailed in the stage-by-stage comments below).
+		$LF
+	]li
+	[li 
+		" Ending the first three bonus stages by jumping into the pits instead of walking into them.
+		$LF
+	]li
+	[li 
+		" Reduction of the timing of the black screens between levels.
+		$LF
+	]li
+]ul
+[h3 
+	" About the choice of version and difficulty setting
+	$LF
+]h3
+[p 
+	"There are two versions of this game, NA (released under the name "Castelian") and JP (with a ROM going under the name "Kyoro-Chan Land"), and there are two difficulty settings, "Novice" (easy, default) and "Hero" (hard).
+	$LF
+]p
+[h4 
+	" Version
+	$LF
+]h4
+[ul 
+	[li 
+		" The JP-version is less laggy. It's difficult to say how big the difference is, but a ballpark guess from my side would be in the range 35-40 seconds over the course of a run.
+		$LF
+	]li
+	[li 
+		" The JP-version has a different sprite for the main character.
+		$LF
+	]li
+	[li 
+		" On hero difficulty, the NA-version forces you to wait a little over a second for a molecule enemy to move out of the way at the beginning of the first tower. In the JP-version, you can avoid the molecule by getting out of the way with an elevator. The only explanation I can think of is that it's caused by minor hitbox differences between the two main character sprites.
+		$LF
+	]li
+	[li 
+		" There is a password system in the JP-version. This has no consequence in a speedrun though.
+		$LF
+	]li
+]ul
+[p 
+	"I decided to go with the JP-version because it's faster. However, I'm also of the opinion that the bird main character looks pretty chill and generally awesome, while the toad character in the NA-version is imo pretty bland and non-descriptive. So that's an added bonus when going with the JP-version.
+	$LF
+]p
+[h4 
+	" Difficulty
+	$LF
+]h4
+[ul 
+	[li 
+		" The molecule enemies move twice as fast on hero difficulty. This saves time in some places and loses time in other places compared to novice difficulty. Overall, it favors playing on hero by a few seconds.
+		$LF
+	]li
+	[li 
+		" The in-game timer ticks down every 15 game frames (= 45 frames + random lag frames) on hero and every 20 game frames (= 60 frames + random lag frames) on novice. Since the timer is converted into points at the end of each tower, this favors hero difficulty by a few seconds over the course of a run (3 frames saved per avoided tick on the timer).
+		$LF
+	]li
+	[li 
+		" Extra lives are awarded every 5.000 points on Novice and every 10.000 points on Hero. Unless this has an impact on the lag generation, it has no consequence for a speedrun though.
+		$LF
+	]li
+]ul
+[p 
+	"Since hero difficulty was easily the faster of the two and also the hardest difficulty, it was an easy choice which difficulty to submit. However, for study purposes of RTA-strategies, I also made a TAS on novice. It was 11 seconds slower and is available here: http://tasvideos.org/userfiles/info/51935530865733165
+	$LF
+]p
+[h3 
+	" Game mechanics
+	$LF
+]h3
+[h4 
+	" Useful RAM-addresses
+	$LF
+]h4
+[p 
+	"12A/122 - x/y of the main character
+	[br 
+	]br
+	$LF
+	"125/12B - x/y of enemy #1
+	[br 
+	]br
+	$LF
+	"126/12C - x/y of enemy #2
+	[br 
+	]br
+	$LF
+	"127/12D - x/y of enemy #3
+	[br 
+	]br
+	$LF
+	"128/12E - x/y of enemy #4
+	[br 
+	]br
+	$LF
+	"164 - molecule timer
+	$LF
+]p
+[p 
+	"The coordinate system for the main character is different from the ones for the enemies, but this has no other effect than being a slight inconvenience from a practical point-of-view.
+	$LF
+]p
+[h4 
+	" Enemy behavior
+	$LF
+]h4
+[p 
+	"The game can only store four enemies in memory at the same time (including the molecule). When an enemy goes below the screen, it gets de-spawned (exception being the molecule, which is not de-spawned when scrolled off screen) and a new enemy can take its place when the screen has scrolled sufficiently in the vertical direction to reach its spawn point. The enemies always spawn in the same order and their spawn locations and movements are predictable with one exception. There is some variation to the initial movement of some of the destroyable ball enemies. This means there is little RNG in this game (unless you count the many unpredictable lag frames). However, there are still plenty of opportunities for manipulating enemy positions by spawning/de-spawning enemies at the most favorable times.
+	$LF
+]p
+[h4 
+	" Lag
+	$LF
+]h4
+[p 
+	"Without a detailed analysis of the game code, the amount of lag is very unpredictable. While such an analysis would without a doubt help to further reduce the time, I deemed that to be beyond the scope of what I wanted to do with this game.
+	$LF
+]p
+[p 
+	"The time of the countdown and splash screens between levels can vary by a considerable amount of time, so most of the time spent on lag reduction was invested in trial-and-error efforts to reduce the time between levels.
+	$LF
+]p
+[h4 
+	" Level countdowns
+	$LF
+]h4
+[p 
+	"There are three countdowns after each level and each tick of countdown costs 3 frames (or more if random lag is added). The first one, the timer, is self-explanatory. The other two are:
+	$LF
+]p
+[ul 
+	[li 
+		" Technique - Starts at 100 and is reduced by 2 for every hit. There are two forced hits to complete the game (in towers 3 and 4). One could imagine taking hits in some other places to reach levels below. However, they're far from saving time with the current knowledge.
+		$LF
+	]li
+	[li 
+		" Extras - Starts at 0. 5 is always added upon level completion and 2 is added for every destroyed enemy. With the current route, the only optional enemy to destroy is at the end of tower 7. Destroying that enemy reduces more lag than what the additional countdown and the time to shoot a bullet cost.
+		$LF
+	]li
+]ul
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[p 
+	"There are many seemingly random stops or unprovoqued jumps (or lack thereof) in the movie. They are either to reduce lag or to manipulate spawning/de-spawning. Below, I'm not going to detail every time such actions are taken, but focus on the main improvements over the previous TAS.
+	$LF
+]p
+[h4 
+	" Tower 1
+	$LF
+]h4
+[ul 
+	[li 
+		" Frame 991 - Skipping the molecule in this place is only possible on the JP-version.
+		$LF
+	]li
+	[li 
+		" 1119 - Turning around on the elevator before activating helped to reduce lag. This technique is used frequently throughout the run, where it ended up saving time, but will not be mentioned again.
+		$LF
+	]li
+	[li 
+		" 2329 - Enemy spawning/de-spawning manipulations throughout the level set up for the two enemies to bounce off of each other.
+		$LF
+	]li
+	[li 
+		" 2 in-game seconds saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 2
+	$LF
+]h4
+[ul 
+	[li 
+		" 6876 - Enemy manipulations allowed for passing below this enemy without waiting.
+		$LF
+	]li
+	[li 
+		" 4 in-game seconds saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 3
+	$LF
+]h4
+[ul 
+	[li 
+		" 1 in-game second saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 4
+	$LF
+]h4
+[ul 
+	[li 
+		" 15649 - By manipulating the y-position of the molecule, a back and forth on the elevator was avoided.
+		$LF
+	]li
+	[li 
+		" 17400-18155 - Improved routing.
+		$LF
+	]li
+	[li 
+		" 19416 - I'm quite displeased with this waiting time, but I couldn't come up with a way to avoid or further reduce it.
+		$LF
+	]li
+	[li 
+		" 19948 - Manipulation of the enemies and molecule timer to speed up the overall waiting time for getting hit by the molecule later on.
+		$LF
+	]li
+	[li 
+		" 5 in-game seconds saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 5
+	$LF
+]h4
+[ul 
+	[li 
+		" 23974 - Turning around on the elevator before activating it delays the enemy spawn above, resulting in less waiting time during the loop that follows.
+		$LF
+	]li
+	[li 
+		" 27477 - Several enemy manipulations from this point on reduce the waiting times in the remainder of this level.
+		$LF
+	]li
+	[li 
+		" 5 in-game seconds saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 6
+	$LF
+]h4
+[ul 
+	[li 
+		" 35258 - A very annoying forced wait here. You can almost make the jump without waiting, but not quite. Despite some effort, I wasn't able to find a way to manipulate the enemies into a better position.
+		$LF
+	]li
+	[li 
+		" 1 in-game second saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 7
+	$LF
+]h4
+[ul 
+	[li 
+		" 1 in-game second saved over the previous run.
+		$LF
+	]li
+]ul
+[h4 
+	" Tower 8
+	$LF
+]h4
+[ul 
+	[li 
+		" The molecules near the end often get in the way and enemies need to start getting manipulated almost from the beginning of the level to prevent this.
+		$LF
+	]li
+	[li 
+		" 1 in-game second saved over the previous run.
+		$LF
+	]li
+]ul
+[h3 
+	" Credits
+	$LF
+]h3
+[p 
+	"I used DrD2k9's previous submission as comparison in a few places.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Memory)
+	": Judging
+	$LF
+]p
+[p 
+	(__wikiLink|user:Memory)
+	": Updating submission file with 38 frame improvement.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Memory)
+	": Optimization appears good. It's an improvement over published run by better execution and not just version differences. There are multiple stages that include ingame seconds saved.
+	$LF
+]p
+[p 
+	"The run is still very boring to watch however. The game has no music, is very repetitive, and slow. There wasn't much audience reception but the poll stands at 2 Yes and 2 No, which is not very good.
+	$LF
+]p
+[p 
+	"Accepting to Vault as an improvement to 
+	(__wikiLink|3727M)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Pubs.
+]p

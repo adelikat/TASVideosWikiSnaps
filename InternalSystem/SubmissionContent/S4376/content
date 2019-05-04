@@ -1,0 +1,1598 @@
+6
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"After the first published 151 run on Pokémon Blue (
+	(__wikiLink|1840M|here)
+	"), there were multiple new glitches found, like the Item Underflow glitch or the use of the Cooltrainer to catch Pokémon, which allow for a significantly faster full completion of the game.
+	$LF
+	"This submission tries to use these new techniques to provide a more up-to-date version.
+	$LF
+	"I didn't really intend to do a TAS on this initially, I mainly started looking into this for two reasons: firstly to see if the "Gotta Catch 'Em All!" category is even a sound category still, and secondly out of curiosity, how much the total time can be improved using these new glitches.
+	$LF
+	"It turned out that the answers to both questions were very promising, and I realized I was half-way into creating a TAS anyway at that point, so I went ahead and finished it.
+	$LF
+]p
+[p 
+	(youtube|v=Is5JoMkN2wU)
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Aims for fastest completion of the game and relevant side-quests
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Forgoes save corruption
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+	[li 
+		" Contains speed/entertainment tradeoffs
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 1.5.3 (syncs on 1.1.0 - 1.6.1)
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[h4 
+	" Goal choice
+	$LF
+]h4
+[p 
+	"The goal of the run is to catch all 151 Pokémon in the game.
+	$LF
+	"This can be done by all means, only excluding arbitrary code execution and any direct manipulation of the Pokédex flags, which would make this category pretty much pointless.
+	$LF
+	"The run is considered complete when Oak evaluates your completed Pokédex in the Hall of Fame.
+	$LF
+]p
+[h4 
+	" Emulator Choice
+	$LF
+]h4
+[p 
+	"The movie requires BizHawk version 1.6.1 or earlier.
+	$LF
+	"In version 1.7.0 and after, the frame timing has changed, which lets the movie desync.
+	$LF
+	"I'm using a (slightly) outdated version, because the pre-1.7 frame timing represents the input capabilities you have on a real Gameboy way better than the new timing, at least for Pokémon games:
+	$LF
+	"The old frame timing always stops at the VBlank interrupt, where the screen is redrawn and Pokémon games fetch the controller input, which allows you to do any input possible on a real Gameboy.
+	$LF
+	"With the new frame timing, VBlank is ignored and frames are forced to be a fixed length, which lets the BizHawk frames cut in the middle of a Gameboy frame.
+	$LF
+	"This can split up the input fetching and input processing awkwardly into two different frames, which makes it harder to correlate the inputs to the actions (you may or may not need to press the button one frame before the actual action, depending on where BizHawk decides to end the frame) and can lead to certain inputs not being possible at all with the new timing.
+	$LF
+	"On the downside, the old timing produces a slightly less accurate total time, since not all frames are of equal length, but are counted as if they were to determine movie length.
+	$LF
+	"The difference is negligible, though, since shorter frames occur only in very rare occasions, e.g. when the LCD is turned off by the game, which it commonly only is at the start of the game, and makes the old timing a few frames slower than the new one.
+	$LF
+]p
+[h4 
+	" Version Choice
+	$LF
+]h4
+[p 
+	"The Red and Blue version are surprisingly close in terms of speed, none of the versions is clearly faster than the other in this category, despite significant route differences due to the version-exclusives of each version.
+	$LF
+	"This run uses the Red version, mainly because the routing turned out to be easier, Blue's version-exclusives are slightly easier to catch in Red than vice versa.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" General strategy
+	$LF
+]h3
+[p 
+	"Since the goal is to catch all Pokémon in the least amount of time, we want to utilize the fastest way for obtaining each Pokémon.
+	$LF
+	"Catching wild Pokémon is obviously one of the fastest ways, it takes about the same time as evolving a Pokémon.
+	$LF
+	"That means, it's often faster to just catch the evolved forms instead of evolving them if you're already in the area, especially if you would need to withdraw it from a box first or it takes more than one Rare Candy to do.
+	$LF
+	"As for glitches, the setup times vary significantly depending on the glitch used, which makes some of them more desirable to use than others.
+	$LF
+	"A 
+	[em 
+		"Trainer-Fly
+	]em
+	" encounter is the most flexible way, especially when combining with Ditto's Transform ability, but is by far the slowest due to its elaborate setup.
+	$LF
+	"The 
+	[em 
+		"Cooltrainer glitch
+	]em
+	" and the newly introduced 
+	[em 
+		"text pointer manipulation
+	]em
+	" are more limited, but also way faster to execute.
+	$LF
+	"In-game trades are only useful if they're on your path anyway or serve an additional purpose, they take pretty long on their own, which makes glitching it faster in most cases.
+	$LF
+]p
+[p 
+	"While it may seem as if you can get any Pokémon at any time using the presented glitches, this is not the case, some of them are significantly harder to catch than others.
+	$LF
+	"This is mostly related to their ID, where higher IDs are harder to get then lower IDs.
+	$LF
+	"I'll illustrate this using Bellsprout as an example.
+	$LF
+	"Bellsprout has ID 188, and there are not many options to get this high: Using Trainer-Fly requires a Ditto transform, since no encounter in the game can get this high (except for Mewtwo, which is already too high).
+	$LF
+	"This is not only slow to do, but also gives you only a level 7 Bellsprout, which will take many Rare Candies to evolve and costs even more time.
+	$LF
+	"Valid tile IDs only go up to 96 as well, so 
+	[em 
+		"Cooltrainer
+	]em
+	" on a (non-glitched) map is also impossible.
+	$LF
+	"Using the 
+	[em 
+		"Old Man glitch
+	]em
+	" is another possibility, but there are only 3 possible encounter slots, and there are many other Pokémon with a high ID which need that spot (also, there is no letter in the available alphabet to give you exactly this number).
+	$LF
+	"An even more exotic possibility is to use the Old man encounters (which usually have abnormally high levels) to get the right stats for a 
+	[em 
+		"Trainer-Fly
+	]em
+	" without Ditto.
+	$LF
+	"This is possible and quite fast, but again it can only be used for one Pokémon, and there are multiple hard-to-catch ones (Machamp gets this spot in this run).
+	$LF
+	"The method which is ultimately used in this run is using 
+	[em 
+		"Cooltrainer
+	]em
+	" on a 
+	[em 
+		"glitched map
+	]em
+	", which happens to allow you to catch Bellsprout.
+	$LF
+	"It is somewhat out of the way as well, but still faster than Trainer-Flying for it.
+	$LF
+]p
+[p 
+	"As for the order in which to catch the Pokémon, it doesn't really matter, the main goal is to minimize the travel time between the individual encounters.
+	$LF
+	"Only at the start of the game, before enabling instant text boxes, most actions, including catching and evolving Pokémon, is slower to do, so catching them later is preferable, unless they are exclusive to the area and you would need to go back to it, like Jigglypuff or Clefairy.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Route Explanation
+	$LF
+]h3
+[p 
+	"This section explains the route used in this run, pointing out non-obvious optimizations and notable glitch uses. You can find more detailed explanations of specific mechanics and glitches in the Glossary below.
+	$LF
+]p
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" The low byte of the 
+		[em 
+			"Trainer ID
+		]em
+		" is manipulated to be 0x06, which will later be used to grab a bike (The bicycle has the item ID 0x06)
+		$LF
+	]li
+	[li 
+		" The character is named "BCVXZQr", which will be important for the 
+		[em 
+			"Old man glitch
+		]em
+		" later on. The "B", "X" and "Q" are not important and chosen simply because they are fast to enter between the relevant characters.
+		$LF
+	]li
+	[li 
+		" The rival's name is chosen to be "BLUE", which serves three purposes:
+		$LF
+		[ul 
+			[li 
+				" It is faster to select a suggested name than to enter a new one, we'll not encounter the rival often enough for a shorter name to outweigh the time spent on naming him.
+				$LF
+			]li
+			[li 
+				" The letter "U" corresponds to an item that belongs to a family of items commonly called 
+				[em 
+					"JACK
+				]em
+				". We'll be able to grab this later on.
+				$LF
+			]li
+			[li 
+				" The game reserves 11 bytes for the rival's name, but you can only use 7 characters for his name. The rest of the characters will be 0x00, which will cause lag when scrolling through it in the item menu. Using a suggested name, all 11 characters will be filled by the game, which reduces lag (see 
+				[em 
+					"Item scroll lag
+				]em
+				").
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 
+	" Pallet town
+	$LF
+]h4
+[ul 
+	[li 
+		" The options are changed to fast text speed, no battle animations and a set battle style, which speeds up all upcoming battles. Changing the options in-game is faster than doing it in the main menu.
+		$LF
+	]li
+	[li 
+		" Charmander is chosen as the starter, since it is easily the fastest in the upcoming fights. Charmander will be the main fighter throughout the run, so we manipulate it to have high 
+		[em 
+			"DVs
+		]em
+		" to speed up the fights. We need 14 ATK and SPC and 15 SPD to kill everything as fast as possible. This runs's Charmander has 15 ATK, SPD and SPC and additionally 13 DEF, which is way more than we need.
+		$LF
+	]li
+	[li 
+		" The rival's Squirtle has 20 HP, a max crit does 6 HP and a max non-crit does 4 HP, so 2 crits and 2 non-crits suffice to kill it (see 
+		[em 
+			"Damage variation
+		]em
+		").
+		$LF
+	]li
+	[li 
+		" Jumping over ledges costs time, so it is avoided whenever possible (also see 
+		[em 
+			"Walking
+		]em
+		").
+		$LF
+	]li
+	[li 
+		" When delivering Oak's package, it's faster to stand next to or above Oak instead of in front of him. This will cause the rival to walk less steps, and NPCs walk at only half of your speed.
+		$LF
+	]li
+]ul
+[h4 
+	" Viridian Forest
+	$LF
+]h4
+[ul 
+	[li 
+		" The Bug Catcher's Weedle is always faster than you, and takes four crits to kill.
+		$LF
+	]li
+	[li 
+		" Talking to trainers directly instead of letting them catch you is faster and is done throughout the run.
+		$LF
+	]li
+	[li 
+		" It is possible to trigger a 
+		[em 
+			"Trainer-Fly
+		]em
+		" off the trainer by fainting from a wild encounter, catch a L1 Nidoking and use the Experience Underflow glitch to get it to L100, but doing this takes a considerable amount of time and ends up being slower than just going with Charmander.
+		$LF
+	]li
+]ul
+[h4 
+	" Pewter city
+	$LF
+]h4
+[ul 
+	[li 
+		" We buy 8 Pokéballs and 2 Escape Ropes in the mart. 7 Pokéballs would suffice for the run, but buying an extra one decreases our money to a specific amount needed later on.
+		$LF
+	]li
+	[li 
+		" When the the guy stopping you from leaving Pewter takes you to the gym, you have a free input frame. This can be abused to save&reset and therefore skip the rest of the cutscene and leave without fighting Brock.
+		$LF
+	]li
+]ul
+[h4 
+	" Mt. Moon
+	$LF
+]h4
+[ul 
+	[li 
+		" Even though buying the Magikarp would be fast, it is only level 5, and using the additional Rare Candies is just slower than catching one at level 15 later.
+		$LF
+	]li
+	[li 
+		" Grabbing the Rare Candy here is faster than grabbing the one in Cerulean City by about 2 seconds.
+		$LF
+	]li
+	[li 
+		" Mega punch is collected and thought to Charmander. Using Mega punch makes the upcoming fights way faster and is well worth the detour.
+		$LF
+	]li
+	[li 
+		" There is an alternative route skipping the Mt. Moon trainers by using 
+		[em 
+			"Trainer-Fly
+		]em
+		" to disable them. This speeds up Mt. Moon, but costs time in later battles due to missing experience on Charmander. It turned out that doing Mt. Moon normally is a few seconds faster than skipping the trainers.
+		$LF
+	]li
+	[li 
+		" Both Moon Stones are collected. Since you can't buy Moon Stones, we'll collect 3 Moon Stones we need throughout the run manually.
+		$LF
+	]li
+	[li 
+		" We choose to take the Helix Fossil, since it's faster to grab. We'll get the Dome Fossil later using the 
+		[em 
+			"Item Underflow glitch
+		]em
+		".
+		$LF
+	]li
+]ul
+[h4 
+	" Cerulean City
+	$LF
+]h4
+[ul 
+	[li 
+		" We evolve Clefairy and deposit Clefable and Jigglypuff to make room in our party for the 
+		[em 
+			"Rhydon glitch
+		]em
+		" coming up.
+		$LF
+	]li
+	[li 
+		" The Pokécenter is used to set the warp location.
+		$LF
+	]li
+	[li 
+		" After the Nugget Bridge is cleared, we catch an Abra in Route 24 and set up a 
+		[em 
+			"Trainer-Fly
+		]em
+		" on the trainer next to us.
+		$LF
+	]li
+	[li 
+		" A Caterpie is caught in Route 25. This is the hardest single encounter in this run, since it is the rarest encounter in this Route and we need specific Special 
+		[em 
+			"DVs
+		]em
+		" for catching Mew later.
+		$LF
+	]li
+	[li 
+		" After receiving the SS.Ticket from Bill and thus moving the guard in Cerulean City to let us through, an Escape Rope is used to return to Cerulean City. Bills house is one of the few houses in R/B you can dig out of.
+		$LF
+	]li
+	[li 
+		" In Cerulean City, a trade is initiated and then cancelled to set the 
+		[em 
+			"Trainer-Fly
+		]em
+		" encounter. The nickname of the Pokémon received in a trade is stored in the same memory segment that is read when triggering an encounter, which changes the species to 0x50 in this case, which is one of the 
+		[em 
+			"Missingno.
+		]em
+		" IDs.
+		$LF
+	]li
+	[li 
+		" The start menu is opened and closed to set the stored text ID of the 
+		[em 
+			"Trainer-Fly
+		]em
+		" to 0 (which is the start menu). Without this, a trainer's text will be triggered upon entering Route 24, which would overwrite the set up encounter.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Missingno.
+		]em
+		" is used to duplicate both the Pokéballs and the Rare Candy. The caught 
+		[em 
+			"Missingno.
+		]em
+		" triggers the 
+		[em 
+			"Rhydon glitch
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" Note that the guard in Cerulean City vanishes as part of the 
+		[em 
+			"Snorlax Skip glitch
+		]em
+		". This can't be abused to skip Bill, though, since the guard that blocks the entrance is a completely different object from the guard that is moved one tile over.
+		$LF
+	]li
+	[li 
+		" In the upcoming fights, the sprites will be drawn flipped, as a side-effect of the 
+		[em 
+			"Missingno.
+		]em
+		" encounter. When updating the graphics, the game gets confused, so that the blocks that make up the sprite are arranged correctly, but the block contents are still flipped, which creates the distortion effect.
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" The 
+		[em 
+			"Jingle Skip
+		]em
+		" in the underground path is impossible with a character name with more than 5 characters, at least on GB (in SGB, it's possible due to lag differences when loading maps).
+		$LF
+	]li
+	[li 
+		" The Full Restore itself is not needed in any way, it is used as a buffer item purely for item management reasons.
+		$LF
+	]li
+	[li 
+		" Two Rare Candies are used on Charmeleon, to bring down the amount to 127, preparing to raise it to 255 with a second upcoming 
+		[em 
+			"Missingno.
+		]em
+		" encounter. Charmeleon does not actually need them for the upcoming fight, but since it will be evolved to Charizard later anyway, it costs no time.
+		$LF
+	]li
+	[li 
+		" The second 
+		[em 
+			"Trainer-Fly
+		]em
+		" is set up in Route 6, both to skip the two mandatory trainers and to use it for an arbitrary encounter later on.
+		$LF
+	]li
+	[li 
+		" Route 12 is entered to load Snorlax's missable object and therefore perform the 
+		[em 
+			"Snorlax Skip glitch
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" Spearow is traded for Farfetch'd, not only to obtain it, but also to set the 
+		[em 
+			"Trainer-Fly
+		]em
+		" encounter just like in Cerulean. Again, the start menu is flashed to set the stored text ID.
+		$LF
+	]li
+	[li 
+		" After successfully setting the amount of Rare Candies to 255 using the 
+		[em 
+			"Missingno.
+		]em
+		" encounter, the teleport location is set to Vermilion by visiting the Pokécenter. It will stay the teleport location for a good part of the run.
+		$LF
+	]li
+	[li 
+		" Another 
+		[em 
+			"Trainer-Fly
+		]em
+		" is set up in Route 12, for the same two reasons as in Route 6: It skips a mandatory fight and will also be used for an encounter later on.
+		$LF
+	]li
+	[li 
+		" The Nugget is tossed to duplicate the Rare Candy stack, since we don't want to lose the amount of 255 when using them. Charmeleon is brought to L32, to be able to speed up the upcoming Clefairy fights. At L33, it will learn a new move, and considering that we will increase the text speed later, it would cost time to raise it any further.
+		$LF
+	]li
+	[li 
+		" Note that the Full Restore collected in the underground path effectively gets deleted by this, since the number of items you have was still decreased, so any new item will overwrite the Full Restore.
+		$LF
+	]li
+]ul
+[h4 
+	" Celadon City
+	$LF
+]h4
+[ul 
+	[li 
+		" In Celadon, we generate money by selling Rare Candies (we keep one to avoid deleting TM28 at the end of our item list) and buy the evolutionary stones needed for this run. We buy 5 extra stones in total and a Soda Pop instead of Fresh Water to manipulate the amount of money.
+		$LF
+	]li
+	[li 
+		" Everything is set up for the 
+		[em 
+			"Item Underflow glitch
+		]em
+		" now, which is performed on the Saffron guard.
+		$LF
+	]li
+	[li 
+		" Now that we have access to memory segments we are not supposed to, we can do all kinds of neat things that will help speed up the remainder of the run.
+		$LF
+		[ul 
+			[li 
+				" The text speed is set to 0, which disables any character delay and therefore makes any text instant. To do this, the save menu is opened beforehand; otherwise the corresponding item would be a key item and therefore too important to toss.
+				$LF
+			]li
+			[li 
+				" The S.S.Ticket is used to manipulate the badges, since its item ID happens to correspond to the first 6 badges and will allow us to use any HM.
+				$LF
+			]li
+			[li 
+				" The glitch item 0x94 is taken from the rival's name, which is one of the 
+				[em 
+					"JACK
+				]em
+				" items.
+				$LF
+			]li
+			[li 
+				" The money, manipulated to represent Full Heals, is taken. They're needed later to cure the status effects inflicted by the 
+				[em 
+					"Cooltrainer glitch
+				]em
+				".
+				$LF
+			]li
+			[li 
+				" The Bicycle is grabbed from the 
+				[em 
+					"Trainer ID
+				]em
+				", which was manipulated to contain this item.
+				$LF
+			]li
+			[li 
+				" Finally, the saved map ID is manipulated to warp us to Victory Road. Also, the map is slightly distorted to bring the exit closer to our position (see 
+				[em 
+					"Wrong warp
+				]em
+				" and 
+				[em 
+					"Map distortion
+				]em
+				").
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 
+	" Victory Road
+	$LF
+]h4
+[ul 
+	[li 
+		" After every fight the currently selected menu items are reset, which makes it faster to do a fight first rather than getting on the bike immediately, which would require to scroll all the way back in the item menu.
+		$LF
+	]li
+	[li 
+		" Due to the way the 
+		[em 
+			"encounter mechanics
+		]em
+		" work, wait times are sometimes unavoidable in order to get the encounter you want. The spinning before the Golbat encounter does not to anything other than wasting some time until the encounter is available. These forced waiting times will occur multiple times throughout the run, and minimizing them by choosing the order of encounters carefully is an important optimization.
+		$LF
+	]li
+	[li 
+		" All Pokémon in the party are evolved before we use the last Escape Rope to leave. Whenever possible, the evolutions are done when the menu needs to be opened anyway to save some time.
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" Using 
+		[em 
+			"JACK
+		]em
+		", a 
+		[em 
+			"Trainer-Fly
+		]em
+		" is set up in Route 6.
+		$LF
+	]li
+	[li 
+		" In the Pokécenter, Charizard, Beedrill and Rhydon are deposited, and the box is switched, saving and resetting the game in order to regain the ability to open the start menu.
+		$LF
+	]li
+	[li 
+		" In the mart, a 
+		[em 
+			"wrong warp
+		]em
+		" to Route 23 is performed.
+		$LF
+	]li
+]ul
+[h4 
+	" Route 23
+	$LF
+]h4
+[ul 
+	[li 
+		" Riding the bike is in theory faster for the amount of steps walked, but scrolling to it in the item menu would cost more time than it saves to use it.
+		$LF
+	]li
+	[li 
+		" A second Ditto encounter is used to transform into Butterfree, which was manipulated to have the right Special stat to encounter Mew with a 
+		[em 
+			"Trainer-Fly
+		]em
+		". Note that it is not possible to use the same Ditto that was caught before, since catching it will revert the stat changes done by the transformation.
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" Mew and Ditto will be the two permanent party members throughout this run: Mew is the only Pokémon that can learn both Dig and Fly, while Ditto is used for the Transform glitch and the resulting 
+		[em 
+			"Cooltrainer glitch
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" Another 
+		[em 
+			"wrong warp
+		]em
+		" takes us to Cinnabar Island.
+		$LF
+	]li
+]ul
+[h4 
+	" Cinnabar Island
+	$LF
+]h4
+[ul 
+	[li 
+		" The Transform glitch is set up on Ponyta.
+		$LF
+	]li
+	[li 
+		" The third Moon Stone is collected, which is the last one needed in this run.
+		$LF
+	]li
+	[li 
+		" By manipulating the text pointer of the map, the Escape Rope is turned into a trainer (from Rock Tunnel to be more exact). Escape Ropes happen to correspond to Pinsir. The original text pointer is saved for use much later in the run (see 
+		[em 
+			"Text pointer manipulation
+		]em
+		").
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" As setup for a 
+		[em 
+			"Cooltrainer
+		]em
+		" encounter, we wrong warp to a 
+		[em 
+			"glitch map
+		]em
+		" and immediately return, saving the screen tiles of the glitch map for the 
+		[em 
+			"Cooltrainer glitch
+		]em
+		", which happens to give us Porygon.
+		$LF
+	]li
+	[li 
+		" since this is a "bad" 
+		[em 
+			"Cooltrainer
+		]em
+		", we walk into Diglett's Cave for the 
+		[em 
+			"Cooltrainer
+		]em
+		" encounter to avoid soft-locking the game.
+		$LF
+	]li
+	[li 
+		" The main menu is flashed to prevent the game from soft-locking when leaving the cave, as part of the "bad" 
+		[em 
+			"Cooltrainer
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" The Silph Scope it taken, Mew is thought Fly and Surf, and the Old Amber, representing the background music ROM bank, is taken. Some trickery is required to make it usable, though, since it initially has a quantity of 0, which makes it unusable in the Cinnabar Lab. By putting it over the saved map ID, which gets overwritten each tick on this map, the amount is set to 22.
+		$LF
+	]li
+	[li 
+		" Another 
+		[em 
+			"glitch map
+		]em
+		" warp is set up for another "bad" 
+		[em 
+			"Cooltrainer
+		]em
+		", catching Vaporeon. To get to the right spot on the map, 
+		[em 
+			"JACK
+		]em
+		" is used. Also, the tileset is manipulated to allow using Dig to escape.
+		$LF
+	]li
+	[li 
+		" The Vaporeon 
+		[em 
+			"Cooltrainer
+		]em
+		" put Ditto asleep, which prevents it from triggering further 
+		[em 
+			"Cooltrainers
+		]em
+		", so it needs to be healed using a Full Heal.
+		$LF
+	]li
+	[li 
+		" Two "good" 
+		[em 
+			"Cooltrainers
+		]em
+		" allow catching Hitmonchan and Vulpix easily.
+		$LF
+	]li
+	[li 
+		" Another 
+		[em 
+			"wrong warp
+		]em
+		" brings us into Silph.Co. in order to grab Lapras.
+		$LF
+	]li
+	[li 
+		" By using the teleporter right before Dig, the initial Dig animation is replaced by the much faster teleporter animation. This requires extra steps, though, for a net total of a whopping 3 saved frames.
+		$LF
+	]li
+	[li 
+		" Back in Vermilion, another 
+		[em 
+			"wrong warp
+		]em
+		" into the Pokémon Tower is performed, catching Gastly, Haunter and Cubone and taking the Super Rod before digging back out.
+		$LF
+	]li
+	[li 
+		" The last 
+		[em 
+			"Trainer-Fly
+		]em
+		" is set up in Route 6, again using 
+		[em 
+			"JACK
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" All fully evolved Pokémon are deposited, Pokémon which still need to be evolved are taken out and the active box is changed, saving and resetting the game.
+		$LF
+	]li
+	[li 
+		" Vulpix is poisoned as part of the 
+		[em 
+			"Cooltrainer glitch
+		]em
+		", which costs 4 frames for every poison tick, but curing it would cost more time than just keeping it poisoned. All 
+		[em 
+			"Cooltrainer
+		]em
+		" Pokémon have absurdly high health, so there is no danger of them dying.
+		$LF
+	]li
+	[li 
+		" Another 
+		[em 
+			"wrong warp
+		]em
+		", to Cerulean Cave.
+		$LF
+	]li
+]ul
+[h4 
+	" Cerulean Cave
+	$LF
+]h4
+[ul 
+	[li 
+		" After catching Raichu, there is a notable delay before one of the text boxes is closed, which is done to manipulate the 
+		[em 
+			"D-Sum
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"JACK
+		]em
+		" is used for a shortcut to get through the cave faster. Running in circles is not actually required, it's again just to burn some time waiting for the right encounter.
+		$LF
+	]li
+	[li 
+		" the map is distorted in order to bring Mewtwo closer, to avoid the need to use Surf.
+		$LF
+	]li
+	[li 
+		" Electrode needs to have a Special 
+		[em 
+			"DV
+		]em
+		" of exactly 3 in order to be able to catch Sandshrew using 
+		[em 
+			"Trainer-Fly
+		]em
+		".
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" In the mart, the Pokéflute is grabbed, and a 
+		[em 
+			"wrong warp
+		]em
+		" to the Powerplant is performed.
+		$LF
+	]li
+]ul
+[h4 
+	" Viridian City
+	$LF
+]h4
+[ul 
+	[li 
+		" The Dome Fossil is grabbed in the Pokécenter before triggering the 
+		[em 
+			"Old Man glitch
+		]em
+		".
+		$LF
+	]li
+]ul
+[h4 
+	" Cinnabar Island
+	$LF
+]h4
+[ul 
+	[li 
+		" All three fossils are turned in at the Cinnabar Lab. As we have multiple Dome Fossils and Old Ambers, they don't get used up when turning them in.
+		$LF
+	]li
+	[li 
+		" Using the 
+		[em 
+			"Old Man glitch
+		]em
+		", Bulbasaur, Squirtle and Alakazam are caught.
+		$LF
+	]li
+	[li 
+		" Alakazam needs a Special 
+		[em 
+			"DV
+		]em
+		" of exactly 10 in order to trigger a Machamp 
+		[em 
+			"Trainer-Fly
+		]em
+		" encounter.
+		$LF
+	]li
+]ul
+[h4 
+	" Celadon City
+	$LF
+]h4
+[ul 
+	[li 
+		" The teleport location is changed to Celadon, which it will remain for the rest of the run.
+		$LF
+	]li
+	[li 
+		" The 
+		[em 
+			"Cooltrainer
+		]em
+		" setup for Dratini is by far the most time-consuming one, especially considering it can be caught legitimately. Levelling it up do Dragonite from L15 would take 40 Rare Candies, though, which takes longer than setting up a glitched encounter with a higher level.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"JACK
+		]em
+		" is used extensively to navigate the 
+		[em 
+			"glitch map
+		]em
+		" in order to get to the right spot for Dratini.
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" Two "bad" 
+		[em 
+			"Cooltrainers
+		]em
+		", for Meowth and Lickitung can be performed inside the Vermilion mart.
+		$LF
+	]li
+	[li 
+		" A 
+		[em 
+			"wrong warp
+		]em
+		" to Seafoam Islands is performed.
+		$LF
+	]li
+]ul
+[h4 
+	" Seafoam Islands
+	$LF
+]h4
+[ul 
+	[li 
+		" 
+		[em 
+			"JACK
+		]em
+		" is used for a shortcut to get to the lowest floor faster.
+		$LF
+	]li
+	[li 
+		" The map is distorted in order to get Articuno closer to us and avoid the need to use Surf or move any boulders.
+		$LF
+	]li
+]ul
+[h4 
+	" Celadon City
+	$LF
+]h4
+[ul 
+	[li 
+		" More "good" 
+		[em 
+			"Cooltrainers
+		]em
+		" are performed to catch Magmar and Mr.Mime, and a "bad" 
+		[em 
+			"Cooltrainer
+		]em
+		" for Gengar.
+		$LF
+	]li
+	[li 
+		" In the Saffron guard house, walking one extra step inside sets the X coordinate to 1 (instead of 0), which decreases the 
+		[em 
+			"item scroll lag
+		]em
+		" and saves more time than the two additional steps cost.
+		$LF
+	]li
+	[li 
+		" Two more "good" 
+		[em 
+			"Cooltrainers
+		]em
+		" for Bellsprout and Eevee. A second Eevee will be received as a gift, which is all we need since we already caught Vaporeon earlier.
+		$LF
+	]li
+	[li 
+		" After catching Oddish, the longest 
+		[em 
+			"D-Sum
+		]em
+		" based delay of the run is needed. The text box is not closed for 4 seconds in order to setup the Mankey encounter.
+		$LF
+	]li
+	[li 
+		" The game thinks Ditto is at low health, which causes a constant beeping throughout these encounters that suppresses other sound effects and speed up the game, but is a major annoyance and therefore not used as a general optimization.
+		$LF
+	]li
+	[li 
+		" After waking up and catching Snorlax, a 
+		[em 
+			"wrong warp
+		]em
+		" into the Safari Zone is performed. Not entering the Safari Zone through the entrance has some side-effects: the number of Safari Balls is 0, which is treated as 256 by the game, and the number of remaining steps is also 0, allowing us to stay there for an indefinite amount of time.
+		$LF
+	]li
+]ul
+[h4 
+	" Safari Zone
+	$LF
+]h4
+[ul 
+	[li 
+		" A second 
+		[em 
+			"text pointer manipulation
+		]em
+		" is performed to turn the Nugget in the center area into the corresponding Pokémon, Golem. The text pointer which was saved from the Pokémon Mansion is re-used here.
+		$LF
+	]li
+]ul
+[h4 
+	" Pewter City
+	$LF
+]h4
+[ul 
+	[li 
+		" The last two remaining Pokémon, Jynx and Hitmonlee, are caught using "good" 
+		[em 
+			"Cooltrainers
+		]em
+		".
+		$LF
+	]li
+]ul
+[h4 
+	" Vermilion City
+	$LF
+]h4
+[ul 
+	[li 
+		" Hitmonlee and Golem are released to make room in the box for the rest of the party Pokémon. All but one party Pokémon is deposited in order to speed up the Hall of Fame cutscene. Note that releasing Golem is chosen over Jynx because its cry is way shorter.
+		$LF
+	]li
+	[li 
+		" A 
+		[em 
+			"wrong warp
+		]em
+		" into the Hall of Fame room skips all of the Elite Four and completes the game.
+		$LF
+	]li
+	[li 
+		" Note that not only the number of caught and seen Pokémon is 151, the game time ends up being 1:51 as well, which was of course totally planned and not just pure coincidence.
+		$LF
+	]li
+]ul
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Glossary
+	$LF
+]h3
+[h4 
+	" Cooltrainer glitch
+	$LF
+]h4
+[p 
+	"The glitch commonly referred to as "Cooltrainer" is an application of the Transform glitch.
+	$LF
+	"In the Transform glitch, you transform into a Pokémon with more moves than your own, and then swap the last with the first move.
+	$LF
+	"This causes the original moves to be swapped as well, making your first move slot empty, which is not handled well by the game.
+	$LF
+	"The Cooltrainer is based on a side-effect of the name of this invalid move.
+	$LF
+	"The game looks for the move's name beyond the actual move name list, and picks up some unpredictable 20 bytes of memory as the name.
+	$LF
+	"Further down the line, this name is first stored in $CD6D and later copied to $CF4B.
+	$LF
+	"This copy operation expects a terminating 
+	[em 
+		"EOS
+	]em
+	" byte, which might not be there, causing far more bytes to be copied than expected.
+	$LF
+	"This memory corruption is exploited in the Cooltrainer glitch: By manipulating the contents of the bytes following $CD6D, you can manipulate the corresponding bytes from $CF4B by simply opening the move list and looking at the invalid move.
+	$LF
+	"When used during a fight, this allows us to manipulate the data of the enemy Pokémon, most importantly its species.
+	$LF
+	"Simply speaking, this can basically turn any encounter into the species you want before you catch it.
+	$LF
+]p
+[p 
+	"It has side-effects however, since you're not surgically changing one single byte, but blindly overwriting the whole memory segment.
+	$LF
+	"Most prominently, it alters the enemy's (and depending on how far the corruption goes also your) stats and status, giving the Pokémon an absurd amount of health and inflicting multiple status ailments simultaneously.
+	$LF
+	"Only one alteration can influence the game's stability, though, which is at $CFC4. This flag determines (indirectly) how sprites are loaded, and having it in the wrong state can just soft-lock the game as soon as the fight ends.
+	$LF
+	"There is a way to handle these "bad" Cooltrainers, though, by doing the fight on a map without offending sprites, allowing the fight to end without soft-lock.
+	$LF
+	"After the fight, the flag can easily be set to the correct state by opening the start menu before leaving the area in order to avoid soft-locks.
+	$LF
+	"There are multiple of these safe maps that don't cause soft-lock in the game, most prominently Diglett's Cave, which is often used since it's close to a warp location.
+	$LF
+]p
+[p 
+	"The memory area that data is copied from contains a buffer of saved screen tiles, which is used to backup the screen when it is covered by a menu.
+	$LF
+	"When you open the party or item menu, this memory segment will be used to store the screen contents, so in order to exploit the Cooltrainer glitch you need to stand at specific positions in the overworld when storing the screen content.
+	$LF
+	"When stored, different tiles on the screen correspond to different properties of the encounter you'll manipulate, like species and level.
+	$LF
+	"You'll also need to have a tile equivalent to the 
+	[em 
+		"EOS
+	]em
+	" byte visible on screen at the right position, to mark the end of the memory corruption and not actually crash the game by overwriting the whole RAM.
+	$LF
+]p
+[h4 
+	" Damage variation
+	$LF
+]h4
+[p 
+	"Attack damage is multiplied by a random number between 217/255 and 255/255 to get the actual damage dealt. Because of the way integer division works, only 255/255 results in full damage, while 254/255 and below will always be at least 1 damage less. Dealing the full amount of damage is called max damage and has a 1/39 chance.
+	$LF
+]p
+[h4 
+	" D-Sum
+	$LF
+]h4
+[p 
+	"The game uses two bytes for determining random events, $FFD3 and $FFD4.
+	$LF
+	"Both change erratically based on a hardware register called DIV and are highly unpredictable.
+	$LF
+	"However, the two values are not independent: for each roll, DIV is added to one and subtracted from the other byte, which makes their sum almost constant (DIV can change slightly in-between the two operations, and there are carry values to consider).
+	$LF
+	"This sum is called the D-Sum, it changes slowly over time and is highly important when manipulating encounters.
+	$LF
+]p
+[h4 
+	" DVs
+	$LF
+]h4
+[p 
+	"DVs are random values between 0 and 15 assigned to each of the four stats (Attack, Defense, Speed, Special) to make Pokémon of the same species different. DVs increase the respective stats so that high DVs mean better stats.
+	$LF
+	"The DVs of wild encounters are random, while Trainer Pokémon always have the same DVs: 9 ATK and 8 DEF, SPD, SPC and HP.
+	$LF
+]p
+[h4 
+	" Encounter mechanics
+	$LF
+]h4
+[p 
+	"When moving in high grass, the game checks for an encounter after every step.
+	$LF
+	"Each area has its own encounter rate, which can range from around 3% to 12%.
+	$LF
+	"Furthermore, each area has a list of 10 possible encounters with fixed probabilities.
+	$LF
+	"That is, each slot has a fixed chance, independent from the area you are in, only the encounter you get in that specific slot varies.
+	$LF
+	"When checking for an encounter, both RNG bytes $FFD3 and $FFD4 are considered: If the value of $FFD3 is lower than the encounter rate of that area, you get an encounter.
+	$LF
+	"At the same time, the value of $FFD4 determines the species of the encounter.
+	$LF
+	"That means in order to hit a specific encounter slot, your D-Sum must be is a specific range; for a specific step you can only get the encounters that your D-Sum is in range of to allow.
+	$LF
+	"Since there is no known way to manipulate the D-Sum effectively, there may be no way to get an encounter at a specific step if your D-Sum just isn't in the necessary range, and you need to wait until it is.
+	$LF
+	"Things get even more problematic for consecutive encounters: After an encounter, your D-Sum is always in a specific range, the range it needed to be to get that encounter.
+	$LF
+	"During the fight, there is not enough manipulation potential to bring the D-Sum where you want it to be, so it might be simply impossible to have specific pairs of encounters consecutively without some wait time.
+	$LF
+]p
+[p 
+	"There's also a mechanic called the 3-step rule in this game, which ensures that after every encounter, a minimum of three steps is necessary to be able to get another encounter.
+	$LF
+]p
+[h4 
+	" EOS
+	$LF
+]h4
+[p 
+	"EOS is the end-of-string symbol, a special byte that tells the game that the character sequence it's reading has finished. In this game EOS = 0x50
+	$LF
+]p
+[h4 
+	" Glitch maps
+	$LF
+]h4
+[p 
+	"When an entrance does not exist for a map and you 
+	[em 
+		"wrong warp
+	]em
+	" into it, you end up in a glitched map.
+	$LF
+	"For each entrance on a map, not only the x and y coordinate is given, but also the address of the block data that makes up the visible tiles on the screen.
+	$LF
+	"Since for most glitch maps the address is some ROM address, the layout of the glitch map is fixed and predictable.
+	$LF
+]p
+[h4 
+	" Item scroll lag
+	$LF
+]h4
+[p 
+	"All item names are placed directly after another in the game's ROM, and whenever the game needs to read an item name with ID i, it will read through all the item names 0 to i-1 (counting the number of 
+	[em 
+		"EOS
+	]em
+	") before finally reading the correct item name.
+	$LF
+	"That means items with higher IDs take longer to read. With glitch items, the amount of read data can be huge, since there may be no 
+	[em 
+		"EOS
+	]em
+	" around, which creates lag when scrolling through your item menu.
+	$LF
+	"The worst offender is item 0x00, which is treated by the game as ID 256 and creates about 6-7 frames of lag every time its name is looked up.
+	$LF
+	"Unfortunately, 0x00 is a common byte to find in RAM, and this run tries to reduce the number of 0x00 bytes whenever possible.
+	$LF
+]p
+[h4 
+	" Item Underflow glitch
+	$LF
+]h4
+[p 
+	"In the item menu, each item is stored as a group of 2 bytes, denoting the item ID ans the quantity.
+	$LF
+	"The byte 0xFF for an item ID is used to mark the end of the list.
+	$LF
+	"When you get the quantity of an item to 0xFF (e.g. by encountering Missingno.), the game confuses it with the end marker and modifies the item list in unexpected ways.
+	$LF
+	"This allows to toss all items without actually removing them from the inventory.
+	$LF
+	"If an event is triggered after that which removes items from the inventory, like the Saffron guards taking water, the item counter underflows from 0 to 0xFF.
+	$LF
+	"This enables us to scroll beyond the actual items into other memory areas and manipulate their contents, which opens up a wide variety of possibilities.
+	$LF
+]p
+[h4 
+	" JACK
+	$LF
+]h4
+[p 
+	"JACK is an effect caused by a set of glitch items, specifically all glitch items that open the party screen when used, like Potions or Rare Candies.
+	$LF
+	"All glitch items starting from 0x80 have the same effects as the regular items starting from 0x00.
+	$LF
+	"However, they don't appear in any list of items that the game needs to handle in a special way.
+	$LF
+	"All items that open up the party screen are is such a list, so that the game can reload the map sprites after the screen is closed.
+	$LF
+	"When using a glitch item with the same effect, the map sprites are not reloaded.
+	$LF
+	"This has multiple useful effects:
+	$LF
+	"Since the sprites are not rendered, all map objects that were invisible while in the item menu are now vanished, they don't block your way and trainers don't engage.
+	$LF
+	"This can be used to skip trainers or trigger a 
+	[em 
+		"Trainer-Fly
+	]em
+	" on any trainer, by walking in front of them and escape while letting them re-appear.
+	$LF
+	"The second useful effect is that the character's sprite has vanished as well, which prevents it from updating its orientation while walking.
+	$LF
+	"This has effects on the collision detection: To determine if the player can go in any direction, the game checks whether the tile in front of the player is passable, assuming the player always looks in the direction he's going.
+	$LF
+	"This is not true any more, so it's possible to go to any adjacent tile, as long as the tile the character is facing is passable, even if the tile you are walking to isn't.
+	$LF
+	"This can be exploited to walk through solid objects and walls, taking short cuts.
+	$LF
+	"It also helps when navigating glitched maps that have no way to traverse them regularly.
+	$LF
+]p
+[h4 
+	" Jingle Skip
+	$LF
+]h4
+[p 
+	"Jingle Skip is a minor time-saving glitch which is triggered when a jingle is suppressed by a recent change in the background music. Most famously, it's possible to skip the item pick-up jingle in the underground path when picking up the Full Restore right after entering.
+	$LF
+]p
+[h4 
+	" Map distortion
+	$LF
+]h4
+[p 
+	"There are two different pieces of information that define the player's position on the map: the X and Y coordinates, and the base address of the blocks of tiles that are visible on screen.
+	$LF
+	"While the coordinates determine the position of the objects on the map, the block address determines the map collisions.
+	$LF
+	"By using the Item Underflow glitch, you can get these two out of sync, which causes graphical glitches commonly known as map distortion.
+	$LF
+	"It is most useful to manipulate the position of map objects and bring them closer to you.
+	$LF
+]p
+[h4 
+	" Map loading
+	$LF
+]h4
+[p 
+	"The game world is split up in multiple maps, each town and route is on it's own map. When you go from one map to another, the map loading creates some lag frames. The GB has a time advantage over the SGB here, as loading the color palettes costs additional time.
+	$LF
+]p
+[h4 
+	" Missingno.
+	$LF
+]h4
+[p 
+	"Missingno. has the Pokédex number 0, which will be read as 256 by the game, so when trying to set the Pokédex entry for Missingno., it sets some bit outside the actual Pokédex data. For the "seen" information, this turns out to be the MSB of the 6th inventory item's quantity. What this effectively does is it gives you 128 more of your 6th item, unless you already have 128 or more of it, in which case it does nothing.
+	$LF
+	"If you catch a Pokémon, the game sets both the "seen" and the "caught" Pokédex bit, which means you can duplicate the 6th item twice with one Missingno. encounter.
+	$LF
+]p
+[h4 
+	" Old Man glitch
+	$LF
+]h4
+[p 
+	"The Old Man glitch is one of the first discovered game exploits and allows to catch specific Pokémon at very high levels depending on the character's name.
+	$LF
+	"When talking to the old man in Viridian City to show you how to catch Pokémon, the your name is temporarily stored in the same memory segment as the grass encounters, in order to replace it with the old man's name for the duration of the fight.
+	$LF
+	"This in itself is not immediately useful, since all routes that have grass to encounter Pokémon provide their own encounter list which would overwrite your name.
+	$LF
+	"However, due to the way the game does encounter checks, you can get a grass encounter without any grass:
+	$LF
+	"Each tile the player walks on consists of 2x2 graphics tiles. Almost all checks, like collision checks, are made based on the lower-left tile.
+	$LF
+	"The test whether you get an encounter, however, is made based on the lower-right tile, while the check which encounter you get is based on the lower-left tile.
+	$LF
+	"This can be exploited in Route 20, where the Cinnabar Island coast line has Water in it's lower-right tile, which can trigger an encounter, but coast on the lower-left tile, triggering grass encounters instead of water ones.
+	$LF
+	"Combining these, you can talk to the old man and then get an encounter at the Cinnabar coast for a wild encounter based on your character name.
+	$LF
+]p
+[h4 
+	" Rhydon glitch
+	$LF
+]h4
+[p 
+	"The Rhydon glitch is triggered when catching Missingno., and causes it to turn into Rhydon, since Rhydon is the first Pokémon by index number.
+	$LF
+	"While the transformation is always performed, the Pokédex entry for Rhydon is written only when Rhydon is kept in the party and not sent to a PC box.
+	$LF
+]p
+[h4 
+	" Snorlax Skip glitch
+	$LF
+]h4
+[p 
+	"If a fight is started as a result of a map object interaction, the game checks whether it was a trainer fight.
+	$LF
+	"If it wasn't, the game assumes it to be a special encounter (like the legendary birds, Mewtwo or Snorlax) and tries to remove the object from the map.
+	$LF
+	[em 
+		"Trainer-Fly
+	]em
+	" encounters are this type of special encounter, but the object is not found in the list of missable objects, which causes the game to remove the object behind the last element in the current map's missable object list.
+	$LF
+	"This entry is usually residue from some previous map which had more missable objects than the current one.
+	$LF
+	"This can be exploited to remove Snorlax: By entering Route 12, Snorlax is written to the missable item list (1st entry), and as long as all routes visited afterwards have no missable objects, it will stay there and be finally removed when the Trainer-Fly encounter is triggered.
+	$LF
+]p
+[h4 
+	" Text pointer manipulation
+	$LF
+]h4
+[p 
+	"This is another exploit made possible by the Item Underflow glitch, which is newly introduced in this submission.
+	$LF
+	"At $D36C, the game stores the pointer to a list of texts that will be shown for each object on the current map.
+	$LF
+	"When manipulating this pointer, texts can be swapped around, combining objects with different texts.
+	$LF
+	"Objects have values attached to them, the meaning of which depend on the type of object: Trainers have their trainer type and set, items have their item ID and Pokémon have their species.
+	$LF
+	"While items are different, Trainers and legendary encounters are the same thing from the game's perspective, it distinguishes between them only by the provided ID (if it is at least 0xC8, it's a trainer).
+	$LF
+	"Now when an item is manipulated to have the text of a trainer, you can "fight" the item, which will result in a legendary encounter or trainer battle depending on the item ID.
+	$LF
+	"This method of triggering encounters is highly limited by the fact that you need an item with the right ID in order to convert it into the Pokémon you want, which works out only in a few cases, but is fast to set up compared to many other glitches that allow catching Pokémon.
+	$LF
+]p
+[h4 
+	" Trainer-Fly glitch
+	$LF
+]h4
+[p 
+	"The Trainer-Fly glitch is one of the most important glitches in the game, as it is the precursor for many other exploits.
+	$LF
+	"When an object appears on screen, its orientation is always south for one frame before adopting its real orientation.
+	$LF
+	"This allows us to step into the line of sight of an off-screen trainer and open the start menu before the orientation is corrected and they see us.
+	$LF
+	"When now escaping , e.g. by Fly or Dig, the fight is still loaded, but not executed.
+	$LF
+	"This has multiple consequences:
+	$LF
+]p
+[ul 
+	[li 
+		" You are unable to open the start menu or interact with objects, since the game thinks you are in the process of being engaged by a trainer.
+		$LF
+	]li
+	[li 
+		" All trainers in the map you performed the Trainer-Fly on will ignore you, for the same reason.
+		$LF
+	]li
+	[li 
+		" The pending fight is stored for this map.
+		$LF
+	]li
+]ul
+[p 
+	"After fighting another trainer in a different map, the stored fight will trigger upon entering the Trainer-Fly map again.
+	$LF
+	"Since the data for the fight has long been overwritten, though, a different encounter is triggered, based on the memory contents at that time.
+	$LF
+	"These can be modified in different ways, most commonly by manipulating the special stat of the last fought Pokémon to change the species of the encounter.
+	$LF
+]p
+[h4 
+	" Trainer ID
+	$LF
+]h4
+[p 
+	"The Trainer ID is a random two byte value assigned to your character at the beginning of the game. All Pokémon you catch will inherit this value to mark them as yours.
+	$LF
+]p
+[h4 
+	" Walking
+	$LF
+]h4
+[p 
+	"Walking mechanics are weird in Gen I. Walking one step in any directions costs 16 frames, and the first turn you take costs additional 2 frames. All consecutive turns (as long as you don't stop walking) cost no extra frames. Additionally, there is a considerable amount of lag when walking, usually 1 frame per step. Lag frames can occur erratically on some maps, so specific walking patterns can help reduce lag and therefore save time.
+	$LF
+]p
+[h4 
+	" Wrong warps
+	$LF
+]h4
+[p 
+	"The destination for all warps on any map is stored in the part of RAM which is accessible using the Item Underflow glitch.
+	$LF
+	"All maps have many entry points defined for them, which denote the places where you can enter the map.
+	$LF
+	"Every warp description contains the map and the entry point it is warping to.
+	$LF
+	"Additionally, there is the concept of saved maps: When entering a house or cave from the overworld, the overworld map is stored.
+	$LF
+	"All warps that lead to the overworld use the map 0xFF to indicate that the stored map should be used instead, which allows the game to re-use interior maps at different overworld locations.
+	$LF
+	"By manipulating the saved map, a wrong warp can be performed.
+	$LF
+	"The entrance on the map can be manipulated, too, but this costs extra time, so for the most warps it is faster to choose an interior that already has the correct entrance set up, so you just need to change the map ID.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Known mistakes
+	$LF
+]h3
+[p 
+	"As expected with such a long run, mistakes are unavoidable.
+	$LF
+	"The ones listed below I noticed while re-watching the run.
+	$LF
+	"I decided to not do it over for them, as the time lost is relatively small and any routing improvement will likely yield a far larger time save than fixing these execution mistakes could, so it's not worth to do it all over just to correct them.
+	$LF
+	"They do bother me nonetheless, and there are probably a few more I haven't even noticed yet.
+	$LF
+]p
+[ul 
+	[li 
+		" I discovered that there was a faster menuing technique half-way through the run, that can save some frames when selecting certain list items. It is used in the second half of the run, but not the first. (~0.5s lost)
+		$LF
+	]li
+	[li 
+		" Catching Weedle before Caterpie on Route 25 allows for better D-Sum manipulation (~1.5s lost)
+		$LF
+	]li
+	[li 
+		" Missed an opportunity to bike in Vermilion before catching Sandshrew (~3s lost)
+		$LF
+	]li
+	[li 
+		" Missed an opportunity to bike on Cinnabar Island before catching Bulbasaur (~0.6s lost)
+		$LF
+	]li
+	[li 
+		" Missed an opportunity to bike in Lavender Town before catching Machamp (~1.5s lost)
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Great improvement. Accepting to Moons as an improvement to the 
+	(__wikiLink|1840M|published movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing... but that second part, that I cannot do. Because it cannot see SGB games.
+]p

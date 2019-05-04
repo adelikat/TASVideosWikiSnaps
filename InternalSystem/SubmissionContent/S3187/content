@@ -1,0 +1,264 @@
+17
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.1.5-interim
+		$LF
+	]li
+	[li 
+		" Collects no evidence
+		$LF
+	]li
+	[li 
+		" Uses paths not intended by the game's developers
+		$LF
+	]li
+	[li 
+		" Is still really, really boring
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	"Where in Time is Carmen Sandiego is a game about 
+	[del 
+		"a time traveling rookie detective, who rises through the ranks
+	]del
+	" a crooked cop, who puts dozens of people in jail by obtaining warrants for their arrest without any evidence.  Fortunately, he also happens to be clairvoyant, so all of the people he put behind bars were guilty.
+	$LF
+]p
+[p 
+	"Gameplay is painfully simple: interview witnesses and informants, collect clues, assemble a warrant, find and capture the suspect-- repeat 80 times.  As far as I'm aware, only two things change as the game progresses: the number of stops you're expected to go to increases (from 4 to 12 or so) and the number of hours you have increases to allow you more time to follow those long routes.
+	$LF
+]p
+[h2 
+	" Oh God.  Why, Bobo?  WHY???
+	$LF
+]h2
+[p 
+	"Good question.  A good question to which I don't really have a good answer.  At least it's a simple game.
+	$LF
+]p
+[p 
+	"In fact, that's entirely why I did this.  I've been working hard to bot Final Fantasy Legend and I decided I'd take a short break.  Within a few days, I had this bot up and running.  Because this game is so damn monotonous, it's quite easy to bot.  Of course, I walk a fine line here-- you should know it's very straightforward to run, but I don't want you to think I didn't put any effort into this TAS.  There are some nontrivial elements to it.
+	$LF
+]p
+[h3 
+	" Like what?  What's nontrivial about it?  I just see you do the same thing over and over again...
+	$LF
+]h3
+[p 
+	"To your untrained eye, of course!  But there's a lot of automatic route planning behind the scenes.
+	$LF
+]p
+[p 
+	"Every level is randomly generated from a pool of 48 locations.  These locations are randomly distributed, along with your starting and ending points as well as the suspect.  To use a little bit of mathematical terminology, a random (and undirected) graph is generated (with a maximum of 4 and a minimum of 2 edges adjacent to each vertex).  To use strictly non-mathematical language, random places lead to other random places.
+	$LF
+]p
+[p 
+	"This makes gameplay decidedly nontrivial.  An early version of my bot simply did a tree search until it reached the proper destination.  That didn't work well, so I tried again with a sort of double-tree search (I'm sure there's a name for it in computer science); in this search, I started out at both the starting point and the destination (reached by overwriting the RAM value), found all adjacent vertices (locations one warp away), compared the two sets, then searched one level deeper.  Finally, I was able to find where the graph is stored in the RAM, so I just assembled and analyzed it directly from the RAM without all that pointless frame advancing, saving, and loading.
+	$LF
+]p
+[p 
+	"I've found that every level can be completed in four moves or less.  Thanks to a little luck manipulation, each level in this run is completed in three moves or less, and sometimes in just one move.
+	$LF
+]p
+[h3 
+	" Does it work?
+	$LF
+]h3
+[p 
+	"You tell me.
+	$LF
+]p
+[p 
+	"No, on second thought, I'll tell you.  Yes, it does work.  As an example, let's consider the first level completed in the TAS.  You start in Italy at 1915 AD (region 29) and your goal is to reach England in 992 (region 0).  If we were to follow the game's "suggested" route (by following clues or just cheating and looking at the RAM), it would take us through 1667 Japan (region 30), 1908 USA (17), and 1407 Holland (18) before finally bringing us to England in 992.  As you can see from the TAS, however, I just travel directly from 1915 Italy to 992 England, saving three stops and about 2000 frames (half a minute).
+	$LF
+]p
+[p 
+	"This can be conceptualized a little more easily through the following diagram.  Numbers represent locations, with the starting point at 29 and the goal at 0.  Arrows and circles in blue indicate the game's suggested path while green indicates the path really taken.  Circles and arrows in red show other destinations not on the way and are included just to give you a vague sense of the vastness of the map (it's generally a bad idea to wander aimlessly through time and space).
+	$LF
+	[img class=embed src=http://i.imgur.com/bK0CV.png 
+	]img
+	$LF
+]p
+[p 
+	"That's just level 1.  Although some levels are completed in two or three time jumps, no levels take the suggested path.  Late in the game, the suggested route has ten stops, allowing me to save minutes with each level.  Even though this movie is over two hours long, I'm confident it would be at least an hour longer if the suggested route were taken.  It might even be an additional hour longer if it took the time to gather evidence (resembling human play).  If anyone would like me to confirm those numbers, I can probably bot it pretty quickly.
+	$LF
+]p
+[h3 
+	" What other things should I know about this run?
+	$LF
+]h3
+[p 
+	"No human input was used.  This game was entirely botted.  This TAS aims for minimal input and while the route may be slightly suboptimal due to time, space, and processing limitations in my bot, all input along this route should be optimal (i.e., all input is entered as soon as it is valid).
+	$LF
+]p
+[p 
+	"The RNGs are rolled every time your chronoskimmer beeps.  I have no idea why.  They are also deterministic, but they do not commute when you perform different actions in a different order.  What this means is if I have two paths that each take two time jumps, they both will yield the same RNGs at the end of the level if I follow the same behavior pattern.  They will not yield the same RNGs if I input the evidence at a different point along the path.  This is where most of the luck manipulation comes in.  For a path with two time jumps, my bot obtains a warrant at the starting location, at the second location, and at the destination, each time evaluating the next case, which is generated from the same RNGs.  If I can manipulate the next case into having just one or two jumps, that case is kept after pruning the tree.
+	$LF
+]p
+[p 
+	"And speaking of the tree, that's another aspect.  Even though I don't use it to its full ability, my bot is set up to create a tree of savestates of a certain depth and breadth.  In this context, depth means how many levels to complete before pruning the tree and breadth means how many of the best runs to keep.  I found that my bot was rather time- and resource-intensive, so I decided to keep depth at 1 and breadth at 2.  That means I evaluate around four to eight different branches with each level, pruning all but the best two.  I suppose I could have set depth and breadth a little higher (at much cost to speed), however I'd much rather see what the community response is like before I optimize my code and leave my computer on all week to run the game.
+	$LF
+]p
+[p 
+	"Searching for suspects is a little bit strange.  You're offered the usual three options of "Witness", "Informant", and "Scanner".  The first option you choose will 
+	[em 
+		"always
+	]em
+	" fail to catch them.  Sometimes the second option will fail and the remaining option will always succeed.  I have no idea what's going on behind the scenes.  The bot attempts all six permutations of the three options to minimize the time spent searching.
+	$LF
+]p
+[p 
+	"Each of the sixteen suspects is characterized by five different features: sex, hair color, eye color, favorite artist, and favorite author.  Each of these characteristics has four different options except sex, which has two options (duh!).  Because sex has just two options, it is the weakest characteristic towards deducing the suspect and obtaining a warrant-- I only use it for Gene Yuss, who is the only member of Carmen's gang who refuses to be categorized by two features.  To obtain warrants for the other members, I use the two characteristics that define them.  In case the suspect could be deduced from more than one pair of characteristics, I chose whichever characteristics can be most quickly entered; fewest button presses is the first priority, followed by convenient cursor alignment.
+	$LF
+]p
+[h3 
+	" Aren't you a little late for April Fools' Day?  Do you seriously expect this to be published?  Isn't this gruefood?
+	$LF
+]h3
+[p 
+	"No need to be pushy with all these questions.
+	$LF
+]p
+[p 
+	"Honestly, I don't expect this to be published.  I have no idea why anyone would want to watch it.  But, perhaps paradoxically, I 
+	[em 
+		"do
+	]em
+	" think it's worthy of publication.  As far as entertainment goes, this is just about the worst game choice possible, yet a TAS is about showing off tricks and demonstrating gameplay as the designers never intended.  This TAS does just that.  Granted, it goes on about 79 levels too long, but it's a decent TAS nonetheless.  And if this is published, I defy you to produce a less entertaining game.
+	$LF
+]p
+[h3 
+	" Possible improvements
+	$LF
+]h3
+[p 
+	"The primary improvement to be made is through more extensive luck manipulation.  This TAS was produced with my script executing to a depth of 1 and a breadth of 2.  By increasing these parameters, luck is manipulated more thoroughly, resulting in shorter cases.  Unfortunately, the time it takes to execute increases linearly in the breadth and exponentially in the depth, so their values are somewhat limited.
+	$LF
+]p
+[p 
+	"Huge gains could be made by deciphering the RNG.
+	$LF
+]p
+[p 
+	"The RNG rolls whenever the chronoskimmer beeps and it would therefore be a valid strategy to enter a menu, then exit it just to scramble the RNG.  This strikes me as inelegant, however.
+	$LF
+]p
+[p 
+	"By delaying the start of the game (when I press A to enter the elevator) until frame 465, I manipulated the first case so that it could be solved with just one time jump.  I've also observed that the RNG is rolled when you leave the elevator and when you enter your name.  The result could be manipulated in these areas instead, perhaps getting a good first case faster.  Also, luck could potentially be manipulated so that both the first and second (and maybe even third) cases can be completed in one time jump.
+	$LF
+]p
+[p 
+	"I was a little lazy with the last case.  I let it play out without explicitly seeking the fastest route.  This may make a difference of a few dozen frames at most, but it is far from the biggest frame loss in the run.
+	$LF
+]p
+[h3 
+	" The bot script
+	$LF
+]h3
+[p 
+	"You may view and download the last version of the script that I used from 
+	[a class=extlink href=http://pastebin.com/1zfjPnfn rel=nofollow 
+		"here
+	]a
+	".
+	$LF
+]p
+[h3 
+	" Some RAM addresses
+	$LF
+]h3
+[p 
+	(addresses|addrset=14)
+	$LF
+]p
+[h3 
+	" Special thanks
+	$LF
+]h3
+[p 
+	"I'd like to throw out a blanket thank you to the people who helped me on the TASVideos IRC channel.  I don't remember everyone, but I recall adelikat, Ilari, and DarkKobold all weighing in.  In particular, I believe DarkKobold was the one who suggested I use savestates and manually stitch together the entire movie (which was what I eventually did).  Botting this has been a much bigger pain that I anticipated.
+	$LF
+]p
+[p 
+	"If I have forgotten anyone who helped me, just speak up and I'll add your name.
+	$LF
+]p
+[p 
+	"I'd also like to thank everyone who eagerly anticipated the "mystery TAS".  I hope you're not disappointed, by which I mean, I hope you are!
+	$LF
+]p
+[h3 
+	" Suggested screenshot
+	$LF
+]h3
+[p 
+	"Frame 269307.
+	$LF
+]p
+[p 
+	[img class=embed src=http://i.imgur.com/EqC9Q.png 
+	]img
+	$LF
+]p
+[h3 
+	" Closing remarks
+	$LF
+]h3
+[p 
+	"Whatever the result, this has been a fun little project.  For 
+	[del 
+		"everyone who's disappointed
+	]del
+	" everyone, just wait for the upcoming Final Fantasy Legend TAS.
+	$LF
+]p
+[p 
+	"Lol:
+	$LF
+	(youtube|w=300|h=224|v=ee6eU_148uI)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:DarkKobold)
+	": I shall carry the ring into mo... Judge this submission. 
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:DarkKobold)
+	": This was a really difficult decision - as it is a 2 hour game played entirely by a bot... Well, a well-written bot.(Rampage A Button Bot, anyone?). Sadly, the game choice is just so plainly and pitifully bad. Once you see the first 3 crooks get arrested, there isn't anything to be seen for 1 hour and 55 minutes more. Awesome achievement, but a horrid result. Even the people who voted yes said they were bored silly. Rejecting for horrid game choice, but keep up the good work with amazing bots. 
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Unrejecting for consideration of publication to the 
+	(__wikiLink|Vault)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Accepting for publication to the 
+	(__wikiLink|Vault)
+	".
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Brandon)
+	": Publication underway.
+]p

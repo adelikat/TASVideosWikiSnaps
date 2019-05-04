@@ -1,0 +1,544 @@
+29
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-2348 
+						" Introduction
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-2349 
+						" Video encoding
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-2350 
+						" Audio encoding
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Introduction
+	$LF
+	[a id=heading-2348 
+	]a
+]h3
+[p 
+	"You now have everything in place to embark upon the most gruelling step of the entire encoding process - the encoding itself.  This step is the core of the entire process and takes the largest amount of time.
+	$LF
+]p
+[p 
+	"You can generally run the video and audio encoding at roughly the same time; the audio encoding will almost certainly take a lot less time than the video encoding.
+	$LF
+]p
+[h3 
+	" Video encoding
+	$LF
+	[a id=heading-2349 
+	]a
+]h3
+[p 
+	"If you are encoding for a console intended to be displayed on a TV, you will need to determine the pixel aspect ratio (PAR)
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" of your target console before proceeding (for handhelds or arcade machines, you can just use 1:1 or not specify this at all).  A table of these follows for most standard resolutions.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Resolution
+			]th
+			[th 
+				"Ratio
+			]th
+		]tr
+		[tr 
+			[td 
+				"256x224
+			]td
+			[td 
+				"7:6
+			]td
+		]tr
+		[tr 
+			[td 
+				"256x240
+			]td
+			[td 
+				"5:4
+			]td
+		]tr
+		[tr 
+			[td 
+				"320x224
+			]td
+			[td 
+				"14:15
+			]td
+		]tr
+		[tr 
+			[td 
+				"512x240
+			]td
+			[td 
+				"5:8
+			]td
+		]tr
+		[tr 
+			[td 
+				"320x240
+			]td
+			[td 
+				"1:1
+			]td
+		]tr
+		[tr 
+			[td 
+				"x by y
+			]td
+			[td 
+				"(4/3)*(y/x) (as an integer ratio)
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Regardless of whether you are using an 
+	[tt 
+		".avi
+	]tt
+	" or an 
+	[tt 
+		".avs
+	]tt
+	" as your input, the following command line (with some minor tweaks as noted afterwards) will initiate the video encoding process:
+	$LF
+]p
+[blockquote 
+	" x264 --sar <PAR as found above> --crf 20 --keyint <keyint> --ref 16 --no-fast-pskip --bframes 16 --b-adapt 2 --direct auto --me umh --merange 64 --subme 11 --trellis 2 --partitions all --input-range pc --range pc --no-dct-decimate --tcfile-in times.txt -o video.mp4 in.avi
+	$LF
+]blockquote
+[p 
+	"Before dissecting this command line, please note the following:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[tt 
+			"in.avi
+		]tt
+		" is the file from your previous step.  For an AVISynth script input, substitute 
+		[tt 
+			".avs
+		]tt
+		" for 
+		[tt 
+			".avi
+		]tt
+		".
+		$LF
+		[ul 
+			[li 
+				" If you are using the DeDup plugin, the above command line is intended for the second of the two scripts.
+				$LF
+			]li
+		]ul
+		" If you are using direct264, you can specify 
+		[tt 
+			"--deldup 40:0.1:100:1:0.1
+		]tt
+		" to employ its duplicate frame removal filter
+		[a id=r2 
+		]a
+		[sup 
+			"[
+			[a href=#2 
+				"2
+			]a
+			"]
+		]sup
+		".  You should not do this if you are using AVISynth's DeDep plugin.
+		$LF
+	]li
+	[li 
+		" Also if you are using direct264, be sure to add 
+		[tt 
+			"--versioninfo
+		]tt
+		" in your batch file. X264 does this automatically, direct264 does not. This writes down the settings used in the batch file to make the encode.
+		$LF
+	]li
+]ul
+[p 
+	"Now, let's briefly look over the x264 command line options:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[b 
+			[tt 
+				"--crf 20
+			]tt
+		]b
+		": this sets the target 
+		[b 
+			"c
+		]b
+		"onstant 
+		[b 
+			"r
+		]b
+		"ate 
+		[b 
+			"f
+		]b
+		"actor of the video, which ultimately determines the video's bit rate.  20 has been semi-arbitrarily chosen as the site's target for visual quality; you may need to adjust this slightly higher or lower in order to obtain decent video quality and/or acceptable file sizes. Lower number means better quality and higher bit rate; higher number means worse quality and lower bit rate.
+		$LF
+		[ul 
+			[li 
+				" For games with low visual complexity, you may be able to use 
+				[tt 
+					"--crf 0
+				]tt
+				" (lossless x264) for the best possible visual quality without too much increase in filesize.  This is most likely to be possible with 8-bit systems (NES, SMS, Game Gear, and Game Boy).
+				$LF
+			]li
+		]ul
+		" 
+		[b 
+			[tt 
+				"--keyint <keyint>
+			]tt
+		]b
+		": the maximum interval between key frames, in frames.  This number is normally set to correspond to ten seconds (i.e. ten times the video's (average) frame rate) - a value selected to give a reasonable compromise between the ability to seek in the video and file size. This value can be computed from 
+		[tt 
+			"times.txt
+		]tt
+		" as 
+		[tt 
+			"( (number of lines) - 1) * 10000 / (last timecode)
+		]tt
+		", rounded to the nearest integer. For a more usable video, you can decrease this value; do not increase it past this point.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--ref 16
+			]tt
+		]b
+		": This sets the number of frames that any given frame can use as a reference; 16 is the maximum.  Larger numbers tend to result in smaller file sizes at the expense of encoding time.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--no-fast-pskip
+			]tt
+		]b
+		": this disables fast P-frame (one of two types of reference frames) skipping, which improves visual quality at the expense of a significant amount of speed.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--bframes 16
+			]tt
+		]b
+		": sets the maximum number of B-frames (the other, smaller type of reference frame) between I-frames (fully specified picture) and P-frames; larger values reduce file size at the possible expense of seeking ability (though this has not been reported to be an issue in encodes that have used it).  16 is the maximum.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--b-adapt 2
+			]tt
+		]b
+		": selects the algorithm used for determining placement of B-frames vs. P-frames.  2 is the 'Optimal' algorithm.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--direct auto
+			]tt
+		]b
+		": x264 employs two different motion prediction methods (
+		[tt 
+			"spatial
+		]tt
+		" and 
+		[tt 
+			"temporal
+		]tt
+		"); 
+		[tt 
+			"auto
+		]tt
+		" allows it to switch between them as necessary.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--me umh
+			]tt
+		]b
+		": Sets the algorithm used for motion estimation.  
+		[tt 
+			"umh
+		]tt
+		" (uneven multi-hexagonal search) is a balance between encoding time and final file size.  If you have plenty of computational power, consider using 
+		[tt 
+			"esa
+		]tt
+		" or 
+		[tt 
+			"tesa
+		]tt
+		" (exhaustive searches) instead.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--merange 64
+			]tt
+		]b
+		": Loosely corresponds to the maximum speed in pixels per frame of motion in the video that can be detected by the motion estimation algorithms.  Larger numbers will slow down encoding and will gradually reduce file size; 64 has been chosen as a good trade-off between file size and encoding time.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--subme 11
+			]tt
+		]b
+		": Sets the algorithm used for subpixel motion estimation; larger numbers use more complex algorithms, reducing file size at the expense of encoding time.  11 is the most complex algorithm.  This is most useful for 3D platforms.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--trellis 2
+			]tt
+		]b
+		": Enables full trellis quantization, which reduces file size at the expense of encoding time.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--partitions all
+			]tt
+		]b
+		": Allows all types of block partitioning to be used in the encoding, increasing visual quality at the expense of encoding time.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--input-range pc
+			]tt
+			", 
+			[tt 
+				"--range pc
+			]tt
+		]b
+		": Allows the full YV12 colour space to be used in the resulting video. These should only be used if the input is PC-range YV12 or RGB (in which case 
+		[tt 
+			"x264
+		]tt
+		" is doing the colour conversion itself).
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--no-dct-decimate
+			]tt
+		]b
+		": Disables dropping of DCT blocks for a slight increase in visual quality at the expense of a slight increase in file size.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--tcfile-in times.txt
+			]tt
+		]b
+		": If you are using duplicate frame removal, this passes the information about frame timecodes to x264 so that it has the correct timing information when deciding how best to encode frames, so that features that are displayed for significant amounts of time can be rendered in detail. If you are not using duplicate frame removal (such as for streaming encodes), this is not necessary (as you will not have timecode information) and can be omitted.
+		$LF
+	]li
+]ul
+[p 
+	"You are encouraged to experiment with tweaking these options; this is intended as a generic set of options to serve as a good starting point, and our encoders tend to develop their own set of options which serves their needs best.  The 
+	[a href=/forum/viewforum.php?f=52 
+		"Encoders' Corner
+	]a
+	" is a good place to look for advice.
+	$LF
+]p
+[h3 
+	" Audio encoding
+	$LF
+	[a id=heading-2350 
+	]a
+]h3
+[p 
+	"This step assumes that the 
+	[tt 
+		".wav
+	]tt
+	" from the previous step is called 
+	[tt 
+		"audio.wav
+	]tt
+	".
+	$LF
+]p
+[p 
+	"Current 
+	(__wikiLink|encoder guidelines)
+	" suggest using Ogg Vorbis or AAC as audio codecs depending on the target container format (Ogg Vorbis for MKV and AAC for MP4).
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-338 
+				"Ogg Vorbis (oggenc)
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-339 
+				"AAC (neroAacEnc)
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-338 
+			[p 
+				"Use the following command line:
+				$LF
+			]p
+			[blockquote 
+				" oggenc2 -q 1 audio.wav
+				$LF
+			]blockquote
+			[p 
+				[tt 
+					"-q 1
+				]tt
+				" specifies the target quality factor, determining the bitrate of the final product relative to the complexity of the audio file (similar to 
+				[tt 
+					"--crf
+				]tt
+				" with x264).  1 has been semi-arbitrarily selected as a suggested target value known to give consistently acceptable results; this value may need to be raised for games with complex sound.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-339 
+			[p 
+				"Use the following command line:
+				$LF
+			]p
+			[blockquote 
+				" neroAacEnc -q 0.25 -if audio-fixed.wav -of audio.mp4
+				$LF
+			]blockquote
+			[p 
+				[tt 
+					"-q 0.25
+				]tt
+				" specifies a target quality factor, determining the bitrate of the final product relative to the complexity of the audio file (similar to 
+				[tt 
+					"--crf
+				]tt
+				" with x264).  0.25 has been semi-arbitrarily selected as a suggested target value known to give consistently acceptable results; this value may need to be raised for games with complex sound.
+				$LF
+			]p
+			[p 
+				"After you have encoded the file, you can check the audio delay with MP4Box:
+				$LF
+			]p
+			[blockquote 
+				" MP4Box -info audio.aac
+				$LF
+			]blockquote
+		]div
+	]div
+]div
+[hr 
+]hr
+[p 
+	"Next page: 
+	(__wikiLink|EncodingGuide/Packaging|Packaging)
+	[br 
+	]br
+	$LF
+	"Previous page: 
+	(__wikiLink|EncodingGuide/PreEncoding|Pre-encoding)
+	$LF
+]p
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	": x264 calls this a 
+	[em 
+		"scale aspect ratio
+	]em
+	" (SAR); hence 
+	[tt 
+		"--sar
+	]tt
+	".  It is exactly the same concept.
+	$LF
+]p
+[p 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	": The '40' is the minimum frame rate of the resulting video; you can reduce this significantly if desired (values as low as 0.1 are in common use).  The remaining values are present to prevent most non-duplicate frames from being detected as duplicate frames. But if a game still has issues with dropped frames (There is one reported case), it is suggested you increase the minimum frame to something a bit higher, or consider not using Deldup at all. In this case, it might be a good idea to use DeDup.
+]p

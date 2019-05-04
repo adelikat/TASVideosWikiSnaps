@@ -1,0 +1,279 @@
+6
+[p 
+	(youtube|v=dmq5_y343Js)
+	$LF
+]p
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"A speedrun classic: an accidental crash while routing one category leads to the RTA record in another dropping by a full minute the following week. This movie takes advantage of a miracle in hardware timing and efficiently executes arbitrary code to skip to the end of the game. This submission also reveals emulation accuracy has reached a point where the cycle-sensitive first generation Pokemon games sync with console.
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Forgoes save data corruption
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 2.2.2
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[h4 
+	" Platform choice
+	$LF
+]h4
+[p 
+	"This movie uses CGB-in-GBA. The Game Boy Player uses Game Boy Advance hardware and is the preferred platform in the RTA community. It does not sync on Game Boy Color because GBA adds an operation to the bios and the extra cycles offset the random number generator.
+	$LF
+]p
+[h4 
+	" Version choice
+	$LF
+]h4
+[p 
+	"Blue version is used over Red to save 9 frames in version differences. Blue loses 7 frames to a longer cry from the Pokemon on the title screen, but gains 16 frames from a shorter preset rival name. The glitch used in this route works identically on both versions.
+	$LF
+]p
+[h4 
+	" Luck manipulation
+	$LF
+]h4
+[p 
+	"The random number generator in Pokemon Blue is delicate. The routine uses the value of a hardware timer to adjust the two bytes used as random numbers, so any slight change in when the routine is run will affect all random numbers from there on. Every input in this movie was produced by a series of scripts that tried variations in movement and delays to find quick setups for lucky situations.
+	$LF
+]p
+[h3 
+	" Arbitrary code execution
+	$LF
+]h3
+[h4 
+	" The glitch
+	$LF
+]h4
+[p 
+	"Maps have a list of scripts and an index for which script should run. The map script is run before the joypad is processed in the overworld and before the player blacks out in battle. Basic maps with trainers have three scripts in the list: check if a trainer can see the player, display the text and start a battle, and end the battle. The first two scripts each increment the index and the third zeroes it to have the scripts run in a cycle. When the player talks to a trainer directly, the text increments the index twice in place of the first two scripts.
+	$LF
+]p
+[p 
+	"Wild encounters are rolled before the map script is run. If the player finds then blacks out to an encounter where a trainer will be able to see the player, the map script run then will increment the index before the player warps. The second script will run when the player returns to the map and reference values it expects were set by the first script. Those values can be changed by other events while outside of the map. The only notable value change in this variation is the blackout cleared the flag that indicates the player was seen by a trainer. Trainer text checks that flag to know if the player talked to the trainer directly. Now the second script will display text which increments the index twice before the script increments the index itself and starts a battle.
+	$LF
+]p
+[p 
+	"An index of 4 in Viridian Forest points past the list of scripts and into a list of text. The text at this position contains a control character and inline code to talk to a trainer. The text engine would read the control character then execute the following data as code, but as a map script it is executed as code from the start, and the code interpretation of the character causes the next two bytes to be skipped. This misses the trainer header, or what defines the text data and the flag that indicates if the trainer was defeated. A cleared flag in read-only memory is checked so the code continues, displays invalid text which still increments the index twice, and starts a battle.
+	$LF
+]p
+[p 
+	"Index 6 does the same but with a set flag in read-only memory. No battle starts and invalid, invisible text of a defeated trainer prints when the map script is run. A trainer is talked to manually to increment the index twice. Index 8 points to similar text with inline code to pick up an item, which reads a function address at a position in a list. The position is what is skipped due to the control character, and the invalid position used instead points past the list and into video memory. Video memory is locked when the LCD controller draws the screen and reads will return $FF. The lower byte of the 16-bit address is read in a locked period, but video memory unlocks in the few cycles before the upper byte is read. The actual value in memory is accessible and the resulting address is $F8FF.
+	$LF
+]p
+[h4 
+	" The setup
+	$LF
+]h4
+[p 
+	"The data at $F8FF is a live copy of working memory. Stored here includes the data for Pokemon in the enemy party starting at slot three, all the original trainer names of Pokemon in the enemy party, the in-game timer values, and the data for Pokemon in the PC. A trainer with three or more Pokemon is never battled so slot three onwards in the enemy party remains full of zeroes.
+	$LF
+]p
+[p 
+	"Enemy party OT names are only seen in link cable trades and the game gets away with the player name there in NPC parties. This leaves two copies of the player name in memory because the most Pokemon in an enemy party at once in the route is two. The player name entered in the intro is "♀:[Mn]a.", where "[Mn]" is the single character. These values correspond to the following assembly:
+	$LF
+]p
+[pre 
+	"push af
+	$LF
+	"sbc h
+	$LF
+	"ld [$ff00+c], a
+	$LF
+	"and b
+	$LF
+	"ld a, [$ff00+c]
+	$LF
+]pre
+[p 
+	"In-game time at execution is 8:49:23 including frames, or "ld [$1731], sp". This instruction has no effect.
+	$LF
+]p
+[p 
+	"PC data starts with a list of Pokemon in the PC then the data of each Pokemon. The list is structured as Pokemon count, the species of each Pokemon, then a terminator, or $01 $99 $FF here. The relevant values in the data of Bulbasaur are its species again, $99, and the first byte of its original trainer ID, $C9. The ID is generated in the intro. These values correspond to the following assembly:
+	$LF
+]p
+[pre 
+	"ld bc, $FF99
+	$LF
+	"sbc c
+	$LF
+	"ret
+	$LF
+]pre
+[p 
+	"Below is a trace of the previous assembly. The initial register values are shown and comments highlight the result of the important operations. The code at $07A0 is the middle of a map change function that warps the player to the map in the A register. $76 is the map ID for the Hall of Fame.
+	$LF
+]p
+[pre 
+	"; af = $FF20
+	$LF
+	"; bc = $00F0
+	$LF
+	"; de = $3E8D
+	$LF
+	"; hl = $F8FF
+	$LF
+	$LF
+	"push af
+	$LF
+	"sbc h           ; a    = $07
+	$LF
+	"ld [$ff00+c], a
+	$LF
+	"and b           ; f    = $A0
+	$LF
+	"ld a, [$ff00+c]
+	$LF
+	$LF
+	"push af         ; [sp] = $07A0
+	$LF
+	"sbc h           ; a    = $0F
+	$LF
+	"ld [$ff00+c], a
+	$LF
+	"and b           ; cf   = 0
+	$LF
+	"ld a, [$ff00+c]
+	$LF
+	$LF
+	"ld bc, $FF99    ; c    = $99
+	$LF
+	"sbc c           ; a    = $76
+	$LF
+	"ret             ; pc   = $07A0
+	$LF
+]pre
+[h3 
+	" Route
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" Text speed is set to FAST and battle animation is set to OFF. It would be 15 frames faster to set options in the overworld, but before new game saves 60 frames by RTA timing to reach sub 10 minutes. This is the only timing method tradeoff in the route.
+		$LF
+	]li
+	[li 
+		" A trainer ID of $C9F7 is manipulated for the arbitrary code execution
+		$LF
+	]li
+	[li 
+		" The player is named "♀:[Mn]a.", where "[Mn]" is the single character
+		$LF
+	]li
+	[li 
+		" The rival is named the preset RED name. It would cost 72 frames to name the rival 1 character and the rival name appears 16 times, so 2 less characters would only regain 32 frames in text at a frame per character. This is evaluated for other names too.
+		$LF
+	]li
+]ul
+[h4 
+	" Pallet Town
+	$LF
+]h4
+[ul 
+	[li 
+		" Different music plays in the lab as one of the three audio channels does not advance. This only occurs when a key part of a channel load is split across two frames. It is a stylistic choice to showcase this and three sprite actions are manipulated to line up the operations correctly.
+		$LF
+	]li
+	[li 
+		" Bulbasaur is chosen as the starter Pokemon for a fast rival battle and the arbitrary code execution. It would cost 82 frames to nickname Bulbasaur 1 character but only regain 64 frames. Stats of 19 HP and 9 defense are manipulated to be able to lose the rival battle in three turns.
+		$LF
+	]li
+	[li 
+		" The rival battle is lost because the rewards are not needed. Three 1/39 damage roll scratches with two critical hits are manipulated from Charmander. It is faster to manipulate two tackle misses from Bulbasaur than two 1/256 growl fails even though two fails would be 17 less frames.
+		$LF
+	]li
+	[li 
+		" The player delivers the parcel to Oak as usual. Wild Pokemon in the grass are avoided with manipulation. 15 frames are saved when beside Oak due to less movement from the rival. The rival happens to look down before he leaves the lab and the cutscene takes 2 less frames than expected.
+		$LF
+	]li
+]ul
+[h4 
+	" Viridian City
+	$LF
+]h4
+[ul 
+	[li 
+		" A Poke Ball is purchased to catch a level 5 Spearow on Route 22. This time investment pays off in the battles at the end of the route, but a second Pokemon is required to deposit Bulbasaur into the PC anyway. The 1 character nickname for Spearow saves 47 frames.
+		$LF
+	]li
+	[li 
+		" Bulbasaur is deposited into the PC for its data and to lower party count
+		$LF
+	]li
+	[li 
+		" The party is healed to set the blackout location closer than Pallet Town
+		$LF
+	]li
+]ul
+[h4 
+	" Viridian Forest
+	$LF
+]h4
+[ul 
+	[li 
+		" A level 5 Pikachu and critical hit are manipulated in front of a trainer
+		$LF
+	]li
+	[li 
+		" The first Weedle is defeated while redbar is obtained. Two 1/39 damage roll critical hit poison stings are manipulated from Weedle. Redbar plays a warning sound and skips delays caused by sound effects, and while the sound is repetitive, its brief use in this route nets 2 seconds.
+		$LF
+	]li
+	[li 
+		" A speedtie win defeats the second Weedle and a critical hit defeats each of the final two Pokemon. On the way to the final fight, there are 10 frames of delay each step due to an invisible textbox with 7 characters. This textbox would cause more delay if the text speed was slower.
+		$LF
+	]li
+	[li 
+		" The arbitrary code executes and warps the player to the Hall of Fame
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Great to see emulation accuracy improve to the point of console verifying even a notoriously cycle-sensitive game like classic Pokémon. And, of course, it's also great to see the game broken again in yet another creative way to save time, and it's excellently executed too. Accepting as an improvement to the 
+	(__wikiLink|2680M|published no-save-corruptions run)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing.
+]p

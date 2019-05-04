@@ -1,0 +1,432 @@
+40
+[p 
+	(listlanguages)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	[img class=embedright src=http://media.tasvideos.org/dw2.png 
+	]img
+	$LF
+]p
+[p 
+	"Luck manipulation is the act of controlling how the game determines "random" results through input. It has many names, including "luck abuse", "randomness abuse", or "RNG abuse".
+	$LF
+]p
+[p 
+	"We should emphasize that the computer, being a deterministic machine, has no concept of randomness. All it does is follow instructions. To simulate a stream of effectively random numbers, the computer uses a 
+	[em 
+		[a class=extlink href=http://en.wikipedia.org/wiki/Pseudorandom_number_generator rel=nofollow 
+			"pseudo-random number generator
+		]a
+	]em
+	" (often called 
+	[em 
+		"random number generator
+	]em
+	" and known as a 
+	[em 
+		"RNG
+	]em
+	" or 
+	[em 
+		"PRNG
+	]em
+	"). The game uses these RNG values to calculate random decisions, such as:
+	$LF
+]p
+[ul 
+	[li 
+		" Attack misses and critical hits (every turn-based RPG ever)
+		$LF
+	]li
+	[li 
+		" Dice rolls (board games, casino games)
+		$LF
+	]li
+	[li 
+		" Boss behavior (Mega Man games)
+		$LF
+	]li
+	[li 
+		" Particle effects
+		$LF
+	]li
+]ul
+[p 
+	"This is where luck-manipulation comes in. Luck manipulation is the act of controlling random decisions through input so that the results occur in your favor.
+	$LF
+]p
+[h2 
+	" What you need to know about the RNG in the game
+	$LF
+]h2
+[h3 
+	" When does the game cycle the RNG?
+	$LF
+]h3
+[p 
+	"In order to be of any use, the game must cycle the RNG at least once when determining random events. However, there are differing approaches to when the game cycles the RNG.
+	$LF
+]p
+[ul 
+	[li 
+		" Some games simply cycle the RNG once per frame. A simple approach.
+		$LF
+	]li
+	[li 
+		" Some games cycle the RNG frequently, using random numbers often for minor, usually cosmetic purposes.
+		$LF
+	]li
+	[li 
+		" Some games cycle the RNG rarely, only using it for important events.
+		$LF
+	]li
+]ul
+[h3 
+	" What seed value does the RNG use?
+	$LF
+]h3
+[p 
+	"All RNGs must have a starting value, called the seed. This is what prevents the RNG from giving the same number sequence each time. It can come from a variety of sources and it is common that additional data is added on the fly to enhance randomness.
+	$LF
+]p
+[ul 
+	[li 
+		" Some games use a hardcoded seed. If the seed is reset between levels then this allows easy cut and paste of input.
+		$LF
+	]li
+	[li 
+		" Some games persist the seed value in the save file.
+		$LF
+	]li
+	[li 
+		" Some games run a counter during moments of the game, such as the initial menus, and use that as the starting value.
+		$LF
+	]li
+	[li 
+		" The current time is an extremely popular seed value on systems that have realtime clocks.
+		$LF
+	]li
+	[li 
+		" DS games like to use the firmware player profile as a seed value.
+		$LF
+	]li
+	[li 
+		" Some games directly seed using the player controller input.
+		$LF
+	]li
+	[li 
+		" Some games use very volatile low level realtime measurements like the exact time it took the game program to process a frame.
+		$LF
+	]li
+]ul
+[h3 
+	" Which RNG does the game use for each action?
+	$LF
+]h3
+[p 
+	"Games sometimes run multiple RNGs, using them for different purposes. It is important to know which RNG is used for which actions in the game.
+	$LF
+]p
+[h3 
+	" When is the random value selected?
+	$LF
+]h3
+[p 
+	"Let's say you are TASing Pokemon and your Pokemon, normally slower, is holding Quick Claw, so it has a 1/4 chance of going first. You try to manipulate by delaying before selecting the attack. However, no matter how many frames you delay, your Pokemon will never go first. What went wrong?
+	$LF
+]p
+[p 
+	"It is very important to find out when the game has decided the random action. Otherwise, you might be wasting rerecords trying to manipulate something that has been determined not to work.
+	$LF
+]p
+[p 
+	"In the case above, Quick Claw activation was decided before the menu appeared for your current turn. Since Quick Claw was already determined not to work, your Pokemon will always go second.
+	$LF
+]p
+[p 
+	"If a scenario appears where you can't manipulate an action that should be able to be manipulated, try searching backward (in the movie) until you discover when inputs can change the result.
+	$LF
+]p
+[h3 
+	" The RNG formula
+	$LF
+]h3
+[p 
+	"The pseudo-random number generator is just an algorithm that produces a sequence of numbers that is not easily predictable, for the purpose of the game. In general, determining the algorithm of the RNG is not easy, and finding out how the game uses these random numbers is even more difficult.
+	$LF
+]p
+[p 
+	"There are well-known algorithms for producing numbers such as:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[a class=extlink href=http://en.wikipedia.org/wiki/Linear_Congruential_Generators rel=nofollow 
+			"Linear congruential generators
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=http://en.wikipedia.org/wiki/Linear_feedback_shift_register rel=nofollow 
+			"Linear feedback shift registers
+		]a
+		".
+		$LF
+	]li
+]ul
+[p 
+	"There are 
+	[a class=extlink href=https://en.wikipedia.org/wiki/List_of_random_number_generators rel=nofollow 
+		"some popular RNG formulas
+	]a
+	", but games on older systems tend to implement their own. On the flip side, modern games tend to use the runtime library provided one.
+	$LF
+]p
+[p 
+	"Common RNGs share a property with standard cryptographic code: certain key numbers tend to be used in many different implementations. A simple search in the code for the key number can reveal a common RNG implementation.
+	$LF
+]p
+[p 
+	"Less secure RNGs are often reversible, there is a formula to produce numbers in the exact opposite order. This is of limited use due to savestates, but the possibility exists none the less.
+	$LF
+]p
+[h4 
+	" Tables and precomputation
+	$LF
+]h4
+[p 
+	"Some random number generators do not use a formula at all. Instead they have a table of prepared random numbers that they read from in order. The seed in this case is where in the table the generator begins reading.
+	$LF
+]p
+[p 
+	"Higher end random number generators may use amortized algorithms. This means that they do some operations to generate data for future numbers in bulk and then hand out the pregenerated data until it runs out. For example, the RNG may be reseeded once every million times it is invoked using expensive to collect data.
+	$LF
+]p
+[h2 
+	" Luck manipulation
+	$LF
+]h2
+[h3 
+	" How to manipulate the seed
+	$LF
+]h3
+[p 
+	"Chances are, you can affect random decisions through input.
+	$LF
+]p
+[p 
+	[img class=embedright src=http://www.fceux.com/web/help/taseditor/lib/dw-luck_manipulation.gif 
+	]img
+	$LF
+]p
+[ul 
+	[li 
+		" If the game seeds using the controller, then there are many, many options here, and you can manipulate almost without loss of time, even though it is harder to optimize, because there are so many inputs that affect the RNG.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" If the game cycles the RNG once per frame, delaying button presses will be necessary, but is also sufficient for manipulation. Here, timing is the key.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" If the game cycles during an easily accessible action, such as moving or shooting, then performing that action will easily manipulate the RNG cycling.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" If the game only ever cycles the RNG through actions that are not easily accessible or through the action you want to manipulate, then it is very hard to get what you want. Some sacrifice may be required. RNG understanding and scenario construction are extremely useful here.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" If the game seeds using volatile measurements then there is usually no other option than brute forcing things by trying all possible paths. Changing resource utilization, like the active enemies, tends to cause larger changes.
+		$LF
+	]li
+]ul
+[p 
+	"The GIF of Darkwing Duck on the right shows how delaying a frame each time causes a different drop.
+	$LF
+]p
+[h3 
+	" AI
+	$LF
+]h3
+[p 
+	"In games where decision-making is involved, the game will often have a decision-making process for the computer players, colloquially called "AI". You are limited by what the AI can do.
+	$LF
+]p
+[p 
+	"Say the AI can make a good move, and you want it to make some other move. If making that good move is the only result of the AI's decision, there is nothing you can do about it. The only thing you can do is to try to arrange a scenario where the AI is not in a position to make that move or regard it as a good move.
+	$LF
+]p
+[p 
+	"This also applies to flawed AI decisions that regard bad moves (to human players) as good moves. The only factor is the AI's insistence on making that move.
+	$LF
+]p
+[h4 
+	" Other issues
+	$LF
+]h4
+[p 
+	"Especially in games where enemy behavior is to be manipulated, check to make sure that the circumstance allows manipulation.
+	$LF
+]p
+[ul 
+	[li 
+		" Some enemies have set behaviors.
+		$LF
+	]li
+	[li 
+		" Some always use a particular attack under some circumstance. It could be when at low health, or depending on your position or status.
+		$LF
+	]li
+]ul
+[p 
+	"Remember that you can only bend a game as far as its game mechanics will allow. Some games use a damage mechanic, with some form of randomness. You can't do more damage than the maximum possible value calculated by the mechanic, even if randomness goes your way.
+	$LF
+]p
+[h3 
+	" Rarity
+	$LF
+]h3
+[p 
+	"While not technically a problem, rarity (usually on the order of 1/1000 or worse) of an event, or a sequence of events, can be perceived as one due to the non-occurrence of the event in any reasonable amount of time. There are ways to deal with it:
+	$LF
+]p
+[ul 
+	[li 
+		" See below for tips on how to improve luck-manipulation. Specifically, subdividing a manipulation of a sequence of events into multiple manipulations may increase the probability of the whole sequence.
+		$LF
+	]li
+	[li 
+		" Understand how the formula works, then apply it for this event.
+		$LF
+	]li
+	[li 
+		" Use Lua or program a simulator to brute-force for this event.
+		$LF
+	]li
+	[li 
+		" Give up.
+		$LF
+	]li
+]ul
+[h2 
+	" Tips for luck manipulation
+	$LF
+]h2
+[h3 
+	" Subdivision of a sequence of events
+	$LF
+]h3
+[p 
+	"Suppose that you want to manipulate three events, each of which occur shortly after the other. Each event has 1/16 chance of occurring, so the total probability is (1/16)^3, or 1/4096, which isn't very high.
+	$LF
+]p
+[p 
+	"However, if it is possible to insert meaningful input (such as delays) between these events, then instead of one manipulation for three events, it becomes three manipulations, each for one event. This is much easier to manipulate because each event has probability 1/16.
+	$LF
+]p
+[p 
+	"It is much easier to manipulate many outcomes, if there is a high degree for which controllable input can manipulate these outcomes one block at a time.
+	$LF
+]p
+[h3 
+	" RNG memory address, and monitoring
+	$LF
+]h3
+[p 
+	"Wouldn't it help to know which actions cycle the RNG?
+	$LF
+]p
+[p 
+	"This is where monitoring the RNG in memory is useful. By observing when it changes and how, one can figure out if some action can be used to help manipulation.
+	$LF
+]p
+[p 
+	"For example, suppose the RNG in memory tends not to change, but changes whenever you shoot a particular weapon. Then you know that shooting this weapon is useful for luck manipulation. Furthermore, you witness some enemy behaviors changing the RNG as well. You know then that this behavior can be manipulated.
+	$LF
+]p
+[p 
+	"Even if the RNG always changes, sometimes some action causes it to change more than usual. This usually means that this action is useful for manipulation.
+	$LF
+]p
+[p 
+	"You need to find the RNG in memory first. See 
+	(__wikiLink|Memory Search)
+	" for details. Then watch it in memory.
+	$LF
+]p
+[h2 
+	" Examples
+	$LF
+]h2
+[p 
+	"One of the prime examples of luck manipulation is the 
+	(__wikiLink|1482M|Dragon Warrior)
+	" movie. The player abuses luck in his movie of this game in different ways.
+	$LF
+]p
+[ul 
+	[li 
+		" All undesired enemy encounters are avoided by stopping his motion for a frame or two at various times along the player's path.
+		$LF
+	]li
+	[li 
+		" When encountering enemy, its HP is manipulated to be as low as possible.
+		$LF
+	]li
+	[li 
+		" Critical hits are gotten 100% of the time by scrolling through the battle menu and waiting to attack on a particular frame. A single frame of difference would not have resulted in a critical hit.
+		$LF
+	]li
+	[li 
+		" When using an enemy encounter to suicide, the enemy is manipulated to attack first.
+		$LF
+	]li
+]ul
+[h2 
+	" More reading
+	$LF
+]h2
+[ul 
+	[li 
+		" Luck manipulation is one of the basic TAS-making techniques, listed at 
+		(__wikiLink|GameResources/CommonTricks|Common Tricks)
+		".
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|Reverse Engineering)
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|Advanced Luck Manipulation)
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|Random Generators)
+		" lists the technical details of randomness generators in different games.
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|Glossary)
+		" lists other terms.
+	]li
+]ul

@@ -1,0 +1,538 @@
+58
+[p 
+	(listlanguages)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"You can directly edit a movie input file. You can change things like header information, or you can change input directly. The idea is to change some input earlier in the movie without changing whatever comes after it.
+	$LF
+]p
+[p 
+	"Here's the catch: It doesn't always work. In fact, it usually doesn't work.
+	$LF
+]p
+[p 
+	"Since games are often dependent on previous input or condition, changing something in the past may cause the rest of the movie to 
+	(__wikiLink|DesyncHelpTAS|fail to sync)
+	". You can correct the desyncs case by case, but often there will be many and it is too time-consuming to do.
+	$LF
+]p
+[p 
+	"Some movie file formats, such as 
+	[a class=extlink href=http://fceux.com/web/FM2.html rel=nofollow 
+		"FM2
+	]a
+	", are in plaintext form. You can use a text editor such as 
+	[a class=extlink href=http://sourceforge.net/projects/notepad-plus/ rel=nofollow 
+		"Notepad++
+	]a
+	" to edit it. On the other hand, some formats, such as 
+	[a class=extlink href=http://code.google.com/p/vba-rerecording/wiki/VBM rel=nofollow 
+		"VBM
+	]a
+	", are in binary form. In this case, you must use a hex editor such as 
+	[a class=extlink href=http://www.chmaas.handshake.de/delphi/freeware/xvi32/xvi32.htm rel=nofollow 
+		"Xvi32
+	]a
+	" or a file editor e.g. 
+	[a class=extlink href=http://sourceforge.net/projects/tas-editor rel=nofollow 
+		"TAS Movie Editor
+	]a
+	" designed for such purpose (see 
+	[a href=/forum/viewtopic.php?t=4448&postdays=0&postorder=asc&start=0 
+		"Forum thread
+	]a
+	" for some information).
+	$LF
+]p
+[p 
+	[b 
+		"You are responsible for your own movie. Make backups before editing it. Please read 
+		(__wikiLink|DesyncHelpTAS)
+		", as it covers necessary precautions in case something goes wrong.
+	]b
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-4854 
+								" Movie formats
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4855 
+								" When to use input editing
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-4856 
+						" Plaintext files
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4857 
+						" Binary files
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-4858 
+								" Bytes
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4859 
+								" Binary movie formats
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-4860 
+						" Binary formats which do not have constant bytes per frame.
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4861 
+						" Does it work?
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4862 
+						" Case Study: SNES Mega Man X: Eliminating a missed shot
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h4 
+	" Movie formats
+	$LF
+	[a id=heading-4854 
+	]a
+]h4
+[p 
+	"Please read the proper movie format specification for the emulator you are using, under 
+	(__wikiLink|EmulatorResources)
+	". You may need to refer to it several times. It tells you how movie files are recorded, so you can try to edit it directly.
+	$LF
+]p
+[h4 
+	" When to use input editing
+	$LF
+	[a id=heading-4855 
+	]a
+]h4
+[ul 
+	[li 
+		" Input editing can be used to copy input (say from a previous TAS) into your TAS. Input editing does not ensure that the newly modified movie 
+		(__wikiLink|Desync Help|plays as intended)
+		"; it may or may not.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Input editing can also be used to try to correct desyncs by adding or deleting inputs from the movie input file. This is time-consuming unfortunately.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Input editing can even be used to insert repetitive input, although if an emulator supports it, Lua scripting is better used for this task.
+		$LF
+	]li
+]ul
+[p 
+	"Editing the movie file can be done just to change header info. This is easy to do so it will not be covered in this page.
+	$LF
+]p
+[h3 
+	" Plaintext files
+	$LF
+	[a id=heading-4856 
+	]a
+]h3
+[p 
+	[img class=embedright src=http://files.tasvideos.org/1853/site_images/InputFileEditing1.png 
+	]img
+	$LF
+]p
+[p 
+	"Plaintext files are files that contain plaintext, that is, text that is easy to read in a text editor. For changing input, the text editor should number lines and have the ability to jump to any desired line. Notepad++ does this.
+	$LF
+]p
+[p 
+	"Most plaintext movie formats begin with a header of some number of lines, followed by the first frame of input (frame 0). For example, in the image on the right, the header (not shown) is 18 lines long, and the first frame of input (frame 0) begins on line 19. Thus the current line shown (line 1929) corresponds to frame 1910 (1929-19).
+	$LF
+]p
+[p 
+	"In general, if you want to go to frame N, and B is the number of lines in the header, then frame N is at the following line:
+	$LF
+]p
+[pre 
+	"N + B
+	$LF
+]pre
+[p 
+	"To change the input, just edit it directly. Review the movie format specification as to how it works. In the image on the right, the current line shows that on frame 1910, left (L), B, and right shoulder (E) are pressed. According to 
+	(__wikiLink|EmulatorResources/Desmume/DSM|DSM)
+	", if you wanted to change input so that the right shoulder is not pressed, change the E to a period (.) . Then, if you want to press the left shoulder instead, change the period just before where the E used to be to a W. (It can actually be changed to anything other than a space or period, but for consistency...)
+	$LF
+]p
+[p 
+	"To insert input, you can just copy and paste from another file. Keep track of where it begins. Also, keep track of where it ends unless you don't care about the input after that point. You must also change the movie length (in the header) to be longer. If you don't know, make it longer than normal. If it is too long, you can fix it in emulator easily. If it is too short, it won't play all the input.
+	$LF
+]p
+[p 
+	"An inbuilt 
+	(__wikiLink|EmulatorResources/TASEditor|TAS Editor)
+	" tool of FCEUX is quite useful too.
+	$LF
+]p
+[h3 
+	" Binary files
+	$LF
+	[a id=heading-4857 
+	]a
+]h3
+[p 
+	"Binary files, on the other hand consist of a bunch of bytes not intended for human reading. When viewed in a text editor, one would only see garbage (although some plaintext might be seen if the file stores some plaintext, such as comment and author fields). To view them properly, it requires a hex editor.
+	$LF
+]p
+[p 
+	"Because binary files are harder to edit, and the size of plaintext is no longer a factor in this day and age (submissions are placed in ZIP files anyway), future format specifications encourage the use of full plaintext files. However, there are still binary formats for the older emulators.
+	$LF
+]p
+[h4 
+	" Bytes
+	$LF
+	[a id=heading-4858 
+	]a
+]h4
+[p 
+	"Bytes are always displayed as a two-digit hexadecimal number. Hexadecimal numbers use base 16, unlike decimal numbers which use base 10. The digits go as follows: 0, 1, 2, ..., 9, 10=A, 11=B, 12=C, 13=D, 14=E, 15=F. The next number is the hexadecimal number 10, which is 1*16 + 0 = 16 in decimal. For example, the hexadecimal number 1234 is 1*16^3 + 2*16^2 + 3*16 + 4 = 4660 in decimal. Hexadecimal numbers with 2 or more digits are usually prefixed with 0x to avoid confusion.
+	$LF
+]p
+[p 
+	"Any number of bytes can represent anything you want it to represent. For example, a byte can represent a number from 0 to 255 (unsigned), or it can represent a number from -128 to 127 (signed), or it can represent a byte of plaintext, or it can represent input. Bytes like those that represent input are bitfields. Each byte has 8 bits and each bit represents whether something is on or off. Bitfields are easier to demonstrate in binary (base 2). A bit is either on (1) or off (0).
+	$LF
+]p
+[pre 
+	"76543210
+	$LF
+	"bit 0: 0x01
+	$LF
+	"bit 1: 0x02
+	$LF
+	"bit 2: 0x04
+	$LF
+	"bit 3: 0x08
+	$LF
+	"bit 4: 0x10
+	$LF
+	"bit 5: 0x20
+	$LF
+	"bit 6: 0x40
+	$LF
+	"bit 7: 0x80
+	$LF
+]pre
+[p 
+	"For example, the bitfield 01101001 means that bits 0, 3, 5, and 6 are on and bits 1, 2, 4, and 7 are off. It has the hex value 69 (0x01+0x08+0x20+0x40).
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Numbers (larger than 255) that require two or more bytes to store are typically stored in little-endian format. That is, the byte order is reversed when viewed in a hex editor. For example, the byte sequence 00 AB CD 12 represents the hex number 12CDAB00 (if it represents a number at all). To avoid confusion, byte sequences are given with spaces in-between the bytes. Big-endian formats (the opposite) are used occasionally in other systems. In all movie formats, little-endian is used.
+	$LF
+]p
+[p 
+	"The bytes in a file are addressed starting with 0. Bytes can hold values that are used as pointers (numbers indicating the address in which something such as input begins). This is important when storing sets of information that do not have a fixed length. Unlike plaintext files, the beginning of input cannot be recognized unless it is declared.
+	$LF
+]p
+[h4 
+	" Binary movie formats
+	$LF
+	[a id=heading-4859 
+	]a
+]h4
+[p 
+	[img class=embedright src=http://files.tasvideos.org/1853/site_images/InputFileEditing2.png 
+	]img
+	$LF
+]p
+[p 
+	"Binary movie formats begin with a header, followed by input. In most cases, the header contains a pointer to the controller (input) data, although in some cases, the beginning of input is set as some address, say, byte 0x200. For example, in 
+	[a class=extlink href=http://code.google.com/p/snes9x-rr/w/list rel=nofollow 
+		"SMV
+	]a
+	" files, bytes 0x1C to 0x1F contain a pointer to the beginning of input. From the image on the right, 0x1C to 0x1F contains B0 00 01 00, so the beginning of input starts at byte 0x100B0.
+	$LF
+]p
+[p 
+	"To find out a particular frame where input is stored, we need to find out:
+	$LF
+]p
+[ul 
+	[li 
+		" where the beginning of input is, and
+		$LF
+	]li
+	[li 
+		" how many bytes per frame.
+		$LF
+	]li
+]ul
+[p 
+	"The movie format specification should tell you how many bytes per frame, and where the pointer to the controller data is located if there is one, or the start of input if not. Remember that the first frame is frame 0. If N is the frame number, A is the number of bytes per frame, and B is the location of beginning of input, frame N is located with the following simple formula:
+	$LF
+]p
+[pre 
+	"A*N + B
+	$LF
+]pre
+[p 
+	"Remember that you have to convert all numbers to either decimal, or hexadecimal. You can use a calculator such as Windows Calculator to do the conversion and calculation for you. Also remember that if you are recording with two or more controllers, the bytes per frame will be different than normal.
+	$LF
+]p
+[p 
+	"For the image to the right, 
+	[a class=extlink href=http://code.google.com/p/snes9x-rr/w/list rel=nofollow 
+		"SMV
+	]a
+	" says A is 2 and we know B is 0x100B0. Let's say we want to go to frame 32856. 32856=0x8058, so using the hex mode of a calculator, 2*0x8058 + 0x100B0 = 0x20160. Select 
+	[tt 
+		"Address -> Goto...
+	]tt
+	" and enter 20160 as the address in hexadecimal. This will result in the image below.
+	$LF
+]p
+[p 
+	"To change input, check the format specification carefully and then make the changes. Remember that inputs are stored as bitfields, so to toggle a button press, you need to change the corresponding bit.
+	$LF
+]p
+[p 
+	"In the image below, frame 32856 (address 0x20160) contains the byte sequence 00 20 (remember, since A=2, there are two bytes per frame). According to 
+	[a class=extlink href=http://code.google.com/p/snes9x-rr/w/list rel=nofollow 
+		"SMV
+	]a
+	" (which gives it in big-endian form, as it is displayed), this means the select key (0x0020) is pressed, and that key only. To add pressing the right key to the input, change 00 20 to 00 21 (since right is 0x0001). If instead you wanted to add B, change 00 20 to 00 A0 (since B is 0x0080).
+	$LF
+]p
+[p 
+	"To insert input, copy and paste from another file. Check Xvi32 as it is not intuitive (you have to mark a block first, then say block copy or block paste). Keep track of where it begins. Also, keep track of where it ends unless you don't care about the input after that point. You must also change the movie length (in the header) to be longer. If you don't know, make it longer than normal. If it is too long, you can fix it in emulator easily. If it is too short, it won't play all the input. Check the specs for where the movie length is and remember that it is 4 bytes and little-endian.
+	$LF
+]p
+[p 
+	[img class=embedright src=http://files.tasvideos.org/1853/site_images/InputFileEditing3.png 
+	]img
+	$LF
+]p
+[h3 
+	" Binary formats which do not have constant bytes per frame.
+	$LF
+	[a id=heading-4860 
+	]a
+]h3
+[p 
+	[a class=extlink href=http://code.google.com/p/mupen64-rr/wiki/M64 rel=nofollow 
+		"M64
+	]a
+	" is slightly different in that it ignores lagged frames. Thus the movie file counts by non-lagged inputs rather than frames. This is easy to work around as the emulator window includes the non-lagged input count.
+	$LF
+]p
+[p 
+	[a class=extlink href=http://code.google.com/p/fceu/wiki/FCM rel=nofollow 
+		"FCM
+	]a
+	" (an old binary format used by FCEU) uses a compressed form rather than a per-frame basis, which makes it very difficult to edit. You can convert it to 
+	(__wikiLink|EmulatorResources/Famtasia/FMV|FMV)
+	" (an even older format from an obsolete emulator) using 
+	[a class=extlink href=http://bisqwit.iki.fi/source/nesmock.html rel=nofollow 
+		"Nesmock
+	]a
+	", edit it, and convert it back.
+	$LF
+]p
+[h3 
+	" Does it work?
+	$LF
+	[a id=heading-4861 
+	]a
+]h3
+[p 
+	"It works if what you intended occurs when you play back in emulator. This is an issue when changing input previously in the movie.
+	$LF
+]p
+[p 
+	"If it doesn't work, either give up, or edit some more. Of course, you should keep the editor open until you are done. When you are finished, close the editor right away. This prevents an overwriting accident.
+	$LF
+]p
+[p 
+	[b 
+		"Always recreate savestates that occur past where you edited the movie.
+	]b
+	" If you don't, and you use those savestates, you will either:
+	$LF
+]p
+[ul 
+	[li 
+		" Erase all the hard work you did to edit the file, or
+		$LF
+	]li
+	[li 
+		" End up with a wrecked movie after finding out 5 hours later.
+		$LF
+	]li
+]ul
+[p 
+	"See 
+	(__wikiLink|DesyncHelpTAS)
+	".
+	$LF
+]p
+[h3 
+	" Case Study: SNES Mega Man X: Eliminating a missed shot
+	$LF
+	[a id=heading-4862 
+	]a
+]h3
+[p 
+	"At or near frame 58090, 
+	(__wikiLink|user:DeHackEd)
+	" discovered a missed shot while climbing the last
+	$LF
+	"segment of Boomer Kuwanger's stage. The targeted enemy was destroyed in 3 hits,
+	$LF
+	"but 4 shots were fired. Having already done a boss battle and started on the next
+	$LF
+	"level, DeHackEd did not want to rerecord over his work to fix it, but the stray shot
+	$LF
+	"still had to be eliminated.
+	$LF
+]p
+[p 
+	"The first step is to find where the shot is stored. Here is the header for the SMV.
+	$LF
+	"It is the same as the one in the SMV format section.
+	$LF
+]p
+[pre 
+	"  53 4D 56 1A  01 00 00 00  77 77 77 77  69 29 00 00
+	$LF
+	"  2B B0 01 00  01 01 00 00  20 00 00 00  C3 00 00 00
+	$LF
+	"  1F 8B 08 00  00 00 00 00  00 03 ED C1  31 01 00 00
+	$LF
+]pre
+[p 
+	"The controller offset is 
+	[tt 
+		"0xC3
+	]tt
+	" (195 bytes).
+	$LF
+	"The frame number is near 58090 and there are 2 bytes per frame,
+	$LF
+	"so our starting point will be 
+	[tt 
+		"195 + 2*58090 = 116375
+	]tt
+	" (
+	[tt 
+		"0x1C697
+	]tt
+	").
+	$LF
+	"Here is some of the file's contents around that area as viewed from a hex editor.
+	$LF
+]p
+[pre 
+	"(Hex position) (bytes)
+	$LF
+	"0001C670       81 80 81 80  81 80 81 80  81 80 81 80  81 80 81 80
+	$LF
+	"0001C680       81 00 81 00  81 30 81 
+	[b 
+		"00  C1 00 81 00  C1 00 81 00
+	]b
+	$LF
+	"0001C690       
+	[b 
+		"C1 00 81 00  41
+	]b
+	" c0 81 80  81 80 81 80  81 80 81 80
+	$LF
+	"0001C6A0       81 80 80 80  81 80 82 80  82 80 82 80  82 80 82 80
+	$LF
+]pre
+[p 
+	"Remember that each line is an even number of bytes, but our starting offset is an
+	$LF
+	"odd number. The portion in bold is found to be our 7 frames consisting of shooting.
+	$LF
+	"This is because firing is by having one frame pressing Fire (Y), one frame without,
+	$LF
+	"one frame with Fire held, and so on. The code for Y is 
+	[tt 
+		"00 40
+	]tt
+	" which shows up in
+	$LF
+	"alternating frames in the bolded section.
+	$LF
+]p
+[p 
+	"We now have our choice of which frame we want to eliminate. For simplicity, DeHackEd
+	$LF
+	"eliminated the last one. Thus the movie's line
+	$LF
+]p
+[pre 
+	"0001C690       C1 00 81 00  
+	[b 
+		"4
+	]b
+	"1 c0 81 80  81 80 81 80  81 80 81 80
+	$LF
+]pre
+[p 
+	"becomes
+	$LF
+]p
+[pre 
+	"0001C690       C1 00 81 00  
+	[b 
+		"0
+	]b
+	"1 c0 81 80  81 80 81 80  81 80 81 80
+	$LF
+]pre
+[p 
+	"After watching the movie again to ensure the shot was eliminated and there were no
+	$LF
+	"desyncs (there were not), recording resumed.
+]p

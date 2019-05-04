@@ -1,0 +1,400 @@
+8
+[p 
+	"As it will happen eventually, destroying all my previous work for this game, have fun watching even less of this game.
+	$LF
+]p
+[p 
+	(youtube|v=FkQdwUns7H8)
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: lsnes rr2-β21
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses game-breaking glitches
+		$LF
+	]li
+	[li 
+		" Achieves credits early
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"Go ahead and watch the TAS first, it doesn't really take that long.
+	$LF
+]p
+[p 
+	"This is basically the reason why I cancelled the Kirby Super Star submission. You can maybe see why I prefer the 
+	(__wikiLink|2380M|previous movie)
+	" over this one. But first...
+	$LF
+]p
+[p 
+	[img class=embedright src=http://i.imgur.com/rDrPely.png 
+	]img
+	$LF
+]p
+[h3 
+	" What happens this time?
+	$LF
+]h3
+[p 
+	"Let's start at the basics. In SMW there are sprites which can change the status of Mario called 
+	[b 
+		"powerups
+	]b
+	" (such as mushrooms, flowers, stars and so on). It's easy enough for the game to just run a routine to change it as soon as Mario touches a sprite which is listed as a powerup. Now the problem comes when Yoshi eats a sprite, because if it is a powerup, it should be applied to Mario. The game checks if the sprite has a specific property that says the game if it should 
+	[em 
+		"give Mario a powerup when it is being eaten
+	]em
+	". Interestingly enough, 
+	[b 
+		"chucks
+	]b
+	" have this property! Normally, this isn't a problem because you can't actually eat chucks because they have another property which ensures that the sprite won't be 
+	[em 
+		"caught
+	]em
+	" by Yoshi's tongue (
+	[a class=extlink href=http://imgur.com/doNOFEZ rel=nofollow 
+		"it goes right through
+	]a
+	"), making it impossible to get it on Yoshi's tongue and eat it... or is it?
+	$LF
+]p
+[h3 
+	" Item Swap
+	$LF
+]h3
+[p 
+	"This glitch is also used in the 
+	(__wikiLink|1944M|warps)
+	" run in YI2 to get the goal tape to replace the shell on Yoshi's tongue, getting the level end earlier or in YI1 to replace a sprite on Yoshi's tongue with a chuck so that Yoshi can... eat it!
+	$LF
+]p
+[p 
+	"This is what I'm doing, too. I 
+	[b 
+		"replace a sprite on Yoshi's tongue with a chuck
+	]b
+	". How do I do that? Well, it is possible to get a coin by touching it, but it is also possible to get a coin on Yoshi's tongue. Now just do both things at the same time (see pictures on the right) and Yoshi's tongue will hold a 
+	[em 
+		"nonexistent sprite
+	]em
+	" or simply 
+	[em 
+		"nothing
+	]em
+	". All the game now knows is that Yoshi's tongue holds a sprite in a specific slot and if in that moment a sprite such as a chuck wants to spawn in that slot, its position will be overwritten since it's now on Yoshi's tongue. Yoshi is now able to eat the chuck which is apparently a powerup to the game.
+	$LF
+]p
+[h3 
+	" Eating a chuck
+	$LF
+]h3
+[p 
+	"Since the chuck powerup isn't intended by the developers and accidentally in the game, the code doesn't account for it and incorrectly indexes the sprite to put in the item box (which is a lakitu cloud) and also gets the subroutine location wrong to jump afterwards. Instead of jumping to a routine to change Mario's status, it jumps to $014A13... which is Open Bus.
+	$LF
+]p
+[h3 
+	" Open Bus
+	$LF
+]h3
+[p 
+	"Open Bus is an area in the SNES which isn't mapped to a location like WRAM or ROM, which means no such device answers the request from the console to get the next instruction to execute. This means that the console will just execute whatever value was the last one on 
+	[b 
+		"data bus
+	]b
+	".
+	$LF
+]p
+[p 
+	"The code just jumped to $014A13 so the last value on data bus is 0x01.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"data bus
+			]th
+			[th 
+				"instruction
+			]th
+			[th 
+				"information
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x01
+			]td
+			[td 
+				"ORA ($01,x)
+			]td
+			[td 
+				"X is 0x09, $0A holds 0x0107, $0107 holds 0x17, A turns to 0x17 and data bus is 0x17
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x17
+			]td
+			[td 
+				"ORA ($17),Y
+			]td
+			[td 
+				"$17 is interesting because $17 and $18 are SMW's controller data, so this is where I can kinda manipulate the outcome
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"This is the reason why I pressed X and the next frame AXL just before the glitch started so that $17 is 0xE0 and $18 is 0xA0. The code manages to change the SNES to emulation mode so now it can survive BRKs easily, as the vector changed. Then it managed to reach $4219 which are controller registers.
+	$LF
+]p
+[h3 
+	" Controller Registers
+	$LF
+]h3
+[p 
+	"These are the last 5 frames of input:
+	$LF
+]p
+[pre 
+	"             1-1              1-2              2-1              2-2
+	$LF
+	"F. 0 0|....u.l.AXL.....|BY..u.lr...R....|.Ys..d..AXLR0.23|................
+	$LF
+	"F. 0 0|...Su...A.L.0..3|BY..u.lr...R....|.Ys..d..AX.R0...|BYsSu...A.......
+	$LF
+	"F. 0 0|..sSud.rA....123|BY..u.lr...R....|.Ys..d......0.23|BYsSu...A.......
+	$LF
+	"F. 0 0|....u...A.L.0..3|BY..u.lr...R....|.Ys..d..A.L.0.23|BYsSu...A.......
+	$LF
+	"F. 0 0|BY...dl.A...01.3|B........XLR..2.|..s........R..23|BYsSu...A.......
+	$LF
+]pre
+[p 
+	"or in bytes ($4218 - $421F):
+	$LF
+]p
+[pre 
+	"E0 0A FB 64 10 CB 00 00
+	$LF
+	"A9 18 D8 64 10 CB 80 F8
+	$LF
+	"87 3D 0B 64 10 CB 80 F8
+	$LF
+	"A9 08 AB 64 10 CB 80 F8
+	$LF
+	"8D C6 13 20 72 80 80 F8
+	$LF
+]pre
+[p 
+	"One thing to notice is that "64 10 CB" and "80 F8" occur often. "64 10 CB" is executed as STZ $10 : WAI which 
+	[b 
+		"ST
+	]b
+	"ores 
+	[b 
+		"Z
+	]b
+	"ero to $10 and then 
+	[b 
+		"WA
+	]b
+	"its for an 
+	[b 
+		"I
+	]b
+	"nterrupt. That effectively advances one frame and lets Auto-Joypad Read finish so that we have new input. Then it executes "80 F8" of the next frame (which is why there isn't one in the first frame). "80 F8" means BRA $F8 or 
+	[b 
+		"BRA
+	]b
+	"nch -8 bytes (or simply 8 bytes back), so we reach $4218 once again and can execute more code.
+	$LF
+]p
+[p 
+	"(The 0xE0 in the first frame isn't actually executed since we start at $4219, which is good because we needed that for the Open Bus part)
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"byte
+			]th
+			[th 
+				"instruction
+			]th
+			[th 
+				"information
+			]th
+		]tr
+		[tr 
+			[td 
+				"0A
+			]td
+			[td 
+				"ASL A
+			]td
+			[td 
+				"used for clearing carry
+			]td
+		]tr
+		[tr 
+			[td 
+				"FB
+			]td
+			[td 
+				"XCE
+			]td
+			[td 
+				"to recover to native mode after emulation mode to safely let NMI execute
+			]td
+		]tr
+		[tr 
+			[td 
+				"A9 18
+			]td
+			[td 
+				"LDA #$18
+			]td
+			[td 
+				"load 0x18 into A for the game mode later
+			]td
+		]tr
+		[tr 
+			[td 
+				"D8
+			]td
+			[td 
+				"CLD
+			]td
+			[td 
+				"clear decimal mode flag to avoid the game getting confused with calculations
+			]td
+		]tr
+		[tr 
+			[td 
+				"87 3D
+			]td
+			[td 
+				"STA ($3D)
+			]td
+			[td 
+				"store A to whatever long address is in $3D, which happens to be $000100 which is the game mode
+			]td
+		]tr
+		[tr 
+			[td 
+				"0B
+			]td
+			[td 
+				"PHD
+			]td
+			[td 
+				"push direct page register so that I have 00's on the stack for later
+			]td
+		]tr
+		[tr 
+			[td 
+				"A9 08
+			]td
+			[td 
+				"LDA #$08
+			]td
+			[td 
+				"load 0x08 into A for $13C6 later
+			]td
+		]tr
+		[tr 
+			[td 
+				"AB
+			]td
+			[td 
+				"PLB
+			]td
+			[td 
+				"pull data bank which is now 00 thanks to the PHD before
+			]td
+		]tr
+		[tr 
+			[td 
+				"8D C6 13
+			]td
+			[td 
+				"STA $13C6
+			]td
+			[td 
+				"store A to $13C6 to complete all necessary steps
+			]td
+		]tr
+		[tr 
+			[td 
+				"20 72 80
+			]td
+			[td 
+				"JSR $8072
+			]td
+			[td 
+				"jump to the main game routine and free the game from any further gameplay
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Suggested Screenshot
+	$LF
+]h3
+[p 
+	[img class=embed src=http://i.imgur.com/RD7RalP.png 
+	]img
+	$LF
+]p
+[h3 
+	" Special Thanks to:
+	$LF
+]h3
+[ul 
+	[li 
+		[b 
+			"Ilari
+		]b
+		" for explaining Open Bus to me
+		$LF
+	]li
+	[li 
+		"Pat for not being able to chuck-glitch
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Accepting as improvement to existing run.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Ilari)
+	": processing
+]p

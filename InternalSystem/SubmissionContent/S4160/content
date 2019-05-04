@@ -1,0 +1,1171 @@
+5
+[p 
+	(__wikiLink|user:FractalFusion)
+	"'s NES Wheel of Fortune in 1:55.18 (6922 frames). An improvement over 
+	(__wikiLink|user:PikachuMan)
+	"'s 
+	(__wikiLink|4079S|previous submission)
+	" by about 26 seconds.
+	$LF
+]p
+[p 
+	(youtube|v=vopAemew0U8)
+	$LF
+	"Nicovideo:
+	[br 
+	]br
+	$LF
+	"Account: http://www.nicovideo.jp/watch/sm22674087
+	[br 
+	]br
+	$LF
+	"No account: http://www.nicozon.net/watch/sm22674087
+	$LF
+]p
+[h4 
+	" Goals
+	$LF
+]h4
+[ul 
+	[li 
+		" Starts from savestate+reset.
+		$LF
+	]li
+	[li 
+		" Aims for fastest time from reset to selecting END on the bonus round which results in a bonus round win.
+		$LF
+	]li
+	[li 
+		" 2P input in a 1P game.
+		$LF
+	]li
+	[li 
+		" Manipulates luck.
+		$LF
+	]li
+]ul
+[h4 
+	" Why from savestate+reset instead of power-on?
+	$LF
+]h4
+[p 
+	"The game uses the RAM range 0x780-0x7FC as a bitfield for the status of its 1000 puzzles. Bit 0 means puzzle is available for selection; bit 1 means puzzle cannot be selected/has already been done. But the game never initializes this range before using it; as a result, the initial RAM power-on state affects this range. The RAM initialization of FCEUX arbitrarily restricts which puzzles are available at first. However, we can use a preparation movie file to manipulate this range, and then start from a reset. This allows much more flexibility.
+	$LF
+]p
+[p 
+	"The preparation movie file, being also a verification movie file, proves that this RAM setup can be reached from FCEUX's power-on state. Nothing special about FCEUX's power-on state; with the right preparation movie file, this setup can be reached from any power-on state whatsoever. This is because, if the entire RAM range 0x780-0x7FC is filled entirely with 1-bits, the game zeroes the entire range next puzzle.
+	$LF
+]p
+[p 
+	"The preparation movie file is in the resource link in the Other information section below.
+	$LF
+]p
+[h4 
+	" Verifying the movie
+	$LF
+]h4
+[ul 
+	[li 
+		" Run 
+		[tt 
+			"Wheel of Fortune-verificationfile.fm2
+		]tt
+		" . Pause at the last frame, when frame display says "692332/692332".
+		$LF
+	]li
+	[li 
+		" Stop the movie.
+		$LF
+	]li
+	[li 
+		" Record a new movie starting from savestate (Record from -> Now).
+		$LF
+	]li
+	[li 
+		" Check the header of the new movie. The savestate in Base64 encoding should be the same as for this submitted movie.
+		$LF
+	]li
+]ul
+[h3 
+	" Optimizing the TAS
+	$LF
+]h3
+[h4 
+	" Optimal puzzles
+	$LF
+]h4
+[p 
+	"First, I found out where the puzzles were stored in the ROM (ROM file 0x109DE-0x14617, NES address 04:89CE-05:C607). There are 1000 of them. (At first sight, there appears to be 1002 of them, but one of them is a fake, corresponding to the title screen's WHEEL OF FORTUNE, and the other is a lost puzzle that the game's puzzle selection routine will never hit, ever.)
+	$LF
+]p
+[p 
+	"I used a C++ program to calculate a "score" for each puzzle, representing how long the puzzle takes. It is based off both the time taken to enter the puzzle on the solve screen, and the time for Vanna to reveal the puzzle. Each puzzle is calculated as follows:
+	$LF
+]p
+[ul 
+	[li 
+		" Let val('A')=1, val('B')=2, ... , val('Z')=26. Let k be the number of letters in the puzzle. Let a(0)=val('A')=1 and a(k)=val(kth letter of puzzle). Let b(k)=a(k)-a(k-1).
+		$LF
+	]li
+	[li 
+		" Then the score of the puzzle is:
+		$LF
+	]li
+]ul
+[pre 
+	"score=  42*k
+	$LF
+	"      + sum(1 to k)
+	"[min( 1+8*|b(k)| , 117-8*(b(k)-16) , 129-8*(-b(k)-16) )]
+	$LF
+	"      + min( 129-8*(15-a(k)
+	[em 
+	]em
+	") , 121-8*(a(k)-16) )
+	$LF
+]pre
+[p 
+	"Puzzles with best results:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Score
+			]th
+			[th 
+				"Puzzle #
+			]th
+			[th 
+				"Word
+			]th
+		]tr
+		[tr 
+			[td 
+				"0642
+			]td
+			[td 
+				"0818
+			]td
+			[td 
+				"TOOTSIE
+			]td
+		]tr
+		[tr 
+			[td 
+				"0643
+			]td
+			[td 
+				"0806
+			]td
+			[td 
+				"BEN HUR
+			]td
+		]tr
+		[tr 
+			[td 
+				"0695
+			]td
+			[td 
+				"0340
+			]td
+			[td 
+				"EUCLID
+			]td
+		]tr
+		[tr 
+			[td 
+				"0697
+			]td
+			[td 
+				"0199
+			]td
+			[td 
+				"BABE RUTH
+			]td
+		]tr
+		[tr 
+			[td 
+				"0702
+			]td
+			[td 
+				"0451
+			]td
+			[td 
+				"MONOCLE
+			]td
+		]tr
+		[tr 
+			[td 
+				"0711
+			]td
+			[td 
+				"0442
+			]td
+			[td 
+				"TUXEDO
+			]td
+		]tr
+		[tr 
+			[td 
+				"0713
+			]td
+			[td 
+				"0138
+			]td
+			[td 
+				"HONG KONG
+			]td
+		]tr
+		[tr 
+			[td 
+				"0724
+			]td
+			[td 
+				"0618
+			]td
+			[td 
+				"HIGH JINKS
+			]td
+		]tr
+		[tr 
+			[td 
+				"0727
+			]td
+			[td 
+				"0686
+			]td
+			[td 
+				"SO BE IT
+			]td
+		]tr
+		[tr 
+			[td 
+				"0729
+			]td
+			[td 
+				"0010
+			]td
+			[td 
+				"FORT KNOX
+			]td
+		]tr
+		[tr 
+			[td 
+				"0729
+			]td
+			[td 
+				"0055
+			]td
+			[td 
+				"BOOT HILL
+			]td
+		]tr
+		[tr 
+			[td 
+				"0738
+			]td
+			[td 
+				"0456
+			]td
+			[td 
+				"LULLABY
+			]td
+		]tr
+		[tr 
+			[td 
+				"0745
+			]td
+			[td 
+				"0462
+			]td
+			[td 
+				"CHESTNUT
+			]td
+		]tr
+		[tr 
+			[td 
+				"0749
+			]td
+			[td 
+				"0922
+			]td
+			[td 
+				"BIRTHDAY
+			]td
+		]tr
+		[tr 
+			[td 
+				"0755
+			]td
+			[td 
+				"0803
+			]td
+			[td 
+				"PSYCHO
+			]td
+		]tr
+		[tr 
+			[td 
+				"0761
+			]td
+			[td 
+				"0688
+			]td
+			[td 
+				"LOOK IT UP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0763
+			]td
+			[td 
+				"0953
+			]td
+			[td 
+				"PAYDAY
+			]td
+		]tr
+		[tr 
+			[td 
+				"0765
+			]td
+			[td 
+				"0850
+			]td
+			[td 
+				"THE ILIAD
+			]td
+		]tr
+		[tr 
+			[td 
+				"0766
+			]td
+			[td 
+				"0392
+			]td
+			[td 
+				"COCONUT
+			]td
+		]tr
+		[tr 
+			[td 
+				"0782
+			]td
+			[td 
+				"0122
+			]td
+			[td 
+				"CAPE COD
+			]td
+		]tr
+		[tr 
+			[td 
+				"0782
+			]td
+			[td 
+				"0366
+			]td
+			[td 
+				"HAIRPIN
+			]td
+		]tr
+		[tr 
+			[td 
+				"0782
+			]td
+			[td 
+				"0430
+			]td
+			[td 
+				"HAIRPIN
+			]td
+		]tr
+		[tr 
+			[td 
+				"0792
+			]td
+			[td 
+				"0969
+			]td
+			[td 
+				"YOM KIPPUR
+			]td
+		]tr
+		[tr 
+			[td 
+				"0793
+			]td
+			[td 
+				"0081
+			]td
+			[td 
+				"HONOLULU
+			]td
+		]tr
+		[tr 
+			[td 
+				"0793
+			]td
+			[td 
+				"0148
+			]td
+			[td 
+				"ETHIOPIA
+			]td
+		]tr
+		[tr 
+			[td 
+				"0797
+			]td
+			[td 
+				"0494
+			]td
+			[td 
+				"SOUR NOTE
+			]td
+		]tr
+		[tr 
+			[td 
+				"0798
+			]td
+			[td 
+				"0355
+			]td
+			[td 
+				"GALILEO
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"(The full list is 
+	(__wikiLink|GameResources/NES/WheelOfFortune/PuzzleList|here)
+	". It is sorted by puzzle number though. You can sort by score in another program like Notepad++ . The list was generated using 
+	[tt 
+		"wofscript.cpp
+	]tt
+	" . See the resoure link in the Other information section below.)
+	$LF
+]p
+[p 
+	"These scores assume the standard first/second round structure.
+	$LF
+]p
+[p 
+	"Speed-up round is a bit different; you have to choose a letter in the puzzle before you are allowed to solve it. I quickly figured that choosing the U in EUCLID pretty much gives the best result; it saves the four seconds needed to go from E to U to C normally, and no other word comes close. It is also near the left side so Vanna doesn't have to walk far.
+	$LF
+]p
+[p 
+	"In bonus round, you choose five consonants and a vowel and if any of them are in the puzzle, they are turned over before you solve it. It is fastest to choose letters that 
+	[em 
+		"aren't
+	]em
+	" in the puzzle so Vanna doesn't have to do anything. Note that if the letters you choose uncover the whole puzzle (for example, if the puzzle is PSYCHO and you choose, well, PSYCHO), you still have to select END after the puzzle is uncovered, and no, timing out causes you to lose no matter what, in case you were thinking about abusing that.
+	$LF
+]p
+[p 
+	"The best bonus round puzzle happens to be the one with the best score above; that is, TOOTSIE. ZYXWVU can be selected while on the way to T. (The next couple best are MONOCLE, selecting BDFGHI along the way, and HONG KONG, selecting BCDFJI.)
+	$LF
+]p
+[p 
+	"This conveniently leaves BEN HUR and BABE RUTH for the first and second rounds, respectively. Checking shows that BEN HUR first and BABE RUTH second is a couple frames faster than the other way around.
+	$LF
+]p
+[p 
+	"There is the possibility of having a puzzle show up twice in a single game by zeroing the range 0x780-0x7FC during the game, I checked to see if it was feasible. However, EUCLID and TOOTSIE would be impossible for speed and bonus rounds in this case, and substituting other puzzles in their place would be too costly.
+	$LF
+]p
+[p 
+	"So, in conclusion, the puzzles I use are:
+	$LF
+]p
+[ul 
+	[li 
+		" First round: BEN HUR (#806)
+		$LF
+	]li
+	[li 
+		" Second round: BABE RUTH (#199)
+		$LF
+	]li
+	[li 
+		" Speed-up round: EUCLID (#340)
+		$LF
+	]li
+	[li 
+		" Bonus round: TOOTSIE (#818)
+		$LF
+	]li
+]ul
+[h4 
+	" Spin manipulation
+	$LF
+]h4
+[p 
+	"It is possible to manipulate the speed-up round's spin. This is also where 2P input comes in.
+	$LF
+]p
+[p 
+	"I manipulate the spin meter to be as low as possible. It is impossible to manipulate the spin further with 1P input; however, with 2P input, the added delay variance is manipulated to be 0. The speed-up round's puzzle can also be manipulated with 2P input as well.
+	$LF
+]p
+[h3 
+	" How to manipulate these puzzles (i.e. 0x780-0x7FC manipulation)
+	$LF
+]h3
+[h4 
+	" The RNG
+	$LF
+]h4
+[p 
+	"The RNG (address 0x0A-0x0C) controls randomness in this game. It is influenced by input most of the time. The address 0x0A merely increments whereas 0x0B and 0x0C are chaotic. Usually, puzzle selection in this game (as well as speed-up round's spin) is determined by the RNG when address 0x0A is 200 (0xC8). At that time, only 38505 out of 65536 values for 0x0B-0x0C are possible.
+	$LF
+]p
+[h4 
+	" Puzzle selection rules
+	$LF
+]h4
+[p 
+	"As stated earlier, if the entire RAM range 0x780-0x7FC is filled entirely with 1-bits, the game zeroes the entire range next puzzle. (It also zeroes address 0x7FD for whatever reason.)
+	$LF
+]p
+[p 
+	"Now the game selects a puzzle using its puzzle select routine that is intricately connected to the RNG. If the routine gives a puzzle that already has its bit set to 1, it runs the routine again up to 7 more times with slightly different parameters. If that fails, the game stops trying to use its fancy routines. It simply takes a point in the range and finds the first puzzle from there that has bit 0.
+	$LF
+]p
+[p 
+	"Now, there are some limitations for puzzle selection. It is entirely possible that two given puzzles must occur in a particular order and never the other way around. Because of RNG timing, this restriction may be particular to the first/second/bonus rounds (the third speed-up round is less restricted). Puzzles 936-959 and 968-991 are extremely restricted. Fortunately, these limitations do not affect the choice of puzzles that I want.
+	$LF
+]p
+[h4 
+	" For the puzzles used in this TAS
+	$LF
+]h4
+[ul 
+	[li 
+		" BEN HUR (#806) can be triggered directly; nothing else needed.
+		$LF
+	]li
+	[li 
+		" BABE RUTH (#199) requires all puzzles 96-198 to be done already (bit 1) as well as a sequence of puzzles for which there exists an RNG value causing the routine to try these puzzles before taking the first available puzzle from 96.
+		$LF
+	]li
+	[li 
+		" EUCLID (#340) requires (for optimal speed-up round spin manipulation) all puzzles 224-339 to be done already (bit 1) as well as a sequence of puzzles for which there exists an RNG value causing the routine to try these puzzles before taking the first available puzzle from 224.
+		$LF
+	]li
+	[li 
+		" TOOTSIE (#818) requires all puzzles 800-817 to be done already (bit 1), including BEN HUR (#806), as well as a sequence of puzzles for which there exists an RNG value causing the routine to try these puzzles before taking the first available puzzle from 800.
+		$LF
+	]li
+]ul
+[p 
+	"Note that the completion of BEN HUR in the first round satisfies the requirements for TOOTSIE in the bonus round.
+	$LF
+]p
+[p 
+	"The following RNG values are used, with the puzzle sequence that the puzzle selection algorithm tries:
+	$LF
+]p
+[ul 
+	[li 
+		" BEN HUR: C8.C7FA (805 124 800 072 814 038 632 804 800 801 802 ... 806)
+		$LF
+	]li
+	[li 
+		" BABE RUTH: C8.6D39 (123 801 075 815 033 633 807 122 096 097 098 ... 199)
+		$LF
+	]li
+	[li 
+		" EUCLID: 99.2327 (333 918 252 672 998 165 999 251 224 225 226 ... 340)
+		$LF
+	]li
+	[li 
+		" TOOTSIE: C8.C7FA (805 124 800 072 814 038 632 804 800 801 802 ... 818)
+		$LF
+	]li
+]ul
+[h4 
+	" Setting up the preparation movie file
+	$LF
+]h4
+[p 
+	"The standard method for setting up bits in the 0x780-0x7FC range is to manipulate a particular puzzle for the first round and then immediately reset after the bit is set to 1. However, not all puzzles can be manipulated this way. Some puzzles require a manipulation in the third (speed-up) round. Thus, some puzzles will have to be solved in the first two rounds. As I was trying to optimize the preparation movie file as well, I chose the puzzles with the lowest possible scores.
+	$LF
+]p
+[p 
+	"The preparation movie, made with a lot of input file editing as well as a bunch of C++-generated information files, boils down to this:
+	$LF
+]p
+[p 
+	"(note that this preparation movie uses only one controller instead of two that the TAS uses)
+	$LF
+]p
+[ul 
+	[li 
+		" Reach the first round and immediately reset after any one bit is set to 1 (no manipulation needed). Repeat this 511 more times. The range 0x780-0x7FC is now filled with 1-bits and will be zeroed out next puzzle.
+		$LF
+	]li
+	[li 
+		" Let the characters below denote the important RNG values to manipulate:
+		$LF
+	]li
+]ul
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Character
+			]th
+			[th 
+				"RNG value at C8.xxxx
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				"Character
+			]th
+			[th 
+				"RNG value at C8.xxxx
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"6D39
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"c
+			]td
+			[td 
+				"440F
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"B4C8
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"d
+			]td
+			[td 
+				"040C
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"1F30
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"e
+			]td
+			[td 
+				"440C
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"C7FA
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"f
+			]td
+			[td 
+				"040D
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"4434
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"g
+			]td
+			[td 
+				"CD7E
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"8373
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"h
+			]td
+			[td 
+				"8368
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"C31A
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"i
+			]td
+			[td 
+				"C368
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"C373
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"j
+			]td
+			[td 
+				"8369
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"C391
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"k
+			]td
+			[td 
+				"C369
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"040E
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"m
+			]td
+			[td 
+				"662A
+			]td
+		]tr
+		[tr 
+			[td 
+				"a
+			]td
+			[td 
+				"040F
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"n
+			]td
+			[td 
+				"D40A
+			]td
+		]tr
+		[tr 
+			[td 
+				"b
+			]td
+			[td 
+				"440E
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"p
+			]td
+			[td 
+				"4615
+			]td
+		]tr
+	]tbody
+]table
+[ul 
+	[li 
+		" Perform the following manipulations in this order (brackets means solve the first two and manipulate the third for the speed-up round):
+		$LF
+	]li
+]ul
+[pre 
+	"41(012)000000111(012)000011111111(012)00111115678(012)0(002)
+	$LF
+	"000011(012)000111(012)0000000(002)(002)(002)00000001(012)
+	$LF
+	"001111(012)00(002)001(012)0000(002)1(012)0011111111(012)
+	$LF
+	"000(002)011111111(012)1(112)1(112)0000000001111111111(012)
+	$LF
+	"(9a2)0000001bcdef(012)00011(012)00011(012)
+	$LF
+	"00000011gg33333333hijk(m1n)m11(31p)
+	$LF
+	$LF
+]pre
+[p 
+	"Memory range 0x780-0x7FC should now look like this. This is starting position for the TAS:
+	$LF
+]p
+[pre 
+	"00000000 42000000 01900000 FFFFFFFF
+	$LF
+	"FFFFFFFF FFFFFFFF FE000000 FFFFFFFF
+	$LF
+	"FFFFFFFF FFFFFFFF FFFFF000 00000120
+	$LF
+	"00000004 00000000 00000000 00000000
+	$LF
+	"00000000 00000000 00040000 000000C0
+	$LF
+	"00000000 80000000 00000000 00000000
+	$LF
+	"00000000 FDFFC000 02000000 00000000
+	$LF
+	"00000200 00000000 00000000 03
+	$LF
+	$LF
+]pre
+[h3 
+	" Other stuff
+	$LF
+]h3
+[h4 
+	" Can this TAS be played directly from power-on?
+	$LF
+]h4
+[p 
+	"Sure. Just modify FCEUX's source code to write the above memory for 0x780-0x7FC at power-on and you're set.
+	$LF
+]p
+[p 
+	"OK, if you mean play directly from power-on on console, then probably not. Well, let's look at it closely. You'll need the following binary values for the following addresses ('.' means any bit value):
+	$LF
+]p
+[pre 
+	"0x784: .1....1.
+	$LF
+	"0x789: 1..1....
+	$LF
+	"0x78C-0x797: 11111111
+	$LF
+	"0x798: 11111110
+	$LF
+	"0x79C-0x7A9: 11111111
+	$LF
+	"0x7AA: 11110...
+	$LF
+	"0x7CF: 11......
+	$LF
+	"0x7D4: 1.......
+	$LF
+	"0x7E4: 11111101
+	$LF
+	"0x7E5: 11111111
+	$LF
+	"0x7E6: 110.....
+	$LF
+	"0x7F2: ......1.
+	$LF
+	"0x7FC: ......11
+	$LF
+	$LF
+]pre
+[p 
+	"Count them. That's 250 bits that must be manipulated at power-on. Assuming each bit can be set independently to 0 or 1 with 0.5 probability each, that's a probability of (0.5)^250 to get a RAM state that works. If you set your NES on fire with a laser beam and throw it into a pool of water, then maybe, just 
+	[em 
+		"maybe
+	]em
+	" it will give you a RAM state that works.
+	$LF
+]p
+[p 
+	"On the other hand, why bother?
+	$LF
+]p
+[h4 
+	" How about console verification?
+	$LF
+]h4
+[p 
+	"There is a method which may allow it to be verified as starting from reset (not from power-on) even though we have no idea of the NES power-on state. See the resource link in the Other information section below.
+	$LF
+]p
+[p 
+	"The file 
+	[tt 
+		"Wheel of Fortune-clearmem-e34f x 77.fm2
+	]tt
+	" (which we call file A) sets 77 bits in 0x780-0x7FC using RNG value C8.E34F (resetting immediately after activating each puzzle, except the last one). Run this file over and over until, during running the file, the range 0x780-0x7FC is zeroed out after being filled completely with 1-bits.
+	$LF
+]p
+[p 
+	"To tell if this has happened, see the shape of the last puzzle and compare it with the 77 puzzles in 
+	[tt 
+		"wofconsoleverify-puzzleshapes.txt
+	]tt
+	" (#0512-0588). If the puzzle is not in there, then the zeroing out did not happen. If the puzzle is there and does not have a star, then the zeroing out happened (except see the last sentence below). If the puzzle is there and has a star, then run 
+	[tt 
+		"Wheel of Fortune-e34f.fm2
+	]tt
+	" (sets only 1 bit in 0x780-0x7FC using RNG value C8.E34F) and check the displayed puzzle (which should be the next one in the puzzle order) to confirm whether or not it is one of these puzzles. Also, if this is the first time running file A and the displayed puzzle is the last one in the puzzle order (#0588), then the zeroing out cannot be confirmed to have happened.
+	$LF
+]p
+[p 
+	"Since there are only 1000 puzzles, file A needs only to be run at most 13 times. On average, it requires 6.5 times.
+	$LF
+]p
+[p 
+	"Once the range has zeroed out, run 
+	[tt 
+		"Wheel of Fortune-verifyfrom0mem.fm2
+	]tt
+	" to set up the necessary RAM for this TAS. Whether or not any additional puzzles of 0512-0588 have been activated by file A after zeroing out the range does not matter; neither 
+	[tt 
+		"Wheel of Fortune-verifyfrom0mem.fm2
+	]tt
+	" nor the actual TAS are affected.
+	$LF
+]p
+[p 
+	"Note that this whole set-up takes a long time (anywhere from 1h40m to 5h20m, though if power-on RAM is truly random, then it takes on average 3h30m).
+	$LF
+]p
+[p 
+	"Once everything has been set up, just run the TAS (should begin with a reset). The TAS itself requires two controllers, even though the setup files only require one.
+	$LF
+]p
+[p 
+	"I don't know if there are any other important details for sync on a real console, but this is how it works, theoretically.
+	$LF
+]p
+[h4 
+	" Other information (disassembly, etc.)
+	$LF
+]h4
+[p 
+	"Some more information regarding game mechanics and disassembly can be found at the 
+	(__wikiLink|GameResources/NES/WheelOfFortune|Game Resources)
+	" page.
+	$LF
+]p
+[p 
+	"Resource link: 
+	[a class=extlink href=http://www.mediafire.com/download/1bchszrhy6vpxiz/wofresource.zip rel=nofollow 
+		"http://www.mediafire.com/download/1bchszrhy6vpxiz/wofresource.zip
+	]a
+	" .
+	$LF
+]p
+[p 
+	"The resource link contains:
+	$LF
+]p
+[ul 
+	[li 
+		" The verification movie file 
+		[tt 
+			"Wheel of Fortune-verificationfile.fm2
+		]tt
+		" .
+		$LF
+	]li
+	[li 
+		" The files for possible method of console verification 
+		[tt 
+			"Wheel of Fortune-clearmem-e34f x 77.fm2
+		]tt
+		" , 
+		[tt 
+			"wofconsoleverify-puzzleshapes.txt
+		]tt
+		" , 
+		[tt 
+			"Wheel of Fortune-verifyfrom0mem.fm2
+		]tt
+		" as described above.
+		$LF
+	]li
+	[li 
+		" The program to generate the full list of puzzles and calculate a score for each one 
+		[tt 
+			"wofscript.cpp
+		]tt
+		" . It requires a ROM for this game, renamed 
+		[tt 
+			"zzz.nes
+		]tt
+		" . 
+		$LF
+	]li
+	[li 
+		" Files to help with RNG manipulation 
+		[tt 
+			"wofrandomtable1.txt
+		]tt
+		" , 
+		[tt 
+			"wofrandomtable2.txt
+		]tt
+		" 
+		[tt 
+			"wofrandomtable3.txt
+		]tt
+		" , 
+		[tt 
+			"wofrandomtable4.txt
+		]tt
+		" ,  as well as the programs to generate them 
+		[tt 
+			"wof.h
+		]tt
+		" , 
+		[tt 
+			"wofrandom1.cpp
+		]tt
+		" , 
+		[tt 
+			"wofrandom2.cpp
+		]tt
+		" , 
+		[tt 
+			"wofrandom3.cpp
+		]tt
+		" , 
+		[tt 
+			"wofrandom4.cpp
+		]tt
+		" and an intermediate file 
+		[tt 
+			"woftbl
+		]tt
+		" .
+		$LF
+		[ul 
+			[li 
+				" Given the current value of RNG as BC.xxxx, 
+				[tt 
+					"wofrandomtable1.txt
+				]tt
+				" gives the input values required to be pressed on 0x0A=BE, C0, C2 to manipulate the RNG from BC.xxxx to C2.0400.
+				$LF
+			]li
+			[li 
+				" Given the desired value of RNG to be C8.xxxx, 
+				[tt 
+					"wofrandomtable2.txt
+				]tt
+				" gives the input values required to be pressed on 0x0A=C4, C6, C8 to manipulate the RNG from C2.0400 to C8.xxxx.
+				$LF
+			]li
+			[li 
+				" Given the value of RNG as C8.xxxx, 
+				[tt 
+					"wofrandomtable3.txt
+				]tt
+				" reveals the sequence of puzzles that the routine tries, in a standard/bonus round, before taking the first available puzzle from the last number given.
+				$LF
+			]li
+			[li 
+				" Given the value of RNG as C8.xxxx, 
+				[tt 
+					"wofrandomtable4.txt
+				]tt
+				" reveals the sequence of puzzles that the routine tries, in a speed-up round, before taking the first available puzzle from the last number given.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"There were other program files and tables involved when I figured out how to use 2P input to manipulate the speed-up round, but it is probably too confusing to include them. They pretty much work on the same idea as the above programs and tables anyway.
+	$LF
+]p
+[h4 
+	" Thanks
+	$LF
+]h4
+[p 
+	"Thanks to 
+	(__wikiLink|user:PikachuMan)
+	", 
+	(__wikiLink|user:MESHUGGAH)
+	", and everyone else in the 
+	[a href=/forum/t/14472 
+		"discussion thread
+	]a
+	" for the previous Wheel of Fortune submission.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Cancelling this submission as explained in the latter half of 
+	[a href=/forum/viewtopic.php?p=364658#364658 
+		"this post
+	]a
+	".
+]p

@@ -1,0 +1,115 @@
+6
+[p 
+	"Wizards & Warriors 3 is the next game in the series following Kuros in his quest to defeat Malkil after the events in Ironsword. The current run is a minor improvement over the published run using a well known trick.  
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.2.2
+		$LF
+	]li
+	[li 
+		" Beats the game as fast as possible.
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"Another slight modification to Ferret Warlord's original run. Despite trying a vast variety of different ideas, I was only able to implement a known improvement and fix a slight oversight to save a total of just over 30 frames.
+	$LF
+]p
+[p 
+	"However I was able to work out why the last boss dies, clearing up a bit of the mystery in Dacicus' original submission of this glitch.
+	$LF
+]p
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[p 
+	"The known improvement is building momentum before entering the third wizard's guild after being kicked out as the thief. Dacicus mentioned this in the thread.
+	$LF
+]p
+[p 
+	"As for why Malkil dies in the end. Here is the offending code:
+	$LF
+]p
+[pre 
+	" $B2A8:BD 3C 03  LDA $033C,X @ $033D = #$4F                   A:04 X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2AB:C9 50     CMP #$50                                     A:4F X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2AD:B0 AD     BCS $B25C                                    A:4F X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2AF:AD 0C 04  LDA $040C = #$00                             A:4F X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2B2:D0 A8     BNE $B25C                                    A:00 X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2B4:A9 01     LDA #$01                                     A:00 X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2B6:8D 0C 04  STA $040C = #$00                             A:01 X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2B9:A9 C0     LDA #$C0                                     A:01 X:01 Y:91 S:FD 
+	$LF
+]pre
+[pre 
+	" $B2BB:99 A4 03  STA $03A4,Y @ $0435 = #$02                   A:C0 X:01 Y:91 S:FD
+	$LF
+]pre
+[p 
+	"Register Y was given Kuros' X subpixel position at a previous point. This block of code only occurs when the room designator (stored in $00B6) is 5 (the last bosses room.) The game performed this check just before this code is called. $033D contains the Y coordinate of Kuros' fireball. The check it performs comparing it to #$50 only fails when you launch a fireball behind you (by holding B and pressing the direction opposite to which you are standing.) Why is a fireball programmed to travel higher this way? I do not know. Anyway this skips the jump to $B25C, the normal exit point. Instead, we get a strange piece of code that tells #$C0 to be stored in $03A4,Y = $0435. $0435 happens to be Malkil's attack pattern, which ranges from 0-5. The game checks what pattern he is currently in, but ends the fight when it finds no match (being $#C0)
+	$LF
+]p
+[p 
+	"As mentioned, this code is specific to this boss fight. I do not know what the original intention was. Other boss fights do not have similar checks. 
+	$LF
+]p
+[h3 
+	" Other comments
+	$LF
+]h3
+[p 
+	"There are several jumps in this run that are not performed optimally. If Kuros jumps and lands in just the right way, he does so without crouching and therefore recovers his max speed slightly quicker. However despite my best efforts, I was never actually able to save frames due to these small improvements, due to subpixels and boss patterns being thrown off. The best example of this is the beehive trick. I had thought I saved a frame with an improved jump only to lose it once I reached the area where the beehive is ordinarily glitched away only to jump right into it. So perhaps there is a slim chance ~5 more frames could be saved in this run, if somehow these jumps could actually save time.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Tompa)
+	": Judgy!
+	$LF
+	[br 
+	]br
+	$LF
+	(__wikiLink|user:Tompa)
+	": It's really impressive how optimal the almost 10 years old run is! But frames were saved, and it's all good. Accepting as an improvement to the published run.
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

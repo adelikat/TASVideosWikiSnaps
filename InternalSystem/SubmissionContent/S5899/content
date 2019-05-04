@@ -1,0 +1,1103 @@
+10
+[p 
+	(youtube|w=1280|h=720|v=CQfj3BDgHPQ)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: lsnes rr2-beta23
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Uses sub-frame resets
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses game-breaking glitches
+		$LF
+	]li
+	[li 
+		" Corrups save data
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Arbitrary Code Execution
+		$LF
+	]li
+]ul
+[h3 
+	" Subframe reset
+	$LF
+]h3
+[p 
+	"If resetting is done while WRAM is being transferred to SRAM, a mixed SRAM is created.
+	$LF
+	"When reset between the X / Y address, it warps horizontally from the SRAM position, but it needs to pass a checksum.
+	$LF
+	"It is also possible to mix the state of various event flags.
+	$LF
+]p
+[h3 
+	" Checksum
+	$LF
+]h3
+[p 
+	"The checksum of FF6 adds the game data to the 16-bit register every 8 bits, but this game adds it to the 16-bit register every 16 bits.
+	$LF
+	"In this game, it is relatively easy to adjust checksum separately for even and odd bytes in config.
+	$LF
+	"Even number bytes have frame advance time, so even number bytes move more intensely.
+	$LF
+]p
+[h3 
+	" Helmet of memory destruction.
+	$LF
+]h3
+[p 
+	"This movie abuses subframe reset.
+	$LF
+	"Some untouched objects will destroy memory when checked.
+	$LF
+	"Memory after $1417 will be destroyed if some untouched objects are checked.
+	$LF
+	"This game's V-blank interrupt has a jump address set to $1F00, which is dynamically rewritten when changing game scenes.
+	$LF
+	"If this address is destroyed, the program of this game jumps to $000000 by the BRK opcode.
+	$LF
+]p
+[h3 
+	" Detailed route
+	$LF
+]h3
+[p 
+	[img class=embed src=https://pbs.twimg.com/media/DZyOfj1VwAEnRAu.jpg 
+	]img
+	$LF
+]p
+[ul 
+	[li 
+		" Saved to data 1 at the position of $0AD8 = {X=0x9C, Y=0x8A}.
+		$LF
+		[ul 
+			[li 
+				" In the initial state it is more difficult to reduce than adding an even number of checksums, so I first increased it with config ($0970-). 
+				$LF
+			]li
+			[li 
+				" By setting to store the cursor position, cursor movement of the menu screen is shortened.
+				$LF
+			]li
+		]ul
+		" Saved to data 3 and 2 at position of $0AD8 = {X=0x9E, Y=0x7B}.
+		$LF
+		[ul 
+			[li 
+				" It walked downwards and rightwards.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 1, at position of $0AD8 = {X=0xAD, Y=0x90}.
+		$LF
+		[ul 
+			[li 
+				" I adjusted the checksum by reducing the increased configuration value.
+				$LF
+			]li
+			[li 
+				" It is important to speed up the message of the battle, but if you speed up the battle speed faster you will only accelerate the enemy.
+				$LF
+			]li
+			[li 
+				" By subframe reset, the position of data 1 has become {X=0xAD, Y=0x8A}.
+				$LF
+			]li
+		]ul
+		" Loaded from data 1.
+		$LF
+		[ul 
+			[li 
+				" It walked eight steps to the right.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 2, at position {X=0xB5, Y=0x8A}.
+		$LF
+		[ul 
+			[li 
+				" Because walking is short, I can adjust the checksum by waiting for some frames, but I changed the character position rather than wait long.
+				$LF
+			]li
+			[li 
+				" By subframe reset, the position of data 2 has become {X=0xB5, Y=0x7B}.
+				$LF
+			]li
+			[li 
+				" Data 2 was apparently lost as the checksum was exceeded.
+				$LF
+			]li
+		]ul
+		" Loaded from data 3.
+		$LF
+		[ul 
+			[li 
+				" It does not move.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 2, at position {X=0x9E, Y=0x7B}.
+		$LF
+		[ul 
+			[li 
+				" By losing data 2, the overwrite question was omitted.
+				$LF
+			]li
+			[li 
+				" The unjoined Lenna whose position was changed in Data 2 was overwritten by the Bartz joined flag.
+				$LF
+			]li
+			[li 
+				" By overwriting the SRAM $0700-$0708, the checksum is corrected.
+				$LF
+			]li
+		]ul
+		" Loaded from data 2.
+		$LF
+		[ul 
+			[li 
+				" I waited one frame on the loading screen to manipulate luck.
+				$LF
+			]li
+			[li 
+				" This waiting time is absorbed by later waiting time.
+				$LF
+			]li
+			[li 
+				" It walked upwards.
+				$LF
+			]li
+		]ul
+		" Saved to data 4 at position {X=0xB6, Y=0x69}.
+		$LF
+		[ul 
+			[li 
+				" Normal reset.
+				$LF
+			]li
+		]ul
+		" Loaded from data 3.
+		$LF
+		[ul 
+			[li 
+				" It walked two steps to the right.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 4, at position {X=0xA0, Y=0x7B}.
+		$LF
+		[ul 
+			[li 
+				" The checksum was adjusted by only waiting for 2 frames when saving the data without using the config screen.
+				$LF
+			]li
+			[li 
+				" By subframe reset, the position of data 4 has become {X=0xA0, Y=0x69}.
+				$LF
+			]li
+		]ul
+		" Loaded from data 4.
+		$LF
+		[ul 
+			[li 
+				" In this position of the ocean there is an event related to the ship, so I got it!
+				$LF
+			]li
+			[li 
+				" The double speed flag by the chocobo is kept even on the ship, so it is quadrupled.
+				$LF
+			]li
+			[li 
+				" The memory address of the position where the ship landed is $0AEF = {X=0xA6, Y=0x4B}.
+				$LF
+			]li
+		]ul
+		" Saved to data 1 and 3, and resetting while saving to data 4, at position {X=0xA6, Y=0x4B}.
+		$LF
+		[ul 
+			[li 
+				" I overlapped the ship and saved it.
+				$LF
+			]li
+			[li 
+				" By subframe reset, the position of data 4 has become {X=0xA6, Y=0x69}.
+				$LF
+			]li
+			[li 
+				" This position is adjacent to the middle entrance of the pirates cave.
+				$LF
+			]li
+			[li 
+				" Data 4 was apparently lost as the checksum was incorrect.
+				$LF
+			]li
+		]ul
+		" Loaded from data 3.
+		$LF
+		[ul 
+			[li 
+				" Landed in front of the Wind Shrine.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 3, at the ship landed position {X=0xB5, Y=0x3D}.
+		$LF
+		[ul 
+			[li 
+				" By subframe reset, the ship landed position of data 3 has become {X=0xB5, Y=0x4B}.
+				$LF
+			]li
+			[li 
+				" Data 3 was apparently lost as the checksum was incorrect.
+				$LF
+			]li
+		]ul
+		" Loaded from data 1.
+		$LF
+		[ul 
+			[li 
+				" It does not move.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 3, at position {X=0xA6, Y=0x4B}.
+		$LF
+		[ul 
+			[li 
+				" By subframe reset, the position of data 3 has become {X=0xA6, Y=0x4B}.
+				$LF
+			]li
+			[li 
+				" The checksum of data 3 was still inaccurate.
+				$LF
+			]li
+		]ul
+		" Loaded from data 2.
+		$LF
+		[ul 
+			[li 
+				" It does not move.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 3, at position {X=0xB5, Y=0x7B}.
+		$LF
+		[ul 
+			[li 
+				" The checksum was adjusted mainly by the setting of the custom pad of config.
+				$LF
+			]li
+			[li 
+				" By subframe reset, the position of data 3 has become {X=0xB5, Y=0x4B}, same as the ship.
+				$LF
+			]li
+		]ul
+		" Loaded from data 3.
+		$LF
+		[ul 
+			[li 
+				" I visited Carwen to pick up the Ice Rod.
+				$LF
+			]li
+			[li 
+				" Disturbance by the residents was avoided with the previous luck manipulation.
+				$LF
+			]li
+		]ul
+		" North Mountain
+		$LF
+		[ul 
+			[li 
+				" When they get off the ship, their appearance is changed, but the no-encounter flag by Chocobo is kept.
+				$LF
+			]li
+		]ul
+		" Magissa
+		$LF
+		[ul 
+			[li 
+				" Luck manipulation can be done easily by input before battle.
+				$LF
+			]li
+			[li 
+				" Because the attack magic can not be avoided, the duplicated man was sacrificed.
+				$LF
+			]li
+			[li 
+				" By pressing LR a few lag frames have been reduced.
+				$LF
+			]li
+			[li 
+				" Ice Rod is strong.
+				$LF
+			]li
+			[li 
+				" Then they returned straight to the save point.
+				$LF
+			]li
+		]ul
+		" Saved to data 3, and resetting while saving to data 4.
+		$LF
+		[ul 
+			[li 
+				" Data 4 was overwritten until no-encounter flag $0A53.
+				$LF
+			]li
+			[li 
+				" They include the Magissa flag $0A18, and helmet flag $0A67 is not included.
+				$LF
+			]li
+			[li 
+				" The checksum was adjusted using several configuration settings and window colors.
+				$LF
+			]li
+		]ul
+		" Loaded from data 4.
+		$LF
+		[ul 
+			[li 
+				" I waited 17 frames on the loading screen to manipulate luck.
+				$LF
+			]li
+			[li 
+				" To avoid encounters with enemies, 14 steps were added.
+				$LF
+			]li
+			[li 
+				" The double speed flag was erased by the event of a slow moving ship.
+				$LF
+			]li
+			[li 
+				" The no-encounter flag was erased by the event getting off Chocobo.
+				$LF
+			]li
+		]ul
+		" Resetting while saving to data 3.
+		$LF
+		[ul 
+			[li 
+				" Data 3 was overwritten until $0A67.
+				$LF
+			]li
+			[li 
+				" Because the rear row can escape faster, I changed it.
+				$LF
+			]li
+			[li 
+				" The checksum was adjusted using several configuration settings.
+				$LF
+			]li
+		]ul
+		" Loaded from data 3.
+		$LF
+		[ul 
+			[li 
+				" Let's set arbitrary code.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Arbitrary code setup
+	$LF
+]h3
+[p 
+	"A direct page is 256 bytes that SNES CPU frequently accesses, and it has a memory address set according to the scene of the game different.
+	$LF
+	"In this game, the jump address of the BRK opcode is set to $000000.
+	$LF
+	"The direct page is set to $0000 in the battle scene, and pad input is put in $0000-$0005. 
+	$LF
+	"But after loading the save data the memory will be filled with 0.
+	$LF
+	"Therefore to execute arbitrary code it was necessary to fight before checking the helmet.
+	$LF
+	"However, because it is disturbed by the "no-encounter flag ($0A53:0x80)", you need to see the event getting off Chocobo.
+	$LF
+]p
+[h4 
+	" Closed menu input
+	$LF
+]h4
+[p 
+	"When walking, the direct page will be set to $0B00,
+	$LF
+	"And when you open the menu screen it will be set to $0100.
+	$LF
+	"If you input the pad in two frames at the moment the menu screen closes, it will be put into $0100-$0105 and it will not change until you open it again.
+	$LF
+]p
+[pre 
+	"37858|........A.......|
+	$LF
+	"37859|..sSudl.A.L.....|
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"address
+			]th
+			[th 
+				"00
+			]th
+			[th 
+				"01
+			]th
+			[th 
+				"02
+			]th
+			[th 
+				"03
+			]th
+			[th 
+				"04
+			]th
+			[th 
+				"05
+			]th
+		]tr
+		[tr 
+			[td 
+				"$0100
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"A0
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"A0
+			]td
+			[td 
+				"3E
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Battle end input
+	$LF
+]h4
+[p 
+	"If you escape when the second character is in order, $000A will be "FC 00 01".
+	$LF
+	"Then $0000 was adjusted at the moment the battle screen closed.
+	$LF
+]p
+[pre 
+	"38444|....u...A.......|
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"address
+			]th
+			[th 
+				"00
+			]th
+			[th 
+				"01
+			]th
+			[th 
+				"02
+			]th
+			[th 
+				"03
+			]th
+			[th 
+				"04
+			]th
+			[th 
+				"05
+			]th
+			[th 
+				"06
+			]th
+			[th 
+				"07
+			]th
+			[th 
+				"08
+			]th
+			[th 
+				"09
+			]th
+			[th 
+				"0A
+			]th
+			[th 
+				"0B
+			]th
+			[th 
+				"0C
+			]th
+			[th 
+				"0D
+			]th
+			[th 
+				"0E
+			]th
+			[th 
+				"0F
+			]th
+		]tr
+		[tr 
+			[td 
+				"$0000
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"08
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"08
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"08
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"FC
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Checked helmet input
+	$LF
+]h4
+[pre 
+	"38595|B.sSu..rA.L.....|
+	$LF
+	"38596|B.sSu.lrAXLR....|
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"address
+			]th
+			[th 
+				"00
+			]th
+			[th 
+				"01
+			]th
+			[th 
+				"02
+			]th
+			[th 
+				"03
+			]th
+			[th 
+				"04
+			]th
+			[th 
+				"05
+			]th
+			[th 
+				"06
+			]th
+			[th 
+				"07
+			]th
+			[th 
+				"08
+			]th
+			[th 
+				"09
+			]th
+			[th 
+				"0A
+			]th
+			[th 
+				"0B
+			]th
+			[th 
+				"0C
+			]th
+			[th 
+				"0D
+			]th
+			[th 
+				"0E
+			]th
+			[th 
+				"0F
+			]th
+		]tr
+		[tr 
+			[td 
+				"$0100
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"A0
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"A0
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"F0
+			]td
+			[td 
+				"BB
+			]td
+			[td 
+				"F0
+			]td
+			[td 
+				"BB
+			]td
+			[td 
+				"50
+			]td
+			[td 
+				"02
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"F0
+			]td
+			[td 
+				"BB
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0110
+			]td
+			[td 
+				"A0
+			]td
+			[td 
+				"B9
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Last 7 frames input
+	$LF
+]h4
+[p 
+	"When Joypad-Registers was read by unjust timing, bit position slipped, so I did the input by which that was considered.
+	$LF
+]p
+[pre 
+	"             1-1              1-2              2-1              2-2
+	$LF
+	"38595|B.sSu..rA.L.....|................|................|................|
+	$LF
+	"38596|B.sSu.lrAXLR....|.YsS..lr.XLR.12.|.YsS.dlrAX.R.1..|.Ys..d.rA.L.0.23|
+	$LF
+	"38597|B..S............|................|B...............|B...............|
+	$LF
+	"38598|..s.udlr....012.|...S.d.r........|B..Sud.......1.3|BY..u.lrAX..0.23|
+	$LF
+	"38599|.Y..u...A..R01..|....ud.r..LR0.2.|B..Sud.....R01.3|BY..u.lrAX..0.23|
+	$LF
+	"38600|BY.Su..rA...012.|BY...d.r...R0.2.|BY.Sud.....R01.3|BY..u.lrAX..0.23|
+	$LF
+	"38601|.....dl.A....1.3|....u.lr.X.R01..|....u...AX...12.|........A.L...2.|
+	$LF
+]pre
+[p 
+	"Actual Joypad binary
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"  
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"A9
+			]td
+			[td 
+				"EF
+			]td
+			[td 
+				"EC
+			]td
+			[td 
+				"06
+			]td
+			[td 
+				"57
+			]td
+			[td 
+				"CB
+			]td
+		]tr
+		[tr 
+			[td 
+				"0E
+			]td
+			[td 
+				"9F
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"8C
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"CB
+			]td
+			[td 
+				"CB
+			]td
+		]tr
+		[tr 
+			[td 
+				"9C
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"1D
+			]td
+			[td 
+				"9C
+			]td
+			[td 
+				"3A
+			]td
+			[td 
+				"1D
+			]td
+			[td 
+				"CB
+			]td
+			[td 
+				"CB
+			]td
+		]tr
+		[tr 
+			[td 
+				"8E
+			]td
+			[td 
+				"48
+			]td
+			[td 
+				"1D
+			]td
+			[td 
+				"9C
+			]td
+			[td 
+				"1A
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"CB
+			]td
+			[td 
+				"CB
+			]td
+		]tr
+		[tr 
+			[td 
+				"85
+			]td
+			[td 
+				"D6
+			]td
+			[td 
+				"C6
+			]td
+			[td 
+				"D8
+			]td
+			[td 
+				"5C
+			]td
+			[td 
+				"CB
+			]td
+			[td 
+				"A2
+			]td
+			[td 
+				"C0
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Executed codes
+	$LF
+]h3
+[pre 
+	"00CEE0 5C 00 1F 00 JML $001F00  A:04fc X:1f52 Y:130e S:1ff5 D:0b00 DB:00 nvmxdIzC V:240 H:  98
+	$LF
+	"001F00 00          BRK          
+	$LF
+	"000000 80 08       BRA $000A    
+	$LF
+	"00000A FC 00 01    JSR (0100,x) -- $2052 return 0101
+	$LF
+	"000101 3E A0 3E    ROL 
+	$LF
+	"000104 A0 3E F0    LDY #$F03E   -- Y = F03E
+	$LF
+	"000107 BB          TYX          -- X = Y
+	$LF
+	"000108 F0 BB       BEQ 
+	$LF
+	"00010A 50 02       BVC $010E
+	$LF
+	"00010E F0 BB       BEQ
+	$LF
+	"000110 A0 B9       LDY #$00B9   -- Y = 00B9
+	$LF
+	"000113 00          BRK
+	$LF
+]pre
+[pre 
+	"000000 80 08       BRA $000A
+	$LF
+	"00000A FC 00 01    JSR (0100,x) -- $F13E return 4218 yey!
+	$LF
+]pre
+[pre 
+	"004218 C1 FE       CMP
+	$LF
+	"00421A A9 EF EC    LDA #$ECEF   -- A = ECEF
+	$LF
+	"00421C 06 57       INC $0B57    -- Event talk flag on
+	$LF
+	"00421F CB          WAI
+	$LF
+]pre
+[pre 
+	"00CEE0 -> 001F00 -> 000000 -> 00000A -> 004218
+	$LF
+]pre
+[pre 
+	"004218 0E 9F 05    ASL $059F    -- GALUF ID 42 -> KLIRE ID 84
+	$LF
+	"00421B 8C 00 05    STY $0500    -- BUTZ  ID 00 -> LENNA ID B9
+	$LF
+	"00421E CB          WAI
+	$LF
+]pre
+[pre 
+	"004218 9C 28 1D    STZ $1D28    -- APU data fix $1D28 = 0000
+	$LF
+	"00421B 9C 38 1D    STZ $1D3A    -- APU data fix $1D3A = 0000
+	$LF
+	"00421E CB          WAI
+	$LF
+	$LF
+	"004218 8E 48 1D    STX $1D49    -- APU data fix $1D49 = F03E
+	$LF
+	"00421B 9C 1A 05    STZ $051A    -- LENNA Status = 0000
+	$LF
+	"00421E CB          WAI
+	$LF
+	$LF
+	"004218 85 D6       STA $0BD6    
+	$LF
+	"00421A C6 D8       DEC $0BD8    -- Event Pointer = C8ECEF
+	$LF
+	"00421C 5C CB A2 C0 JML $C0A2C0  -- Event Script engine
+	$LF
+]pre
+[h3 
+	" likelihood
+	$LF
+]h3
+[p 
+	"Dead zombie and chemist glitch could also do Arbitrary Code Execution likewise, but I thought the second world was far.
+	$LF
+]p
+[h3 
+	" Special Thanks
+	$LF
+]h3
+[pre 
+	"Yu-ki(hs), Sumurai Goroh, Yona2san
+	$LF
+]pre
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Masterjun)
+	": This looks interesting. Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Masterjun)
+	": An important part to note for this run is the fact that it executes controller registers while they are being updated. This is known to 
+	[b 
+		"not
+	]b
+	" be emulated in a correct way on emulator. This gives this run a high chance of not working on console at all. However, leading the game code to the controller registers is done perfectly fine, so while these exact input sequences probably won't work on console, it's likely there are indeed some inputs which work. The run wouldn't look very different, so we can safely say that this isn't a problem.
+	$LF
+]p
+[p 
+	"Important to note is if there was a submission that is a bit longer, but with a more accurate way of beating the game in terms of emulator accuracy, then it can count as superior and obsolete this movie.
+	$LF
+]p
+[p 
+	"No other problems with this run and the viewer feedback has been quite good as well.
+	$LF
+]p
+[p 
+	"Accepting to Moons.
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

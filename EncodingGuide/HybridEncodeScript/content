@@ -1,0 +1,1457 @@
+96
+[h2 
+	" 
+	(__wikiLink|user:feos)
+	": This page has been obsoleted, see 
+	(__wikiLink|Encoding Guide / Publication Manual)
+	" for the most recent version of our Guide.
+	$LF
+	[a id=heading-4036 
+	]a
+]h2
+[hr 
+]hr
+[p 
+	(listparents)
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-4036 
+				" 
+				(__wikiLink|user:feos)
+				": This page has been obsoleted, see 
+				(__wikiLink|Encoding Guide / Publication Manual)
+				" for the most recent version of our Guide.
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-4037 
+								" History
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4038 
+								" TAS Encoding Package
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4039 
+								" Script
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4040 
+								" Settings
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4041 
+								" Commands
+								$LF
+							]a
+						]li
+					]ul
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h4 
+	" History
+	$LF
+	[a id=heading-4037 
+	]a
+]h4
+[p 
+	"The following is an AVS script that can produce HD, downloadable, and 512kb (archive.org streamable) encodes all in one.  It is to be maintained, documented, and supported by the community. If you have a worthwhile contribution to it, please post in 
+	[a href=/forum/viewtopic.php?t=10870 
+		"this thread
+	]a
+	" explaining what it does and why you think it should be included. Upon review and a general acceptance of the improvement, it will be included here by a site editor.
+	$LF
+]p
+[p 
+	"This script has been rewritten and perhaps popularized by 
+	(__wikiLink|user:Brandon)
+	". 
+	(__wikiLink|user:Flygon)
+	" was the original creator, who then gave it to Brandon because he liked his rewrite. Brandon, merely being a fan of good syntax, did not feel capable of maintaining a script he barely understood, so he first implicitly, then explicitly gave it to the community. Flygon has credited 
+	(__wikiLink|user:MisterEpic)
+	" and 
+	(__wikiLink|user:Grunt)
+	" for their "great contributions", 
+	(__wikiLink|user:Aktan)
+	" his audio / video desync fixing algorithm, JEEB and J_Darnley of Freenode's #avisynth IRC channel for assisting with the automatic detection of the branch name, and "you for using this script!"
+	$LF
+]p
+[p 
+	"Thanks to 
+	(__wikiLink|user:Guga)
+	", the script also supports the most recent HD encoding tricks, developed by 
+	(__wikiLink|user:nanogyth)
+	" and 
+	(__wikiLink|user:natt)
+	". After 
+	(__wikiLink|user:feos)
+	" saw how all the batch commands can be placed in a single script, and how the folders can be used for all inputs/outputs, he produced a global package (thanks to 
+	(__wikiLink|user:Velitha)
+	"'s ideas and 
+	(__wikiLink|user:nanogyth)
+	"'s sar automation), that makes the total process the less laborious possible (at the moment).
+	$LF
+]p
+[h4 
+	" TAS Encoding Package
+	$LF
+	[a id=heading-4038 
+	]a
+]h4
+[p 
+	"If you want everyting automated, all encodes by 1 click, 
+	[a class=extlink href=https://github.com/vadosnaprimer/TASEncodingPackage/archive/master.zip rel=nofollow 
+		"download this archive
+	]a
+	". It contains all executionals, scripts and DLLs you are going to need anyway. Unzip, put the 
+	(__wikiLink|EncodingGuide/VideoDumping|AVI dump)
+	" named "movie.avi" in a root folder. Replace the 
+	(__wikiLink|EncodingGuide/Logo|logo)
+	". Preview your encode in 
+	[a class=extlink href=http://virtualdub.sourceforge.net/ rel=nofollow 
+		"VirtualDub
+	]a
+	" and adjust the subtitles and trim timing as always. Run 
+	[tt 
+		"global.bat
+	]tt
+	".
+	$LF
+]p
+[p 
+	"What does it do then:
+	$LF
+]p
+[ul 
+	[li 
+		" Requires minimal user input: whether it is a TV based console
+		[a id=r1 
+		]a
+		[sup 
+			"[
+			[a href=#1 
+				"1
+			]a
+			"]
+		]sup
+		" and what encode to do.
+		$LF
+		[ul 
+			[li 
+				" Sets 
+				[a href=/EncodingGuide/Encoding.html#VideoEncoding 
+					"SAR
+				]a
+				" to 1:1 for handhelds, arcade machines and computers.
+				$LF
+			]li
+			[li 
+				" Calculates SAR for TV consoles to match 4:3 aspect ratio.
+				$LF
+			]li
+			[li 
+				" Runs the selected encoding (all, if chosen).
+				$LF
+			]li
+		]ul
+		" Makes downloadable (
+		[em 
+			"8-bit
+		]em
+		" & 
+		[em 
+			"10-bit
+		]em
+		") and streamable (
+		[em 
+			"512kb
+		]em
+		" & 
+		[em 
+			"YouTube HD
+		]em
+		") encodes in one flow.
+		$LF
+		[ul 
+			[li 
+				" Extracts audio automatically, accounting the logo silence.
+				$LF
+			]li
+			[li 
+				" Encodes audio, fixing desync when necessary.
+				$LF
+			]li
+			[li 
+				" Encodes video, DeDupping when necessary.
+				$LF
+			]li
+			[li 
+				" Uses 
+				(__wikiLink|Natt|FreeSub)
+				" with BDF fonts for subtitles.
+				$LF
+			]li
+			[li 
+				" Muxes the final videos.
+				$LF
+			]li
+		]ul
+		" Uses 4 additional folders to keep the most tidiness.
+		$LF
+		[ul 
+			[li 
+				" 
+				[tt 
+					"output
+				]tt
+				" - here your resulting videos appear.
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"programs
+				]tt
+				" - all necessary executionals and plugins lie here.
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"fonts
+				]tt
+				" - contains some BDF fonts and a viewer program.
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"temp
+				]tt
+				" - this one would contain temporary audio and video tracks, timecode files. You don't need to remove any of these files every time, as they are being rewritten on each run.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"If you get any errors with this package, please report them at #tasvideos IRC channel, or on the 
+	[a href=/forum/viewforum.php?f=52 
+		"Encoder forums
+	]a
+	".
+	$LF
+]p
+[p 
+	"If you want an old and monstrous encode method, use the below manual.
+	$LF
+]p
+[h4 
+	" Script
+	$LF
+	[a id=heading-4039 
+	]a
+]h4
+[p 
+	[b 
+		"Please make sure you know what you are doing encoding-wise before using this script.
+	]b
+	" Many of the concepts in use and the command lines given below are derived from the main 
+	(__wikiLink|Encoding Guide)
+	", so if you are unsure what anything is doing please look through the guide first. If you are still uncertain as to how something works, consult 
+	[a href=/forum/viewtopic.php?t=10870 
+		"this thread
+	]a
+	" or post in the Encoder's Corner for more general questions.
+	$LF
+]p
+[pre 
+	[code class=language-sh 
+		"# The downloadable / HD encoding script. For more information, see:
+		$LF
+		"# http://tasvideos.org/EncodingGuide/HybridEncodeScript.html
+		$LF
+		$LF
+		"# Replace "-0" with a framenumber to trim the source video after
+		$LF
+		"AVISource("movie.avi").Trim(0, -0).ConvertToRGB32()
+		$LF
+		$LF
+		"# Set the proper paths to these plugins, if they are neither
+		$LF
+		"# in defalult AVISynth plugin directory, nor in root one.
+		$LF
+		"LoadPlugin("ExactDedup.dll")
+		$LF
+		"LoadPlugin("mvtools2.dll")
+		$LF
+		"LoadPlugin("mt_masktools-26.dll")
+		$LF
+		$LF
+		"# The below filenames are the filenames of your logo, be sure to keep the "" tags.
+		$LF
+		"# Several methods prevent the logo distortion:
+		$LF
+		"# 1) Separate logo for each aspect ratio the console has, except if it's TV based.
+		$LF
+		"# 2) 4:3 aspect ratio for TV based consoles.
+		$LF
+		"# 3) Logo resolution above 720.
+		$LF
+		"file = "logo.png"
+		$LF
+		$LF
+		"# Set this to true for HD encode resolutions.
+		$LF
+		"# After uploading to YouTube, add "yt:stretch=4:3" tag to resulting video
+		$LF
+		"# to correct the aspect ratio for TV consoles (not for handhelds)
+		$LF
+		"hd = false
+		$LF
+		$LF
+		"# Set this to true if this is a handheld console to disable aspect correction.
+		$LF
+		"# If you are encoding in HD, you can ignore this.
+		$LF
+		"handheld = true
+		$LF
+		$LF
+		"# Adjust the below items to adjust the subtitles text.
+		$LF
+		"# All the required information will be on the movies submission page.
+		$LF
+		"# Be sure to keep the quotes everywhere, even when branch is blank ("").
+		$LF
+		"game = "Metroid Fusion"
+		$LF
+		"branch = ""
+		$LF
+		"author = "BioSpark"
+		$LF
+		"time = "1:35:19.3"
+		$LF
+		"rerecords = "143141"
+		$LF
+		$LF
+		"# This sets the start time for the subtitles to start displaying.
+		$LF
+		"# A good choise is the beginning of the first level.
+		$LF
+		"# This is set as a frame number.
+		$LF
+		"subff = 15131
+		$LF
+		$LF
+		"# This controls how long the subtitles stay on the screen.
+		$LF
+		"sublength = 300
+		$LF
+		$LF
+		"# This sets the y position for the subtitles,
+		$LF
+		"# basically, how high or low they are up on the screen.
+		$LF
+		"# The higher the number, the lower the subtitles.
+		$LF
+		"# Make sure the subtitles don't obstruct any important action
+		$LF
+		"ypos = 2
+		$LF
+		$LF
+		"# Autoadjust the timing due to HD framerate reduction
+		$LF
+		"subff = hd ? subff / 2 + 1 : subff
+		$LF
+		"sublength = hd ? sublength / 2 : sublength
+		$LF
+		$LF
+		"# This sets the start time for the second set of subtitles to start displaying,
+		$LF
+		"# this is set as a frame number. Make sure there's at least a delay of 1 frame
+		$LF
+		"# in between this set and the previous one.
+		$LF
+		"subff2 = subff + sublength + 1
+		$LF
+		$LF
+		"# This controls how long the second set of subtitles stay on the screen.
+		$LF
+		"sublength2 = sublength
+		$LF
+		$LF
+		"# Below is the size for the subtitles, standard encodes use a size of 10.
+		$LF
+		"subsize = 12
+		$LF
+		$LF
+		"# Below is the values for the left, center, or right positioning for the
+		$LF
+		"# subtitles below in the script, modification shouldn't be attempted unless you
+		$LF
+		"# know what you're doing.
+		$LF
+		"positionleft = 7
+		$LF
+		"positioncenter = 8
+		$LF
+		"positionright = 9
+		$LF
+		$LF
+		"# This sets the position of the subtitles in terms of direction, it can be
+		$LF
+		"# left, right, or center.
+		$LF
+		"# Set positionleft for left, set positioncenter for center, set positionright
+		$LF
+		"# for right.
+		$LF
+		"# Setting this to positioncenter is considered standard practice, so other
+		$LF
+		"# positions shouldn't be used unless it looks far better.
+		$LF
+		"position = positioncenter
+		$LF
+		$LF
+		"# If you are sure, there's no frame altering flickering in the movie,
+		$LF
+		"# or the game runs at half normal framerate, you can set this to false
+		$LF
+		"# Has no effect if hd = false.
+		$LF
+		"blend = true
+		$LF
+		$LF
+		"# Set this to true to use the new advanced ng_deblink instead of TasBlend.
+		$LF
+		"# Generally better.  Has no effect if blend = false or hd = false.
+		$LF
+		"ngdb = true
+		$LF
+		$LF
+		"# Set this to true for 10 bit 444 encodes. You additionally have to:
+		$LF
+		"# 1) Use 10-bit version of x264.
+		$LF
+		"# 2) Use command line option '--output-csp i444'.
+		$LF
+		"i444 = false
+		$LF
+		$LF
+		"# Passes for downloadable/streaming encodes:
+		$LF
+		"# 0: audio extraction / streaming (archive.org 512kb; AR correction);
+		$LF
+		"# 1: DupMC (no AR correction);
+		$LF
+		"# 2: DeDup (no AR correction).
+		$LF
+		"pass = 0
+		$LF
+		$LF
+		"# This setting turns the audio/video desync fixer on/off using true/false.
+		$LF
+		"# The below should always be set to false, barring the unusual occasion that it
+		$LF
+		"# actually fixes the audio.
+		$LF
+		"desyncfixer = false
+		$LF
+		$LF
+		"# This setting adjusts the framerate for HD encodes when uploading to YouTube.
+		$LF
+		"# This is to save space due to YouTube having a maximum framerate of 30 anyway.
+		$LF
+		"# It is suggested to be at either 24 fps or 30fps for NTSC games (Depending on
+		$LF
+		"# if they use alternating frame flicker or not).
+		$LF
+		"# PAL games should generally be set to 30 fps, it can be set to 25 fps if there
+		$LF
+		"# is no flickering, but it's difficult to notice the strobing effect in 30fps
+		$LF
+		"# anyway. If you have ng_deblink enabled, you can ignore this.
+		$LF
+		"hdframerate = 30
+		$LF
+		$LF
+		"# THE BELOW CODE SHOULDN'T BE MODIFIED UNLESS YOU KNOW WHAT YOU ARE DOING!
+		$LF
+		"# This automatically fixes length based audio/video desync if it exists inside
+		$LF
+		"# the encode (eg. Many PCEngine games).
+		$LF
+		"num = last.AudioLengthF * last.FrameRateNumerator
+		$LF
+		"denom = last.FrameCount * last.FrameRateDenominator
+		$LF
+		"fixedaudiorate = Round(num / denom)
+		$LF
+		"(desyncfixer) ? last.AssumeSampleRate(fixedaudiorate) : 0
+		$LF
+		$LF
+		$LF
+		"# This activates the frame dropper or the ng_deblink function for HD encodes.
+		$LF
+		"# This depends on if the game simulates transperancy with alternating frame
+		$LF
+		"# flicker. The frame dropper saves filesize without image loss, because YouTube
+		$LF
+		"# caps at 30fps. The ng_deblink function, however, increases the filesize due to
+		$LF
+		"# the frame blending, but optimizes the flicker effects for YouTube.
+		$LF
+		$LF
+		"# blended = last.TASBlend()
+		$LF
+		$LF
+		"# ng_deblink parameters:
+		$LF
+		"# ng_deblink(0.5).SelectOdd (30 fps, NTSC encodes)
+		$LF
+		"# Change "0.5" to "1.0" to get half framerate flickering.
+		$LF
+		"# Leave empty "()" for default; some transparency, some flickering - TASBlend style.
+		$LF
+		"# Exclude ".SelectOdd" to prevent framerate reduction.
+		$LF
+		"# Replace ".SelectOdd" with ".SelectEvery(5,0,2,4)" for 25 fps, PAL encodes
+		$LF
+		"hd ? (blend ? (ngdb ? ng_deblink(0.5).SelectOdd \
+		$LF
+		"     : TasBlend()) : ChangeFPS(hdframerate)) : 0
+		$LF
+		$LF
+		"# someone really likes these nonsensical clip names, so they shall remain untouched
+		$LF
+		"sourcevideo = last
+		$LF
+		$LF
+		"# High Definition.
+		$LF
+		"factor = hd ? 8 : 1
+		$LF
+		$LF
+		"b = sourcevideo.PointResize(sourcevideo.width * factor, sourcevideo.height * factor)
+		$LF
+		$LF
+		"width = (b.width > b.height * 4 / 3) ? b.width : b.height * 4 / 3
+		$LF
+		"width = (width % 4 == 1) ? width + 3 : \
+		$LF
+		"        (width % 4 == 2) ? width + 2 : \
+		$LF
+		"        (width % 4 == 3) ? width + 1 : width
+		$LF
+		"height = (b.width > b.height * 4 / 3) ? b.width * 3 / 4 : b.height
+		$LF
+		"height = (height % 4 == 1) ? height + 3 : \
+		$LF
+		"         (height % 4 == 2) ? height + 2 : \
+		$LF
+		"         (height % 4 == 3) ? height + 1 : height
+		$LF
+		$LF
+		"c = handheld ? b : (hd ? b : b.LanczosResize(width, height, taps=2))
+		$LF
+		"g = hd ? c : ((pass == 0) ? c : sourcevideo)
+		$LF
+		$LF
+		"# Logo.
+		$LF
+		"d = ImageSource( \
+		$LF
+		"    file=file, start=0, end=int((sourcevideo.FrameRate * 2) - 1), \
+		$LF
+		"    fps=sourcevideo.FrameRate \
+		$LF
+		").ConvertToRGB32().AssumeFPS( \
+		$LF
+		"    sourcevideo.FrameRateNumerator, sourcevideo.FrameRateDenominator \
+		$LF
+		")
+		$LF
+		"e = BlankClip( \
+		$LF
+		"    d, audio_rate=sourcevideo.AudioRate, channels=sourcevideo.AudioChannels \
+		$LF
+		")
+		$LF
+		"f = AudioDub(d, e).LanczosResize(g.width, g.height, taps=2)
+		$LF
+		"last = f + g
+		$LF
+		$LF
+		"# This is set of subtitles.
+		$LF
+		"# This shouldn't be modified unless you know what you are doing
+		$LF
+		"hd ? ng_bighalo( \
+		$LF
+		"    game + "\n" + ( \
+		$LF
+		"        (branch == "") ? "" : branch + "\n" \
+		$LF
+		"    ) + "Played by " + author + "\nPlaying time: " + \
+		$LF
+		"    time + "\nRerecord count: " + rerecords, y=(ypos * factor), \
+		$LF
+		"    align=position, first_frame=subff, last_frame=(subff + sublength), \
+		$LF
+		"    size=(subsize * factor), text_color=$00FFFFFF, halo_color=$00000000, lsp=2 \
+		$LF
+		") : Subtitle( \
+		$LF
+		"    game + "\n" + ( \
+		$LF
+		"        (branch == "") ? "" : branch + "\n" \
+		$LF
+		"    ) + "Played by " + author + "\nPlaying time: " + \
+		$LF
+		"    time + "\nRerecord count: " + rerecords, y=ypos, \
+		$LF
+		"    align=position, first_frame=subff, last_frame=(subff + sublength), \
+		$LF
+		"    size=subsize, text_color=$00FFFFFF, halo_color=$00000000, lsp=2 \
+		$LF
+		")
+		$LF
+		$LF
+		"hd ? ng_bighalo( \
+		$LF
+		"    "This is a tool\nassisted recording.\nFor details, visit\n" + \
+		$LF
+		"    "http://TASVideos.org/", y=(ypos * factor), \
+		$LF
+		"    align=position, first_frame=subff2, last_frame=(subff2 + sublength2), \
+		$LF
+		"    size=(subsize * factor), text_color=$00FFFFFF, halo_color=$00000000, lsp=2 \
+		$LF
+		") : Subtitle( \
+		$LF
+		"    "This is a tool\nassisted recording.\nFor details, visit\n" + \
+		$LF
+		"    "http://TASVideos.org/", y=ypos, \
+		$LF
+		"    align=position, first_frame=subff2, last_frame=(subff2 + sublength2), \
+		$LF
+		"    size=subsize, text_color=$00FFFFFF, halo_color=$00000000, lsp=2 \
+		$LF
+		")
+		$LF
+		$LF
+		"# Downloadable encodes need a resizing filter for the colourspace reduction.
+		$LF
+		"# HD encodes need to be point resized to keep the colour information faithful.
+		$LF
+		"ConvertToYV24(chromaresample="point", matrix=(hd ? "Rec709" : "PC.601") )
+		$LF
+		"(pass == 1) ? ExactDedup( \
+		$LF
+		"    firstpass=true, dupinfo="dup.txt", times="times.txt" \
+		$LF
+		") : last
+		$LF
+		"(pass == 2) ? ExactDedup(firstpass=false, dupinfo="dup.txt") : last
+		$LF
+		"i444 ? last : ConvertToYV12( \
+		$LF
+		"        chromaresample=(hd ? "point" : "lanczos"), \
+		$LF
+		"        matrix=(hd ? "Rec709" : (pass == 0 ? "Rec601" : "PC.601")) \
+		$LF
+		")
+		$LF
+		$LF
+		$LF
+		$LF
+		"# Begin nanogyth's deblink code here
+		$LF
+		$LF
+		"function ng_deblink(clip clp,
+		$LF
+		"\ float "ratio",
+		$LF
+		"\ int "level",
+		$LF
+		"\ clip "blinkmask"
+		$LF
+		"\){
+		$LF
+		"#Version 10 2012.04.22
+		$LF
+		$LF
+		"    blink = default(blinkmask, clp.ng_blinkmask())
+		$LF
+		$LF
+		"    ratio = default(ratio, 2.0 /3)
+		$LF
+		"    assert(ratio >= 0.0 && 1.0 >= ratio,
+		$LF
+		"    \      "[ng_deblink] 1.0 >= ratio >= 0.0, it was " + string(ratio))
+		$LF
+		$LF
+		"    level = default(level, round(ratio * 257))
+		$LF
+		"    assert(level >= 0 && 257 >= level,
+		$LF
+		"    \      "[ng_deblink] 257 >= level >= 0, it was " + string(level))
+		$LF
+		$LF
+		"    m01=mt_logic(blink.SelectEvery(4,0),
+		$LF
+		"\                blink.SelectEvery(4,1),
+		$LF
+		"\                mode="or").ConvertToRGB32()
+		$LF
+		"    m23=mt_logic(blink.SelectEvery(4,2),
+		$LF
+		"\                blink.SelectEvery(4,3),
+		$LF
+		"\                mode="or").ConvertToRGB32()
+		$LF
+		$LF
+		"    f0=Layer(clp.SelectEvery(4,0),
+		$LF
+		"\            clp.SelectEvery(4,1).Mask(m01),
+		$LF
+		"\            level=level)
+		$LF
+		"    f1=Layer(clp.SelectEvery(4,1),
+		$LF
+		"\            clp.SelectEvery(4,0).Mask(m01),
+		$LF
+		"\            level=level)
+		$LF
+		"    f2=Layer(clp.SelectEvery(4,2),
+		$LF
+		"\            clp.SelectEvery(4,3).Mask(m23),
+		$LF
+		"\            level=(257-level) )
+		$LF
+		"    f3=Layer(clp.SelectEvery(4,3),
+		$LF
+		"\            clp.SelectEvery(4,2).Mask(m23),
+		$LF
+		"\            level=(257-level) )
+		$LF
+		$LF
+		"    Interleave(f0,f1,f2,f3)
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_blinkmask(clip clp,
+		$LF
+		"\ bool "TEST",
+		$LF
+		"\ bool "STABILIZE",
+		$LF
+		"\ bool "SHARP",
+		$LF
+		"\ bool "HYSTER",
+		$LF
+		"\ int "inpand",
+		$LF
+		"\ int "expand",
+		$LF
+		"\ int "ml"
+		$LF
+		"\){
+		$LF
+		"#Version 10 2012.04.22
+		$LF
+		$LF
+		"#BLINK
+		$LF
+		"# Blinking is a block that alternates on/off each frame
+		$LF
+		"# SelectEven would only see either the on or the off
+		$LF
+		$LF
+		"#FLASH
+		$LF
+		"# Flashing is a block that is only on for a single frame
+		$LF
+		"# SelectEven might miss the flash
+		$LF
+		$LF
+		"#SHAKE
+		$LF
+		"# Shaking is a block that moves back/forth each frame
+		$LF
+		"# SelectEven would only see one position
+		$LF
+		$LF
+		"# The goal of this function is to make a blink mask for use with
+		$LF
+		"# ng_deblink. For overly complicated scenes where a clean blinkmask
+		$LF
+		"# can't be found, just use TASBlend. Uniform softness looks better
+		$LF
+		"# than sharp artifacts.
+		$LF
+		$LF
+		"# This function calculates flash and shake info for the test script,
+		$LF
+		"# but those effects should be handled in different ways.
+		$LF
+		"# Flash - choose frames to make sure the flash is in your final clip.
+		$LF
+		"# Shake - SelectEvery(4,0,2,1,3) or SelectEvery(4,1,0,2,3)
+		$LF
+		"# SelectEvery doesn't generally work because it messes with the fluidity
+		$LF
+		"# of motion. But that won't be noticable on a shaking screen.
+		$LF
+		"# Be careful if 2 frame blinking is present, as the selectevery can turn
+		$LF
+		"# it into 1 frame blinking.
+		$LF
+		$LF
+		"    TEST      = default(     TEST, false)
+		$LF
+		"    STABILIZE = default(STABILIZE, true)
+		$LF
+		"    SHARP     = default(    SHARP, true)
+		$LF
+		"    HYSTER    = default(   HYSTER, false)
+		$LF
+		"    inpand    = default(   inpand, 1)
+		$LF
+		"    expand    = default(   expand, 1)
+		$LF
+		"    ml        = default(       ml, 128)
+		$LF
+		$LF
+		"# The functions used to make the masks work in the YV12 colorspace. Once
+		$LF
+		"# the masks are created they can be used in the RGB32 colorspace direcly
+		$LF
+		"    src=clp.ConvertToYV12()
+		$LF
+		$LF
+		"# Blinking is located by looking for blocks that don't exist in
+		$LF
+		"# consecutive frames. The motion vector will match blocks that exist in
+		$LF
+		"# both frames. The blocks that aren't in both will end up with huge
+		$LF
+		"# values that are picked out by the motion mask.
+		$LF
+		"    super = MSuper(src, pel=1)
+		$LF
+		"    fvec  = MAnalyse(super, isb=false, blksize=4)
+		$LF
+		"    bvec  = MAnalyse(super, isb=true , blksize=4)
+		$LF
+		"    fmask = Mmask(src, fvec, kind=1, ml=ml).mt_binarize()
+		$LF
+		"    bmask = Mmask(src, bvec, kind=1, ml=ml).mt_binarize()
+		$LF
+		"    blink = mt_logic(fmask, bmask, mode="and")
+		$LF
+		$LF
+		"# Blinking usually occurs against a stable background. This is found
+		$LF
+		"# by looking at blocks 2 frames apart. This distinguishes a blink from
+		$LF
+		"# blocks that are just changing every frame.
+		$LF
+		"    ee_src   = src.SelectEven()
+		$LF
+		"    ee_super = MSuper(ee_src, pel=1)
+		$LF
+		"    ee_fvec  = MAnalyse(ee_super, isb=false, blksize=4)
+		$LF
+		"    ee_bvec  = MAnalyse(ee_super, isb=true , blksize=4)
+		$LF
+		"    ee_fmask = Mmask(ee_src, ee_fvec, kind=1, ml=ml).mt_binarize()
+		$LF
+		"    ee_bmask = Mmask(ee_src, ee_bvec, kind=1, ml=ml).mt_binarize()
+		$LF
+		$LF
+		"    oo_src   = src.SelectOdd()
+		$LF
+		"    oo_super = MSuper(oo_src, pel=1)
+		$LF
+		"    oo_fvec  = MAnalyse(oo_super, isb=false, blksize=4)
+		$LF
+		"    oo_bvec  = MAnalyse(oo_super, isb=true , blksize=4)
+		$LF
+		"    oo_fmask = Mmask(oo_src, oo_fvec, kind=1, ml=ml).mt_binarize()
+		$LF
+		"    oo_bmask = Mmask(oo_src, oo_bvec, kind=1, ml=ml).mt_binarize()
+		$LF
+		$LF
+		"    fmask_2   = Interleave(ee_fmask, oo_fmask)
+		$LF
+		"    bmask_2   = Interleave(ee_bmask, oo_bmask)
+		$LF
+		"    background = mt_logic(fmask_2.SelectEvery(1,1),
+		$LF
+		"\                         bmask_2.SelectEvery(1,-1),
+		$LF
+		"\                         mode="or")
+		$LF
+		"    stable_blink = mt_hysteresis(background.mt_invert, blink)
+		$LF
+		"    blink2 = (STABILIZE) ? stable_blink : blink
+		$LF
+		$LF
+		"# Shrinking the blink mask can get rid of noise,
+		$LF
+		"# too much will lose signal as well.
+		$LF
+		"    blink3 = blink2.mt_inpand(mode=mt_diamond(inpand))
+		$LF
+		"    
+		$LF
+		"# Using just pixels that changed helps sharpen the mask
+		$LF
+		"    diff   = ng_diff(clp.SelectEvery(1,-1), clp)
+		$LF
+		"    diff_2 = mt_logic(diff, diff.SelectEvery(1,1), mode="and")
+		$LF
+		$LF
+		"#Hysteresis
+		$LF
+		"# Matches continuous blocks of pixels.
+		$LF
+		"# Use with care, will match the whole screen on fades.
+		$LF
+		"    hyster_blink = mt_hysteresis(blink3, diff_2)
+		$LF
+		$LF
+		"# Expand the mask to make up for shrinking it (or just use hysteresis)
+		$LF
+		"    blink4 = blink3.mt_expand(mode=mt_circle(expand))
+		$LF
+		"    sharp_blink = mt_logic(blink4, diff_2, mode="and")
+		$LF
+		$LF
+		"    blink5 = (HYSTER) ? hyster_blink :
+		$LF
+		"\            (SHARP)  ? sharp_blink  : blink4
+		$LF
+		$LF
+		"    
+		$LF
+		"# A flash won't match blocks 1 or 2 frames away.
+		$LF
+		"    sub_flash = mt_logic(fmask_2, bmask_2, mode="and")
+		$LF
+		"    flash     = mt_logic(blink, sub_flash, mode="and")
+		$LF
+		"    
+		$LF
+		"# A shake changes in one frame and changes back in the next.
+		$LF
+		"# This isn't detected by the motion vectors because the blocks exist in
+		$LF
+		"# both frames, they are just shifting around.
+		$LF
+		"    same   = ng_same(clp.SelectEvery(1,-1), clp.SelectEvery(1,1))
+		$LF
+		"    shake  = mt_logic(same, diff_2, mode="and")
+		$LF
+		$LF
+		"    (TEST) ? stackhorizontal(clp, mergeRGB(blink5, flash, shake))
+		$LF
+		"\          : blink5.GreyScale()
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_diff(clip A, clip B, int "thr"){
+		$LF
+		"    thr=default(thr,0)
+		$LF
+		"    TAD=ng_TAD(A,B)
+		$LF
+		"    return mt_binarize(TAD, threshold=thr)
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_same(clip A, clip B, int "thr"){
+		$LF
+		"    thr=default(thr,0)
+		$LF
+		"    TAD=ng_TAD(A,B)
+		$LF
+		"    return mt_binarize(TAD, threshold=thr, upper=true)
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_TAD(clip A, clip B){
+		$LF
+		"    R=ng_AD(A  .showRed("YV12"),B  .showRed("YV12"))
+		$LF
+		"    G=ng_AD(A.showGreen("YV12"),B.showGreen("YV12"))
+		$LF
+		"    B=ng_AD(A .showBlue("YV12"),B .showBlue("YV12"))
+		$LF
+		"    return ng_plus(R, ng_plus(G, B))
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_AD(clip A, clip B){
+		$LF
+		"    return mt_lutxy(A,B,"x y - abs")
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_plus(clip A, clip B){
+		$LF
+		"    return mt_lutxy(A,B,"x y +")
+		$LF
+		"}
+		$LF
+		$LF
+		"function ng_bighalo(
+		$LF
+		"\ clip clp,
+		$LF
+		"\ string text,
+		$LF
+		"\ float "x",
+		$LF
+		"\ float "y",
+		$LF
+		"\ int "first_frame",
+		$LF
+		"\ int "last_frame",
+		$LF
+		"\ string "font",
+		$LF
+		"\ float "size",
+		$LF
+		"\ int "text_color",
+		$LF
+		"\ int "halo_color",
+		$LF
+		"\ int "align",
+		$LF
+		"\ int "spc",
+		$LF
+		"\ int "lsp",
+		$LF
+		"\ float "font_width",
+		$LF
+		"\ float "font_angle",
+		$LF
+		"\ int "halo_radius",
+		$LF
+		"\ string "memo"
+		$LF
+		"\){
+		$LF
+		$LF
+		"#Version 7
+		$LF
+		$LF
+		"    x           = default(          x, -1)
+		$LF
+		"    first_frame = default(first_frame, 0)
+		$LF
+		"    last_frame  = default( last_frame, first_frame + 299)
+		$LF
+		"    font        = default(       font, "Ariel")
+		$LF
+		"    size        = default(       size, 18)
+		$LF
+		"    y           = default(          y, size)
+		$LF
+		"    text_color  = default( text_color, $20FFFFFF)
+		$LF
+		"    halo_color  = default( halo_color, $20000000)
+		$LF
+		"    align       = default(      align, 5)
+		$LF
+		"    spc         = default(        spc, 0)
+		$LF
+		"    lsp         = default(        lsp, 1)
+		$LF
+		"    font_width  = default( font_width, 0)
+		$LF
+		"    font_angle  = default( font_angle, 0)
+		$LF
+		"    halo_radius = default(halo_radius, 8)
+		$LF
+		$LF
+		"    invis=BlankClip(clp, length=1, pixel_type="YV12")
+		$LF
+		"    text_mask=Subtitle(invis, text, x, y, 0, 0, font, size, $00FFFFFF,
+		$LF
+		"\                      $80808080, align, spc, lsp, font_width, font_angle)
+		$LF
+		"    halo_mask=mt_logic(text_mask,
+		$LF
+		"\                      text_mask.mt_expand(mode=mt_circle(halo_radius)),
+		$LF
+		"\                      mode="xor")
+		$LF
+		$LF
+		"    hc=BlankClip(clp, length=1, color=halo_color)
+		$LF
+		"    tc=Subtitle(hc, text, x, y, 0, 0, font, size, text_color,
+		$LF
+		"\               $FF000000, align, spc, lsp, font_width, font_angle)
+		$LF
+		$LF
+		$LF
+		"    h_alpha=(halo_color >= 0) ? 255 - halo_color/$01000000
+		$LF
+		"\                             :  -(halo_color+1)/$01000000
+		$LF
+		"    t_alpha=(text_color >= 0) ? 255 - text_color/$01000000
+		$LF
+		"\                             :  -(text_color+1)/$01000000
+		$LF
+		$LF
+		"    lut_str=string(h_alpha)+" x * 255 / "+string(t_alpha)+" y * 255 / max"
+		$LF
+		"    mm3=tc.Mask(mt_lutxy(halo_mask, text_mask, lut_str).ConvertToRGB32())
+		$LF
+		$LF
+		"    mm4=Defined(memo) ? (
+		$LF
+		"\       Exist(memo+"0.bmp") ? ImageSource(memo+"0.bmp")
+		$LF
+		"\                        : mm3.ImageWriter(memo+"%d.bmp")
+		$LF
+		"\                   ) : mm3
+		$LF
+		$LF
+		"    clp.ApplyRange(first_frame, last_frame, "Layer", mm4)
+		$LF
+		"}
+		$LF
+		$LF
+		"# This is the TASBlend function. It reduces framerate to 1/2 but leave
+		$LF
+		"# flickering effects partly visible. Do not touch it.
+		$LF
+		"function TASBlend(clip c, float "ratio") {
+		$LF
+		"    # reduces framerate to 1/2 but leaves flicker effects partly visible
+		$LF
+		"    # blends frame pairs with alternating opacity
+		$LF
+		"    # The default for this is 2/3+1/3;1/3+2/3)
+		$LF
+		"    # optional "ratio" is the opacity of the first frame out of the four
+		$LF
+		"    ratio = default(ratio, 2.0 / 3)
+		$LF
+		"    opacity1 = round((1 - ratio) * 257)
+		$LF
+		"    opacity2 = round((ratio) * 257)
+		$LF
+		"    c
+		$LF
+		"    Interleave( \
+		$LF
+		"        Layer(SelectEvery(4, 0), SelectEvery(4, 1), level=opacity1), \
+		$LF
+		"        Layer(SelectEvery(4, 2), SelectEvery(4, 3), level=opacity2) \
+		$LF
+		"    )
+		$LF
+		"}
+		$LF
+		$LF
+		"function Replace(clip c, int i, int j, clip d) {
+		$LF
+		"    Assert(i >= 0, "Replace: parameter i is negative")
+		$LF
+		"    Assert(j >= 0, "Replace: parameter j is negative")
+		$LF
+		"    p1 = c.Trim(0, -i)
+		$LF
+		"    p2 = d.Trim(i, j)
+		$LF
+		"    p3 = c.Trim(j + 1, 0)
+		$LF
+		"    p1 = (i == 0) ? c.Trim(0, -1).DeleteFrame(0) : p1
+		$LF
+		"    p3 = (j == 0) ? c.Trim(0, -1).DeleteFrame(0) : p3
+		$LF
+		"    p1 + p2 + p3
+		$LF
+		"    return (c.HasAudio) ? last.AudioDub(c) : last
+		$LF
+		"}
+		$LF
+		$LF
+		"last
+		$LF
+	]code
+]pre
+[h4 
+	" Settings
+	$LF
+	[a id=heading-4040 
+	]a
+]h4
+[p 
+	"Brandon used the following algorithm with this script (Referenced as encode.avs), to produce encodes:
+	$LF
+]p
+[p 
+	"For all types of encodes, first dump the movie, load the parts, change the subtitle text and positions, trim the file as necessary, change any necessary additional settings (Ex. handheld), and preview in VirtualDub with hd = false. Once the preview is acceptable, click File > Save WAV as, and name it "audio.wav". What is done from here on depends on the type of encode:
+	$LF
+]p
+[p 
+	"For primary downloadable:
+	$LF
+]p
+[ol 
+	[li 
+		" Once the audio file is extracted, double click ogg.bat
+		$LF
+	]li
+	[li 
+		" Set hd = false, pass = 1, and double click first.bat
+		$LF
+	]li
+	[li 
+		" Once first.bat finishes running, set pass = 2 and double click second.bat (Make sure i444 is set to false)
+		$LF
+	]li
+	[li 
+		" Once all of the above are done processing, double click mux.bat. This will produce the final product, an encode.mkv file.
+		$LF
+	]li
+]ol
+[p 
+	"For 10-bit 444:
+	$LF
+]p
+[ol 
+	[li 
+		" Once the audio file is extracted, double click ogg.bat
+		$LF
+	]li
+	[li 
+		" Set hd = false, pass = 1, and double click first.bat
+		$LF
+	]li
+	[li 
+		" Once first.bat finishes running, set pass = 2, set i444 = true, and double click second_10bit444.bat
+		$LF
+	]li
+	[li 
+		" Once all of the above are done processing, double click mux_10bit444.bat. This will produce the final product, an encode_10bit444.mkv file.
+		$LF
+	]li
+]ol
+[p 
+	"For 512kb:
+	$LF
+]p
+[ol 
+	[li 
+		" Once the audio file is extracted, double click mp4.bat
+		$LF
+	]li
+	[li 
+		" Set hd = false, pass = 0 and double click 512kb.bat
+		$LF
+	]li
+	[li 
+		" Once all of the above are done processing, double click mux_512kb.bat. This will produce the final product, an encode_512kb.mp4 file.
+		$LF
+	]li
+]ol
+[p 
+	"For HD:
+	$LF
+]p
+[ol 
+	[li 
+		" Once the audio file is extracted, double click ogg_youtube.bat
+		$LF
+	]li
+	[li 
+		" Set hd = true, pass = 0 and double click youtube.bat
+		$LF
+	]li
+	[li 
+		" Once the above are done processing, double click mux_youtube.bat. This will produce the final product, hd.mkv.
+		$LF
+	]li
+]ol
+[h4 
+	" Commands
+	$LF
+	[a id=heading-4041 
+	]a
+]h4
+[p 
+	"ogg.bat
+	$LF
+]p
+[blockquote 
+	" venc -q2 audio.wav audio.ogg
+	$LF
+]blockquote
+[p 
+	"first.bat
+	$LF
+]p
+[blockquote 
+	" x264 --sar 7:6 --keyint infinite --crf 0 --range pc --input-range pc -o NUL encode.avs --preset ultrafast
+	$LF
+]blockquote
+[p 
+	"second.bat
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	$LF
+]p
+[blockquote 
+	" x264 --threads auto --sar 7:6 --crf 20 --keyint 600 --ref 16 --no-fast-pskip --bframes 16 --b-adapt 2 --direct auto --me tesa --merange 24 --subme 11 --trellis 2 --partitions all --rc-lookahead 250 --no-dct-decimate --range pc --input-range pc --colormatrix smpte170m --tcfile-in times.txt -o video.mkv encode.avs
+	$LF
+]blockquote
+[p 
+	"mux.bat
+	$LF
+]p
+[blockquote 
+	" mkvmerge -o encode.mkv --timecodes -1:times.txt video.mkv audio.ogg
+	$LF
+]blockquote
+[p 
+	"second_10bit444.bat
+	$LF
+]p
+[blockquote 
+	" x264-10 --threads auto --sar 7:6 --crf 20 --keyint 600 --ref 16 --no-fast-pskip --bframes 16 --b-adapt 2 --direct auto --me tesa --merange 24 --subme 11 --trellis 2 --partitions all --rc-lookahead 250 --no-dct-decimate --input-range pc --range pc --tcfile-in times.txt -o video_10bit444.mkv --colormatrix smpte170m --output-csp i444 encode.avs
+	$LF
+]blockquote
+[p 
+	"mux_10bit444.bat
+	$LF
+]p
+[blockquote 
+	" mkvmerge -o encode_10bit444.mkv --timecodes -1:times.txt video_10bit444.mkv audio.ogg
+	$LF
+]blockquote
+[p 
+	"mp4.bat
+	$LF
+]p
+[blockquote 
+	" sox audio.wav -t wav - trim 4672s | neroAacEnc -q 0.25 -if - -of audio.mp4
+	$LF
+]blockquote
+[p 
+	"512kb.bat
+	$LF
+]p
+[blockquote 
+	" x264 --threads auto --crf 20 --keyint 600 --ref 16 --no-fast-pskip --bframes 16 --b-adapt 2 --direct auto --me umh --merange 24 --subme 10 --trellis 2 --partitions all --rc-lookahead 250 --no-dct-decimate --range tv --input-range tv --colormatrix smpte170m -o video_512kb.mp4 encode.avs
+	$LF
+]blockquote
+[p 
+	"mux_512kb.bat
+	$LF
+]p
+[blockquote 
+	" MP4Box -add video_512kb.mp4 -add audio.mp4 -new encode_512kb.mp4
+	$LF
+]blockquote
+[p 
+	"ogg_youtube.bat
+	$LF
+]p
+[blockquote 
+	" venc -q10 audio.wav audio_youtube.ogg
+	$LF
+]blockquote
+[p 
+	"youtube.bat
+	$LF
+]p
+[blockquote 
+	" x264.exe --qp 0 --keyint 600 --output video_youtube.mkv encode.avs
+	$LF
+]blockquote
+[p 
+	"mux_youtube.bat
+	$LF
+]p
+[blockquote 
+	" mkvmerge.exe -o encode_youtube.mkv --compression -1:none video_youtube.mkv audio_youtube.ogg
+	$LF
+]blockquote
+[p 
+	"These files require several dependencies. All of them are included in 
+	[a class=extlink href=http://www.mediafire.com/?dx8o44eubh8se85 rel=nofollow 
+		"Brandon's setup
+	]a
+	". Also get 
+	[a class=extlink href=http://code.google.com/p/feos-tas/downloads/detail?name=AVISynth%20plugins%20for%20ng_deblink.7z rel=nofollow 
+		"ng_deblink dependencies
+	]a
+	".
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	": We can't autodetect if it's a TV console or not, because both TV consoles and Arcade machines may have random resolution. The former must be scaled to 4:3, the latter shall keep untouched as well as handhelds and computers.
+	$LF
+]p
+[p 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	": See MeGUI wiki for the list of 
+	[a class=extlink href=http://mewiki.project357.com/wiki/X264_Settings rel=nofollow 
+		"x264 parameters
+	]a
+	".
+]p

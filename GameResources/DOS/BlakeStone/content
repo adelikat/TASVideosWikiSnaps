@@ -1,0 +1,585 @@
+2
+[h2 
+	"Movement
+	$LF
+]h2
+[ul 
+	[li 
+		" Using the mouse is faster than the keyboard, even while running with the keyboard.
+		$LF
+		[ul 
+			[li 
+				" Using the run button is not necessary with the mouse. It archives full speed anyway.
+				$LF
+			]li
+			[li 
+				" Mouse sensitivity just affects how much speed is needed, not how much can be achieved.
+				$LF
+			]li
+		]ul
+		" Fastest method of motion is strafing forward and sideways with the mouse (backward and sideways is slower).
+		$LF
+		[ul 
+			[li 
+				" This produces motion at 45 degrees from the view direction.
+				$LF
+			]li
+			[li 
+				" This method of motion is fast regardless of angle, but zigzagging from having the wrong direction should be avoided.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Scale
+	$LF
+]h3
+[ul 
+	[li 
+		" Each tile is 256 units.
+		$LF
+	]li
+	[li 
+		" There are 360 directions in a full circle (degrees).
+		$LF
+	]li
+]ul
+[h3 
+	" Speed
+	$LF
+]h3
+[ul 
+	[li 
+		" Forward: Max. ~58.5 units per frame.
+		$LF
+	]li
+	[li 
+		" Backward: Max. ~39 units per frame.
+		$LF
+	]li
+	[li 
+		" Sideways (strafe): Max. ~58.5 units per frame.
+		$LF
+	]li
+	[li 
+		" Straferun (diagonal): Max. ~83 units per frame.
+		$LF
+	]li
+	[li 
+		" Backwards straferun (diagonal): Max ~70.3 units per frame.
+		$LF
+	]li
+	[li 
+		" Maximum turn is 5 units per frame (= 5 degrees per frame).
+		$LF
+	]li
+]ul
+[h3 
+	" Primary direction
+	$LF
+]h3
+[p 
+	"Each direction has an associated primary direction. This is the direction the "use" command searches for object (door, elevator, secret door, etc...)
+	$LF
+]p
+[ul 
+	[li 
+		" For 45 degree direction (North-East), it is North.
+		$LF
+	]li
+	[li 
+		" For 135 degree direction (North-West), it is West.
+		$LF
+	]li
+	[li 
+		" For 225 degree direction (South-West), it is South.
+		$LF
+	]li
+	[li 
+		" For 315 degree direction (South-East), it is South (not East).
+		$LF
+	]li
+	[li 
+		" For every other direction, it is the nearest cardinal direction.
+		$LF
+	]li
+]ul
+[p 
+	"So for instance, if strafing West at a 135 degree angle, you can open the door pointing to the West, but if strafing West at a 225 degree angle, you can't open that door without turning.
+	$LF
+]p
+[p 
+	"Also, doors to the East can't be opened at either 45 degree angle suitable for straferunning East.
+	$LF
+]p
+[h2 
+	"Player-to-enemy damage calculation
+	$LF
+]h2
+[p 
+	"All random numbers are 0-255.
+	$LF
+]p
+[ul 
+	[li 
+		" Attacks where enemy hasn't "woken up" yet do double damage and wake up the enemy.
+		$LF
+		[ul 
+			[li 
+				" If the attack connects at the same frame as enemy would wake up from seeing you, it still counts (your attack is evaluated first).
+				$LF
+			]li
+		]ul
+		" With bad luck, attack can do 0 damage even if it hits.
+		$LF
+	]li
+	[li 
+		" Hitscan attack damage depends on distance.
+		$LF
+		[ul 
+			[li 
+				" The distance is calculated from differences in the tile positions of player and enemy.
+				$LF
+			]li
+			[li 
+				" If distance is 0-1, you hit for random / 2 damage (max. 127).
+				$LF
+			]li
+			[li 
+				" If distance is 2-3, you hit for random / 4 damage (max. 63).
+				$LF
+			]li
+			[li 
+				" If distance is 4-21, if random / 12 >= distance, you hit, and do random / 4 damage (max. 63), otherwise you miss.
+				$LF
+			]li
+			[li 
+				" From distance 22-, it is not possible to hit.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"The numbers are pulled from a table-based pseudo-random number generator. The table is:
+	$LF
+]p
+[pre 
+	"  0,   8, 109, 220, 222, 241, 149, 107,  75, 248, 254, 140,  16,  66
+	$LF
+	" 74,  21, 211,  47,  80, 242, 154,  27, 205, 128, 161,  89,  77,  36
+	$LF
+	" 95, 110,  85,  48, 212, 140, 211, 249,  22,  79, 200,  50,  28, 188
+	$LF
+	" 52, 140, 202, 120,  68, 145,  62,  70, 184, 190,  91, 197, 152, 224
+	$LF
+	"149, 104,  25, 178, 252, 182, 202, 182, 141, 197,   4,  81, 181, 242
+	$LF
+	"145,  42,  39, 227, 156, 198, 225, 193, 219,  93, 122, 175, 249,   0
+	$LF
+	"175, 143,  70, 239,  46, 246, 163,  53, 163, 109, 168, 135,   2, 235
+	$LF
+	" 25,  92,  20, 145, 138,  77,  69, 166,  78, 176, 173, 212, 166, 113
+	$LF
+	" 94, 161,  41,  50, 239,  49, 111, 164,  70,  60,   2,  37, 171,  75
+	$LF
+	"136, 156,  11,  56,  42, 146, 138, 229,  73, 146,  77,  61,  98, 196
+	$LF
+	"135, 106,  63, 197, 195,  86,  96, 203, 113, 101, 170, 247, 181, 113
+	$LF
+	" 80, 250, 108,   7, 255, 237, 129, 226,  79, 107, 112, 166, 103, 241
+	$LF
+	" 24, 223, 239, 120, 198,  58,  60,  82, 128,   3, 184,  66, 143, 224
+	$LF
+	"145, 224,  81, 206, 163,  45,  63,  90, 168, 114,  59,  33, 159,  95
+	$LF
+	" 28, 139, 123,  98, 125, 196,  15,  70, 194, 253,  54,  14, 109, 226
+	$LF
+	" 71,  17, 161,  93, 186,  87, 244, 138,  20,  52, 123, 251,  26,  36
+	$LF
+	" 17,  46,  52, 231, 232,  76,  31, 221,  84,  37, 216, 165, 212, 106
+	$LF
+	"197, 242,  98,  43,  39, 175, 254, 145, 190,  84, 118, 222, 187, 136
+	$LF
+	"120, 163, 236, 249
+	$LF
+]pre
+[p 
+	"The RNG index is a value from 0-255. It increases at least once every frame and also whenever a random number is required, and wraps back around after it hits 255.
+	$LF
+]p
+[h2 
+	"Enemy-to-player damage
+	$LF
+]h2
+[h3 
+	" Hitscan
+	$LF
+]h3
+[ul 
+	[li 
+		" The chances of dodging an enemy bullet can be increased not only by running, but you also get a significantly higher dodge chance if the enemy is visible on the screen.
+		$LF
+	]li
+	[li 
+		" The odds of dodging depend on the distance from the enemy.
+		$LF
+		[ul 
+			[li 
+				" A point-blank shot against the player's back has a 0% chance of missing.
+				$LF
+			]li
+			[li 
+				" Running while being shot at increases the odds of dodging by a flat 37.5%.
+				$LF
+			]li
+			[li 
+				" If the enemy is visible, the odds of dodging increase by an additional 6.25% for each tile of distance between the player and the enemy. If the enemy isn't visible, this bonus is cut in half to 3.125% per tile.
+				$LF
+			]li
+			[li 
+				" If running and the enemy is visible, the maximum distance they can hit from is 9 tiles.
+				$LF
+			]li
+			[li 
+				" If running and the enemy is not visible, the maximum distance is 19.
+				$LF
+			]li
+			[li 
+				" If not running and the enemy is visible, the maximum distance is 15.
+				$LF
+			]li
+			[li 
+				" If not running and the enemy is not visible, the maximum distance is 31.
+				$LF
+			]li
+		]ul
+		" The above values are different for star sentinels, as they are hardcoded to be more accurate. The distance bonus of the dodging formula is cut by 1/3 and as a result their range also increases.
+		$LF
+	]li
+	[li 
+		" If a shot hits, the damage depends on the distance.
+		$LF
+		[ul 
+			[li 
+				" From a distance of 0-1, the damage is random >> 2 (maximum 63).
+				$LF
+			]li
+			[li 
+				" From a distance of 2-3, the damage is random >> 3 (maximum 31).
+				$LF
+			]li
+			[li 
+				" From a distance of 4 or greater, the damage is random >> 4 (maximum 15).
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Melee
+	$LF
+]h3
+[ul 
+	[li 
+		" Genetic guards, pod aliens, mutant humans: damage is (random >> 3) | 1 (range of 1 to 31). Chance of hitting is 86.3%.
+		$LF
+	]li
+	[li 
+		" Others: random >> 4 (range of 0 to 15). Chance of hitting is 78.5%.
+		$LF
+	]li
+]ul
+[h2 
+	" Enemy info table
+	$LF
+]h2
+[p 
+	"All HP values are on veteran difficulty.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Enemy
+			]th
+			[th 
+				"ID
+			]th
+			[th 
+				"HP
+			]th
+			[th 
+				"Damage
+			]th
+		]tr
+		[tr 
+			[td 
+				"Sector patrol
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"38
+			]td
+			[td 
+				"Hitscan
+			]td
+		]tr
+		[tr 
+			[td 
+				"Informant
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Emotional (NOT ME)
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bio-tech
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"Hitscan
+			]td
+		]tr
+		[tr 
+			[td 
+				"Plasma alien
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"96
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Plasma sphere
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Star sentinel
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"175
+			]td
+			[td 
+				"Hitscan
+			]td
+		]tr
+		[tr 
+			[td 
+				"Genetic guard
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"240
+			]td
+			[td 
+				"Melee
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mech sentinel
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"210
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Genetic alien
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"240
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Star trooper
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"425
+			]td
+			[td 
+				"Hitscan
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	" Enemy AI
+	$LF
+]h2
+[p 
+	"Enemies behave differently depending on if they can see you or not. Note that AI decisions are based on entire tiles, and the subposition of the player is not used as a tiebreaker if they line up with the enemy.
+	$LF
+]p
+[h3 
+	" Enemy sees player
+	$LF
+]h3
+[ul 
+	[li 
+		" List of enemy travel directions, in order of priority. If one direction is blocked, it will go down the list until something works.
+		$LF
+		[ul 
+			[li 
+				" Diagonal towards the player. If their x tile is the same as the player, west will be the x component, and if the y tiles are the same, north will be the y component.
+				$LF
+			]li
+			[li 
+				" Cardinal direction towards the player, randomly chosen between the two possibilities
+				$LF
+			]li
+			[li 
+				" Other cardinal direction towards the player
+				$LF
+			]li
+			[li 
+				" Cardinal direction away from the player, randomly chosen between the two possibilities. This is predetermined by the previous randomly chosen direction and does not use an extra RNG roll.
+				$LF
+			]li
+			[li 
+				" Other cardinal direction away from the player
+				$LF
+			]li
+		]ul
+		" If the enemy is less than 4 tiles away from the player, they will want more distance. In this case, use the above priority list but prioritize moving away from the player.
+		$LF
+	]li
+	[li 
+		" An RNG roll is always used when determining the direction, even if the diagonal is free.
+		$LF
+	]li
+	[li 
+		" The odds of the enemy shooting the player decrease with distance.
+		$LF
+		[ul 
+			[li 
+				" If the player is right up against the enemy, he's guaranteed to stop and shoot.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Enemy is awake but cannot see player
+	$LF
+]h3
+[ul 
+	[li 
+		" List of enemy travel directions, in order of priority. If one direction is blocked, it will go down the list until something works.
+		$LF
+		[ul 
+			[li 
+				" Cardinal direction towards the player with the largest difference in distance to the player. Skip if this requires turning around
+				$LF
+			]li
+			[li 
+				" Other cardinal direction towards the player. Skip if this requires turning around. Also skip if the player is lined up directly behind.
+				$LF
+			]li
+			[li 
+				" Direction previously traveled by the enemy
+				$LF
+			]li
+			[li 
+				" Enemy will rotate until it finds a free direction. This includes diagonals and is the only way for enemies to move diagonally when they can't see the player. Any direction that involves turning around is skipped over. The direction of rotation (clockwise or counter-clockwise) is randomly chosen. The enemy will only check west, northwest, and north, which is possibly unintended but is what the code does. This RNG roll is not done unless this step is necessary.
+				$LF
+			]li
+			[li 
+				" Turn around as a last resort
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Enemy reaction times
+	$LF
+]h3
+[p 
+	"Enemies will react if they see you or if you fire a bullet within their floor code (enemies placed on deaf tiles will not react to bullets). Floor codes and deaf tiles can be viewed in the map editor. If a door is even slightly open between two floor codes, they will be considered conjoined and firing within one code will awaken enemies in both.
+	$LF
+]p
+[p 
+	"Different enemies have different reaction times once they're aware of your presence, with some of them incorporating randomness. All reaction times here are given in frames.
+	$LF
+]p
+[ul 
+	[li 
+		" Goldfire, sector patrol, turret, perscan drone: 1 + random/4 (range of 1 to 64)
+		$LF
+	]li
+	[li 
+		" Star sentinel, star trooper, fluid monster: Both are 1 + random/6 (range of 1 to 43)
+		$LF
+	]li
+	[li 
+		" Scientist: Always 2, no randomness involved.
+		$LF
+	]li
+	[li 
+		" Everything else (including bosses): Always 1.
+		$LF
+	]li
+]ul
+[h2 
+	" Map editor
+	$LF
+]h2
+[p 
+	"WDC: http://winwolf3d.dugtrio17.com/
+	$LF
+]p

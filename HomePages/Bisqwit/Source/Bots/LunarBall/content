@@ -1,0 +1,3220 @@
+2
+[pre 
+	[code class=language-c 
+		"static struct LunarFilenameManager
+		$LF
+		"{
+		$LF
+		"    char LockFileName[512];
+		$LF
+		"    char StateFileName[512];
+		$LF
+		"    
+		$LF
+		"    LunarFilenameManager()
+		$LF
+		"    {
+		$LF
+		"        int botfrontpid = getpid();
+		$LF
+		"        sprintf(LockFileName, "/tmp/botfront-lock-%d", botfrontpid);
+		$LF
+		"        sprintf(StateFileName, "botfrontL-middle-%d", botfrontpid);
+		$LF
+		"    }
+		$LF
+		"} LunarFilenames;
+		$LF
+	]code
+]pre
+[pre 
+	[code class=language-c 
+		"namespace LunarballLaunchManager2ns{
+		$LF
+		"unsigned MAX_FRAMES;
+		$LF
+		"unsigned BALLS_REMAINING;
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[pre 
+	[code class=language-c 
+		"struct LunarballMethods
+		$LF
+		"{
+		$LF
+		"    struct Winner
+		$LF
+		"    {
+		$LF
+		"        /* number pocketed
+		$LF
+		"           best time
+		$LF
+		"           best_model
+		$LF
+		"           savestate
+		$LF
+		"         */
+		$LF
+		"        
+		$LF
+		"        static void GetBest(unsigned& best_pocketed, unsigned& best_time)
+		$LF
+		"        {
+		$LF
+		"            best_pocketed=0; best_time=65535;
+		$LF
+		$LF
+		"            int flags = O_RDWR | O_CREAT;
+		$LF
+		"            
+		$LF
+		"            int fd = open(LunarFilenames.LockFileName, flags, 0600);
+		$LF
+		"            if(fd < 0) return;
+		$LF
+		"            struct autocloser { int f;
+		$LF
+		"                    autocloser(int fd):f(fd){}
+		$LF
+		"                    ~autocloser(){close(f);} }
+		$LF
+		"                au(fd);
+		$LF
+		"            flock(fd, LOCK_EX);
+		$LF
+		"            char Buf[sizeof(unsigned)*30];
+		$LF
+		"            if(pread(fd, Buf, sizeof(Buf), 0) < sizeof(Buf)) return;
+		$LF
+		"            unsigned* const best_pptr     = (unsigned*)&Buf[0];
+		$LF
+		"            unsigned* const best_tptr     = (unsigned*)&Buf[sizeof(unsigned)*10];
+		$LF
+		"            //unsigned* const best_mptr     = (unsigned*)&Buf[sizeof(unsigned)*20];
+		$LF
+		"            best_pocketed = best_pptr[0];
+		$LF
+		"            best_time     = best_tptr[0];
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        static unsigned GetBestTimeWithPocketCount(unsigned count, unsigned& model)
+		$LF
+		"        {
+		$LF
+		"            int flags = O_RDWR | O_CREAT;
+		$LF
+		"            int fd = open(LunarFilenames.LockFileName, flags, 0600);
+		$LF
+		"            if(fd < 0) return 65535;
+		$LF
+		"            struct autocloser { int f;
+		$LF
+		"                    autocloser(int fd):f(fd){}
+		$LF
+		"                    ~autocloser(){close(f);} }
+		$LF
+		"                au(fd);
+		$LF
+		"            flock(fd, LOCK_EX);
+		$LF
+		$LF
+		"            char Buf[sizeof(unsigned)*30];
+		$LF
+		"            if(pread(fd, Buf, sizeof(Buf), 0) < sizeof(Buf)) return 65535;
+		$LF
+		"            //unsigned* const best_pptr     = (unsigned*)&Buf[0];
+		$LF
+		"            unsigned* const best_tptr     = (unsigned*)&Buf[sizeof(unsigned)*10];
+		$LF
+		"            unsigned* const best_mptr     = (unsigned*)&Buf[sizeof(unsigned)*20];
+		$LF
+		"            model = best_mptr[count];
+		$LF
+		"            return best_tptr[count];
+		$LF
+		"        }
+		$LF
+		"         
+		$LF
+		"        static bool SetBest(unsigned num_pocketed, unsigned nframes, unsigned model, bool Force=true)
+		$LF
+		"        {
+		$LF
+		"            using namespace LunarballLaunchManager2ns;
+		$LF
+		"    
+		$LF
+		"            int flags = O_RDWR | O_CREAT; // | (Force ? O_TRUNC : 0);
+		$LF
+		"            int fd = open(LunarFilenames.LockFileName, flags, 0600);
+		$LF
+		"            struct autocloser { int f;
+		$LF
+		"                    autocloser(int fd):f(fd){}
+		$LF
+		"                    ~autocloser(){close(f);} }
+		$LF
+		"                au(fd);
+		$LF
+		"            
+		$LF
+		"            flock(fd, LOCK_EX);
+		$LF
+		$LF
+		"            char Buf[sizeof(unsigned)*30] = { 0 };
+		$LF
+		"            pread(fd, Buf, sizeof(Buf), 0);
+		$LF
+		"            unsigned* const best_pptr     = (unsigned*)&Buf[0];                   // 0x00
+		$LF
+		"            unsigned* const best_tptr     = (unsigned*)&Buf[sizeof(unsigned)*10]; // 0x28
+		$LF
+		"            unsigned* const best_mptr     = (unsigned*)&Buf[sizeof(unsigned)*20]; // 0x50
+		$LF
+		"            
+		$LF
+		"            unsigned& best_pocketed = best_pptr[0];
+		$LF
+		"            unsigned& best_time     = best_tptr[0];
+		$LF
+		"            unsigned& best_model    = best_mptr[0];
+		$LF
+		"            
+		$LF
+		"            if(!Force)
+		$LF
+		"            {
+		$LF
+		"                double ratio_now = num_pocketed  / (double)(nframes  ?nframes:1);
+		$LF
+		"                double ratio_old = best_pocketed / (double)(best_time?best_time:1);
+		$LF
+		"                
+		$LF
+		"                /* If the "now" is subpar, reject it. */
+		$LF
+		"                if(ratio_now < ratio_old || ratio_now == 0.0)
+		$LF
+		"                {
+		$LF
+		"                    /* If regardless we got a better number of pocketing */
+		$LF
+		"                    if(num_pocketed != best_pocketed && num_pocketed > 0)
+		$LF
+		"                    {
+		$LF
+		"                        unsigned& ref_pocketed = best_pptr[num_pocketed];
+		$LF
+		"                        unsigned& ref_time     = best_tptr[num_pocketed];
+		$LF
+		"                        unsigned& ref_model    = best_mptr[num_pocketed];
+		$LF
+		"                        double ratio_ref = ref_pocketed / (double)(ref_time?ref_time:1);
+		$LF
+		"                        
+		$LF
+		"                        if(ratio_now >= ratio_ref || ref_pocketed == 0 || ratio_ref == 0.0)
+		$LF
+		"                        {
+		$LF
+		"                            unsigned cur = model%65536;
+		$LF
+		"                            unsigned pre = model/65536;
+		$LF
+		"                            
+		$LF
+		"                            fprintf(stderr, "Ignoring: Pocketed %u (time %u, angle %u, velo %u, preangle %u, prevelo %u) (ball at %02X,%02X)\n",
+		$LF
+		"                                num_pocketed, nframes, cur%256, cur/256,
+		$LF
+		"                                                       pre%256, pre/256,
+		$LF
+		"                                                       RAM[0x370], RAM[0x330]
+		$LF
+		"                                   );
+		$LF
+		"                        
+		$LF
+		"                            ref_pocketed = num_pocketed;
+		$LF
+		"                            ref_time     = nframes;
+		$LF
+		"                            ref_model    = model;
+		$LF
+		"                            pwrite(fd, Buf, sizeof(Buf), 0);
+		$LF
+		"                        }
+		$LF
+		"                    }
+		$LF
+		"                    return false;
+		$LF
+		"                }
+		$LF
+		"                /*
+		$LF
+		"                if(num_pocketed < best_pocketed) return false;
+		$LF
+		"                if(num_pocketed == best_pocketed && nframes >= best_time) return false;
+		$LF
+		"                */
+		$LF
+		"                if(ratio_now == ratio_old)
+		$LF
+		"                {
+		$LF
+		"                    unsigned now_cur = model%65536, old_cur = best_model%65536;
+		$LF
+		"                    unsigned now_pre = model/65536, old_pre = best_model/65536;
+		$LF
+		"                    unsigned now_cur_vel = now_cur/256, old_cur_vel = old_cur/256;
+		$LF
+		"                    unsigned now_pre_vel = now_pre/256, old_pre_vel = old_pre/256;
+		$LF
+		$LF
+		"                    if(num_pocketed < best_pocketed) return false;
+		$LF
+		"                    if(now_cur_vel < old_cur_vel) return false;
+		$LF
+		"                    if(now_pre_vel > old_pre_vel) return false;
+		$LF
+		"                    if(model == best_model) return false;
+		$LF
+		"                }
+		$LF
+		"            }
+		$LF
+		$LF
+		"            best_pocketed = num_pocketed;
+		$LF
+		"            best_time     = nframes;
+		$LF
+		"            best_model    = model;
+		$LF
+		"            best_pptr[best_pocketed] = best_pocketed;
+		$LF
+		"            best_tptr[best_pocketed] = best_time;
+		$LF
+		"            best_mptr[best_pocketed] = best_model;
+		$LF
+		"            pwrite(fd, Buf, sizeof(Buf), 0);
+		$LF
+		$LF
+		"            if(!Force)
+		$LF
+		"            {
+		$LF
+		"                unsigned cur = model%65536;
+		$LF
+		"                unsigned pre = model/65536;
+		$LF
+		"                
+		$LF
+		"                fprintf(stderr, "Record: Pocketed %u (time %u, angle %u, velo %u, preangle %u, prevelo %u) (ball at %02X,%02X)\n",
+		$LF
+		"                    best_pocketed, best_time, cur%256, cur/256,
+		$LF
+		"                                              pre%256, pre/256,
+		$LF
+		"                                              RAM[0x370], RAM[0x330]
+		$LF
+		"                       );
+		$LF
+		"                //beststate.Create();
+		$LF
+		"                FCEUSS_Save(LunarFilenames.StateFileName);
+		$LF
+		"                
+		$LF
+		"                if(RAM[0x18E] == 0) // no remaining balls
+		$LF
+		"                    MAX_FRAMES = std::min(MAX_FRAMES, best_time+3);
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            return true;
+		$LF
+		"        }
+		$LF
+		"        static void Compete(unsigned num_pocketed, unsigned nframes, unsigned model)
+		$LF
+		"        {
+		$LF
+		"            SetBest(num_pocketed, nframes, model, false);
+		$LF
+		"            ContestLimit(num_pocketed, nframes);
+		$LF
+		"        }
+		$LF
+		"        static void Load()
+		$LF
+		"        {
+		$LF
+		"            FCEUSS_Load(LunarFilenames.StateFileName);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        static void LoadLimit()
+		$LF
+		"        {
+		$LF
+		"            int flags = O_RDONLY;
+		$LF
+		"            int fd = open(LunarFilenames.LockFileName, flags, 0600);
+		$LF
+		"            if(fd < 0) return;
+		$LF
+		"            struct autocloser { int f;
+		$LF
+		"                    autocloser(int fd):f(fd){}
+		$LF
+		"                    ~autocloser(){close(f);} }
+		$LF
+		"                au(fd);
+		$LF
+		"            flock(fd, LOCK_EX);
+		$LF
+		$LF
+		"            char Buf[sizeof(unsigned)*30];
+		$LF
+		"            if(pread(fd, Buf, sizeof(Buf), 0) < sizeof(Buf)) return;
+		$LF
+		"            
+		$LF
+		"            //unsigned* const best_pptr     = (unsigned*)&Buf[0];
+		$LF
+		"            unsigned* const best_tptr     = (unsigned*)&Buf[sizeof(unsigned)*10];
+		$LF
+		"            //unsigned* const best_mptr     = (unsigned*)&Buf[sizeof(unsigned)*20];
+		$LF
+		"            
+		$LF
+		"            for(unsigned num_pocketed=1; num_pocketed<10; ++num_pocketed)
+		$LF
+		"            {
+		$LF
+		"                unsigned nframes = best_tptr[num_pocketed];
+		$LF
+		"                ContestLimit(num_pocketed, nframes);
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        static void ContestLimit(unsigned num_pocketed, unsigned nframes)
+		$LF
+		"        {
+		$LF
+		"            if(!num_pocketed || !nframes) return;
+		$LF
+		"            
+		$LF
+		"            using namespace LunarballLaunchManager2ns;
+		$LF
+		"            
+		$LF
+		"            unsigned max_hope = nframes * BALLS_REMAINING
+		$LF
+		"                                        / num_pocketed;
+		$LF
+		"            if(num_pocketed < BALLS_REMAINING)
+		$LF
+		"                max_hope += 7 + 160;
+		$LF
+		"            else
+		$LF
+		"                max_hope += 3;
+		$LF
+		$LF
+		"            if(max_hope < MAX_FRAMES)
+		$LF
+		"            {
+		$LF
+		"                fprintf(stderr, "[%d]Setting max frame limit to %u\n",
+		$LF
+		"                    (int)getpid(), max_hope);
+		$LF
+		"                MAX_FRAMES = max_hope;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"    
+		$LF
+		"    private:
+		$LF
+		"        Winner();
+		$LF
+		"    };
+		$LF
+		$LF
+		"    #undef RunFrameWith
+		$LF
+		"    #define RunFrameWith(k) do { CurInput = (k); FCEUI_FrameAdvance(); scrReturn(1); if(!Active)goto EndLoop; } while(0)
+		$LF
+		"    
+		$LF
+		"    struct AimingMethod
+		$LF
+		"    {
+		$LF
+		"        unsigned char key;
+		$LF
+		"        bool autofire;
+		$LF
+		"    public:
+		$LF
+		"        AimingMethod() : key(0),autofire(false) { }
+		$LF
+		"        
+		$LF
+		"        void Decide(unsigned wanted, unsigned orig_angle = RAM[0x3C0])
+		$LF
+		"        {
+		$LF
+		"            unsigned plus_dist  = (wanted+256-orig_angle) & 255;
+		$LF
+		"            unsigned minus_dist = (orig_angle+256-wanted) & 255;
+		$LF
+		"            int dir = plus_dist > minus_dist ? -1 : 1;
+		$LF
+		"            unsigned dist = std::min(plus_dist, minus_dist);
+		$LF
+		"            key = dir == 1 ? K_R : K_L;
+		$LF
+		"            unsigned elapse_norepeat = 16 + (dist-1)*1;
+		$LF
+		"            unsigned elapse_repeat = 1 + 2*(dist-1);
+		$LF
+		"            autofire = elapse_repeat <= elapse_norepeat;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        bool operator==(const AimingMethod& b) const
+		$LF
+		"            { return key==b.key && autofire==b.autofire; }
+		$LF
+		"        bool operator!=(const AimingMethod& b) const
+		$LF
+		"            { return !operator==(b); }
+		$LF
+		"        bool operator<(const AimingMethod& b) const
+		$LF
+		"            { return (key*2+autofire) < (b.key*2+b.autofire); }
+		$LF
+		"    
+		$LF
+		"        int Run(unsigned angle, unsigned frno, unsigned& frames_begin, unsigned maxframes)
+		$LF
+		"        {
+		$LF
+		"            scrBegin;
+		$LF
+		"            
+		$LF
+		"            // autofire: repeatedly press to the direction
+		$LF
+		"            // !autofire: hold button until angle is right
+		$LF
+		$LF
+		"            while(RAM[0x3C0] != angle)
+		$LF
+		"            {
+		$LF
+		"                RunFrameWith( (autofire && (frno&1)) ? 0x00 : key);
+		$LF
+		"                if(++frames_begin >= maxframes) goto Fail;
+		$LF
+		"            }
+		$LF
+		"        EndLoop: Fail: ;
+		$LF
+		"            scrFinish(0);
+		$LF
+		"        }
+		$LF
+		"    };
+		$LF
+		$LF
+		"    static bool DoAiming(unsigned angle, unsigned& frames_begin, unsigned maxframes)
+		$LF
+		"    {
+		$LF
+		"        //fprintf(stderr, "#1 aiming for angle %u, f(%u)\n", angle, frames_begin);
+		$LF
+		"        scrBegin;
+		$LF
+		"        //fprintf(stderr, "#2 aiming for angle %u, f(%u)\n", angle, frames_begin);
+		$LF
+		"        
+		$LF
+		"        static AimingMethod method;
+		$LF
+		"        method.Decide(angle);
+		$LF
+		$LF
+		"        /*fprintf(stderr, "#M aiming for angle %u, f(%u): %02X,%s, 0x3C0=%u\n",
+		$LF
+		"            angle, frames_begin,
+		$LF
+		"            method.key, method.autofire?"true":"false", RAM[0x3C0]);*/
+		$LF
+		"        
+		$LF
+		"        static unsigned frno; frno=0;
+		$LF
+		"        while(method.Run(angle, frno++, frames_begin, maxframes)) scrReturn(1);
+		$LF
+		"        
+		$LF
+		"        //fprintf(stderr, "#3 aiming for angle %u, f(%u)\n", angle, frames_begin);
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    static bool DoFiring(unsigned& frames_begin, unsigned maxframes)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        if(!frames_begin) RunFrameWith(0);
+		$LF
+		"        do { RunFrameWith(K_B); ++frames_begin;
+		$LF
+		"            // If white was pocketed or maxframes hit
+		$LF
+		"            if(WhitePocketed() || frames_begin > maxframes) goto Fail;
+		$LF
+		"        } while(RAM[0x3D0] == 0 || RAM[0x3D0] == 0xFF);
+		$LF
+		"        
+		$LF
+		"    EndLoop: Fail:;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    static bool DoWaitBallsStop(unsigned& nframes, const char*& failreason, unsigned maxframes)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        while(RAM[0x3D0] != 0 && RAM[0x3D0] != 0xFF)
+		$LF
+		"        {
+		$LF
+		"            if(RAM[0x3A0] == 0)
+		$LF
+		"            {
+		$LF
+		"                // If white ball is not moving, check if all other balls
+		$LF
+		"                // have been pocketed
+		$LF
+		"                for(unsigned b=1; b<16; ++b)
+		$LF
+		"                    if(RAM[0x310+b] < 0x10
+		$LF
+		"                    && RAM[0x300+b] >= 4) goto NotAllPocketed;
+		$LF
+		"                break; // yay!
+		$LF
+		"            NotAllPocketed:;
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            if(WhitePocketed()) { failreason="blunder"; goto Fail; }
+		$LF
+		"            if(++nframes > maxframes) { failreason="timeout"; goto Fail; }
+		$LF
+		"            //if(frames_begin+nframes >= 300) goto Fail;
+		$LF
+		"            RunFrameWith(0);
+		$LF
+		"        }
+		$LF
+		"    EndLoop: Fail:;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    static bool DoWaitNextShotPossible(
+		$LF
+		"        unsigned& nframes_total,
+		$LF
+		"        unsigned& nframes_transition,
+		$LF
+		"        bool verbose, unsigned maxframes)
+		$LF
+		"    {
+		$LF
+		"        /* After the shot has been shot, wait
+		$LF
+		"           until the cursor can be moved again.
+		$LF
+		"        */
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        static SaveState tmp;
+		$LF
+		"        static unsigned was_angle, became_angle1, became_angle2;
+		$LF
+		"        static bool transition;
+		$LF
+		"        transition = false;
+		$LF
+		"        
+		$LF
+		"        if(verbose) fprintf(stderr, "Waiting until next shot can be shot\n");
+		$LF
+		"    NextFrameWaiter:
+		$LF
+		"        if(!transition && RAM[0x18F] == 0) transition = true;
+		$LF
+		"        if(nframes_total-nframes_transition > maxframes) goto Fail;
+		$LF
+		"        tmp.Create();
+		$LF
+		"        was_angle = RAM[0x3C0];
+		$LF
+		"        RunFrameWith(K_R); ++nframes_total; if(transition) ++nframes_transition;
+		$LF
+		"        became_angle1 = RAM[0x3C0];
+		$LF
+		"        if(became_angle1 == was_angle) goto NextFrameWaiter;
+		$LF
+		"        // K_R affected angle, check if K_L also affects angle
+		$LF
+		"        
+		$LF
+		"        tmp.Load(); --nframes_total; if(transition) --nframes_transition;
+		$LF
+		"        RunFrameWith(K_L); ++nframes_total; if(transition) ++nframes_transition;
+		$LF
+		"        became_angle2 = RAM[0x3C0];
+		$LF
+		"        if(became_angle2 == was_angle) goto NextFrameWaiter;
+		$LF
+		"        // K_R and K_L both worked
+		$LF
+		"        
+		$LF
+		"        // If Right and Left produced the *same* change, reject this action 
+		$LF
+		"        if(became_angle1 == became_angle2) goto NextFrameWaiter;
+		$LF
+		"        
+		$LF
+		"        // K_R and K_L produced different changes, so we're ready.
+		$LF
+		"        tmp.Load(); --nframes_total; if(transition) --nframes_transition;
+		$LF
+		"    EndLoop: Fail: ;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static bool DoProfileShot(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"        const char*& failreason,
+		$LF
+		"        unsigned maxframes)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        failreason = 0;
+		$LF
+		"        
+		$LF
+		"        // Count how many balls were pocketed before playing
+		$LF
+		"        static unsigned pocketed_begin;
+		$LF
+		"        pocketed_begin = GetPocketedCount();
+		$LF
+		$LF
+		"        // Fire (and wait until it registers the action)
+		$LF
+		"        while(DoFiring(nframes, maxframes)) scrReturn(1);
+		$LF
+		$LF
+		"        // Wait until all balls stop moving.
+		$LF
+		"        while(DoWaitBallsStop(nframes, failreason, maxframes)) scrReturn(1);
+		$LF
+		"        if(failreason) goto Fail;
+		$LF
+		"        
+		$LF
+		"        num_pocketed = GetPocketedCount();
+		$LF
+		"        if(WhitePocketed()) { failreason="blunder2"; goto Fail; }
+		$LF
+		"        
+		$LF
+		"        /*fprintf(stderr, "frame %u, pocketed %u, begin %u\n",
+		$LF
+		"            (unsigned)framecount,
+		$LF
+		"            num_pocketed,
+		$LF
+		"            pocketed_begin);
+		$LF
+		"        */
+		$LF
+		"        
+		$LF
+		"        if(num_pocketed >= pocketed_begin)
+		$LF
+		"            num_pocketed -= pocketed_begin; else num_pocketed=0;
+		$LF
+		"    
+		$LF
+		"    /*EndLoop:*/ Fail: ;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    static unsigned GetPocketedCount()
+		$LF
+		"    {
+		$LF
+		"        unsigned result = 0;
+		$LF
+		"        for(unsigned a=1; a<16;++a)
+		$LF
+		"        {
+		$LF
+		"            if(RAM[0x300+a]==0xC0) break;
+		$LF
+		"            if((RAM[0x300+a] & 15) != 2 && (RAM[0x300+a] & 15) != 1)
+		$LF
+		"            {
+		$LF
+		"                //fprintf(stderr, "%u:%02X;", a,RAM[0x300+a]);
+		$LF
+		"                ++result;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        ++result;
+		$LF
+		"        return result;
+		$LF
+		"    }
+		$LF
+		"    static bool WhitePocketed()
+		$LF
+		"    {
+		$LF
+		"        return  (RAM[0x300] & 15) != 2
+		$LF
+		"             && (RAM[0x300] & 15) != 1;
+		$LF
+		"    }
+		$LF
+		$LF
+		$LF
+		"    static double CalculateProspects()
+		$LF
+		"    {
+		$LF
+		"        /* Returns a value 0..1 describing how good the board state is */
+		$LF
+		"        static std::vector<double> pocket_x;
+		$LF
+		"        static std::vector<double> pocket_y;
+		$LF
+		"        static int LastInitPockets=-1;
+		$LF
+		"        static double maximumdistance;
+		$LF
+		"        
+		$LF
+		"        if(LastInitPockets != RAM[0x187])
+		$LF
+		"        {
+		$LF
+		"            /* To save CPU time, only regenerate
+		$LF
+		"             * the pocket list when the table changes
+		$LF
+		"             */
+		$LF
+		"            pocket_x.clear(); pocket_y.clear();
+		$LF
+		"            LastInitPockets = RAM[0x187];
+		$LF
+		"            
+		$LF
+		"            for(unsigned y=1; y<19; ++y)
+		$LF
+		"            {
+		$LF
+		"                for(unsigned x=1; x<25; ++x)
+		$LF
+		"                {
+		$LF
+		"                    unsigned char c = RAM[0x600 + y*26+x];
+		$LF
+		"                    //fprintf(stderr, "%02X ", c);
+		$LF
+		"                    #define b(n) (((n)&~0xCC)==0)
+		$LF
+		"                    
+		$LF
+		"                    if((c & 0x10) == 0x10 // this indicates a pocket-type tile
+		$LF
+		"                    && (b(RAM[0x600 + (y-1)*26+x]) // must be next to field
+		$LF
+		"                     || b(RAM[0x600 + (y+1)*26+x])
+		$LF
+		"                     || b(RAM[0x600 + y*26+(x-1)])
+		$LF
+		"                     || b(RAM[0x600 + y*26+(x+1)])))
+		$LF
+		"                    {
+		$LF
+		"                        pocket_x.push_back(x);
+		$LF
+		"                        pocket_y.push_back(y);
+		$LF
+		"                        //fprintf(stderr, "\npocket at %u,%u", x,y);
+		$LF
+		"                    }
+		$LF
+		"                    #undef b
+		$LF
+		"                }
+		$LF
+		"                //fprintf(stderr, "\n");
+		$LF
+		"            }
+		$LF
+		$LF
+		"            maximumdistance=0;
+		$LF
+		"            unsigned n_pockets = pocket_x.size();
+		$LF
+		"            for(unsigned y=1; y<19; ++y)
+		$LF
+		"                for(unsigned x=1; x<25; ++x)
+		$LF
+		"                {
+		$LF
+		"                    double mindist=9e39;
+		$LF
+		"                    for(unsigned p=0; p<n_pockets; ++p)
+		$LF
+		"                    {
+		$LF
+		"                        double xd = x-pocket_x[p], yd = y-pocket_y[p];
+		$LF
+		"                        double dist = std::sqrt(xd*xd+yd*yd);
+		$LF
+		"                        if(dist < mindist) mindist=dist;
+		$LF
+		"                    }
+		$LF
+		"                    if(mindist>maximumdistance) maximumdistance=mindist;
+		$LF
+		"                }
+		$LF
+		"        }
+		$LF
+		"        unsigned n_pockets = pocket_x.size();
+		$LF
+		"        
+		$LF
+		"        double result = 0;
+		$LF
+		"        for(unsigned n=1; n<16; ++n)
+		$LF
+		"        {
+		$LF
+		"            unsigned char BallState = RAM[0x300+n];
+		$LF
+		"            if(RAM[0x310+n] == 0 || RAM[0x310+n] >= 0x10) continue; // non-balls
+		$LF
+		"            if(BallState == 0x83 || BallState == 0x03 || BallState == 0x00)
+		$LF
+		"            {
+		$LF
+		"                // The ball does not exist anymore. Perfect.
+		$LF
+		"                //result += 1.0;
+		$LF
+		"                continue;
+		$LF
+		"            }
+		$LF
+		"          
+		$LF
+		"          #if 1
+		$LF
+		"            // Find out how close the ball is to the nearest pocket
+		$LF
+		"            double ballx = int(RAM[0x370 + n] / 8) - 3;
+		$LF
+		"            double bally = int(RAM[0x330 + n] / 8) - 8;
+		$LF
+		"            double mindistsquared = 9e39;
+		$LF
+		"            for(unsigned p=0; p<n_pockets; ++p)
+		$LF
+		"            {
+		$LF
+		"                double xdist = ballx - pocket_x[p], ydist = bally - pocket_y[p];
+		$LF
+		"                double distsquared = xdist*xdist + ydist*ydist;
+		$LF
+		"                if(distsquared < mindistsquared) mindistsquared = distsquared;
+		$LF
+		"            }
+		$LF
+		"            double dist = std::sqrt(mindistsquared);
+		$LF
+		"            
+		$LF
+		"            /*
+		$LF
+		"            fprintf(stderr, "\n[%u/%u][0:%02X 3:%02X 7:%02X] ballx=%6.3f bally=%6.3f dist=%6.3f, maxdist=%g;",
+		$LF
+		"                n, framecount,
+		$LF
+		"                RAM[0x300+n], RAM[0x330+n], RAM[0x370+n],
+		$LF
+		"                ballx,bally,dist, maximumdistance);*/
+		$LF
+		"            
+		$LF
+		"            result += (1.0 - (dist / maximumdistance)) * 0.5;
+		$LF
+		"          #endif
+		$LF
+		"        }
+		$LF
+		"        //fprintf(stderr, "\n");
+		$LF
+		"        
+		$LF
+		"        return result / 6.0;
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+	]code
+]pre
+[pre 
+	[code class=language-c 
+		"struct LunarballLaunchManager2: public LunarballMethods
+		$LF
+		"{
+		$LF
+		"    // Define the range of parameters to be passed to Mutate().
+		$LF
+		"    static const double MINMUTAATIO = 0.0010; // Minimum value, given to first candidates
+		$LF
+		"    static const double MAXMUTAATIO = 0.7800; // Maximum value, given to last candidates
+		$LF
+		"    // This controls the curve of mutation distribution 
+		$LF
+		"    // (larger value = more big mutations, smaller value = more small mutations).
+		$LF
+		"    // 1 = even distribution
+		$LF
+		"    static const double LOGMUTAATIO = 0.243;
+		$LF
+		"    
+		$LF
+		"    static const unsigned WINNERS = 16; // number of winners to take each round for refinement
+		$LF
+		$LF
+		"    // number of variations per each generation (PLUS WINNERS, which are preserved for competition)
+		$LF
+		"    // larger number increases the chances of finding the Right Thing
+		$LF
+		"    static const unsigned NUM_VARIATIONS = 1900;
+		$LF
+		"    
+		$LF
+		"    // number of entirely randomly generated candidates to add each round
+		$LF
+		"    static const unsigned NUM_RANDOMS = 300;
+		$LF
+		$LF
+		"    // accept rule when no improvements have been found within this number of generations
+		$LF
+		"    // larger number decreases the chances of missing the Right Thing
+		$LF
+		"    static const unsigned min_generations_no_improvement = 80;
+		$LF
+		$LF
+		"    static const unsigned NUM_FORKS = 4;
+		$LF
+		"    static const unsigned NUM_CANDIDATES_PER_PROCESS = 200;
+		$LF
+		$LF
+		"    static const unsigned INIT_MAX_FRAMES = 600+3;
+		$LF
+		"    
+		$LF
+		"    static const bool DO_DUALSHOT = true;
+		$LF
+		"    
+		$LF
+		"    /*
+		$LF
+		"        Input:
+		$LF
+		"         For all
+		$LF
+		"           angle
+		$LF
+		"           preangle
+		$LF
+		"           
+		$LF
+		"           try some: prevelocity
+		$LF
+		"           try all: velocity
+		$LF
+		"           
+		$LF
+		"           find best, then refine it
+		$LF
+		"           genetically
+		$LF
+		"    */
+		$LF
+		"    
+		$LF
+		"    struct CandidateType
+		$LF
+		"    {
+		$LF
+		"    private:
+		$LF
+		"        float angle;
+		$LF
+		"        float velocity;
+		$LF
+		"        float preangle;
+		$LF
+		"        float prevelocity;
+		$LF
+		"    public:
+		$LF
+		"        float scoring;
+		$LF
+		"        uint_least16_t confidence;
+		$LF
+		"        bool dummy_first;
+		$LF
+		"        uint_least32_t key;
+		$LF
+		"    public:
+		$LF
+		"        CandidateType(): angle(0),velocity(0),preangle(0),prevelocity(0),
+		$LF
+		"                         scoring(0),confidence(0),dummy_first(false), key(0)
+		$LF
+		"                         { }
+		$LF
+		"        
+		$LF
+		"        void Mutate(double mut_amount)
+		$LF
+		"        {
+		$LF
+		"        retry: ;
+		$LF
+		"            unsigned r = lrand48();
+		$LF
+		"            unsigned which = 1+(r%15), change = r/15;
+		$LF
+		"            unsigned oldmodel = GetModel();
+		$LF
+		"            if(dummy_first) { which = 12 + 1+(r%3); change = r/3;}
+		$LF
+		"            if(which & 1) angle       = fmod(angle       + 1 + ((change&1)?1:-1)*mut_amount, 1);
+		$LF
+		"            if(which & 2) velocity    = fmod(velocity    + 1 + ((change&2)?1:-1)*mut_amount, 1);
+		$LF
+		"            if(which & 4) preangle    = fmod(preangle    + 1 + ((change&4)?1:-1)*mut_amount, 1);
+		$LF
+		"            if(which & 8) prevelocity = fmod(prevelocity + 1 + ((change&8)?1:-1)*mut_amount, 1);
+		$LF
+		"            if(dummy_first)
+		$LF
+		"            {
+		$LF
+		"                if((GetModel() >> 16) == (oldmodel >> 16))
+		$LF
+		"                {
+		$LF
+		"                    if(mut_amount < 0.4) mut_amount += 0.1;
+		$LF
+		"                    goto retry;
+		$LF
+		"                }
+		$LF
+		"                dummy_first = false;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        unsigned GetModel() const
+		$LF
+		"        {
+		$LF
+		"            unsigned char ang = (unsigned)(angle*256)& 0xFF;
+		$LF
+		"            unsigned char vel = (unsigned)(velocity*256) & 0xFF;
+		$LF
+		"            unsigned char preang = (unsigned)(preangle*256) & 0xFF;
+		$LF
+		"            unsigned char prevel = (unsigned)(prevelocity*256) & 0xFF;
+		$LF
+		"            
+		$LF
+		"            /* Game's velocity gauge goes in increments of 3 */
+		$LF
+		"            vel = (vel/3)*3;       if(vel < 0x12)    vel = 0x12;
+		$LF
+		"            prevel = (prevel/3)*3; if(prevel < 0x12) prevel = 0x12;
+		$LF
+		"            
+		$LF
+		"            return (ang + vel*256U) + 65536U * (preang + prevel*256U);
+		$LF
+		"        }
+		$LF
+		"        CandidateType& SetModel(unsigned model, bool dummy=false)
+		$LF
+		"        {
+		$LF
+		"            unsigned cur = model%65536;
+		$LF
+		"            unsigned pre = model/65536;
+		$LF
+		"            
+		$LF
+		"            angle    = (cur%256) / 256.0; preangle    = (pre%256) / 256.0;
+		$LF
+		"            velocity = (cur/256) / 256.0; prevelocity = (pre/256) / 256.0;
+		$LF
+		"            dummy_first = dummy;
+		$LF
+		"            return *this;
+		$LF
+		"        }
+		$LF
+		"        void CreateRandom()
+		$LF
+		"        {
+		$LF
+		"            angle    = drand48(); preangle = drand48();
+		$LF
+		"            velocity = drand48(); prevelocity = drand48();
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        static unsigned CountSeeds() { return 0; }
+		$LF
+		"        CandidateType& SetSeed(unsigned)
+		$LF
+		"        {
+		$LF
+		"            return *this;
+		$LF
+		"        }
+		$LF
+		$LF
+		"        bool BetterScoring(const CandidateType& b) const
+		$LF
+		"        {
+		$LF
+		"            return scoring > b.scoring;
+		$LF
+		"        }
+		$LF
+		"        void SaveRes()
+		$LF
+		"        {
+		$LF
+		"            char candfn[128]; sprintf(candfn, "/tmp/cand%u.res", key);
+		$LF
+		"            FILE*fp = fopen(candfn, "wt");
+		$LF
+		"            if(fp)
+		$LF
+		"            {
+		$LF
+		"                fprintf(fp, "%g,%d,%d\n",
+		$LF
+		"                    scoring,
+		$LF
+		"                    confidence,
+		$LF
+		"                    (int)dummy_first);
+		$LF
+		"                fclose(fp);
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"                perror(candfn);
+		$LF
+		"        }
+		$LF
+		"        void LoadRes()
+		$LF
+		"        {
+		$LF
+		"            char candfn[128]; sprintf(candfn, "/tmp/cand%u.res", key);
+		$LF
+		"            if(FILE*fp = fopen(candfn, "rt"))
+		$LF
+		"            {
+		$LF
+		"                int dummy, cf;
+		$LF
+		"                double sc;
+		$LF
+		"                fscanf(fp, "%lg,%d,%d",
+		$LF
+		"                    &sc,
+		$LF
+		"                    &cf,
+		$LF
+		"                    &dummy);
+		$LF
+		"                scoring=sc;
+		$LF
+		"                confidence=cf;
+		$LF
+		"                dummy_first = dummy;
+		$LF
+		"                fclose(fp);
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                perror(candfn);
+		$LF
+		"            }
+		$LF
+		"            unlink(candfn);
+		$LF
+		"        }
+		$LF
+		"    };
+		$LF
+		$LF
+		"    typedef
+		$LF
+		"      std::map<unsigned char/*preang*/,
+		$LF
+		"               std::map<unsigned char/*prevel*/,
+		$LF
+		"                   std::map<unsigned char/*ang*/,
+		$LF
+		"                      std::map<unsigned char/*vel*/, CandidateType*>
+		$LF
+		"              > > > CandidateOptMapType;
+		$LF
+		"    
+		$LF
+		"    struct LunarState: public SaveState
+		$LF
+		"    {
+		$LF
+		"        unsigned nmp, nmf, *nmpp, *nmfp;
+		$LF
+		"        LunarState(): SaveState(), nmp(0), nmf(0), nmpp(&nmp), nmfp(&nmf) { }
+		$LF
+		"        
+		$LF
+		"        void Save(unsigned& np, unsigned& nf)
+		$LF
+		"            { SaveState::Create(); nmp=*(nmpp=&np); nmf=*(nmfp=&nf); }
+		$LF
+		"        
+		$LF
+		"        void Load()
+		$LF
+		"            { SaveState::Load(); *nmpp=nmp; *nmfp=nmf; }
+		$LF
+		"    };
+		$LF
+		"    
+		$LF
+		"    bool AnalyzeShotResult(CandidateType& cand, unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"        unsigned ang,unsigned vel,unsigned preang,unsigned prevel)
+		$LF
+		"    {
+		$LF
+		"        using namespace LunarballLaunchManager2ns;
+		$LF
+		"    
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        static const char* failreason; failreason = 0;
+		$LF
+		"        static unsigned nframes_transition; nframes_transition = 0;
+		$LF
+		"        
+		$LF
+		"      #if 1 /* Don't do this, it hinders the finding of good candidates */
+		$LF
+		"        if(num_pocketed > 0)
+		$LF
+		"        { unsigned dummy_model, best_time_this_pocket_count
+		$LF
+		"            = Winner::GetBestTimeWithPocketCount(num_pocketed,dummy_model);
+		$LF
+		"          if(best_time_this_pocket_count > 0
+		$LF
+		"          && best_time_this_pocket_count*5/3 < nframes)
+		$LF
+		"          {
+		$LF
+		"            /*fprintf(stderr, "estimated %u, got %u\n",
+		$LF
+		"                best_time_this_pocket_count, nframes);*/
+		$LF
+		"            failreason = "pessimistic";
+		$LF
+		"            goto Fail;
+		$LF
+		"          }
+		$LF
+		"        }
+		$LF
+		"      #endif
+		$LF
+		"      
+		$LF
+		"        static double prospects; prospects = CalculateProspects();
+		$LF
+		"        
+		$LF
+		"        if(num_pocketed > 0)
+		$LF
+		"        {
+		$LF
+		"            while(DoWaitNextShotPossible(
+		$LF
+		"                nframes, nframes_transition, false, MAX_FRAMES)) scrReturn(1);
+		$LF
+		"            if(nframes-nframes_transition >= MAX_FRAMES) goto Fail;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        static unsigned nframes_scoring;
+		$LF
+		"        nframes_scoring = nframes - nframes_transition;
+		$LF
+		"        cand.scoring = num_pocketed;
+		$LF
+		"        cand.scoring += prospects;
+		$LF
+		"        cand.scoring /= (double)(nframes_scoring ? nframes_scoring : 0);
+		$LF
+		"        cand.scoring *= 131072; // arbitrary number to make the scores more readable
+		$LF
+		"        
+		$LF
+		"        ++cand.confidence;
+		$LF
+		"        goto EndLoop;
+		$LF
+		"    Fail:
+		$LF
+		"        if(!failreason && nframes-nframes_transition >= MAX_FRAMES) failreason="timeout";
+		$LF
+		"        if(!failreason && !num_pocketed) failreason="dummy";
+		$LF
+		"        if(!failreason) failreason="fail";
+		$LF
+		"        if(nframes < nframes_transition) nframes_transition=0;
+		$LF
+		"        
+		$LF
+		"    EndLoop: ;
+		$LF
+		"        // confidence is not increased if a fail happens
+		$LF
+		"        fprintf(stderr, "\rk[%04d]ang[%3d]vel[%3d]preang[%3u]prevel[%3u]: p=%u, f=%u(ef=%u), %2.4f, %-18s%s",
+		$LF
+		"            cand.key,
+		$LF
+		"            ang,vel,preang,prevel,
+		$LF
+		"            num_pocketed, nframes-nframes_transition, nframes_transition,
+		$LF
+		"            cand.scoring,
+		$LF
+		"            failreason ? failreason : "",
+		$LF
+		"            (/*num_pocketed &&*/ !failreason) ? "\n" : ""
+		$LF
+		"        );
+		$LF
+		"        
+		$LF
+		"        if(!failreason && num_pocketed > 0)
+		$LF
+		"            Winner::Compete(num_pocketed,
+		$LF
+		"                nframes_scoring,
+		$LF
+		"                cand.GetModel());
+		$LF
+		"        fflush(stderr);
+		$LF
+		"        
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    typedef CandidateOptMapType i1s;         typedef i1s::iterator i1; // i, preang -> *prevel
+		$LF
+		"    typedef i1::value_type::second_type i2s; typedef i2s::iterator i2; // j, prevel -> *ang
+		$LF
+		"    typedef i2::value_type::second_type i3s; typedef i3s::iterator i3; // k, ang -> *vel
+		$LF
+		"    typedef i3::value_type::second_type i4s; typedef i4s::iterator i4; // l, vel -> *candidate
+		$LF
+		"    typedef i4::value_type::second_type i5s; 
+		$LF
+		"    
+		$LF
+		"    template<typename VelT, typename NextT>
+		$LF
+		"    int RunCandidates_VelocityLoop(VelT& list, NextT& j,
+		$LF
+		"        unsigned& num_pocketed, unsigned& nframes, unsigned& vel)
+		$LF
+		"    {
+		$LF
+		"        using namespace LunarballLaunchManager2ns;
+		$LF
+		"    
+		$LF
+		"        scrBegin;
+		$LF
+		$LF
+		"        /* For each prevelocity / velocity */
+		$LF
+		"        while(!list.empty())
+		$LF
+		"        {
+		$LF
+		"            for(;;)
+		$LF
+		"            {
+		$LF
+		"                vel = RAM[0x3A0];
+		$LF
+		"                j = list.find(vel);
+		$LF
+		"                if(j != list.end()) break;
+		$LF
+		"                if(nframes++ >= MAX_FRAMES) goto Fail;
+		$LF
+		"                RunFrameWith(0x00);
+		$LF
+		"            }
+		$LF
+		"            /* got vel and j */
+		$LF
+		"            /* Shoot */
+		$LF
+		"            static LunarState shot_state; shot_state.Save(num_pocketed,nframes);
+		$LF
+		"            scrReturn(2);
+		$LF
+		"            list.erase(j);
+		$LF
+		"            if(!list.empty()) shot_state.Load();
+		$LF
+		"        }
+		$LF
+		"    EndLoop: Fail: ;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    template<typename AngT, typename NextT>
+		$LF
+		"    int RunCandidates_AngleLoop(AngT& list, NextT& k,
+		$LF
+		"        unsigned& num_pocketed, unsigned& nframes, unsigned& ang)
+		$LF
+		"    {
+		$LF
+		"        using namespace LunarballLaunchManager2ns;
+		$LF
+		"    
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        /* For each preangle / angle. */
+		$LF
+		"        
+		$LF
+		"        /* Divide the angles into groups per what kind of input
+		$LF
+		"         * is needed to create them. After that, for each group,
+		$LF
+		"         * one just need to extend one frame at time until the
+		$LF
+		"         * desired frame is met.
+		$LF
+		"         */
+		$LF
+		"        typedef std::map<unsigned/*angle*/, NextT> AimList;
+		$LF
+		"        typedef std::map<AimingMethod, AimList> AimMap;
+		$LF
+		"        static AimMap aims;
+		$LF
+		"        aims.clear();
+		$LF
+		"        for(k = list.begin(); k != list.end(); ++k)
+		$LF
+		"        {
+		$LF
+		"            AimingMethod method;
+		$LF
+		"            method.Decide(k->first);
+		$LF
+		"            aims[method][k->first] = k;
+		$LF
+		"        }
+		$LF
+		$LF
+		"        static LunarState begin; begin.Save(num_pocketed,nframes);
+		$LF
+		"        
+		$LF
+		"        static typename AimMap::iterator ai;
+		$LF
+		"        for(ai = aims.begin(); ai != aims.end(); ++ai)
+		$LF
+		"        {
+		$LF
+		"            static unsigned aim_framecount; aim_framecount = 0;
+		$LF
+		"            
+		$LF
+		"            if(ai != aims.begin()) begin.Load();
+		$LF
+		"            
+		$LF
+		"            while(!ai->second.empty())
+		$LF
+		"            {
+		$LF
+		"                for(;;)
+		$LF
+		"                {
+		$LF
+		"                    ang = RAM[0x3C0];
+		$LF
+		"                    
+		$LF
+		"                    { typename AimList::iterator j = ai->second.find(ang);
+		$LF
+		"                      if(j != ai->second.end())
+		$LF
+		"                      {
+		$LF
+		"                        k = j->second;
+		$LF
+		"                        ai->second.erase(j);
+		$LF
+		"                        break;
+		$LF
+		"                    } }
+		$LF
+		"                    
+		$LF
+		"                    if(nframes++ >= MAX_FRAMES) goto FailAim;
+		$LF
+		$LF
+		"                    RunFrameWith( (ai->first.autofire && (aim_framecount++&1))
+		$LF
+		"                                 ? 0x00
+		$LF
+		"                                 : ai->first.key );
+		$LF
+		"                }
+		$LF
+		"                /* got ang and k */
+		$LF
+		"                /* Now each velocity for this angle.... */
+		$LF
+		"                static LunarState aim_state; aim_state.Save(num_pocketed,nframes);
+		$LF
+		"                scrReturn(2);
+		$LF
+		"                if(!ai->second.empty()) aim_state.Load();
+		$LF
+		"            }
+		$LF
+		"        FailAim: ;
+		$LF
+		"        }
+		$LF
+		"    EndLoop: ;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* Actual shot */
+		$LF
+		"    bool RunCandidates_4do(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"                           i5s& lsecond, unsigned preang, unsigned prevel,
+		$LF
+		"                           unsigned ang, unsigned vel)
+		$LF
+		"    {
+		$LF
+		"        using namespace LunarballLaunchManager2ns;
+		$LF
+		"    
+		$LF
+		"        scrBegin;
+		$LF
+		"    
+		$LF
+		"        static const char* failreason; failreason = 0;
+		$LF
+		"        
+		$LF
+		"        while(DoProfileShot(num_pocketed, nframes,
+		$LF
+		"                            failreason, MAX_FRAMES)) scrReturn(1);
+		$LF
+		"        if(failreason)
+		$LF
+		"        {
+		$LF
+		"            /*fprintf(stderr, "ang[%3d]vel[%3d]preang[%3u]prevel[%3u]: %s\n",
+		$LF
+		"                ang,vel,preang,prevel,
+		$LF
+		"                failreason);*/
+		$LF
+		"            goto Fail;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        while(AnalyzeShotResult(*lsecond, num_pocketed, nframes,
+		$LF
+		"            ang,vel,preang,prevel)) scrReturn(1);
+		$LF
+		"        
+		$LF
+		"    /*EndLoop:*/ Fail: ;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* Preshot */
+		$LF
+		"    bool RunCandidates_2do(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"                           i3s& jsecond, unsigned preang, unsigned prevel)
+		$LF
+		"    {
+		$LF
+		"        using namespace LunarballLaunchManager2ns;
+		$LF
+		"    
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        static const char* failreason; failreason = 0;
+		$LF
+		"        
+		$LF
+		"        while(DoProfileShot(num_pocketed, nframes,
+		$LF
+		"                            failreason, MAX_FRAMES)) scrReturn(1);
+		$LF
+		"        if(failreason)
+		$LF
+		"        {
+		$LF
+		"            /* Second shot is irrelevant now */
+		$LF
+		"            for(i3 k = jsecond.begin(); k != jsecond.end(); ++k)
+		$LF
+		"                for(i4 l = k->second.begin(); l != k->second.end(); ++l)
+		$LF
+		"                    l->second->dummy_first = true;
+		$LF
+		$LF
+		"            /*fprintf(stderr, "ang[*]vel[*]preang[%3u]prevel[%3u]: %s\n",
+		$LF
+		"                preang,prevel,
+		$LF
+		"                failreason);*/
+		$LF
+		"            goto Fail;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        if(num_pocketed > 0)
+		$LF
+		"        {
+		$LF
+		"            /* Second shot is irrelevant now */
+		$LF
+		"            /* Just analyze the shot, put it in one of the candidates
+		$LF
+		"             * and mark all of them as "dummy_first" */
+		$LF
+		"            static bool first; first=true;
+		$LF
+		"            static i3 k;
+		$LF
+		"            static i4 l;
+		$LF
+		"            for(k = jsecond.begin(); k != jsecond.end(); ++k)
+		$LF
+		"                for(l = k->second.begin(); l != k->second.end(); ++l)
+		$LF
+		"                {
+		$LF
+		"                    l->second->dummy_first = true;
+		$LF
+		"                    if(first)
+		$LF
+		"                    {
+		$LF
+		"                        static unsigned ang, vel;
+		$LF
+		"                        ang = k->first;
+		$LF
+		"                        vel = l->first;
+		$LF
+		"                        while(AnalyzeShotResult(*l->second, num_pocketed, nframes,
+		$LF
+		"                            ang,vel,preang,prevel)) scrReturn(1);
+		$LF
+		"                        first = false;
+		$LF
+		"                    }
+		$LF
+		"                }
+		$LF
+		"            goto EndLoop;
+		$LF
+		"        }
+		$LF
+		"        if(!DO_DUALSHOT) goto EndLoop;
+		$LF
+		$LF
+		"        static unsigned nextshot; nextshot = 0;
+		$LF
+		"        while(DoWaitNextShotPossible(nframes, nextshot,
+		$LF
+		"            false, MAX_FRAMES)) scrReturn(1);
+		$LF
+		"        // ignore transition time, it shouldn't transition here
+		$LF
+		"        if(nextshot) { failreason="??transition"; goto Fail; }
+		$LF
+		"        
+		$LF
+		"        /* actual shot */
+		$LF
+		"        while(RunCandidates_3(num_pocketed, nframes, jsecond, preang, prevel)) scrReturn(1);
+		$LF
+		"        
+		$LF
+		"    EndLoop: Fail: ;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* Velocity loop */
+		$LF
+		"    bool RunCandidates_4(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"                         i4s& ksecond, unsigned preang, unsigned prevel, unsigned ang)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        for(;;)
+		$LF
+		"        {
+		$LF
+		"            static i4 l;
+		$LF
+		"            static unsigned vel;
+		$LF
+		"            { int c = RunCandidates_VelocityLoop(ksecond, l, num_pocketed, nframes, vel);
+		$LF
+		"              if(!c) break;
+		$LF
+		"              if(c == 1) goto Idle;
+		$LF
+		"            }
+		$LF
+		"            /* got vel and l */
+		$LF
+		"            /* Shoot the shot */
+		$LF
+		"            while(RunCandidates_4do(num_pocketed, nframes, l->second, preang, prevel, ang, vel)) scrReturn(1);
+		$LF
+		"            continue;
+		$LF
+		"        Idle: scrReturn(1);
+		$LF
+		"        }
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* Angle loop */
+		$LF
+		"    bool RunCandidates_3(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"                         i3s& jsecond, unsigned preang, unsigned prevel)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        for(;;)
+		$LF
+		"        {
+		$LF
+		"            static i3 k;
+		$LF
+		"            static unsigned ang;
+		$LF
+		"            { int c = RunCandidates_AngleLoop(jsecond, k, num_pocketed, nframes, ang);
+		$LF
+		"              if(!c) break;
+		$LF
+		"              if(c == 1) goto Idle;
+		$LF
+		"            }
+		$LF
+		"            /* got ang and k */
+		$LF
+		"            /* Check each velocity */
+		$LF
+		"            while(RunCandidates_4(num_pocketed, nframes, k->second, preang, prevel, ang)) scrReturn(1);
+		$LF
+		"            continue;
+		$LF
+		"        Idle: scrReturn(1);
+		$LF
+		"        }
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    /* Prevelocity */
+		$LF
+		"    bool RunCandidates_2(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"                         i2s& isecond, unsigned preang)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        for(;;)
+		$LF
+		"        {
+		$LF
+		"            static i2 j;
+		$LF
+		"            static unsigned prevel;
+		$LF
+		"            { int c = RunCandidates_VelocityLoop(isecond, j, num_pocketed, nframes, prevel);
+		$LF
+		"              if(!c) break;
+		$LF
+		"              if(c == 1) goto Idle;
+		$LF
+		"            }
+		$LF
+		"            /* got prevel and j */
+		$LF
+		"            /* Shoot the preshot -> Check each angle */
+		$LF
+		"            while(RunCandidates_2do(num_pocketed, nframes, j->second, preang, prevel)) scrReturn(1);
+		$LF
+		"            continue;
+		$LF
+		"        Idle: scrReturn(1);
+		$LF
+		"        }
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    /* Preangle */
+		$LF
+		"    bool RunCandidates_1(unsigned& num_pocketed, unsigned& nframes,
+		$LF
+		"                         i1s& optmap)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        for(;;)
+		$LF
+		"        {
+		$LF
+		"            static i1 i;
+		$LF
+		"            static unsigned preang;
+		$LF
+		"            { int c = RunCandidates_AngleLoop(optmap, i, num_pocketed, nframes, preang);
+		$LF
+		"              if(!c) break;
+		$LF
+		"              if(c == 1) goto Idle;
+		$LF
+		"            }
+		$LF
+		"            /* got preang and i */
+		$LF
+		"            /* Check each velocity */
+		$LF
+		"            while(RunCandidates_2(num_pocketed, nframes, i->second, preang)) scrReturn(1);
+		$LF
+		"            continue;
+		$LF
+		"        Idle: scrReturn(1);
+		$LF
+		"        }
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    bool RunCandidates(const SaveState& itbegin_state, CandidateOptMapType& optmap)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        itbegin_state.Load();
+		$LF
+		"        
+		$LF
+		"        static unsigned num_pocketed; num_pocketed = 0;
+		$LF
+		"        static unsigned nframes;      nframes      = 0;
+		$LF
+		$LF
+		"        while(RunCandidates_1(num_pocketed, nframes, optmap)) scrReturn(1);
+		$LF
+		"        
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    typedef std::deque<CandidateType> CandidateListType;
+		$LF
+		"    
+		$LF
+		"    void WaitCandidate(CandidateListType& CandidateList,
+		$LF
+		"                       std::map<int, unsigned>& pid_list,
+		$LF
+		"                       bool block)
+		$LF
+		"    {
+		$LF
+		"        for(int waitflag = block ? 0 : WNOHANG; ; waitflag = WNOHANG)
+		$LF
+		"        {
+		$LF
+		"            int status = 0;
+		$LF
+		"            int pid = waitpid(-1, &status, waitflag);
+		$LF
+		"            if(pid <= 0) break;
+		$LF
+		"        
+		$LF
+		"            std::map<int, unsigned>::iterator i = pid_list.find(pid);
+		$LF
+		"            if(i == pid_list.end())
+		$LF
+		"            {
+		$LF
+		"                fprintf(stderr, "Unknown child %d died\n", pid);
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                const unsigned first_candno = i->second;
+		$LF
+		"                unsigned candno     = first_candno;
+		$LF
+		"                unsigned end_candno = candno + NUM_CANDIDATES_PER_PROCESS;
+		$LF
+		"                if(end_candno > CandidateList.size()) end_candno = CandidateList.size();
+		$LF
+		"                
+		$LF
+		"                for(; candno < end_candno; ++candno)
+		$LF
+		"                {
+		$LF
+		"                    CandidateType* candit = &CandidateList[candno];
+		$LF
+		"                    candit->LoadRes();
+		$LF
+		"                }
+		$LF
+		"                pid_list.erase(i);
+		$LF
+		"            }
+		$LF
+		$LF
+		"            if(WIFSIGNALED(status))
+		$LF
+		"            {
+		$LF
+		"                fprintf(stderr, "Child died at signal %d\n",
+		$LF
+		"                    WTERMSIG(status));
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    int LaunchNCandidates
+		$LF
+		"        (CandidateListType& CandidateList, const unsigned first_candno,
+		$LF
+		"         std::map<int, unsigned>& pid_list,
+		$LF
+		"         const SaveState& itbegin)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        if(true) // parent
+		$LF
+		"        {
+		$LF
+		"            Winner::LoadLimit();
+		$LF
+		"        
+		$LF
+		"            int pid;
+		$LF
+		"            fflush(stdout);
+		$LF
+		"            fflush(stderr);
+		$LF
+		"            pid = fork();
+		$LF
+		"            if(pid > 0)
+		$LF
+		"            {
+		$LF
+		"                pid_list[pid] = first_candno;
+		$LF
+		"                fprintf(stderr, "."); fflush(stderr);
+		$LF
+		"                goto end;
+		$LF
+		"            }
+		$LF
+		"            if(pid < 0)
+		$LF
+		"            {
+		$LF
+		"                perror("fork");
+		$LF
+		"                goto end;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        // child
+		$LF
+		"        
+		$LF
+		"        MovieForkIntoTempFiles();
+		$LF
+		"        
+		$LF
+		"        static unsigned end_candno;
+		$LF
+		"        end_candno = first_candno + NUM_CANDIDATES_PER_PROCESS;
+		$LF
+		"        if(end_candno > CandidateList.size())
+		$LF
+		"            end_candno = CandidateList.size();
+		$LF
+		"        
+		$LF
+		"        static CandidateOptMapType optmap;
+		$LF
+		"        optmap.clear();
+		$LF
+		"        for(unsigned candno=first_candno; candno < end_candno; ++candno)
+		$LF
+		"        {
+		$LF
+		"            CandidateType* candit = &CandidateList[candno];
+		$LF
+		"            unsigned model = candit->GetModel();
+		$LF
+		"            unsigned cur = model%65536, ang=cur%256, vel=cur/256;
+		$LF
+		"            unsigned pre = model/65536, preang=pre%256, prevel=pre/256;
+		$LF
+		"            optmap[preang][prevel][ang][vel] = candit;
+		$LF
+		"            candit->scoring = 0; // Assume it does really badly
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        while(RunCandidates(itbegin, optmap)) scrReturn(1);
+		$LF
+		"        optmap.clear();
+		$LF
+		$LF
+		"        for(unsigned candno=first_candno; candno < end_candno; ++candno)
+		$LF
+		"            CandidateList[candno].SaveRes();
+		$LF
+		"        
+		$LF
+		"        // terminate child
+		$LF
+		"        fflush(stdout);
+		$LF
+		"        fflush(stderr);
+		$LF
+		"        _exit(0);
+		$LF
+		"    
+		$LF
+		"    end:;
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    int RunCandidates(CandidateListType& CandidateList,
+		$LF
+		"                      const SaveState& itbegin)
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        static std::map<int, unsigned> pid_list;
+		$LF
+		"        pid_list.clear();
+		$LF
+		"        BotFrontDisableVideo=2;
+		$LF
+		"        
+		$LF
+		"        // Sort the new-round candidates, in an order that
+		$LF
+		"        // is fastest to execute
+		$LF
+		"       // std::sort(CandidateList.begin(), CandidateList.end(),
+		$LF
+		"       //           std::mem_fun_ref(&CandidateType::SimilarityCompare));
+		$LF
+		"        
+		$LF
+		"        /* As much as I'd like to use OpenMP here, it wouldn't work because it's
+		$LF
+		"         * not compatible with coroutines: an omp loop may only have one exit.
+		$LF
+		"         */
+		$LF
+		"        static unsigned candno;
+		$LF
+		"        for(candno=0; candno<CandidateList.size(); candno+=NUM_CANDIDATES_PER_PROCESS)
+		$LF
+		"        {
+		$LF
+		"            do {
+		$LF
+		"                WaitCandidate(CandidateList, pid_list, pid_list.size() >= NUM_FORKS);
+		$LF
+		"            } while(pid_list.size() >= NUM_FORKS);
+		$LF
+		"            
+		$LF
+		"            while(LaunchNCandidates(CandidateList, candno, pid_list, itbegin)) scrReturn(1);
+		$LF
+		"        }
+		$LF
+		"        BotFrontDisableVideo=1;
+		$LF
+		$LF
+		"        while(!pid_list.empty())
+		$LF
+		"        {
+		$LF
+		"            WaitCandidate(CandidateList, pid_list, true);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    int Run()
+		$LF
+		"    {
+		$LF
+		"        scrBegin;
+		$LF
+		"        
+		$LF
+		"        static CandidateListType WinnerList;
+		$LF
+		"        static std::bitset<0x100000000ULL> covered_candidates;
+		$LF
+		"        static std::bitset<0x10000> covered_preshots;
+		$LF
+		"        
+		$LF
+		"BeginNewShot:
+		$LF
+		"        Winner::SetBest(0,0,0);
+		$LF
+		"        
+		$LF
+		"        LunarballLaunchManager2ns::MAX_FRAMES = INIT_MAX_FRAMES;
+		$LF
+		"        LunarballLaunchManager2ns::BALLS_REMAINING = RAM[0x18E];
+		$LF
+		"        
+		$LF
+		"        WinnerList.clear();
+		$LF
+		"        covered_candidates.reset();
+		$LF
+		"        covered_preshots.reset();
+		$LF
+		"        
+		$LF
+		"        /* Append the seed group to this list */
+		$LF
+		"        for(unsigned a=0; a< CandidateType::CountSeeds(); ++a)
+		$LF
+		"            WinnerList.push_back(CandidateType().SetSeed(a));
+		$LF
+		$LF
+		"      #define CreateSeed(pok,tim,ang,vel,preang,prevel, is_oneshot) \
+		$LF
+		"          /*if(preang >= 110 && preang < 0x90)*/ \
+		$LF
+		"          /*if(preang >= 0x75 && ang >= 0x75)*/ \
+		$LF
+		"          /*if(ang < 40 || ang > 170)*/ \
+		$LF
+		"          do{ \
+		$LF
+		"            CandidateType tmp; \
+		$LF
+		"            unsigned model = (ang+vel*256U) + (preang + prevel*256U)*65536U; \
+		$LF
+		"            if(!covered_preshots[model >> 16] \
+		$LF
+		"            && !covered_candidates[model]) \
+		$LF
+		"            { \
+		$LF
+		"                WinnerList.push_back(tmp.SetModel(model, is_oneshot)); \
+		$LF
+		"                if(is_oneshot) covered_preshots[model >> 16] = true; \
+		$LF
+		"                covered_candidates[model] = true; \
+		$LF
+		"            } \
+		$LF
+		"            /*Winner::SetBest(pok,tim,model);*/ \
+		$LF
+		"          }while(0)
+		$LF
+		"        
+		$LF
+		"        fprintf(stderr, "Beginning new shot. Table=%u, remaining balls=%u\n",
+		$LF
+		"            RAM[0x187], RAM[0x18E]);
+		$LF
+		$LF
+		"        if(RAM[0x187] == 1 && RAM[0x18E] == 6)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(4, 488,  228,240, 208,138, false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 1 && RAM[0x18E] == 2)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(2, 346,   56,177,  36,0, false);
+		$LF
+		"            CreateSeed(1, 225,   59,174,  35,6, false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 2 && RAM[0x18E] == 6)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(4, 550,   51,255,  44, 54, false);
+		$LF
+		"            CreateSeed(3, 378,   97,252, 102, 36, false);
+		$LF
+		"            CreateSeed(1, 127,  245, 60,  33,222, false);
+		$LF
+		"            CreateSeed(1, 156,  246,241, 105,141, true);
+		$LF
+		"            CreateSeed(2, 276,    0,255, 100,144, true);
+		$LF
+		"            CreateSeed(2, 250,    0,255, 161,252, true);
+		$LF
+		"            CreateSeed(2, 245,   46,204,  26, 45, false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 2 && RAM[0x18E] == 2)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(1, 286,   0x9D,0x60,0x81,0x99, false);
+		$LF
+		"            CreateSeed(1, 251,  157,189, 34,153, true);
+		$LF
+		"            CreateSeed(2, 420,   0x61,0xCC,0x48,0x30, false);
+		$LF
+		"            CreateSeed(2, 420,   97,204,77,27, false);
+		$LF
+		"            CreateSeed(2, 420,   97,207,77,27, false);
+		$LF
+		"            CreateSeed(2, 422,   97,204,77,33, false);
+		$LF
+		"            CreateSeed(2, 422,   97,207,72,24, false);
+		$LF
+		"            CreateSeed(2, 422,   97,222,72,48, false);
+		$LF
+		"            CreateSeed(2, 422,   97,225,77,21, false);
+		$LF
+		"            
+		$LF
+		"            CreateSeed(2, 430,   97,225,77,42, false);
+		$LF
+		"            CreateSeed(2, 439, 24,177,40,18, false);
+		$LF
+		"            CreateSeed(2, 439, 53,234,13,27, false);
+		$LF
+		"            CreateSeed(2, 439, 98,225,53,27, false);
+		$LF
+		"            CreateSeed(2, 439, 107,210,57,39, false);
+		$LF
+		"            CreateSeed(2, 439, 95,234,97,30, false);
+		$LF
+		"            CreateSeed(2, 464, 102,246,109,33, false);
+		$LF
+		"            CreateSeed(2, 464,  26,225,14,24, false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 4 && RAM[0x18E] == 5)
+		$LF
+		"        {/*
+		$LF
+		"            CreateSeed(3, 373,  134,  243,  126,  33, false);
+		$LF
+		"            CreateSeed(3, 373,  134,  243,  126,  36, false);
+		$LF
+		"            CreateSeed(3, 373,  134,  243,  126,  48, false);
+		$LF
+		"            CreateSeed(3, 373,  134,  243,  127,  45, false);*/
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 5 && RAM[0x18E] == 7)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(1, 191, 84,255, 84,207, true);
+		$LF
+		"            CreateSeed(2, 301, 80,255, 80,213, true);
+		$LF
+		"            CreateSeed(3, 372, 86,255, 86,255, true);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 5 && RAM[0x18e] == 4)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(3,534,155,255,155,45,false);
+		$LF
+		"            CreateSeed(3,506,155,255,155,42,false);
+		$LF
+		"            CreateSeed(3,506,155,255,155,39,false);
+		$LF
+		"            CreateSeed(3,506,155,255,155,27,false);
+		$LF
+		"            CreateSeed(1,303,168,255,168,243,false);
+		$LF
+		"            CreateSeed(2,324,170,255,170,249,false);
+		$LF
+		"            CreateSeed(3,446,169,255,169,240,false);
+		$LF
+		"            CreateSeed(1,303,168,255,168,243,false);
+		$LF
+		"            CreateSeed(2,324,170,255,170,249,false);
+		$LF
+		"            CreateSeed(4,696,136,246,76,18,false);
+		$LF
+		"            CreateSeed(4,693,136,240,76,21,false);
+		$LF
+		"            CreateSeed(4,693,136,243,76,21,false);
+		$LF
+		"            CreateSeed(4,693,136,240,76,24,false);
+		$LF
+		"            CreateSeed(4,693,136,243,76,24,false);
+		$LF
+		"            CreateSeed(4,692,136,237,76,45,false);
+		$LF
+		"            CreateSeed(4,641,74,246,81,51,false);
+		$LF
+		"            CreateSeed(4,572,68,240,88,18,false);
+		$LF
+		"            CreateSeed(4,569,68,237,88,21,false);
+		$LF
+		"            CreateSeed(4,568,67,243,93,45,false);
+		$LF
+		"            CreateSeed(4,568,67,246,93,45,false);
+		$LF
+		"            CreateSeed(4,567,67,240,93,51,false);
+		$LF
+		"            CreateSeed(4,553,63,210,95,42,false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 6 && RAM[0x18E] == 6)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(0,400,7,255,7,174,false);
+		$LF
+		"            CreateSeed(0,398,7,255,7,168,false);
+		$LF
+		"            CreateSeed(0,373,12,255,12,132,false);
+		$LF
+		"            CreateSeed(0,364,12,255,12,129,false);
+		$LF
+		"            CreateSeed(0,364,12,255,12,126,false);
+		$LF
+		"            CreateSeed(0,302,15,255,15,192,false);
+		$LF
+		"            CreateSeed(0,302,15,255,15,189,false);
+		$LF
+		"            CreateSeed(0,294,15,255,15,174,false);
+		$LF
+		"            CreateSeed(0,422,21,255,21,210,false);
+		$LF
+		"            CreateSeed(0,379,46,255,46,228,false);
+		$LF
+		"            CreateSeed(0,420,40,255,40,255,false);
+		$LF
+		"            CreateSeed(0,273,45,255,45,231,false);
+		$LF
+		"            CreateSeed(0,264,45,255,45,141,false);
+		$LF
+		"            CreateSeed(0,378,47,255,47,228,false);
+		$LF
+		"            CreateSeed(0,298,50,255,50,216,false);
+		$LF
+		"            CreateSeed(0,241,62,255,62,132,false);
+		$LF
+		"            CreateSeed(0,240,62,255,62,117,false);
+		$LF
+		"            CreateSeed(0,132,64,255,64,177,false);
+		$LF
+		"            CreateSeed(0,365,81,255,81,216,false);
+		$LF
+		"            CreateSeed(0,345,81,255,81,243,false);
+		$LF
+		"            CreateSeed(0,291,229,255,229,255,false);
+		$LF
+		"            CreateSeed(0,132,64,255,64,177,false);
+		$LF
+		"            CreateSeed(0,291,229,255,229,255,false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 7 && RAM[0x18E] == 7)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(0,0, 45,252, 73,24,false);
+		$LF
+		"            CreateSeed(0,0, 45,255, 73,24,false);
+		$LF
+		"            CreateSeed(0,0, 45,252, 73,27,false);
+		$LF
+		"            CreateSeed(0,0, 45,255, 73,27,false);
+		$LF
+		"            CreateSeed(0,0, 59,234, 56,42,false);
+		$LF
+		"            CreateSeed(0,0, 59,237, 56,42,false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 7 && RAM[0x18E] == 2)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(2,325, 30,207,39,30, false);
+		$LF
+		"            CreateSeed(2,325, 30,207,39,33, false);
+		$LF
+		"            CreateSeed(2,325, 30,204,39,45, false);
+		$LF
+		"            CreateSeed(1,154, 48,255,48,240, false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 8 && RAM[0x18E] == 3)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(1,125, 50,255,50,171, false);
+		$LF
+		"            CreateSeed(2,203, 33,255,33,234, false);
+		$LF
+		"            CreateSeed(3,389, 15,237,27,24, false);
+		$LF
+		"            CreateSeed(3,389, 15,240,27,33, false);
+		$LF
+		"            CreateSeed(3,389, 15,237,27,33, false);
+		$LF
+		"            CreateSeed(3,389, 15,240,27,36, false);
+		$LF
+		"            CreateSeed(3,389, 15,237,27,36, false);
+		$LF
+		"            CreateSeed(3,389, 15,240,28,21, false);
+		$LF
+		"            CreateSeed(3,389, 15,237,28,33, false);
+		$LF
+		"            CreateSeed(3,389, 15,240,28,33, false);
+		$LF
+		"        }
+		$LF
+		"        if(RAM[0x187] == 9 && RAM[0x18E] == 6)
+		$LF
+		"        {
+		$LF
+		"            CreateSeed(3,263, 7,255, 7,84, false);
+		$LF
+		"            CreateSeed(3,263, 246,240, 10,54, false);
+		$LF
+		"            //CreateSeed(3,250, 64,210, 34,30, false);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        /**/
+		$LF
+		"        
+		$LF
+		"        /*
+		$LF
+		"        CreateSeed(0,0, 0x9A,0xFC, 0x9F,0x1B, false);
+		$LF
+		"        CreateSeed(0,0, 0x9A,0xFF, 0x9F,0x1B, false);
+		$LF
+		"        CreateSeed(0,0, 0x9A,0xFC, 0x9F,0x1E, false);
+		$LF
+		"        CreateSeed(0,0, 0x9A,0xFF, 0x9F,0x1E, false);
+		$LF
+		"        CreateSeed(0,0, 140,237, 57,255, false);*/
+		$LF
+		$LF
+		"        /* This ensures that all pre-shots are covered. */
+		$LF
+		"        /**/
+		$LF
+		"        for(unsigned preang=0; preang<256; preang += 1)
+		$LF
+		"        for(unsigned prevel=18; prevel<256; prevel += 3)
+		$LF
+		"            CreateSeed(0,0, preang,255, preang, prevel, false);
+		$LF
+		"        /**/
+		$LF
+		$LF
+		"        static SaveState itbegin;
+		$LF
+		"        itbegin.Create();
+		$LF
+		$LF
+		"        static unsigned generationno;
+		$LF
+		"        static unsigned n_generations_no_improvement;
+		$LF
+		"        n_generations_no_improvement = 0;
+		$LF
+		"        static double best_scoring;
+		$LF
+		"        static CandidateType best_candidate;
+		$LF
+		"        best_scoring = -999999;
+		$LF
+		"        
+		$LF
+		"        /* Generate NUM_VARIATIONS for as many generations as needed */
+		$LF
+		"        for(generationno=1; Active; ++generationno)
+		$LF
+		"        {
+		$LF
+		"            static CandidateListType CandidateList;
+		$LF
+		"            /* generate new scorings from models */
+		$LF
+		"            if(generationno == 2)
+		$LF
+		"            {
+		$LF
+		"                if(DO_DUALSHOT)
+		$LF
+		"                {
+		$LF
+		"                    /* Each plausible two-shot combination... */
+		$LF
+		"                    for(unsigned preang=0; preang<256; preang += 1)
+		$LF
+		"                    for(unsigned prevel=18; prevel<=63; prevel += 3)
+		$LF
+		"                    {
+		$LF
+		"                        /*
+		$LF
+		"                        if(preang==51) preang=52;
+		$LF
+		"                        if(preang==164) preang=168;
+		$LF
+		"                        */
+		$LF
+		"                    
+		$LF
+		"                        static const int dists[] = {
+		$LF
+		"                            50,1,/*
+		$LF
+		"                            20,1,
+		$LF
+		"                            34,2,
+		$LF
+		"                            40,3,
+		$LF
+		"                            70,5,
+		$LF
+		"                            100,7,
+		$LF
+		"                            128,14,*/ -1};
+		$LF
+		"                        int prevdist=0;
+		$LF
+		"                        for(int n=0; dists[n*2] != -1; ++n)
+		$LF
+		"                        {
+		$LF
+		"                            int dist = dists[n*2];
+		$LF
+		"                            int skip = dists[n*2+1];
+		$LF
+		"                            for(; prevdist <= dist; prevdist += skip)
+		$LF
+		"                            {
+		$LF
+		"                                const unsigned minvel = 198; //171;
+		$LF
+		"                                
+		$LF
+		"                                for(unsigned vel=minvel; vel<256; vel+=3)
+		$LF
+		"                                    CreateSeed(0, 0, ((preang-prevdist)&255), vel, (preang&0xFF), prevel, false);
+		$LF
+		"                                if(prevdist != 0)
+		$LF
+		"                                for(unsigned vel=minvel; vel<256; vel+=3)
+		$LF
+		"                                    CreateSeed(0, 0, ((preang+prevdist)&255), vel, (preang&0xFF), prevel, false);
+		$LF
+		"                            }
+		$LF
+		"                            prevdist = dist;
+		$LF
+		"                        }
+		$LF
+		"                    }
+		$LF
+		"                }
+		$LF
+		"            }
+		$LF
+		"            CandidateList = WinnerList;
+		$LF
+		"            if(generationno > 2) CandidateList.clear();
+		$LF
+		"            /*
+		$LF
+		"            for(unsigned candno=0; candno<CandidateList.size(); ++candno)
+		$LF
+		"                while(candno < CandidateList.size()
+		$LF
+		"                && !covered_candidates[candno])
+		$LF
+		"                {
+		$LF
+		"                    CandidateList.erase(CandidateList.begin() + candno);
+		$LF
+		"                }
+		$LF
+		"            */
+		$LF
+		$LF
+		"            if(DO_DUALSHOT && !WinnerList.empty() && generationno > 2)
+		$LF
+		"            for(unsigned a=0; a<NUM_VARIATIONS; ++a)
+		$LF
+		"            {
+		$LF
+		"                // Take one of the best as a model, and mutate a copy of it
+		$LF
+		"                unsigned randi = lrand48() % WinnerList.size();
+		$LF
+		"                CandidateType tmp = WinnerList[randi];
+		$LF
+		$LF
+		"                static const double minlog  = pow(LOGMUTAATIO, MINMUTAATIO);
+		$LF
+		"                static const double maxlog  = pow(LOGMUTAATIO, MAXMUTAATIO);
+		$LF
+		"                const double logpos = minlog + (a*(maxlog-minlog))/(NUM_VARIATIONS-1);
+		$LF
+		"                const double mut_amount = log(logpos) / log(LOGMUTAATIO);
+		$LF
+		"                
+		$LF
+		"                //if(generationno == 1)
+		$LF
+		"                //    fprintf(stderr, "Gen %u: mut_amount=%g\n", a, mut_amount);
+		$LF
+		$LF
+		"                tmp.confidence = 0;
+		$LF
+		"                tmp.Mutate(mut_amount);
+		$LF
+		$LF
+		"                unsigned c = tmp.GetModel();
+		$LF
+		"                if(covered_candidates[c]) continue;
+		$LF
+		"                if(covered_preshots[c >> 16]) continue;
+		$LF
+		"                covered_candidates[c] = true;
+		$LF
+		$LF
+		"                CandidateList.push_back(tmp);
+		$LF
+		"            }
+		$LF
+		"            //if(generationno==1){Active=0;}
+		$LF
+		"            
+		$LF
+		"            if(DO_DUALSHOT &&
+		$LF
+		"              (CandidateList.empty() || n_generations_no_improvement > 0 /*|| generationno==1*/))
+		$LF
+		"            for(unsigned a=0; a<NUM_RANDOMS; ++a)
+		$LF
+		"            {
+		$LF
+		"                CandidateType tmp; tmp.CreateRandom();
+		$LF
+		$LF
+		"                unsigned c = tmp.GetModel();
+		$LF
+		"                if(covered_candidates[c]) continue;
+		$LF
+		"                if(covered_preshots[c >> 16]) continue;
+		$LF
+		"                covered_candidates[c] = true;
+		$LF
+		$LF
+		"                CandidateList.push_back(tmp);
+		$LF
+		"            }
+		$LF
+		$LF
+		"            ++n_generations_no_improvement;
+		$LF
+		"                
+		$LF
+		"            { 
+		$LF
+		"            fprintf(stderr, "Generation %u: %u candidates based on %u; %u on 16-bit donelist, %lu on 32-bit\n",
+		$LF
+		"                generationno, (unsigned)CandidateList.size(), (unsigned)WinnerList.size(),
+		$LF
+		"                (unsigned) covered_preshots.count(),
+		$LF
+		"                (unsigned long) covered_candidates.count() );
+		$LF
+		"            }
+		$LF
+		$LF
+		"            WinnerList.clear(); // list of old winners not needed at this point
+		$LF
+		$LF
+		"            for(unsigned candno=0; candno<CandidateList.size(); ++candno)
+		$LF
+		"                CandidateList[candno].key = candno;
+		$LF
+		"            
+		$LF
+		"            // Run the candidates
+		$LF
+		"            while(RunCandidates(CandidateList, itbegin)) scrReturn(1);
+		$LF
+		$LF
+		"            fprintf(stderr, "\r");
+		$LF
+		"            
+		$LF
+		"            for(unsigned candno=0; candno<CandidateList.size(); ++candno)
+		$LF
+		"            {
+		$LF
+		"                CandidateType* candit = &CandidateList[candno];
+		$LF
+		"                candit->key = candno;
+		$LF
+		$LF
+		"                if(candit->dummy_first)
+		$LF
+		"                {
+		$LF
+		"                    covered_preshots[candit->GetModel() >> 16] = true;
+		$LF
+		"                }
+		$LF
+		"            }
+		$LF
+		$LF
+		"            // Sort the new-round candidates, best-first
+		$LF
+		"            std::sort(CandidateList.begin(), CandidateList.end(),
+		$LF
+		"                      std::mem_fun_ref(&CandidateType::BetterScoring));
+		$LF
+		"            
+		$LF
+		"            /* Check if there was a new improvement */
+		$LF
+		"            for(unsigned candno=0; candno<CandidateList.size(); ++candno)
+		$LF
+		"            {
+		$LF
+		"                static CandidateType* candit;
+		$LF
+		"                candit = &CandidateList[candno];
+		$LF
+		$LF
+		"                if(candit->scoring > best_scoring)
+		$LF
+		"                {
+		$LF
+		"                    // reset the no-progress counter
+		$LF
+		"                    best_scoring   = candit->scoring;
+		$LF
+		"                    best_candidate = *candit;
+		$LF
+		"                    n_generations_no_improvement = 0;
+		$LF
+		"                }
+		$LF
+		"                break; // No need to check further, as they're sorted by score
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            /* Always add the winners of each kind for seeding the next breed */
+		$LF
+		"            for(unsigned n=1; n<10; ++n)
+		$LF
+		"            {
+		$LF
+		"                unsigned model, time = Winner::GetBestTimeWithPocketCount(n, model);
+		$LF
+		"                if(time == 0) continue;
+		$LF
+		"                CandidateType tmp;
+		$LF
+		"                tmp.SetModel(model, false); // don't know if it's a dummy_first or not
+		$LF
+		"                tmp.confidence = 1;
+		$LF
+		"                tmp.scoring    = (n / (double)time);
+		$LF
+		"                tmp.scoring += n * 1e-5;
+		$LF
+		"                tmp.scoring += ((model/0x100)&0xFF) * (1e-5/256.0);
+		$LF
+		"                tmp.scoring += ((model/0x1000000)&0xFF) * (1e-5/65536.0);
+		$LF
+		"                tmp.scoring *= 131072;
+		$LF
+		"                WinnerList.push_front(tmp);
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            for(unsigned n=0; n<WINNERS; ++n)
+		$LF
+		"            {
+		$LF
+		"                static const double minlog  = pow(LOGMUTAATIO, MINMUTAATIO);
+		$LF
+		"                static const double maxlog  = pow(LOGMUTAATIO, MAXMUTAATIO);
+		$LF
+		"                const double logpos = minlog + (n*(maxlog-minlog))/(WINNERS-1);
+		$LF
+		"                const double mut_amount = log(logpos) / log(LOGMUTAATIO);
+		$LF
+		"                
+		$LF
+		"                unsigned sel_winner = (unsigned)(mut_amount * CandidateList.size());
+		$LF
+		"                sel_winner %= CandidateList.size();
+		$LF
+		"                
+		$LF
+		"                WinnerList.push_back(CandidateList[sel_winner]);
+		$LF
+		"            }
+		$LF
+		"             
+		$LF
+		"            Averaging quality_all, quality_best;
+		$LF
+		"            for(CandidateListType::const_iterator i=WinnerList.begin();
+		$LF
+		"                  i!=WinnerList.end(); ++i)
+		$LF
+		"                quality_best.Cumulate(i->scoring);
+		$LF
+		"            for(CandidateListType::const_iterator i=CandidateList.begin();
+		$LF
+		"                  i!=CandidateList.end(); ++i)
+		$LF
+		"                quality_all.Cumulate(i->scoring);
+		$LF
+		"            
+		$LF
+		"            fprintf(stderr, "Average quality of generation %u: %g (all), %g (inheritors)\n",
+		$LF
+		"                generationno,
+		$LF
+		"                quality_all.GetValue(), quality_best.GetValue());
+		$LF
+		$LF
+		"            if(n_generations_no_improvement >= min_generations_no_improvement
+		$LF
+		"            || !DO_DUALSHOT) break;
+		$LF
+		"        } // proceed to next generation
+		$LF
+		"        
+		$LF
+		"      #undef CreateSeed
+		$LF
+		$LF
+		"        Winner::Load();
+		$LF
+		"        if(true)
+		$LF
+		"        {
+		$LF
+		"            fprintf(stderr, "Beginning new shot\n");
+		$LF
+		"            FCEUSS_Save("botfrontL-newshotbegin");
+		$LF
+		"            goto BeginNewShot;
+		$LF
+		"        }
+		$LF
+		$LF
+		"    /*EndLoop: ; */
+		$LF
+		"        BotFrontEnd();
+		$LF
+		"        Winner::Load();
+		$LF
+		"        FCEUSS_Save("botfrontL-final");
+		$LF
+		"        
+		$LF
+		"        scrFinish(0);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    #undef RunFrameWith
+		$LF
+		"};
+		$LF
+	]code
+]pre

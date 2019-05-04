@@ -1,0 +1,192 @@
+4
+[p 
+	"Once again Link goes on a journey to save Zelda, but the circumstances let him not do that.
+	$LF
+]p
+[h3 
+	" Encode
+	$LF
+]h3
+[p 
+	(youtube|v=2yPq-uatB2o)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Luck Manipulation
+		$LF
+	]li
+	[li 
+		" Uses damage to save time
+		$LF
+	]li
+	[li 
+		" Uses game restart sequence
+		$LF
+	]li
+	[li 
+		" Executes arbritray code
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[h4 
+	" Route
+	$LF
+]h4
+[p 
+	"The first thing that needs to be done is get the flute in dungeon 2. It almost starts as the published 2nd quest TAS, but with two differences: Using the first savegame and not collecting bombs.
+	[br 
+	]br
+	$LF
+	"After dungeon two a single rupee is collected, not to spent it on anything, but to do some memory manipulation of course. On the way to the graveyard nothing interessting happens.
+	[br 
+	]br
+	$LF
+	"On the graveyard all 10 ghosts need to be spawned in order to glitch the game. The ghost which is already there and the last spawned ghost need to be at the right position at the right time.
+	[br 
+	]br
+	$LF
+	"If everything is done correctly, the item glitch will happen and have a lot of powerful new items.
+	[br 
+	]br
+	$LF
+	"Now going to level 9, because the credits load into memory when entering this dungeon, using the warp bombs.
+	[br 
+	]br
+	$LF
+	"In dungeon 9 the warp bombs are used to get to room 0x00, from there to the next room and use another item to call the credits depending on the X positions of Link and the next two enemies.
+	$LF
+]p
+[h4 
+	" Technical explanation
+	$LF
+]h4
+[dl 
+	[dt 
+		"Using saveslot 1
+	]dt
+	[dd 
+		" The current saveslot is stored in $16 and using the 1st slot gives value 0x00. Using the 3rd saveslot, which is faster when typig in the name, gives value 0x02. That is bad, because that would crash the game when the PC runs over this instruction. That's why the 1st slot is used, the opcode 00 does nothing.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Collecting a rupee
+	]dt
+	[dd 
+		" The rupee is collected, because of the nice sound it makes. After the sound played, address $0618 will be 0x4C, with the next 2 bytes that results as an JMP $0000.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Waiting for the random numbers
+	]dt
+	[dd 
+		" It is crucial to get from $18-$24 into somewhere where the memory can easily manipulated, because at $59 there will be always a 0x02. In this case a branch BNE $5F at $23 to the Y positions is taken. I made a 
+		[a class=extlink href=http://pastebin.com/4PvMgvV3 rel=nofollow 
+			"list
+		]a
+		" with the numbers of the RNG to see when a branch would happen.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Positioning the enemies
+	]dt
+	[dd 
+		" To get the item glitch, the area around $EC6E needs to be executed. It is possible to use a direct jump, but it turned out to be slower, because of the last enemy that spawns. So a indirect jump is used. Link will be at Y position 0x6C, the ghost which is already there will at Y position 0x9A and the last spawned ghost will be at Y position 0xB3. All this together will result in JMP ($B39A) wich jumps to $EC69. After positioning the enemies a long pause is used to wait for the random numbers.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Playing the flute
+	]dt
+	[dd 
+		"Because every slot for objects on screen is already used, the ghost AI will jump to $0602. From there it will execute the memory which is set up.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Item glitch
+	]dt
+	[dd 
+		" The item glitch overwrites that area where the items, collected rupees from caves and opened caves are. To use the glitch items the item index $0656 needs to be greater than 8 and the area where the item index is needs to be filled with something not equal to 0, or else the item index will be set back to 0 if there are to many zeroes between two addresses. In this case the item index is set 0x6E and the whole area from $0602 to $0701 is overwritten. Besides the glitch items the cave to level 9 needs to be opened, $067F needs to be greater or equal to 0x80.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Preventing a crash
+	]dt
+	[dd 
+		"The game would crash after the item glitch, but when visiting the menu and closing it again at the right frame, the crash can be prevented.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Warp bombs
+	]dt
+	[dd 
+		"Item index 0x66 refers to the warp bombs. It makes the screen scroll and warps to the last visited screen in the screen history. The warp happens instantly, so a room can be load instantly without moving.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"X position ACE item
+	]dt
+	[dd 
+		"Item index 0x76 executes $1870, where a copy of the X positions are. So an opcode which jumps to the credits $B7C7 is needed. Again an indirect jump is used again, man I love these. Link is at X position 0x6C, the first enemy at 0x7C and the next at 0x9A, which will result in JMP ($9A7C), that makes the PC jump to $B7C4.
+		$LF
+	]dd
+]dl
+[h4 
+	" Thanks to...
+	$LF
+]h4
+[ul 
+	[li 
+		" RAT926 for finding the item glitch.
+		$LF
+	]li
+	[li 
+		" Sockfolder for documentation on the glitch.
+		$LF
+	]li
+	[li 
+		" Masterjun for documentation on the glitch and finding the credits glitch. Although he doesn't have any inputs on this run, he still is a co-author, because I would be a bit helpless on the credits glitch.
+		$LF
+	]li
+]ul
+[p 
+	"I hope I blew your mind.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": I'm told there's going to be an immediate improvement, so rejecting.
+]p

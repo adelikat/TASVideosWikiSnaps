@@ -1,0 +1,289 @@
+2
+[p 
+	"The tool records inputs into a movie file which has a 
+	[tt 
+		".ltm
+	]tt
+	" extension. It is actually a 
+	[tt 
+		"tar.gz
+	]tt
+	" archive which contains three text files.
+	$LF
+]p
+[h4 
+	" Config
+	$LF
+]h4
+[p 
+	"The first one is 
+	[tt 
+		"config.ini
+	]tt
+	", containing all meta-data of the movie file. It consists of a list of key/value pairs. Here is an example of such a file, with added comments:
+	$LF
+]p
+[pre 
+	"[General]
+	$LF
+	"authors=me ; authors of the movie
+	$LF
+	"frame_count=81 ; frame count of the movie file
+	$LF
+	"framerate_den=1 ; denominator of the number of frames per second
+	$LF
+	"framerate_num=60 ; numerator of the number of frames per second
+	$LF
+	"game_name=SuperMeatBoy ; name of the game executable
+	$LF
+	"initial_time_nsec=0 ; number of nanoseconds of the initial system time
+	$LF
+	"initial_time_sec=1 ; number of seconds of the initial system time
+	$LF
+	"keyboard_support=true ; are keyboard inputs sent to the game
+	$LF
+	"libtas_major_version=1
+	$LF
+	"libtas_minor_version=3
+	$LF
+	"libtas_patch_version=0
+	$LF
+	"mouse_support=true ; are mouse inputs sent to the game
+	$LF
+	"nb_controllers=0 ; up to 4 controllers are supported
+	$LF
+	"rerecord_count=0
+	$LF
+	"savestate_frame_count=13 ; savestate frame for savestate movies
+	$LF
+]pre
+[pre 
+	"; Time hack values
+	$LF
+]pre
+[pre 
+	"[mainthread_timetrack]
+	$LF
+	"clock=-1
+	$LF
+	"clock_gettime=-1
+	$LF
+	"gettimeofday=-1
+	$LF
+	"sdl_getperformancecounter=-1
+	$LF
+	"sdl_getticks=-1
+	$LF
+	"time=-1
+	$LF
+]pre
+[pre 
+	"[secondarythread_timetrack]
+	$LF
+	"clock=-1
+	$LF
+	"clock_gettime=-1
+	$LF
+	"gettimeofday=-1
+	$LF
+	"sdl_getperformancecounter=-1
+	$LF
+	"sdl_getticks=-1
+	$LF
+	"time=-1
+	$LF
+]pre
+[h4 
+	" Inputs
+	$LF
+]h4
+[p 
+	"The second file is the 
+	[tt 
+		"inputs
+	]tt
+	" text file. In this file, each line that starts with the character '
+	[tt 
+		"|
+	]tt
+	"' is an input frame.
+	$LF
+	"The content of one line depends on the three settings 
+	[tt 
+		"keyboard_support
+	]tt
+	", 
+	[tt 
+		"mouse_support
+	]tt
+	" and 
+	[tt 
+		"nb_controllers
+	]tt
+	" above.
+	$LF
+]p
+[p 
+	"If 
+	[tt 
+		"keyboard_support=1
+	]tt
+	", a list of Xlib KeySym (u32) values of each pressed key is appended to the line. They are encoded into an hex string and separated by the '
+	[tt 
+		":
+	]tt
+	"' character. The list ends with the '
+	[tt 
+		"|
+	]tt
+	"' character.
+	$LF
+]p
+[p 
+	"If 
+	[tt 
+		"mouse_support=1
+	]tt
+	", mouse inputs in the format: 
+	[tt 
+		"xpos:ypos:12345
+	]tt
+	" are appended to the line. 
+	[tt 
+		"xpos
+	]tt
+	" and 
+	[tt 
+		"ypos
+	]tt
+	" are x and y coordinates of the pointer (i32) in decimal strings (can be negative). This is followed by 5 characters which are either a digit if the corresponding mouse button is pressed, or the character '
+	[tt 
+		".
+	]tt
+	"'. When decoding the file, the code only checks if the character is a '
+	[tt 
+		".
+	]tt
+	"' or not. The list ends with the '
+	[tt 
+		"|
+	]tt
+	"' character.
+	$LF
+]p
+[p 
+	"For each controller from 1 to 
+	[tt 
+		"nb_controllers
+	]tt
+	", the corresponding controller inputs is appended to the line, in the format: 
+	[tt 
+		"axis_left_x:axis_left_y:axis_right_x:axis_right_y:trigger_left:trigger_right:ABXYbgs()
+		"[]
+		"udlr
+	]tt
+	". The first 6 values are the axis values (i16) encoded in decimal strings. Then each character is either a button character or '
+	[tt 
+		".
+	]tt
+	"', indicating if the corresponding button was pressed or not. The order of the buttons are:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[tt 
+			"A
+		]tt
+		", 
+		[tt 
+			"B
+		]tt
+		", 
+		[tt 
+			"X
+		]tt
+		", 
+		[tt 
+			"Y
+		]tt
+		" buttons
+		$LF
+	]li
+	[li 
+		" back (
+		[tt 
+			"b
+		]tt
+		"), guide (
+		[tt 
+			"g
+		]tt
+		") and start (
+		[tt 
+			"s
+		]tt
+		") buttons
+		$LF
+	]li
+	[li 
+		" left stick (
+		[tt 
+			"(
+		]tt
+		") and right stick (
+		[tt 
+			")
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" left shoulder (
+		[tt 
+			"[}}) and right shoulder ({{]
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" dpad up (
+		[tt 
+			"u
+		]tt
+		"), down (
+		[tt 
+			"d
+		]tt
+		"), left (
+		[tt 
+			"l
+		]tt
+		") and right (
+		[tt 
+			"r
+		]tt
+		")
+		$LF
+	]li
+]ul
+[p 
+	"Each controller inputs end with the '
+	[tt 
+		"|
+	]tt
+	"' character.
+	$LF
+]p
+[h4 
+	" Annotations
+	$LF
+]h4
+[p 
+	"The third file is the 
+	[tt 
+		"annotations.txt
+	]tt
+	" text file, containing movie annotations.
+	$LF
+]p

@@ -1,0 +1,492 @@
+14
+[p 
+	(__wikiLink|user:FractalFusion)
+	"'s Mega Man X 10HP-glitched-password no-dash run in 16:57. Emulator used is Snes9x-rr 1.51 v6.
+	$LF
+]p
+[p 
+	(youtube|v=S-p35iYUO30)
+	$LF
+]p
+[p 
+	(nicovideo|v=sm18030513|w=440|h=320)
+	$LF
+]p
+[p 
+	"Mediafire download: http://www.mediafire.com/download.php?fj5c8o7ipfy2j0p (~48MB)
+	$LF
+]p
+[p 
+	"The Youtube encode used above uses a variant of TASBlend. It works like this:
+	$LF
+]p
+[pre 
+	"...|33|66|66|33|66|33|33|66|33|66|66|33|66|33|33|66|...
+	$LF
+	"...|     |     |     |     |     |     |     |     |...
+	$LF
+]pre
+[p 
+	"and you can implement it in AVISynth like this:
+	$LF
+]p
+[pre 
+	"function Blend(clip c, float oa)  { 
+	$LF
+	"Interleave(
+	$LF
+	"\ Layer(SelectEvery(c, 8, 0), SelectEvery(c, 8, 1), level=int(round(oa * 257)
+	[em 
+	]em
+	")
+	[em 
+	]em
+	"), 
+	$LF
+	"\ Layer(SelectEvery(c, 8, 2), SelectEvery(c, 8, 3), level=int(round(
+	[em 
+	]em
+	"(1.0 - oa) * 257)
+	[em 
+	]em
+	")
+	[em 
+	]em
+	"),
+	$LF
+	"\ Layer(SelectEvery(c, 8, 4), SelectEvery(c, 8, 5), level=int(round(
+	[em 
+	]em
+	"(1.0 - oa) * 257)
+	[em 
+	]em
+	")
+	[em 
+	]em
+	"),
+	$LF
+	"\ Layer(SelectEvery(c, 8, 6), SelectEvery(c, 8, 7), level=int(round(oa * 257)
+	[em 
+	]em
+	")
+	[em 
+	]em
+	")
+	[em 
+	]em
+	")
+	$LF
+	"}
+	$LF
+	"...
+	$LF
+	"Blend(c,2.0/3)
+	$LF
+]pre
+[p 
+	"(I actually used 0.66 exact for the encode rather than 2.0/3, but does that really matter?)
+	$LF
+]p
+[p 
+	"This variant reduces the effect of 1-on-1-off blinking, but is equipped to deal with period-4-type blinking that is prominent in Mega Man X games, which is why I used it here. See 
+	[a href=/forum/t/12028 
+		"this topic
+	]a
+	" for why TASBlend on this site doesn't work well on period-4-type blinking. 
+	$LF
+]p
+[h3 
+	" Goals
+	$LF
+]h3
+[ul 
+	[li 
+		" Obtains 10 MaxHP with a glitched password.
+		$LF
+	]li
+	[li 
+		" Does not obtain Leg Part (Dash) and does not use ride armor.
+		$LF
+	]li
+	[li 
+		" Uses speed/entertainment tradeoffs.
+		$LF
+	]li
+	[li 
+		" Aims for fastest time.
+		$LF
+	]li
+	[li 
+		" Abuses programming errors in the game.
+		$LF
+	]li
+	[li 
+		" Manipulates luck.
+		$LF
+	]li
+	[li 
+		" Uses a Lua script.
+		$LF
+	]li
+	[li 
+		" Is able to auto-fire left and right without dashing.
+		$LF
+	]li
+	[li 
+		" Paints the screen black.
+		$LF
+	]li
+	[li 
+		" Turns down the music volume slider.
+		$LF
+	]li
+	[li 
+		" Prevents Bee Bladers from falling into pits.
+		$LF
+	]li
+	[li 
+		" Splits Electric Spark diagonally.
+		$LF
+	]li
+	[li 
+		" Reverses Vile.
+		$LF
+	]li
+	[li 
+		" Gets 
+		[del 
+			"9
+		]del
+		" 12 extra lives.
+		$LF
+	]li
+	[li 
+		" Gets 7 of the 12 extra lives in a span of 11 seconds.
+		$LF
+	]li
+	[li 
+		" Is chased by a ride armor.
+		$LF
+	]li
+	[li 
+		" Sends a boomerang into orbit.
+		$LF
+	]li
+	[li 
+		" Colors a dialog palette.
+		$LF
+	]li
+	[li 
+		" Enters a wall.
+		$LF
+	]li
+	[li 
+		" Rides a block of ice.
+		$LF
+	]li
+	[li 
+		" Makes a Maverick boss fail to appear.
+		$LF
+	]li
+	[li 
+		" Bounces on springs.
+		$LF
+	]li
+	[li 
+		" Pokes an eye using half the screen space.
+		$LF
+	]li
+	[li 
+		" Only the first six goals count.
+		$LF
+	]li
+]ul
+[h3 
+	" About the run
+	$LF
+]h3
+[p 
+	"I discovered the glitched password and its effects from a couple of Youtube videos:
+	$LF
+]p
+[p 
+	"http://www.youtube.com/watch?v=OqJqQtocCxo 
+	[br 
+	]br
+	$LF
+	"http://www.youtube.com/watch?v=frYwVuBYZAw
+	$LF
+]p
+[p 
+	"There are three known effects:
+	$LF
+]p
+[ul 
+	[li 
+		" Start with no health. The game is stuck and X cannot move. Occurs if you use the password without going into the demo.
+		$LF
+	]li
+	[li 
+		" Start with 10 health. Occurs if you press start just before it goes into demo (1-5 frames before), and enter the password.
+		$LF
+	]li
+	[li 
+		" Start with 32 health, all weapons and subtanks (no capsule parts), and 0 lives. Occurs if you reach the demo at least once, and then enter the password.
+		$LF
+	]li
+]ul
+[p 
+	"I decided to use a fourth effect, which combines the 10-health effect with the all-weapons effect (reach the demo at least once, then press start just before going into another demo). The downside is having to watch the intro twice, but I decided it was worth it.
+	$LF
+]p
+[p 
+	"None of these effects give X any capsule parts. In fact, using this password, it is possible for X to beat the game without the dash part. I decided to make it a walkathon. Interestingly, being restricted to walking speed increases the opportunity to do entertaining stuff.
+	$LF
+]p
+[h3 
+	" More info
+	$LF
+]h3
+[ul 
+	[li 
+		" I used 
+		[a class=extlink href=http://tasvideos-moviefiles.googlecode.com/files/megamanx%2Bextralife%201.1.zip rel=nofollow 
+			"this script
+		]a
+		". It definitely helps with positioning, timing, and item drops.
+		$LF
+	]li
+	[li 
+		" The blackout glitch (after defeating a boss) is caused by pressing Start at the right time, after the boss explosion but just before X tries to walk to the center of the screen. It causes the music to become soft (as if the player is in the subscreen menu) and lasts until the next subscreen menu access.
+		$LF
+	]li
+	[li 
+		" The Armadillo skip glitch occurs by skipping the camera scroll. Using the ice platform to push X into the door, this bypasses the trigger that scrolls the camera up. As a result, Armadillo does not appear and you can advance without any problem. You can get Armadillo to appear by jumping in the boss room.
+		$LF
+	]li
+	[li 
+		" The ice platform glitch allows X to enter a wall from an upper right or left corner. He can only go downward, however, so this restricts its use. Furthermore, usage in some parts doesn't work well because the glitch bypasses the horizontal scroll trigger, and so prevents X from advancing. However, it works nicely in the corridor between Chameleon and Mandrill in Sigma 3.
+		$LF
+	]li
+	[li 
+		" Dropping 7 extra lives in 11 seconds was sheer luck. It just so happens that a set of random values responsible for dropping extra lives was close together, and occurred in a location with many enemies that have normal drop ability. It did not take me 1000000 years to TAS this. I used the script above, as well as a text file containing the indices of the random values which drop extra lives. There are only 341 such random values out of 43534. See below for more information about RNG.
+		$LF
+	]li
+	[li 
+		" I end the movie not at the last dialog clear, but when I press start to force fadeout after warping out at the end.
+		$LF
+	]li
+]ul
+[h3 
+	" About the RNG
+	$LF
+]h3
+[p 
+	"This RNG is used in Mega Man X-X6, Mega Man 7, and Rockman & Forte.
+	$LF
+]p
+[p 
+	"The RNG uses the following formula to generate the next 16-bit number:
+	$LF
+]p
+[pre 
+	"val <- (val*3)&0xFF00 + (
+	[em 
+	]em
+	"(
+	[em 
+	]em
+	"(val*3)>>8)+val)&0x00FF
+	$LF
+]pre
+[p 
+	"or in C code:
+	$LF
+]p
+[pre 
+	"a=val*3
+	$LF
+	"hi=(a/256)%256
+	$LF
+	"lo=(hi+val)%256
+	$LF
+	"val=256*hi+lo
+	$LF
+]pre
+[p 
+	"The starting value for the RNG, which is taken to be index 0, is 0xD37. With this starting value, there are 43534 numbers in the sequence until the RNG reaches 0x0D37 again.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Index
+			]th
+			[th 
+				"Value (Hex)
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"0D37
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"275E
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"76D4
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"6438
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"2C64
+			]td
+		]tr
+		[tr 
+			[td 
+				"...
+			]td
+			[td 
+				"...
+			]td
+		]tr
+		[tr 
+			[td 
+				"43530
+			]td
+			[td 
+				"3F83
+			]td
+		]tr
+		[tr 
+			[td 
+				"43531
+			]td
+			[td 
+				"BE41
+			]td
+		]tr
+		[tr 
+			[td 
+				"43532
+			]td
+			[td 
+				"3A7B
+			]td
+		]tr
+		[tr 
+			[td 
+				"43533
+			]td
+			[td 
+				"AF2A
+			]td
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"0D37
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The Lua script above uses a 128KB binary file (generated in C++) to look up the index corresponding to a given random value.
+	$LF
+]p
+[p 
+	"Information regarding how the game uses the RNG to determine things like random drops can be found at 
+	[a href=/forum/viewtopic.php?p=284826#284826 
+		"this post
+	]a
+	".
+	$LF
+]p
+[h3 
+	" Closing remarks
+	$LF
+]h3
+[p 
+	"Not much else to say. Enjoy the run!
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Changed branch from "glitched" to "glitched password, walkathon". Don't know if you guys agree.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": After reading everyone's comments and mulling over this for a bit, I realize there is no clear cut decision to be rendered for this run.
+	$LF
+]p
+[p 
+	"This run is faster than the existing any% run, and can technically be used to obsolete it. On the other hand, it abuses the password system, and while not actually using a password, the use is questionable. That alone pushes this into the same kind of "glitched" realm we have for games with SRAM, and makes it a separate category. Many viewers disapproved of this run for violating password rules, but I find this case to be acceptable.
+	$LF
+]p
+[p 
+	"The way the glitch works, all 8 stages are considered beaten, and X has their weapons. FractalFusion manipulated things so he'd have the minimal health and upgrades one can get using this glitch, to skip as little as possible. This leads to an interesting scenario where the intro level is played with all items and stands out from other runs, but the final levels would end up looking pretty much the same as an any% run, except that X has less than usual once he gets there.
+	$LF
+]p
+[p 
+	"The next thing about this run that stands out is the walkathon quality. The idea of a walkathon has mostly been shot down throughout the site when attempted for most games. The one exception has been Super Mario Bros, where the game is pretty short, and believed to not be possible as a walkathon, hence the movie there stands out as doing the impossible. Such a feat is really not much of a feat in other games, and in terms of this game, not the least bit surprising, thanks to wall jumping being part of normal game mechanics required to be used. On terms of a full walkathon alone, I think most people would want such a run rejected.
+	$LF
+]p
+[p 
+	"The next thing about this run is the speed vs. entertainment trade off. I don't know for sure if going to get the boots would make it faster, but I imagine so. There's plenty of other places where thanks to the slow speed, plenty of tricks were shown off and lent to entertainment. I don't think those tricks would work across a long non glitched run, and certainly not when doing the initial stages, where X doesn't even have the weapons available yet to show them off. So this run to an extent is a playaround, showing off the weapons, and only across a few stages to keep entertainment high.
+	$LF
+]p
+[p 
+	"Based on the above, neither quality alone would really be publishworthy. A glitched run to skip 8 levels then grab the boots would be too repetitive with the any% run. A full walkathon would be boring and not show much off that this run doesn't, nor have the entertainment the intro level here did. Adding a third branch to a popular game is acceptable, and it seems the combination specific to this run is one of the few that can work.
+	$LF
+]p
+[p 
+	"Feedback for this movie wasn't great, but it seems most of the negative feedback was about prejudging the run's allowance based on entering a failed password, or fighting over whether some other kind of movie would be more acceptable or not.
+	$LF
+]p
+[p 
+	"Since a slim majority of the users prefer to see this published, and many of the negative comments either misunderstood this run's glitch, or preferred an alternate run which would be rejected by my above criteria, I'm going to err on the side of acceptance.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Guga)
+	": Processing...
+]p

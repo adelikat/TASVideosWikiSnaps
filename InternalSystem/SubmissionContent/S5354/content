@@ -1,0 +1,253 @@
+5
+[p 
+	"The old TAS was horribly optimized, I was a bad TASer back then. This one is better.
+	$LF
+]p
+[h3 
+	" Encode
+	$LF
+]h3
+[p 
+	(youtube|v=9yJ62sKzOZM)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.2.3
+		$LF
+	]li
+	[li 
+		" Minor glitch abuse
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"This one improves the 
+	(__wikiLink|2491M|published)
+	" run by 370 frames, mainly due to better speed cycling and luck manipulation. Unfortunately there's an 8 frame-rule for every screen transition and a 16 frame-rule for the credits, so small improvements are cancelled out.
+	$LF
+]p
+[p 
+	"To make TASing this game easier I created a 
+	[a href=/userfiles/info/35790233850650263 
+		"lua script
+	]a
+	" that automates assigning input based on the current game state, control markers and variables. It lead to faster TASing, because then I didn't had to draw inputs by hand, many mouse clicks were reduced to one or zero. You can read more about the functionality about the script 
+	[a href=/forum/viewtopic.php?t=18670 
+		"here
+	]a
+	", but the script is utter garbage anyways since I coded it before thinking about it and doesn't work as idealized as in the submission text.
+	$LF
+]p
+[h3 
+	" Tricks and glitches 
+	$LF
+]h3
+[h4 
+	" Mid-air speed cycling
+	$LF
+]h4
+[p 
+	"The non-deterministic automatoe below represents optimal speed cycling in mid-air. The expression in the circle are state properties, the expression next to the lines are inputs. Other inputs are possible as well, but those usually lead to worse states, less efficient speed cycling or don't minimize input. As you can see the inputs leading from a state are all the same which means caring about the state which comes next isn't necessary and thus no rerecording involved for automating speed cycling.
+	$LF
+]p
+[p 
+	"Here was the automatoe. RIP. :'(
+	$LF
+]p
+[p 
+	"State (numbered from left to right, top to bottom) optimality is as follow: s_1 < s_2 < s_3 < s_4 < s_5. Which means state 5 is the best due to having the highest speed. Goal was to maximize the state optimality, going from a low state to a high state as quickly as possible and to remain in the highest possible state as long as possible.
+	$LF
+]p
+[h4 
+	" On ground movement
+	$LF
+]h4
+[p 
+	"The animation time for normal walking is 5, while for running it is 3. Another timer which increments after each step is responsible for how many pixels the character will move. The character will move when ¬r:a=4→a=3, r:a=2→a=1. The rate of movement just depends on the animation timer. Both timers reset when the d-pad is released, second timer also resets when jumping. The rates for the second timer are: 768, 1280, 1024, 1024.
+	$LF
+]p
+[dl 
+	[dt 
+		"Walking
+	]dt
+	[dd 
+		" (s|s∊a>2) × ¬d → (s|s∊a=0)
+		[br 
+		]br
+		"(s|s∊a=0) × d → (s|s∊a=4)
+		[br 
+		]br
+		"(s|s∊a=4) × d → (s|s∊a=3)
+		[br 
+		]br
+		"On the last state change the character will move 768 pixels and from releasing d in the first state change the animation time is reduced to 3, leading to faster walking despite always having lowest speed.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Runing
+	]dt
+	[dd 
+		" (s|s∊a=0∧r) × B∧d → (s|s∊a=2∧r)
+		[br 
+		]br
+		"(s|s∊a=2∧r) × d → (s|s∊a=1∧r)
+		[br 
+		]br
+		"(s|s∊a=1∧r) × d → (s|s∊a=0∧r)
+		[br 
+		]br
+		"Now the second timer wont reset due to never releasing the d-pad, so the speed cycles through all 4 rates of speed.
+		$LF
+	]dd
+]dl
+[h4 
+	" X Speed and Subpixel behaviour
+	$LF
+]h4
+[p 
+	"The speed value in the game is unsigned, which means high subpixel is always nearer to next position tick no matter what direction the character is moving. The direction flips instantly while the speed stays the same when pressing opposide direction on the d-pad.
+	[br 
+	]br
+	$LF
+	"When jumping the x subpixel is set to 255, to 0 when landing.
+	$LF
+]p
+[h4 
+	" Jumping 
+	$LF
+]h4
+[p 
+	"The A presses for the jumping are distributable, which means 2^11 possibilities to adjust jump height in total, because the timer for accepting A presses is 12. But it's not needed to test all 2^11 possibilites, after working out the y positions the character can get the possibilites are reduced to 175, for landing it's even less.
+	$LF
+]p
+[h4 
+	" Landing
+	$LF
+]h4
+[p 
+	"f: (s|s∊¬g∧a=0) × ¬B → (s|s∊g∧a=4)
+	[br 
+	]br
+	$LF
+	"f: (s|s∊¬g∧a=0∧r) × B → (s|s∊g∧a=2∧r)
+	$LF
+]p
+[p 
+	"Here are the for what's happening when the character lands based on wheter B is pressed or not and pretending I actually understand the stuff I write here. As even the untrained eye can see these are quite smiliar to walking and rerecording is needed in order to go to the more optimal state and to minimize button presses.
+	$LF
+]p
+[p 
+	"Also:∀(s|s∊¬g) → (s|s∊g) : s_k × d → s_l ≡ s_k × ¬d → s_l
+	[br 
+	]br
+	$LF
+	"As you have correctly guessed it, it means pressing a directional button prior to landing doesn't do anything.
+	$LF
+]p
+[h4 
+	" Despawning enemies
+	$LF
+]h4
+[p 
+	"Some enemies can be despawned by pausing the game on certain position. Which means taking damage can be avoided.
+	$LF
+]p
+[h4 
+	" Luck manipulation
+	$LF
+]h4
+[p 
+	"It depends on time. To adjust the RN for the next action a simple pause is the best solution. Appliances for luck manipulation are damage boost, since they depend on enemies direction or avoiding taking damage. 
+	$LF
+]p
+[h4 
+	" Frame-advance
+	$LF
+]h4
+[p 
+	"When the game is paused S can be used to advance a frame at a time ingame. It also can be hold, which has a small delay upon start then goes at 30 fps. This is useful to reduce pauses to 1 frame. And it is actually the first time I used frame-advance in ages.
+	$LF
+]p
+[p 
+	"Appendix:
+	[br 
+	]br
+	$LF
+	"r: running, only possible after a certain level
+	[br 
+	]br
+	$LF
+	"b: damage boost
+	[br 
+	]br
+	$LF
+	"l: move left flag
+	[br 
+	]br
+	$LF
+	"d: direction input function, d: l,b -> L,R
+	[br 
+	]br
+	$LF
+	"v_x: x speed
+	[br 
+	]br
+	$LF
+	"g: ground flag
+	[br 
+	]br
+	$LF
+	"a: animation counter
+	[br 
+	]br
+	$LF
+	"A,B,S,T,U,D,L,R: buttons
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[p 
+	"Maybe later or never.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Masterjun)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Masterjun)
+	": Uuuh, →×∊¬. I don't usually see those in submission texts... Good optimization though. Accepting to Moons as an improvement to the 
+	(__wikiLink|2491M|previous run)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub. Probably getting rid of all can publish helps others publish what I accepted >_>
+]p

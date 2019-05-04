@@ -1,0 +1,1150 @@
+2
+[p 
+	"This is a thorough explanation of the strategy behind a Pokemon Blue Any% Glitchless TAS in 1:29:53 which you can watch at the following link.
+	$LF
+]p
+[p 
+	(youtube|v=TlnN9OlkW6Y)
+	$LF
+]p
+[h2 
+	"Important Credits
+	$LF
+]h2
+[p 
+	"Stringflow and Sudotrainer need a big thanks for assisting with getting me set up to bot my own encounter RNG manips for this TAS.  Until that setup this TAS would not have been possible.  Gifvex needs a big thanks as always for getting the emulator set up in BizHawk to be accurate enough for these TASes to sync on console.  Extrems's work on Game Boy Interface also enabled the console playback of this TAS through his Game Boy Interface software.
+	$LF
+]p
+[h2 
+	"Setup:
+	$LF
+]h2
+[p 
+	"The TAS was created using BizHawk 2.3.1.  As in the Yellow Glitchless and NSC TASes, the use of GBC mode, a gbc_bios.bin firmware, and CGB in GBA "true" mode allows the TAS to sync on the Game Boy Player console which can be seen in my initial video.  This pastebin explains the pipeline we use for verifying the TASes.
+	$LF
+]p
+[p 
+	"An important update to the capture quality of the console feed was obtained with this TAS.  Andersama with OBS-Studio development helped me learn HLSL shader language to write a video filter which corrects an error in the GameCube's video output and enables pixel-exact captures of GB, GBC, and GBA games over GBI-HF.  This results in image fidelity equal to emulator.  The filter was recently featured on RetroRGB: https://www.retrorgb.com/obtaining-pixel-exact-gbi-hf-output.html
+	$LF
+]p
+[h2 
+	"Legend:
+	$LF
+]h2
+[p 
+	"Frame = The smallest unit of time that can be observed realistically in emulation.  The game accepts some inputs on every frame (for example in nickname menus), some (in the overworld) every other frame, and some (primarily in textboxes) every 3 frames. GB/GBC games play back at approximately 59.7275 Frames Per Second.
+	$LF
+]p
+[p 
+	"PrintLetterDelay = The use of mashing during textboxes to cause differences in frame and CPU cycle counts and in turn advance the RNG or manipulate the timing of an input window.
+	$LF
+]p
+[p 
+	"Red Bar = The sound effect and HP bar color change caused if 
+	[em 
+	]em
+	"(
+	[em 
+	]em
+	"(Current HP * 48 / Max HP) < 10).  Being in red bar cancels level up jingles when in trainer battles (worth 2.5 seconds per level up) cancels death cries (40 frames per death) and cancels text box clear jingles (timesave unknown, around a frame per clear).  In Pokemon Blue it has the additional benefit of canceling pokemon cries when sent into battle, which changes many routing decisions including the Gastly fight after the heal pad.
+	$LF
+]p
+[p 
+	"Gen 1 Miss = An oversight in the code for the accuracy check causes moves with 100% accuracy to still have a 1 in 256 chance to miss/fail.  This means that we can cause an enemy to miss even if they're locked into using a theoretically deadly move, or miss our own moves if we need to. 
+	$LF
+]p
+[p 
+	"DSUM = A label for the predictable outcomes caused by deterministic behavior of the random number generator.  This behavior leads to an encounter cycle which constantly loops through the ten encounter slots in order.
+	$LF
+]p
+[p 
+	"Consecutive Input Delay = In Gen 1 Pokemon, if you press a button it needs to be released for a frame in order for it to be pressed again, otherwise the game will just see the button as being held the whole time.  This can be counteracted via a trick to reapply the relevant button press.  The key is to press a different button (typically a directional button) on the same frame that you want to press the initial button again, it will register a 2nd press of the initial button and not a hold of the initial button.  This is done when a directional input is used to reapply B while exiting shops (which can be done in RTA) and to reapply up/down in the item bag.  The Fly menu does not have this trick available as it does in Yellow.  The trick is also useful when B reapplies A to get on the Bike (also used in RTA), to deposit pokemon (not useful in RTA), and to throw a poke ball from slot 1 (used in RTA).  In general it could be used to select any slot 1 bag item in the overworld or in battle, but the relevant ones are the poke ball throws and the bike.  In Blue unlike in Yellow, some A presses to use items can be applied the same frame as an up or down press.
+	$LF
+]p
+[p 
+	"Ranges = The damage formula in Pokemon Gen 1 is modified by a random number, rerolled until it lands between 217 and 255 inclusive. The move is multiplied by this number and divided by 255 to obtain a range of possible damage between ~85% and 100%.  Because we manipulate random number generation, we can manipulate these damage ranges to our liking.  Also, because of the way much of the 8 bit math rounds down calculations, the full calculated damage is only a 1/39 chance (217 to 255 inclusive is 39 possible rolls).
+	$LF
+]p
+[p 
+	"Glitchless = the category this TAS was written for.  I followed the RTA Pokemon Speedrunning community's ruleset for Glitchless, so while arbitrary code execution glitches like Brock Through Walls and Trainer Fly are disallowed, certain glitches that are not avoidable in RTA such as Gen 1 Misses are allowed, as well as oversights such as using Poke Doll on the Marowak ghost in Lavender Tower.  The Instant Text obtained from talking to the Bike Shop owner without a Bike Voucher falls under the allowed oversight category.  This ruleset is uncontroversial in the RTA community at this point.
+	$LF
+]p
+[p 
+	"Note: There are no known previous TASes of Blue ENG Glitchless in any ruleset.  There is a somewhat improvable TAS of the JPN release, whose times are not easily comparable due to the text differences and the major route changes from not using instant text or the poke doll on Marowak.  As there were no TASes of the ENG game prior to this, the main goal was to establish a very competitive baseline for TASes of this game and category, so there are some known optimizations possible in the early game.
+	$LF
+]p
+[p 
+	"Here's a link to the old JPN cart TAS in 4 parts: https://youtu.be/_flV070jIEY
+	$LF
+]p
+[h2 
+	"Route:
+	$LF
+]h2
+[p 
+	"Set options in game (Fast Off Set) using A and B holds to have text roll at the fastest speed while text speed is still on medium in the intro.
+	$LF
+]p
+[p 
+	"Squirtle DVs: 12/14 attack, 8+Special, 7+ speed, not both speed+special odd for specific HP requirements
+	$LF
+]p
+[h3 
+	"Rival 1
+	$LF
+]h3
+[p 
+	"Tail Whip->1/39 non-crit Tackle, 1/39 non-crit Tackle, any normal Tackle roll (growl fails from Bulba)
+	$LF
+]p
+[p 
+	"Buy 4 Poke Balls (Nido, Cut slave, Flyer, bag slot)
+	$LF
+]p
+[p 
+	"Catch L3 Nido on Route 22 - DVS 15 Attack, 0-8 Defense (must be even),  14 Speed, 15 Special
+	$LF
+]p
+[p 
+	"Kill L5 pika while using it to get hit to 1 HP (Pika needs to be 0-4 HP 0-9 Defense for 3x 1/39 normal tackle hits)
+	$LF
+]p
+[p 
+	"The previous 2 encounter manips were found using the RNG manip bot developed by Stringflow and amended for this TAS by Sudotrainer and me.  The Nido takes a little less than 2 seconds of delay for a near perfect F6EF stat line, and the Pika takes only 8 frames of delay mainly because there are so many encounter tiles available to sync up the DSUM without losing time.
+	$LF
+]p
+[p 
+	"Weedle can spam string shot miss, hit 3 1/39 crits and one normal crit (alternate strat used here, Tail whip and 4 tackles.  Avoids delays necessary for 3 1/39 crits and the 4 crit text boxes in exchange for the tail whip turn)
+	$LF
+]p
+[h3 
+	"Brock
+	$LF
+]h3
+[p 
+	"Geodude can't die to Bubble crit, instead 2x Bubble with a Tackle miss from Geodude
+	$LF
+]p
+[p 
+	"Cause Onix to miss turn 1, crit him to 1, die, get Nido hit to 1 (Nido needs 0-8 defense DV), finish Onix and level to 8.  This fight is why the Nido on Route 22 needs to be level 3, otherwise L4 Nido jumps past L8 to L9 and can't learn Horn Attack.
+	$LF
+]p
+[p 
+	"Crits with specific damage range needs are hard to manipulate with Squirtle and Nidoran as they have low base speed.  I spent 6000 rerecords each alone just to find a way through the Brock Onix fight and the Route 3 3rd trainer caterpie.  A revised TAS would spend even more time searching for battle RNG, hopefully with a botting setup to find the minimal delay necessary.
+	$LF
+]p
+[p 
+	"Sell Bide, Buy 7 Escape Ropes (needed for Bill's house without walking to the moon escape rope, also faster than teaching Dig)
+	$LF
+]p
+[h3 
+	"Route 3
+	$LF
+]h3
+[p 
+	"Caterpie: Leer+2x HA (take 2 non-crit 5 damage tackles to 1 HP)
+	$LF
+]p
+[p 
+	"Weedle: HA crit+HA
+	$LF
+]p
+[p 
+	"Caterpie: HA+HA crit (take a 1/39 5 damage Tackle to 1 HP out of 31)
+	$LF
+]p
+[p 
+	"Rattata: HA+HA crit
+	$LF
+]p
+[p 
+	"Ekans: HA+HA crit
+	$LF
+]p
+[p 
+	"Weedle: HA Crit
+	$LF
+]p
+[p 
+	"Kakuna: Tackle+HA crit
+	$LF
+]p
+[p 
+	"Caterpie: 1/39 HA crit
+	$LF
+]p
+[p 
+	"Metapod: HA Crit+Tackle non-crit
+	$LF
+]p
+[p 
+	"Caterpie: 2x HA (take 4 damage)
+	$LF
+]p
+[p 
+	"Metapod: HA+HA crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Mt Moon
+	$LF
+]h3
+[p 
+	"Grab Moon Stone
+	$LF
+]p
+[p 
+	"Rattata: PS+HA Crit
+	$LF
+]p
+[p 
+	"Zubat: HA Crit+Supersonic Fail+Tackle
+	$LF
+]p
+[p 
+	"Grimer: HA+HA crit
+	$LF
+]p
+[p 
+	"Voltorb: HA crit+PS
+	$LF
+]p
+[p 
+	"Koffing: HA 1/39+HA 1/39 crit (optimal strat, this TAS crits both turns)
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Catch Sandshrew after Mt Moon
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Cerulean
+	$LF
+]h3
+[p 
+	"Center to set the escape rope waypoint
+	$LF
+]p
+[p 
+	"IT is slightly faster for Misty's gym but makes the zany RNG manip too difficult because PrintLetterDelay cannot be used while IT is on
+	$LF
+]p
+[p 
+	"Inside Misty Gym, swap Nidoking with Squirtle, evolve to Nidoking
+	$LF
+]p
+[p 
+	"Misty's Trainer: HA crit x2
+	$LF
+]p
+[h3 
+	"Misty
+	$LF
+]h3
+[p 
+	"Staryu: HA crit+PS (1/39 both) (This TAS did not find the optimal fight here, uses 2 HAs)
+	$LF
+]p
+[p 
+	"Starmie: BB non crit, HA Crit high roll, Gen 1 Miss into HA 1/39 crit x2
+	$LF
+]p
+[p 
+	"Teach Bubblebeam
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Get IT
+	$LF
+]p
+[p 
+	"Pidgeotto: Swap up and use BB, get hit to 1, BB crit
+	$LF
+]p
+[p 
+	"Abra: PS crit (Not found due to IT lack of PrintLetterDelay, used HA instead)
+	$LF
+]p
+[p 
+	"Rattata: BB crit
+	$LF
+]p
+[p 
+	"Bulbasaur: HA crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Caterpie: PS crit
+	$LF
+]p
+[p 
+	"Weedle: BB
+	$LF
+]p
+[p 
+	"Pidgey: BB crit
+	$LF
+]p
+[p 
+	"NidoF: BB crit
+	$LF
+]p
+[p 
+	"Rattata: BB
+	$LF
+]p
+[p 
+	"Ekans: BB crit
+	$LF
+]p
+[p 
+	"Zubat: BB crit
+	$LF
+]p
+[p 
+	"Pidgey: BB crit
+	$LF
+]p
+[p 
+	"NidoF: BB crit
+	$LF
+]p
+[p 
+	"Mankey: BB crit
+	$LF
+]p
+[p 
+	"Ekans: BB crit
+	$LF
+]p
+[p 
+	"Zubat: BB crit
+	$LF
+]p
+[p 
+	"Onix: BB
+	$LF
+]p
+[p 
+	"NidoM: BB crit
+	$LF
+]p
+[p 
+	"NidoF: BB crit
+	$LF
+]p
+[p 
+	"Rattata: BB, teach Thrash over Poison Sting
+	$LF
+]p
+[p 
+	"Ekans: BB
+	$LF
+]p
+[p 
+	"Oddish: Swap up Thrash, Thrash non-crit x3
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Escape Rope back to Cerulean in Bill's house after getting the SS Ticket
+	$LF
+]p
+[p 
+	"Dig Rocket: Thrash non-crit x2
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Pidgeys: Thrash non-crit x3
+	$LF
+]p
+[p 
+	"Spearow+Raticate: Thrash
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Boat Rival
+	$LF
+]p
+[p 
+	"Pidgetto: Get hit back to 1 from QA crit, Thrash crit
+	$LF
+]p
+[p 
+	"Raticate: Thrash
+	$LF
+]p
+[p 
+	"Kadabra: Thrash
+	$LF
+]p
+[p 
+	"Ivysaur: Thrash crit
+	$LF
+]p
+[p 
+	"Manip the 1st can on exiting the boat as the cans are selected when you enter Vermillion.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Teach Cut, use Cut, Manip can 2 after choosing the 1st can
+	$LF
+]p
+[h3 
+	"Surge
+	$LF
+]h3
+[p 
+	"Voltorb: Thrash
+	$LF
+]p
+[p 
+	"Pikachu: Thrash
+	$LF
+]p
+[p 
+	"Raichu: Thrash crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"4 Turn Thrash: Thrash
+	$LF
+]p
+[p 
+	"Venonat Trainer: Thrash
+	$LF
+]p
+[p 
+	"Cubone: BB
+	$LF
+]p
+[p 
+	"Slowpoke: TB
+	$LF
+]p
+[p 
+	"Slowpoke: TB
+	$LF
+]p
+[p 
+	"Oddish+Bulbasaur: Thrash
+	$LF
+]p
+[p 
+	"Geodude+Geodude+Graveler: TB->Selfdestruct Gen 1 Miss
+	$LF
+]p
+[p 
+	"Meowth+Oddish+Pidgey: Thrash (used Pidgey for red bar maintenance)
+	$LF
+]p
+[p 
+	"Growlithe: Swap TB and Thrash, TB crit
+	$LF
+]p
+[p 
+	"Vulpix: TB crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Get Underground Elixer
+	$LF
+]p
+[h3 
+	"Celadon Mart
+	$LF
+]h3
+[p 
+	"Shop: 2 TM07, 2 Poke Doll, Fresh Water, 3 X Speed
+	$LF
+]p
+[p 
+	"Grab Doduo while heading to Fly House
+	$LF
+]p
+[p 
+	"Fly Menu: Swap up Poke Doll, teach TM07 HD in 3, teach Fly
+	$LF
+]p
+[h3 
+	"Tower Rival
+	$LF
+]h3
+[p 
+	"Pidgeotto: TB
+	$LF
+]p
+[p 
+	"Gyarados: TB (may be able to Thrash Crit in a revised TAS, needs more investigation)
+	$LF
+]p
+[p 
+	"Growlithe: Thrash
+	$LF
+]p
+[p 
+	"Kadabra: Thrash
+	$LF
+]p
+[p 
+	"Ivysaur: Thrash crit
+	$LF
+]p
+[p 
+	"Gastly: TB crit
+	$LF
+]p
+[p 
+	"Gastly: TB crit
+	$LF
+]p
+[p 
+	"Gastly: Thrash->Night Shade x4, TB crit
+	$LF
+]p
+[p 
+	"Gastly: TB crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Zubat: Thrash
+	$LF
+]p
+[p 
+	"Zubat: Thrash
+	$LF
+]p
+[p 
+	"Golbat: Thrash crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Koffing+Drowzee: Thrash crits
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Zubat: Thrash
+	$LF
+]p
+[p 
+	"Rattata: Thrash
+	$LF
+]p
+[p 
+	"Raticate: Thrash
+	$LF
+]p
+[p 
+	"Zubat: Thrash
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Snorlax Menu: Swap up Elixer
+	$LF
+]p
+[p 
+	"Get Max Elixer on cycling road after biking down the left side
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Drowzee: Thrash crit
+	$LF
+]p
+[p 
+	"Drowzee: Thrash crit
+	$LF
+]p
+[p 
+	"Kadabra: Thrash
+	$LF
+]p
+[p 
+	"Drowzee: Thrash crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Drowzee: HD
+	$LF
+]p
+[p 
+	"Hypno: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Koga
+	$LF
+]h3
+[p 
+	"Koffing: TB x2 (a revised TAS would probably want to HD here and a find a gen 1 miss selfdestruct from Weezing, his experience is needed to hit L36 for candying to 37, hitting a speed mark for Silph Rival's Alakazam in combo with Koga's speed badge boost)
+	$LF
+]p
+[p 
+	"Muk: HD
+	$LF
+]p
+[p 
+	"Koffing: HD
+	$LF
+]p
+[p 
+	"Weezing: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Pallet menu: Elixer, Swap up X Speed, HM03, Rare Candy to get back to the top of the menu for escape rope in Mansion.
+	$LF
+]p
+[p 
+	"Get Silph Elixer
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Arbok: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Silph Rival
+	$LF
+]h3
+[p 
+	"Pidgeot: TB crit
+	$LF
+]p
+[p 
+	"Gyarados: TB
+	$LF
+]p
+[p 
+	"Growlithe: TB crit
+	$LF
+]p
+[p 
+	"Alakazam: HD
+	$LF
+]p
+[p 
+	"Venusaur: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Cubone: BB
+	$LF
+]p
+[p 
+	"Drowzee: HD
+	$LF
+]p
+[p 
+	"Marowak: BB
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Silph Gio
+	$LF
+]p
+[p 
+	"Nidorino: TB crit
+	$LF
+]p
+[p 
+	"Kangaskhan: TB crit
+	$LF
+]p
+[p 
+	"Rhyhorn: BB
+	$LF
+]p
+[p 
+	"Nidoqueen: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Use an Elixer
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Blaine
+	$LF
+]h3
+[p 
+	"Growlithe: BB crit
+	$LF
+]p
+[p 
+	"Ponyta: BB crit
+	$LF
+]p
+[p 
+	"Rapidash: HD
+	$LF
+]p
+[p 
+	"Arcanine: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Exeggcute: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Erika
+	$LF
+]h3
+[p 
+	"Victreebel: Thrash crit
+	$LF
+]p
+[p 
+	"Tangela: Thrash crit
+	$LF
+]p
+[p 
+	"Vileplume: Thrash crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Sabrina
+	$LF
+]h3
+[p 
+	"Kadabra: Thrash
+	$LF
+]p
+[p 
+	"Mr. Mime: Thrash crit
+	$LF
+]p
+[p 
+	"Venomoth: Thrash crit
+	$LF
+]p
+[p 
+	"Alakazam: Maintain red bar with Psywave, Thrash crit
+	$LF
+]p
+[p 
+	"I'm very proud of the Alakazam fight here.  The fight requires manipulating a 4 turn thrash on Kadabra (1 in 2), 2 crits on Mr Mime and Venemoth (1 in 6 each), Psywave use from Alakazam (1 in 4), Psywave exact damage (1 in 64 because damage is from 0 to 1.5x level), and then another thrash crit (1 in 6).  Getting all this means you never need to take damage again for red bar through the rest of the run.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Rhyhorn: BB
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Machoke: TB crit
+	$LF
+]p
+[p 
+	"Machop: TB crit
+	$LF
+]p
+[p 
+	"Machoke: TB crit
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Gio Gym
+	$LF
+]h3
+[p 
+	"Rhyhorn: BB
+	$LF
+]p
+[p 
+	"Dugtrio: BB
+	$LF
+]p
+[p 
+	"Nidoqueen: HD
+	$LF
+]p
+[p 
+	"Nidoking: HD
+	$LF
+]p
+[p 
+	"Rhydon: BB
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Swap up Max Elixer, Teach HM04, Teach Fissure in 2
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Viridian Rival
+	$LF
+]h3
+[p 
+	"Pidgeot: X Speed, TB crit
+	$LF
+]p
+[p 
+	"Rhyhorn: BB
+	$LF
+]p
+[p 
+	"Gyarados: TB
+	$LF
+]p
+[p 
+	"Growlithe: TB crit
+	$LF
+]p
+[p 
+	"Alakazam: Fissure
+	$LF
+]p
+[p 
+	"Venusaur: Fissure
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Use an Elixer
+	$LF
+]p
+[h3 
+	"Lorelei
+	$LF
+]h3
+[p 
+	"Dewgong: Fissure
+	$LF
+]p
+[p 
+	"Cloyster: Fissure
+	$LF
+]p
+[p 
+	"Slowbro: HD
+	$LF
+]p
+[p 
+	"Jynx: HD
+	$LF
+]p
+[p 
+	"Lapras: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Bruno
+	$LF
+]h3
+[p 
+	"Onix: BB
+	$LF
+]p
+[p 
+	"Hitmonchan: TB crit
+	$LF
+]p
+[p 
+	"Hitmonlee: TB crit
+	$LF
+]p
+[p 
+	"Onix: BB
+	$LF
+]p
+[p 
+	"Machamp: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Agatha
+	$LF
+]h3
+[p 
+	"Gengar: X Speed, Fissure
+	$LF
+]p
+[p 
+	"Golbat: TB crit
+	$LF
+]p
+[p 
+	"Haunter: Fissure
+	$LF
+]p
+[p 
+	"Arbok: HD
+	$LF
+]p
+[p 
+	"Gengar: Fissure
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Use Max Elixer
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Lance
+	$LF
+]h3
+[p 
+	"Gyarados: TB crit
+	$LF
+]p
+[p 
+	"Dragonair: Fissure
+	$LF
+]p
+[p 
+	"Dragonair: Fissure
+	$LF
+]p
+[p 
+	"Aerodactyl: TB crit
+	$LF
+]p
+[p 
+	"Dragonite: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	"Champion
+	$LF
+]h3
+[p 
+	"Pidgeot: X Speed, HD
+	$LF
+]p
+[p 
+	"Alakazam: Fissure
+	$LF
+]p
+[p 
+	"Rhydon: BB
+	$LF
+]p
+[p 
+	"Gyarados: HD
+	$LF
+]p
+[p 
+	"Arcanine: HD
+	$LF
+]p
+[p 
+	"Venusaur: HD
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Bag Slot notes to manip a full bag of 20 items for Gyms 4-7:
+	$LF
+]p
+[p 
+	"Poke Ball
+	$LF
+]p
+[p 
+	"TM34->Escape Rope->TM27
+	$LF
+]p
+[p 
+	"Helix Fossil
+	$LF
+]p
+[p 
+	"Nugget
+	$LF
+]p
+[p 
+	"SS Ticket
+	$LF
+]p
+[p 
+	"TM28
+	$LF
+]p
+[p 
+	"Full Restore
+	$LF
+]p
+[p 
+	"HM01
+	$LF
+]p
+[p 
+	"Bicycle
+	$LF
+]p
+[p 
+	"Elixer
+	$LF
+]p
+[p 
+	"TM07
+	$LF
+]p
+[p 
+	"Poke Doll
+	$LF
+]p
+[p 
+	"Fresh Water->Card Key
+	$LF
+]p
+[p 
+	"X Speed
+	$LF
+]p
+[p 
+	"HM02
+	$LF
+]p
+[p 
+	"Rare Candy->Secret Key
+	$LF
+]p
+[p 
+	"Poke Flute
+	$LF
+]p
+[p 
+	"Max Elixer
+	$LF
+]p
+[p 
+	"HM03
+	$LF
+]p
+[p 
+	"Gold Teeth->HM04
+	$LF
+]p
+[h2 
+	"Notes:
+	$LF
+]h2
+[p 
+	"The frame count of this TAS will make it appear to be a 1:30:03.  When played back on console you can see in the commentary video that this is not quite accurate, the TAS actually runs at 1:29:53 from bootup to last input.  How is this possible without the TAS desyncing?  It turns out that frames do not actually exist on the game boy while the LCD is disabled, and the emulator's counted frames during this time can last a shorter than usual number of CPU cycles.  For console playback we sync the inputs by CPU cycle count, and using the total executed cycle count obtained from the emulator instead of frame count we get the same time as the console playback at 1:29:53.
+	$LF
+]p
+[p 
+	"I'll also make a quick note due to inevitable comparison to the similar Yellow Glitchless TAS.  The difference in the nature of red bar and the lack of instant text in yellow make for some route differences that to me are uniquely interesting, including the trips to the bike shop and the Gastly Thrash strategy.  Instant Text requires delaying flyer from Pidgey on the way to Vermillion (the optimal Yellow strategy and the strat used in Blue JPN Glitchless) to Doduo on the way to the Fly house. The different starters between Pikachu and Squirtle and different Brock opponent levels lead to unique strategies for getting exp before Brock.  The different location of Male Nidoran and different starting levels also lead to different strategies to get to Misty with Nidoking.  Blue also does not have color lag, so move use order and critical hit timing have differences.  The mid to late game ends up looking quite different as a lot of the gym leaders have different AI and different Pokemon, usually at lower levels than in Yellow.  The lower levels enable a lot of strategies with using Bubblebeam and Thrash in the lategame where Yellow needs to refill PP more often and use Horn Drill.
+	$LF
+]p
+[p 
+	"Thanks for watching and reading the explanation!
+]p

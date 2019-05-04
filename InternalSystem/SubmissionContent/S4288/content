@@ -1,0 +1,172 @@
+12
+[p 
+	"Bowser left a back door open into the Princess' chamber, letting Mario rescue her 7 minutes and 30 seconds faster.  This run uses a glitched pipe entry in 7-1 to go out of bounds, where a glitched tile and enemy x-positions are used to execute arbitrary code that jumps straight to the Princess rescue.
+	$LF
+]p
+[p 
+	(youtube|v=PUdHMr2-U9s)
+	$LF
+]p
+[p 
+	"Enable subtitles on the encode if you want some explanation as the movie plays.
+	$LF
+]p
+[h3 
+	" Lord Tom's Comments
+	$LF
+]h3
+[p 
+	"Tompa and I had been working pretty steadily on a 100% run when RAT926 found the glitch. I wasn't good enough with assembly to try to do anything with it until HHS figured out a way to use it to reach the credits.  The prospect of cutting 7 minutes off the any% was too much to pass up, so here we are! 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"It was a challenge to understand the spawning/despawning behavior and translate that into strats that would both be fast and gives us the memory values we needed. But my biggest surprise was how hard it was to optimize Mario's movements with the tail on a vertical level like 7-1...we re-did various portions countless times for frame savings big and small. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"Along the way I was happy to work with Producks on strats that might be possible realtime, a feat at least 3 speed-runners have accomplished, with the fastest time 
+	[a class=extlink href=http://www.twitch.tv/producks/c/4007669 rel=nofollow 
+		"currently 3:31
+	]a
+	" with room for improvement. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"My personal preference would be that this run not obsolete the prior any%, with a new category created whichever labels are chosen.  I know there's active discussion presently on how to handle this sort of glitched run, so here's some more fodder for discussion.  :)
+	$LF
+]p
+[h3 
+	" Tompa's Comments
+	$LF
+]h3
+[p 
+	"I had tried to improve the previous run for a long time, just to see if we could push it lower. Thanks to Glitchman, 9 of the 14 needed frames for the first world were improved. And with a few extra frames by Tom and I, we reached 13. I gave up for the moment. Until this glitch came around! 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"I expected us to be done fairly quickly, for an April 1st submission, though we kept pushing it. When you are just one frame to bypass another frame rule, we just got to go for it. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"I'm quite happy with the result. Meaning it's finally time to get back to the 100% TAS and work on fun autoscrollers again...
+	$LF
+]p
+[h3 
+	"World 1
+	$LF
+]h3
+[p 
+	"Not much is new here.  GlitchMan found a faster way to collect the mushroom in 1-1.  We managed to save a few more frames in the fortress using less slowdown to get past the balls.
+	$LF
+]p
+[h3 
+	" 7-1
+	$LF
+]h3
+[p 
+	"Recent warpless TAS's have gone through the wall to skip most of 7-1 so TAS'ing the vertical portion was pretty new.  Having the racoon suit left over from 1-F is helpful since the tail-flip lets Mario grab shells very quickly and Mario can also tail-flip shells on the same frame he stomps them to climb faster.  Wall jumps are also crucial to climbing without needing either P-speed or entering extra tubes (which are very slow).
+	$LF
+]p
+[h3 
+	" Wrong-warping SMB3
+	$LF
+]h3
+[p 
+	"Touching the glitch tile, an invisible note block, makes the processor try to update memory outside of the normal tile data, at an address ($9c70) that reprograms how the processor interprets addresses.  This causes execution to jump to an unintended area of the ROM and execute incorrect instructions.  Eventually, the stack overflows and it starts executing RAM instructions starting at address $0081, which is just before the location of the player x value at $0090 and enemy x values $0091-5. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"Devising an effective strat requires understanding how enemies spawn into the five enemy slots.  New enemies spawn when the screen scrolls close enough to their spawn position, and that enemy has not previously been killed.  The new enemy will be placed into the first slot that doesn't already hold an active enemy, starting at $0095 and working backwards. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"To jump to the Princess, we need 3 consecutive x values to read, in order: 32, 225 or 227, 143.  This results in the assembly instruction "JSR $8FE1", which reads as "Jump to the subroutine at address $8FE1." 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"Mario's x must be 232-240 to activate the glitch, so 3 enemies must be used.  The leftmost piranha plant's x range includes 32; the other 2 plants aren't useful so 225/227 and 143 have to come from koopas. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"The piranha plant unavoidably spawns into $0094 at the start of the level, but we need it at $0093 or lower to have 2 enemy slots follow it.  Therefore we have to climb at least until the piranha despawns.  But doing so (bringing the first koopa along to keep $0095 occupied) spawns the koopa between the ?'s into $0094 and the flying koopa into $0093. 
+	$LF
+	"Initial efforts killed the flying koopa to allow the piranha to spawn into $0093 on the way down.  Later, we found that by optimizing a 4-frame despawn rule and grabbing the ?'s koopa and falling very quickly we could despawn the flying koopa just before the piranha spawns, putting the piranha into the correct slot. Note also that the right-most piranha must be killed on the way up or it will spawn into $0093 on the way back down. 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"Mario can only carry one shell at time.  So to grab the ?'s shell, we need to throw the $0095 shell such that it doesn't despawn and also ends up where we can grab it again.  There's not much margin for this, but it's just possible to throw the shell so it ends up spinning between the middle pipes down below.  This lets Mario grab it after throwing the $0094 shell without breaking stride.  
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"As we fall from the ?'s area, we now have the left piranha plant in $0093, the ?'s shell in $0094, and the first shell from the level entry in $0095.  All that remains is to throw the two shells such that they hit the right x values on the same (single) frame the plant's x value hits 32...and then execute the pipe glitch on that same frame.
+	$LF
+]p
+[h3 
+	" The Pipe Glitch
+	$LF
+]h3
+[p 
+	"This glitch has been known for some time.  If Mario presses down while being ejected from the right side of a pipe end-cap, the game thinks he's standing in the middle and lets Mario enter the pipe.
+	$LF
+]p
+[h3 
+	" Thanks
+	$LF
+]h3
+[p 
+	"RAT926 for discovering the glitch tile that enables the wrong warp. 
+	[br 
+	]br
+	$LF
+	"HHS for figuring out the technical details of the glitch, determining the instruction that would skip to the ending, and writing a script to troubleshoot sprite placement. 
+	[br 
+	]br
+	$LF
+	"vgmaps.com for making TAS'ing so much easier.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Great to see another big title broken with arbitrary code execution to jump to the ending. Accepting to Moons as a separate branch - this run will not obsolete the 
+	(__wikiLink|1590M|classic conventionally played)
+	" run category.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Ilari)
+	": Processing.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Ilari)
+	": Replaced file with one with author subtitles. No changes to input.
+]p

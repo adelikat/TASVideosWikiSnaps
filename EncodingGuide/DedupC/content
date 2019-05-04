@@ -1,0 +1,148 @@
+4
+[p 
+	"This tool, written by 
+	(__wikiLink|user:sgrunt)
+	" for use in 
+	(__wikiLink|EncodingGuide|encoding)
+	" in conjunction with 
+	[tt 
+		"mencoder
+	]tt
+	", takes a raw RGB24 video stream on 
+	[tt 
+		"stdin
+	]tt
+	", removes duplicate frames, and writes the resulting stream to 
+	[tt 
+		"stdout
+	]tt
+	" and the associated timecodes to a specified file.
+	$LF
+]p
+[h3 
+	" Usage
+	$LF
+]h3
+[p 
+	"Usage is:
+	$LF
+]p
+[blockquote 
+	" dedup <outfile> <fpsnum> <fpsden> <width> <height> 
+	"[<max consecutive dup frames>]
+	$LF
+]blockquote
+[p 
+	"where:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[tt 
+			"<outfile>
+		]tt
+		" is the time code file to be written;
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"<fpsnum>
+		]tt
+		" and 
+		[tt 
+			"<fpsden>
+		]tt
+		" are the numerator and denominator of the frame rate of the input stream;
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"<width>
+		]tt
+		" and 
+		[tt 
+			"<height>
+		]tt
+		" are the dimensions of the video stream; and
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"<max consecutive dup frames>
+		]tt
+		" is the maximum number of consecutive duplicate frames that will be removed from a stream. If not specified, the default value is 20, which tends to be a good trade off between disk space and usability.
+		$LF
+	]li
+]ul
+[p 
+	[tt 
+		"mencoder
+	]tt
+	" can produce a raw RGB24 output with:
+	$LF
+]p
+[blockquote 
+	" mencoder -nosound -of rawvideo -ovc raw -vf format=rgb24,scale <input/output files>
+	$LF
+]blockquote
+[p 
+	"and can read a raw RGB24 input with:
+	$LF
+]p
+[blockquote 
+	" mencoder -demuxer rawvideo -rawvideo format=rgb24:w=<width>:h=<height>:fps=<fps> <input/output/codec settings>
+	$LF
+]blockquote
+[p 
+	"This is best used in conjunction with pipes or FIFOs to avoid having to write large raw files to disk.
+	$LF
+]p
+[h3 
+	" Example: logo-combining
+	$LF
+]h3
+[blockquote 
+	" mkfifo dedupin
+	[br 
+	]br
+	$LF
+	" mkfifo dedupout
+	[br 
+	]br
+	$LF
+	" mencoder -nosound -of rawvideo -ovc raw -vf format=rgb24,scale logo.avi raw.avi -sub subtitle.srt -subpos 98 -subalign 2 -o dedupin &
+	[br 
+	]br
+	$LF
+	" dedup times.txt <fps> <width> <height> 20 <dedupin >dedupout &
+	[br 
+	]br
+	$LF
+	" mencoder -demuxer rawvideo -rawvideo format=rgb24:w=<width>:h=<height>:fps=<fps> dedupin -ovc x264 -x264encopts crf=0:fullrange=on -sws 9 -o in.avi
+	$LF
+]blockquote
+[p 
+	"(Note that sound will need to be extracted from 
+	[tt 
+		"raw.avi
+	]tt
+	" and delayed by hand, perhaps with 
+	[tt 
+		"sox
+	]tt
+	", for encoding purposes.)
+	$LF
+]p
+[h3 
+	" Code
+	$LF
+]h3
+[pre 
+	[code class=language-sh 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre

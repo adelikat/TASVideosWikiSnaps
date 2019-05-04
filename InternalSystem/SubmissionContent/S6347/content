@@ -1,0 +1,1104 @@
+11
+[p 
+	"This TAS completes NES Arkanoid in 11:12.57. It aims to obsolete 
+	(__wikiLink|961M|Baxter's 2007 run)
+	" and therefore has the same goals:
+	$LF
+]p
+[ul 
+	[li 
+		" Complete all 36 levels
+		$LF
+	]li
+	[li 
+		" Use the multiball powerup and no others
+		$LF
+	]li
+	[li 
+		" Never lose a ball
+		$LF
+	]li
+	[li 
+		" Complete in the shortest amount of time.
+		$LF
+	]li
+]ul
+[p 
+	"It beats said run by 1 minute and 13 seconds through the use of new strategies discovered by a brute-forcing bot. The entire movie was generated programmatically; no manual input was involved.
+	$LF
+]p
+[p 
+	"Encode:
+	$LF
+	(youtube|v=CoEFp5RBVfY)
+	$LF
+]p
+[p 
+	"The engine I wrote for this project includes a game visualization mode. Originally this was just for debugging, but for April Fool's Day I expanded it to do a full-playback visualization of the TAS with some faked content on the starting and ending screens. You can find that encode here: https://youtu.be/pQY1jSkcCDQ
+	$LF
+]p
+[h3 
+	" The concept behind this TAS
+	$LF
+]h3
+[p 
+	"I've always been intrigued by brute forcing as an optimization strategy and tried to find a game where it might be possible without spending multiple lifetimes finishing it. After some research, I decided that NES Arkanoid was a good candidate.
+	$LF
+]p
+[p 
+	"At first glance, brute-forcing an 11-minute TAS might seem to be completely impossible, having 2^8^(60 * 60 * 11) possibilities to evaluate. But that assumes we actually want to try every combination of inputs; if we encode the rules of the game into the bot and don't bother looking for things like glitches or ACE exploits, we can actually get this into the realm of possibility. The input surface of the game is actually quite small: you only have to press left, right, and A, and never any of those at the same time. There also aren't all that many ways to bounce the ball around.
+	$LF
+]p
+[p 
+	"I started with about 1500 lines of Lua scripting on top of Bizhawk. This was useful and proved out a lot of my ideas, but the execution time wasn't where it needed to be. Evaluations were maxing out at thousands of paths per hour, when I needed it to be billions per hour to make any kind of headway.
+	$LF
+]p
+[p 
+	"The bottleneck was emulation speed. Could I improve performance within the emulator? I found a few settings (like disabling the display) that gave marginal improvements. But I was still a long way from the goal.
+	$LF
+]p
+[p 
+	"And then I realized something - what if I could 
+	[em 
+		"simulate
+	]em
+	" the game state instead of emulating it? There's a lot of overhead in running BizHawk, running the Lua engine, and emulating the NES internals that isn't necessary if we're just trying to make a ball bounce around. Could I instead write an optimized, bare-bones program that mimicked Arkanoid's mechanics and then run my brute force bot on that?
+	$LF
+]p
+[p 
+	"So I went back to the drawing board. I disassembled the game, analyzed its logic, pulled out the routines that mattered for gameplay, and rewrote them all in C++. Logic for graphics, sound, and such could be omitted since they don't affect the physics or any outcomes in the game.
+	$LF
+]p
+[p 
+	"With the replicated game engine in hand, the next step was proving it was equivalent to the original. I constructed a test harness that fed Baxter's TAS inputs into the engine and compared memory values against what BizHawk showed for any divergence. This uncovered many small issues and inconsistencies that I painstakingly fixed. Eventually I'd resolved everything and could "play back" Baxter's TAS perfectly.
+	$LF
+]p
+[p 
+	"Now I could finally move on to brute-forcing the game. I wrote an evaluation engine with a bunch of rules (discussed later) to go through levels and output BizHawk movies with their solutions. After about a year of execution time on six CPU cores, I'd finally evaluated everything to a satisfactory point to assemble and produce this TAS.
+	$LF
+]p
+[p 
+	"There's a lot of potential in this type of brute-forcing and I'd love to see this happen for more games. The principles discussed below are game-agnostic; the key is the complexity of the game.
+	$LF
+]p
+[h3 
+	" Reducing the brute force search space: Decision Points and Outcomes
+	$LF
+]h3
+[p 
+	"So how do we tackle the brute forcing problem? At first glance, with 8 buttons on the controller there are 2^8 input possibilities per frame, for an 11-minute movie - an almost unimaginable volume to evaluate. But it turns out it's not so bad as that if you just think about the game a little differently.
+	$LF
+]p
+[p 
+	"The trick is that we can reduce everything down to a simple execution model of 
+	[em 
+		"Decision Points
+	]em
+	" and 
+	[em 
+		"Outcomes
+	]em
+	". Decision Points are the moments when we as the one holding the controller have a chance to change the future state of the game; choosing what angle to bounce the ball, for example. Outcomes are all of the possible branches that emanate from that decision point; using the previous example, it'd be the gameplay paths corresponding to each of the directions the ball bounced.
+	$LF
+]p
+[p 
+	"The evaluation algorithm, then, is straightforward:
+	$LF
+]p
+[ul 
+	[li 
+		" Step 1: Grab a job from a queue (job = any game state we saved off earlier).
+		$LF
+	]li
+	[li 
+		" Step 2: "Run" the game from that state until we detect the next Decision Point.
+		$LF
+		[ul 
+			[li 
+				" If we beat the level, go see if it beats the best-known solution, and save it off.
+				$LF
+			]li
+			[li 
+				" If we hit a losing condition (e.g. lost a ball) give up and go back to step 1.
+				$LF
+			]li
+			[li 
+				" Otherwise, generate a game state for each possible Outcome of the Decision Point and append it to the queue.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"For many games, Decision Points happen every frame, making this only marginally better than true brute forcing. For example, in Mario games there's a decision point every frame whether to start, stop, or keep running. But in a game like Arkanoid, the number of Decision points is much less, and lends itself much better to this algorithm. Let's take a look at why.
+	$LF
+]p
+[p 
+	"The first obvious shortcut is to assume loading screens and menus contain no hidden tricks, and we're only brute-forcing in-level content; that cuts out about three minutes of content. Yeah, it's possible we're missing out on stuff like glitches and ACE exploits, but those aren't in scope for this TAS anyway.
+	$LF
+]p
+[p 
+	"Next, let's try and figure out what we can actually do during gameplay to affect Arkanoid's state. We can:
+	$LF
+]p
+[ul 
+	[li 
+		" Launch the ball with A if it's not already been launched.
+		$LF
+	]li
+	[li 
+		" Move the paddle left and right.
+		$LF
+	]li
+	[li 
+		" Pause and unpause the game with Start.
+		$LF
+	]li
+]ul
+[p 
+	"Moving the paddle lets us do a few more specific things:
+	$LF
+]p
+[ul 
+	[li 
+		" Bounce the ball in a specific direction
+		$LF
+	]li
+	[li 
+		" Manipulate what powerup will appear from a block
+		$LF
+	]li
+	[li 
+		" Collect powerups
+		$LF
+	]li
+	[li 
+		" Manipulate where enemies spawn
+		$LF
+	]li
+	[li 
+		" Manipulate where enemies move (in the rare cases when they move randomly)
+		$LF
+	]li
+	[li 
+		" Hit enemies (if they come close enough)
+		$LF
+	]li
+]ul
+[p 
+	"Now, if you think about how often these actually come up in a game of Arkanoid, it's not really that many. Well sure, for a human it seems like a lot; you have to hit the ball a bunch, grab the powerups, try and get the enemies, and it's all really quite hectic. But in the end these only happen once or twice a second; most of the time we're just waiting around for the ball to come back, or for something interesting to happen that we can manipulate. This is a huge improvement over having to decide on controller inputs every single frame!
+	$LF
+]p
+[p 
+	"This means for a 10-second level, instead of 2^8^600 possibilities, it's more like 10^15. Still large, but actually starting to look doable! What helps us even further is that we can prune branches that aren't useful to us, such as dead ends where we can't help but lose a ball, or branches where we've taken too long to accomplish anything.
+	$LF
+]p
+[p 
+	"Okay, enough talking in generalities. Here are the exact mechanics of Arkanoid's Decision Points:
+	$LF
+]p
+[ul 
+	[li 
+		" Launching the ball: This amounts to where the ball should be launched from, and what frame to do it on. Sometimes we want to delay launching the ball so that enemies will be in a more favorable pattern, so in any level that has enemies we have to try all the launch-delay possibilities. Total possibilities: 4800 (48 launch positions x 100 possible frames of delay before launching the ball. It's possible to delay more than 100 frames but such a strategy is extremely unlikely to be faster than delaying less, so I've semi-arbitrarily drawn the line at 100.)
+		$LF
+	]li
+	[li 
+		" Manipulating a multiball powerup: When a powerup-containing block is broken, the game uses the paddle position (among other things) to determine which powerup should spawn. We always want a multiball powerup, of course. Total possibilities: 48 worst-case (48 paddle positions to check).
+		$LF
+	]li
+	[li 
+		" Collecting a powerup: There's a 10-frame window where the powerup is collect-able. Collecting it on different frames lets us manipulate when the single ball turns into a multiball, which affects how each ball can be bounced after that. Total possibilities: 10 (due to the available frame window).
+		$LF
+	]li
+	[li 
+		" Bouncing the ball with the paddle. There are a few scenarios:
+		$LF
+		[ul 
+			[li 
+				" Bouncing off the top: Six angles available (shallow / middle / steep going either left or right). Unlike most breakout games, the paddle speed doesn't matter, only the position of the paddle relative to the ball!
+				$LF
+			]li
+			[li 
+				" Bouncing off the side: Two angles available (shallow either left or right), but we can also manipulate the paddle position to make the ball take 1-4 extra frames to bounce, leading to a different result.
+				$LF
+			]li
+			[li 
+				" Bumping: This is where the ball would miss the paddle, but at the last second we shove the paddle back into the ball. Similar to side-bouncing, this results in one of two angles (shallow either left or right) and lets us manipulate when exactly the ball gets reflected back up.
+				$LF
+			]li
+			[li 
+				" Total possibilities: As many as 12, but often less (e.g. the wall can prevent us from moving the paddle to all of them).
+				$LF
+			]li
+		]ul
+		" Manipulating enemy spawns: An enemy is coming through one of the two gates. If the paddle is in the left half of the screen it'll come through the left one, otherwise through the right one. The act of stopping the paddle to manipulate an enemy can leave the paddle in a bad position to bounce the next ball, so there's a hidden third-possibility we have to consider, where we don't bother manipulating anything at all and just move on to the next Decision Point. Total possibilities: 3 (one for each gate, and a third for not doing any manipulation at all).
+		$LF
+	]li
+	[li 
+		" Manipulating enemy movement: In certain scenarios an enemy blocked in on multiple sides will use RNG to determine where to go next, which means manipulating it with the paddle position. Due to how random enemy movement works, the manipulation is always a choice between only two movement directions, but in the worst case we still have to check all 48 paddle positions. And like enemy spawn-manipulation, we also have to consider ignoring the manipulation to attend to more important actions. Total possibilities: 49 (all paddle positions + ignoring the manipulation).
+		$LF
+	]li
+	[li 
+		" Hitting enemies with the paddle: In very rare cases, enemies survive long enough to reach paddle height. Hitting them with the paddle destroys them and spawns a new enemy, so we can hit early or later to manipulate when the old enemy (hitbox) should disappear and when the new enemy should appear. Total possibilities: at least 100 (the frame window to hit an enemy before it goes below the paddle entirely).
+		$LF
+	]li
+]ul
+[p 
+	"Side note: Why care about enemies at all? There are two reasons. First, they have a hitbox, so they affect the path the ball takes through the level. Second, they give us points, and are the only way to manipulate the score (and by extension the RNG).
+	$LF
+]p
+[p 
+	"In addition, there are a few "end states" that result in the termination of a particular branch:
+	$LF
+]p
+[ul 
+	[li 
+		" A ball being lost (i.e. unreachable by the paddle before it goes off the bottom): the branch is rejected, since one of the goals is to never lose a ball.
+		$LF
+	]li
+	[li 
+		" Frame count exceeding the current known-best time: the branch is rejected, since we're demonstrably slower than the current record.
+		$LF
+	]li
+	[li 
+		" All blocks broken: the level is complete, so the the branch is examined and possibly saved as a new record. The score is allowed to run up first since that's included in the level-completion time.
+		$LF
+	]li
+	[li 
+		" (Boss level only) Boss defeated: Same as all-blocks-broken, except input is simply ended on the final hit.
+		$LF
+	]li
+]ul
+[p 
+	"These are the Decision Points fed into the simple execution model described earlier. Each has rules for how to generate its respective Outcomes, which themselves become candidates for further evaluation as a new branch.
+	$LF
+]p
+[p 
+	"The rest is just CPU time!
+	$LF
+]p
+[h3 
+	" Game Mechanics
+	$LF
+]h3
+[p 
+	"Even in this simple block-breaking game there are many interesting mechanics that affect the strategy and had to be simulated.
+	$LF
+]p
+[h4 
+	" Ball speed-up
+	$LF
+]h4
+[p 
+	"After a certain number of block hits, the ball goes faster. Golden blocks (which are unbreakable) also count. The starting speed of the ball varies level to level, and the speed can be increased more than once. Some levels have so many blocks that the ball ends up going super fast by the end.
+	$LF
+	"Importantly, the game also increases the ball speed the first time a ball hits the ceiling of the level.
+	$LF
+	"This means we have two interesting strategies that can save time:
+	$LF
+	"1. Hit golden blocks extra times to force the ball to go faster sooner. (Example: level 20.)
+	$LF
+	"2. Get the ball to the ceiling earlier to get an early speedup. (Example: level 1.)
+	$LF
+	"Naturally, the bot exploits these organically as it evaluates the branches, rather than them being a part of the coded strategy logic.
+	$LF
+]p
+[h4 
+	" Enemy spawning
+	$LF
+]h4
+[p 
+	"The first three enemies spawn at set intervals that vary from level to level. While some levels seem to have no enemies (like level 1), they in fact just have very large intervals set and will eventually spawn enemies if you waste enough time not completing the level. Only three enemies can be around at once, but if any of them are destroyed then the game will keep spawning new ones until it's back to the full number.
+	$LF
+	"There are two gates from which an enemy can spawn. The decision is very simple: if the paddle is on the left side, the enemy will spawn from the left gate, and if the paddle is on the right then the right gate. Manipulating enemy spawn locations with the paddle is an important action in the simulation, since differently-placed enemies can lead to the ball bouncing in completely different ways.
+	$LF
+]p
+[h4 
+	" Enemy movement
+	$LF
+]h4
+[p 
+	"There are three phases to enemy movement: initial descent and wandering, circling, and final descent and exit.
+	$LF
+	"Enemies start by descending out of a gate and turning when they hit a block or wall. The movement pattern is mostly deterministic, but an enemy blocked on multiple sides (which can only happen by being boxed in by another enemy) can randomly choose its next direction to move.
+	$LF
+	"When the enemy's moved sufficiently far below the lowest row of remaining blocks, it switches to the circling pattern. It'll loop around a few times, gradually descending in the process. Interestingly, due to a bug with 2s complement and the movement tables, circling enemies will also gradually move to the right as well. Enemies no longer collide with blocks when circling.
+	$LF
+	"When the enemy gets sufficiently far down the screen, it switches to its final descent pattern of movement. All it does is move straight down; if it hits the paddle it'll get destroyed, otherwise it goes all the way off screen and despawns.
+	$LF
+]p
+[h4 
+	" RNG
+	$LF
+]h4
+[p 
+	"The RNG function in this game relies on a few deterministic values. The ones we can manipulate are the 100s digit of the score, and the paddle position. Manipulating the paddle position is obviously the easiest way to change the RNG, but sometimes it's necessary to manipulate the score too to get a better result. Blocks always give the same score when broken, so the only way to manipulate the score RNG is to kill a different number of enemies. This means it's sometimes advantageous to use a slower solution for a level so that a different number of enemies can be destroyed, and thus produce a better result for a subsequent level. It turns out to be faster to do this twice in the TAS (levels 16 and 29).
+	$LF
+]p
+[h3 
+	" Other Pointless Stuff
+	$LF
+]h3
+[p 
+	"These mechanics aren't really important for the TAS, but I found them interesting, so I'll say a few words about them here.
+	$LF
+]p
+[h4 
+	" Powerup Spawning
+	$LF
+]h4
+[p 
+	"When the game decides to spawn a powerup, it first generates a one-byte random number (RN). It checks that RN against a special table of six arbitrary values. If it matches one of the first three, the powerup is an extra life; if it matches one of the last three, it's a warp powerup. This means warps and extra lives have a 3/256 chance of spawning, each.
+	$LF
+	"If the game didn't spawn one of these rare powerups, it moves on to the common powerup logic. The game then looks at the lowest three bits of the RN and maps it to the common powerups like this:
+	$LF
+]p
+[pre 
+	" 0 = Large Paddle
+	$LF
+	" 1 = Slow
+	$LF
+	" 2 = Sticky
+	$LF
+	" 3 = Large Paddle
+	$LF
+	" 4 = Multiball
+	$LF
+	" 5 = Laser
+	$LF
+	" 6 = Multiball
+	$LF
+]pre
+[p 
+	"If you're wondering why Large Paddle and Multiball are on there twice, that's because 0 and 6 would normally correspond to the Extra Live and Warp powerups, but the game doesn't want those to be common, so it fills their slots with copies of other powerups. So if Slow, Sticky, and Laser powerups have always seemed a bit rarer to you, that's why!
+	$LF
+	"Finally, if the game finishes all this and you already have the powerup it rolled, it starts the process all over again until it gets one you don't have.
+	$LF
+]p
+[h4 
+	" Ball movement after bumping
+	$LF
+]h4
+[p 
+	"When a ball is below the height of paddle top, and is moving upwards, it moves at double speed until it's above the paddle. The only time this comes up is when bumping the ball off the side of the paddle. The behavior is seemingly pointless, but is probably to enhance the look of the ball "bumping" off the paddle. Or maybe the developers wanted the ball overlapping the paddle as little as possible and hurry the ball up to get it away... who knows!
+	$LF
+]p
+[h4 
+	" Enemy Types
+	$LF
+]h4
+[p 
+	"Despite how they look, every single enemy in the game behaves the same! All of those graphics are just for show, I guess.
+	$LF
+]p
+[h4 
+	" Silver Blocks
+	$LF
+]h4
+[p 
+	"Silver blocks take multiple hits to destroy, and the number of hits depends on the level. In level 1 they only take two hits, but by level 25 they take 5 hits. Many of the solutions for later levels center around silver blocks and how quickly to run the ball into them a lot.
+	$LF
+	"Interestingly, silver blocks also give a different number of points when broken, again depending on the level. The number of points is simply the level number times 50. So level 1's silver blocks give only 50 points, but level 33's silver blocks give a whopping 1650!
+	$LF
+]p
+[h4 
+	" Starting ball speed
+	$LF
+]h4
+[p 
+	"We've already discussed how the ball speed can change during a level. But there's also a starting speed for the ball in each level, too. Most levels start the ball at a "standard" speed, but several levels (8, 10, 14, 16, 23, 27, and 29) start it a little faster than usual, and a handful of levels (11, 13, 17, and 28) where it starts out slower than usual. This was probably done for a bit of variety, or perhaps to influence the difficulty of those levels.
+	$LF
+]p
+[h3 
+	" Improvements over the previous TAS
+	$LF
+]h3
+[p 
+	"In-level timing is from the first frame of control to the final frame of score tally.
+	$LF
+]p
+[p 
+	"Why time the score tally? Because the level doesn't advance until the score has finished tallying up, so if there were a lot of points queued up (meaning a lot of bricks were broken at the last second) the level will wait until they're all counted. This means that sometimes a solution that breaks all of the bricks sooner can actually be slower than one that finishes by breaking just one or two. The brute-force bot accounts for this so all levels are ultimately completed in the fastest real time.
+	$LF
+]p
+[p 
+	"Once the score has finished tallying up there's a constant 198 frames of loading screen and intro until the next level. There is no lag in the loading screen or anywhere else so the movie length is completely deterministic.
+	$LF
+]p
+[p 
+	"All times are in frames.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Baxter's TAS
+			]th
+			[th 
+				"This TAS
+			]th
+			[th 
+				"Frames Saved
+			]th
+			[th 
+				"Notes
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"1207
+			]td
+			[td 
+				"988
+			]td
+			[td 
+				"219
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"1081
+			]td
+			[td 
+				"825
+			]td
+			[td 
+				"256
+			]td
+			[td 
+				"It turns out breaking the wall of blocks from below is best, since there's a bigger gap from the ceiling to the blocks than from our paddle to the blocks. This principle applies in several other levels.
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"703
+			]td
+			[td 
+				"604
+			]td
+			[td 
+				"99
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"832
+			]td
+			[td 
+				"758
+			]td
+			[td 
+				"74
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"1312
+			]td
+			[td 
+				"1026
+			]td
+			[td 
+				"286
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"619
+			]td
+			[td 
+				"488
+			]td
+			[td 
+				"131
+			]td
+			[td 
+				"The bot found a strategy producing this very short result. I like how the pattern of scattered blocks gets suddenly taken down in the last couple of seconds.
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"807
+			]td
+			[td 
+				"621
+			]td
+			[td 
+				"186
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"248
+			]td
+			[td 
+				"248
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"One of two levels where no time was saved; the previous TAS was already optimal. This is the shortest level in the set.
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"627
+			]td
+			[td 
+				"507
+			]td
+			[td 
+				"120
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"810
+			]td
+			[td 
+				"696
+			]td
+			[td 
+				"114
+			]td
+			[td 
+				"I was quite surprised this much time could be saved considering how good Baxter's version looked. A good example of why waiting before launching the ball can be a good idea.
+			]td
+		]tr
+		[tr 
+			[td 
+				"11
+			]td
+			[td 
+				"1688
+			]td
+			[td 
+				"1477
+			]td
+			[td 
+				"211
+			]td
+			[td 
+				"This is one of my favorite solutions because of the crazy bouncing around and use of enemies. I was sure the original TAS had the best early strategy but was surprised when the bot found something even better.
+			]td
+		]tr
+		[tr 
+			[td 
+				"12
+			]td
+			[td 
+				"707
+			]td
+			[td 
+				"624
+			]td
+			[td 
+				"83
+			]td
+		]tr
+		[tr 
+			[td 
+				"13
+			]td
+			[td 
+				"492
+			]td
+			[td 
+				"474
+			]td
+			[td 
+				"18
+			]td
+		]tr
+		[tr 
+			[td 
+				"14
+			]td
+			[td 
+				"818
+			]td
+			[td 
+				"746
+			]td
+			[td 
+				"72
+			]td
+		]tr
+		[tr 
+			[td 
+				"15
+			]td
+			[td 
+				"1749
+			]td
+			[td 
+				"1352
+			]td
+			[td 
+				"397
+			]td
+			[td 
+				"The level with the most time saved, probably because of all the possibilities. It turns out to be much faster to break from the bottom up instead of sending the ball to the top as soon as possible.
+			]td
+		]tr
+		[tr 
+			[td 
+				"16
+			]td
+			[td 
+				"658
+			]td
+			[td 
+				"578
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"This is one of only two levels where time had to be sacrificed to manipulate the score. It can be completed 7 frames faster (
+				[a class=extlink href=https://www.dropbox.com/s/1n12w9vps8pvmsl/Arkanoid-lvl16-571frames.bk2 rel=nofollow 
+					"link
+				]a
+				") but the resulting score is unfavorable for later levels.
+			]td
+		]tr
+		[tr 
+			[td 
+				"17
+			]td
+			[td 
+				"829
+			]td
+			[td 
+				"693
+			]td
+			[td 
+				"136
+			]td
+		]tr
+		[tr 
+			[td 
+				"18
+			]td
+			[td 
+				"672
+			]td
+			[td 
+				"625
+			]td
+			[td 
+				"47
+			]td
+		]tr
+		[tr 
+			[td 
+				"19
+			]td
+			[td 
+				"720
+			]td
+			[td 
+				"670
+			]td
+			[td 
+				"50
+			]td
+		]tr
+		[tr 
+			[td 
+				"20
+			]td
+			[td 
+				"554
+			]td
+			[td 
+				"520
+			]td
+			[td 
+				"34
+			]td
+			[td 
+				"The solution here abuses the golden blocks to increase the ball speed really quickly.
+			]td
+		]tr
+		[tr 
+			[td 
+				"21
+			]td
+			[td 
+				"448
+			]td
+			[td 
+				"443
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"Baxter's solution was almost optimal, but it turns out that waiting to launch the ball leads to a slightly better solution due to the enemy location.
+			]td
+		]tr
+		[tr 
+			[td 
+				"22
+			]td
+			[td 
+				"639
+			]td
+			[td 
+				"535
+			]td
+			[td 
+				"104
+			]td
+		]tr
+		[tr 
+			[td 
+				"23
+			]td
+			[td 
+				"1304
+			]td
+			[td 
+				"1265
+			]td
+			[td 
+				"39
+			]td
+		]tr
+		[tr 
+			[td 
+				"24
+			]td
+			[td 
+				"991
+			]td
+			[td 
+				"891
+			]td
+			[td 
+				"100
+			]td
+		]tr
+		[tr 
+			[td 
+				"25
+			]td
+			[td 
+				"1193
+			]td
+			[td 
+				"1180
+			]td
+			[td 
+				"13
+			]td
+		]tr
+		[tr 
+			[td 
+				"26
+			]td
+			[td 
+				"731
+			]td
+			[td 
+				"731
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"This is the other level where no time was saved. The original TAS's strategy of abusing enemies and keeping the ball in the top area turns out to be the fastest.
+			]td
+		]tr
+		[tr 
+			[td 
+				"27
+			]td
+			[td 
+				"1586
+			]td
+			[td 
+				"1456
+			]td
+			[td 
+				"130
+			]td
+		]tr
+		[tr 
+			[td 
+				"28
+			]td
+			[td 
+				"926
+			]td
+			[td 
+				"771
+			]td
+			[td 
+				"155
+			]td
+		]tr
+		[tr 
+			[td 
+				"29
+			]td
+			[td 
+				"1639
+			]td
+			[td 
+				"1447
+			]td
+			[td 
+				"192
+			]td
+			[td 
+				"Like level 16, some time was lost to manipulate a better score. The best-known time is 5 frames faster (
+				[a class=extlink href=https://www.dropbox.com/s/4cz0gwsyosopgot/Arkanoid-lvl29-1442frames.bk2 rel=nofollow 
+					"link
+				]a
+				").
+			]td
+		]tr
+		[tr 
+			[td 
+				"30
+			]td
+			[td 
+				"1440
+			]td
+			[td 
+				"1258
+			]td
+			[td 
+				"182
+			]td
+		]tr
+		[tr 
+			[td 
+				"31
+			]td
+			[td 
+				"1066
+			]td
+			[td 
+				"1012
+			]td
+			[td 
+				"54
+			]td
+		]tr
+		[tr 
+			[td 
+				"32
+			]td
+			[td 
+				"816
+			]td
+			[td 
+				"763
+			]td
+			[td 
+				"53
+			]td
+			[td 
+				"The initial bounces let us spawn a powerup from the side of the leftmost block instead of having to send the ball up and around, saving a lot of time.
+			]td
+		]tr
+		[tr 
+			[td 
+				"33
+			]td
+			[td 
+				"1437
+			]td
+			[td 
+				"1112
+			]td
+			[td 
+				"325
+			]td
+		]tr
+		[tr 
+			[td 
+				"34
+			]td
+			[td 
+				"947
+			]td
+			[td 
+				"702
+			]td
+			[td 
+				"245
+			]td
+		]tr
+		[tr 
+			[td 
+				"35
+			]td
+			[td 
+				"818
+			]td
+			[td 
+				"611
+			]td
+			[td 
+				"207
+			]td
+		]tr
+		[tr 
+			[td 
+				"Boss
+			]td
+			[td 
+				"732
+			]td
+			[td 
+				"763
+			]td
+			[td 
+				"-31
+			]td
+			[td 
+				"This TAS optimizes for last-hit rather than last-input. It defeats the boss 158 frames faster but due to ending input later it loses 31 frames compared to the published TAS. Note that this strategy is also 98 frames faster than the published warps TAS, which does aim for last-hit timing.
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"In addition, one frame was saved on the title screen by pressing Start sooner, one frame was lost on the title screen due to better startup emulation with NesHawk, and one frame was saved in level 1 by starting as soon as control is gained (the previous TAS waited a frame before starting).
+	$LF
+]p
+[p 
+	"This adds up to 4387 frames saved over the entire TAS (1:13.12).
+	$LF
+]p
+[h3 
+	" A Word on Optimality
+	$LF
+]h3
+[p 
+	"Even with all of the reductions and simplifications, some levels were still too complex to evaluate exhaustively with the bot. For those levels I added branch-pruning metrics and heuristics to bring the execution time within the realm of possibility. For example, if the current attempt is too far behind the published TAS (e.g. 20 fewer blocks broken with only 3 seconds to go) it's pretty safe to eliminate it and move on to more useful ones.
+	$LF
+]p
+[p 
+	"So which levels 
+	[em 
+		"were
+	]em
+	" exhaustively evaluated? I'll divide the levels into three groups:
+	$LF
+]p
+[pre 
+	" A. Level 8, 12, 13, 21, 26, 36 (boss)
+	$LF
+	" B. Level 1, 6, 10, 17, 19, 20, 23, 24, 28, 32, 34
+	$LF
+	" C. Level 2, 3, 4, 5, 7, 9, 11, 14, 15, 16, 18, 21, 22, 25, 27, 29, 30, 31, 33
+	$LF
+]pre
+[p 
+	"Levels in group A were exhaustively evaluated; barring a mistake in the bot or game engine, these levels are optimal.
+	$LF
+]p
+[p 
+	"Levels in group B were evaluated with very basic assumptions that are unlikely to be wrong. For example, level 6 was shown to be optimal unless there's a solution that breaks 18 blocks in the last 88 frames. This almost certainly doesn't exist, so we can assume the solution is optimal, even if we didn't prove it.
+	$LF
+]p
+[p 
+	"Levels in group C were evaluated with bigger assumptions that could possibly be hiding better solutions. For example, level 4 assumes that launching the ball on the first frame (rather than waiting a few frames to bounce the ball off enemies differently) will lead to an optimal result. This was done because actually evaluating all of those extra ball-launch timings would take years, and enemies appear to have a minimal effect in this level. But a better solution may very well be out there.
+	$LF
+]p
+[h3 
+	" Special Thanks
+	$LF
+]h3
+[p 
+	"While I came up with the idea of simulating the Arkanoid engine on my own, I happily acknowledge that I'm not the first to implement something like this. I'd like to recognize MrWint's work on Super Mario Bros, Dragster, and Barnstorming as a predecessor to this TAS. This proved how powerful the technique can be and gave me more confidence it would work for Arkanoid. Thanks to MrWint for all of your awesome and innovative advancements in TAS tech.
+	$LF
+]p
+[p 
+	"I also took inspiration from Bisqwit's Lunar Ball TASes as an early example of bot-generated movies and brute forcing techniques. Without Bisqwit's TASes I probably wouldn't have even thought of making this. Thanks to Bisqwit for all of your work.
+	$LF
+]p
+[p 
+	"Thanks to Kiwisauce and cheetah7071 for being a sounding board for my ideas and having great suggestions of their own. This TAS would have been many seconds slower without their help. Cheetah7071 in particular suggested a branch-pruning technique that led to several levels' solutions actually being computable within my lifetime. Many thanks to both of them for their contributions.
+	$LF
+]p
+[p 
+	"Finally, thanks to Baxter for making the fantastic 3-ball TAS back in 2007. Many of Baxter's solutions were within a second of the optimal time already, no small feat for a game this complex. After doing this TAS I've gained a new appreciation for the work involved.
+	$LF
+]p
+[p 
+	"On to the next project!
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": Amazing job in every regard, accepting to obsolete 
+	(__wikiLink|961M)
+	"!
+	$LF
+]p
+[p 
+	[small 
+		"PS: Mister Windows NT is a cool guy indeed, almost as awesome as MrWint!
+	]small
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Waiting on Chef Stef's thoughts on the movie file 
+	[a href=/forum/p/483241#483241 
+		"feos posted
+	]a
+	". After that, I will process it.
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Replacing the movie with a file without blank input at the end, and a few frames "saved" by tweaking the last input. The game ends at the same frame, so it's not a gameplay improvement, just a cleanup.
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": All right, processing for real.
+]p

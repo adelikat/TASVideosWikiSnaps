@@ -1,0 +1,125 @@
+14
+[p 
+	[tt 
+		"gir
+	]tt
+	" is the movie capture format of 
+	[a class=extlink href=http://www.zophar.net/genesis/gens-plus-.html rel=nofollow 
+		"Gens+
+	]a
+	", an improvement of the 
+	(__wikiLink|EmulatorResources|Gens)
+	" Sega Genesis/Megadrive emulator.
+	$LF
+]p
+[p 
+	"This page documents the 
+	[tt 
+		"gir
+	]tt
+	" format used by 
+	[a class=extlink href=http://www.zophar.net/genesis/gens-plus-.html rel=nofollow 
+		"Gens+
+	]a
+	".  It is accurate for version 0.0.9.61.
+	$LF
+	"Currently, 
+	[tt 
+		"gir
+	]tt
+	" movies are not acceptable for submission for the following reasons:
+	$LF
+]p
+[ul 
+	[li 
+		" no way to store author comments
+		$LF
+	]li
+	[li 
+		" no rerecord count
+		$LF
+	]li
+	[li 
+		" code is not cross-platform
+		$LF
+	]li
+	[li 
+		" no AVI recording
+		$LF
+	]li
+]ul
+[p 
+	"Because Gens+ is open source, these requirements can be met by a dedicated coder.
+	$LF
+]p
+[h3 
+	" GIR file format description
+	$LF
+]h3
+[p 
+	"A 
+	[tt 
+		"gir
+	]tt
+	" file consists of a 35-byte header, optionally followed by an embedded save state and/or sram image, followed by frame data.
+	$LF
+	"The file may optionally be compressed with 
+	[a class=extlink href=http://www.gzip.org/ rel=nofollow 
+		"gzip
+	]a
+	",
+	$LF
+	"in which case it is typically called a 
+	[tt 
+		"giz
+	]tt
+	" file.
+	$LF
+]p
+[pre 
+	"  0x00-04: magic number (0x00564D47, stored as 474D5600) "GMV\0"
+	$LF
+	"  0x05-08: file version (0x00000001, stored as 01000000)
+	$LF
+	"  0x09-0b: flags
+	$LF
+	"     0x01  - movie file includes savestate
+	$LF
+	"     0x02  - movie file uses 8 joystick inputs
+	$LF
+	"     0x04  - movie file includes sram image
+	$LF
+	"     others - not used
+	$LF
+	"  0x0c-0f: frame count 
+	$LF
+	"  0x10-13: framerate (60 (0x3C) or 50 (0x32) )
+	$LF
+	"  0x14-1b: controller types for players 1-8 (3 or 6), not correctly implemented in 0.0.9.61 
+	$LF
+	"  0x1c-1f: state size (only valid if movie includes save state)
+	$LF
+	"  0x20-23: sram size (only valid if movie includes sram)
+	$LF
+	"  0x24 -> 0x24 + state size - 1: movie save state (if applicable)
+	$LF
+	"  0x24 + state_size -> 0x24 + state size + sram size - 1: movie sram (if applicable)
+	$LF
+	"  0x24 + state size + sram size: start of frame data
+	$LF
+]pre
+[p 
+	"Frame data is stored the same way as the 
+	[a class=extlink href=http://code.google.com/p/gens-rerecording/wiki/GMV rel=nofollow 
+		"GMV
+	]a
+	" format with one exception:  If flags includes 0x02, there are 3 additional frames for players 3-8.  This means that 
+	[tt 
+		"gir
+	]tt
+	" supports up to 8 players with 6-button controllers.
+	$LF
+]p
+[p 
+	"The file format has no means of identifying NTSC/PAL, but the FPS can be derived from the header.
+]p

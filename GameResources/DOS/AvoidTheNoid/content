@@ -1,0 +1,437 @@
+1
+[h2 
+	" The random number generator
+	$LF
+]h2
+[h3 
+	" Seeding:
+	$LF
+]h3
+[p 
+	"The random number generator is seeded with time in seconds since some unknown epoch modulo 65536.
+	$LF
+]p
+[h3 
+	" Iteration
+	$LF
+]h3
+[p 
+	"The random number state is iterated by:
+	$LF
+]p
+[pre 
+	"X' = (22695477 * X + 1) mod 2^32
+	$LF
+]pre
+[p 
+	"This formula is invertible:
+	$LF
+]p
+[pre 
+	"X = (690295837 * (X' - 1) ) mod 2^32
+	$LF
+]pre
+[p 
+	"The RNG has a single cycle of 2^32 numbers.
+	$LF
+]p
+[h3 
+	" Random numbers
+	$LF
+]h3
+[p 
+	"To generate a random number, the RNG is iterated once, then the RNG state is taken, divided by 65536 and ANDed with 32767.
+	$LF
+]p
+[p 
+	"Typically the resulting number is then divded by something depending on what the random number is used for and taking the remainder, e.g.:
+	$LF
+]p
+[ul 
+	[li 
+		" 11 when determining the type of fade to perform
+		$LF
+	]li
+	[li 
+		" 1000 when determining the securty code
+		$LF
+	]li
+]ul
+[h3 
+	" RNG usage:
+	$LF
+]h3
+[ul 
+	[li 
+		" The first throw is for security code, the second throw is for type of the first fade.
+		$LF
+	]li
+	[li 
+		" Using the noid remover uses 75 random numbers.
+		$LF
+	]li
+	[li 
+		" Some fade types use random numbers (amount unknown)
+		$LF
+	]li
+	[li 
+		" Launching of bazooka might use one extra random number per frame?
+		$LF
+	]li
+	[li 
+		" Floors use number of random numbers per frame, depending on the floor.
+		$LF
+	]li
+]ul
+[pre 
+	" * Number of enemies doesn't seem to matter
+	$LF
+	" 
+	$LF
+]pre
+[h2 
+	" Fades
+	$LF
+]h2
+[p 
+	"Each time character transitions between rooms, a dialog box appears or disappears there is a fade.
+	$LF
+]p
+[p 
+	"This fade is random, and the fades vary wildly in length, so this is a good subject for luck manipulation.
+	$LF
+]p
+[p 
+	"Most fades are very slow.
+	$LF
+]p
+[p 
+	"The fade type is determined by taking a random number, dividing 11 and taking the remainder:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Remainder
+			]td
+			[td 
+				"Fade type
+			]td
+			[td 
+				"Notes
+			]td
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"Whole screen random
+			]td
+			[td 
+				"Fast, uses random numbers
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"From top and bottom to center
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"Random from top
+			]td
+			[td 
+				"Uses random numbers
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"Striped from top and bottom
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"From center to top and bottom
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"From left and right to center
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"From center to left and right
+			]td
+			[td 
+				"Can be canceled
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"Random from bottom
+			]td
+			[td 
+				"Uses random numbers
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"Random from left
+			]td
+			[td 
+				"Uses random numbers
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"Random from right
+			]td
+			[td 
+				"Uses random numbers
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"Diagonal
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The fade type 6 is special: It can be canceled by a keypress. No other fade type behaves that way.
+	$LF
+]p
+[p 
+	"The fade type 0 is greatly faster than others (except canceled type 6).
+	$LF
+]p
+[h2 
+	" The missing three keys
+	$LF
+]h2
+[p 
+	"The missing three keys are in following places:
+	$LF
+]p
+[ul 
+	[li 
+		" Phone on floor 9 (use it to pick the key)
+		$LF
+	]li
+	[li 
+		" Phone on floor 11 (use it to pick the key)
+		$LF
+	]li
+	[li 
+		" Phone on floor 29 (use it to pick the key).
+		$LF
+	]li
+]ul
+[pre 
+	" * The security has to be deactivated first, otherwise it will blow up.
+	$LF
+]pre
+[h2 
+	" Tricks
+	$LF
+]h2
+[h3 
+	" Jump trick
+	$LF
+]h3
+[p 
+	"This only works when moving left for some reason.
+	$LF
+]p
+[p 
+	"Hit either roll or jump when running. The character speed increases to 12 for one frame (normal running is 8).
+	$LF
+]p
+[h3 
+	" Event invincibility
+	$LF
+]h3
+[ul 
+	[li 
+		" When jumping or rolling, the character is invincible to melee attacks, but not projectile attacks.
+		$LF
+	]li
+	[li 
+		" When between floors, the character seems invincible to all attacks.
+		$LF
+	]li
+]ul
+[h3 
+	" Phones with optional stuff:
+	$LF
+]h3
+[ul 
+	[li 
+		" Floor 18: The first digit of security code.
+		$LF
+	]li
+	[li 
+		" Floor 20 (left): The second digit of security code.
+		$LF
+	]li
+	[li 
+		" Floor 26: The third digit of security code.
+		$LF
+	]li
+	[li 
+		" Floor 28: Two extra pizzas and two noid removers.
+		$LF
+	]li
+]ul
+[h3 
+	" Noid removers
+	$LF
+]h3
+[p 
+	"Using noid remover will:
+	$LF
+]p
+[ul 
+	[li 
+		" Use 75 random numbers
+		$LF
+	]li
+	[li 
+		" Remove all noids and missiles on screen 
+		$LF
+	]li
+	[li 
+		" If you have been knocked back by a melee attack, save your pizza.
+		$LF
+	]li
+]ul
+[h2 
+	" Memory addresses
+	$LF
+]h2
+[p 
+	"The addresses can change, here are addresses from one playthrough
+	$LF
+]p
+[p 
+	"Even if these addresses change, the differences between addresses should remain constant.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"0x1E344
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Character X position
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1E3B4
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Time left minutes
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1E3BA
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Time left seconds
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1E3BE
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Time left quater seconds
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1DE34
+			]td
+			[td 
+				"Dword
+			]td
+			[td 
+				"RNG state
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1707C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Security code (0-999)
+			]td
+		]tr
+	]tbody
+]table

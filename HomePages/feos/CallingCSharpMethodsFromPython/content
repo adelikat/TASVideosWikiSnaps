@@ -1,0 +1,487 @@
+8
+[p 
+	"Original article:
+	$LF
+]p
+[ul 
+	[li 
+		" https://www.red-gate.com/simple-talk/dotnet/net-framework/dynamic-language-integration-in-a-c-world/
+		$LF
+	]li
+]ul
+[p 
+	"Pythonnet:
+	$LF
+]p
+[ul 
+	[li 
+		" https://pypi.org/project/pythonnet/
+		$LF
+	]li
+]ul
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-7042 
+				" Calling C# Methods from Python
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-7043 
+						" Create the C# Class
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-7044 
+						" Call the C# Methods from Python
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h2 
+	" Calling C# Methods from Python
+	$LF
+	[a id=heading-7042 
+	]a
+]h2
+[p 
+	"In the following example, I’ll perform the reverse operation; creating the calculator’s class in C# and then accessing it from Python. There is no attached demonstration for this, and it does not significantly inform the final build of the application, so this is primarily an academic exercise.
+	$LF
+]p
+[h3 
+	" Create the C# Class
+	$LF
+	[a id=heading-7043 
+	]a
+]h3
+[p 
+	"1. In Visual Studio, create a new C# Class Library project with the name 
+	[b 
+		"DynamicCS
+	]b
+	";
+	$LF
+]p
+[p 
+	"2. Create a standard C# class in the 
+	[b 
+		"DynamicCS
+	]b
+	" project by renaming the existing 
+	[b 
+		"Class1.cs
+	]b
+	" class to 
+	[b 
+		"Calculator.cs
+	]b
+	". Implement two simple methods for adding and subtracting numbers, as follows:
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		"using System;
+		$LF
+		$LF
+		"namespace DynamicCS
+		$LF
+		"{
+		$LF
+		"    public class Calculator
+		$LF
+		"    {
+		$LF
+		"        public double add(double argA, double argB)
+		$LF
+		"        {
+		$LF
+		"            return argA + argB;
+		$LF
+		"        }
+		$LF
+		"        public double sub(double argA, double argB)
+		$LF
+		"        {
+		$LF
+		"            return argA - argB;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[p 
+	"The 
+	[b 
+		"Calculator
+	]b
+	" class is a valid C# class, but to access it as a dynamic object from Python, you need to have a wrapper class that inherits from DynamicObject, as demonstrated over the remaining steps:
+	$LF
+]p
+[p 
+	"3. In the Solution Explorer, right-click the DynamicCS project file, and select 
+	[b 
+		"Add > New Item > Class
+	]b
+	";
+	$LF
+]p
+[p 
+	"4. In the Solution Explorer, rename the new file to 
+	[b 
+		"DynamicCalc.cs
+	]b
+	";
+	$LF
+]p
+[p 
+	"5. In the newly-created class, add:
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		"using System.Dynamic
+		$LF
+	]code
+]pre
+[p 
+	"6. Define a public 
+	[b 
+		"DynamicCalc
+	]b
+	" class that derives from 
+	[b 
+		"DynamicObject
+	]b
+	":
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		"public class DynamicCalc: DynamicObject
+		$LF
+	]code
+]pre
+[p 
+	"7. Implement the constructor of the 
+	[b 
+		"DynamicCalc
+	]b
+	" class: 
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		"public DynamicCalc()
+		$LF
+		"{
+		$LF
+		"    calc = new Calculator();
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[p 
+	"8. Override methods from the 
+	[b 
+		"DynamicObject
+	]b
+	" class. In the presented example, the 
+	[b 
+		"TryGetMember
+	]b
+	" method has to be overridden, at the very least:
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		"public override bool TryGetMember(GetMemberBinder binder, out object result)
+		$LF
+		"{
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[p 
+	"9. The resulting 
+	[b 
+		"DynamicCalc.cs
+	]b
+	" file might look like this: 
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		"namespace DynamicCS
+		$LF
+		"{
+		$LF
+		"    public class DynamicCalc: DynamicObject
+		$LF
+		"    {
+		$LF
+		"        Calculator calc;
+		$LF
+		"        public DynamicCalc()
+		$LF
+		"        {
+		$LF
+		"            calc = new Calculator();
+		$LF
+		"        }
+		$LF
+		"        public override bool TryGetMember(GetMemberBinder binder, out object result)
+		$LF
+		"        {
+		$LF
+		"            result = null;
+		$LF
+		"            switch (binder.Name)
+		$LF
+		"            {
+		$LF
+		"            case "add":
+		$LF
+		"                result = (Func<double, double, double>) ((double a, double b)
+		$LF
+		"                    => calc.add(a, b));
+		$LF
+		"                return true;
+		$LF
+		"            case "sub":
+		$LF
+		"                result = (Func<double, double, double>) ((double a, double b)
+		$LF
+		"                    => calc.sub(a, b));
+		$LF
+		"                return true;
+		$LF
+		"            }
+		$LF
+		"            return false;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[p 
+	"Note that, in the 
+	[b 
+		"TryGetMember
+	]b
+	" method:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[b 
+			"binder.Name
+		]b
+		" represents a name of the method or property called; 
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"result
+		]b
+		" is an output value of the method or property. In this case, it is a delegate to the ‘add’ and ‘sub’ methods of the calc object; 
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"return
+		]b
+		" should return ‘true’ if the operation is successful, otherwise ‘false’. 
+		$LF
+	]li
+]ul
+[p 
+	"Finally, save and build the solution. The Python executable performs the calculations by calling the calc object, which in turn resolves the result of the C# 
+	[b 
+		"DynamicCalc
+	]b
+	" class, imported from 
+	[b 
+		"DynamicCS.dll
+	]b
+	".
+	$LF
+]p
+[h3 
+	" Call the C# Methods from Python
+	$LF
+	[a id=heading-7044 
+	]a
+]h3
+[pre 
+	"       
+	$LF
+]pre
+[p 
+	"1. In the Solution Explorer, right click the 
+	[b 
+		"DynamicCS
+	]b
+	" project file, and select 
+	[b 
+		"Add > New Item > Text file
+	]b
+	";
+	$LF
+]p
+[p 
+	"2. In the Solution Explorer, rename the new file to 
+	[b 
+		"client.py
+	]b
+	";
+	$LF
+]p
+[p 
+	"3. Add an 
+	[b 
+		"import sys
+	]b
+	" statement, pointing to the directory where your C# DLL is located.  In this example, I have saved 
+	[b 
+		"DynamicCS.dll
+	]b
+	" in 
+	[em 
+		"C:\MyProjects\DynamicCS\DynamicCS\bin\Debug
+	]em
+	": 
+	$LF
+]p
+[pre 
+	[code class=language-python 
+		"import sys
+		$LF
+		"sys.path.append(r"C:\MyProjects\DynamicCS\DynamicCS\bin\Debug")
+		$LF
+	]code
+]pre
+[p 
+	"4. Reference your C# DLL: 
+	$LF
+]p
+[pre 
+	[code class=language-python 
+		"import clr
+		$LF
+		"clr.AddReference(r"DynamicCS.dll")
+		$LF
+	]code
+]pre
+[p 
+	"5. Create a Python object as you would for any other object, then use it to perform some calculations: 
+	$LF
+]p
+[pre 
+	[code class=language-python 
+		"from DynamicCS import DynamicCalc
+		$LF
+		"calc=DynamicCalc()
+		$LF
+	]code
+]pre
+[p 
+	"6. The resulting 
+	[b 
+		"client.py
+	]b
+	" file might look like this: 
+	$LF
+]p
+[pre 
+	[code class=language-python 
+		"import sys
+		$LF
+		"sys.path.append(r"C:\MyProjects\DynamicCS\DynamicCS\bin\Debug")
+		$LF
+		$LF
+		"import clr
+		$LF
+		"clr.AddReference(r"DynamicCS.dll")
+		$LF
+		$LF
+		"from DynamicCS import DynamicCalc
+		$LF
+		$LF
+		"calc=DynamicCalc()
+		$LF
+		$LF
+		"print calc.__class__.__name__
+		$LF
+		"# display the name of the class: 'DynamicCalc' 
+		$LF
+		$LF
+		"a=7.5
+		$LF
+		"b=2.5
+		$LF
+		$LF
+		"res = calc.add(a, b)
+		$LF
+		"print a, '+', b, '=', res
+		$LF
+		$LF
+		"res = calc.sub(a, b)
+		$LF
+		"print a, '-', b, '=', res
+		$LF
+		$LF
+		"raw_input('Press any key to finish...')
+		$LF
+	]code
+]pre
+[p 
+	"7. Save and run the Python client. 
+	$LF
+]p
+[p 
+	[img class=embed src=https://i.imgur.com/jUwq8pd.gif 
+	]img
+	$LF
+]p
+[ul 
+	[li 
+		" Figure 2. The basic calculator, implemented mostly in Python. Creating and calling Python methods in C#
+		$LF
+	]li
+]ul
+[p 
+	"The Python executable performs the calculations by calling the 
+	[b 
+		"calc
+	]b
+	" object, which in turn resolves the result of the C# 
+	[b 
+		"DynamicCalc
+	]b
+	" class, imported from 
+	[b 
+		"DynamicCS.dll
+	]b
+	". The end result looks much the same as the earlier implementation.
+	$LF
+]p

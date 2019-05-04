@@ -1,0 +1,823 @@
+4
+[p 
+	"NES Wheel of Fortune game mechanics and assembly documentation.
+	$LF
+]p
+[p 
+	"See also 
+	(__wikiLink|Game Resources/NES/Wheel Of Fortune/Puzzle List)
+	$LF
+]p
+[h4 
+	" Addresses related to puzzle selection and RNG
+	$LF
+]h4
+[ul 
+	[li 
+		"0x0A-0x0C: RNG
+		$LF
+	]li
+	[li 
+		"0x20-0x22: Key inputs (used for randomization)
+		$LF
+		[ul 
+			[li 
+				"0x20: 1P key input status
+				$LF
+			]li
+			[li 
+				"0x21: 1P key input change status (a bit is 1 if and only if key is pressed, and not pressed on previous frame)
+				$LF
+			]li
+			[li 
+				"0x22: 2P key input status
+				$LF
+			]li
+		]ul
+		"0x780-0x7FC: Puzzle availability bitfield (0=available, 1=not available)
+		$LF
+	]li
+]ul
+[p 
+	"Key inputs (NES standard):
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Key
+			]th
+			[th 
+				"Hex value
+			]th
+		]tr
+		[tr 
+			[td 
+				"R
+			]td
+			[td 
+				"01
+			]td
+		]tr
+		[tr 
+			[td 
+				"L
+			]td
+			[td 
+				"02
+			]td
+		]tr
+		[tr 
+			[td 
+				"D
+			]td
+			[td 
+				"04
+			]td
+		]tr
+		[tr 
+			[td 
+				"U
+			]td
+			[td 
+				"08
+			]td
+		]tr
+		[tr 
+			[td 
+				"Start
+			]td
+			[td 
+				"10
+			]td
+		]tr
+		[tr 
+			[td 
+				"Select
+			]td
+			[td 
+				"20
+			]td
+		]tr
+		[tr 
+			[td 
+				"B
+			]td
+			[td 
+				"40
+			]td
+		]tr
+		[tr 
+			[td 
+				"A
+			]td
+			[td 
+				"80
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" RNG
+	$LF
+]h4
+[p 
+	"What the below does: Random stuff. Note that, as far as is known, addresses 0x341, 0x381, 0x3A1, 0x3A2 are always 0 when this is executed. Not all values are possible, even if all possible inputs (0x20-0x22) are entered.
+	$LF
+]p
+[p 
+	"When on the screen showing the round, carry is always set at execution of 00:87F8, and the game polls all inputs 0x20-0x22. When on the spin screen, carry is always clear at execution of 00:87F8, and the game only polls input from 0x22 (0x20 and 0x21 are set to zero).
+	$LF
+]p
+[pre 
+	[code class=language-snescom 
+		"00:8C4C:E6 0A     INC $000A
+		$LF
+		"...
+		$LF
+		";(carry is set on screen showing round; carry is clear when on spin screen)
+		$LF
+		"00:87F8:A5 0B     LDA $000B
+		$LF
+		"00:87FA:65 20     ADC $0020
+		$LF
+		"00:87FC:65 22     ADC $0022
+		$LF
+		"00:87FE:65 21     ADC $0021
+		$LF
+		"00:8800:65 0A     ADC $000A
+		$LF
+		"00:8802:2A        ROL
+		$LF
+		"00:8803:2A        ROL
+		$LF
+		"00:8804:2A        ROL
+		$LF
+		"00:8805:6D A2 03  ADC $03A2
+		$LF
+		"00:8808:4D 41 03  EOR $0341
+		$LF
+		"00:880B:85 0B     STA $000B
+		$LF
+		"00:880D:69 09     ADC #$09
+		$LF
+		"00:880F:65 0C     ADC $000C
+		$LF
+		"00:8811:6D 81 03  ADC $0381
+		$LF
+		"00:8814:49 07     EOR #$07
+		$LF
+		"00:8816:65 0A     ADC $000A
+		$LF
+		"00:8818:65 20     ADC $0020
+		$LF
+		"00:881A:ED A1 03  SBC $03A1
+		$LF
+		"00:881D:85 0C     STA $000C
+		$LF
+		"00:881F:60        RTS
+		$LF
+	]code
+]pre
+[h4 
+	" Puzzle selection routines
+	$LF
+]h4
+[p 
+	"What the below does: A puzzle selection subroutine, which also messes with the RNG. It is as follows: Let X be a random multiple of 4 from 0 to 0x7C, and add a random number from 0 to 3 if it is not 0x74, 0x78, or 0x7C. Let Y be a random number from 0 to 7. Then take the (Y+1)th high-end bit of address 0x780+X. If it is 0, turn the 0 bit to 1 (this selects a puzzle) and return success (0). If it is 1, return failure (1).
+	$LF
+]p
+[p 
+	"Address 0x17 starts at 8. Each time failure is returned, 0x17 is decremented and the subroutine is called again. This subroutine executes up to 8 times.
+	$LF
+]p
+[pre 
+	[code class=language-snescom 
+		"04:8006:A5 0B     LDA $000B
+		$LF
+		"04:8008:0A        ASL
+		$LF
+		"04:8009:0A        ASL
+		$LF
+		"04:800A:45 0C     EOR $000C
+		$LF
+		"04:800C:85 0B     STA $000B
+		$LF
+		"04:800E:45 0A     EOR $000A
+		$LF
+		"04:8010:65 0B     ADC $000B
+		$LF
+		"04:8012:85 0C     STA $000C
+		$LF
+		"04:8014:A5 0B     LDA $000B
+		$LF
+		"04:8016:29 7C     AND #$7C
+		$LF
+		"04:8018:AA        TAX
+		$LF
+		"04:8019:C9 74     CMP #$74
+		$LF
+		"04:801B:B0 0E     BCS $802B
+		$LF
+		"04:801D:A5 0C     LDA $000C
+		$LF
+		"04:801F:45 0B     EOR $000B
+		$LF
+		"04:8021:4A        LSR
+		$LF
+		"04:8022:4A        LSR
+		$LF
+		"04:8023:29 03     AND #$03
+		$LF
+		"04:8025:85 1A     STA $001A
+		$LF
+		"04:8027:8A        TXA
+		$LF
+		"04:8028:05 1A     ORA $001A
+		$LF
+		"04:802A:AA        TAX
+		$LF
+		"04:802B:A5 0C     LDA $000C
+		$LF
+		"04:802D:45 17     EOR $0017
+		$LF
+		"04:802F:29 07     AND #$07
+		$LF
+		"04:8031:85 1A     STA $001A
+		$LF
+		"04:8033:A8        TAY
+		$LF
+		"04:8034:BD 80 07  LDA $0780,X
+		$LF
+		"04:8037:39 5D 80  AND $805D,Y
+		$LF
+		"04:803A:F0 03     BEQ $803F
+		$LF
+		"04:803C:A9 01     LDA #$01
+		$LF
+		"04:803E:60        RTS -----
+		$LF
+		"04:803F:BD 80 07  LDA $0780,X
+		$LF
+		"04:8042:19 5D 80  ORA $805D,Y
+		$LF
+		"04:8045:9D 80 07  STA $0780,X
+		$LF
+		"04:8048:8A        TXA
+		$LF
+		"04:8049:4A        LSR
+		$LF
+		"04:804A:4A        LSR
+		$LF
+		"04:804B:4A        LSR
+		$LF
+		"04:804C:4A        LSR
+		$LF
+		"04:804D:4A        LSR
+		$LF
+		"04:804E:85 19     STA $0019
+		$LF
+		"04:8050:E6 19     INC $0019
+		$LF
+		"04:8052:8A        TXA
+		$LF
+		"04:8053:0A        ASL
+		$LF
+		"04:8054:0A        ASL
+		$LF
+		"04:8055:0A        ASL
+		$LF
+		"04:8056:05 1A     ORA $001A
+		$LF
+		"04:8058:85 18     STA $0018
+		$LF
+		"04:805A:A9 00     LDA #$00
+		$LF
+		"04:805C:60        RTS --------
+		$LF
+		$LF
+		";(data table used above)
+		$LF
+		"04:805D:80 40 20 10 08 04 02 01
+		$LF
+	]code
+]pre
+[p 
+	"Puzzle selection routine:
+	$LF
+]p
+[p 
+	"What the below does: If all bytes of 0x780-0x7FC are 0xFF, turn them all to 0.
+	$LF
+]p
+[pre 
+	[code class=language-snescom 
+		"04:8065:A2 7C     LDX #$7C
+		$LF
+		"04:8067:BD 80 07  LDA $0780,X
+		$LF
+		"04:806A:C9 FF     CMP #$FF
+		$LF
+		"04:806C:D0 0E     BNE $807C
+		$LF
+		"04:806E:CA        DEX
+		$LF
+		"04:806F:10 F6     BPL $8067
+		$LF
+		"04:8071:A9 00     LDA #$00
+		$LF
+		"04:8073:E8        INX
+		$LF
+		"04:8074:9D 80 07  STA $0780,X
+		$LF
+		"04:8077:E8        INX
+		$LF
+		"04:8078:E0 7E     CPX #$7E
+		$LF
+		"04:807A:D0 F8     BNE $8074
+		$LF
+	]code
+]pre
+[p 
+	"What the below does: Address 0x17 starts at 8 and the subroutine at 04:8006 executed. Each time failure is returned, 0x17 is decremented and the subroutine is called again. This subroutine executes up to 8 times. If at any time the subroutine returns success, then a bit in the range 0x780-0x7FC has been turned from 0 to 1 (a puzzle has been selected).
+	$LF
+]p
+[pre 
+	[code class=language-snescom 
+		"04:807C:A9 08     LDA #$08
+		$LF
+		"04:807E:85 17     STA $0017
+		$LF
+		"04:8080:20 06 80  JSR $8006
+		$LF
+		"04:8083:F0 42     BEQ $80C7
+		$LF
+		"04:8085:C6 17     DEC $0017
+		$LF
+		"04:8087:D0 F7     BNE $8080
+		$LF
+	]code
+]pre
+[p 
+	"What the below does: If it still returns failure after 8 times, then take the last value of X (from description above), and let Z be the largest multiple of 32 less than X. Starting from address 0x780+Z, take the first byte that is not 0xFF (that means a puzzle is available there). If it reaches address 0x7FC and that byte is 0xFF, then go back to 0x700 and keep trying.
+	$LF
+]p
+[pre 
+	[code class=language-snescom 
+		"04:8089:A5 0B     LDA $000B
+		$LF
+		"04:808B:29 7C     AND #$7C
+		$LF
+		"04:808D:AA        TAX
+		$LF
+		"04:808E:BD 80 07  LDA $0780,X
+		$LF
+		"04:8091:C9 FF     CMP #$FF
+		$LF
+		"04:8093:D0 09     BNE $809E
+		$LF
+		"04:8095:E8        INX
+		$LF
+		"04:8096:E0 7D     CPX #$7D
+		$LF
+		"04:8098:D0 F4     BNE $808E
+		$LF
+		"04:809A:A2 00     LDX #$00
+		$LF
+		"04:809C:F0 F0     BEQ $808E
+		$LF
+		"04:809E:85 14     STA $0014
+		$LF
+		"04:80A0:8A        TXA
+		$LF
+		"04:80A1:4A        LSR
+		$LF
+		"04:80A2:4A        LSR
+		$LF
+		"04:80A3:4A        LSR
+		$LF
+		"04:80A4:4A        LSR
+		$LF
+		"04:80A5:4A        LSR
+		$LF
+		"04:80A6:85 19     STA $0019
+		$LF
+		"04:80A8:E6 19     INC $0019
+		$LF
+		"04:80AA:8A        TXA
+		$LF
+		"04:80AB:0A        ASL
+		$LF
+		"04:80AC:0A        ASL
+		$LF
+		"04:80AD:0A        ASL
+		$LF
+		"04:80AE:85 18     STA $0018
+		$LF
+	]code
+]pre
+[p 
+	"What the below does: From the above byte which is not 0xFF, take the first high-end bit that is 0. Turn the 0 to 1 (this selects a puzzle).
+	$LF
+]p
+[pre 
+	[code class=language-snescom 
+		"04:80B0:A9 80     LDA #$80
+		$LF
+		"04:80B2:85 15     STA $0015
+		$LF
+		"04:80B4:06 14     ASL $0014
+		$LF
+		"04:80B6:90 07     BCC $80BF
+		$LF
+		"04:80B8:E6 18     INC $0018
+		$LF
+		"04:80BA:46 15     LSR $0015
+		$LF
+		"04:80BC:4C B4 80  JMP $80B4
+		$LF
+		"04:80BF:BD 80 07  LDA $0780,X
+		$LF
+		"04:80C2:05 15     ORA $0015
+		$LF
+		"04:80C4:9D 80 07  STA $0780,X
+		$LF
+	]code
+]pre
+[h4 
+	" ROM bank of puzzles
+	$LF
+]h4
+[p 
+	"All pointers are 2-byte little-endian values to NES addresses (04:xxxx range). For example, the hex string "EC 81" points to the address 04:81EC.
+	$LF
+]p
+[ul 
+	[li 
+		"04:81D8-81E9 (ROM 101E8-101FC): pointers to 81EC-89BD range (marking categories?)
+		$LF
+	]li
+	[li 
+		"04:81EA-81EB (ROM 101FA-101FB): pointer to wheel of fortune fake puzzle (title screen)
+		$LF
+	]li
+	[li 
+		"04:81EC-89BD (ROM 101FC-109CD): pointers to puzzles in 89CE-C5F4 range
+		$LF
+	]li
+	[li 
+		"04:89BE-89CD (ROM 109CE-109DD): wheel of fortune fake puzzle
+		$LF
+	]li
+	[li 
+		"04:89CE-C607 (ROM 109DE-14617): puzzle set
+		$LF
+	]li
+]ul
+[p 
+	"Note: The last puzzle (1001st puzzle/puzzle #1000) at 04:C5F5-C607 (ROM 14605-14617) can never be called by the game's puzzle selection routine.
+	$LF
+]p
+[p 
+	"Puzzles are stored in a modified ASCII form:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Symbol
+			]th
+			[th 
+				"Hex value
+			]th
+		]tr
+		[tr 
+			[td 
+				"space
+			]td
+			[td 
+				"20
+			]td
+		]tr
+		[tr 
+			[td 
+				"'
+			]td
+			[td 
+				"27
+			]td
+		]tr
+		[tr 
+			[td 
+				"-
+			]td
+			[td 
+				"2D
+			]td
+		]tr
+		[tr 
+			[td 
+				"A
+			]td
+			[td 
+				"41
+			]td
+		]tr
+		[tr 
+			[td 
+				"B
+			]td
+			[td 
+				"42
+			]td
+		]tr
+		[tr 
+			[td 
+				"C
+			]td
+			[td 
+				"43
+			]td
+		]tr
+		[tr 
+			[td 
+				"D
+			]td
+			[td 
+				"44
+			]td
+		]tr
+		[tr 
+			[td 
+				"E
+			]td
+			[td 
+				"45
+			]td
+		]tr
+		[tr 
+			[td 
+				"F
+			]td
+			[td 
+				"46
+			]td
+		]tr
+		[tr 
+			[td 
+				"G
+			]td
+			[td 
+				"47
+			]td
+		]tr
+		[tr 
+			[td 
+				"H
+			]td
+			[td 
+				"48
+			]td
+		]tr
+		[tr 
+			[td 
+				"I
+			]td
+			[td 
+				"49
+			]td
+		]tr
+		[tr 
+			[td 
+				"J
+			]td
+			[td 
+				"4A
+			]td
+		]tr
+		[tr 
+			[td 
+				"K
+			]td
+			[td 
+				"4B
+			]td
+		]tr
+		[tr 
+			[td 
+				"L
+			]td
+			[td 
+				"4C
+			]td
+		]tr
+		[tr 
+			[td 
+				"M
+			]td
+			[td 
+				"4D
+			]td
+		]tr
+		[tr 
+			[td 
+				"N
+			]td
+			[td 
+				"4E
+			]td
+		]tr
+		[tr 
+			[td 
+				"O
+			]td
+			[td 
+				"4F
+			]td
+		]tr
+		[tr 
+			[td 
+				"P
+			]td
+			[td 
+				"50
+			]td
+		]tr
+		[tr 
+			[td 
+				"Q
+			]td
+			[td 
+				"51
+			]td
+		]tr
+		[tr 
+			[td 
+				"R
+			]td
+			[td 
+				"52
+			]td
+		]tr
+		[tr 
+			[td 
+				"S
+			]td
+			[td 
+				"53
+			]td
+		]tr
+		[tr 
+			[td 
+				"T
+			]td
+			[td 
+				"54
+			]td
+		]tr
+		[tr 
+			[td 
+				"U
+			]td
+			[td 
+				"55
+			]td
+		]tr
+		[tr 
+			[td 
+				"V
+			]td
+			[td 
+				"56
+			]td
+		]tr
+		[tr 
+			[td 
+				"W
+			]td
+			[td 
+				"57
+			]td
+		]tr
+		[tr 
+			[td 
+				"X
+			]td
+			[td 
+				"58
+			]td
+		]tr
+		[tr 
+			[td 
+				"Y
+			]td
+			[td 
+				"59
+			]td
+		]tr
+		[tr 
+			[td 
+				"Z
+			]td
+			[td 
+				"5A
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"As well, the following rules apply to indicate new line or end of puzzle:
+	$LF
+]p
+[ul 
+	[li 
+		" The last symbol before a new line has 0x80 added to its value.
+		$LF
+	]li
+	[li 
+		" The last two symbols of the puzzle both have 0x80 added to their values.
+		$LF
+	]li
+]ul
+[p 
+	"For example, the following string is WHEEL@OF@FORTUNE (@ meaning newline):
+	$LF
+]p
+[pre 
+	"57 48 45 45 CC 4F C6 46 4F 52 54 55 CE C5
+	$LF
+	"W  H  E  E  L@ O  F@ F  O  R  T  U  N  E
+	$LF
+]pre
+[h4 
+	" Addresses related to spin mechanics
+	$LF
+]h4
+[ul 
+	[li 
+		"0x5A: Delay after spin stops.
+		$LF
+	]li
+	[li 
+		"0x73-0x74: Spin counter while wheel is spinning.
+		$LF
+	]li
+	[li 
+		"0x8A: Spin strength.
+		$LF
+	]li
+	[li 
+		"0xC5: Spin delay.
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[h4 
+	" Spin mechanics
+	$LF
+]h4
+[p 
+	"The spin for speed-up round uses the following randomization rules, in this order:
+	$LF
+]p
+[ul 
+	[li 
+		" Set address 0x0A to 0 and 0x8A to 0.
+		$LF
+	]li
+	[li 
+		" Take address 0x0B mod 128. Add 20 to this value and store in address 0xC5 (spin wait).
+		$LF
+	]li
+	[li 
+		" From now on, run RNG each frame using spin RNG behavior (see above section on RNG). Each frame, decrement address 0xC5. If 0xC5 is not decremented to 0, do the following to 0x8A:
+		$LF
+		[ul 
+			[li 
+				" If 0x8A (spin strength) is equal to 0x39, add 0x80=128 to it. If 0x8A is equal to 0x80=128, set it to 0.
+				$LF
+			]li
+			[li 
+				" Otherwise, increment 0x8A if it is less than 0x80 and decrement 0x8A otherwise.
+				$LF
+			]li
+		]ul
+		" On the frame when 0xC5 is decremented to 0, after running RNG, take 0x0B mod 16 (this is random fudge factor). Add 0x8A mod 128 (spin strength) to this value. Add 100 to this value. Multiply this value by 4. Store this value as two-byte big-endian value in 0x73-74.
+		$LF
+	]li
+	[li 
+		" On each frame, if, after running RNG, 0x0A is even, then decrement 0x73-0x74. Otherwise, subtract two from 0x73-0x74.
+		$LF
+	]li
+	[li 
+		" On the frame when 0x73-0x74 becomes negative, assuming the spin lands on a price panel, start incrementing 0x5A (which starts at 0).
+		$LF
+	]li
+	[li 
+		" On the frame when 0x5A becomes 0x39, stop running the RNG. These values will be used for the next puzzle.
+	]li
+]ul

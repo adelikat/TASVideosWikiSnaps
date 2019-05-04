@@ -1,0 +1,352 @@
+4
+[p 
+	(youtube|v=najVhuDhwR4)
+	$LF
+]p
+[ul 
+	[li 
+		" Emulator: lsnes rr2-beta23
+		$LF
+	]li
+	[li 
+		" Rom: Final Fantasy III (U) (V1.0)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses game-breaking glitch
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+	[li 
+		" Features mid-frame resets
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[p 
+	"This is an improvement of 30127 frames from the 
+	(__wikiLink|2922M|previously published TAS)
+	", using mid-frame resets to skip another portion of the game and to speed up the fights. Like the previous TAS, it uses the 52 game-over glitch to trigger the ending. The mechanics of this glitch were described in the previous TAS, so we will only detail the improvements of the present TAS. Comments are embedded in the above video and are available 
+	[a class=extlink href=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/ff6_52go_v2_captions.srt rel=nofollow 
+		"here
+	]a
+	".
+	$LF
+]p
+[h3 
+	" Early Narshe escape
+	$LF
+]h3
+[p 
+	"When Terra wakes up in Arvis house and leaves the house to escape through the caves, there is a invisible NPC placed in front of the backdoor to prevent Terra from entering the house again. The flag for this NPC is located at bit 1 of address 
+	[tt 
+		"$1F41
+	]tt
+	". However, this flag is not set before the Whelk fight, where there is a save point. Also, there is another save point in the caves after leaving Arvis. So by overwriting the NPC flag from the second save by the value of the first save, we obtain a save where we can go back and enter Arvis house. This gives us access to the whole Narshe town and we can leave the town.
+	$LF
+]p
+[h3 
+	" Dead party
+	$LF
+]h3
+[p 
+	"To get faster gameovers, we will also build a dead party. In the first save, we have a 3-characters party, so we take this opportunity to let Terra die before saving. This was not a trivial task, because enemies are obviously weak in the very beginning of the game. Also, we absolutely need Terra to get the fast Whelk kill. Several options were considered, but in the end it was faster to let Terra die during Whelk fight and backtrack to the save point.
+	$LF
+]p
+[p 
+	"By the way, we used the non-assisted setup for the Whelk fight by leaving Battle Speed at 3. This is the slowest setting where Whelk shell takes 2 rounds before going inside. This gives us time to manipulate our damage as well as giving Whelk two attacks to kill Terra.
+	$LF
+]p
+[p 
+	"In the second save point, we have a solo Terra party, so we combine the two saves to get a solo dead Terra party. Actually, Terra's HP are not relevant to consider her dead, what matters is the Wound status. This trick was done in the continuation of the Arvis NPC trick, to save time in resets and to remove the save overwriting dialogs.
+	$LF
+]p
+[p 
+	"However, we had to be sure to be able to leave the cave without a single fight. Luckily, it was barely possible when the danger value was minimal, so we triggered a fight just before the second save point.
+	$LF
+]p
+[h3 
+	" Details of the combined save
+	$LF
+]h3
+[pre 
+	"Save      | Terra status ($0014) | Party ($0250-$025F) | Arvis NPC ($0941) | Map/Coords ($0964/$09C0)
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+		"--
+		$LF
+		"Whelk     | 
+		[b 
+			"88 (Wound+Magitek)
+		]b
+		"   | Terra/Vicks/Wedge   | 
+		[b 
+			"00
+		]b
+		"                | Cave before Whelk
+		$LF
+		"Arvis     | 00                   | 
+		[b 
+			"Terra
+		]b
+		"               | 01                | 
+		[b 
+			"Cave after Arvis
+		]b
+		$LF
+		"Combined  | 
+		[b 
+			"88 (Wound+Magitek)
+		]b
+		"   | 
+		[b 
+			"Terra
+		]b
+		"               | 
+		[b 
+			"00
+		]b
+		"                | 
+		[b 
+			"Cave after Arvis
+		]b
+		$LF
+	]del
+]pre
+[p 
+	"After all the mid-frame resets, we needed to get a valid savefile, which is tested by the game using a checksum system. To trigger a checksum collision, we carefully chose the name of Terra, so that after the last partial save overwrite, we ended up with a savefile with a correct checksum.
+	$LF
+]p
+[h3 
+	" Triggering the ending
+	$LF
+]h3
+[p 
+	"Like the previous TAS, we will manipulate the event pointer to be 
+	[tt 
+		"$1860
+	]tt
+	" in RAM, which correspond to the lower byte of the money value. By buying and selling items, we set this byte to be 
+	[tt 
+		"C4
+	]tt
+	" (
+	[tt 
+		"C3-C7
+	]tt
+	" works). Instruction 
+	[tt 
+		"C4
+	]tt
+	" is:
+	$LF
+]p
+[pre 
+	"C4 t1 t2 t3 t4 t5 addr -> if(t1 || t2 || t3 || t4 || t5) jump to addr; else continue;
+	$LF
+	"tx are 2 bytes values referring to bits starting at $1E80, addr is 3 bytes
+	$LF
+	$LF
+]pre
+[p 
+	"So 
+	[tt 
+		"addr
+	]tt
+	" is located at 
+	[tt 
+		"$186B-186D
+	]tt
+	", which corresponds the item ids in slots 2-4 of the inventory. We placed a Leather Hat, a Mithril Pike (bought in Narshe) and a Buckler in these slots, so the memory looks like this:
+	$LF
+]p
+[pre 
+	$LF
+	"|     Gold     |   Game Time  | Step counter |                  Inventory
+	$LF
+	"| C4 | xx | xx | xx | xx | xx | xx | xx | xx | xx | xx |   69    |   1D    |   5A    |
+	$LF
+	"                                                       | Leather | Mithril | Buckler |
+	$LF
+	"                                                       |   Hat   |  Pike   |         |
+	$LF
+]pre
+[p 
+	"When this 
+	[tt 
+		"C4
+	]tt
+	" instruction is executed, it jumps to address 
+	[tt 
+		"$5A1D69 + $CA0000 = $241D69
+	]tt
+	" if any of the 
+	[tt 
+		"tx
+	]tt
+	" is true. We didn't have to manipulate a 
+	[tt 
+		"tx
+	]tt
+	", it was very likely that one will be good.
+	$LF
+]p
+[p 
+	"Address 
+	[tt 
+		"$241D69
+	]tt
+	" is located in RAM, in the middle of the window colors configuration. We can now write our code to trigger the ending using colors. The code to input was carefully chosen to minimize the change of color values, and the result code is:
+	$LF
+]p
+[pre 
+	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
+	$LF
+	"$1D6x xx xx xx xx xx xx xx xx xx CD xx xx xx xx xx xx
+	$LF
+	"$1D7x xx xx xx xx xx xx xx xx xx C3 xx xx xx xx xx xx
+	$LF
+	"$1D8x xx xx xx xx xx B2 0C 53 00 B2 52 13 00 xx xx xx
+	$LF
+]pre
+[p 
+	"Instructions are:
+	$LF
+]p
+[pre 
+	$LF
+	"CD t1 t2 t3 t4 t5 t6 addr -> if(t1 && t2 && t3 && t4 && t5 && t6) jump to addr; else continue;
+	$LF
+	"C3 t1 t2 t3 t4 addr       -> if(t1 || t2 || t3 || t4) jump to addr; else continue;
+	$LF
+	"B2 aaaaaa                 -> call subroutine $aaaaaa + $CA0000
+	$LF
+	$LF
+]pre
+[p 
+	"The first two instructions 
+	[tt 
+		"CD
+	]tt
+	" and 
+	[tt 
+		"C3
+	]tt
+	" are just used to advance to the right location, where is actual relevant code is faster to input. In both cases, the test condition failed (which is surprising for the second one). The first 
+	[tt 
+		"B2
+	]tt
+	" instruction jumps to address 
+	[tt 
+		"$CA530C
+	]tt
+	" which is the very end of the world destruction sequence that loads the World of Ruin maps. It was necessary to avoid a softlock during the game ending. The last instruction jumps to 
+	[tt 
+		"$CA1352
+	]tt
+	" which is the beginning of the ending sequence.
+	$LF
+]p
+[h3 
+	" Small tricks
+	$LF
+]h3
+[h4 
+	" Monster-in-a-box
+	$LF
+]h4
+[p 
+	"If the first death is against the monster-in-a-box inside the Beginner's room in Narshe, it will increment the stack size by 9, which is equivalent to three deaths.
+	$LF
+]p
+[h4 
+	" Fast preemptive runaway
+	$LF
+]h4
+[p 
+	"During certain preemptive/side attacks, the party might not escape quickly, usually when there are more characters than enemies. However, by choosing 
+	[tt 
+		"Def.
+	]tt
+	" with Terra at the very beginning of the fight, it delays the escape script so that all characters have the time to escape. This saves 2 seconds per fight.
+	$LF
+]p
+[h3 
+	" Suggested screenshots
+	$LF
+]h3
+[p 
+	"Frames 99730
+	$LF
+]p
+[p 
+	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6_52go_v2_99730f.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Fog)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Fog)
+	": This is definitely a big jump in improvement compared to the previous publication, and even to the previously rejected submission with the different method of ending the game (without the rests, but using possibly invalid SRAM). However, it's still the same method as before with the 52 game-overs, meaning a significant portion of the run is quite honestly boring to viewers. Because the time that was saved compared to the previous publication was during regular gameplay, even more of the run is considered to be of boring gameplay. Unfortunately, due to the nature of the glitch, this is ultimately unavoidable.
+	$LF
+]p
+[p 
+	"Until such a method is found to trigger the game end is found which doesn't rely on the 52 game-overs, and doesn't rely on possibly invalid RAM, this category will still remain in the Vault. Accepting as an improvement to the previous publication.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing
+]p

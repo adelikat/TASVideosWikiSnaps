@@ -1,0 +1,206 @@
+2
+[p 
+	"A newly discovered dialogue glitch allows jumping to unrelated locations in the game script by activating a bogus dialogue prompt. This run jumps straight to the end and thereby beats the game soon after leaving Potos.
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Snes9x 1.51 v7 svn225
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Abuses glitches
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"While playing the game on a console, a player named BJW recorded a video where the dialogue window went crazy after opening a 1000 GP chest in the fire palace. After staring long enough at the code, I was able to determine the cause.
+	$LF
+]p
+[p 
+	"If a script is triggered on a specific frame following the disappearance of a status message from the screen, and the script displays the player's money before printing anything else, the game will instead give an invisible prompt using the last parameters. Entering the save menu will clear the number of options, allowing underflowing to option 256 by pressing left. After making a choice, both the jump table pointer and the script pointer will point to the selected entry in the jump table. Furthermore, if this location contains text rather than a script command, the game will continue giving invisible prompts. The table pointer is also used to point at the tables for printing names of enemies, equipment and spells. In this run, I get a "barreled" status message before talking to the cannon man, as there are few ways to trigger messages in this room at this point in the game.
+	$LF
+]p
+[h3 
+	" Route
+	$LF
+]h3
+[h4 
+	" Waterfall
+	$LF
+]h4
+[p 
+	"Gained 25 frames by better stair walking and bush slashing.
+	$LF
+]p
+[h4 
+	" Rabite forest
+	$LF
+]h4
+[p 
+	"From here it goes downhill. I need to kill 10 rabites to get money for shopping in Potos, and the RNG is giving me a hard time. The awkward movements at the end are for manipulating spawns. It is still faster than selling the overalls, as the selling menu refuses to open when you do not have any equipment, if the item menu was opened last.
+	$LF
+]p
+[h4 
+	" Mantis Ant
+	$LF
+]h4
+[p 
+	"Again, the RNG is being stubborn, and no critical hits could be had in a reasonable time.
+	$LF
+]p
+[h4 
+	" Potos
+	$LF
+]h4
+[p 
+	"I get 50 GP from chest in Elder's house. I buy a candy, a herb and a cup of wishes at the store and execute the money glitch.
+	$LF
+]p
+[h4 
+	" Neko's
+	$LF
+]h4
+[p 
+	"I buy a barrel and a cup of wishes, and invoke the save menu. The cup of wishes is necessary since the item menu is messed up at this point.
+	$LF
+]p
+[h4 
+	" Dyluck
+	$LF
+]h4
+[p 
+	"After talking to the second soldier from the right, the cannon man starts charging money.
+	$LF
+]p
+[h4 
+	" Cannon
+	$LF
+]h4
+[p 
+	"Before entering the cannon room, I use the barrel. It is important to leave the menu open until it starts printing "Barrel", to load an usable text table pointer. After the message about being barreled disappears, I talk to the cannon man and the false prompt is activated. I then advance the pointer in increments of 2 (by choosing option 1) and 512 (by choosing option 256) until I get to C91096, which invokes the ending screen.
+	$LF
+]p
+[h3 
+	" Useful RAM addresses
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"7E00F4
+			]td
+			[td 
+				"Frame counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"7ECC48
+			]td
+			[td 
+				"Items
+			]td
+		]tr
+		[tr 
+			[td 
+				"7ECC6A
+			]td
+			[td 
+				"Money
+			]td
+		]tr
+		[tr 
+			[td 
+				"7EE002
+			]td
+			[td 
+				"Position
+			]td
+		]tr
+		[tr 
+			[td 
+				"7EE006
+			]td
+			[td 
+				"Speed
+			]td
+		]tr
+		[tr 
+			[td 
+				"7E1873
+			]td
+			[td 
+				"Item selection
+			]td
+		]tr
+		[tr 
+			[td 
+				"7E1D00
+			]td
+			[td 
+				"Text flags. Bit 7: Activates a prompt
+			]td
+		]tr
+		[tr 
+			[td 
+				"7EA200
+			]td
+			[td 
+				"Current dialogue choice
+			]td
+		]tr
+		[tr 
+			[td 
+				"7EA1D4
+			]td
+			[td 
+				"Number of dialogue choices
+			]td
+		]tr
+		[tr 
+			[td 
+				"7EA1D5
+			]td
+			[td 
+				"Table pointer
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Also useful was the script I wrote for displaying real time information about the game state, downloadable here:
+	$LF
+	"http://www.mediafire.com/download/hmlq9015op565a3/som.lua
+	$LF
+]p
+[p 
+	[em 
+		"Edit: An improvement was pointed out. I am therefore cancelling this and uploading a new one.
+	]em
+]p

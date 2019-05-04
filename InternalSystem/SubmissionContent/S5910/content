@@ -1,0 +1,668 @@
+7
+[p 
+	(youtube|v=Qux6-e6e-R8)
+	$LF
+]p
+[h3 
+	" Categories
+	$LF
+]h3
+[ul 
+	[li 
+		" 100% completion
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Forgoes save data corruption
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+]ul
+[h3 
+	" Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.2.2
+		$LF
+	]li
+	[li 
+		" Aims for fastest completion time.
+		$LF
+	]li
+	[li 
+		" Catches all 151 Pokémon as quickly as possible.
+		$LF
+	]li
+	[li 
+		" ...like, really, really quickly.
+		$LF
+	]li
+	[li 
+		" Does not modify Pokédex flags
+		$LF
+	]li
+	[li 
+		" Does not use arbitrary code execution.
+		$LF
+	]li
+	[li 
+		" Is really boring.
+		$LF
+	]li
+]ul
+[h3 
+	" About the run
+	$LF
+]h3
+[p 
+	"Some terms or concepts used in the TAS (such as Cooltrainer) have been explained in the 
+	(__wikiLink|4376S|previous submission)
+	" by MrWint. The justification for platform choice and version choice, and explanation of luck manipulation are mostly the same as the current 
+	(__wikiLink|5859S|"warp glitch" submission)
+	" by gifvex, except that Blue version is used over Red version as it manipulates the required trainer ID faster than Red version, factoring in time lost from Blue version's slower preset player name.
+	$LF
+]p
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" Soft reset is pressed 15 times. 16 inputs are required to perform a soft reset and each delays 1 frame. The delays are used to manipulate the trainer ID and allow a soft reset later with just 1 input.
+		$LF
+	]li
+	[li 
+		" A trainer ID of 0xbe05 is manipulated. The bytes are aligned in memory in the expanded item pack where 0xbe is the quantity of some Master Balls and 0x05 is a Town Map item.
+		$LF
+	]li
+	[li 
+		" The player is named the preset BLUE name. The name does not appear enough times before fastest text speed (0 frames per character) is acquired to be worth naming 1 character.
+		$LF
+	]li
+	[li 
+		" The rival is named ",./xox". Each pair of characters corresponds to an item and its quantity in the expanded item pack. The items are TM44 x242, TM43 x183, and BLUE x183. TM44 x242 is merely filler to reduce lag caused by glitched item names, but the TM43 item and BLUE x183 are necessary for the main farming glitch.
+		$LF
+	]li
+]ul
+[h4 
+	" Pallet Town
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[ul 
+	[li 
+		" Charmander is chosen as the starter Pokemon. DVs (values used to calculate stats) of exactly 0x1024 are manipulated. Charmander has a fast battle for both rival and Weedle.
+		$LF
+	]li
+	[li 
+		" The rival battle is lost because the rewards are not needed. Four 1/256 growl fails from Charmander and three 1/39 damage roll Tackles (+ one non-1/39) from Squirtle are manipulated.
+		$LF
+	]li
+	[li 
+		" Battle animation is ON and saves 30 frames over OFF. The Poke Ball animation costs 10 frames, but each Tackle animation saves 10 frames over a fixed delay when animations are off.
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[h4 
+	" Viridian Forest
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[ul 
+	[li 
+		" Options are set in the gate before the forest. Menu speed varies by map and the gate is the best available before Weedle. The menu also skips a 2 frame delay in movement.
+		$LF
+	]li
+	[li 
+		" Weedle is defeated with a combination of four 1/39 damage rolls and four critical hits. Charmander wins the battle with 40/40 Growl PP and 30/35 Scratch PP in order.
+		$LF
+	]li
+	[li 
+		" The cursor is moved to SAVE now because directional inputs are disabled later.
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[h4 
+	" Pewter City
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[ul 
+	[li 
+		" An antidote was picked up in Viridian Forest and 5 more items are bought to reach 6 items. Three Poke Balls are used to catch Pokemon and an Escape Rope ends up in slot 6.
+		$LF
+	]li
+	[li 
+		" A trigger causes dialogue with the Brock fan, but the start menu is able to be buffered before the cutscene movement begins. The game is saved and soft reset.
+		$LF
+	]li
+	[li 
+		" After more dialogue, movement is able to be buffered before the trigger catches the player again, and allows the player to pass the Brock Fan before Brock is defeated.
+		$LF
+	]li
+	[li 
+		" The Brock Fan is talked to from the right and invalid cutscene movement data is read that enables walk through walls. The game attempts to find the player's coordinates in memory and load the appropriate data, but (y:16, x:36) is not defined by the game. It finds 0x1024 in Charmander's DVs and loads data from 0x1E28 due to Charmander's move PP.
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[h4 
+	" Cerulean Cave
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[ul 
+	[li 
+		" A Ditto is caught and swapped to slot 1. When a transformed Pokemon swaps its first move with a slot it does not have, it will swap move ID 0x00 into the first slot, known as "Cooltrainer".
+		$LF
+	]li
+	[li 
+		" Cooltrainer's invalid name can cause a buffer overflow that copies saved screen data over enemy Pokemon data. This is done to turn a wild Pokemon into MissingNo. and catch it using the screen data saved when opening the party menu. The buffer overflow also sets an audio fade-out value that causes MissingNo.'s Pokedex jingle to be skipped.
+		$LF
+	]li
+	[li 
+		" MissingNo.'s invalid seen flag sets bit 7 of the item quantity in slot 6. The Escape Ropes went from a quantity of 1 to a quantity of 129 and 2 are tossed to unset bit 7.
+		$LF
+	]li
+	[li 
+		" MissingNo.'s Pokedex entry never unsets the flag to flip sprites horizontally. This affects Cooltrainer, so Ditto's summary is viewed because the page unsets the flag.
+		$LF
+	]li
+	[li 
+		" Cooltrainer is activated again with screen data saved when opening the item menu. This MissingNo. catch sets bit 7 again and the Escape Ropes now have a quantity of 255.
+		$LF
+	]li
+]ul
+[h4 
+	" Obtaining Item Underflow
+	$LF
+]h4
+[p 
+	"Note that the remaining sections make heavy use of 
+	[a class=extlink href=https://www.github.com/pret/pokered rel=nofollow 
+		"the pokered disassembly
+	]a
+	" labels. Each time a new label is mentioned or referenced much later than previous references, the address in square brackets will be listed next to it.
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			"Item Underflow
+		]em
+		" is obtained via the "
+		[em 
+			"Dry Underflow
+		]em
+		"" method. Escape Rope x43 is created as a side effect to save a quantity toss later.
+		$LF
+	]li
+	[li 
+		" The Use/Toss Menu is brought up to fix the item menu's cursor bounds (set to 1 during 
+		[em 
+			"Item Underflow
+		]em
+		"), which is currently set so that the cursor can move to at most the second item before scrolling the menu. Not resetting this value would cause the game to render more of item 0x00 (referred to as 
+		"[]
+		"j.) which the name lookup causes enough lag to be slower than bringing up the Use/Toss Menu.
+		$LF
+	]li
+	[li 
+		" Escape Rope x43 is swapped into the 9th slot. The 43 (0x2b) represents the lower byte of a pointer used for the main farming glitch.
+		$LF
+	]li
+	[li 
+		" The 
+		"[]
+		"j. item below is swapped with a TM43 in the 
+		[b 
+			"Rival Name
+		]b
+		" Underflow memory section. This forms the pointer 0xf32b, which points to the quantity of the third and last 0xff item (CANCEL).
+		$LF
+	]li
+	[li 
+		" The 
+		[b 
+			"Options
+		]b
+		" item (
+		"[]
+		"j. x129) is swapped with the 
+		[b 
+			"Palette
+		]b
+		" item (Old Amber x0), setting the delay between printing letters to zero.
+		$LF
+	]li
+	[li 
+		" One Master Ball is tossed from Master Ball x3, setting the 
+		[b 
+			"Last Outside Map
+		]b
+		" warp location to 2, the internal ID of Pewter City.
+		$LF
+	]li
+	[li 
+		" Full Restore x77 is swapped with item 0x7d to reduce lag later on. Item 0x7d belongs to a family of items known as 
+		[b 
+			"TMTRAINER
+		]b
+		" items, which their names are not properly terminated and read from a backup of the screen tiles, causing considerable lag.
+		$LF
+	]li
+	[li 
+		" 
+		"[]
+		"j. x255 is swapped with Moon Stone x10. This sets the source of the value copied to 
+		[em 
+			"wWalkCounter
+		]em
+		" [0xcfc5] to 0 during the buffer overflow used in the main farming glitch.
+		$LF
+	]li
+	[li 
+		" 
+		"[]
+		"j. x1 is tossed from the 
+		"[]
+		"j. x255 stack so that the buffer overflow, terminated by 0xff, does not end prematurely.
+		$LF
+	]li
+	[li 
+		" An HM03 is swapped with item 0x9e (4 8 4 8). This does two things: preserves an HM03 for later to be swapped with an unavoidable HM03 x255 that appears when warping to Pewter City, and removes an undesirable 
+		[b 
+			"TMTRAINER
+		]b
+		" item which would have to be swapped out later anyway to avoid generating lag during the main farming glitch.
+		$LF
+	]li
+	[li 
+		" A Master Ball x4 is swapped out from the game's warp entries and placed in a location that would cause the internal ID of Master Ball (0x01) to be copied to 
+		[em 
+			"wIsInBattle
+		]em
+		" [0xd057] during the main farming glitch.
+		$LF
+	]li
+	[li 
+		" 
+		"[]
+		"j. x1 is tossed from a 
+		"[]
+		"j. x0 (corresponding to 
+		[em 
+			"wEnemyBattleStatus3
+		]em
+		" [0xd069] for the buffer overflow) to get 
+		"[]
+		"j. x255, which sets the end terminator of the buffer overflow.
+		$LF
+	]li
+	[li 
+		" The inventory is wrapped around to reach the start of the inventory, which happens due to the game using 8-bit addition to determine offsets for scrolling menus. Tossing a 
+		"[]
+		"j. x0 to reset the cursor to the start of the inventory was found to be slower due to additional lookups of the 
+		"[]
+		"j.'s item name.
+		$LF
+	]li
+	[li 
+		" CANCEL x2 is tossed from the third CANCEL's quantity to set it to 0xfe, representing a mart for the game's text ID engine.
+		$LF
+	]li
+	[li 
+		" Exiting Cerulean Cave wrong warps us to Pewter City.
+		$LF
+	]li
+	[li 
+		" Escape Rope x255 is swapped into the map's text pointer. Escape Rope x12 is tossed from Escape Rope x255, giving us Escape Rope x243 which points to 0xf31d.
+		$LF
+	]li
+	[li 
+		" Town Map x255 is swapped with the Town Map generated from the trainer ID to get rid of the 0xff quantity value.
+		$LF
+	]li
+	[li 
+		" The 
+		[b 
+			"Current Map
+		]b
+		" item is swapped with item 0xae (BLUE), corresponding to Indigo Plateau's Pokémon Center. This allows us to access a PC to change boxes during the main farming glitch, while not generating 0xff bytes upon loading a new map due to a lack of South and East Connections. If the setup was done in an indoor map with no connections, then we would have to toss CANCEL items which is slower as it resets the inventory to the top of the menu.
+		$LF
+	]li
+	[li 
+		" Master Ball x190 (quantity generated from TID) is swapped with Town Map (item ID generated from TID). The item ID of Master Ball corresponds to flags handling print delays, which the whole value requires bit 0 set and bit 1 reset for faster text delay. If bit 0 is reset, then text is forced to display at one frame per character, while if bit 1 is set, then text placed through the "text string" engine (e.g. PC menu options) would be delayed.
+		$LF
+	]li
+	[li 
+		" Master Ball x190 is swapped into a location where its quantity corresponds to 
+		[em 
+			"wEnemyMonSpecies2
+		]em
+		" [0xcfd8] for the buffer overflow.
+		$LF
+	]li
+	[li 
+		" The bottom HM03 is swapped with the top HM03 to get rid of the 255 quantities.
+		$LF
+	]li
+	[li 
+		" The player moves to (y:9, x:16), to be able to interact with the now (invisible) sign-turned-mart vendor.
+		$LF
+	]li
+	[li 
+		" With the aforementioned item manipulation, the mart list overflows into other memory regions, allowing us to efficiently catch the remaining 148 Pokémon. Pokémon Storage System boxes are changed every 20 Pokémon (22 for the first round) using the Indigo Plateau PC at (y:07, x:15).
+		$LF
+	]li
+	[li 
+		" Once all remaining 148 Pokémon are captured, all party Pokémon except Ditto are deposited into the PC to save time on the Hall of Fame cutscene.
+		$LF
+	]li
+	[li 
+		" The player walks two steps down to prepare for a fast Hall of Fame warp.
+		$LF
+	]li
+	[li 
+		" TM40 x198 is swapped with Town Map (quantity representing the map ID for the map's north connected map).
+		$LF
+	]li
+	[li 
+		" TM40 x80 is tossed from TM40 x198, giving us TM40 x118, which the quantity corresponds to the Hall of Fame map ID.
+		$LF
+	]li
+	[li 
+		" Parlyz Heal x0 is swapped with HM05, setting the player's y-coordinate to 0 (quantity representing the player's y-coordinate).
+		$LF
+	]li
+	[li 
+		" The player walks up into the Hall of Fame. The two steps down taken earlier were necessary to put the player in a location where the player could walk upwards.
+		$LF
+	]li
+]ul
+[h3 
+	" Major Terminology/Concepts
+	$LF
+]h3
+[h4 
+	" Quantity 255
+	$LF
+]h4
+[p 
+	"When the game has to completely remove an item from the inventory, it shifts the items below in order to fill up the empty item slot, until it reaches the end of list terminator (marked as CANCEL). If an item with a quantity of 255 is below the tossed item, then the game mistakes the quantity of 255 for the end of list terminator and stops shifting the remaining items upwards. This leads to interesting side effects such as duplicating the 255 quantity item, or having another item represent the cancel button (despite not actually being the 0xff item). While the former effect makes obtaining the farming setup faster, the latter effect is relevant in obtaining Item Underflow.
+	$LF
+]p
+[h4 
+	" Item Underflow/Dry Underflow
+	$LF
+]h4
+[p 
+	"When the game merges two same items via swapping, it checks if the on-screen menu needs to be resized (note that this only refers to the current four items shown on screen). If the resulting list length is one, then the menu should be resized to 01 (only being able to use the first item). However, if a merge was somehow accomplished so that the resulting list length is zero (or any other value), then the menu is not resized. In normal gameplay, this does not matter as it is impossible to merge two items with only one item in the inventory. However, by having a non-CANCEL item act as the cancel button, we can merge two items together while having only one item in the inventory. By doing this twice, we can underflow the number of items in the inventory to 255.
+	$LF
+]p
+[h4 
+	" LWA (Lucky Wins Again)
+	$LF
+]h4
+[p 
+	"LWA, or "Lucky Wins Again" (poking fun at my successful attempts of finding new ways to break the Gen 1/2 glitched speedruns) is the main farming glitch used to catch the remaining 148 Pokémon in the game. The glitch abuses the capability for a mart to create a buffer overflow. When a mart is loaded, the game copies the list to 
+	[em 
+		"wItemList
+	]em
+	" [0xcf7b], terminated by 0xff. Therefore if we were to create a mart that has a terminator much later than expected, the copied data would overflow into unrelated memory. By controlling the buffer overflow, we can overwrite five main variables allowing us to catch Pokémon at a very fast rate. These variables are:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			"wEnemyMonSpecies2
+		]em
+		" [0xcfd8]: Read from when catching enemy Pokémon and is used to determine the resulting Pokémon caught, regardless of other similar variables.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"wIsInBattle
+		]em
+		" [0xd057]: Writing a value of 1 to this address allows throwing Poké Balls outside of battle.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"wCurOpponent
+		]em
+		" [0xd059]: Starts a battle if this value is non-zero. Must be kept as zero to prevent battles from being generated.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"wBattleType
+		]em
+		" [0xd05a]: Indicates if this is a non-standard battle (Old Man battle or Safari Zone battle). Must be kept as zero to prevent thrown Poké Balls from glitching out.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"wEnemyBattleStatus3
+		]em
+		" [0xd069]: When a Pokémon is captured, the game sets a flag to indicate not to generate new DVs for the Pokémon. This is done in a very weird way, by setting a flag corresponding to whether the Pokémon has transformed or not, and has a side effect of causing subsequent out-of-battle captures to become Dittos (referred to as "Dittoization", and caused due to an assumption made by the programmers that a transformed Pokémon is a Ditto). Therefore, we want to clear this flag. This was the limiting factor for the efficiency of previous glitches, as the buffer overflow method used could not manage to clear this variable, requiring a battle to be completed (by running away) or a save and reset to happen. As this variable is cleared with the corruption, we do not need to do any additional steps to be able to capture more Pokémon.
+		$LF
+	]li
+]ul
+[p 
+	"Other relevant variables that are affected as a side effect of the buffer overflow:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			"wFontLoaded
+		]em
+		" [0xcfc4]: Bit 0 determines whether font is loaded over the VRAM space for sprite walking patterns. Coincidentally, bit 0 is reset during the corruption, and in normal gameplay this would mean the player is transitioning to a different map via a warp, so the game assumes the LCD is disabled (allowing unrestricted access to VRAM) and directly copies the sprite walking patterns to VRAM. This saves time over if bit 0 was set, as the function to copy to VRAM while the screen is enabled would be called instead, thus wasting 5 frames (1 per sprite) every time the mart is closed.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"wWalkCounter
+		]em
+		" [0xcfc5]: Stores the remaining about of player sprite advances to perform. Longer values mean waiting more, so naturally we want to set this to zero.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"wAudioFadeOutControl
+		]em
+		", 
+		[em 
+			"wAudioFadeOutCounterReloadValue
+		]em
+		", and 
+		[em 
+			"wAudioFadeOutCounter
+		]em
+		" [0xcfc7-0xcfc9]: Writing a non-zero value to 
+		[em 
+			"wAudioFadeOutControl
+		]em
+		" will cause the game to start fading out audio, from the internal volume of 0x77 to 0x00 (in decrements of 0x11). This has a side effect of skipping sound effects, allowing us to bypass forced waits for certain sound effects, such as Pokémon cries. 
+		[em 
+			"wAudioFadeOutCounterReloadValue
+		]em
+		", which reloads 
+		[em 
+			"wAudioFadeOutCounter
+		]em
+		" whenever it hits zero, is coincidentally loaded with 246 allowing for a fadeout long enough to keep the music playing until a cry is played (which sets volume to 0x33, then to 0x77).
+		$LF
+	]li
+]ul
+[p 
+	"To create this custom mart, text pointer manipulation is used. Firstly, the base text pointer is replaced to be 0xf31d (echo RAM copy of 
+	[em 
+		"wNumBagItems
+	]em
+	" [0xd31d]). From there, 0xf32f, the location where the Pewter Museum sign would read its text using pointer lookup, is manipulated to 0xf32b, which points to the earliest possible address that we can set up this glitch (anything earlier would require tossing the "CANCEL" item which requires too much preparation). At 0xf32b, we set its value to 0xfe. This causes the game to call the mart code instead, as in the text ID engine the game checks the first byte of the text to see if it matches specific values and does alternate functions based on them. In this case, 0xfe will treat the NPC (or sign) as a mart. By removing any early instances of 0xff, setting the actual terminator much later, and manipulating the expanded inventory pack to align correctly with the destination, we can create a buffer overflow that will desirably corrupt memory according to the above values to efficiently catch Pokémon.
+	$LF
+]p
+[h3 
+	" Alternatives considered
+	$LF
+]h3
+[ul 
+	[li 
+		" Setting up another text pointer to bring up Bill's PC: The first iteration of the route had slightly better swaps and less movement, however creating a "fake" PC doesn't work out, as changing boxes from a PC that isn't accessed through the game's "hidden object" code (which also handles PCs) will result in the base text pointer being erroneously overwritten.
+		$LF
+	]li
+	[li 
+		" Using a single ROM based pointer to create the glitched mart: While only requiring the preparation of one pointer instead of two, there are no values in ROM that can represent a suitable pointer for the glitched mart without needing to toss the three CANCEL items at the start of the inventory for the buffer overflow to be successful.
+		$LF
+	]li
+]ul
+[h3 
+	" Reasons for rejection
+	$LF
+]h3
+[p 
+	"LWA isn't very interesting to watch and becomes boring pretty quickly, but the overall goal (catching all Pokémon) is considered 100% and is thus Vault-able. However, it could be deemed rejectable for not being entertaining enough for Moons and using somewhat arbitrary restrictions for Vault, which aims to go as fast as possible. These restrictions are in particular:
+	$LF
+]p
+[ul 
+	[li 
+		" Does not modify Pokédex flags.
+		$LF
+	]li
+	[li 
+		" Does not execute arbitrary code.
+		$LF
+	]li
+]ul
+[p 
+	"Other restrictions were self-imposed during the routing of this TAS. These restrictions might not even matter towards fastest completion time as LWA may be the fastest setup anyway, although other setups that do not follow the other self-imposed have not been looked into.
+	$LF
+]p
+[ul 
+	[li 
+		" Does not use glitches that allow executing arbitrary ROM addresses. Modifying the map script pointer (called every overworld frame) comes close to this as it allows specifying an arbitrary ROM address, but fails to completely cover the entire ROM space as only ROM banks that are used by maps can be executed. It is still not used for this TAS.
+		$LF
+	]li
+	[li 
+		" Does not use glitches that allow writing to an arbitrary destination. The text engine has capability to do this, using the unused command 0x03 to repoint the destination to theoretically any address, then by using the string engine to print text to the specified destination. However, it is unable to write completely arbitrary values as some values are used as "control codes" which do alternate functions that do not result in the byte being written. The invalid mart used in LWA does not fall under this as the destination address of the corruption is fixed, while the source is arbitrarily specifiable.
+		$LF
+	]li
+	[li 
+		" Does not use "mass corruption" glitches. Perhaps the most subjective of the self-imposed restrictions, the TAS forgoes glitches that can cause "mass corruption" (which isn't even well defined) such as party overflow (used in previous RTA speedruns of Pokémon Blue Any% No Save Corruption) or out-of-bounds Pokémon Storage System boxes, which can theoretically be used to write a massive amount of data to WRAM, albeit not entirely chosen arbitrarily. These glitches are forgone because of the general unstability of them, as well as the two mentioned "mass corruption" glitches are not easily manipulable.
+		$LF
+	]li
+]ul
+[h3 
+	" Credits:
+	$LF
+]h3
+[ul 
+	[li 
+		" luckytyphlosion: Coming up with the route for the TAS and creating the LWA strategy.
+		$LF
+	]li
+	[li 
+		" gifvex: Botting the entire TAS and suggesting minor route improvements. He chose not to be listed as an author here, 
+		[q 
+			"because Pokémon is primarily routing-based and LWA is [luckytyphlosion's] creation
+		]q
+		".
+		$LF
+	]li
+	[li 
+		" Chivu93: While he didn't participate in the making of the TAS, he improved the LWA strategy by using the Master Ball's quantity for the caught Pokémon instead of originally needing to toss a separate item for each Pokémon.
+		$LF
+	]li
+	[li 
+		" MrWint: Faster menuing techinique used in his 
+		(__wikiLink|4431S|"SRAM Glitch")
+		" TAS.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.github.com/pret/pokered rel=nofollow 
+			"the pokered disassembly
+		]a
+		": General massive help in documenting the game's code allowing numerous tricks, including the LWA strategy, to be discovered.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=http://bgb.bircd.org/ rel=nofollow 
+			"BGB
+		]a
+		": Game Boy emulator with an amazing debugger that helped with routing out the TAS.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": This TAS spawned an interesting discussion on exactly what levels of glitchiness a run can contain while still being considered a legitimate full completion (catch 'em all) movie. Essentially, this movie sets a quite good example: arbitrary code execution and such glitches are not used, as they would break the point of being full completion, setting Pokémon capture flags 
+	(__wikiLink|1860M|through memory corruption)
+	" is not counted (and isn't done), and the movie does run through the game to collect all Pokémon one by one before going to the ending, just like other runs of this category; it just does so more efficiently, cutting out gameplay time between captures and trimming down the capture sequence to its most basic form. Ultimately, it's just full completion to a highly optimized form. As such, this movie is acceptable for the Vault. The 
+	(__wikiLink|Vault|rules of the Vault)
+	" have also been updated as a result of the discussion surrounding this movie, in order to define what levels of glitches are (not) allowed for full completion movies.
+	$LF
+]p
+[p 
+	"Since this movie is much more repetitive in achieving its goal, only relying on one major glitch to collect all Pokémon in one chain, it also can only be accepted in the Vault tier based on entertainment grounds. As such, accepting to the Vault as an improvement to the 
+	(__wikiLink|2653M|published "Gotta Catch 'Em All!" movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Gotta Break 'Em All! PUBLISHING!... Wait... that's not how the song goes.
+]p

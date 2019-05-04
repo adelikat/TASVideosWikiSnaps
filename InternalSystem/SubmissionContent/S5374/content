@@ -1,0 +1,207 @@
+12
+[p 
+	"Tool-assisted speed run for The Great Giana Sisters on the Commodore 64, famous for its overall quality but infamous for its similarities to Super Mario Bros. Still, even though similarities exist, the game physics feels quite different, especially regarding TAS. Unfortunately many of the tricks used aren't obvious to people who have never played this game themselves.
+	$LF
+]p
+[p 
+	"I aimed for frame perfection in this run which was rather easy thanks to BizHawk and shaved off 15 seconds compared to a test run I did years ago with VICE. Even though the sound is not completely right (lack of filters) emulation quality is in my opinion good enough for this game.
+	$LF
+]p
+[p 
+	"The game was officially published on tape and on disc, I'm using the tape version as tape support was quite easy to add to the emulator. The downside of not having an (official) cartridge version is that loading takes quite some time, 3:42 seconds in this case, leaving 6:30 seconds of actual gameplay. I also went for PAL as this game was (to my best knowledge) only released in Europe (but it runs just fine on NTSC apart from the usual speedup).
+	$LF
+]p
+[p 
+	"There is also an Amiga version but game physics are somewhat different in that one. 
+	$LF
+]p
+[p 
+	"Temporary encode (omitting those about 4 minutes of loading time):
+	$LF
+]p
+[p 
+	(youtube|v=-TTFsZul93g)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 1.11.3
+		$LF
+	]li
+	[li 
+		" Aims for shortest time
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+	[li 
+		" Uses warps
+		$LF
+	]li
+	[li 
+		" Might abuse death but not sure whether that actually counts as death
+		$LF
+	]li
+]ul
+[h3 
+	" Tricks and glitches used
+	$LF
+]h3
+[ul 
+	[li 
+		" Faster speed up: This game does not use subpixels, instead position increments are read from a lookup table based on the current velocity (0 to 32). Velocities 28, 29, 30 and 32 have an increment of 2 whereas velocity 31 as an increment of just 1. By alternatingly pressing forward and letting go I keep the velocity in range 28 to 30 and never let it reach 31 in order to not lose a pixel here which gains one frame in most (possibly all) levels. (Pressing forward in the direction of motion increases velocity by 1 as long as it is not yet 32, pressing backward decreases it by 2, not pressing anything decreases it by 1.) A variant of this trick is used for shooting backwards without losing speed: press left just for a single frame when velocity is 30 and shoot at the same time, velocity will decrease to 28 but no pixels are lost.
+		$LF
+	]li
+	[li 
+		" Movement pattern optimisation: In a few places where obstacles force Giana to slow down I let a bot search for the optimal input sequence. Still this looks a bit clumsy sometimes due to the lousy game physics that make it difficult to cut corners, and sometimes Giana needs to slow down for a jump of maximum height because reaching the platform without losing speed needs frame perfection here.
+		$LF
+	]li
+	[li 
+		" Dragon skipping: when running right across the middle of the screen the game changes from moving Giana and keeping the screen static to scrolling the screen and keeping Giana static, however this change only happens if right is being pressed too. So by letting go of right just before reaching the middle of the screen Giana can move a bit beyond that point without starting the screen to scroll. This helps skipping some of the dragons; normally they fly down after spawning to block Giana's path, but running further to the right means that they spawn later and don't have enough time for that so Giana can run right across underneath.
+		$LF
+	]li
+	[li 
+		" Stomping enemies from below: similar to Super Mario Bros the decision whether the enemy or Giana dies is made based on Giana's vertical velocity; as long as she is falling downwards the enemy will die, otherwise Giana will die. This can even cause an enemy to die which is falling onto Giana's head while she is slowly falling downwards.
+		$LF
+	]li
+	[li 
+		" Warp time optimisation: after hitting a warp stone the game counts down using a busy loop that runs when there's nothing else to do for the game so the aim here is to reduce the amount of CPU time the game needs to spend. The best option is to "die" because that stops the game physics from running (normally the death handler would kick in here but the game is already busy with warping so the death handler is never executed); running forwards to make the screen scroll is the worst thing one could do because scrolling needs about an entire frame of CPU time for every 8 pixels. That is why it's not always the best choice to run forward to hit an enemy or reach a pit.
+		$LF
+	]li
+	[li 
+		" Sneaking through gaps: while walking only Giana's foot level is checked for collisions, this allows for walking underneath some obstacles.
+		$LF
+	]li
+	[li 
+		" Enemy omission: the game reserves only 4 sprites for both enemies and powerups. Further enemies/powerups won't spawn when all 4 sprites are still in use.
+		$LF
+	]li
+	[li 
+		" Enemy despawning: big objects (dragons, spiders (not seen in this movie), lifts, big diamond) will however always spawn and despawn all other objects that are on screen at that moment as they need all 4 sprite slots for themselves.
+		$LF
+	]li
+	[li 
+		" Early lift glitch: the game evaluates enemy collisions one frame after they occur; when a lift is spawned at the end of level and in the previous frame an enemy (whether dead or alive) collided with anything (another enemy or Giana) the game assumes that Giana collided with the lift and depending on her vertical position and velocity it makes Giana either land on the lift or bounce off it. In the 1st case Giana is positioned on the lift and the lift takes her to the bottom of the screen, however the code for positioning assumes that Giana is far right on the screen and because she isn't her horizontal position is set incorrectly (only the lower 8 bits of her horizontal position are set).
+		$LF
+	]li
+]ul
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[ul 
+	[li 
+		" Stage 1: nothing special. Just notice how similar this level is to SMB's first level. And don't trust the in-game timer as it counts down too fast (every 41/50 seconds).
+		$LF
+	]li
+	[li 
+		" Stage 2: collecting the 1st powerup (smash bricks) because I will need it for later.
+		$LF
+	]li
+	[li 
+		" Stage 3: warping to stage 6
+		$LF
+	]li
+	[li 
+		" Stage 6: warping to stage 9 and collecting the 2nd powerup (fireballs) for free whilst doing so. A trick I could not use is to collect the 1st powerup here instead as that skips its animation and gives a funny sound effect, however this would be slower since I need both powerups by the end of stage 9 and collecting the 2nd powerup in stage 9 would be slower than having to wait for the animation in stage 2.
+		$LF
+	]li
+	[li 
+		" Stage 9: killing an enemy with a fireball to position it on top of the ramp so I can touch it while the lift is spawning to trigger the early lift glitch which saves more frames than I spent on collecting both powerups.
+		$LF
+	]li
+	[li 
+		" Stages 10, 11: nothing special
+		$LF
+	]li
+	[li 
+		" Stage 12: notice that I stomp the 1st crocodile without touching it. The game normally uses pixel perfect collision detection but since the video chip only says who was involved in a collision but doesn't tell who touched who the game follows up with a bounding box check and makes the game incorrectly assume the wrong enemy to be affected. Later on the dragon is skipped as described above.
+		$LF
+	]li
+	[li 
+		" Stage 13: I jump over the 1st enemy by purpose so it won't stay on screen and the next 4 enemies will all find a sprite slot to spawn in; stomping the first 2 of those in turn ensures that all 4 slots are still occupied when the game wants to spawn a bouncing bubble on one of the pillars which would slow me down but as all the sprite slots are occupied the bubble doesn't spawn.
+		$LF
+	]li
+	[li 
+		" Stages 14, 15, 16: nothing special, just some tricky movements and another skipped dragon at the end of stage 16.
+		$LF
+	]li
+	[li 
+		" Stage 17: warping to stage 20
+		$LF
+	]li
+	[li 
+		" Stage 20: this dragon is skipped by sneaking through a gap at the bottom of a wall which does not reach all the way down to the floor. Skipping the dragon this way is one or 2 frames faster.
+		$LF
+	]li
+	[li 
+		" Stage 21: nothing special
+		$LF
+	]li
+	[li 
+		" Stages 22, 25, 28: warping 3 stages ahead each
+		$LF
+	]li
+	[li 
+		" Stage 31: nothing special
+		$LF
+	]li
+	[li 
+		" Stage 32: this pit is the official exit, going ahead instead would just take you to a dead end.
+		$LF
+	]li
+	[li 
+		" Stage 33: the end dragon is forcefully despawned when reaching the wall as the game loads the big crystal. Deliberately ending input early so Giana's momentum takes her to the crystal and end the game.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": Nice movie, clever execution, accepting to Moons.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": 
+	[del 
+		"That was a Twisted Dream. Publishing.
+		[br 
+		]br
+		$LF
+		"Well this 
+		[em 
+			"is
+		]em
+		" one Twisted Dream. I keep desyncing on every version I stumbled across. Dropped.
+	]del
+	[br 
+	]br
+	$LF
+	"Also, feos you forgot to give it the Moon tier.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Fog)
+	": 
+	[del 
+		"Hot Potato!
+	]del
+	" Dropped Potato!
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": "In case you were wondering: Yes. I'm still a potato."
+	[br 
+	]br
+	$LF
+	"Reclaimed, "BECAUSE I'M A POTATO."
+]p

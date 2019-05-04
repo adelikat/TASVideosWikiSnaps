@@ -1,0 +1,185 @@
+9
+[p 
+	(YouTube|v=evNtNAufs7g|w=480|h=432)
+	$LF
+]p
+[h3 
+	" About the game
+	$LF
+]h3
+[p 
+	"The goal of the game is to blow at a bubble to guide it through a house. If the bubble hits a wall or obstacle, it will burst and you lose a life. This game was ported to several different systems and featured rooms with black background and a scary ghost sprite (as seen 
+	[a class=extlink href=https://www.youtube.com/watch?v=5z_Rl4T2p-w rel=nofollow 
+		"here
+	]a
+	"). The Gameboy port, the one I grew up with, is the last one released and seems to be an update to the other ports: It now features a cute ghost and added animations and improved sound effects.
+	$LF
+]p
+[h3 
+	" Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Uses warps
+		$LF
+	]li
+	[li 
+		" Uses death to save time
+		$LF
+	]li
+	[li 
+		" Genre: Action
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" Bizhawk 1.11.6 (Gambatte-core)
+	$LF
+]p
+[p 
+	"This run syncs on both the Japanese and the US/EU ROMs.
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[p 
+	"I found a 
+	[a class=extlink href=https://www.youtube.com/watch?v=W3javvTpnrk rel=nofollow 
+		"respawn bug
+	]a
+	" in this game which turned out to be a timesaver so I started a new run. It can be used only in rooms where you travel horizontally, otherwise it leads to softlocks. I tested it in each such room to see if using the bug turned out faster than just going through the room normally, and then used the faster of the two. 
+	$LF
+]p
+[p 
+	"I also took a very close look at RAM values this time, particularly those related to speed and movement. I was able to optimize speed much better than in the previous run thanks to my better understanding of what frame rules and patterns the game uses. I could go into much detail with the frame rules but it's kind of complicated. Basicly, the bubble's "speed" value vaguely tells 
+	[em 
+		"how often
+	]em
+	" it should move. In theory, you could abuse speed patterns like 
+	$LF
+	"in Super Mario Land 2, but blowing actually only affects the bubble if its speed is below a certain value so optimizing it was easy:
+	$LF
+]p
+[ul 
+	[li 
+		" when moving diagonally, blowing when speed is 1 or lower makes it 3
+		$LF
+	]li
+	[li 
+		" when moving horizontally, blowing when speed is 2 or lower makes it 4
+		$LF
+	]li
+]ul
+[p 
+	"I made the bubble move at those 3 or 4 respectively by blowing at the correct frames. What's more to say, some of the rooms caused frequent lag frames that would sometimes overlap with that frame of opportunity and thus killing the perfect strategy as it would have caused the bubble to move at 1 unit lower speed for 8 frames. So what I did to prevent that was that I changed directions, or sometimes the game would, oddly, still accept my blow even though the framerule wouldn't normally permit it, so I could change 3 back to 4 quickly enough in those cases. ... It's difficult to explain all this stuff, but I hope you get the idea.
+	$LF
+]p
+[p 
+	"This run falls 3 seconds behind the 
+	(__wikiLink|2726S|previous run)
+	" because of the now added LCD lag emulation which was not accounted for in VBA v19~23 in the previous run. But disregarding that, if my math is not wrong, I actually saved 25.3 seconds. About 4 seconds were saved due to the bug and the other 21 seconds due to faster speed.
+	$LF
+]p
+[p 
+	"There is a slight difference in the timing end point: The previous run enters the name and presses Start to go to the title screen faster. This run doesn't press Start since the game goes to the title screen in 2 seconds by itself anyway. This actually makes a difference of 41 frames because confirming the name makes the game lag that long before Start can be pressed. Then again, you could shorten the run even more by not entering a name at all. It seems to be something that's up to the runner's decision and future runs should be judged by gameplay rather than name entry/post-game shenanigans.
+	$LF
+]p
+[p 
+	"The respawn bug might even come in handy for console speedrunners, although I doubt they can finish a run with it. It's too precise, you have to blow at it at the right frame and then it might still be a hit or miss depending on speed/positioning. The 1 or 2 seconds it saves per usage doesn't seem worth the frustration that you have to go through trying to do the bug in a run. But if you do manage to finish a run, my hats off to you! I would be happy to have found a useful bug for RTA. 
+	$LF
+]p
+[h3 
+	" Note about the credits at the end of the run
+	$LF
+]h3
+[p 
+	"I recall someone (NitroGenesis?) wrote that the credits on the title screen are only shown once you beat the game. But that's not the case. I request that that portion of the run still be included in the encode for the sake of completion (it shows the staff credits, like at the end of most other runs). Also I have seen other runs being granted extra time at the end (I recall Donkey Kong Country).
+	$LF
+]p
+[h3 
+	" Possible improvements
+	$LF
+]h3
+[p 
+	"The luascript I made and used to keep track of speed/movement patterns helped cut down on the rerecords used, hence why the rerecord count is much lower than in the previous run which relied on a trial-and-error approach. That being said, I believe the run is near perfect except for these theories that haven't been checked yet:
+	$LF
+]p
+[ul 
+	[li 
+		" I'm almost certain that in rooms where the bug is used, when you approach the bubble in a certain way, it's possible to start blowing at it upwards or downwards towards the wall where you burst it, before finally blowing at it towards the exit. You could save 1~5 frames per usage. I have not investigated it further because I think the rooms that cause lag frames might not be hex-edit friendly and I didn't want to redo the run. 
+		[del 
+			"I suppose I could try to edit this improvement in while the run is on the workbench, but fingers crossed!
+		]del
+		" Nah, I don't have the time at the moment. Maybe later.
+		$LF
+	]li
+	[li 
+		" Account for score counting at the end of each room. The game displays a bonus meter, but seems to add points in intervals different to that meter. Basicly the idea here is that it might be possible to, say, delay by 1 or 2 frames and thus cause the bonus meter to be 1 unit shorter and thus speed up the score counting by 3 frames (which leaves us with a net income of 1 frame saved). Not sure if that math is correct, but it's just an idea. Then again, you could deliberately go ahead and ignore post-room bonus effects altogether (so you just account for room beginning to the frame where the bubble is no longer visible). That would also mean the bug could be used in a few more rooms where the difference between "bug" and "going through the room normally" was really small and it ended up in the "going through the room normally" scenario's favor just because the "bug" scenario had a longer bonus meter. A max score TAS could also be something to be considered, although it might lead to strange strategies being used, and I would really prefer it be based on realtime instead.
+		$LF
+	]li
+	[li 
+		" Random frame squeezing might be possible in sections where it's not clear to see what's the optimal solution, e.g. whenever moving past a ventilator. Room 32 might also be improvable. Maybe speed patterns can be abused after all if you change directions in a clever way? Overall, more thorough testing could lead to frames being squeezed in various rooms. But my personal standpoint is that this game is too obscure to worry too much about putting all that effort into trying to improve each room by 2 frames or so. It doesn't seem worth it to me.
+		$LF
+	]li
+]ul
+[p 
+	"(In b4 technical rating is 6 at max. 
+	[img class=embed src=http://imgur.com/MUkDQGU.png 
+	]img
+	" )
+	$LF
+]p
+[h3 
+	" Links
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[a class=extlink href=http://pastebin.com/ig18cLzU rel=nofollow 
+			"Luascript
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=/forum/t/8583 
+			"Forum thread
+		]a
+		$LF
+	]li
+]ul
+[h3 
+	" Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" Bizhawk and Gambatte team
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Positive viewer response. Accepting as an improvement to the 
+	(__wikiLink|2726S|published movie)
+	" and elevating to Moons.
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

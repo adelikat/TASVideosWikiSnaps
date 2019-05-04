@@ -1,0 +1,162 @@
+8
+[p 
+	"This TAS of Pokémon Yellow resets while saving to screw up some memory so that it can complete the game as fast as possible.
+	$LF
+]p
+[p 
+	(youtube|v=eqqjaHloP5Q)
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 1.4.0
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"The 
+	(__wikiLink|1860M|previous run)
+	" was made on VBA which was replaced by Bizhawk for GB and GBC TASes. This run is 
+	[b 
+		"more
+	]b
+	" than copied input from the other movie. I had to figure out what was going on in the game and then try to optimize that. The clearly hardest part was luck manipulation. To get the values needed you have to manipulate the TID, short for Trainer ID. The TID ($D358) is 16 bits long and it is based on the RNG which is based on an internal timer of the GBC.
+	$LF
+]p
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 
+	" First Room
+	$LF
+]h4
+[p 
+	"Here I... well I beat the game...
+	$LF
+]p
+[h3 
+	" How I beat the game
+	$LF
+]h3
+[pre 
+	"SAVING GAME! DO NOT TURN OFF THE MACHINE!
+	$LF
+	"            ^ this is where I turn off the machine
+	$LF
+]pre
+[p 
+	"Normally, when resetting the game while saving it will either say that the save file is corrupted or it won't let you open the "Pokemon" menu. If you reset at the perfect time it will let you load the game which has corrupted RAM. The game fills every address starting from $D162 to $D2F5 with 0xFF (dec 255) which will make the game think you have 255 Pokemon. Since the game only has place for 6 Pokemon, it will overwrite other addresses when you switch Pokemon.
+	$LF
+]p
+[p 
+	"Clever usage of this glitch can lead to overwriting the value in $D35D which is the current map. Overwriting that address with a value that loads bank 0x16 and overwriting 2 bytes at $D36D, which determines the area where the code will jump, leads to executing the Hall of Fame sequence. The values for $D35D which can load bank 0x16 are: 0x11, 0x13, 0x15, 0x16, 0x17, 0x1A, 0x1B, 0x1D, 0x5A, 0x71, 0x76, 0xCF, 0xD0 and 0xEA. The 2 bytes at $D36D have to be so that they eventually lead to the code for the Hall of Fame. One could throw away items to get the amount of that item to one of those values and then swap items to place them right, but that just takes too long. To make things faster I manipulated my TID to fit for those values. That means my TID has to be 0x64yy where yy is one of the 14 values listed above. The reason for the 0x64 at the start is because the value before the TID is always 0x01, so when we place the 2 bytes at $D36D, the game will jump to code 0x6401 which then will load the required code for the Hall of Fame.
+	$LF
+]p
+[p 
+	"So we have to get the values from
+	$LF
+]p
+[ul 
+	[li 
+		" $D357 to $D36D
+		$LF
+	]li
+	[li 
+		" $D358 to $D36E
+		$LF
+	]li
+	[li 
+		" $D359 to $D35D
+		$LF
+	]li
+]ul
+[p 
+	"Since the TID is based on the internal gameboy timer, the only way to manipulate the TID is delaying. The TID is determined after you press on "New Game", which gives me 4 places to delay input: 1. at the GAME FREAK scene, 2. at the little running Pikachu scene, 3. at the title screen, 4. at the "New Game" menu. I wrote a bot that brute forces a TID of 0x64yy and this run is what I got. Even though there are 14 values for yy, this run just happens to have the same value for yy as the previous run (I tested this with other values of that list and it works). So in this run we have a TID of 0x64D0, which is located at $D358. To move that value around I have to swap Pokemon and Items.
+	$LF
+]p
+[ul 
+	[li 
+		" So I first swap one of the first few Pokemon, in this case the 7th, with the 10th Pokemon. This will overwrite addresses like the item count with 0xFF. So that now the game thinks that you have 255 items (there is also a side effect that the Pokedex data is filled with 0xFF, so we have seen and caught 152 Pokemon).
+		$LF
+	]li
+	[li 
+		" Then I swap the 12th Pokemon with the 13th so that the 0x64 goes to $D384 and 0xD0 goes to $D385.
+		$LF
+	]li
+	[li 
+		" Then I switch the 13th Pokemon with the 11th so that the 0x64 goes to $D32C and 0xD0 goes to $D32D. Here a 11 byte data overlaps and causes 0x64 to go to $D342.
+		$LF
+	]li
+	[li 
+		" Since it's impossible to get the 0xD0 to the right place with only Pokemon swaps, we have to move items to get the 0xD0 from $D32D to $D331.
+		$LF
+	]li
+	[li 
+		" The last swap is the 11th Pokemon with the 12th. This causes our 0xD0 to go to $D35D (current map) and the 0x64 goes to $D36E, since there is a 0x01 before the TID it is now at $D36D.
+		$LF
+	]li
+]ul
+[p 
+	"After closing the menu the game will read the 0xD0 and it will load bank 0x16. It will jump to 0x6401 which will the lead eventually to the Hall of Fame code and to the credits.
+	$LF
+]p
+[h3 
+	" Other comments
+	$LF
+]h3
+[h4 
+	" Small things that save time (not over the previous run)
+	$LF
+]h4
+[ul 
+	[li 
+		" Naming myself ASH instead of YELLOW
+		$LF
+	]li
+	[li 
+		" Holding B while advancing text to display the text faster
+		$LF
+	]li
+	[li 
+		" I tested several Pokemon to swap the first time, it seems like some just lose a frame
+		$LF
+	]li
+]ul
+[h4 
+	" Thanks
+	$LF
+]h4
+[p 
+	"I want to thank p4wn3r and gia, not only because they did the previous runs, but also because they did a very good job exploring this game and explaining stuff. This game is more complicated than I thought so I want to thank them.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Judging. This will take a while.
+]p

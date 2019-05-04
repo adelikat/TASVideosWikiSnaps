@@ -1,0 +1,195 @@
+3
+[p 
+	"FCM is the movie capture format of FCE-Ultra
+	$LF
+]p
+[h3 
+	" FCM file format description
+	$LF
+]h3
+[p 
+	"FCM file consists of a variable-length header and various blocks that depend on settings. The header must be a minimum of 56 bytes. The first 32 bytes are interpreted the same between v1 and v2 movies. The header and file layout are completely different between blip's patched version and the unpatched official version of FCEU. Only the savestate and controller data are the same.
+	$LF
+]p
+[h4 
+	" Header format
+	$LF
+]h4
+[pre 
+	"000 4-byte signature: 46 43 4D 1A "FCM\x1A"
+	$LF
+	"004 4-byte little-endian unsigned int: version number, must be 2
+	$LF
+	"008 1-byte flags:
+	$LF
+	"     bit 0: reserved, set to 0
+	$LF
+	"     bit 1:
+	$LF
+	"          if "0", movie begins from an embedded "quicksave" snapshot
+	$LF
+	"          if "1", movie begins from reset or power-on 
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	$LF
+	"     bit 2:
+	$LF
+	"          if "0", NTSC timing
+	$LF
+	"          if "1", PAL timing
+	$LF
+	"          see notes below
+	$LF
+	"     other: reserved, set to 0
+	$LF
+	"009 1-byte flags: reserved, set to 0
+	$LF
+	"00A 1-byte flags: reserved, set to 0
+	$LF
+	"00B 1-byte flags: reserved, set to 0
+	$LF
+	"00C 4-byte little-endian unsigned int: number of frames
+	$LF
+	"010 4-byte little-endian unsigned int: rerecord count
+	$LF
+	"014 4-byte little-endian unsigned int: length of controller data in bytes
+	$LF
+	"018 4-byte little-endian unsigned int: offset to the savestate inside file
+	$LF
+	"01C 4-byte little-endian unsigned int: offset to the controller data inside file
+	$LF
+	"020 16-byte md5sum of the ROM used
+	$LF
+	"030 4-byte little-endian unsigned int: version of the emulator used
+	$LF
+	"034 name of the ROM used - UTF8 encoded nul-terminated string.
+	$LF
+]pre
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" Even if the header says "movie begins from reset", the file still contains a quicksave, and the quicksave is actually loaded. This flag can't therefore be trusted. To check if the movie actually begins from reset, one must analyze the controller data and see if the first non-idle command in the file is a Reset or Power Cycle type control command.
+	$LF
+]p
+[h4 
+	" Metadata
+	$LF
+]h4
+[p 
+	"After the header comes "metadata", which is UTF8-coded movie title string. The metadata begins after the ROM name and ends at the savestate offset. This string is displayed as "Author Info" in the Windows version of the emulator.
+	$LF
+]p
+[h4 
+	" Savestate data
+	$LF
+]h4
+[p 
+	"The savestate offset is <header_size + length_of_metadata_in_bytes + padding>. The savestate offset should be 4-byte aligned. At the savestate offset there is a savestate file. The savestate exists even if the movie is reset-based.
+	$LF
+]p
+[h4 
+	" Controller Data
+	$LF
+]h4
+[p 
+	"The controller data offset is <savestate_offset + length_of_compressed_savestate + padding>. The controller data offset should be 4-byte aligned. The controller data contains <number_of_frames> frames.
+	$LF
+]p
+[p 
+	"Note that the savestate data must come before controller data. A gap between the savestate data and the controller data is allowed.
+	$LF
+]p
+[p 
+	"Starting with version 0.98.12 released on September 19, 2004, a PAL flag was added to the header but unfortunately it is not reliable - the emulator does not take the PAL setting from the ROM, but from a user preference. This means that this site cannot calculate movie lengths reliably.
+	$LF
+]p
+[h4 
+	" The controller data is written as follows:
+	$LF
+]h4
+[pre 
+	$UNPRINTABLE TEXT!!!
+]pre
+[pre 
+	"Control update: 1aabbbbb
+	$LF
+	"aa: Number of delta bytes to follow
+	$LF
+	"bbbbb:  
+	$LF
+	"  0     Do nothing
+	$LF
+	"  1     Reset
+	$LF
+	"  2     Power cycle
+	$LF
+	"  7     VS System Insert Coin
+	$LF
+	"  8     VS System Dipswitch 0 Toggle
+	$LF
+	" 24     FDS Insert
+	$LF
+	" 25     FDS Eject
+	$LF
+	" 26     FDS Select Side
+	$LF
+	"Controller update: 0aabbccc
+	$LF
+	"aa: Number of delta bytes to follow
+	$LF
+	"bb: Gamepad number minus one (?)
+	$LF
+	"ccc:
+	$LF
+	" 0      A
+	$LF
+	" 1      B
+	$LF
+	" 2      Select
+	$LF
+	" 3      Start
+	$LF
+	" 4      Up
+	$LF
+	" 5      Down
+	$LF
+	" 6      Left
+	$LF
+	" 7      Right
+	$LF
+]pre
+[p 
+	"The controller update toggles the affected input. Controller update data is emitted to the movie file only when the state of the controller changes.
+	$LF
+]p
+[p 
+	"The delta byte(s) indicate the number of emulator frames between this update and the next update. It is encoded in little-endian format and its size depends on the magnitude of the delta:
+	$LF
+]p
+[pre 
+	" Delta of:      Number of bytes:
+	$LF
+	" 0              0
+	$LF
+	" 1-255          1
+	$LF
+	" 256-65535      2
+	$LF
+	" 65536-(2^24-1) 3
+	$LF
+]pre
+[p 
+	"FCEU emits a "do nothing" command if the current delta is about to overflow.
+]p

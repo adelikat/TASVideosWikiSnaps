@@ -1,0 +1,168 @@
+13
+[h4 
+	" Encodes
+	$LF
+]h4
+[p 
+	(youtube|v=EowXU9cZ_S4)
+	$LF
+]p
+[p 
+	[a class=extlink href=http://www.mediafire.com/?uf5o1uoi72jlb25 rel=nofollow 
+		"Downloadable Encode
+	]a
+	" | 
+	[a class=extlink href=http://www.mediafire.com/?6mjqad6g5i4s383 rel=nofollow 
+		"512kb
+	]a
+	$LF
+]p
+[p 
+	"Emulator: VBA-rr v22
+	$LF
+]p
+[p 
+	"This is an improvement to the published run made originally by 
+	(__wikiLink|user:gia)
+	" that wasn't submitted. More information about it can be seen in his youtube video here: http://www.youtube.com/watch?v=7yXTpnUCh5Q
+	$LF
+]p
+[p 
+	"As far as I know, no .vbm of that movie was posted, shortly after that run was made I managed to recreate the presses file but kept it to myself as I was hoping that run would be submitted. Some months have passed and it seems the author doesn't have the intention to submit it here, so I'm submitting my own version (*puts on bullet proof vest*) because it looks like people want to have this published in TASVideos.org and asked me to submit this.
+	$LF
+]p
+[h3 
+	" Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		" Extreme glitch abuse (not afraid to destroy the game)
+		$LF
+	]li
+	[li 
+		" Luck manipulation
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+]ul
+[h3 
+	" What happens here
+	$LF
+]h3
+[p 
+	"In order to understand, it's recommended to have familiarity with programming and some knowledge of GBC assembly and other aspects of the platform.
+	$LF
+]p
+[h3 
+	" Relevant memory addresses
+	$LF
+]h3
+[ul 
+	[li 
+		" Trainer ID: 0xD358-0xD359
+		$LF
+	]li
+	[li 
+		" Map function (little endian): 0xD36D-0xD36E
+		$LF
+	]li
+	[li 
+		" Current map: 0xD35D
+		$LF
+	]li
+	[li 
+		" Party Pokémon general data: 1st one is at 0xD16A, has a size of 44 bytes
+		$LF
+	]li
+	[li 
+		" Party Pokémon OT name data: 1st one is at 0xD272, has a size of 11 bytes
+		$LF
+	]li
+	[li 
+		" Party Pokémon nickname data: 1st one is at 0xD2A4, has a size of 11 bytes
+		$LF
+	]li
+	[li 
+		" Pokédex data: everything from 0xD356 to 0xD31B, inclusive (38 bytes).
+		$LF
+	]li
+	[li 
+		" Inventory: 0xD31C (amount) and an array starting at 0xD31D with 20 elements of 2 bytes (item type and quantity) in the end of your normal inventory there's an 0xFF that indicates the CANCEL option, so this takes up at most 42 bytes.
+		$LF
+	]li
+]ul
+[p 
+	"The process to finish the game:
+	$LF
+]p
+[ul 
+	[li 
+		" When the title screen opens, frames are waited to manipulate the trainer ID to be 0x64D0, there are other values that work but this is the fastest.
+		$LF
+	]li
+	[li 
+		" After the usual intro, picking the names ASH and BLUE because they are faster, we spawn in the room and hard reset mid-save to corrupt the data.
+		$LF
+	]li
+	[li 
+		" After the reset, the entire area destined to contain the data for pokémon in the party is full of 0xFF and is thus, corrupted. This includes the byte that counts the number of pokémon you have, so the game thinks you have 255 pokemon and will let you scroll the cursor and perform switches far after the usual limit of 6 pokemon.
+		$LF
+	]li
+	[li 
+		" Notice that for a max of 6 pokémon, the region that contains the party data will work fine, the general data for a pokémon will never overlap with its nickname or OT name. For more than that, this no longer holds because the difference in size will cause overlaps at some positions. When a switch occurs, the game will first switch the general data and then the other two, because of the coincidence of these two regions, interesting RAM manipulation can take place.
+		$LF
+	]li
+	[li 
+		" Switch 2nd pokemon (1st, 2nd, ..., 9th also work, the only difference is that the 1st is slower by 2 frames) with the 10th. This will set the entire pokedex region to FF, completing it and sets the inventory counter to 255 items. Because of the irregular 152 pokedex, a glitched description will appear at the end that doesn't need a click to cancel and input can be terminated sooner.
+		$LF
+	]li
+	[li 
+		" Switch 12th with 13th. 0x64 goes to address 0xD384 and 0xD0 goes to 0xD385.
+		$LF
+	]li
+	[li 
+		" Switch 11th with 13th. 0x64 goes to address 0xD32C and 0xD0 goes to 0xD32D, after this the 11 byte data is changed and the overlap causes it to be the region where 0x64 is, so after this last switch it goes to 0xD342.
+		$LF
+	]li
+	[li 
+		" It's impossible to get 0xD0 the right position with only pokémon switches, so we open the inventory and do an item switch to bring 0xD0 from 0xD32D to 0xD331.
+		$LF
+	]li
+	[li 
+		" Switch 11th with 12th. 0xD0 goes to 0xD35D (current map), 0x64 goes to 0xD36E, there's also a 0x01 that goes to 0xD36D, it's a byte that come before the trainer ID that, for our purposes, always contains 1.
+		$LF
+	]li
+]ul
+[p 
+	"After that, you can close the menu and the game will be completed, this is because Pokémon Yellow comes in an MBC5 GBC cartridge, this cartridge contains a lot of ROM that the GBC cannot handle all at once, so it's separated in chunks called banks. MBC5 has a main bank, which is always loaded into the gameboy and occupies positions 0x0000-0x3FFF and 63 other banks that the game can choose one of them to put in the active memory, at addresses 0x4000-0x7FFF. Having D0 as current map will force the game to load the bank which contains the function for the Hall of Fame walking cutscene, there are other values that work, but some of them mysteriously make ASH wait 16 frames to start walking, whereas D0 and some others don't. Additionally, having 0x0164 at the map function addresses will make the game execute a call to a function at this address and start executing stuff at 0x6401 (the data is little endian). Since this is an address from the bank area, what will be executed depends on the bank loaded, but with the previous setting, the machine will eventually start executing the hall of fame cutscene and grant you the completion of the game.
+	$LF
+]p
+[p 
+	"Through disassembly, I've verified that this function at some point switches to bank 60 and calls 0x4F26, which rolls the credits immediately without talking to OAK and that the map F8 can load this bank. However, with the above method we can only call addresses that terminate with 0x01, and going to 0x4F01 will get you a ret instruction on the way, and the procedure will return before reaching the credits. This can be circumvented with more manipulation of the RAM, but unfortunately, ended up slower than this attempt because of extra switches.
+	$LF
+]p
+[p 
+	"I also could notice that forcing the machine to jump to address 0x41c6 at bank 28 will start the pokedex rating sequence, however no map at 0xD35D can load this bank, the values for the bank which map loads are 256 bytes whose location starts at address 0x43e4 in bank 63.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Tremendous improvement, now you literally skipped the entire game. Accepting.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Brandon)
+	": Publication underway.
+]p

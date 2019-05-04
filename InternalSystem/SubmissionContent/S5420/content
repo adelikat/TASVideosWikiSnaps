@@ -1,0 +1,206 @@
+12
+[p 
+	"Yu-Gi-Oh! Forbidden Memories is a Yu-Gi-Oh! game for the PS1 based on a prototype of the card game's rules. In this run I shave almost 13 minutes off the published TAS by Hoandjzj by winning Meteor B. Dragon from Heishin at the start of the game and then beating almost everyone in 2 turns.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 1.12.0
+		$LF
+	]li
+	[li 
+		" BIOS used: SCPH-5501.BIN
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[h3 
+	" History
+	$LF
+]h3
+[p 
+	"At the end of 2016 and start of 2017 it was discovered by myself and some other people (most notably GCAH2006 and Froggy25) that it was possible to manipulate drops in speedruns, specifically that with a starter deck it was possible to beat Heishin and win three Meteor B. Dragons. This took the RTA WR of the game down from 3:15:05 to (as of writing) 1:23:32. With the knowledge gained from this, I realised that I could significantly improve upon the current TAS. After one half-completed attempt (which I stopped since I realised I could save a significant amount of time in World Tournament), this TAS is now complete.
+	$LF
+]p
+[h3 
+	" General Strategy
+	$LF
+]h3
+[p 
+	"The main strategy is to win Meteor B. Dragon from Heishin, then beat most duels in 2 turns. This is accomplished by having the AI suicide into my face-down MBD, then attacking directly with MBD and a second monster. It's ideal to do this without having to fuse, so I win Jirai Gumo from Weevil and later on I win a second MBD from Meadow Mage. There is no way to pull this strategy off without having an MBD (without it the fastest win is 3 turns, barring other strategies that would involve winning lots of hard to get cards), so the extra duel to win MBD easily pays for itself over the course of the World Tournament.
+	$LF
+]p
+[p 
+	"In contrast, Hoandjzj's general strategy was to make a deck that can fuse lots of THTDs (Twin-Headed Thunder Dragon, the strongest fusion you can easily make) and win an MBD off Meadow Mage. This means they beat everyone in three or four turns, which is the main cause for the gap between our times.
+	$LF
+]p
+[p 
+	"There are a few opponents who can see your face-down cards and so will never suicide. These are Heishin, Pegasus, Heishin 2nd, Seto 3rd, DarkNite, and Nitemare. For most of these I use a strategy suggested by GCAH2006 that involves Mountain, and it's quicker to win that from Rex than to try and start with it in your deck. An equip for MBD would also work, but starting with this takes too long and it also takes too long to win.
+	$LF
+]p
+[h3 
+	" Luck manipulation
+	$LF
+]h3
+[p 
+	"To pull this off requires a good understanding of the game's RNG and how this is used, since I am trying to beat an end-game level boss at the start, quickly, and get a 0.2% drop. Then I have to get some other drops (Mountain is a 1.7% drop, Jirai Gumo is a 0.2% drop, second MBD is a 1.0% drop). On top of this, I need to draw the specific cards I want, the AI has to play a monster weak enough where after a suicide I can win, and then they have to suicide with it.
+	$LF
+]p
+[p 
+	"The game uses an LCG with a 32 bit seed (specifically the ANSI C one). This seed gets set to 0x55555555 at game startup, and then changes once a frame for most menus, dialogue, etc. The exceptions to this that matter for this TAS are loading screens and duels. This stops you from doing things like delaying an attack by 7 frames to get a different drop or anything. Once you enter a duel, you are to a large extent "locked in" so I need to spend time setting up the duels I want.
+	$LF
+]p
+[p 
+	"The seed also changes whenever the game calls for a random number. In particular, the game calls for random numbers whenever it performs certain animations, and this includes most animations that happen in a duel. I don't have much flexibility here in a duel since I want to go as fast as possible, but at two points I dump a card for just this reason. Also, since my first move will always be the same, I can only control the AI's first move by entering the duel on certain seeds, and at times this can reach odds of 0.2% or worse.
+	$LF
+]p
+[p 
+	"The seed you enter a duel on determines what the enemy's deck is, and what their first move will be if you play MBD face-down. Thus, to even have a hope of getting the duel I have to wait before a duel to enter on a desirable seed.
+	$LF
+]p
+[p 
+	"In addition, I need to draw the cards I want. The game shuffles your deck by taking the seed, uses it to calculate a certain permutation of a deck of size 40, and then applies that to your deck as stored in memory. One major trick is to sort your deck before going into a duel, which changes how your deck is stored in memory before the game applies the permutation. Thankfully, there is a random sort option and this changes depending on the seed you go over random sort, and even what order your deck is in previously. Going over random sort also causes the game to call for random numbers, so by doing this repeatedly I can end up advancing the RNG 21 times more quickly than otherwise (this trick was found by GCAH2006).
+	$LF
+]p
+[p 
+	"With the freedom this gives me to sort the deck the way I want and advance the RNG quickly, I do not need to spend much time to consistently pull off the duels I want. I created a script to find the first few thousand random sorts starting from any point, another script to figure out a shortlist of duels that could lead to a good AI play, and then used a final script to combine this information and figure out the quickest ways to enter a duel that I want (I even took into account my own cursor movement). The script did not take into account the AI's cursor movement for playing their first card, but I added this on whenever it came up and looked up to that higher total time. This procedure was enough to deal with almost every duel. This is also why the rerecord count isn't that high: most of the work was done outside of the emulator.
+	$LF
+]p
+[h3 
+	" Starter deck and Heishin
+	$LF
+]h3
+[p 
+	"The hardest part of the TAS was getting MBD off Heishin, because he's really really hard and MBD is really really rare. The starter deck is randomly generated though so that gave me some more stuff to play with.
+	$LF
+]p
+[p 
+	"The starter deck absolutely must contain Raigeki, for the people I cannot beat in 2 turns. The next requirement is that it's able to win MBD from Heishin quickly. I wasn't able to pull off this second requirement and start with an MBD equip or Mountain, so I instead win the Mountain off Rex later. There's one trick to help with waiting for the deck: overwriting a character in the name entry screen advances the RNG about 30 times (found by Froggy25). I use this once, but there's not enough time to fit it in again so I just have to wait a bit regardless.
+	$LF
+]p
+[p 
+	"I save some time over Hoandjzj at the start because they get lag in the opening cutscene, which the community calls "Heishin lag". It's not completely clear what causes this, but the general belief is that it's due to a scratched disc or certain emulators (like PSXjin, which they used).
+	$LF
+]p
+[p 
+	"Now for setting up the Heishin MBD. Alone this isn't too difficult (it's even human-viable) but the issue is doing it as quickly as possible, which suddenly makes duels far less flexible. The Yami field in campaign makes more of his monsters dangerous, but it does let me use some extra monsters to help kill him in 3 turns with less fusions than say double THTD. Nevertheless, I'm still very restricted by the seeds I can start on. Furthermore, drawing the cards I want is far harder because I need all the material for the fusions I do. Because of this, random sorts are less powerful than before (but still crucial) so I end up having to wait about 3 seconds after getting the random sort I want (I use the time to show off my deck). Lots of viable starter decks are similar due to how the starter deck generation algorithm works, which leads to similar random sorts so you don't even have as much variety there as you might first expect.
+	$LF
+]p
+[p 
+	"The duel I ended up with was very clean (no extra fusions or dumping) and I'm quite happy with it. However, because there are so many ways to possibly win the duel and get MBD (and that's even after filtering out for good AI and ending with an MBD drop) I wasn't able to go through them all. The maximum theoretically possible time save is something like 5-6 seconds, but I'd be very surprised if optimally you could save more than 2-3.
+	$LF
+]p
+[p 
+	"After MBD is won I still have to lose to Heishin as usual. I save some time over Hoandjzj here by having Heishin use Megamorph first turn and attacking me directly, then suiciding into him.
+	$LF
+]p
+[h3 
+	" World Tournament
+	$LF
+]h3
+[p 
+	"With MBD in hand the suiciding begins. I need Mountain to save time on 4 duels later on so I grab it off Rex. I then grab Jirai Gumo off Weevil, saving me from having to fuse for the rest of World Tournament. For both of these duels I dump a card to manipulate the drops I want, and I couldn't find a quick enough way to get them without dumping. Same reason I fused against Weevil when you can beat him the way I beat Rex.
+	$LF
+]p
+[p 
+	"Most of the rest of World Tournament then turns into me playing MBD face-down, the AI attacking into it, then I attack with MBD and Jirai Gumo and win. The exception is Pegasus, who can see your face down cards and will never do this. Instead, I do the Mountain strategy suggested by GCAH2006. I get Pegasus to play a trap instead of a magic because it's faster, but I couldn't quickly enough get a duel where he leads with MBD so I just accept the 10 frame cost of him putting a monster in defense.
+	$LF
+]p
+[h3 
+	" The mages
+	$LF
+]h3
+[p 
+	"I save a little bit of textboxing over Hoandjzj at the start because I do not ask where my parents are buried (it is not required to progress and doesn't save time anywhere).
+	$LF
+]p
+[p 
+	"The first fight is Mage Soldier, and he goes just like those who came before him. Past him the opponents become too strong to defeat with MBD + Jirai Gumo, so once I unlock the mages I go straight for Meadow Mage to win MBD. I wanted to start the duel on a very specific seed, because Meadow Mage is incredibly difficult to defeat in 2 turns with my deck. I unlocked the Hiding Card Shop early because there's no penalty for doing so and I want to kill the time now to advance the RNG to help me reach that seed.
+	$LF
+]p
+[p 
+	"Because I'm aiming for one specific starting seed, random sorts become less useful. The closest one would still have required me to wait about 8 seconds or so, so instead I opt for alphabetical sort and then edit my deck by filling it with some junk entirely to make it work. Then the duel plays out nicely and I get my second MBD. With it in my deck, I can now easily 2 turn Kepura and move on to Mountain Mage.
+	$LF
+]p
+[p 
+	"Mountain Mage is the other person who can drop MBD, and he's very very easy to 2 turn (you can even do it with no fusions). So why did I not grab it off him? Well because the duel starts on Mountain, two direct attacks from MBD is enough. Suicides are slow, so it's very fast to have him set a magic and then just do the two direct attacks (which I'd have to do anyway). If I went for MBD off Mountain Mage, I couldn't do this trick against him and it would waste a lot of time. Therefore, as slow as the duel was, Meadow Mage was still faster. Atenza dies to the same trick.
+	$LF
+]p
+[p 
+	"The other three shrines fall to the same strategy as World Tournament, but with double MBD.
+	$LF
+]p
+[h3 
+	" Final 7
+	$LF
+]h3
+[p 
+	"Just like "Heishin lag", there's a bit of lag when Seto opens the door before Sebek in Hoandjzj's run, so there's some time saved there.
+	$LF
+]p
+[p 
+	"Labyrinth Mage, Sebek, and Neku die just like the mages (contrary to somewhat popular belief, Sebek and Neku cannot see your face-down cards). The last 4 duelists can all see your face-down cards, so this is the end of the 2 turns.
+	$LF
+]p
+[p 
+	"Heishin 2nd and Seto 3rd are both very similar, and I use the same strategy against them that I used against Pegasus. Unfortunately every trap they can play kills this strategy, so instead they have to play specific magics and this costs a little extra AI cursor movement. For Heishin 2nd I was looking for him to play Cosmo Queen's Prayer or Harpie's Feather Duster, and for Seto 3rd I was looking for him to play Harpie's Feather Duster. Additionally Seto 3rd has to not play Blue-Eyes Ultimate Dragon, which kills my MBD.
+	$LF
+]p
+[p 
+	"It turns out it was harder to manipulate Heishin 2nd than Seto 3rd. The issue is if the AI decides to set a magic or trap first turn, then they will prioritise setting traps, then setting equips, then failing that magics (and ritual spells are under all of this). If they end up setting a magic, they set the first magic in their deck. Therefore, while with Seto 3rd I need to avoid his strongest monster and one trap, with Heishin 2nd I need to avoid both his traps and Megamorph, and additionally Harpie's Feather Duster appears less in his deck.
+	$LF
+]p
+[p 
+	"DarkNite can play four traps, three of which are harmless for this strategy. On top of that he plays monsters that never go in defense way more than Pegasus, so this duel goes very nicely.
+	$LF
+]p
+[p 
+	"Nitemare sadly doesn't play anything but monsters, so the Mountain strategy is unworkable and there's not much you can do with him. The best I can do is use Raigeki and kill him in three attacks, by getting a guardian star advantage against Black Luster Soldier or Metalzoa which he will leave in attack mode but are just weak enough to get him killed.
+	$LF
+]p
+[h3 
+	" Other comments
+	$LF
+]h3
+[p 
+	"The main potential improvement would be a faster Heishin MBD. It's also possible that winning a >= 1600 dragon off say Keith would save a fusion against Meadow Mage, or by doing this all you could end up with a nearby seed where Meadow Mage suicides with Beaver Warrior and you can win MBD (I found one Beaver Warrior suicide seed but I couldn't quickly get MBD from it). It's hard to know the effect of this last point since by the nature of the RNG you cannot simply insert an improved section into the middle of the run, the rest will fall apart if you try this. This is why I didn't bother with the strong dragon, since it took me a fair bit longer and I wasn't sure if it would even be worth it.
+	$LF
+]p
+[p 
+	"Suggested screenshot: 13909
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Fog)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Fog)
+	": Great improvements, makes it about as exciting as card games can get. Audience reception is once again very positive.
+	$LF
+]p
+[p 
+	"Accepting to Moons as an improvement to the previous publication!
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing.
+]p

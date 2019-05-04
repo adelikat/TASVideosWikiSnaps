@@ -1,0 +1,376 @@
+7
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-2654 
+				"Memory Addresses
+				$LF
+			]a
+		]li
+		[li 
+			[a href=#heading-2655 
+				"Tricks
+				$LF
+			]a
+		]li
+	]ul
+]div
+[p 
+	"In this page, Mini-Turbo (or, power-slide turbo boost) is abbreviated as MT.
+	$LF
+]p
+[h2 
+	"Memory Addresses
+	$LF
+	[a id=heading-2654 
+	]a
+]h2
+[p 
+	"The pointer to these values is at 0x217ACF8 (USA version) or 0x217D028 (EUR version).
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Short Description
+			]th
+			[th 
+				"Offset
+			]th
+			[th 
+				"Size
+			]th
+			[th 
+				"Explanation
+				$LF
+			]th
+		]tr
+		[tr 
+			[td 
+				"X, Y, Z pos
+			]td
+			[td 
+				"+0x80, 84, 88
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"Your kart's location
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Speed
+			]td
+			[td 
+				"+0x2A8
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"Your speedometer. Watch the difference in position too.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Maximum Speed
+			]td
+			[td 
+				"+0xD0
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"Your speed cannot exceed this value. PRB locks it; otherwise it increases when you jump off an uphill slope or angle your kart downwards in the air
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Boost Timer
+			]td
+			[td 
+				"+0x238
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"How many frames remain for your current boost.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"MT Time
+			]td
+			[td 
+				"+0x30C
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"How many frames you must wait before the next MT charge level.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Angle Facing
+			]td
+			[td 
+				"+0x236
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"The direction you are facing.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Drift Angle
+			]td
+			[td 
+				"+0x388
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"Add this to Angle Facing to get the direction your kart is trying to go.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Vertical Angle
+			]td
+			[td 
+				"+0x234
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"The up/down angle of your kart in the air.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Turning Loss
+			]td
+			[td 
+				"+0x2D4
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"Tells you how much speed you are sacrificing by turning. Only takes effect on the ground and when not drifting. (Does not affect the Speed value.)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Grip
+			]td
+			[td 
+				"+0x240
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"Tells you how slippery the road is. A value of zero would mean that turning is impossible. (Regular road is always the same, other roads depend on your kart choice.)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Air
+			]td
+			[td 
+				"+0x3DD
+			]td
+			[td 
+				"1 byte
+			]td
+			[td 
+				"0 means you are on the ground.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Spawn Point
+			]td
+			[td 
+				"+0x3C4
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"Tells you where lakitu will drop you. Set when you fall off the course.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Direction Sine, Cosine
+			]td
+			[td 
+				"+0x60, 70
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"(20.12 Fixed Point value) The sine and cosine of the angle at which you are moving. The game uses these values to determine your movement.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Target Sine, Cosine
+			]td
+			[td 
+				"+0x50, 58
+			]td
+			[td 
+				"4 bytes
+			]td
+			[td 
+				"(20.12 Fixed Point value) Direction Sine/Cosine will approach these values by some percentage (dependent on Grip) each frame. These are the values changed by your angle.
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The pointer for the last Key Checkpoint you activated is at 0x21661B4 (either USA or EUR (?)). Offset is +0x620. (1 byte) This is useful when doing shortcuts that require going forward a bit first, such as the shortcuts on Rainbow Road.
+	$LF
+]p
+[p 
+	[a class=extlink href=http://pastebin.com/1veqsLTs rel=nofollow 
+		"Here
+	]a
+	" is a lua script for DeSmuME that displays all the values listed above.
+	$LF
+]p
+[h2 
+	"Tricks
+	$LF
+	[a id=heading-2655 
+	]a
+]h2
+[ul 
+	[li 
+		"Prolonged Rocket Boost (PRB): A well-known glitch: If you keep using MTs fast enough that your boost timer never reaches 0, you can drive offroad without losing any speed. This can also be done with a boost pad instead of the starting boost.
+		$LF
+		[ul 
+			[li 
+				"Using a mushroom boost will set a different boost timer. When this timer hits 0 PRB will be lost.
+				$LF
+			]li
+			[li 
+				"PRB prevents Maximum Speed from going above top boosting speed; therefore, it can be useful to lose PRB in order to gain speed from hopping up steep slopes.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Fast fall: When making a large jump, it is usually beneficial to hold up. Not doing so could cause you to slow down when your boost wears out. This happens because pressing up increases your Maximum Speed, keeping it above current speed even after your boost wears out. (This can sometimes be combined with hopping uphill to get better speed boosts upon landing.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Starting Turn: Turning while not drifting slows you down. However, there is one frame before you start moving when pressing left/right will change Turning Loss without actually turning your kart. By pressing left/right on this frame, and then the other direction the next frame, you can turn a bit without losing any speed.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Lap Timer Bug: Mario Kart DS allows you to have a lap time that is not an interval of 1/60th of a second (1 frame). However, this partial-frame time is NOT used as the starting time of your next lap's timer. Thus, any "time" between the finish line and your position the frame after crossing it is not counted. See 
+		[a class=extlink href=https://youtu.be/4ZlHvn3SSYY rel=nofollow 
+			"this video
+		]a
+		" for a demonstration of this effect.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Driving into the air: Normally, drifting into the air (e.g., going off a ramp) slows you down. To prevent this slow-down, drive off while your Drift Angle is 0, or as close to it as possible. This can't always be done, but is very easy to do in places like GCN Luigi Circuit when driving off the boost pads.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Tight/Wide Drifting: When using a kart that does not have good drifting abilities, pressing outside (left on a right drift or vice versa) near the start of a drift will cause you to turn more inside than pressing neutral (neither left or right). In the case of ROB's BLS kart, this effect lasts 10 frames. Each frame reduces the strength of the effect.
+		$LF
+		[ul 
+			[li 
+				"Note that this does not happen on the first frame after landing. In order to charge a MT as fast as possible while turning tight, do not press outside to start the charging on the first frame possible; wait 1 frame so that pressing outside will turn you inside.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Left+Right: Pressing left and right at the same time turns you exactly as if you were only holding left. However, the right press can still be used to charge a MT. (This only works if you were already holding left the frame before you press left+right.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Exiting a drift: Turning Loss does not take effect when drifting, but is changed by pressing left/right. Press left/right just before exiting a drift to get it as low as possible. (When drifting tight, pressing 2 frames neutral, 2 frames outside, 1 frame inside to charge, 1 frame outside+release gets it very low. When drifting wide, 2 neutral, 1 inside to charge, 1 inside+release gets it very low.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Drift turning in air: When you are in the air during a drift, pressing either left or right will slow your turn, eventually stopping the turn. Not pressing either will result in turning inside.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Slowing down: The best way to slow down from top speed is not to simply press B. Pressing A+B will decrease your speed by a percentage each frame. At high speeds, this percentage is a greater decrease than the fixed decrease from simply pressing B.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Wall clip: When you hit a wall (or other wall-like obstacle), your Drift Angle is set to zero. If you hit the wall at the very end of the wall, your speed will not go down to zero and you can continue driving past the wall. This can be very useful for making sharp turns.
+		$LF
+		[ul 
+			[li 
+				"Many walls are off-road, which doesn't provide as much Grip as road does. When clipping these walls you will have to wait extra frames to get your speed back up. (The low grip will affect your movement speed, not your Speed value.)
+				$LF
+			]li
+			[li 
+				"Boxes, pipes and mission gates can be clipped with no Speed loss. I (Suuper) have yet to see such a clip on a regular wall, though.
+				$LF
+			]li
+			[li 
+				"Hopping on the same frame you hit the wall will allow you to go some extra distance with the direction you had before the clip.
+			]li
+		]ul
+	]li
+]ul

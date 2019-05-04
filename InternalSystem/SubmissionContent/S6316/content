@@ -1,0 +1,530 @@
+11
+[p 
+	[b 
+		"Ty the TASmanian Tiger 2:Bush Rescue
+	]b
+	" for the 
+	[b 
+		"GBA
+	]b
+	" is a 2D platformer that is largely unknown compared to the 3D platformer by same name of which it is a "port". I started TASing this game because I was looking for a quick TAS project. It appeared to be an extremely linear game, but managing boomerangs seemed like a decent enough challenge to keep the game interesting. I soon discovered several glitches that completely broke the game. This opened up a huge amount of routing possibilities while making resource management even more critical than initially expected, and made this project large enough for me to seek out a coauthor (The8bitbeast) for this TAS. The RTA WR prior to starting this project was a 1:32:15 (robthegamer115), the glitches discovered in this TAS has reduced the current RTA WR by 58 minutes to 34:08 (Mittenz), and the final TAS almost cuts this time in half by achieving a sub-15 minute time (14:54.317 from power-on).
+	$LF
+]p
+[p 
+	(youtube|v=8nPvtgTNwE0|w=240|h=160)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.3.0(x64) (mGBA 0.6.3)
+		$LF
+	]li
+	[li 
+		" Fastest Completion
+		$LF
+	]li
+	[li 
+		" OoBs and Off-screen movement
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Takes Damage To Save Time
+		$LF
+	]li
+	[li 
+		" Genre: Action Platformer
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	"Special Thanks
+	$LF
+]h3
+[h4 
+	" Contributors
+	$LF
+]h4
+[p 
+	"Niamek: Discovered super jump glitch in Ty3 (GBA) which translated to this game. Discovered that pressing and releasing direction every frame while in a jump slightly increased horizontal speed.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h4 
+	" Honorable Mentions
+	$LF
+]h4
+[p 
+	"Isotarge: For creating scripthawk, which was used in making this TAS.
+	$LF
+]p
+[h3 
+	"Maps and Routes
+	$LF
+]h3
+[p 
+	"We created maps of each of level to assist in routing the game since the major movement glitches in the game allow for major shortcuts and sequence breaks on almost every level. https://imgur.com/a/8F0yg
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	" Movement
+	$LF
+]h3
+[p 
+	"All position data is stored in subpixels (sp) with 256 sp per pixel, all velocity information is expressed in subpixels per frame (sppf). We will use these units when talking about position, velocity, and sppf per frame (sppf⸢⸢2⸣⸣) when talking about acceleration. 
+	$LF
+]p
+[h4 
+	" Running
+	$LF
+]h4
+[p 
+	"The max run speed is 512 sppf. 
+	$LF
+]p
+[h4 
+	" Jumping/Falling
+	$LF
+]h4
+[p 
+	"While jumping Ty can normally only reach a horizontal velocity of 512 sppf, however once at this intended max speed releasing the direction of travel slightly increases Ty's horizontal velocity for a single frame. We can take advantage of this by alternating pressing and releasing the direction of travel every frame. If traveling backwards at a velocity greater than 512 sppf, pressing the direction of travel will instant drop Ty's velocity to 512 sppf.
+	$LF
+]p
+[h4 
+	" Gliding
+	$LF
+]h4
+[p 
+	"If the player has both boomerangs during a jump/fall, they can press and hold A again to perform a glide. The first time glide is performed in a jump/fall, Ty's Y-velocity is instantly reset to 0. While glide is held gravity is reduced to -19 sppf⸢⸢2⸣⸣. The maximum horizontal velocity from gliding is 529 sppf. This move is intended for crossing large gaps, but this TAS uses it to mainly shorten jumps.
+	$LF
+]p
+[h4 
+	" Boomerang Throw
+	$LF
+]h4
+[p 
+	"The main gimmick of this game is the use of multiple different boomerangs with different properties, however the only 2 boomerangs used in this TAS are the normal boomerangs you start the game with, and the infra-rangs which are needed to complete one of the levels in the game. When a boomerang is thrown it travel a set distance away from Ty or until it hits an object. It then turns around and tries finding it's way back to Ty. If the boomerang is out long enough without colliding with Ty it will despawn and reappear in Ty's hand. Normal boomerangs give you 2 boomerangs that can be thrown in the 8 cardinal directions. Infra-rangs places a reticle on the screen that can be controlled when the play hold "B" to be in a pre-throw state.
+	$LF
+]p
+[h4 
+	" Boosteranging
+	$LF
+]h4
+[p 
+	"Boosteranging (or back boosting using with boomerang) is the fastest of horizontal movement, and the main form of movement used in this TAS. When landing while performing a aerial boomerang throw, the game tries to kill Ty's velocity. It does so by accelerating Ty by -32 sppf⸢⸢2⸣⸣ in the direction he's facing for the remaining length of the boomerang throw animation or until Ty's velocity is less than 32 sppf. When Ty is facing the same direction he is traveling this has the intended effect. However by facing away from the direction of travel, this acceleration adds constructively to Ty's existing velocity causing him to move faster and faster. To make matters worse, this grounded-aerial boomerang throw state can be cancelled directly into another grounded-aerial boomerang throw to continue the boosteranging or cancelled into a jump to maintain the increased velocity while clearing obstacles. On top of that, the grounded-aerial boomerang throw does not reset Ty's velocity when he collides with walls or other background objects allowing him to boosterang into a corner and continue building up enough speed (>4098 sppf) to clip OoB. On top of that, once OoB the constant collisions all around Ty will normally lock him in place, however since these collision do not reset Ty's velocity in this state he can continue moving the entire time he is OoB as long as he continues boosteranging. Since Ty's velocity is stored as a s32 integer, the maximum obtainable velocities through boosteranging are 2,147483,648 sppf and 2,147483,647 sppf in the left and right directions respectively.
+	$LF
+]p
+[h4 
+	" Super Jumps
+	$LF
+]h4
+[p 
+	"Normally after landing the bit that determines if glide has already been used this fall/jump is reset meaning next time the player jumps and performs a glide their Y velocity will be reset to 0. However landing while throwing a boomerang and then cancelling the boomerang throw with another jump will not reset this bit. This allows Ty to enter the glide state without his Y-velocity instantly resetting to 0. The result of which is a jump with about 1/4 of the normal gravity.
+	$LF
+]p
+[p 
+	"Since glide was intended to reset your Y-velocity, you were never intended to gain height with the glide move, it appears that ceiling collisions for the glide state do not exist. This allows the player to easily embed themselves OoBs in low ceilings with a super jump. This can also be used to overflow the player's y-position to teleport the player from the top of a level to the bottom.
+	$LF
+]p
+[h4 
+	" Infinte Boosterang
+	$LF
+]h4
+[p 
+	"If gliding close enough to the ground, Ty will enter a landing state slightly above the ground or platform. If a boosterang is performed at this time, Ty will begin gaining velocity without having to continually throw rangs. Ty will continue traveling in a straight horizontal line until he hits a wall, floor, or other object.
+	$LF
+]p
+[h4 
+	" Out of Bounds Movement
+	$LF
+]h4
+[p 
+	"There are a few oddities to OoBs movement in this game. This is a list of notable OoBs movement rules:
+	$LF
+]p
+[ul 
+	[li 
+		"Only the grounded-aerial boomerang throw animation doesn't reset your velocity when colliding with terrain, So it must be used for almost the entire times while out of bounds.
+		$LF
+	]li
+	[li 
+		"Jumping in a given direction will cause a terrain collision in that direction. Following up with a boomerang throw on the next frame will maintain the collision correction velocity pushing the player in the opposite direction of the jump at a velocity of 4096 ppf.
+		$LF
+	]li
+	[li 
+		"If the player is within 1 tile of the edge of a wall, floor or roof, they can simply walk, jump or fall back in bounds respectively.
+		$LF
+	]li
+	[li 
+		"The player cannot pass outside the box the level is contained within unless super jumping. This allows you to use bottom edge of the level  as a floor.
+		$LF
+	]li
+	[li 
+		"There are no actual floors while OoBs, so the player's will fall while moving OoB unless on the bottom edge of the level.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	" Individual Levels
+	$LF
+]h3
+[h4 
+	" Intro - Prison Escape
+	$LF
+]h4
+[p 
+	"The frills are trying to break Boss Cass out of prison and you have to try to stop them.
+	$LF
+]p
+[ul 
+	[li 
+		"Off camera movement due to high velocity and locked camera mini-boss fights. 
+		$LF
+	]li
+	[li 
+		"Breaking out of locked camera mini-boss fights. This causes Ty to lose all his velocity.
+		$LF
+	]li
+	[li 
+		"Completely avoiding first mini-boss fight by traveling out of bounds along lower bounding box of the stage.
+		$LF
+	]li
+	[li 
+		"First example of super-jumping.
+		$LF
+	]li
+	[li 
+		"Avoiding Boss Cass dialog by traveling past him before trigger loads.
+		$LF
+	]li
+	[li 
+		"Taking Damage to save time in boss fight. 
+		$LF
+	]li
+]ul
+[h4 
+	" Outback Oasis
+	$LF
+]h4
+[ul 
+	[li 
+		" Infinite boosterang to gain speed while avoiding spike damage
+		$LF
+	]li
+	[li 
+		" Out of bounds movement to obtain second koala kid without back tracking
+		$LF
+	]li
+]ul
+[h4 
+	" Boonie Come Home
+	$LF
+]h4
+[ul 
+	[li 
+		"Superjumps shorten path 
+		$LF
+	]li
+]ul
+[h4 
+	" Faire Dinkum
+	$LF
+]h4
+[ul 
+	[li 
+		" Positioning Ty after hitting each button to minimize locked camera movement.
+		$LF
+	]li
+	[li 
+		" Pause exit to skip final cutscene.
+		$LF
+	]li
+]ul
+[h4 
+	" Data Nut Debacle
+	$LF
+]h4
+[ul 
+	[li 
+		" OoBs travel along bottom of level bounding box.
+		$LF
+	]li
+	[li 
+		" Superjump to clip trough ceiling. 
+		$LF
+	]li
+]ul
+[h4 
+	" Lizard Lagoon
+	$LF
+]h4
+[ul 
+	[li 
+		" Shows off infinite boosterangs, y-position underflow,and a variety of other movement tech/glitches.
+		$LF
+	]li
+	[li 
+		" Pause exit to return to overworld map instead of inside Bush HQ
+		$LF
+	]li
+]ul
+[h4 
+	" Lion Village
+	$LF
+]h4
+[ul 
+	[li 
+		"Glitch to get each enemy to count twice. Enemy despawns from death animation and level screen on exact save frame.
+		$LF
+	]li
+]ul
+[h4 
+	" Croc o' Trouble
+	$LF
+]h4
+[ul 
+	[li 
+		" Escort Mission.
+		$LF
+	]li
+	[li 
+		" Partially clipping through gate to hit croc from behind wall
+		$LF
+	]li
+	[li 
+		" Major Lag reduction
+		$LF
+	]li
+]ul
+[h4 
+	" City of Industry
+	$LF
+]h4
+[ul 
+	[li 
+		" Clips to skip major parts of the level.
+		$LF
+	]li
+	[li 
+		" Camera manipulation to affect platform cycles
+		$LF
+	]li
+]ul
+[h4 
+	" Tree Tangle
+	$LF
+]h4
+[ul 
+	[li 
+		" First example of upwards movement while OoB.
+		$LF
+	]li
+]ul
+[h4 
+	" Fluffy
+	$LF
+]h4
+[ul 
+	[li 
+		" Skips initial boss trigger
+		$LF
+	]li
+	[li 
+		" Locks boss in place  
+		$LF
+	]li
+]ul
+[h4 
+	" Bush HQ
+	$LF
+]h4
+[ul 
+	[li 
+		" Purchases Lifter Bunyip and Infrarang
+		$LF
+	]li
+]ul
+[h4 
+	" Red Ahead
+	$LF
+]h4
+[ul 
+	[li 
+		" Skips all but final required use of Lifter Bunyip
+		$LF
+	]li
+]ul
+[h4 
+	" Excursion Excitement
+	$LF
+]h4
+[ul 
+	[li 
+		" Super jumps to reduces travel distance
+		$LF
+	]li
+]ul
+[h4 
+	" Cy vs Ty
+	$LF
+]h4
+[ul 
+	[li 
+		" Building up speed to clear lake obstacle
+		$LF
+	]li
+	[li 
+		" Clip to mini-boss
+		$LF
+	]li
+	[li 
+		" Frame locks mini-boss
+		$LF
+	]li
+]ul
+[h4 
+	" Koala Kiddies
+	$LF
+]h4
+[ul 
+	[li 
+		" Major rerouting/sequence breaking
+		$LF
+	]li
+]ul
+[h4 
+	" Buster
+	$LF
+]h4
+[ul 
+	[li 
+		" Uses infrarange to precisely position rang throws to maximize number of enemy hits.
+		$LF
+	]li
+]ul
+[h4 
+	" Rock n' Ruin
+	$LF
+]h4
+[ul 
+	[li 
+		" Y-position overflow
+		$LF
+	]li
+	[li 
+		" Intended sequence breaks
+		$LF
+	]li
+]ul
+[h4 
+	" Crocodile Chaos
+	$LF
+]h4
+[ul 
+	[li 
+		" Y-position overflow
+		$LF
+	]li
+	[li 
+		" Intended sequence break, TAS order 1-2-6-5-3-4
+		$LF
+	]li
+]ul
+[h4 
+	" Crouching Koala, Hidden Frill
+	$LF
+]h4
+[ul 
+	[li 
+		" Only required use of infrarange
+		$LF
+	]li
+	[li 
+		" Enemies count twice to kill 4 enemies instead of 8. Multiple boomerangs colliding at with enemy on the same frame. Multirang can get more than 2 points per kill, however buying would require a second visit to bush HQ to buy multirang and flamerang. Timeloss from second visit outweighed possible time save.  
+		$LF
+	]li
+]ul
+[h4 
+	" You're Fired
+	$LF
+]h4
+[ul 
+	[li 
+		" Major sequence breaks
+		$LF
+	]li
+	[li 
+		" Damage at end to use invisibility frames to save time
+		$LF
+	]li
+]ul
+[h4 
+	" Boss Kass
+	$LF
+]h4
+[ul 
+	[li 
+		" Firing to reduce jump height
+		$LF
+	]li
+	[li 
+		" Frame locking Cy
+		$LF
+	]li
+	[li 
+		" Use of laser during Buster fight
+		$LF
+	]li
+	[li 
+		" Ending Buster fight as far left as possible to reduce screen scrolling
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	" Other comments
+	$LF
+]h3
+[p 
+	"suggested screenshot:
+	$LF
+	[img class=embed src=https://cdn.discordapp.com/attachments/339337829161369612/559923038657970196/vlcsnap-2019-03-25-22h00m30s646_small.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:slamo)
+	": Whew! Great job utterly ruining this game's engine. The laws of physics are optional in Tasmania, apparently. Thank you for making the waiting sections entertaining as well.
+	$LF
+]p
+[p 
+	"Personally, the zipping around and out-of-bounds sections made this run very entertaining to me. The audience enjoyed it as well. This is exactly the kind of run we like to see at TASVideos. Accepting to Moons.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Dacicus)
+	": Processing...
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Replaced the movie with one without a frame of blank input at the end.
+]p

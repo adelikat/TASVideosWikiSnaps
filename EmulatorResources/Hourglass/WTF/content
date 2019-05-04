@@ -1,0 +1,164 @@
+4
+[p 
+	(__wikiLink|EmulatorResources/Hourglass)
+	$LF
+]p
+[p 
+	".wtf is the input movie format of Hourglass. It stands for 
+	[del 
+		"what the
+	]del
+	" "Windows TAS File".
+	$LF
+]p
+[p 
+	"In r60 or later, Hourglass also recognizes the extension .hgm ("Hourglass Movie"), which can be used instead of .wtf if you wish.
+	$LF
+]p
+[h3 
+	" WTF file format description
+	$LF
+]h3
+[p 
+	"A WTF file consists of a 1024-byte header followed by the input data.
+	$LF
+]p
+[h4 
+	" Header format
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"0x000
+			]th
+			[td 
+				"4-byte signature: 0x66 0x54 0x77 0x02
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x004
+			]th
+			[td 
+				"4-byte little-endian unsigned int: total number of input frames
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x008
+			]th
+			[td 
+				"4-byte little-endian unsigned int: rerecord count
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x00C
+			]th
+			[td 
+				"8-byte unterminated ASCII-encoded string: keyboard layout such as "00000409" for a US keyboard
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x014
+			]th
+			[td 
+				"4-byte little-endian unsigned int: frames per second
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x018
+			]th
+			[td 
+				"4-byte little-endian unsigned int: initial system clock time plus 1
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x01C
+			]th
+			[td 
+				"4-byte little-endian unsigned int: CRC32 of the game executable
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x020
+			]th
+			[td 
+				"4-byte little-endian unsigned int: size in bytes of the game executable
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x024
+			]th
+			[td 
+				"48-byte null-terminated ASCII-encoded string: filename of game executable (excluding directories)
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x054
+			]th
+			[td 
+				"16 4-byte little-endian unsigned ints: system clock time at power-of-two frame boundaries, used for desync detection. Ignored if zero. Introduced in r41.
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x094
+			]th
+			[td 
+				"4-byte little-endian unsigned int: revision number of Hourglass that the movie was recorded with. If 0, the revision is assumed to be 51 (or 39 if the first clock time at 0x054 is also 0). Introduced in r57.
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x098
+			]th
+			[td 
+				"160-byte null-terminated ASCII-encoded string: command line arguments that are provided to the game. Introduced in r60.
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x138
+			]th
+			[td 
+				"reserved bytes which should be 0, padding until end of 1024 byte header
+			]td
+		]tr
+		[tr 
+			[th 
+				"0x400
+			]th
+			[td 
+				"beginning of frame data
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Input Data
+	$LF
+]h4
+[p 
+	"Each frame consists of 8 bytes of keyboard data.
+	$LF
+]p
+[p 
+	"Each byte is a virtual key code such as VK_ESCAPE indicating that a particular key was held on that frame. The first zero-value byte indicates that no other keys were held on that frame.
+	$LF
+]p
+[p 
+	"Frames where more than 8 different keys are held cannot be represented by the movie format. Nevertheless, attempting to press more than 8 keys at once will not cause desyncs, because Hourglass implements recording by saving each frame of input in movie format and then playing that frame of input back as if in playback mode.
+	$LF
+]p
+[p 
+	"DirectInput key codes are not stored separately, instead, they are generated based on the virtual key codes and the keyboard layout string that's stored in the current movie.
+]p

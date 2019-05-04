@@ -1,0 +1,209 @@
+19
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-676 
+				"Movie base
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-677 
+				"Lua script
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-678 
+				"NamesLog
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-676 
+			[p 
+				"http://tasvideos.org/userfiles/game/27
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-677 
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-678 
+			[p 
+				"Save as 
+				[tt 
+					"'Duck Tales 2 (U) [!].nes.ram.nl'
+				]tt
+				" and put to 'roms' folder for symbolic debugging.
+				$LF
+			]p
+			[pre 
+				[code class=language-sh 
+					"$000A#XposLowTtemp#
+					$LF
+					"$000B#XposHighTemp#
+					$LF
+					"$000C#YposLowTemp#
+					$LF
+					"$000D#YposHighTemp#
+					$LF
+					"$0013#XcamLowTemp#
+					$LF
+					"$0014#XcamHighTemp#
+					$LF
+					"$0015#YcamLowTemp#
+					$LF
+					"$0016#YcamHighTemp#
+					$LF
+					"$0017#XcamLow#
+					$LF
+					"$0018#XcamHigh#
+					$LF
+					"$001A#YcamLow#
+					$LF
+					"$001B#YcamHigh#
+					$LF
+					"$008F#GlobalTimer#
+					$LF
+					"$0090#RNG#
+					$LF
+					"$0095#PlayerXposSub#
+					$LF
+					"$0096#PlayerXposLow#
+					$LF
+					"$0097#PlayerXposHigh#
+					$LF
+					"$0098#PlayerYposSub#
+					$LF
+					"$0099#PlayerYposLow#
+					$LF
+					"$009A#PlayerYposHigh#
+					$LF
+					"$00B1#SlotPointer#
+					$LF
+					"$03FE#ID#
+					$LF
+					"$040E#State#
+					$LF
+					"$042E#Timer#
+					$LF
+					"$043E#DeathFlag#
+					$LF
+					"$044E#Sprite#
+					$LF
+					"$045E#Yspeed#
+					$LF
+					"$049E#XposSub#
+					$LF
+					"$04AE#XposLow#
+					$LF
+					"$04BE#XposHigh#
+					$LF
+					"$04CE#YposSub#
+					$LF
+					"$04DE#YposLow#
+					$LF
+					"$04EE#YposHigh#
+					$LF
+				]code
+			]pre
+		]div
+	]div
+]div
+[h4 
+	" Positioning
+	$LF
+]h4
+[p 
+	"Regular horizontal moving speed is 1.x pixel per frame. x is subpixel value, each subpixel used in the game is 4 256ths of a pixel, and it alters within 1/2 of a pixel each frame you move (it is either less than 0x80, or more). X subpixel rolls each frame you move, even if you are running into a wall. So by adding such wall bumps when possible you can manipulate X subpos to always result in a higher total position.
+	$LF
+]p
+[p 
+	"Y subpixel only advances while you are on a rope, or are falling through a screen transition gap. So you can manipulate Y subpixel by grabbing the ropes or jumping into gaps at different time. Sometimes Y subpixel is critical for some collision.
+	$LF
+]p
+[p 
+	"Subpixels get carried between levels, so you want to adjust them after boss fights to be higher. X position resets to a default value on each level start, so you will be farther right even if you moved left enough to have 0x80+ subpos.
+	$LF
+]p
+[h4 
+	" Collision glitch
+	$LF
+]h4
+[p 
+	"You usually are able to damage enemies only from above, but if you position yourself right relatively to an enemy, you can damage them from a side. This requires enemies to move to allow precise adjustment, doesn't work on Boss 1 when he is in the upper corner.
+	$LF
+]p
+[p 
+	[img class=embed src=https://vadosnaprimer.github.io/dropbox/DuckTales2U2_zps52b9f73f.gif 
+	]img
+	" 
+	[img class=embed src=https://vadosnaprimer.github.io/dropbox/DuckTales2U_zps964fbd77.gif 
+	]img
+	$LF
+]p
+[h4 
+	" Interactive objects
+	$LF
+]h4
+[p 
+	"Usually you need to run into an interactive object to setup hockey hit on it or pulling it. But if you are moving along the same platform before it for 15 frames, you can add one blank frame 16 (or 32) frames back and be able to hit it as soon as you reach it.
+	$LF
+]p
+[p 
+	"Jumping for 4 frames once you press B cancels the rest of hit animation as you land, so you can move forward instantly too.
+	$LF
+]p
+[p 
+	[img class=embed src=https://vadosnaprimer.github.io/dropbox/DuckTales2U11233_zps4dafda6c.gif 
+	]img
+	$LF
+]p
+[h4 
+	" Zipping
+	$LF
+]h4
+[p 
+	"The game has hidden boxes. If you spawn them at a proper position and face backwards for a proper frame, you get zipped through them, gaining about 10 pixels.
+	$LF
+]p
+[p 
+	[img class=embed src=https://vadosnaprimer.github.io/dropbox/DuckTashsdgfles2U_zps55428b56.gif 
+	]img
+	$LF
+]p
+[h4 
+	" RNG
+	$LF
+]h4
+[p 
+	"Usual RNG roll:
+	$LF
+]p
+[pre 
+	[code class=language-asm 
+		"      $D320:A5 8F     LDA GlobalTmr
+		$LF
+		"      $D322:65 90     ADC RNG
+		$LF
+		"      $D324:85 90     STA RNG
+		$LF
+		"      $D326:E6 90     INC RNG
+		$LF
+	]code
+]pre
+[p 
+	"It runs each time you kill an enemy that can drop an item, or when an enemy wants to get its new pattern. So you can manipulate RNG by killing enemies at different frames. Bosses also account your X position, mixing it with global timer and previous RNG values.
+	$LF
+]p
+[p 
+	"More code samples can be found in 
+	[a href=/forum/p/350387#350387 
+		"DT2 thread
+	]a
+	".
+	$LF
+]p

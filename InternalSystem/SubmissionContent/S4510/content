@@ -1,0 +1,808 @@
+5
+[p 
+	"After his failed takeover of Mario's castle in the previous game, Wario decides to go after a statue stolen by Captain Syrup. Armed with a new glitch, he finishes over two minutes faster than his previous attempt.
+	$LF
+]p
+[ul 
+	[li 
+		" Heavily abuses glitches
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Uses fake death to save real time
+		$LF
+	]li
+	[li 
+		" Ending choice: fastest end-of-input
+		$LF
+	]li
+	[li 
+		" Contains speed-sanity tradeoffs
+		$LF
+	]li
+]ul
+[h4 
+	" Emulator notes and timing differences
+	$LF
+]h4
+[p 
+	"This run was started all the way back on Bizhawk 1.4.1 
+	[del 
+		"and should sync on any version up through 1.9.1 with unequal frame lengths
+	]del
+	". (This turned out not to be true due to issues with the sync settings, so this submission has a fixed bk2. It will sync now. ...hopefully.) However, at the time this run was finished, the most recent version was 1.8.4, which did not have the new TAStudio. So the actual TASing never went past 1.5.3. Use of TAStudio is also why the rerecord count is zero.
+	$LF
+]p
+[p 
+	"The 
+	(__wikiLink|1688M|previous run)
+	" used an old version of VBA-rr, which uses a framerate of 60 instead of Bizhawk's ~59.7. There appears to be a lot of extra lag in this run, but most of this is VBA's fault. The display is disabled during room transitions and other parts of the game, and VBA counts this as 1 frame regardless of length.
+	$LF
+]p
+[h4 
+	" Sprite lag and the sprite limit
+	$LF
+]h4
+[p 
+	"Wario Land 1 will hold data for up to seven objects at once. However, the last two sprite slots are reserved for important items such as coins and what's in item boxes. Everything else is limited to the first five sprite slots. If all of those are full when the game tries to load another sprite, it won't load. Five is actually a pretty hard number to hit, and even when it's possible it typically requires a big coin to be taken out.
+	$LF
+]p
+[p 
+	"The game will not always process each object on each frame, and will not always start with the same one each time. To keep the game from lagging, any that haven't done anything near the end of the frame will not do anything on that frame. The sprite that would have moved next on the first frame will then be the first one to move on the next frame. This can be either a good thing or a bad thing depending on the situation. The amount of sprite lag is mostly unchangeable while jet dashing, but it can be controlled more while jumping (usually by pressing up on certain frames). The index of the sprite that will move first can also be changed by waiting a few frames before entering a door, provided there is enough time left on the eight frame rule.
+	$LF
+]p
+[h4 
+	" The coin game
+	$LF
+]h4
+[p 
+	"The RNG used for the coin game after each boss fight is based on cycles, making it very sensitive to tiny changes. The list of things that can change how it turns out is very long, and includes things like when Wario stops a jet dash (and for how long), which direction he faces, when the jet dash was started, which direction(s) he collects a coin from, which coin he collects when there's more than one on screen, what the index of the first sprite is, if... well, there's a lot.
+	$LF
+]p
+[p 
+	"The coins that appear can take the last two sprite slots, but letting that many coins on screen is a bad idea. For one thing, when all seven slots are filled the coin counter stops. It doesn't matter whether or not all 30 coins have already appeared; if there's nowhere to put a new coin, the game won't even check that. Even filling up six is too much because any big coin Wario takes out will take the seventh. Also, during a boss fight and coin game, the sprite lag feature is disabled, so letting that many sprites on screen will cause game lag.
+	$LF
+]p
+[p 
+	"Pressing select during gameplay actually sort of does something here. It's part of a hidden debug mode (seperate from the 16 selects when paused one) and changes the hat Wario is wearing. It's not active in this run, and in fact the activation method (press select 16 times on the "Course No. xx" screen) only does anything if it's already active. However, the check if it's active takes enough cycles to sometimes change the result on that frame. Sometimes it can even affect what happens several frames later.
+	$LF
+]p
+[p 
+	"The coin replacement technique to take out more than one at a time works like this: When trying to take out a big coin, the game checks every sprite slot in order until it either finds an empty one, one containing an already thrown coin, or goes through all of them. If it finds the empty slot first Wario will take out the coin. This means to do this multiple times Wario has to grab the small coins in reverse sprite order. Unfortunately each coin will take the lowest numbered slot availible, so in most cases he can only grab them in forward order.
+	$LF
+]p
+[p 
+	"Finally, throwing away a big coin on the ground will start a counter for how long before Wario can move again. This uses the same address as the counter for the end of level fadeout, and it isn't zeroed before that starts. This gives Wario an extra three frames to manipulate the coins while making the same frame rule.
+	$LF
+]p
+[h4 
+	" Fake death
+	$LF
+]h4
+[p 
+	"When Wario gets close to an instant death tile while jet dashing/diving and cancels it, the game will set him to the dying state and start the death sequence... and then immediately change it to the midair state. If a jet dash is started on the next frame, Wario will no longer be touching the tile and can continue the level. This will not work on the death zone at the bottom of the level or with an instant death object such as a pouncer.
+	$LF
+]p
+[p 
+	"When fake death is active, all sprites are frozen in the state they initially load in. They can be unfrozen by pausing and unpausing. The glitch also sets the level fadeout counter to 128, saving that many frames each time. This is the only thing fake death is used for in this run, as the autoscroll rooms in course 33 are completely skipped.
+	$LF
+]p
+[h4 
+	" Screen wrap
+	$LF
+]h4
+[p 
+	"When Wario jet dashes into a wall and is knocked backwards the camera will not move to follow him until the player regains control. This allows Wario to get closer to the edge of the screen than normally possible.
+	$LF
+]p
+[p 
+	"By not touching the ground for more than one frame and moving at the same speed as the camera (jet dashing or only moving every other frame), it will not be able to catch up to Wario. If the recoil is repeated enough times, Wario can go off the left side. At this point the camera will try to catch up by moving to the right. If Wario then moves far enough to the right that the camera reaches the part where it normally locks, it will be able to go past that point into the next room.
+	$LF
+]p
+[p 
+	"This game, like many, determines where each exit leads to using the camera position instead of Wario's. Using the screen wrap glitch therefore allows Wario to use a different exit, which can skip large parts of the game. This glitch is responsible for most of the improvements in this run.
+	$LF
+]p
+[p 
+	"Under most circumstances Wario will have to bash into five walls to go offscreen. If there's an enemy he can bounce off of it can be done with four, but otherwise the edge of the screen is just out of reach. The right side of the screen is much farther away and the screen doesn't like to scroll to the left, so going in that direction has no use in this run.
+	$LF
+]p
+[p 
+	"The goal while moving offscreen is usually to reach a specific spot in the level while moving the camera as quickly as possible. Slow jumps to the right and alternately walking left and right are the best ways to do this.
+	$LF
+]p
+[h3 
+	" Frames saved
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Course
+			]th
+			[th 
+				"Frames Saved
+			]th
+			[th 
+				"Extra Lag
+			]th
+			[th 
+				"Total
+			]th
+		]tr
+		[tr 
+			[td 
+				"Title Screen
+			]td
+			[td 
+				"-0
+			]td
+			[td 
+				"+42
+			]td
+			[td 
+				"+42
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 02
+			]td
+			[td 
+				"-48
+			]td
+			[td 
+				"+68
+			]td
+			[td 
+				"+20
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 03
+			]td
+			[td 
+				"-168
+			]td
+			[td 
+				"+67
+			]td
+			[td 
+				"-101
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 04
+			]td
+			[td 
+				"-80
+			]td
+			[td 
+				"+66
+			]td
+			[td 
+				"-14
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 05
+			]td
+			[td 
+				"-96
+			]td
+			[td 
+				"+125
+			]td
+			[td 
+				"+29
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 20
+			]td
+			[td 
+				"-176
+			]td
+			[td 
+				"+67
+			]td
+			[td 
+				"-109
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 22
+			]td
+			[td 
+				"-104
+			]td
+			[td 
+				"+67
+			]td
+			[td 
+				"-37
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 25
+			]td
+			[td 
+				"-168
+			]td
+			[td 
+				"+85
+			]td
+			[td 
+				"-83
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 26
+			]td
+			[td 
+				"-16
+			]td
+			[td 
+				"+73
+			]td
+			[td 
+				"+57
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 27
+			]td
+			[td 
+				"-48
+			]td
+			[td 
+				"+72
+			]td
+			[td 
+				"+24
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 28/29
+			]td
+			[td 
+				"-256
+			]td
+			[td 
+				"+83
+			]td
+			[td 
+				"-173
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 30
+			]td
+			[td 
+				"-792
+			]td
+			[td 
+				"+114
+			]td
+			[td 
+				"-678
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 32
+			]td
+			[td 
+				"-40
+			]td
+			[td 
+				"+76
+			]td
+			[td 
+				"+36
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 33
+			]td
+			[td 
+				"-2160
+			]td
+			[td 
+				"+68
+			]td
+			[td 
+				"-2092
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 34
+			]td
+			[td 
+				"-360
+			]td
+			[td 
+				"+79
+			]td
+			[td 
+				"-281
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 35
+			]td
+			[td 
+				"-1512
+			]td
+			[td 
+				"+58
+			]td
+			[td 
+				"-1454
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 36
+			]td
+			[td 
+				"-144
+			]td
+			[td 
+				"+87
+			]td
+			[td 
+				"-57
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 37
+			]td
+			[td 
+				"-24
+			]td
+			[td 
+				"+67
+			]td
+			[td 
+				"+43
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 38
+			]td
+			[td 
+				"-1904
+			]td
+			[td 
+				"+104
+			]td
+			[td 
+				"-1800
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 39
+			]td
+			[td 
+				"-336
+			]td
+			[td 
+				"+91
+			]td
+			[td 
+				"-245
+			]td
+		]tr
+		[tr 
+			[td 
+				"Course 40
+			]td
+			[td 
+				"-1031
+			]td
+			[td 
+				"+43
+			]td
+			[td 
+				"-988
+			]td
+		]tr
+		[tr 
+			[td 
+				"Total
+			]td
+			[td 
+				"-9463
+			]td
+			[td 
+				"+1602
+			]td
+			[td 
+				"-7861
+			]td
+		]tr
+	]tbody
+]table
+[ul 
+	[li 
+		" Ending point for each lag count is on the map screen before the course is selected. Currently this only measures the difference in lag counts between emulators. The lag VBA doesn't count has not yet been counted, because I don't know how to do that.
+		$LF
+	]li
+]ul
+[h3 
+	" Stage-by-stage comments
+	$LF
+]h3
+[h4 
+	" Course 2
+	$LF
+]h4
+[ul 
+	[li 
+		" The fading platforms in the first section need to be manipulated so a spearman lands on one for more bouncing. These will normally change every 32 frames, but just like sprite lag they'll stay put if there's too much going on.
+		$LF
+	]li
+	[li 
+		" There are two possible coin routes that take exactly the same amount of time. Getting the second coin from a spearman instead of a block is faster initially, but it's all lost later because it restricts what the fading platforms can do later. And this time there's not enough happening to lag the platforms. Grabbing either of the coins from the enemies at the end of the room takes too long.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 3
+	$LF
+]h4
+[ul 
+	[li 
+		" The sprite limit makes its first appearance in the second room. Hitting the first spearman from below is only slightly faster waiting for it to reach the edge, but it gets it far enough to the right that it won't disappear before Wario reaches the skull door spawn point. The big coin won't despawn until it stops bouncing around, and the big heart exists before the invisible block is hit.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 4
+	$LF
+]h4
+[ul 
+	[li 
+		" The breakable blocks can only spawn coins every fourth frame with a 50% chance. The low ceiling allows the blocks to be destroyed on a few different frames without losing any time, making the manipulation a non-issue. Getting zero coins still isn't an option because the fastest route over the lava requires grabbing a few.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 5
+	$LF
+]h4
+[ul 
+	[li 
+		" There aren't enough sprites availible to get rid of the pouncer in the second room. Five is actually a pretty hard number to hit.
+		$LF
+	]li
+	[li 
+		" The boss will start rising to the air after spending 120 frames spinning on the ground, plus however long it takes to come to a complete stop afterward.
+		$LF
+	]li
+	[li 
+		" There isn't a single well-behaved coin game in this run. In this one there are walls on either side of the room instead of just the screen lock other boss rooms have. Wario has to be carefully placed during the final jet dive, because if he hits the wall it will cost time that would be used to throw away the coins. Speaking of which, the walls also prevent Wario from throwing the coins offscreen... and this is the only floor high enough for Wario to get away with that without wasting time jumping. The coin replacement problem is solved by manipulating the front coins to bounce high, letting Wario grab a back coin out from under them.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 20
+	$LF
+]h4
+[ul 
+	[li 
+		" With fake death active, the spearmen are frozen before they're set to do any damage to Wario. This allows him to just pass straight through all of them. The star is frozen inside the block and can't be interacted with, but with the spearmen in the ladder section frozen it doesn't have to be.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 22
+	$LF
+]h4
+[ul 
+	[li 
+		" Setting up the bounce out of the lava is tricky because of where the duck has to be placed. It has a very large hitbox and needs to be as close to the lava as it can get without dying to be bounced off of. Then if it's too far away, Wario won't reach it before he's too low for the bounce... but if he's too close, he'll land on the edge of the platform instead of falling into the lava. And there's no time to extend the jump with a jet dash, because if that duck hits the lava Wario's goose is cooked. In the end there was no middle ground; using 3-frame pauses to take advantage of the 2-frame movement rule was the only way to get enough distance.
+		$LF
+	]li
+	[li 
+		" The pause and unpause at the end is to demonstrate that it unfreezes everything, and also to get the last duck offscreen before entering the door. Reducing the number of sprites that are onscreen will also reduce the lag time the display is disabled. It's only a fraction of a frame and only affects the frame count in one spot (course 36), but for consistency it was done everywhere there was time to do it. (Which wasn't that many places actually.)
+		$LF
+	]li
+]ul
+[h4 
+	" Course 25
+	$LF
+]h4
+[ul 
+	[li 
+		" The large number of coins in Wario's path and the falling bridges make it easy to reach the sprite limit in the second half of the stage. It's used three times to get rid of some inconveniently placed enemies.
+		$LF
+	]li
+	[li 
+		" ...However, it also causes a problem. When the fake death glitch is used, Wario will drop coins if he is carrying any. The falling coins and jet hat on top of the number of sprites on-screen will be enough to cause the game to lag. To counteract this a coin route must be chosen that leaves Wario with no coins when he hits the lava.
+		$LF
+	]li
+	[li 
+		" There isn't a single well-behaved coin game in this run. In this one, throwing a coin on the ground will cancel out fake death's faster fadeout, so they have to be thrown from a jump, which temporarily pauses the coin game timer. Also, the boss takes up three sprite slots. Attempting to use coin replacement with the number of coins the route forces will fill up all the remaining slots, which also stops the timer. And there's ALMOST enough time to get rid of them all without coin replacement without jumping more than necessary.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 26
+	$LF
+]h4
+[ul 
+	[li 
+		" Sixteen frames from optimizing movement and nothing else. This level's not much more than flying straight through, and the rooms are too short for any significant time gains.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 27
+	$LF
+]h4
+[ul 
+	[li 
+		" Improvement comes entirely from getting enough coins to avoid having to take the detour right before the exit door. At least one coin is needed from the blocks at the beginning of the course to get enough. The second one can be gotten from the conveyor belt in the second room without any time loss. Oddly, both coins always appeared no matter how many times the previous input changed.
+		$LF
+	]li
+]ul
+[h4 
+	" 
+	[del 
+		"Course 28
+	]del
+	$LF
+]h4
+[ul 
+	[li 
+		" Skipped, as it's no longer the faster course to play.
+		$LF
+	]li
+	[li 
+		" The map screens are slightly slower overall due to the course switch. However it has a larger frame rule (16) so no time is lost. This temporary time loss is not included in the table above.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 29
+	$LF
+]h4
+[ul 
+	[li 
+		" Up until this point every level has either been one big room and one small one for the exit or a few smaller rooms all laid out one after the other. In this one the main rooms still are, but one of them the exit is on the left side of the room. This allows the first use of the screen wrap glitch.
+		$LF
+	]li
+	[li 
+		" There's usually a waiting period while the camera scrolls horizontally to the next screen boundary. Having this happen while the camera is scrolling vertically (control is lost during this) reduces the waiting period.
+		$LF
+	]li
+	[li 
+		" If Wario stands any further to the left than he already is, the camera will consider him "centered enough" before reaching the screen boundary and stop scrolling. If this happens it won't lock on the next room when Wario moves left.
+		$LF
+	]li
+	[li 
+		" When a large enemy like a duck is stunned it creates a set of stars above its head. Just like thrown big coins there can usually be only one of these at a time, but coin replacement can be used so Wario doesn't have to wait for the first one to disappear.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 30
+	$LF
+]h4
+[ul 
+	[li 
+		" After coming out of the treasure room Wario is on the wrong side of the 2-frame rule to crawl to the left, and will instead be knocked away from the treasure door on the ground to the right. Another 3-frame pause fixes this.
+		$LF
+	]li
+	[li 
+		" Duck jumping into Bobo for the first hit prevents him from moving backward, and Wario can land the first hit slightly sooner. This is enough to beat a 32 frame rule for when the first bird can appear. Some initial sprite slot manipulation also saves a couple frames on the second hit from unmanipulated.
+		$LF
+	]li
+	[li 
+		" The pit at the left side of the boss room is not actually the bottom of the level. All boss rooms use the screen at the top left, well above the instant death line. That pit is instead an instead death tile, and can be used for the fake death glitch.
+		$LF
+	]li
+	[li 
+		" There isn't a single well-behaved coin game in this run. Not even this one; activating fake death after the boss fight prevents the game from starting, and the pause to unfreeze everything takes enough time to lose a frame rule.
+		$LF
+	]li
+	[li 
+		" RNG manipulation for the course 36 coin game starts back here. It's not the only place where the initial state can be controlled, but it's the easiest way to preserve the later levels.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 32
+	$LF
+]h4
+[ul 
+	[li 
+		" The minecarts will start moving sooner if Wario touches the top of them instead of coming in from the bottom and being warped up. And of course, it's important not to stop and jump off until he's reached the end of the cart.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 33
+	$LF
+]h4
+[ul 
+	[li 
+		" With badly placed enemies the first time the screen wrap is done and no enemies the second time, Wario needs to dash into five walls. However he doesn't need all of the fifth one; getting stopped early by the low ceiling will still be enough.
+		$LF
+	]li
+	[li 
+		" Out of all the screen wraps in the run this one takes the longest due to the blocks in the middle of the path, the bad placement of the walls to bounce off of, and having to do it twice. However it's still much faster than going through two autoscroll rooms.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 34
+	$LF
+]h4
+[ul 
+	[li 
+		" Hyper climbing is so fast that Wario can catch up to a thrown enemy and bounce off of it while it's still moving up, allowing a jump directly to the door in the first room.
+		$LF
+	]li
+	[li 
+		" Normally if Wario stands this close to the edge of the screen, it will stop scrolling before it reaches the next screen boundary and won't lock when moving to the left. However, free scroll rooms will always try to have the camera centered on Wario. The extra distance it moves is enough.
+		$LF
+	]li
+	[li 
+		" No, that last ladder can't be hyper climbed any more than it already is.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 35
+	$LF
+]h4
+[ul 
+	[li 
+		" By this point the screen wrap glitch is self explanatory.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 36
+	$LF
+]h4
+[ul 
+	[li 
+		" Autofiring right while jumping keeps the screen from getting too far ahead of Wario. The spike balls around the midpoint of the course then load late enough that he can fly right under them without stopping.
+		$LF
+	]li
+	[li 
+		" The thunderclouds will follow Wario forever and will never de-spawn. This makes the final spike ball section very laggy and Wario has to go higher than he normally would. Unfortunately there's no way to get rid of them. Even with both thunderclouds, five is still a pretty hard number to hit. Also, whether there's a lightning strike uses the same RNG as the coin game. Between all the clouds and the course 30 coin game the initial state for this coin game can be completely controlled.
+		$LF
+	]li
+	[li 
+		" As noted in the previous submission, when Wario is paralyzed and touching the ghost, nothing he throws can hurt it. This also works in reverse -- when something else such as a big coin is touching the ghost, it cannot paralyze Wario. This lets him save time getting the first hit by getting closer than what would normally be possible.
+		$LF
+	]li
+	[li 
+		" There isn't a single well behaved coin game in this run. In this one the problem is the low floor. A jump from the floor will just barely take Wario high enough to grab them the frame they appear, but they have a 50% chance of moving out of his reach on that frame. Instead of dealing with that a midair bounce off the small ghost gives enough height to reach them easily.
+		$LF
+	]li
+	[li 
+		" The small ghost is actually still "alive" offscreen. Its "death" occurs while Wario is throwing away the coins, freeing up a slot so only one coin is needed for coin replacement. The other coin is just there because that's how the coin game turned out, and it's in a bad slot to be used for the glitch anyway.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 37
+	$LF
+]h4
+[ul 
+	[li 
+		" It looks like Wario is one short of the sprite limit, as the spike ball disappears as soon as the mole is stunned. However if the mole is hit by jumping into it and letting go of A on the correct frame, the spike ball will invisibly reappear the frame after it disappears.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 38
+	$LF
+]h4
+[ul 
+	[li 
+		" There are a lot of potential shortcuts early in the level... that don't work. The early rooms don't have a layout that would allow a screen wrap.
+		$LF
+	]li
+	[li 
+		" The sprite limit is used twice to get rid of the two spearmen in the tunnels, which will otherwise be difficult to deal with. The first time there are already enough sprites on screen that nothing has to be done. The second requires manipulating enough coins to take out a big one, and then adding one more. The last coin must appear on the same frame the spearman would because Wario is going to collect it on the next frame.
+		$LF
+	]li
+	[li 
+		" This course is normally completed by hitting a large [!]-block... but the screen that contains it is an exit screen. This is the only one of the [!] courses that also has a regular exit. Now there isn't actually a door on the exit screen, but with the screen wrap glitch this isn't a problem. By finishing this way, the castle destruction cutscene doesn't happen.
+		$LF
+	]li
+	[li 
+		" The combination of the fake death and screen wrap glitches makes it impossible to throw away a big coin once it's been taken out. There's nothing to do but the slow method of taking it out next to the door and walking to it.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 39
+	$LF
+]h4
+[ul 
+	[li 
+		" If Wario is close to the center of the screen before starting the first screen wrap he can still make it, but will lose a lot of time jumping so he can reach the next wall without landing. It's better to go all the way to the left and use the extra space to speed that part up.
+		$LF
+	]li
+	[li 
+		" The second screen wrap can be done with four recoils, but the layout is so bad that it's actually slower to do this.
+		$LF
+	]li
+]ul
+[h4 
+	" Course 40
+	$LF
+]h4
+[ul 
+	[li 
+		" The recoil from hitting something like the door or the guard (along with other things) works slightly differently. It will send Wario to the left as long as he stays in the air, but the camera will start following him if it reaches the edge.
+		$LF
+	]li
+	[li 
+		" A second hit is set up after end of input by placing a cloud for Wario to land on and hit the genie from above. This saves 103 frames at the cost of 59 for the final hit to land. By a nice coincidence, the method to get the final hit as soon as possible also puts Wario in the exact spot he would walk to during the ending sequence.
+		$LF
+	]li
+]ul
+[h3 
+	" Known improvement
+	$LF
+]h3
+[p 
+	"The same trick with the big coin that lets Wario touch the big ghost without being paralyzed also lets him touch the course 5 boss without being hurt. This lets Wario get the second hit on the frame it stops spinning, which is when it becomes vulnerable again. The boss won't have time to rise into the air and will immediately stand up, allowing in immediate third hit. This strat would save 40 frames over the current boss fight.
+	$LF
+]p
+[p 
+	"However, implementing this strat would make the course 5 coin game significantly harder. The big coin cannot hit the ground and start its final slow bounce until Wario is close enough to get the second hit, or else it will not interact with the boss and Wario will take damage. This places the limit on how fast the coin can disappear at well after every coin has spawned. The empty slot it leaves behind has such a low index that using coin replacement enough times will be impossible. This also means the disappearence can't be used to spawn a later coin in an earlier slot, making it much harder to replace the coins in the correct order. And an extra coin has to be replaced because Wario has to get rid of four coins at the end. AND the other two coin games would have to be redone as well. AND this strat was only found after the TAS had been completed.
+	$LF
+]p
+[p 
+	"So I decided to leave it as. I'll eventually give this another shot when I revisit this game for 100%, but it's been well over a year since I started and I need a break.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": ME UNBRANCH, ME JUDGE!
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Accepting to obsolete 
+	(__wikiLink|1688M)
+	" (with inheriting the star).
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Okay
+]p

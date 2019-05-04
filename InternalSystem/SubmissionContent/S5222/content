@@ -1,0 +1,313 @@
+5
+[p 
+	"After a whole decade, this run improves the 
+	(__wikiLink|562M|obsoleted run)
+	" by 75 frames. It wasn't long after that run was published here that a couple mistakes and a few tiny movement optimizations were noticed, but it mostly sat abandoned for some time. Eventually I got around to doing some preliminary debugging—which for the most part did little more than explain 
+	[em 
+		"why
+	]em
+	" certain things were already optimal—but did lead to some more minor tweaks. Later, xipo found a way to speed up one of the boss fights, and then Marx applied the same technique to another boss. After this, the run was again set aside for about four years until feos's and MESHUGGAH's work on a pacifist run supplied two new damage boosts that I had convinced myself couldn't work. Applying those improvements also changed some enemy behavior that had been costing time and made a few more new things possible. Finally we had a run that was different enough to be worth replacing the published run.
+	$LF
+]p
+[p 
+	"The submitted fm2 also includes subtitles with additional trivia about the run and about the game, as well as some technical notes targeted towards anyone who might attempt to improve it.
+	$LF
+]p
+[p 
+	(youtube|v=kGlEjhjO3a0)
+	$LF
+]p
+[hr 
+]hr
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.2.3 (and multiple versions since FCEU 0.98.16)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Manipulates [stuff that is unpredictable in real-time]
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	"Programming quirks and errors taken advantage of to go faster
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	$LF
+]h3
+[ul 
+	[li 
+		" Damage boosts: hardly seems worth mentioning here, but no harm in being thorough. Whether extending a jump or just speeding up a wall-climb a little, damage boosts are a huge part of playing this game fast. Some work so nicely that you might wonder if they're an intentional feature.
+		$LF
+	]li
+	[li 
+		" Slash-cancel: though it was probably intended simply as a way for the player to preserve Ninpo while possessing the Spin Slash attack, it lets you attack with the sword as often as Down+B can be pressed and released—which is every two frames in a TAS.
+		$LF
+	]li
+	[li 
+		" Left+Right / Up+Down+Left: these basically keep new horizontal speeds from being written. This can be applied to avoid the standard slow backwards movement during jumps or to keep the slower movement from jumping backwards or bouncing off an enemy for precise positional adjustments. Somewhat unusually 
+		[small 
+			"is it? I don't know
+		]small
+		", Ryu's speed is only ever positive and the game uses which direction he's moving to decide whether to add or subtract.
+		$LF
+	]li
+	[li 
+		" Entry-ladder shortcuts: when Ryu enters an area where he starts on a ladder, a hard-coded value determines which direction he faces in the first frame of input, before he grabs it. If he's facing right then he can move far enough into the ladder to be inside it after jumping away—but only with frame-perfect use of L+R/U+D+L.
+		$LF
+	]li
+	[li 
+		" Special weapon persistence across screen transitions: used to score some extra damage on bosses (3-3, 6-4) and just to show off a bit a few times.
+		$LF
+	]li
+	[li 
+		" Drawing interrupts: every 16 pixels of scrolling, the game has to put most things on hold for a frame to load new stuff into memory. Ryu's movement is one exception, so he can go back and forth across such boundaries at will to, in effect, freeze time around him. In areas where the goal is to the left of the starting position, this can even line up with a wall that has to be climbed.
+		$LF
+	]li
+	[li 
+		" Randomness:
+		$LF
+		[ul 
+			[li 
+				" Enemy spawns: In areas with more than 8 enemy spawns, where exactly they spawn will vary as much as 3 frames. Simple delays, positional adjustments, or taking advantage of the interrupts mentioned above can all affect spawns. 
+				$LF
+				[ul 
+					[li 
+						" Re-spawning enemies: the game uses a simple (and often very frustrating to casual players) system to re-spawn enemies when moving back through a level based on which direction the screen was last scrolled. These "re-spawns" look as you might expect for enemies which spawn ahead of Ryu and near the edge of the screen—they re-appear roughly where they first appeared. But for enemies which normally spawn behind Ryu, the re-spawn will place them ahead of him. It is those enemies, along with some that appear more towards the middle of the screen, which can be re-spawned with one frame of movement in the opposite direction and sometimes used for a damage boost.
+						$LF
+					]li
+				]ul
+				" Enemy subpixels: subpixel values are carried over from enemy to enemy, so paying attention to them when killing stuff can be pretty important. Most enemies only move in half-units, but for some—such as birds, which accelerate in sixteenths—very small differences in the value they inherit can make a significant difference in their path over the course of multiple screen-widths.
+				$LF
+			]li
+			[li 
+				" Enemy behavior: there is a constantly-running timer on a 256 frame cycle used to determine both how frequently and at what angle the tosser enemies (affectionately known as "hammer brothers" to speedrunners) will, well, toss things. The fact that nothing can be done to influence it beyond going faster or slower can be greatly frustrating, but can also be great motivation to find a way to squeeze out 
+				[em 
+					"just one more frame
+				]em
+				" to get them to provide a helpful boost or to simply stop being a jerk.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	"This list primarily focuses on how things were applied to this submission. For a more generalized and comprehensive overview, see the 
+	[a href=/GameResources/NES/NinjaGaiden.html 
+		"game resources page
+	]a
+	", which also contains Lua scripts, RAM info, and symbolic namelists.
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	"Level Comments
+	$LF
+]h3
+[h4 
+	" Acts I & II
+	$LF
+]h4
+[p 
+	"Though there are no speed improvements here, all input has been redone. 
+	[a href=/userfiles/info/33536839331834764 
+		"It is possible to complete Act II one frame faster
+	]a
+	", but a tosser providing a boost in 3-2 prevents that improvement from getting past him.
+	$LF
+]p
+[h4 
+	" Act III
+	$LF
+]h4
+[p 
+	"Ditching the Fire Wheel here means there's no need to waste time getting rid of the spare Ninpo left over after using the Throwing Star. That combined with not delaying the cut-scene skip after Act II and the improved boss fight gets us or first speed improvements.
+	$LF
+]p
+[h4 
+	" Act IV
+	$LF
+]h4
+[p 
+	"One of my earliest memories of learning the TAS ropes was checking if the bat boost in 4-1A was actually faster than climbing the wall and concluding that the bat was indeed about 30 frames faster. Obviously that was wrong, and it went unnoticed until some time after the old run was published that the bat is actually 4 frames slower. 
+	$LF
+]p
+[p 
+	"At one point using a couple slash-cancels to get through 4-2 and its lack of Ninpo was replaced with turning around to provide an opportunity to freeze the level timer to save 3 frames at the Act V boss. Though the Act III improvements later made that unnecessary, it was kept in and eventually provided a key component of the setup when MESHUGGAH came along and applied the bird boost from the pacifist run here. 4-3 also gets a few single-frame improvements, and we get a more favorable timer going into the boss for another 3 frames.
+	$LF
+]p
+[h4 
+	" Act V
+	$LF
+]h4
+[p 
+	"5-1 sees the most significant changes. First, feos provided a way to include the longtime RTA-standard "5-1 manipulation" or simply, "the manip." This helped to set up a bird re-spawn that provided so many boosts that a health pick-up was needed. The one frame delay to knock down the health is even required for the final boost to be effective.
+	$LF
+]p
+[p 
+	"In 5-2, the Spin Slash is collected without wasting time, a new boost is added, and an old boost is improved by killing a bird. 5-3 gets a few minor wall-climbing improvements, a new tosser boost, one useless boost just because, and avoids some damage that wasted time.
+	$LF
+]p
+[h4 
+	" Act VI
+	$LF
+]h4
+[p 
+	"After all the consternation the various tossers in this level have caused, it's nice that the last round of improvements seems to have mellowed them out. Still a bit of a shame that they're so boring now though. 6-2 gets a not-so-new boost and a pair of one frame improvements. Same goes for 6-3, minus the boost. I put a fair amount of effort into trying to get through the final screen in 6-3 without using the hourglass 
+	[em 
+		"and
+	]em
+	" without losing time. Doesn't work: Ryu has to face left (which means continuing to face left after the wall-climb, or turning around would cost 2 frames) to throw the Fire Wheel before leaving, and the Windmill Star can't get low enough to kill the first enemy in his way after going over the wall. Okay, what if he could bring the Windmill Star from the previous screen and kill everything with that? Almost, but not quite! Finally, xipo's input helps bring Ken to his senses 4 frames faster.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Saved
+			]th
+			[th 
+				"Total
+			]th
+		]tr
+		[tr 
+			[td 
+				"Act III
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"13
+			]td
+		]tr
+		[tr 
+			[td 
+				"Act IV
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"29
+			]td
+		]tr
+		[tr 
+			[td 
+				"Act V
+			]td
+			[td 
+				"37
+			]td
+			[td 
+				"66
+			]td
+		]tr
+		[tr 
+			[td 
+				"Act VI
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"75
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The removed instances of delayed cut-scene skips (for manipulation) from 562M are counted as improvements to the following level here.
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	"Credits
+	$LF
+]h3
+[p 
+	"BoltR: making the first TAS of Ninja Gaiden which established many speed-running strategies that would become standard at a time when there was little-to-no video of competent Ninja Gaiden game play to be found on the internet
+	$LF
+]p
+[p 
+	"Slotermeyer: expanding on BoltR's work and introducing left+right to NG1 TASing
+	$LF
+]p
+[p 
+	"Scumtron: writing this submission text; some other stuff
+	$LF
+]p
+[p 
+	"xipo: using special-weapon-persistence to kill the first of the final bosses faster
+	$LF
+]p
+[p 
+	"Marx: applying xipo's idea to the 3-3 boss
+	$LF
+]p
+[p 
+	"MESHUGGAH: figuring out how to boost from a bird at the end of 4-2; catching a one frame improvement that I missed at the last minute; creative consulting
+	$LF
+]p
+[p 
+	"feos: finding a way to use the RTA "5-1 manipulation" that didn't cost more time than it saved in a TAS; lots of thorough debugging/disassembly and Lua scripting; creative consulting
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"Suggested screenshot: 24016
+	$LF
+]p
+[p 
+	[img class=embed src=http://i.imgur.com/Veol4Zg.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Samsara)
+	": Hell yes.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Samsara)
+	": Fantastic work, deeply entertaining and insanely optimized. Accepting as an improvement to the 
+	(__wikiLink|562M|published run)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub.
+]p

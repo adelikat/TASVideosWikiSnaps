@@ -1,0 +1,337 @@
+26
+[p 
+	(youtube|v=GpHIfYkNCP0)
+	$LF
+]p
+[p 
+	"A 676-frame improvement over the 
+	(__wikiLink|4263S|previous submission)
+	", using new routes, a speed trick, and a newly-discovered glitch.  In Dodge 'Em, you play as a speed-endowed 
+	[a class=extlink href=http://i.imgur.com/Z98ZnI2 rel=nofollow 
+		"parasect
+	]a
+	" who tries to evade Disney ant 
+	[a class=extlink href=http://i.imgur.com/6kcEeCBm rel=nofollow 
+		"clones
+	]a
+	" while gathering all 64 livers in each particle accelerator.  You travel at 1 PPF (pixels per frame), or 2 if you hold down B.  You can move 1-2 lanes over at any gap (located above, below, left, and right).  Using a glitch, you can also move 3 lanes over (see "Triple Lane Switch" below).  Clones can switch lanes (only one lane at a time) in 4 frames in the top and bottom gaps, or 8 frames in the left or right gaps.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 1.6.1
+		$LF
+	]li
+	[li 
+		" Ends input early
+		$LF
+	]li
+	[li 
+		" Manipulates AI
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"There's a varying degree of difficulty in each accelerator.  Every 5 accelerators, the AI loops and you lose 1 life out of 3 (e.g., accelerator 6 and 11 are the same as accelerator 1, but with 2 lives at accelerator 6 and 1 at accelerator 11).  At the end of accelerator 15, you have no life and the game presents you with a consolatory 
+	[a class=extlink href=http://i.imgur.com/23g5BmN rel=nofollow 
+		"teal screen
+	]a
+	", which is miles different from the 
+	[a class=extlink href=http://imgur.com/nbP5Ofs rel=nofollow 
+		"game over screen
+	]a
+	".  Because accelerator 6-15 uses the 
+	[em 
+		"exact
+	]em
+	" same input as 1-5, the submission ends after accelerator 5.
+	$LF
+]p
+[h4 
+	" Going Fast
+	$LF
+]h4
+[p 
+	"The fastest way to play is to hold down B at all times.  This is not possible when moving 2 lanes over.  However, if you release B for the first frame of the lane change, and hold B for the remainder of the lane changes, you will have maximum speed while succeeding in the double lane change.
+	$LF
+]p
+[h4 
+	" Triple Lane Switch
+	$LF
+]h4
+[p 
+	"The game was intended to only allow the player to move 2 lanes at most over each gap, and without changing directions during the lane switch.  However, we found that under some frame-precise circumstances, the player can move 3 lanes over, can switch into a lane and back in a single gap, and can even change lanes once (e.g., left), change back, then change lanes on the other side (e.g., right).
+	$LF
+]p
+[p 
+	"When Address 02 divided by 4 has a remainder of 1, and if the car has the correct coordinates at this frame, you can perform this glitch.  We used it in accelerator 2 to trick the clone into thinking we were in a different lane than we actually were. Edit: The glitch is no longer used in accelerator 2.
+	$LF
+]p
+[p 
+	"In practice, satisfying 
+	[em 
+		"(02h) % 4 = 1
+	]em
+	" may require slowing down for a few frames, so the triple lane switch becomes less practical if you need to slow down for many frames.
+	$LF
+]p
+[h4 
+	" Fast Lane Switches
+	$LF
+]h4
+[p 
+	"Watching (26h), single lane switches on top and bottom can take at minimum 9 frames, while single lane switches on the left and right can take 13.  The first half of double lane switches are also this long.  Watching Address 26 is useful, because you can count the length of the lane switch by the number of frames.  Also, you can usually predict the length of the lane switch by looking at (02h).  When (02h) % 4 = 3, the lane switch will be optimal.
+	$LF
+]p
+[h3 
+	" Improvement Summary
+	$LF
+]h3
+[p 
+	"Unless otherwise indicated, a lane change number is assumed to count the number of single lane changes.  A "d" after the number denotes a double lane change.  For example, "4 + d" is 4 single lane changes and a double lane change.  Also, "tls" stands for "triple lane switch", and "w" stands for "wait".
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Accelerator
+			]th
+			[th 
+				"Lane changes now
+			]th
+			[th 
+				"Lane changes before
+			]th
+			[th 
+				"Frames now
+			]th
+			[th 
+				"Frames before
+			]th
+			[th 
+				"Frames saved
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"4 + d
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"562
+			]td
+			[td 
+				"578
+			]td
+			[td 
+				"16
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"3 + 2d
+			]td
+			[td 
+				"9 + 2d
+			]td
+			[td 
+				"575
+			]td
+			[td 
+				"721
+			]td
+			[td 
+				"146
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"4 + d + w
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"577
+			]td
+			[td 
+				"713
+			]td
+			[td 
+				"136
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"4 + d + w
+			]td
+			[td 
+				"6 + 3d
+			]td
+			[td 
+				"582
+			]td
+			[td 
+				"781
+			]td
+			[td 
+				"199
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"4 + d + w
+			]td
+			[td 
+				"4 + 4d
+			]td
+			[td 
+				"482
+			]td
+			[td 
+				"660
+			]td
+			[td 
+				"178
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 
+	" First Accelerator
+	$LF
+]h4
+[p 
+	"Clone speed is 1 PPF.  Clones can only switch lanes in the top and bottom gaps (not left and right).
+	$LF
+]p
+[h4 
+	" Second Accelerator
+	$LF
+]h4
+[p 
+	"The clone can switch lanes at all 4 gaps.  This is the only accelerator that uses the new glitch. Edit: A better route makes use of the glitch unnecessary.
+	$LF
+]p
+[h4 
+	" Third Accelerator
+	$LF
+]h4
+[p 
+	"Parasect is now pitted against 2 Disney ant clones.  The clones' regular and lane change speeds are halved, though both clones can still switch lanes at any of the 4 gaps.  At frame 1710, we release B for 12 frames before changing from lane 2 (inner) to lane 3 (outer) to manipulate Clone 1 into moving into lane 2.  Edit: Got the "B release" down to 7 frames, it is now at frame 1750.
+	$LF
+]p
+[h4 
+	" Fourth Accelerator
+	$LF
+]h4
+[p 
+	"Clones' speed is now 1 PPF, but lane change speeds are still halved.  At frame 2370, we release B for 45 frames (plus the B released directly afterward for a double lane change) to manipulate Clone 1 into staying in lane 3, rather than following us to lane 4. Edit: By replanning the route, we got the B release down to 14 frames.  It starts at frame 2404.
+	$LF
+]p
+[h4 
+	" Fifth Accelerator
+	$LF
+]h4
+[p 
+	"Same AI and input as the 4th accelerator, but input ends early.
+	$LF
+]p
+[h3 
+	" Other comments
+	$LF
+]h3
+[p 
+	"The game actually only displays 1 clone per frame and alternates the sprite's location each frame so it looks like there's 2.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:morningpee)
+	": Optimized accelerators 3 and 5, saving 3 frames.  The video and comments have been edited to reflect this.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Updated submission file with the improvements.
+	$LF
+]p
+[p 
+	(__wikiLink|user:morningpee)
+	": Saved an additional 87 frames and discovered the "triple lane switch" bug.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Updated again.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": And again.
+	$LF
+]p
+[p 
+	(__wikiLink|user:morningpee)
+	": 24 more frames saved in levels 3-5.  Video and comments updated
+	$LF
+]p
+[p 
+	(__wikiLink|user:morningpee)
+	": 19 frames saved in 1, 2, and 5 using a new route in accelerator 2, and by optimizing lane switches.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Updated with the fourth improvement and accepting to Moons as an improvement to the 
+	(__wikiLink|2575M|published movie)
+	". Viewer feedback has improved quite a bit since the first publication.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Guga)
+	": Processing...
+]p

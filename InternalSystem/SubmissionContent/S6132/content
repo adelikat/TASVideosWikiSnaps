@@ -1,0 +1,468 @@
+12
+[p 
+	"30 years ago today, Super Mario Bros. 3 was released in Japan! Amazingly, folks around the world have been using TAS to solve it quicker and quicker for 
+	(__wikiLink|668M|half that time)
+	".
+	$LF
+]p
+[p 
+	"Widely considered one of the greatest video games of all time,
+	$LF
+	"its development was led by Shigeru Miyamoto, the legendary designer behind several iconic franchises. Some believe Miyamoto had a mischievous
+	$LF
+	"streak and included an 
+	(__wikiLink|3050M|elaborate back door)
+	" in Super Mario Bros. 3 that went undiscovered until 2014. 
+	$LF
+]p
+[p 
+	"This submission improves the 
+	(__wikiLink|1590M|published run)
+	" by 40 frames and includes a ~1 frame time/entertainment trade-off. 
+	$LF
+]p
+[p 
+	"Despite a time improvement of less than a second in a span of 8 years, multiple points in this submission are quite noticeably different 
+	$LF
+	"from the published run, and seemingly each frame we saved had a bit of a story to it. If you wish to avoid spoilers, we recommend 
+	$LF
+	"watching before you read further.
+	$LF
+]p
+[p 
+	(youtube|v=p80Jv3gupZ0)
+	$LF
+]p
+[p 
+	"You may press the "CC" button to see closed-captioned subtitles explaining the various strategies. There are also subtitles included with the .fm2 file.
+	$LF
+]p
+[p 
+	"You may be interested in these side-by-side comparisons of TAS strat evolution in SMB3, showing portions of movies by Morimoto in 2003, Genisto in 2005, Lord Tom, Mitjitsu & Tompa in 2010 compared to this submission.
+	$LF
+]p
+[h4 
+	" World 1/Warp Flutes
+	$LF
+]h4
+[p 
+	(youtube|v=viPAZX9Q5rI)
+	$LF
+]p
+[h4 
+	" 8-Fortress
+	$LF
+]h4
+[p 
+	(youtube|v=w5LHLzvx5m8)
+	$LF
+]p
+[h2 
+	" The Strats
+	$LF
+]h2
+[h3 
+	" 1-1
+	$LF
+]h3
+[p 
+	"We incorporate the improved mushroom grab discovered by GlitchMan (previously published in the warpless and 100% versions), which exits the mushroom block with sufficient speed to clear
+	$LF
+	"the pit that follows, saving 6 frames.
+	$LF
+]p
+[p 
+	"The lag frame near the mushroom grab is avoidable using a tweak on the published mushroom grab, but not with GlitchMan's faster
+	$LF
+	"one. In testing, the loss of frames to remove the lag frame compounds itself as World 1 continues due to worse luck with the RNG 
+	$LF
+	"for the overworld hammer brothers, ultimately falling short of the frame rule on 8-Tank boomerang brother. The bottom line is that 
+	$LF
+	"removing this lag frame could improve this submission by 1 frame, but because of the Bowser RNG pattern it would NOT improve the 
+	$LF
+	"fastest possible time.
+	$LF
+]p
+[h3 
+	" 1-3
+	$LF
+]h3
+[p 
+	"The first visually notable strat change is clipping into the block with the leaf to activate it rather than capturing and throwing
+	$LF
+	"a koopa shell. This is 2 frames faster - and would have been more except for the need to preserve P-speed long enough to get to the
+	$LF
+	"white block.
+	$LF
+]p
+[p 
+	"RAT926 made the other major discovery here. The koopa on the white block must be disabled, or it will hit Mario before he can duck
+	$LF
+	"through the block. Unfortunately, ducking ordinarily cancels a tail flip. Several frames are saved by using a duck-jump up to the 
+	$LF
+	"white block; since Mario is already ducking, the tail flip is not canceled when he lands, and so the timer for ducking on the block
+	$LF
+	"can be started earlier. 
+	$LF
+]p
+[h3 
+	" 8-Tank
+	$LF
+]h3
+[p 
+	"The combination of savings in World 1 was sufficient to save an RNG-related 14-frame rule on the boomerang brother at the end of 
+	$LF
+	"8-Tank.
+	$LF
+]p
+[h3 
+	" Score Manipulation
+	$LF
+]h3
+[p 
+	"We had noticed some variation in the number of lag frames required to enter the pipe at the end of the various autoscrollers:
+	$LF
+	"sometimes it'd be 9, sometimes 10. It didn't seem to be affected by enemy position, etc, but Tompa noticed on 8-Navy that by waiting
+	$LF
+	"atop the pipe, the amount of lag would change every 20ish frames: 9, 10, 9, 10, in an endless cycle.
+	$LF
+]p
+[p 
+	"By dumping traces and comparing instruction counts, Lord Tom found the cyclical phenomenon seemed related to the sound code.
+	$LF
+	"This made sense, because the sound code executes during lag frames -- otherwise the music would lag and would sound awful.
+	$LF
+]p
+[p 
+	"This insight didn't prove useful, but led to one that did. Using the same technique to investigate an extra lag frame at the start
+	$LF
+	"of 8-Tank2, we found a quite unexpected cause: the score display!
+	$LF
+]p
+[p 
+	"The score is stored as 3 bytes at $715-7. But converting those bytes to a six-digit, base-10 number (plus a zero on the end) is
+	$LF
+	"actually quite a chore for the NES's little 6502 processor. Basically, a loop runs for each digit in the display -- the higher 
+	$LF
+	"the digit, the more iterations of the loop. Those extra instructions can add up; for frames where it's a close call whether or not lag will occur, having a good (or bad)
+	$LF
+	"score can make the difference.
+	$LF
+]p
+[p 
+	"A good score is one where the sum of each digit is low, so 9999990 is the worst and 0 is the best, and 1110000 is much better 
+	$LF
+	"than 9990. 
+	$LF
+	"To check a given score, we'd just divide by 10 and convert to hex, e.g. for 224,030 we'd google '22,403 in hexadecimal', then use the hex editor to enter 
+	$LF
+	"00 57 83 starting at $715 and see if it lagged. It was surprisingly painful to aim for the scores we wanted, chained from level
+	$LF
+	"to level as the autoscrollers have hundreds of individual scoring events, the escalation of values as you stomp enemies make
+	$LF
+	"certain scores much easier to achieve than others, and the timer countdown at the end of each level affects the 10's place, which
+	$LF
+	"we can otherwise only change via coins (50) and block-breaking (10).
+	$LF
+]p
+[p 
+	"All that said, compared to the published run, we removed all possible lag frames on the autoscrollers by chasing beautiful, 
+	$LF
+	"round, low-digit scores, which was 4 frames. The 1-1 lag
+	$LF
+	"frame is unaffected by score.
+	$LF
+]p
+[h3 
+	" 8-Airship
+	$LF
+]h3
+[p 
+	"We were quite surprised to find 6 frames here, because the underlying game physics were known as far back as 2008 when Lord Tom
+	$LF
+	"recalls Mitjitsu mentioning it was possible to inch further right on the screen by jumping up and down without holding right.
+	$LF
+]p
+[p 
+	"Actually, you don't have to jump, you just have to be on the right side of the screen with a horizontal speed ($bd) between 1 and
+	$LF
+	"14. The Airship scrolls faster than other auto's, 15/16th pixel per frame; because of how Mario is kept in synch with the terrain, he can advance 1 pixel right every 16 frames, when the camera doesn't advance. Prior runs used this to finish with Mario's screen
+	$LF
+	"position at 233, or 7 pixels further right than is possible just pressing right all the time.
+	$LF
+]p
+[p 
+	"Well, apparently neither in that run nor in any subsequent submission was it realized that getting P-speed and doing as large a
+	$LF
+	"jump as possible before the last platform would increase the time Mario can spend digging himself into the right side of the screen.
+	$LF
+	"This was done here to achieve a final screen position of 239, 6 frames faster.
+	$LF
+]p
+[h3 
+	" 8-1
+	$LF
+]h3
+[p 
+	"Two frames saved by not needing to manipulate the card at the end of the level (flowers gotten rather than stars in World 1) and better corner boosting.
+	$LF
+]p
+[h3 
+	" 8-Fortress
+	$LF
+]h3
+[p 
+	"This submission contains the first significant route change to 8-F since Morimoto's landmark TAS in 2003. Lord Tom proposed it
+	$LF
+	"early in our work on this run, but all of us worked heavily in optimizing it. There's a lot going on, so it's worth breaking the
+	$LF
+	"route down step by step.
+	$LF
+]p
+[h4 
+	" 1. 1st Star
+	$LF
+]h4
+[p 
+	"The major challenge here is to grab the star as quickly as possible while still being able to clip through the blocks to the right.
+	$LF
+	"Performing the clip requires a duck-jump at a certain horizontal speed (33+). Unfortunately, while it is possible to use a duck
+	$LF
+	"jump to grab the star, it cannot be done with a high enough speed to perform the clip - it isn't even close. As a result, the star is grabbed from the block's left side. As well, the star grab and clip must be performed without touching ground for more than
+	$LF
+	"a frame at a time - else more P-meter power is lost performing the clip, along with several frames afterward.
+	$LF
+]p
+[h4 
+	" 2. 2nd Star
+	$LF
+]h4
+[p 
+	"One might wonder why we grab the first star at all if there's another one just down the way. Well, the reason is that if you don't
+	$LF
+	"have star power active when you hit the 2nd star's block you'll get a coin rather than a star!
+	$LF
+]p
+[p 
+	"This grab was perhaps the most laborious portion of the route to optimize. Again, to preserve P-speed we need to avoid spending more
+	$LF
+	"than one frame on the ground prior to grabbing the star. As with the first star, the game's collision detection makes it impossible
+	$LF
+	"to grab a power-up via a duck jump with appreciable horizontal velocity, so we stand up for a frame as we leave the block to take
+	$LF
+	"advantage of standing-Mario's bigger hit box.
+	$LF
+]p
+[p 
+	"After grabbing the star, we need enough speed (49+) to clip through the blocks ahead, which is just possible.
+	$LF
+]p
+[h4 
+	" 3. P-Switch
+	$LF
+]h4
+[p 
+	"Like the 1st star, hitting the P-switch might seem a needless detour, but the door to BoomBoom only exists when a P-switch is active,
+	$LF
+	"so it can't be skipped.
+	$LF
+]p
+[p 
+	"A shout-out here to Tompa for finding a type of block clip we hadn't seen before - to go through the wall we duck-jump to fall into
+	$LF
+	"the block that's sticking out, then "land" as if to do a wall-jump against the wall beyond it. Now, since we've landed but are also
+	$LF
+	"ducking inside a block, we clip through the wall without having to stand up.
+	$LF
+]p
+[p 
+	"With optimal conditions, there's just enough time to get through the wall, hit the P-switch and jump up to it before losing 
+	$LF
+	"additional P-meter.
+	$LF
+]p
+[h4 
+	" 4. Spike Room
+	$LF
+]h4
+[p 
+	"We tried soooo many strats in here; this was the fastest we found. Like the published run, we go through the door as far left as is
+	$LF
+	"useful to let accelerate, jumping coming out of the door to preserve P-speed.
+	$LF
+]p
+[p 
+	"Since we have the star, though, we can duck-jump under the spikes! At least, we can until the star runs out, which we manage to delay
+	$LF
+	"long enough to slide out without losing P-speed. Unlike the published run, our P-switch is still active at this point, which means
+	$LF
+	"we don't get extra speed from the moving walkway, but it's still faster to run right before firing our fireballs.
+	$LF
+]p
+[h4 
+	" 5. Boom Boom
+	$LF
+]h4
+[p 
+	"Once BoomBoom is active, the moving walkway starts again; we stay on the ground as long as possible to take advantage.
+	$LF
+]p
+[p 
+	"BoomBoom is defeated 29 frames faster. Despite this, there's less time left on the level timer (378 vs 380) because we used fewer doors,
+	$LF
+	"during which the timer doesn't run. Unfortunately, the level timer counts down digit by digit, though. It takes 8 more frames to
+	$LF
+	"count down from 378 than it does from 380, so we lose those frames after the ? ball is grabbed and finish the level 21 frames faster. 
+	$LF
+]p
+[p 
+	"So, hooray, new 8-F strat! But...remember those door transitions? There's a caveat...
+	$LF
+]p
+[h3 
+	" Time vs Entertainment
+	$LF
+]h3
+[p 
+	"None of us anticipated including time-entertainment trade-offs in this submission, so here's the explanation. The fundamental 
+	$LF
+	"reason is the Bowser Quick Drop. Killing Bowser just as he's about to take a small hop makes him drop much more quickly, saving about 50 frames. Unfortunately, the RNG patterns that permit this are infrequent, creating a frame-rule of sorts generally on the order of dozens of frames.
+	$LF
+]p
+[p 
+	"With that background, let's go back to 8-F. Compared to all prior strats, the 2-star strat is faster and 
+	$LF
+	"(we think) much more interesting, involving highly optimized and varied powerup collection, block clipping, and even jumping
+	$LF
+	"through a spiked tunnel at top speed. Okay, so what's the problem?
+	$LF
+]p
+[p 
+	"The problem is the new strat enters 2 fewer doors. While the door transitions take up realtime frames, the RNG lags during them -
+	$LF
+	"so the new strat is "slower" as far as the RNG is concerned because we've used more non-lag frames. Depending purely on luck, this
+	$LF
+	"can be helpful, harmful, or irrelevant. We had bad luck: despite the new strat being 21 frames faster in realtime, the old strat's
+	$LF
+	"extra lag frames generate the right Bowser pattern 1 frame earlier.
+	$LF
+]p
+[p 
+	"This was a wrench: For us and probably for many, the SMB3 TASs are iconic for their pursuit of speed and perfect optimization. 
+	$LF
+	"However, entertainment is no small part of their popularity, as well as being a focus of tasvideos. We decided we'd rather submit 
+	$LF
+	"(and watch) a movie that shows a surprising new strat that does finish the level faster rather than one that is slower in-level 
+	$LF
+	"but shaves 1 more frame by lagging the RNG through a pair of door transitions. The same logic applies to the lag frame in 1-1 since
+	$LF
+	"avoid it would prevent us from using GlitchMan's improved strat as well as make the fastest Bowser pattern unattainable.
+	$LF
+]p
+[p 
+	"It is our understanding that there is a comments section if anyone wishes to weigh in...
+	$LF
+]p
+[h3 
+	" Bowser
+	$LF
+]h3
+[p 
+	"Our original submission was actually 1 frame slower than is possible between Bowser's death and the end of the movie. We discovered this was due to an unfavorable y subpixel for Bowser, which (since he's the only enemy we encounter in the castle that moves vertically) had to be fixed via a minor change in 8-Tank2. 
+	$LF
+]p
+[h3 
+	" Lord Tom's Comments
+	$LF
+]h3
+[p 
+	"I was glad to get pulled in on this project. I'd kept tabs on the known improvements, and had found the 1-3 leaf grab playing around some months earlier, but real life has been busy and I probably wouldn't have had the oomph to start it on my own. 
+	$LF
+]p
+[p 
+	"This project was harder than I expected as the 8-F route and score manipulation were totally new, and the RNG/lag madness with the Bowser and 8-Tank frame rules complicate things a lot. It was great fun collaborating with these guys, especially improving 8-F. Although we always want to beat the next frame rule, I'm very happy with where we ended up and to take this category another notch faster.
+	$LF
+]p
+[h3 
+	" Maru's Comments
+	$LF
+]h3
+[p 
+	"It's amazing to see this game being pushed one step further. For such a tightly contested category like this, it was great working with Lord Tom and Tompa to produce this work of TASing. We hope to work on other SMB3-related projects in the future. It's good that we were able to find something new even after all these years, and despite the fact that lag manipulation and RNG frustrated us throughout making this project, we were able to find answers to things that mysteriously puzzled us for quite some time.
+	$LF
+]p
+[h3 
+	" Tompa's Comments
+	$LF
+]h3
+[p 
+	"For the past couple of years, I've went back to this category many times, trying to find the final frame needed in W1 for the better Boomerang Bro. pattern in 8-Tank. Prior to that, we could have saved the lag frame in 1-1 by losing real time frames, but making a new TAS purely to save a lag frame was discouraging and felt pointless to me.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Then RAT926 came up with a faster 1-3 strat that got me really excited. Six months later, I was contacted by Maru about making a new TAS. Lord Tom was, once again, dragged into this and the struggle began!
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"I'll likely never grow tired of TASing this game and this is not the end either. Thanks a lot to Maru and Lord Tom for teaming up on this, I had a lot of fun!
+	$LF
+]p
+[h3 
+	" Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" GlitchMan - For the 1-1 mushroom grab
+		$LF
+	]li
+	[li 
+		" RAT926 - For improving the 1-3 tail-flip, and for generally masterful glitch-hunting
+		$LF
+	]li
+	[li 
+		" Southbird's disassembly of the game was again extremely helpful for deciphering game mechanics and how to save lag by manipulating the score.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Judging. I think. Gotta remember how to do this again...
+	$LF
+]p
+[p 
+	(__wikiLink|user:Masterjun)
+	": Replaced movie with a 
+	[a href=/forum/p/476296#476296 
+		"1 frame improvement
+	]a
+	".
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": This game for the most part is the one that started it all. It's great to see an improvement for it. You had me on pins and needles anticipating how will you get 99 lives.
+	$LF
+]p
+[p 
+	"Great audience feedback, and obviously a great run. Accepting to stars.
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+	$LF
+]p
+[p 
+	"Note to self: Inherit tier.
+]p

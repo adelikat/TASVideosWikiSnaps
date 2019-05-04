@@ -1,0 +1,941 @@
+1
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-842 
+				"Known glitches and quirks
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-843 
+						"Status immunities aren't 100%
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-844 
+						"Sword weaknesses don't work
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-845 
+						"Dark status does nothing
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-846 
+						"One levelup per battle
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-847 
+						"Possible to make bosses flee with FEAR
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-848 
+						"Black belt's defense rating
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-849 
+				"Encounter Algorithms
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-850 
+						"Encounter table traversal
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-851 
+						"Encounter table
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-852 
+						"Thresholds for different areas
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-853 
+				"Enemy groups
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-854 
+						"Formations
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-855 
+						"Type and number of enemies
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-856 
+						"Surprise factor
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-857 
+						"Can't run flag
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-858 
+						"Enemy group for random battles
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-859 
+						"Power cycle
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-860 
+						"Encounter-free spaces
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-861 
+				"Battle Algorithms
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-862 
+						"Random numbers
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-863 
+						"Enemy count
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-864 
+						"Surprise calculation
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-865 
+						"Order determination
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-866 
+						"Running
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-867 
+						"Enemy attacks
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-868 
+						"Magic and special attacks
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-869 
+						"Target selection
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-870 
+						"Hit and crit rolls
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-871 
+						"BANE
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-872 
+						"Levelup
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-873 
+						"One character
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[p 
+	"Much of this information comes from the algorithm FAQs on gamefaqs. The Game Mechanics Guide recently posted by AstralEsper is probably the most comprehensive algorithms guide. There have also been great FAQs written by paulygon and patbuns. FFhackster is also a great source of information. More details come from assembly analysis and don't seem to be posted anywhere else. This page concentrates on the game mechanics useful to a TAS. Because of how the run turned out there were a lot of areas that don't need to be explored in detail. But it is important to know every detail of the encounter system.
+	$LF
+]p
+[h2 
+	"Known glitches and quirks
+	$LF
+	[a id=heading-842 
+	]a
+]h2
+[h3 
+	"Status immunities aren't 100%
+	$LF
+	[a id=heading-843 
+	]a
+]h3
+[p 
+	"Basically, this means that no enemy is immune to status effects including instant death. There is a loophole in how the immunity affects the calculation of whether or not the attack works. This is explained in more detail in the BANE section.
+	$LF
+]p
+[h3 
+	"Sword weaknesses don't work
+	$LF
+	[a id=heading-844 
+	]a
+]h3
+[p 
+	"Coral swd, were swd, rune swd, ice swd, etc were all supposed to do extra damage to some enemies. But they don't.
+	$LF
+]p
+[h3 
+	"Dark status does nothing
+	$LF
+	[a id=heading-845 
+	]a
+]h3
+[p 
+	"Absolutely no change when you have dark status.
+	$LF
+]p
+[h3 
+	"One levelup per battle
+	$LF
+	[a id=heading-846 
+	]a
+]h3
+[p 
+	"If you get enough experience for two levelups, you will only get one right away. You will catch up with the next victorious battle.
+	$LF
+]p
+[h3 
+	"Possible to make bosses flee with FEAR
+	$LF
+	[a id=heading-847 
+	]a
+]h3
+[p 
+	"An enemy runs when:
+	$LF
+]p
+[pre 
+	"EnemyMorale - (2 * LeadCharLevel) + randInRange(0, 50) < 80
+	$LF
+]pre
+[p 
+	"See below for how random numbers are generated. Each enemy has a morale level ranging from 105 for cowardly WOLFs to 255 for bosses.
+	$LF
+	"FEAR reduces an enemy's morale by 40. The effect is stackable with multiple casts.
+	$LF
+	"Bosses go through the same run mechanics as normal enemies. But because of their high morale they will not run unless affected by FEAR. It has been discussed on the 
+	[a href=/forum/t/1421 
+		"forum
+	]a
+	" a few times.
+	$LF
+]p
+[h3 
+	"Black belt's defense rating
+	$LF
+	[a id=heading-848 
+	]a
+]h3
+[p 
+	"On leveling up, a black belt's defense rating is set to 2*level. This gets reset when you visit the armor screen. However, if you don't visit the armor screen you can keep the armor rating and still get any special effects from equipped armor.
+	$LF
+]p
+[h2 
+	"Encounter Algorithms
+	$LF
+	[a id=heading-849 
+	]a
+]h2
+[h3 
+	"Encounter table traversal
+	$LF
+	[a id=heading-850 
+	]a
+]h3
+[p 
+	"A counter at $00F5 changes with each step. It may go down or up depending on the value of $00F6. When the high bit is 1, it decrements, otherwise it increments.
+	$LF
+	"Whenever $00F5 hits 0, $00F6 is updated by adding A0. It starts out at FF (on FCEU-may differ on a real NES or other emulators). So the order that the table is traversed goes like this:
+	$LF
+]p
+[pre 
+	"down, down, up, down, up, up, down, up, down, (repeat)
+	$LF
+]pre
+[h3 
+	"Encounter table
+	$LF
+	[a id=heading-851 
+	]a
+]h3
+[p 
+	"All values in hex and located at $F100 in RAM
+	$LF
+]p
+[pre 
+	"1F A6 DE BA CC 12 7D 74 1B F3 B4 88 F8 52 F4 07
+	$LF
+	"90 AB B3 BD AA 55 28 BC 8A 6D 0E C4 83 A9 3B 76
+	$LF
+	"20 7C 09 92 FD 4A A8 F0 61 E3 F2 69 6C BB 38 C3
+	$LF
+	"AE B7 43 84 78 23 7B 9B 2D DB 3E 91 CF 02 2A B6
+	$LF
+	"86 EE 9C 8E B8 6F 1A 57 05 E9 73 31 D2 D9 1D FB
+	$LF
+	"94 9D B1 0A 3A 11 5A 47 95 2C 44 E0 6A 8C 5B 7A
+	$LF
+	"A7 5D 36 70 E5 C7 49 DC 68 97 D8 66 A3 0F B0 9F
+	$LF
+	"03 D6 77 16 13 30 25 3C 10 17 AD 98 6B 2F D7 A1
+	$LF
+	"FF A4 EB 51 FE 27 8D 93 D5 3D F6 08 75 E1 A5 46
+	$LF
+	"63 F5 4D DA 32 AF 40 37 D3 C0 89 67 06 21 6E 81
+	$LF
+	"B5 A0 4F 0C 2E E7 1C 58 85 E8 59 CE 35 CB 1E C6
+	$LF
+	"2B 9A E6 DD F1 EC 96 CA AC 00 50 C9 4C FC 14 7E
+	$LF
+	"56 80 D0 79 BF 29 87 48 24 19 C5 22 71 7F 72 0D
+	$LF
+	"CD 8F BE 3F 9E 34 ED 53 54 04 62 A2 C2 41 5E 82
+	$LF
+	"4B 26 5C 42 65 99 4E 60 8B F7 0B 33 DF D1 64 C8
+	$LF
+	"C1 01 EF F9 FA E4 5F 18 B9 B2 39 D4 15 E2 EA 45
+	$LF
+]pre
+[h3 
+	"Thresholds for different areas
+	$LF
+	[a id=heading-852 
+	]a
+]h3
+[p 
+	"For each step, the value accessed in that table is compared with a threshold set for that area. If tableValue < threshold then fight!
+	$LF
+]p
+[ul 
+	[li 
+		" Outer world:
+		$LF
+		[ul 
+			[li 
+				" Walking or canoeing: 10
+				$LF
+			]li
+			[li 
+				" Sailing on ship: 3
+				$LF
+			]li
+		]ul
+		" Most dungeons: 8
+		$LF
+	]li
+	[li 
+		" Exceptions:
+		$LF
+		[ul 
+			[li 
+				" Sky Palace 5th (last) floor: 24
+				$LF
+			]li
+			[li 
+				" Temple of Fiends Revisited Earth floor: 9
+				$LF
+			]li
+			[li 
+				" Temple of Fiends Revisited Fire floor: 10
+				$LF
+			]li
+			[li 
+				" Temple of Fiends Revisited Water floor: 11
+				$LF
+			]li
+			[li 
+				" Temple of Fiends Revisited Wind floor: 12
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"So if you know how many steps you are going to take in what areas you can figure out exactly where every battle will occur.
+	$LF
+]p
+[h2 
+	"Enemy groups
+	$LF
+	[a id=heading-853 
+	]a
+]h2
+[p 
+	"In each battle the enemies present are determined by the battle group you have encountered. Even bosses come in battle groups. A table in the ROM contains all battle group data. Specifically:
+	$LF
+]p
+[h3 
+	"Formations
+	$LF
+	[a id=heading-854 
+	]a
+]h3
+[p 
+	"The formation can be 1-9 small enemies, 1-4 large enemies or a mix of up to 6 small and 2 large. There is also a "one big enemy" formation for bosses.
+	$LF
+]p
+[h3 
+	"Type and number of enemies
+	$LF
+	[a id=heading-855 
+	]a
+]h3
+[p 
+	"Each battle group can have up to four different types of enemies. For each enemy type there is a min and max count. If min and max are the same, then the count is fixed.
+	$LF
+]p
+[h3 
+	"Surprise factor
+	$LF
+	[a id=heading-856 
+	]a
+]h3
+[p 
+	"Enemy surprise factor is tracked by battle group. This is used in determining surprise and preemptive battles. (See battle algorithms below)
+	$LF
+]p
+[h3 
+	"Can't run flag
+	$LF
+	[a id=heading-857 
+	]a
+]h3
+[p 
+	"There is a "can't run" flag attached to each enemy group. This is set for all bosses and some random battles. When the flag is set, running always fails and the battle is never a surprise or preemptive. This is probably because you run from preemptive battles 100% of the time.
+	$LF
+]p
+[h3 
+	"Enemy group for random battles
+	$LF
+	[a id=heading-858 
+	]a
+]h3
+[p 
+	"This part of the encounter system has been explained well in several FAQs. I'll summarize.
+	$LF
+	"In each area, there are 8 enemy group slots. Area means each floor of a dungeon or each region of the outer world. For this purpose the sea is one area. Canoe-able waterways are divided in to two areas, one for the north and one for the south.
+	$LF
+	"Each of these slots specifies one of the enemy groups described above. 
+	$LF
+	"There is a counter that increments with each battle. That counter is used to index into a list that determines which of those 8 slots you get. Here is the list:
+	$LF
+]p
+[pre 
+	" 1: 3    33: 3    65: 1     97: 4    129: 8    161: 5    193: 2    225: 1
+	$LF
+	" 2: 4    34: 7    66: 4     98: 3    130: 4    162: 3    194: 1    226: 4
+	$LF
+	" 3: 3    35: 1    67: 3     99: 6    131: 4    163: 2    195: 2    227: 3
+	$LF
+	" 4: 6    36: 2    68: 2    100: 5    132: 2    164: 2    196: 6    228: 1
+	$LF
+	" 5: 2    37: 7    69: 6    101: 4    133: 7    165: 4    197: 8    229: 4
+	$LF
+	" 6: 2    38: 1    70: 4    102: 1    134: 4    166: 4    198: 4    230: 3
+	$LF
+	" 7: 7    39: 4    71: 3    103: 1    135: 2    167: 3    199: 1    231: 2
+	$LF
+	" 8: 5    40: 5    72: 2    104: 3    136: 2    168: 3    200: 1    232: 3
+	$LF
+	" 9: 3    41: 3    73: 1    105: 4    137: 2    169: 1    201: 4    233: 1
+	$LF
+	"10: 5    42: 3    74: 4    106: 2    138: 7    170: 4    202: 3    234: 6
+	$LF
+	"11: 5    43: 5    75: 5    107: 3    139: 6    171: 3    203: 1    235: 1
+	$LF
+	"12: 1    44: 4    76: 5    108: 4    140: 1    172: 2    204: 3    236: 5
+	$LF
+	"13: 6    45: 4    77: 2    109: 3    141: 5    173: 5    205: 5    237: 3
+	$LF
+	"14: 2    46: 6    78: 3    110: 2    142: 3    174: 1    206: 8    238: 2
+	$LF
+	"15: 5    47: 6    79: 3    111: 5    143: 4    175: 3    207: 5    239: 4
+	$LF
+	"16: 1    48: 1    80: 6    112: 3    144: 1    176: 1    208: 2    240: 1
+	$LF
+	"17: 2    49: 4    81: 2    113: 1    145: 3    177: 4    209: 2    241: 1
+	$LF
+	"18: 4    50: 6    82: 3    114: 2    146: 5    178: 3    210: 2    242: 1
+	$LF
+	"19: 5    51: 1    83: 5    115: 6    147: 2    179: 4    211: 7    243: 4
+	$LF
+	"20: 7    52: 1    84: 1    116: 2    148: 3    180: 3    212: 8    244: 6
+	$LF
+	"21: 4    53: 6    85: 6    117: 2    149: 5    181: 5    213: 3    245: 6
+	$LF
+	"22: 2    54: 3    86: 2    118: 5    150: 4    182: 4    214: 5    246: 4
+	$LF
+	"23: 4    55: 6    87: 3    119: 4    151: 1    183: 2    215: 4    247: 3
+	$LF
+	"24: 7    56: 3    88: 1    120: 7    152: 6    184: 1    216: 2    248: 3
+	$LF
+	"25: 1    57: 4    89: 2    121: 2    153: 2    185: 4    217: 2    249: 6
+	$LF
+	"26: 4    58: 3    90: 4    122: 2    154: 1    186: 1    218: 1    250: 5
+	$LF
+	"27: 2    59: 7    91: 1    123: 4    155: 1    187: 2    219: 3    251: 6
+	$LF
+	"28: 1    60: 2    92: 3    124: 3    156: 4    188: 1    220: 3    252: 2
+	$LF
+	"29: 1    61: 2    93: 4    125: 4    157: 1    189: 2    221: 1    253: 2
+	$LF
+	"30: 4    62: 1    94: 2    126: 4    158: 3    190: 7    222: 1    254: 3
+	$LF
+	"31: 6    63: 4    95: 3    127: 2    159: 4    191: 2    223: 3    255: 4
+	$LF
+	"32: 6    64: 6    96: 6    128: 3    160: 1    192: 7    224: 1    256: 1
+	$LF
+]pre
+[p 
+	"Some of the enemy groups are listed many more times than others and as a result the overall chance to encounter them is lower. Group 7 is pretty uncommon at 12/256 and 8 is downright rare at 3/256! 
+	$LF
+	"WarMech is group 7 on the top floor of the Sky Palace. So it may take quite a few battles to meet him depending on where you are on that list.
+	$LF
+	"See FFhackster or one of the FAQs for a complete list of enemy groups for each area.
+	$LF
+]p
+[h3 
+	"Power cycle
+	$LF
+	[a id=heading-859 
+	]a
+]h3
+[p 
+	"If you cycle power, the values at $00F5 and $00F6 are reset as well as the counter for the enemy group.
+	$LF
+	"FCEUX and other emulators come up with a different initial value than a real NES.
+	$LF
+	"This is the most powerful way to manipulate random encounters. You could avoid all encounters along land by doing this every 12 steps, but it's suboptimal for a TAS due to the time needed to get the save items.
+	$LF
+]p
+[h3 
+	"Encounter-free spaces
+	$LF
+	[a id=heading-860 
+	]a
+]h3
+[ul 
+	[li 
+		" A lot of the field around Coneria
+		$LF
+	]li
+	[li 
+		" Docks
+		$LF
+	]li
+	[li 
+		" The squares on either side of a door in dungeons
+		$LF
+	]li
+	[li 
+		" The southern edge of some walls inside rooms in dungeons
+		$LF
+	]li
+	[li 
+		" The step that boards or disembarks the canoe or ship (The location doesn't matter)
+		$LF
+	]li
+]ul
+[p 
+	"FFhackster can show all of the encounter-free squares.
+	$LF
+]p
+[h2 
+	"Battle Algorithms
+	$LF
+	[a id=heading-861 
+	]a
+]h2
+[h3 
+	"Random numbers
+	$LF
+	[a id=heading-862 
+	]a
+]h3
+[p 
+	"The random seed at $688A is used to index into this table of numbers:
+	$LF
+]p
+[pre 
+	"   AE D0 38 8A ED 60 DB 72 5C 59 27 D8 0A 4A F4
+	$LF
+	"34 08 A9 C3 96 56 3B F1 55 F8 6B 31 EF 6D 28 AC
+	$LF
+	"41 68 1E 2A C1 E5 8F 50 F5 3E 7B B7 4C 14 39 12
+	$LF
+	"CD B2 62 8B 82 3C BA 63 85 3A 17 B8 2E B5 BE 20
+	$LF
+	"CB 46 51 2C CF 03 78 53 97 06 69 EB 77 86 E6 EA
+	$LF
+	"74 0C 21 E2 40 D4 5A 3D C7 2B 94 D5 8C 44 FD EE
+	$LF
+	"D2 43 00 BB FA C6 1D 98 A0 D3 54 5F 5E DC A8 00
+	$LF
+	"AF 93 A1 E1 6C 04 DE B6 D7 36 16 C5 C8 C4 E4 0F
+	$LF
+	"02 AB E8 33 99 73 11 6A 09 67 F3 FF A2 DF 32 0E
+	$LF
+	"1F 0D 90 25 64 75 B3 65 2F C9 B0 DA 5D 9F EC 29
+	$LF
+	"CE E3 F0 91 7A 58 45 24 1C 47 A4 89 18 2D CC BD
+	$LF
+	"6F 80 F6 81 22 E9 07 70 FB DD AD 35 A6 61 B4 A3
+	$LF
+	"FE B1 30 4B 15 48 6E 4F 5B 13 9C 83 92 01 C2 19
+	$LF
+	"7F 1A 1B 71 B9 3F 4E 9B BF 9E 87 0B 10 57 F2 26
+	$LF
+	"79 9A 05 C0 E0 F7 4D 7D CA 52 9D F9 BC AA FC 8D
+	$LF
+	"7E D1 A5 42 E7 D6 76 A7 84 8E 66 7C 23 88 37 49
+	$LF
+	"D9
+	$LF
+]pre
+[p 
+	"At first glance it looks like 00-FF were randomly reordered. But some values are duplicated and others are missing. The most interesting aspect is that there are two 0s. This is very nice because those 0s lead to critical hits and BANE deaths.
+	$LF
+]p
+[p 
+	"Address $688A is in the savegame memory range, so its value stays the same if you save and power cycle.
+	$LF
+	"This index is preserved between battles. Its state at the end of one battle determines the enemy count and surprise calculation for the next battle.
+	$LF
+]p
+[p 
+	"There are two important functions for randomization:
+	$LF
+]p
+[pre 
+	"rand8bit: The value accessed by the random seed
+	$LF
+]pre
+[pre 
+	"randInRange(low, high):
+	$LF
+	"    randRange = 1 + high - low
+	$LF
+	"    low + floor( (rand8bit * randRange) / 256 )
+	$LF
+]pre
+[p 
+	"The computation is actually done by taking the high byte after an 8bit*8bit => 16bit multiply.
+	$LF
+]p
+[p 
+	"The rand seed increments every time a random number is used. It also increments every 2 frames while you are ordering your heroes. So in order to fully analyze battles, you need to know every instance where RNGs are used and how many are used. The seed also increments while moving the cursor, so you need to consider how long it takes to give your orders.
+	$LF
+]p
+[p 
+	"The graphical effects that happen with each hit also use the RNG. When your characters are hit the screen shaking animation uses 12 seeds. The number of seeds used by the dust that appears when your chars attack the enemy varies depending on the enemy.
+	$LF
+]p
+[h3 
+	"Enemy count
+	$LF
+	[a id=heading-863 
+	]a
+]h3
+[p 
+	"For each enemy in group, calculate randInRange( minEnemies, maxEnemies ). That's how many enemies of the that type show up.
+	$LF
+]p
+[h3 
+	"Surprise calculation
+	$LF
+	[a id=heading-864 
+	]a
+]h3
+[pre 
+	"surpriseIndex = floor( (First char's luck + First char's agility) / 8)
+	$LF
+	"surpriseRoll = surpriseIndex + randInRange( surpriseIndex, 100 ) - enemyGroupSurpriseFactor
+	$LF
+	"If surpriseRoll < 0, surpriseRoll = 0
+	$LF
+	"If surpriseRoll <= 10, surprised!
+	$LF
+	"If surpriseRoll >= 90, preemptive!
+	$LF
+]pre
+[p 
+	"Otherwise, normal. For "can't run" battles (all bosses), the entire calculation is skipped and the battle is always normal.
+	$LF
+	"The enemyGroupSurpriseFactor can vary from 4 for most groups to 90 for shadows. 
+	$LF
+	"One thing to note is that the thief's massive luck and agility won't help you get the jump on enemies unless he's in front!
+	$LF
+]p
+[h3 
+	"Order determination
+	$LF
+	[a id=heading-865 
+	]a
+]h3
+[p 
+	"It is completely random and does not depend on either enemy or hero stats.
+	$LF
+	"Start out with a list of the 9 enemy slots followed by the four hero slots. 13 total.
+	$LF
+	"Get two random numbers using randInRange(0,12). Swap those entries in the list.  Do this 17 times.
+	$LF
+	"The resulting list is the battle order. Empty slots are skipped. If it was a surprise or premptive, the surprised side's slots are skipped as well.
+	$LF
+]p
+[h3 
+	"Running
+	$LF
+	[a id=heading-866 
+	]a
+]h3
+[p 
+	"If it is the first round of a preemptive battle, running is always successful. Otherwise there is a random factor involved.
+	$LF
+]p
+[pre 
+	"maxRand = 15 + status of char two slots down
+	$LF
+	"runRoll = randInRange(0, maxRand)
+	$LF
+]pre
+[p 
+	"Running succeeds if luck > runRoll
+	$LF
+]p
+[p 
+	"The status number is as follows:
+	$LF
+]p
+[ul 
+	[li 
+		" 0: ok
+		$LF
+	]li
+	[li 
+		" 1: dead
+		$LF
+	]li
+	[li 
+		" 2: stone
+		$LF
+	]li
+	[li 
+		" 3: poison
+		$LF
+	]li
+]ul
+[p 
+	"That's right, it depends on that status of the hero two slots down. So the first character has more trouble running when the third character is dead or has a status affliction. Similarly for the second and fourth chars.
+	$LF
+	"This gets more complicated for the third and fourth chars because it accesses a different patch of memory. For the third char, it is looking at some of the random numbers used in order determination. It could be 0 to 8 or 128 to 131. The fourth char's pointer hits an area used when displaying each char's HP. The value will either be 128 or 137 depending on the ones digit of the fourth char's hp. 
+	$LF
+]p
+[p 
+	"You can run 100% of the time with 16 luck or more. That is, if you are in one of the first two slots and all heros are alive.
+	$LF
+	"The memory accessed for chars 3 and 4 is almost always higher than the status indicator used for the first two chars. It can easily be high enough to throw off your chances of running. So don't count on that thief in back to be able to run more easily!
+	$LF
+]p
+[h3 
+	"Enemy attacks
+	$LF
+	[a id=heading-867 
+	]a
+]h3
+[p 
+	"On each enemy's turn it makes a roll to determine it's attack type: physical, magic or special. Each enemy has two stats that determine what the chances are they will use magic and special attacks. If neither of these are selected, it does a physical attack.
+	$LF
+]p
+[h3 
+	"Magic and special attacks
+	$LF
+	[a id=heading-868 
+	]a
+]h3
+[p 
+	"Each enemy has a list of eight magic and four special attacks. The first time it picks a magic attack, it executes the first attack on the list. It goes down the list each time it picks magic again. Same for specials. The spot on each list is tracked separately. If it gets to the end of the list, it goes back to the beginning. If the enemy is muted and picks magic or special, it does nothing.
+	$LF
+]p
+[h3 
+	"Target selection
+	$LF
+	[a id=heading-869 
+	]a
+]h3
+[p 
+	"If the attacker is an enemy, the target is selected randomly. So pick a targetRoll = rand8bit. Target is selected based on that:
+	$LF
+]p
+[pre 
+	"       targetRoll >= 128   ->   Front hero
+	$LF
+	"128 >  targetRoll >= 64    ->   Second hero
+	$LF
+	"64  >  targetRoll >  32    ->   Third hero
+	$LF
+	"32  >= targetRoll          ->   Rear hero
+	$LF
+]pre
+[p 
+	"If the selected target is not valid on account of being dead or stoned, then keep picking another targetRoll until you get a valid target. There has to be at least one valid target or else the party has perished!
+	$LF
+	"The front char gets hit 1/2 of the time, the second 1/4 and the last two are both 1/8. This is why having a knight in front to soak up physical damage is so effective.
+	$LF
+]p
+[h3 
+	"Hit and crit rolls
+	$LF
+	[a id=heading-870 
+	]a
+]h3
+[p 
+	"Two thresholds are involved: hitThreshold and critThreshold. The crit threshold is an item index of the weapon. Hit threshold is computed based on the hit and evade of the entities involved.
+	$LF
+	"For an enemy, damage is one of their stats. For a hero, damage is usually weaponDamage + strength. But unarmed blackBelts/masters can behave differently.
+	$LF
+	"Each enemy also has an absorption defense rating similar to the hero's absorb stat.
+	$LF
+]p
+[pre 
+	"hitRoll = randInRange(0, 200)
+	$LF
+	"damageRoll = attackerDamage + randInRange(0, attackerDamage)
+	$LF
+]pre
+[p 
+	"These random values are always computed, even if the attack misses.
+	$LF
+]p
+[pre 
+	"If hitRoll > hitThreshold, miss. No damage.
+	$LF
+	"If hitRoll <= hitThreshold, it's a hit!
+	$LF
+	"    hitDamage = damageRoll - targetAbsorb
+	$LF
+	"    if hitDamage < 1 then hitDamage = 1
+	$LF
+	"If hitRoll <= critThreshold, it's a critical hit!
+	$LF
+	"    hitDamage = hitDamage + damageRoll
+	$LF
+]pre
+[p 
+	"If the attacker has multiple hits, repeat, accumulating more and more damage. Enemies have a number of hits stat. For players, number of hits is floor(hit / 32) + 1
+	$LF
+]p
+[p 
+	"When hitRoll is 0 it will always be a critical hit. So there's at least a 3/256 chance because there are three entries in the RNG table that will produce a 0 here.
+	$LF
+	"Critical hits deal decent damage regardless of target's defense but can do even more damage when the target has low defense.
+	$LF
+]p
+[h3 
+	"BANE
+	$LF
+	[a id=heading-871 
+	]a
+]h3
+[p 
+	"If hitRoll <= successThreshold the enemy is killed.
+	$LF
+	"As in the physical attack, hitRoll comes from randInRange(0, 200). The successThreshold is based on the enemy's magic defense. 
+	$LF
+	"If enemy is immune to poison, successThreshold = 0. So when hitRoll is 0 you always succeed, even when the enemy is immune. This is the essence of the immunity bug.
+	$LF
+	"There are 3 entries in the table that will give 0 from randInRange(0, 200): the two 0s and the 1. So the chance to BANE an immune enemy is 3/256.
+	$LF
+	"If we look more specifically at a fight with one living hero in slot 1 vs a poison-immune boss, there is only 1 possible starting seed that will allow the hero to go first and succeed.
+	$LF
+]p
+[h3 
+	"Levelup
+	$LF
+	[a id=heading-872 
+	]a
+]h3
+[p 
+	"Depending on class and level, you either gain each stat unconditionally or have a 25% chance.
+	$LF
+	"To make the roll, an rand8bit number is generated.
+	$LF
+	"The roll for luck succeeds when the low two bits are 0.
+	$LF
+]p
+[h3 
+	"One character
+	$LF
+	[a id=heading-873 
+	]a
+]h3
+[p 
+	"So if you put everything together you can see why one character is optimal for a TAS. Two characters would have more chances to run, but the chance to run is very high after just a few levels. The third and fourth chars have reduced chances to run. In a fight it's possible to manipulate a miss from the enemy and a strong hit from one low-level char. But at extremely low levels the second char would be much less effective. Finally, you can manipulate stats if you concentrate on one char. Otherwise it's not practical given all the other things that need to be manipulated.
+	$LF
+]p

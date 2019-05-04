@@ -1,0 +1,1439 @@
+4
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-1 
+				"Monopoly_card
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-2 
+				"Monopoly_header
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-3 
+				"Monopoly_main_functions
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-4 
+				"Monopoly_input_solve
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-1 
+			[p 
+				"The following source is for a program used to determine which card combinations are feasible through luck-manipulation. This code is based off an RNG disassembly of the Monopoly ROM.
+				$LF
+			]p
+			[p 
+				"Most of this stuff is independent of the below project, because it was one of the earlier programs.
+				$LF
+			]p
+			[p 
+				"Note: Chance deck starts at $0472. Community Chest deck starts at $0482. Both are 16 bytes long.
+				$LF
+			]p
+			[p 
+				"Chance card values:
+				$LF
+				"0 getoutofjailfree
+				$LF
+				"1 adv to go
+				$LF
+				"2 nearestrail
+				$LF
+				"3 back3space
+				$LF
+				"4 repairs
+				$LF
+				"5 poortax
+				$LF
+				"6 boardwalk
+				$LF
+				"7 illinois
+				$LF
+				"8 adv to stcharles
+				$LF
+				"9 nearestrail
+				$LF
+				"10 bankpays$50
+				$LF
+				"11 nearestutil
+				$LF
+				"12 rideonreading
+				$LF
+				"13 buildingmatures$150
+				$LF
+				"14 gotojail
+				$LF
+				"15 chairman
+				$LF
+			]p
+			[p 
+				"Community Chest card values:
+				$LF
+				"0 getoutofjailfree
+				$LF
+				"1 inherit$100
+				$LF
+				"2 doctorsfee$50
+				$LF
+				"3 payhospital$100
+				$LF
+				"4 repairs
+				$LF
+				"5 salestock$45
+				$LF
+				"6 schooltax
+				$LF
+				"7 gotojail
+				$LF
+				"8 incometaxrefund$20
+				$LF
+				"9 adv to go
+				$LF
+				"10 receiveservices$25
+				$LF
+				"11 secondprize$10
+				$LF
+				"12 bankerror
+				$LF
+				"13 lifeinsur$100
+				$LF
+				"14 xmasfundmatures$100
+				$LF
+				"15 grandopera
+				$LF
+			]p
+			[p 
+				"monopoly.cc:
+				$LF
+			]p
+			[pre 
+				[code class=language-c_white 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-2 
+			[p 
+				"This was the code for the main project during Monopoly TASing.
+				$LF
+			]p
+			[p 
+				"Header only.
+				$LF
+			]p
+			[p 
+				"monopolyfuncdef.h:
+				$LF
+			]p
+			[pre 
+				[code class=language-c_white 
+					"//in monopoly.h
+					$LF
+					$LF
+					"void rndfunc1();
+					$LF
+					"void random1(int x);
+					$LF
+					"void rndfunc2();
+					$LF
+					"void random2(int x);
+					$LF
+					"void random3(int x);
+					$LF
+					"void random4(int x);
+					$LF
+					"void getdice();
+					$LF
+					"void cpumove();
+					$LF
+					"void cpumovedouble();
+					$LF
+					"void playermove(int b, int c);
+					$LF
+					"void playermovedouble(int b, int c);
+					$LF
+					"void finishturn();
+					$LF
+					"void cpumoveab();
+					$LF
+					$LF
+					"//in monopolysolve.cc
+					$LF
+					$LF
+					"void initabc();
+					$LF
+					"void save();
+					$LF
+					"void revert();
+					$LF
+					"void trynext();
+					$LF
+					"void nextabc();
+					$LF
+					"void printdelay();
+					$LF
+					"int calcdelay();
+					$LF
+					"void drreset();
+					$LF
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-3 
+			[p 
+				"Actually a C file.
+				$LF
+				"Provides functionality
+				$LF
+			]p
+			[p 
+				"monopoly.h:
+				$LF
+			]p
+			[pre 
+				[code class=language-c_white 
+					"#include <stdio.h>
+					$LF
+					"#include "monopolyfuncdef.h"
+					$LF
+					$LF
+					$LF
+					"unsigned long rnda=0;
+					$LF
+					"unsigned char rndb=0;
+					$LF
+					"unsigned char rcnt=0;
+					$LF
+					"unsigned char die1=0;
+					$LF
+					"unsigned char die2=0;
+					$LF
+					$LF
+					"//the linear feedback shift register
+					$LF
+					"//corresponding to polynomial x^22 + x^21 + 1 in Z_2
+					$LF
+					"void rndfunc1()
+					$LF
+					"{
+					$LF
+					"     long b,c;
+					$LF
+					"     char x;
+					$LF
+					"     b=rnda;
+					$LF
+					"     c=b<<1;
+					$LF
+					"     c^=b;
+					$LF
+					"     if (c&0x200000) x=1; else x=0;
+					$LF
+					"     rnda=((rnda<<1)+x);
+					$LF
+					"}
+					$LF
+					$LF
+					"void random1(int x)
+					$LF
+					"{
+					$LF
+					"     for(int i=1;i<=x;i++)
+					$LF
+					"             rndfunc1();
+					$LF
+					"}
+					$LF
+					$LF
+					"void rndfunc2()
+					$LF
+					"{
+					$LF
+					"     random1(5);
+					$LF
+					"     rndb+=35;
+					$LF
+					"}
+					$LF
+					$LF
+					"//reset rcnt before doing this
+					$LF
+					$LF
+					"void random2(int x)
+					$LF
+					"{
+					$LF
+					"     for(int i=1;i<=x;i++)
+					$LF
+					"     {
+					$LF
+					"             random1(3);
+					$LF
+					"             rndfunc2();
+					$LF
+					"             rcnt++;
+					$LF
+					"     }
+					$LF
+					"}
+					$LF
+					$LF
+					"//don't forget to rcnt++ between random2 and random3
+					$LF
+					$LF
+					"void random3(int x)
+					$LF
+					"{
+					$LF
+					"     for(int i=1;i<=x;i++)
+					$LF
+					"     {
+					$LF
+					"             rndfunc1();
+					$LF
+					"             rndfunc2();
+					$LF
+					"             rndfunc2();
+					$LF
+					"             rndfunc2();
+					$LF
+					"             rcnt++;
+					$LF
+					"             if(rcnt%4==0)
+					$LF
+					"                          random1(2);   
+					$LF
+					"     }
+					$LF
+					"}
+					$LF
+					$LF
+					"void random4(int x)
+					$LF
+					"{
+					$LF
+					"     for(int i=1;i<=x;i++)
+					$LF
+					"     {
+					$LF
+					"             rndfunc1();
+					$LF
+					"             rndfunc2();
+					$LF
+					"             rcnt++;
+					$LF
+					"     }
+					$LF
+					"}
+					$LF
+					$LF
+					"void getdice()
+					$LF
+					"{
+					$LF
+					"     unsigned char c;
+					$LF
+					"     random1(5);
+					$LF
+					"     c=rnda%256;
+					$LF
+					"     c^=rndb;
+					$LF
+					"     c%=6;
+					$LF
+					"     c++;
+					$LF
+					"     die2=c;
+					$LF
+					"     random1(5);
+					$LF
+					"     c=rnda%256;
+					$LF
+					"     c%=6;
+					$LF
+					"     c++;
+					$LF
+					"     die1=c;
+					$LF
+					"}
+					$LF
+					$LF
+					"void cpumove()
+					$LF
+					"{
+					$LF
+					"     rcnt=0;
+					$LF
+					"     random2(40);
+					$LF
+					"     rcnt++;
+					$LF
+					"     random3(23);
+					$LF
+					"     random4(27);
+					$LF
+					"     getdice();
+					$LF
+					"}
+					$LF
+					$LF
+					"//somehow uses random4 this time
+					$LF
+					"void cpumovedouble()
+					$LF
+					"{
+					$LF
+					"     rcnt=0;
+					$LF
+					"     random4(40);
+					$LF
+					"     rcnt++;
+					$LF
+					"     random3(23);
+					$LF
+					"     random4(27);
+					$LF
+					"     getdice();
+					$LF
+					"}
+					$LF
+					$LF
+					"//"glitched" code; not used
+					$LF
+					"void cpumoveab()
+					$LF
+					"{
+					$LF
+					"     rcnt=0;
+					$LF
+					"     random4(1);
+					$LF
+					"     random2(39);
+					$LF
+					"     rcnt++;
+					$LF
+					"     random3(23);
+					$LF
+					"     random4(27);
+					$LF
+					"     getdice();
+					$LF
+					"}
+					$LF
+					$LF
+					"void playermove(int b, int c)
+					$LF
+					"{
+					$LF
+					"     rcnt=0;
+					$LF
+					"     random2(6+b);
+					$LF
+					"     rcnt++;
+					$LF
+					"     random3(2+c);
+					$LF
+					"     random4(27);
+					$LF
+					"     getdice();
+					$LF
+					"}
+					$LF
+					$LF
+					"//uses random4
+					$LF
+					"void playermovedouble(int b, int c)
+					$LF
+					"{
+					$LF
+					"     rcnt=0;
+					$LF
+					"     random4(6+b);
+					$LF
+					"     rcnt++;
+					$LF
+					"     random3(2+c);
+					$LF
+					"     random4(27);
+					$LF
+					"     getdice();
+					$LF
+					"}
+					$LF
+					$LF
+					"void finishturn()
+					$LF
+					"{
+					$LF
+					"     random4(31+(die1+die2)*6);
+					$LF
+					"}
+					$LF
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-4 
+			[p 
+				"This is a program used to find input delay that produces the correct rolls, subject to 3 degrees of freedom per turn over multiple turns. Originally used to find optimal input for a game, this program has now been abused (in the //quickie section) to find input for one or two turns.
+				$LF
+			]p
+			[p 
+				"monopolysolve.cc:
+				$LF
+			]p
+			[pre 
+				[code class=language-c_white 
+					"#include "monopoly.h"
+					$LF
+					$LF
+					"int a,b,c,ptr=1;
+					$LF
+					$LF
+					"unsigned long rar[40];
+					$LF
+					"unsigned char rbr[10];
+					$LF
+					"int dr[10][3];
+					$LF
+					"int f=0;
+					$LF
+					"//int x[10]={0,5,20,10,150,0}; //delay 31
+					$LF
+					"int x[10]={0,10,43,43,43,0};
+					$LF
+					"unsigned long debug, debug3;
+					$LF
+					"unsigned char debug2, debug4;
+					$LF
+					"long rerecords=0;
+					$LF
+					"char reverttag=0;
+					$LF
+					"int delay=1000;
+					$LF
+					"int ff;
+					$LF
+					"int fg;
+					$LF
+					$LF
+					"int main()
+					$LF
+					"{
+					$LF
+					"    //rnda=0x4BFFE3; //first strat
+					$LF
+					"    //rnda=0x41D723; //ollie strat
+					$LF
+					"    rnda=0x07D580; //starting seeds
+					$LF
+					"    rndb=0x28; //starting seeds
+					$LF
+					"    rar[1]=rnda;
+					$LF
+					"    rbr[1]=rndb;
+					$LF
+					"    initabc();
+					$LF
+					"    drreset();
+					$LF
+					"    
+					$LF
+					"    while (1)
+					$LF
+					"    {
+					$LF
+					"          switch(ptr)
+					$LF
+					"          {
+					$LF
+					"                     case 1: //nd 6 to oriental
+					$LF
+					"                          //random1(3+a);
+					$LF
+					"                          a=-1;
+					$LF
+					"                          playermove(b,c);
+					$LF
+					"                          
+					$LF
+					"                          //quickie
+					$LF
+					"                          
+					$LF
+					"                          if(die2+die1==2 && die1==1) //to get 1+1
+					$LF
+					"                          {printf("%d %d %d", a,b,c); goto br;}
+					$LF
+					"                          trynext();
+					$LF
+					"                          break;
+					$LF
+					"                          
+					$LF
+					"                       /*   a=-1;
+					$LF
+					"                          random2(1+b);
+					$LF
+					"                          random1(32+c);
+					$LF
+					"                          fg=rndb;
+					$LF
+					"                          cpumove();
+					$LF
+					"                          if(die1==die2 && die1!=2); //to get any double except 2+2
+					$LF
+					"                          else {trynext(); break;}
+					$LF
+					"                          ff=die1;
+					$LF
+					"                          finishturn();
+					$LF
+					"                          if(ff==6 || ff==5) random1(114); else if (ff==4) random1(120); else random1(116); //delays for whichever doubles
+					$LF
+					"                          cpumovedouble();
+					$LF
+					"                          if(die1+die2+2*ff==12 && die1!=die2)
+					$LF
+					"                          {printf("%d %d %d %d %d %d %X", a,b,c, ff, die1, die2, fg); goto br;}
+					$LF
+					"                          trynext();
+					$LF
+					"                          break;*/
+					$LF
+					"                          
+					$LF
+					"                          
+					$LF
+					"                          
+					$LF
+					"                          
+					$LF
+					"                          
+					$LF
+					"                          
+					$LF
+					"                          //\quickie
+					$LF
+					"                          
+					$LF
+					"                          if(die1+die2==6 && die1!=3)
+					$LF
+					"                          {
+					$LF
+					"                                          finishturn();
+					$LF
+					"                                          debug=rnda;
+					$LF
+					"                                          save();
+					$LF
+					"                                          initabc();
+					$LF
+					"                                          a=-1;
+					$LF
+					"                                          b=-1;
+					$LF
+					"                          }
+					$LF
+					"                          else
+					$LF
+					"                          {
+					$LF
+					"                              trynext();
+					$LF
+					"                          }
+					$LF
+					"                          break;
+					$LF
+					"                     case 2: //cpu nd 8 to vermont
+					$LF
+					"                          random1(85+c);
+					$LF
+					"                          cpumove();
+					$LF
+					"                          if(die1+die2==8 && die1!=4)
+					$LF
+					"                          {
+					$LF
+					"                                          finishturn();
+					$LF
+					"                                          random1(118);
+					$LF
+					"                                          save();
+					$LF
+					"                                          initabc();
+					$LF
+					"                                          a=-1;
+					$LF
+					"                          }
+					$LF
+					"                          else
+					$LF
+					"                          {
+					$LF
+					"                              trynext();
+					$LF
+					"                          }
+					$LF
+					"                          break;
+					$LF
+					"                     case 3: //3 to connecticut
+					$LF
+					"                          playermove(b,c);
+					$LF
+					"                          if(die1+die2==3)
+					$LF
+					"                          {
+					$LF
+					"                                          finishturn();
+					$LF
+					"                                          //strategy#1 random1(492+350-5);
+					$LF
+					"                                          //random1(524+350-5);
+					$LF
+					"                                          random1(85);
+					$LF
+					"                                          random2(7);
+					$LF
+					"                                          debug3=rnda;
+					$LF
+					"                                          debug4=rndb;
+					$LF
+					"                                          /*2 prop mortgage random1(542);*/
+					$LF
+					"                                          /*1 prop mortgage */ random1(528+8);
+					$LF
+					"                                          //0 prop mortgage random1(524);
+					$LF
+					"                                          //random1(184);
+					$LF
+					$LF
+					"                                          save();
+					$LF
+					"                                          initabc();
+					$LF
+					"                                          a=-1;
+					$LF
+					"                          }
+					$LF
+					"                          else
+					$LF
+					"                          {
+					$LF
+					"                              trynext();
+					$LF
+					"                          }
+					$LF
+					"                          break;
+					$LF
+					"                     case 4: //cpu roll double
+					$LF
+					"                     //goto solution;
+					$LF
+					"                          random2(b);
+					$LF
+					"                          random1(c);
+					$LF
+					"                          debug=rnda;
+					$LF
+					"                          debug2=rndb;
+					$LF
+					"                          random4(1);
+					$LF
+					"                          
+					$LF
+					"                          //strategy#1
+					$LF
+					"                          ////random1(1801);
+					$LF
+					"                          //random1(2279);
+					$LF
+					"                          //random1(2109);
+					$LF
+					"                          
+					$LF
+					"                          //strategy#2
+					$LF
+					"                          //random1(938);
+					$LF
+					"                          random1(1250);
+					$LF
+					"                          //random1(2275);
+					$LF
+					"                          
+					$LF
+					"                          cpumove();
+					$LF
+					"                          if(die1!=die2)
+					$LF
+					"                          {
+					$LF
+					"                                        trynext();
+					$LF
+					"                                        break;
+					$LF
+					"                          }
+					$LF
+					"                          finishturn();
+					$LF
+					"                          
+					$LF
+					"                          f=die1;
+					$LF
+					"                          if(f==1 || f==6) random1(120); else random1(114);
+					$LF
+					"                          cpumovedouble();
+					$LF
+					"                          if(die1!=7-f || die2!=7-f)
+					$LF
+					"                          {
+					$LF
+					"                                           trynext();
+					$LF
+					"                                           break;
+					$LF
+					"                          }
+					$LF
+					"                          finishturn();
+					$LF
+					"                          if(f==1 || f==6) /*random1(987);*/ /*random1(983);*/ random1(234); else{ trynext();break;}//random1(1299);
+					$LF
+					"                          cpumovedouble();
+					$LF
+					"                          if(die1+die2==11) //solution
+					$LF
+					"                          {
+					$LF
+					"                                            save();
+					$LF
+					"                                            if(calcdelay()<=delay)
+					$LF
+					"                                            {
+					$LF
+					"                                                                  delay=calcdelay();
+					$LF
+					"                                                                  //solution:
+					$LF
+					"                                                                  printdelay();
+					$LF
+					"                                            }
+					$LF
+					"                                            //goto br;
+					$LF
+					"                                            revert();
+					$LF
+					"                          }
+					$LF
+					"                          else trynext();
+					$LF
+					"                          
+					$LF
+					"          }
+					$LF
+					"          
+					$LF
+					"          reverttag=0;
+					$LF
+					"          
+					$LF
+					"          if(ptr==0) break;
+					$LF
+					"          //if(dr[1][0]>=1) break;
+					$LF
+					"          
+					$LF
+					"          //printf("%d, %d",die1,die2);
+					$LF
+					"          
+					$LF
+					"    }
+					$LF
+					"    
+					$LF
+					"    
+					$LF
+					"    br:
+					$LF
+					"    
+					$LF
+					"    printf("\n%d rerecords\n", rerecords);
+					$LF
+					"    
+					$LF
+					"    printf("done");
+					$LF
+					"    getchar();
+					$LF
+					"    return 0;
+					$LF
+					"}
+					$LF
+					$LF
+					"void initabc()
+					$LF
+					"{
+					$LF
+					"     a=0;
+					$LF
+					"     b=0;
+					$LF
+					"     c=0;
+					$LF
+					"}
+					$LF
+					$LF
+					"void save()
+					$LF
+					"{
+					$LF
+					"     dr[ptr][0]=a;
+					$LF
+					"     dr[ptr][1]=b;
+					$LF
+					"     dr[ptr][2]=c;
+					$LF
+					"     ptr++;
+					$LF
+					"     rar[ptr]=rnda;
+					$LF
+					"     rbr[ptr]=rndb;
+					$LF
+					"}
+					$LF
+					$LF
+					"void revert()
+					$LF
+					"{
+					$LF
+					"     //printf("sdf");
+					$LF
+					"  /*   dr[ptr][0]=0;
+					$LF
+					"     dr[ptr][1]=0;
+					$LF
+					"     dr[ptr][2]=0;*/
+					$LF
+					"     reverttag=1;
+					$LF
+					"     ptr--;
+					$LF
+					"     if(ptr!=0)
+					$LF
+					"     {
+					$LF
+					"               a=dr[ptr][0];
+					$LF
+					"               b=dr[ptr][1];
+					$LF
+					"               c=dr[ptr][2];
+					$LF
+					"               trynext();
+					$LF
+					"     }
+					$LF
+					"}
+					$LF
+					$LF
+					"void trynext()
+					$LF
+					"{
+					$LF
+					"     if(reverttag==0) rerecords++;
+					$LF
+					"     rnda=rar[ptr];
+					$LF
+					"     rndb=rbr[ptr];
+					$LF
+					"     nextabc();
+					$LF
+					"}
+					$LF
+					$LF
+					"void nextabc()
+					$LF
+					"{
+					$LF
+					"    if(c>=x[ptr] || calcdelay()>delay)
+					$LF
+					"             if(b>=x[ptr] || b==-1 || calcdelay()-c>delay)
+					$LF
+					"                      if(a>=x[ptr] || a==-1 || calcdelay()-c-b>delay)
+					$LF
+					"                               revert();
+					$LF
+					"                      else{c=0; b=0; a++;}
+					$LF
+					"             else{c=0; b++;}
+					$LF
+					"    else c++;
+					$LF
+					"  /*  dr[ptr][0]=a;
+					$LF
+					"    dr[ptr][0]=b;
+					$LF
+					"    dr[ptr][0]=c;*/
+					$LF
+					"  //  if(calcdelay()>delay) revert();
+					$LF
+					"}
+					$LF
+					$LF
+					"void printdelay()
+					$LF
+					"{
+					$LF
+					"     for(int i=1;i<=4;i++)
+					$LF
+					"     {
+					$LF
+					"             for(int j=0;j<=2;j++)
+					$LF
+					"                     if(dr[i][j]==-1) printf("x "); else printf("%d ", dr[i][j]);
+					$LF
+					"             printf("%X %X\n",rar[i]&0xFFFFFF,rbr[i]);
+					$LF
+					"             //if(i==1) printf("%X %X ", debug3&0xFFFFFF, debug4);
+					$LF
+					"     }
+					$LF
+					"     
+					$LF
+					"     printf("%d %X %X     %d\n\n", f,debug&0xFFFFFF,debug2,delay);
+					$LF
+					$LF
+					"}
+					$LF
+					$LF
+					"void drreset()
+					$LF
+					"{
+					$LF
+					"     for(int i=1;i<=4;i++)
+					$LF
+					"             for(int j=0;j<=2;j++)
+					$LF
+					"                     dr[i][j]=0;
+					$LF
+					"}
+					$LF
+					$LF
+					"int calcdelay()
+					$LF
+					"{
+					$LF
+					"     int t=0;
+					$LF
+					"     for(int i=1;i<=ptr-1;i++)
+					$LF
+					"             for(int j=0;j<=2;j++)
+					$LF
+					"                     if(dr[i][j]!=-1)
+					$LF
+					"                                     t+=dr[i][j];
+					$LF
+					"     if(ptr!=5)
+					$LF
+					"     {
+					$LF
+					"               
+					$LF
+					"               if(a!=-1) t+=a; if(b!=-1) t+=b; if(c!=-1) t+=c;
+					$LF
+					"     }
+					$LF
+					"     return t;
+					$LF
+					"}                                
+					$LF
+				]code
+			]pre
+		]div
+	]div
+]div
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-5 
+				"Monopoly
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-5 
+			[p 
+				"This program searches for endings. Meaning that it searches for a random seed that generates automatic consecutive CPU losses after end of input.
+				$LF
+			]p
+			[p 
+				"Where the CPU players are is not important 
+				[em 
+					"a priori
+				]em
+				". The important part is that a CPU rolls a double into an orange hotel group (St. James), and then 2 to Tennessee or 3 to New York. It is permitted for one CPU (at most) to go from either of these three to the next Chance, since the card is (manipulated to be) go back 3 spaces onto New York.
+				$LF
+			]p
+			[p 
+				"In other words each CPU must roll a double first, then 2 or 3 second, with at most one exception permitted to roll 4 or 6 second.
+				$LF
+			]p
+			[p 
+				"The program only searches over the first few 
+				[tt 
+					"RndVal1 (rnda)
+				]tt
+				" random values for all 256 values of 
+				[tt 
+					"RndVal2 (rndb)
+				]tt
+				". The period of 
+				[tt 
+					"RndVal1
+				]tt
+				" is 2^22-1, or over 4 million, so most values of 
+				[tt 
+					"RndVal1
+				]tt
+				" are impractical.
+				$LF
+			]p
+			[p 
+				"For manipulating 3 CPUs (6 rolls), there are many short-range solutions. For 4 CPUs (8 rolls), there are very few short-range solutions. No solution has been found for 5 CPUs (10 rolls) within a range of 100000 
+				[tt 
+					"RndVal1
+				]tt
+				" iterations.
+				$LF
+			]p
+			[p 
+				"There are two timing versions, one with hurry timing and one with relax timing.
+				$LF
+			]p
+			[p 
+				"monopolysolve2.cc:
+				[br 
+				]br
+				$LF
+			]p
+			[pre 
+				[code class=language-c_white 
+					"#include "monopoly.h"
+					$LF
+					"#define BEGINSEED 0x3E2AD2
+					$LF
+					"#define SEARCHOFFSET 9000
+					$LF
+					"#define LIMIT 20000
+					$LF
+					"#define PLAYERS 2
+					$LF
+					"//#define HURRY
+					$LF
+					$LF
+					"#ifdef HURRY
+					$LF
+					"unsigned int billtime=120;
+					$LF
+					"#else
+					$LF
+					"unsigned int billtime=464;
+					$LF
+					"#endif
+					$LF
+					$LF
+					$LF
+					"unsigned long c=BEGINSEED,cc,cc2,delay=0;
+					$LF
+					"unsigned int i,f,f2,g,g2,h,h2,j,j2,k,k2,bb,bb2;
+					$LF
+					"unsigned int cnt=0;
+					$LF
+					$LF
+					"int main()
+					$LF
+					"{
+					$LF
+					"    //rnda=BEGINSEED;
+					$LF
+					"    rnda=BEGINSEED;
+					$LF
+					"    random1(SEARCHOFFSET);
+					$LF
+					"    c=rnda;
+					$LF
+					"    
+					$LF
+					"    rnda=c;
+					$LF
+					"    rndb=0;
+					$LF
+					"    
+					$LF
+					"    rcnt=0;
+					$LF
+					"    random2(40);
+					$LF
+					"    rcnt++;
+					$LF
+					"    random3(23);
+					$LF
+					"    random4(27);
+					$LF
+					"            
+					$LF
+					"    cc=rnda;
+					$LF
+					"    bb=rndb;    
+					$LF
+					"    
+					$LF
+					"    random1(10);
+					$LF
+					"    random4(31);
+					$LF
+					"    random1(billtime);
+					$LF
+					$LF
+					"    rcnt=0;
+					$LF
+					"    random4(40);
+					$LF
+					"    rcnt++;
+					$LF
+					"    random3(23);
+					$LF
+					"    random4(27);
+					$LF
+					"    
+					$LF
+					"    cc2=rnda;
+					$LF
+					"    bb2=rndb;
+					$LF
+					"    
+					$LF
+					"    while(delay<=LIMIT)
+					$LF
+					"    {
+					$LF
+					"            delay++;
+					$LF
+					"            
+					$LF
+					"            rnda=c;
+					$LF
+					"            random1(1);
+					$LF
+					"            c=rnda;
+					$LF
+					"            
+					$LF
+					"            rnda=cc;
+					$LF
+					"            random1(1);
+					$LF
+					"            cc=rnda;
+					$LF
+					"            
+					$LF
+					"            rnda=cc2;
+					$LF
+					"            random1(1);
+					$LF
+					"            cc2=rnda;
+					$LF
+					$LF
+					"            
+					$LF
+					$LF
+					"            
+					$LF
+					"            for(i=0;i<=255;i++)
+					$LF
+					"            {
+					$LF
+					"                               cnt=0;
+					$LF
+					"                               
+					$LF
+					"                               rnda=cc;
+					$LF
+					"                               rndb=bb;
+					$LF
+					"                               
+					$LF
+					"                               rndb+=i;
+					$LF
+					"                               getdice();
+					$LF
+					$LF
+					"                               if(die1!=die2) continue;
+					$LF
+					"                               f=die1;
+					$LF
+					$LF
+					"                               rnda=cc2;
+					$LF
+					"                               rndb=bb2;
+					$LF
+					"                               rndb+=i;
+					$LF
+					"                               
+					$LF
+					"                               random4((die1+die2)*6);
+					$LF
+					"                               getdice();
+					$LF
+					"                               if(die1+die2!=3 && die1+die2!=2 && die1+die2!=4 && die1+die2!=6) continue;
+					$LF
+					"                               f2=die1+die2;
+					$LF
+					"                               if(f2==4 || f2==6){ cnt++; random1(114);}
+					$LF
+					"                               //if(die1+die2==2 && f==3) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               random1(439);
+					$LF
+					"                               
+					$LF
+					"                               cpumove();
+					$LF
+					"                               if(die1!=die2) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               g=die1;
+					$LF
+					"                               random1(billtime);
+					$LF
+					"                               cpumovedouble();
+					$LF
+					"                               if(die1+die2!=3 && die1+die2!=2 && die1+die2!=4 && die1+die2!=6) continue;
+					$LF
+					"                               g2=die1+die2;
+					$LF
+					"                               if(g2==4 || g2==6){ cnt++; random1(114);}
+					$LF
+					"                               //if(die1+die2==2 && g==3) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               random1(439);
+					$LF
+					"                               
+					$LF
+					"                               cpumove();
+					$LF
+					"                               if(die1!=die2) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               h=die1;
+					$LF
+					"                               random1(billtime);
+					$LF
+					"                               cpumovedouble();
+					$LF
+					"                               if(die1+die2!=3 && die1+die2!=2 && die1+die2!=4 && die1+die2!=6) continue;
+					$LF
+					"                               h2=die1+die2;
+					$LF
+					"                               if(h2==4 || h2==6){ cnt++; random1(114);}
+					$LF
+					"                               //if(die1+die2==2 && h==3) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               random1(439);
+					$LF
+					$LF
+					"                               cpumove();
+					$LF
+					"                               if(die1!=die2) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               j=die1;
+					$LF
+					"                               random1(billtime);
+					$LF
+					"                               cpumovedouble();
+					$LF
+					"                               if(die1+die2!=3 && die1+die2!=2 && die1+die2!=4 && die1+die2!=6) continue;
+					$LF
+					"                               j2=die1+die2;
+					$LF
+					"                               if(j2==4 || j2==6){ cnt++; random1(114);}
+					$LF
+					"                               //if(die1+die2==2 && h==3) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               random1(439);
+					$LF
+					"                                    /*                                                                                
+					$LF
+					"                               cpumove();
+					$LF
+					"                               if(die1!=die2) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               k=die1;
+					$LF
+					"                               random1(billtime);
+					$LF
+					"                               cpumovedouble();
+					$LF
+					"                               if(die1+die2!=3 && die1+die2!=2 && die1+die2!=4 && die1+die2!=6) continue;
+					$LF
+					"                               k2=die1+die2;
+					$LF
+					"                               if(k2==4 || k2==6){ cnt++; random1(114);}
+					$LF
+					"                               //if(die1+die2==2 && h==3) continue;
+					$LF
+					"                               finishturn();
+					$LF
+					"                               random1(439);
+					$LF
+					"                               */
+					$LF
+					"                               if(cnt>=2) continue;
+					$LF
+					$LF
+					"                               printf("%d%d %d%d %d%d %d%d %d%d %X %X %d\n",f,f2,g,g2,h,h2,j,j2,k,k2,c&0xFFFFFF,i,delay);
+					$LF
+					"            }
+					$LF
+					"            
+					$LF
+					"            if(delay%5000==0)
+					$LF
+					"                              printf("Done delay %d\n",delay);
+					$LF
+					"            
+					$LF
+					"      }
+					$LF
+					$LF
+					"    printf("done");
+					$LF
+					"    getchar();
+					$LF
+					"    return 0;
+					$LF
+					"}
+					$LF
+					$LF
+				]code
+			]pre
+		]div
+	]div
+]div

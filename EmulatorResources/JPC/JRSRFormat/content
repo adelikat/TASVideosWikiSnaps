@@ -1,0 +1,1379 @@
+6
+[h2 
+	"Character classes
+	$LF
+]h2
+[h3 
+	"File conventions
+	$LF
+]h3
+[ul 
+	[li 
+		" The character set is always UTF-8.
+		$LF
+	]li
+	[li 
+		" All integers are written using Unicode codepoints DIGIT ZERO - DIGIT NINE (and prefixed with HYPHEN-MINUS if negative)
+		$LF
+	]li
+]ul
+[h3 
+	"Notations:
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[em 
+			""foo"
+		]em
+		" is literal string foo as Unicode code points.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"()
+		]em
+		" denote grouping.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<space>
+		]em
+		" is any space character (see section on spaces below)
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<linefeed>
+		]em
+		" is any linefeed character (see section on linefeeds below)
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"something*
+		]em
+		" is 
+		[em 
+			"something
+		]em
+		" repeated zero or more times
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"something+
+		]em
+		" is 
+		[em 
+			"something
+		]em
+		" repeated one or more times
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"something?
+		]em
+		" is 
+		[em 
+			"something
+		]em
+		" or empty.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"$foo
+		]em
+		" denotes Metasyntactic variable.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"$foo...
+		]em
+		" denotes Metasyntactic variable that may span multiple components.
+		$LF
+	]li
+	[li 
+		" Space means either concatenation (in raw strings) or component split (in stuff that is component-encoded)
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<start-of-line>
+		]em
+		" is special zero-length string at beginning of line.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<end-of-line>
+		]em
+		" is special zero-length string at end of line.
+		$LF
+	]li
+]ul
+[h3 
+	"Spaces
+	$LF
+]h3
+[p 
+	"Following Unicode codepoints act as spaces:
+	$LF
+]p
+[ul 
+	[li 
+		" Codepoints 0x20 (SPACE) and 0x09 (TAB)
+		$LF
+	]li
+	[li 
+		" Codepoints 0x1680, 0x180E, 0x2028, 0x205F and 0x3000
+		$LF
+	]li
+	[li 
+		" Codepoints 0x2000-0x200A.
+		$LF
+	]li
+]ul
+[h3 
+	"Line feeds
+	$LF
+]h3
+[p 
+	"Following Unicode codepoints act as line feeds:
+	$LF
+]p
+[ul 
+	[li 
+		" codepoint 0x0A
+		$LF
+	]li
+	[li 
+		" codepoint 0x0D
+		$LF
+	]li
+	[li 
+		" codepoint 0x1C-0x1E
+		$LF
+	]li
+	[li 
+		" codepoint 0x85
+		$LF
+	]li
+	[li 
+		" codepoint 0x2029
+		$LF
+	]li
+]ul
+[p 
+	"These characters all end line and begin the next.
+	$LF
+]p
+[h2 
+	"File structure
+	$LF
+]h2
+[p 
+	"JRSR file consists of magic and number of sections.
+	$LF
+]p
+[h3 
+	" Magic
+	$LF
+]h3
+[p 
+	"The JRSR file magic is 
+	[em 
+		""JRSR" <linefeed>+
+	]em
+	". This magic must be first thing in the file, and there can't be anything (including spaces or line feeds before it). After magic, there is no open section.
+	$LF
+]p
+[h3 
+	" Blank lines
+	$LF
+]h3
+[p 
+	"Blank lines are allowed anywhere after magic. They are ignored.
+	$LF
+]p
+[h3 
+	" Starting section
+	$LF
+]h3
+[p 
+	"Section named 
+	[em 
+		"$foo
+	]em
+	" is opened with line of form 
+	[em 
+		""!BEGIN" <space>+ $foo
+	]em
+	". If there is previous section open, it is implicitly closed.
+	$LF
+]p
+[h3 
+	" Section line
+	$LF
+]h3
+[p 
+	"If there is section open, section content lines are prefixed with 
+	[em 
+		""+"
+	]em
+	". Such lines may only occur when section is open.
+	$LF
+]p
+[h3 
+	" Ending section
+	$LF
+]h3
+[p 
+	"Section is closed with line of form 
+	[em 
+		""!END"
+	]em
+	". This line can appear at any time there is open section.
+	$LF
+]p
+[h3 
+	" End of file
+	$LF
+]h3
+[p 
+	"End of file can appear anywhere there is no open section. The file must not end inside open section.
+	$LF
+]p
+[h2 
+	"Line (component) format
+	$LF
+]h2
+[p 
+	"Not all sections follow this format, but many do. Empty lines are skipped. The purpose is to encode non-empty array of non-empty strings into single line.
+	$LF
+]p
+[p 
+	"Characters:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			"<start-of-line>
+		]em
+		": Initialize depth counter to 0. Initialize current token to "", initialize array to empty.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<space>
+		]em
+		": If current token is not empty string, append token to array and reset token to "".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""("
+		]em
+		" and depth counter is 0: Increment depth counter to 1 and behave like <space> was read.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""("
+		]em
+		" and depth counter is >0: Increment depth counter and append literal '(' to token.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"")"
+		]em
+		" and depth counter is >1: Decrement depth counter and append literal ')' to token.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"")"
+		]em
+		" and depth counter is 1: Decrement depth counter to 0 and behave like <space> was read.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"")"
+		]em
+		" and depth counter is 0: Parse error.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""\"
+		]em
+		" (backslash) followed by 
+		[em 
+			"<end-of-line>
+		]em
+		": Parse error.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""\"
+		]em
+		" (backslash) followed by some character: Read next character and append it to token as-is. Don't process the next character further.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<end of line>
+		]em
+		" and depth counter is >0: Parse error.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"<end of line>
+		]em
+		" and depth counter is 0: Behave like <space> was read. If the resulting array is empty, ignore the whole line. Otherwise the array is the parse result.
+		$LF
+	]li
+	[li 
+		" anything else: Append character literally to current token.
+		$LF
+	]li
+]ul
+[h2 
+	"Sections
+	$LF
+]h2
+[h3 
+	""header" section
+	$LF
+]h3
+[p 
+	"This section contains information about the whole movie. It is in component format. Of each line, first element in array gives its type. The rest are parameters.
+	$LF
+]p
+[p 
+	"Currently known header line types:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			""PROJECTID" $opaque
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 1
+				$LF
+			]li
+			[li 
+				" Meaning: Project ID is 
+				[em 
+					"$opaque
+				]em
+				". Project ID is used for keeping track if newly loaded savestate is from the same movie (for purposes of keeping rerecord count and not erroring out the load if it would result cross-movie rewind).
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""SAVESTATEID" $opaque
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-1
+				$LF
+			]li
+			[li 
+				" Meaning if present: This is either savestate or movie starting from savestate. The 
+				[em 
+					"$opaque
+				]em
+				" must equal to ID of one of the savestate events in event section.
+				$LF
+			]li
+			[li 
+				" Meaning if absent: This is movie starting from poweron.
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""RERECORDS" $count
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 1
+				$LF
+			]li
+			[li 
+				" Meaning: Movie rerecord count is 
+				[em 
+					"$count
+				]em
+				". 
+				[em 
+					"$count
+				]em
+				" must be nonnegative integer. 
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""AUTHORS" $author...
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-(infinity)
+				$LF
+			]li
+			[li 
+				" Meaning: Gives authors (real names) of run. Each component of 
+				[em 
+					"$author...
+				]em
+				" gives new author. The names listed are presumed to be real names.
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""AUTHORNICKS" $nick...
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-(infinity)
+				$LF
+			]li
+			[li 
+				" Added in: R10.9.
+				$LF
+			]li
+			[li 
+				" Meaning: Gives authors (nicknames) of run. Each component of 
+				[em 
+					"$nick...
+				]em
+				" gives new author. The authors listed are assumed to be nicknames and do not have real names. 
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""AUTHORFULL" $fullname $nickname
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-(infinity)
+				$LF
+			]li
+			[li 
+				" Added in R10.9.
+				$LF
+			]li
+			[li 
+				" Meaning: Run has author with full name of 
+				[em 
+					"$fullname
+				]em
+				" and nickname of 
+				[em 
+					"$nickname
+				]em
+				".
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""COMMENT" $opaque...
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-(infinity)
+				$LF
+			]li
+			[li 
+				" Meaning: Comment. Not parsed by emulator.
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""SYSTEM" $system
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-1
+				$LF
+			]li
+			[li 
+				" Added in R10.14.
+				$LF
+			]li
+			[li 
+				" Meaning if absent: Ignored.
+				$LF
+			]li
+			[li 
+				" Meaning if present: If 
+				[em 
+					"$system
+				]em
+				" is anything else than "PC-JPC-RR-r10" or "PC-JPC-RR-r11.3" (starting from r11.3), causes savestate/movie load error (as incompatible movie).
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""INITIALSTATE" $opaque
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" Multiplicity: 0-(infinity)
+				$LF
+			]li
+			[li 
+				" Meaning: Denotes that 
+				[em 
+					""initialization-"$opaque
+				]em
+				" is a valid initialization section to choose. If this is not present, "initialization" is assumed. If present, SYSTEM should be set to 
+				[em 
+					""PC-JPC-RR-r11.3"
+				]em
+				".
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	""initialization" section
+	$LF
+]h3
+[p 
+	"This section gives parameters for PC initial poweron. It is in component format. Of each line, first element in array gives its type. The rest are parameters.
+	$LF
+]p
+[p 
+	"Mandatory lines, must be present exactly once:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			""BIOS" $id
+		]em
+		": BIOS image ID is 
+		[em 
+			"$id
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""VGABIOS" $id
+		]em
+		": VGA BIOS image ID is 
+		[em 
+			"$id
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""INITIALTIME" $time
+		]em
+		": Number of milliseconds since Unix epoch when system is first powered on. 
+		[em 
+			"$time
+		]em
+		" must be integer 0-4 102 444 799 999.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""CPUDIVIDER" $divider
+		]em
+		": Divide 1GHz by 
+		[em 
+			"$divider
+		]em
+		" to get CPU clock rate. $divider must be integer 1-256.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""MEMORYSIZE" $pages
+		]em
+		": Number of 4KiB pages of memory present is 
+		[em 
+			"$pages
+		]em
+		". 
+		[em 
+			"$pages
+		]em
+		" must be integer 256-262 144.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""BOOT" $device
+		]em
+		": 
+		[em 
+			"$device
+		]em
+		" must be one of "FLOPPY", "HDD" or "CDROM". Sets the boot device. If 
+		[em 
+			"$device
+		]em
+		" is "CDROM", HDC must not be present. If 
+		[em 
+			"$device
+		]em
+		" is "HDD", HDA must be present.
+		$LF
+	]li
+]ul
+[p 
+	"Optional line types that can be present at most once:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			""HDA" $id
+		]em
+		": HDA image ID is 
+		[em 
+			"$id
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""HDB" $id
+		]em
+		": HDB image ID is 
+		[em 
+			"$id
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""HDC" $id
+		]em
+		": HDC image ID is 
+		[em 
+			"$id
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""HDD" $id
+		]em
+		": HDD image ID is 
+		[em 
+			"$id
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""FDA" $num
+		]em
+		": Upon poweron disk number 
+		[em 
+			"$num
+		]em
+		" is put into FDA. The specified disk must be of floppy type.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""FDB" $num
+		]em
+		": Upon poweron disk number 
+		[em 
+			"$num
+		]em
+		" is put into FDB (the disk with same number must not be put into FDA too). The specified disk must be of floppy type.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""CDROM" $num
+		]em
+		": Upon poweron disk number 
+		[em 
+			"$num
+		]em
+		" is put into CD-ROM drive. Mutually exclusive with HDC. The specified disk must be of cd-rom type.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""IOPORTDELAY"
+		]em
+		": Signals that I/O delay emulation is enabled.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""VGAHRETRACE"
+		]em
+		": Signals that VGA horizontal retrace emulation is enabled.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""FLUSHONMODIFY"
+		]em
+		": Signals that pipeline is to be flushed on detected code self-modification.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""VGATIMINGMETHOD" $method
+		]em
+		": 
+		[em 
+			"$method
+		]em
+		" is either "0" or "1". If "0", classical force-60fps VGA timings are used. If "1", real VGA timings in accordance with timing registers are used.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""SVGATYPE" $type
+		]em
+		": 
+		[em 
+			"$type
+		]em
+		" is either "0" or "1". If "0", emulated SVGA card is revision 2 BGA. If "1", emulated SVGA card is revision 5 BGA.
+		$LF
+	]li
+]ul
+[p 
+	"May be present multiple times:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			""DISK" $num $id
+		]em
+		": ID of image in image slot 
+		[em 
+			"$num
+		]em
+		" is 
+		[em 
+			"$id
+		]em
+		". 
+		[em 
+			"$num
+		]em
+		"  must be nonnegative integer. Only one entry for each 
+		[em 
+			"$num
+		]em
+		" may be present.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""DISKNAME" $num $name
+		]em
+		": Set name of image in image slot 
+		[em 
+			"$num
+		]em
+		" to 
+		[em 
+			"$name
+		]em
+		". The image slot must be defined before setting its name by 
+		[em 
+			"DISK
+		]em
+		" line.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""LOADMODULEA" $module $parameters
+		]em
+		": Load module named 
+		[em 
+			"$module
+		]em
+		", passing 
+		[em 
+			"$parameters
+		]em
+		" to it.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""LOADMODULE" $module
+		]em
+		": Load module 
+		[em 
+			"$module
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""FPU" $class
+		]em
+		": Set FPU emulator class to 
+		[em 
+			"$class
+		]em
+		". Obsolete but still supported.
+		$LF
+	]li
+]ul
+[h3 
+	""savestate" and "manifest" sections
+	$LF
+]h3
+[p 
+	"These are savestate data and not documented here.
+	$LF
+]p
+[h3 
+	""events" section
+	$LF
+]h3
+[p 
+	"This section gives the actual movie input data and is in component format.
+	$LF
+]p
+[p 
+	"The base time is always 0 (even if movie begins from savestate), and time unit is nanoseconds.
+	$LF
+]p
+[p 
+	"Event format is: 
+	[em 
+		""$timestamp $class $parameters...?"
+	]em
+	" and there is one event per line. If 
+	[em 
+		"$class
+	]em
+	" consists only of 'A-Z' and '0-9' (capital letters and numbers) then it is either special event or reserved (error). Valid 
+	[em 
+		"$parameters...
+	]em
+	" depend on event class. Some events may also have timing restrictions. Events must be in time order from first to last.
+	$LF
+]p
+[p 
+	"Timestamps must be nonnegative integers. By default they are relative to initial poweron. When computing movie length, it is customary to ignore all special events.
+	$LF
+]p
+[p 
+	"Following event types are defined:
+	$LF
+]p
+[ul 
+	[li 
+		" Class 
+		[em 
+			""SAVESTATE"
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" $opaque $rerecords
+				[em 
+					": Savestate with identifier $opaque. $rerecords gives the rerecord count at point of saving (must be nonnegative integer).
+					$LF
+				]em
+			]li
+		]ul
+		" Class 
+		[em 
+			""OPTION"
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" 
+				[em 
+					""RELATIVE"
+				]em
+				": Further timestamps will be relative to last timestamp.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""ABSOLUTE"
+				]em
+				": Further timestamps will be relative to initial poweron (warning: buggy in versions R10.7 and before).
+				$LF
+			]li
+		]ul
+		" Class 
+		[em 
+			""org.jpc.emulator.peripheral.Keyboard"
+		]em
+		$LF
+		[ul 
+			[li 
+				" 
+				[em 
+					""KEYEDGE" $keynumber
+				]em
+				": Specified key pressed or released (initially all keys are released). The 
+				[em 
+					"$keynumber
+				]em
+				" must be from ranges 1-83, 85-95, 129-197 or 199-233. Timestamp of event must be divisible by keyboard time unit (66 666ns), and there must not have been any keyboard events within certain number of units
+				[a id=r1 
+				]a
+				[sup 
+					"[
+					[a href=#1 
+						"1
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""PAUSE"
+				]em
+				": Pause is hit. The timing restrictions are the same as in KEYEDGE case.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""MOUSEBUTTON" $button
+				]em
+				": Specified mouse button is pressed or released (initially all buttons are released). 
+				[em 
+					"$button
+				]em
+				" must be one of 0, 1, 2, 3 or 4.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""XMOUSEMOTION" $motion
+				]em
+				": Specifies that mouse has moved by 
+				[em 
+					"$motion
+				]em
+				" mickeys  (must be integer -255 - 255) in X direction (positive is right).
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""YMOUSEMOTION" $motion
+				]em
+				": Similar to 
+				[em 
+					"XMOUSEMOTION
+				]em
+				", but gives motion in Y direction (positive is up).
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""ZMOUSEMOTION" $motion
+				]em
+				": Gives scrollwheel motion (positive is down?). 
+				[em 
+					"$motion
+				]em
+				" must be integer in range -7 - 7.
+				$LF
+			]li
+		]ul
+		" Class 
+		[em 
+			""org.jpc.modules.Joystick"
+		]em
+		" (joystick module required to use these):
+		$LF
+		[ul 
+			[li 
+				" 
+				[em 
+					""BUTTONA" $state
+				]em
+				": Set joystick #1 button A state to 
+				[em 
+					"$state
+				]em
+				" ("0" if released, "1" if pressed). 
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""BUTTONB" $state
+				]em
+				": The same as 
+				[em 
+					"BUTTONA
+				]em
+				" but for Joystick #1 button B.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""BUTTONC" $state
+				]em
+				": The same as 
+				[em 
+					"BUTTONA
+				]em
+				" but for Joystick #2 button A.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""BUTTOND" $state
+				]em
+				": The same as 
+				[em 
+					"BUTTONA
+				]em
+				" but for Joystick #2 button B.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""AXISA" $hold
+				]em
+				": Set joystick #1 X axis monostable multivibrator hold time to 
+				[em 
+					"$hold
+				]em
+				" nanoseconds (must be positive integer).
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""AXISB" $hold
+		]em
+		": The same as  
+		[em 
+			"AXISA
+		]em
+		", but for joystick #1 Y axis.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""AXISC" $hold
+		]em
+		": The same as  
+		[em 
+			"AXISA
+		]em
+		", but for joystick #2 X axis.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""AXISD" $hold
+		]em
+		": The same as  
+		[em 
+			"AXISA
+		]em
+		", but for joystick #2 Y axis.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			""org.jpc.emulator.PC$ResetButton"
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" (none): Reboot the PC.
+				$LF
+			]li
+		]ul
+		" 
+		[em 
+			""org.jpc.emulator.PC$DiskChanger"
+		]em
+		":
+		$LF
+		[ul 
+			[li 
+				" 
+				[em 
+					""FDA" $num
+				]em
+				": 
+				[em 
+					"$num
+				]em
+				" must be integer at least -1. If 
+				[em 
+					"$num
+				]em
+				" is "-1", disk in FDA is ejected (FDA must contain disk). Otherwise disk number 
+				[em 
+					"$num
+				]em
+				" is inserted into FDA (it must be valid disk number for disk of floppy type that's not already in FDB and FDA must be empty).
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""FDB" $num
+				]em
+				": Same as 
+				[em 
+					"FDA
+				]em
+				", but roles of FDA and FDB swapped.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""CDROM" $num
+				]em
+				": Similar to 
+				[em 
+					"FDA
+				]em
+				" but for CD-ROM drive (obivously images must be of CD-ROM type and such disks can't be in FDA or FDB). HDC may not be present.
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""WRITEPROTECT $num
+				]em
+				": Turn on write protect of disk number 
+				[em 
+					"$num
+				]em
+				" (must be valid image slot of floppy type and must not be inserted in either fda or fdb).
+				$LF
+			]li
+			[li 
+				" 
+				[em 
+					""WRITEUNPROTECT" $num
+				]em
+				": Same as 
+				[em 
+					"WRITEPROTECT
+				]em
+				", but turn off the write protect instead of on.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	""diskinfo-<id>" sections
+	$LF
+]h3
+[p 
+	"These sections are optional. They give information about images used. Component encoding is used, first array element gives the type, rest are parameters. Emulator does not parse these. What is present depends on image.
+	$LF
+]p
+[p 
+	"Currently following lines/types can be written:
+	$LF
+]p
+[ul 
+	[li 
+		" TYPE FLOPPY: This is floppy disk image
+		$LF
+	]li
+	[li 
+		" TYPE HDD: This is HD image.
+		$LF
+	]li
+	[li 
+		" TYPE CDROM: This is CDROM image (.iso)
+		$LF
+	]li
+	[li 
+		" TYPE BIOS: This is BIOS image
+		$LF
+	]li
+	[li 
+		" TYPE UNKNOWN: WTF???
+		$LF
+	]li
+	[li 
+		" IMAGELENGTH $length: Raw image length is $length.
+		$LF
+	]li
+	[li 
+		" IMAGEMD5: Raw image MD5.
+		$LF
+	]li
+	[li 
+		" TOTALSECTORS: Total sectors in image.
+		$LF
+	]li
+	[li 
+		" TRACKS: Tracks (cylinders) on disk (per side)
+		$LF
+	]li
+	[li 
+		" SIDES: Sides on disk.
+		$LF
+	]li
+	[li 
+		" SECTORS: Sectors per track on disk.
+		$LF
+	]li
+	[li 
+		" COMMENT: Line from image comments.
+		$LF
+	]li
+]ul
+[h3 
+	""output-info" section
+	$LF
+]h3
+[p 
+	"Emulator does not parse this. This gives information about outputs used. Compoenent encoding is used, first array element gives the type, rest are parameters. Emulator does not parse these.
+	$LF
+]p
+[ul 
+	[li 
+		" AUDIO $outputname: $outputname is audio output.
+		$LF
+	]li
+	[li 
+		" VIDEO: Video output.
+		$LF
+	]li
+]ul
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" PAUSE: Keyboard must be idle afterwards for 60 units (exception: If CTRL is held (codes 29 and 157), then only for 40 units). For keys with numbers <128, keyboard must be idle for 10 units afterwards. For keys with numbers >128, keyboard must be idle for 20 units afterwards (exception: number 183 if either ALT (codes 56 and 184) is held only takes 10).
+	$LF
+]p

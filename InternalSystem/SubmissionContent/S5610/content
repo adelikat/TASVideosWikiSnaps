@@ -1,0 +1,386 @@
+8
+[p 
+	"Dear MasterJun, Ive seen your Arbitrary Code Injection videos, and I saw you last year on AGDQ. I love to mess around and see what I can make with the Code Injection, and Ive really wanted to create something, but I dont know what to start with. I was wondering if you could make Yoshi's Island via Arbitrary Code Injection. That would be awesome because I've tried, and I did ok, the only problem was that I couldnt implement the Flutter A.I and when yoshi is it, baby mario cries and floats in his bubble. So now Im trying to make Game Genie in SMW so we could Inject Game Genie codes.
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.0.0
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+]ul
+[h3 
+	" Improvement table
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Stage
+			]th
+			[th 
+				"Frames (old run)
+			]th
+			[th 
+				"Frames (new run)
+			]th
+			[th 
+				"Absolute
+			]th
+			[th 
+				"Relative
+			]th
+		]tr
+		[tr 
+			[th 
+				"1
+			]th
+			[td 
+				" 3565 
+			]td
+			[td 
+				" 3282 
+			]td
+			[td 
+				"-283
+			]td
+			[td 
+				"-283
+			]td
+		]tr
+		[tr 
+			[th 
+				"2
+			]th
+			[td 
+				" 3561 
+			]td
+			[td 
+				" 3375 
+			]td
+			[td 
+				"-186
+			]td
+			[td 
+				"-469
+			]td
+		]tr
+		[tr 
+			[th 
+				"3
+			]th
+			[td 
+				" 4827 
+			]td
+			[td 
+				" 4535 
+			]td
+			[td 
+				"-292
+			]td
+			[td 
+				"-761
+			]td
+		]tr
+		[tr 
+			[th 
+				"4
+			]th
+			[td 
+				" 3698 
+			]td
+			[td 
+				" 3496 
+			]td
+			[td 
+				"-202
+			]td
+			[td 
+				"-963
+			]td
+		]tr
+		[tr 
+			[th 
+				"5
+			]th
+			[td 
+				" 2751 
+			]td
+			[td 
+				" 2668 
+			]td
+			[td 
+				"-83 
+			]td
+			[td 
+				"-1046
+			]td
+		]tr
+		[tr 
+			[th 
+				"6
+			]th
+			[td 
+				" 6068 
+			]td
+			[td 
+				" 5471 
+			]td
+			[td 
+				"-597
+			]td
+			[td 
+				"-1643
+			]td
+		]tr
+		[tr 
+			[th 
+				"7
+			]th
+			[td 
+				" 3392 
+			]td
+			[td 
+				" 3300 
+			]td
+			[td 
+				" -92
+			]td
+			[td 
+				"-1735
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"After a really long time, this is a 1735 frame improvement over 
+	(__wikiLink|5098S|my old submission.)
+	" Most improvements come from much better mastery and understanding of the game.
+	$LF
+]p
+[p 
+	"If you have not played this game, I suggest trying to play it casually, to get just how horrendous the controls are; then watch this run. Mario is slow and extremely annoying to control, and every step of the level design seems like a giant "piss off" to the player.
+	$LF
+]p
+[h3 
+	" Mechanics, tricks and glitches
+	$LF
+]h3
+[h4 
+	" Movement
+	$LF
+]h4
+[p 
+	"To monitor a variety of adresses regarding movement, I made a very simple lua script that 
+	[a href=/userfiles/info/40537966076771555 
+		"you can find here.
+	]a
+	$LF
+]p
+[p 
+	"The game has a "P-meter" that goes up for every frame walked, in the air (while not windup-ing), and while holding right while capeing. There are three speeds: Mario walks at 1px/f; he runs at 2px/f when the P-meter reaches 64, and 3px/f when it reaches 112. There are no subpixels in this game. The P-meter can only exceed 64 when A, the run button, is held.) 
+	$LF
+]p
+[p 
+	"Note that normal jumps cannot reach P-speed (instead limited to 2 speed.) 
+	$LF
+]p
+[p 
+	"There are two types of normal jumps (I will describe the cape later on): normal jumps, done with B, and spin jumps, done with C. Each of these has a certain 'gravity', which dictates at what speed Mario will rise, then fall. For a normal jump, it's 2 (the adress goes 2 > 0 > 2) and for spinjumps it is 3, which means Mario will rise faster and fall faster; this is useful in a variety of situations. If the gravity is equal to 0, Mario will float (his x pos will remain the same.
+	$LF
+]p
+[p 
+	"In terms of movement, a jump goes like this (I'll take the normal jump here): Windup (10f, 2 gravity) - Jump (depends on how long B is held, max 32f, 2 gravity) - Float (4f, 0 gravity) - Fall (until Mario hits the ground, 2 gravity). Each of these portions of a jump can be watched precisely by observing the animation frame counter, at C41F. If Mario hits an enemy, then the jump "starts over" again, but without windup.
+	$LF
+]p
+[p 
+	"Every jump in the game has a "windup" state wherein the jump cannot be interrupted. During windup, the P-meter will not be increased, and the current "gravity" will be kept for the duration of the windup. A normal jump has a 10 frame windup, while a spinjump has a 3 frame windup. This means if the P-meter is under 64, it's (if possible) faster to use a spinjump for movement (and reach 2 speed in mid-air.).
+	$LF
+]p
+[p 
+	"When landing; the P-meter is set to 32 if greater than 32, or keeps its current value otherwhise. If Mario turns to the left from the right, the P-meter is kept; but if he turns to the left from the right, the P-meter is reset to 0. This means that when I need to slow down during a jump, I do it by turning to the left while in the air, then turning right as soon as I hit the ground. The only exception is floating platforms, which make Mario retain the current P-meter value.
+	$LF
+]p
+[h4 
+	" Double windup glitch
+	$LF
+]h4
+[p 
+	"The spinjump lasts 24 frames, and the normal jump lasts 32 frames (after windup.) If B is released on the exact last frame a jump could last, then Mario will be in the windup state again, but this time with 0 gravity; the jump goes: 
+	$LF
+	"Windup (2g) - Jump (2g) - Windup (0g!!) - Fall. Here, the second windup takes the place of the fall, but it lasts much longer than the float does (10 frames instead of 4.) A double windup jump can stay in the air much longer, which is very useful in a variety of situations.
+	$LF
+]p
+[h4 
+	" Hitboxes
+	$LF
+]h4
+[p 
+	"Hitboxes are equivalent to their sprite: imagine a box exactly around the sprite, and you have its hitbox. This is important, because it means that Mario's x and y position is determined by his sprite, and as such the animation he is in. For example, when falling from a spinjump, Mario's hitbox will be very taller (because of the cape falling with him. In many situations, I can use certain animations that make Mario wider or taller in order to either get pushed by a celling, hit the ground sooner, or hit a goalpoint or enemy sooner.
+	$LF
+]p
+[h4 
+	" P-meter ground carry
+	$LF
+]h4
+[p 
+	"Normally, Mario loses the P-meter (and as such his speed) if he hits the ground. However, the game is very bad at checking if Mario is actually on the ground or not; to jump again, the game only checks if Mario's x pos is at the right position, and the check for if he is on the ground is dealt with separately.
+	$LF
+]p
+[p 
+	"With a bit of clever tricks, we can carry the P-meter. There are two ways to do this: the first is to use the "float" part of a jump while being perfectly aligned with the ground you want to use for the trick. Mario will float a bit at the correct X position; as soon as he approaches the ground, then he will be able to jump again, without having been on ground. This is possible because since Mario is at 0 gravity, he will not go downwards, even if considered by position on the ground.
+	$LF
+]p
+[p 
+	"The second way to do this is using the cape. Falling with the cape has the lowest gravity in the game, 1. If done with 3/7 gliding, then Mario can hit the ground, but is actually registered as on ground on the next frame. Jumping during this frame allows to carry the P-meter.
+	$LF
+]p
+[h4 
+	" Cape mechanics
+	$LF
+]h4
+[p 
+	"When in posession on the game, Mario gets several more options:
+	$LF
+	"- the normal jump is replaced with the cape jump, which is the same as the normal jump, except gravity is 1 instead of 2.
+	$LF
+	"- the spinjump is replaced with the capespin, which can damage enemies from the side; useful when it's needed to clear enemies while staying in the air as little as possible.
+	$LF
+	"- if at P-speed, when Mario jumps, he will do a super jump, then start flying.
+	$LF
+]p
+[h4 
+	" Infinite windup glitch
+	$LF
+]h4
+[p 
+	"For some reason, while doing the cape jump, Mario is able to trigger the windup state infinitely, as long as he is in the air. This is very useful, because it allows to stay in the air much longer, and also to do P-speed carryover.
+	$LF
+]p
+[h4 
+	" L+R flying P-speed gain
+	$LF
+]h4
+[p 
+	"When Mario is not at top P-meter and is currently flying, then his speed will increase for every frame he holds right; but holding right causes Mario to dash towards the ground. However, holding left will make Mario pump his cape, gaining height. We can combine the two; start pumping by pressing left, then holding right will make Mario keep pumping while increasing the P-meter.
+	$LF
+]p
+[h4 
+	" Dash jumping
+	$LF
+]h4
+[p 
+	"Dashing down while flying will boost Mario 4 pixels to the right ( 3 of P-speed + 1 pixel.) In conjunction with floating platforms, Mario can dash down repetadly on floating platforms to gain some extra pixels.
+	$LF
+]p
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 
+	" Stage 1
+	$LF
+]h4
+[p 
+	"Main time same here is using double windup to make a jump that lasts half the stage. Not much changed otherwhise.
+	$LF
+]p
+[h4 
+	" Stage 2
+	$LF
+]h4
+[p 
+	"General optimisation, lag, and a jump in the middle of the stage that skips a cycle of waiting.
+	$LF
+]p
+[h4 
+	" Stage 3
+	$LF
+]h4
+[p 
+	"Use spinjumps at the start to reach 64 P-meter faster. Going under the turtle saves a lot of time. Precise jump under the podoboo that saves another cycle of waiting. Boss optimisation.
+	$LF
+]p
+[h4 
+	" Stage 4
+	$LF
+]h4
+[p 
+	"Much more precise jumps, use of P-meter ground carry up to getting the feather.
+	$LF
+]p
+[h4 
+	" Stage 5
+	$LF
+]h4
+[p 
+	"Super jump directly at the start, then flying until we gain P-speed.
+	$LF
+]p
+[h4 
+	" Stage 6
+	$LF
+]h4
+[p 
+	"General movement optimisation, use of flying when possible to keep P-speed. Near the end of the level, super jump from the very bottom area with the mini-thwomp, then fly with L+R to get P-speed.
+	$LF
+]p
+[h4 
+	" Stage 7
+	$LF
+]h4
+[p 
+	[img class=embed src=http://i.imgur.com/wH0TY5O.png 
+	]img
+	$LF
+]p
+[h3 
+	" Suggested screenshot
+	$LF
+]h3
+[p 
+	[img class=embed src=https://files.catbox.moe/iib0so.png 
+	]img
+	$LF
+]p
+[p 
+	"18377
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": This game, with its peculiar music choices, and its final boss, is like a quirky form of abstract art. It's slow and not exactly entertaining, but it's still...
+	[em 
+		"interesting
+	]em
+	" in its own way. Accepting for the Vault.
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub.
+]p

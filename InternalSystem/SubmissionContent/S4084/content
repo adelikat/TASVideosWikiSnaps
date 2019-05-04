@@ -1,0 +1,422 @@
+4
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"Hi there! In this exciting episode of 'Pokémon Gold: The Game', a young boy named 'A' is going to run around Johto buying and selling items he finds on his journey. Then, he will look in his Coin Case and will make a call to his best friend '999', who will make him a Pokémon Champion without ever fighting the Elite Four.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"This run does not aim for the fastest possible time. It was made to show the people that Generation I isn't the only Pokémon game series that can be completed with pure glitches. I am also 100% sure that this run could be significantly improved, since I have no knowledge about how RNG works in Generation II. I was solving all my problems by inserting big amounts of delay between important actions, so that RNG gets a chance to cycle a couple of times. And, since it is my first TAS ever (excluding the tests), I may have made a bunch of obvious mistakes along the way.
+	$LF
+]p
+[h3 
+	" Categories
+	$LF
+]h3
+[ul 
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Forgoes save data corruption
+		$LF
+	]li
+	[li 
+		" Low% completion
+		$LF
+	]li
+	[li 
+		" Uses a game restart sequence
+		$LF
+	]li
+]ul
+[h3 
+	" Emulator/ROM
+	$LF
+]h3
+[p 
+	"The movie was recorded on 
+	[a class=extlink href=https://code.google.com/p/vba-rerecording/downloads/detail?name=vba-rerecording-svn480-win32.7z&can=2&q= rel=nofollow 
+		"VBA-RR v23.6 svn480
+	]a
+	". Since VBA has problems with emulating the Real Time Clock while recording a movie, and correct RTC values are crucial for the run, the RTC emulation was turned off. All other settings were left at their defaults.
+	$LF
+]p
+[p 
+	"I used a standard UE Gold Version ROM found on the Interwebz. MD5: a6924ce1f9ad2228e1c6580779b23878, filename: Pokemon Gold Version (UE) [C][!].gbc
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[p 
+	"This run is abusing 3 different programming errors:
+	$LF
+]p
+[p 
+	[b 
+		"1. Pokémon cloning glitch
+	]b
+	$LF
+]p
+[p 
+	"In order to buy all the items needed, a huge amount of money is required. Thankfully, using the Pokémon cloning glitch to clone a Pokémon holding an item duplicates the item too. So, to get that huge amount of money, 3 Pokémon holding 3 valuable items (Nugget, PP Up, Big Mushroom) are cloned, essentially doubling my amount of cash.
+	$LF
+]p
+[p 
+	[b 
+		"2. Coin Case glitch/glitch dimension
+	]b
+	$LF
+]p
+[p 
+	"On Pokémon Gold/Silver, there is a popular glitch involving opening the Coin Case after listening to Machop/Machamp's cry. The Coin Case text script is improperly terminated, so the game tries to execute commands past the actual script, leading to arbitrary code execution. 
+	$LF
+]p
+[p 
+	"This text script error causes the game to jump to address $E112. By listening to specific cries, manipulating the party Pokémon list and by standing in specific locations on the map, it is possible to redirect that accidental jump to a useful location - I chose my 4th boxed item as a location to store my code (more on that later).
+	$LF
+]p
+[p 
+	[b 
+		"3. Glitched Pokégear numbers
+	]b
+	$LF
+]p
+[p 
+	"There exist only 36 different numbers a player can hold in their Pokégear contact list. However, the maximum value for a byte is 255, not 36. So there exist (255-36 equals... umm...) 219 numbers with no behavior assigned. Every number has a pointer, which tells the game where to look for the script to execute after calling a number.
+	$LF
+]p
+[p 
+	"All those script pointers are located in a table. Like with the glitch Pokémon in Gen I, requesting a script pointer for a number with ID bigger than 36 will cause the game to read a pointer from a memory area beyond the table. And by sheer luck, the number ID 255 (0xFF) happens to have a script pointer that triggers the Hall Of Fame sequence!
+	$LF
+]p
+[p 
+	[b 
+		"Creating the payload
+	]b
+	$LF
+]p
+[p 
+	"So the goal of the run is to turn the Coin Case's bad habit of executing arbitrary code into our favor, by causing it to add a glitch person with ID 255 into the Pokégear. Then, by calling that newly added person - we complete the game.
+	$LF
+]p
+[p 
+	"I'm not going to describe the method how the Coin Case's arbitrary code execution works in much detail. If you're interested in the inner workings of this glitch, visit this link: http://forums.glitchcity.info/index.php/topic,6716.0.html
+	$LF
+]p
+[p 
+	"The address $E112, the initial jumping location, is a ECHO RAM section which contains several music/sound related addresses. By playing different sounds and cries it is possible to change the code flow and jump somewhere else. Machop's cry contains a sequence which will redirect the instruction pointer to $EB12.
+	$LF
+]p
+[p 
+	"Now at $EB12, a table of current color palettes is located. By standing in specific areas, it is again possible to redirect the code flow. The grassy area in front of Bill's lab is such a specific area - it contains a jump to $FA98.
+	$LF
+]p
+[p 
+	"After this jump, we're finally located somewhere more useful - in the middle of the third party Pokémon data. This is where the most manipulation potential is. But instead of trying to construct opcodes by catching Pokémon with specific IVs, I decided to use fourth Pokémon's moveset and ID number to create yet another jump to $F61D - 4th item in the PC box. Now, I can construct my own program inside my PC.
+	$LF
+]p
+[p 
+	"The code used to add the person only has to do two different things:
+	$LF
+]p
+[ul 
+	[li 
+		" Add the actual person to the list (write 0xFF to any address between $D9C6 and $D9CF)
+		$LF
+	]li
+	[li 
+		" Clean up the stack and return control back to the game
+		$LF
+	]li
+]ul
+[p 
+	"So normally, this piece of machine code should look like this:
+	$LF
+]p
+[pre 
+	"ld   a,$ff
+	$LF
+	"ld   ($d9c6),a
+	$LF
+	"inc  sp
+	$LF
+	"ld   bc,$0134
+	$LF
+	"push bc
+	$LF
+	"jp   $12f5
+	$LF
+	$LF
+]pre
+[p 
+	"Sadly, it would be way too easy if it was possible with such a little bit of effort. The opcodes we can use are severely limited by the maximum quantity (99) and the item availability. The real code used to add the glitch ID 255 to the Pokégear is a lot more difficult to understand, and half of it are just elaborate ways of doing nothing, just to pad the opcodes and make them representable as items.
+	$LF
+]p
+[p 
+	"Below is the item list used in the run, and the code it evaluates to.
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-225 
+				"Item list
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-226 
+				"Assembly
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-227 
+				"Minimize tab
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-225 
+			[pre 
+				"*** ANY ITEM, ANY QTY     
+				$LF
+				"*** ANY ITEM, ANY QTY     
+				$LF
+				"*** ANY ITEM, ANY QTY    
+				$LF
+				"X Defend              x2   
+				$LF
+				"TM49                  x1   
+				$LF
+				"Hyper Potion          x5   
+				$LF
+				"Burn Heal             x7   
+				$LF
+				"Fresh Water           x1   
+				$LF
+				"Surf Mail             x79  
+				$LF
+				"PP UP                 x1   
+				$LF
+				"TM34                  x1  
+				$LF
+				"*** ANY ITEM, ANY QTY      
+				$LF
+				"Antidote              x30  
+				$LF
+				"TM28                  x1   
+				$LF
+				"*** ANY ITEM, ANY QTY     
+				$LF
+				"Carbos                x1   
+				$LF
+				"*** ANY ITEM, ANY QTY      
+				$LF
+				"Awakening             x29  
+				$LF
+				"Blk Apricorn          x1   
+				$LF
+				"*** ANY ITEM, ANY QTY      
+				$LF
+				"Flower Mail           x46 
+				$LF
+				"TM08                  x1   
+				$LF
+				"Great Ball            x4   
+				$LF
+				"Parlyz Heal           x10  
+				$LF
+				"Big Mushroom          x1   
+				$LF
+				"*** ANY ITEM, ANY QTY     
+				$LF
+				"RageCandyBar          x1   
+				$LF
+				"*** ANY ITEM, ANY QTY    
+				$LF
+				"Flower Mail           x51  
+				$LF
+				"Surf Mail             x51 
+				$LF
+				"TM33                  x1   
+				$LF
+				"*** ANY ITEM, ANY QTY      
+				$LF
+				"TM41                  x1  
+				$LF
+			]pre
+		]div
+		[div class=tab-pane fade id=y-226 
+			[pre 
+				"inc sp
+				$LF
+				"db $02      ; item filler
+				$LF
+				"pop af
+				$LF
+				"ld bc,$0510 ; 
+				"[$0510]
+				" == 0x4F
+				$LF
+				"ld a,(bc)
+				$LF
+				"rlca
+				$LF
+				"ld l,$01
+				$LF
+				"or l
+				$LF
+				"ld c,a
+				$LF
+				"ld a,$01
+				$LF
+				"ld ($ff00+c),a
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"db $09      ; item filler
+				$LF
+				"ld e,$db
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"dec e
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"db $0c      ; item filler
+				$LF
+				"dec e
+				$LF
+				"ld h,e
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"db $35      ; item filler
+				$LF
+				"ld l,$c7
+				$LF
+				"ld bc,$0404 ; 
+				"[$0404]
+				" == 0xFF
+				$LF
+				"db $0d      ; item filler
+				$LF
+				"ld a,(bc)
+				$LF
+				"ld d,a
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"ld (hl),d
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"db $b8      ; item filler
+				$LF
+				"inc sp
+				$LF
+				"db $05      ; item filler
+				$LF
+				"inc sp
+				$LF
+				"pop hl
+				$LF
+				"ld bc,$0000 ; 0000 - any item, any qty
+				$LF
+				"jp hl
+				$LF
+			]pre
+		]div
+		[div class=tab-pane fade id=y-227 
+		]div
+	]div
+]div
+[h3 
+	" Hard luck manipulations used:
+	$LF
+]h3
+[ul 
+	[li 
+		" Manipulating the trainer ID's high byte to be 0xD6 or 0xF6 (~0.78%)
+		$LF
+	]li
+	[li 
+		" Encountering a Paras holding Tinymushroom (~3.75%)
+		$LF
+	]li
+	[li 
+		" Encountering a Paras holding Big Mushroom (~1.2%)
+		$LF
+	]li
+	[li 
+		" And of course, long continuous critical hit streaks to speed up the battles
+		$LF
+	]li
+]ul
+[h3 
+	" Explaining certain steps
+	$LF
+]h3
+[p 
+	"At the game's very beginning (first 8 minutes of the game), all actions are delayed on purpose, most noticeably, by continuously mashing the A button, causing the text scrolling to be delayed. For some reason, with insufficient time delay, I wasn't able to successfully get the Coin Case to do what I wanted.
+	$LF
+	"Also, derping on the new game menu at the game start is required to get a proper trainer ID.
+	$LF
+]p
+[p 
+	"While travelling from town to town, I collect every possible valuable item I can find. The real problem with getting all the needed items is the lack of money. So I try to earn as much money as I can, so later only one item duplication round is needed to satisfy my needs.
+	$LF
+]p
+[p 
+	"The real time clock is very important to the trick. If the glitch person 255 is called after the morning has passed, the game would say that 'the number is out of the area'. Also, the lady who gives out TM21 (Frustration) comes only on Sundays.
+	$LF
+]p
+[p 
+	"Special thanks to Sanqui, for discovering the actual arbitrary code part of the coin case glitch.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": While this run does well to showcase an arbitrary code execution glitch that can be used to enter the Hall of Fame, there are a number of issues that make it unsuitable for publication:
+	$LF
+]p
+[ul 
+	[li 
+		" It is slower than the current unassisted any% record of 
+		[a class=extlink href=http://www.twitch.tv/werster/c/2958728 rel=nofollow 
+			"1:22:13 by Werster
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" It is also not optimal for a TAS at some points, e.g. when walking around for a wild Pokémon encounter.
+		$LF
+	]li
+	[li 
+		" It also does not conform to the standard of what's considered finishing the game, which is triggering the credits through defeating Red, not through the Hall of Fame. (However, whether this is required for glitched completion may be debatable. Werster's unassisted run also uses major glitches and finishes the game by defeating Red. My personal opinion is that a glitched TAS should trigger the credits through Red.)
+		$LF
+	]li
+]ul
+[p 
+	"For these reasons, I'm rejecting the run for publication. Good luck on your future attempts!
+]p

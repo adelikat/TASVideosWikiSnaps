@@ -1,0 +1,178 @@
+2
+[p 
+	"A concise explanation of compact disc CDs, gathered for the first time EVER in one location. It isn't finished yet.
+	$LF
+]p
+[h2 
+	" Introduction
+	$LF
+]h2
+[p 
+	"While researching the topic of compact disc and disc image formats for BizHawk, we discovered that information is scattered, hard to understand, frequently wrong, and occasionally missing altogether (although perhaps implied by a very careful analysis of specs). Out of fear for ourselves forgetting what we discovered and finding it difficult to reconstruct later, as well as out of pure generosity, we decided to write it all down. 
+	$LF
+]p
+[p 
+	"Moreover, it isn't possible to unambiguously interpret the specifications. Therefore in accordance with this as well as the overall complexity, this document sometimes will take a prescriptive approach. It's meant as a prescription for us, but I hope you'll find the prescriptions useful as well.
+	$LF
+]p
+[p 
+	"DISCLAIMER: The notes contained herein may be WRONG and are probably not even FINISHED. Furthermore, it may use NON-STANDARD terminology, in areas where existing terminology was inconsistent or inadequate or just plain misunderstood by me. Furthermore, it may say things to which there are exceptions (and the exceptions will be added later as they are discovered or reported) for purposes of laying down clear rules which we have judged to be adequate for our purposes. 
+	$LF
+]p
+[p 
+	"These notes are limited in scope to COMPACT DISCS. CDRs may be different in some ways. Furthermore, MULTISESSION discs have not yet been contemplated, as well as a host of other less usual extensions.
+	$LF
+]p
+[p 
+	"The context of this document is emulation of compact discs for PCE-CD, Saturn, and Playstation emulators. This includes whatever is necessary to process and access disc image files, but nothing that is related to extracting or burning them, which is a sloppiness best left for hydrogenaudio or the like.
+	$LF
+]p
+[h2 
+	" Definitions
+	$LF
+]h2
+[p 
+	"A Disc is what you're dealing with, much to your disappointment. Wouldn't you rather be sailing?
+	$LF
+]p
+[p 
+	"Subcode and Sub-channel are used almost interchangeably, although Subcode relates more to the concept and Sub-channel refers to a specific data channel contained in the subcode. For example you might have a Subcode descrambler, and then just fetch Subchannel Q from it.
+	$LF
+]p
+[p 
+	"SubQ is a useful shorthand for Subchannel Q.
+	$LF
+]p
+[p 
+	"LBA is a Logical Block Address. It's just the number of the sector on the disc. This is the most sensible way for a programmer to address data. But beware: sometimes negative LBA will be sensible. Deal with it.
+	$LF
+]p
+[p 
+	"MSF is a timestamp format. It is different from an LBA but each one is the same size as an LBA and they can be readily converted. MSF are stored on the disc in a one-byte, two digit BCD format. 
+	$LF
+]p
+[p 
+	"Since MSF and LBA are more general terms than concrete entities, you will discover MSFs and "LBAs" with varying meanings. With MSF it isn't so bad: You might encounter MSFs which are Absolute, or Relative. A Relative MSF is relative to the start of a Track. An Absolute MSF begins at -150 (aka -00:02:00) and increments without deviating. But with LBA, you have equivalently according to various sources, LBA, LSN, and ABA. It isn't clear what any of these mean, or whether they're based on -150 or 0. (More on the significance of -150 later).
+	$LF
+]p
+[ul 
+	[li 
+		" I strongly recommend you adopt the following convention: The LBA shall be based on -150; don't use ABA or LSN terminology; use aMSF and rMSF terminology for the types of MSFs.
+		$LF
+	]li
+]ul
+[p 
+	"A Track is just what you think it is. But there are some surprises. The first track on a disc is nicely viewed as Track #0, and is known as the Lead-in Track. You do not ever get these with a disc image and they can't be ripped reliably. Tracks #1-#99 are known as Information Tracks (and maybe constitute the User Data Area or Information Area or something like that?). The Lead-out track I call Track #100. As with the Lead-in, you never see these. Nonetheless, games may be accessing them due to varying capabilities of CD-Readers.
+	$LF
+]p
+[p 
+	"A CD-Reader is a combination of physical equipment and firmware implementation which yields a certain view of the disc to users.
+	$LF
+]p
+[p 
+	"A RawTOCEntry is a data structure stored in the Lead-in track of a disc. In triplicate (at least?), since they're not reliable, and the data is very important. A CD-Reader will look for the best-of-3 matches and compile them into the TOC. There are special RawTOCEntries for encoding the additional information stored in the TOC.
+	$LF
+]p
+[p 
+	"A TOC is a 101-entry table of track information that is seemingly a common (and quite useful) representation of the structure of the disc. It's sized 101 to allow room for the Tracks #0 and #100. Additionally, it stores the number of the "first and last recorded information tracks" since they might not be otherwise distinguishable from the RawTOCEntries; it further stores the Session format (CDDA, CDI, or CDXA)
+	$LF
+]p
+[p 
+	"A Blob is a source datafile within a cue file. I made up this word. I'm not sure if I need it.
+	$LF
+]p
+[h2 
+	" Disc Discussion
+	$LF
+]h2
+[p 
+	"Here's the story of a Disc.
+	$LF
+]p
+[p 
+	"A disc begins with a Lead-in track. This track is of unknown length. CD-Readers autonomously read this area while mounting the disc to read the TOC. CD-Readers do not typically provide user access to this area; however, some are capable. Unfortunately, this area does not exist in any image file formats. It will need to be emulated. The disc's addressing schemes have no provision for accessing it, but some CD-Reader designers and programmers have been imaginative.
+	$LF
+]p
+[p 
+	"(TBD)
+	$LF
+]p
+[p 
+	"The first track always contains a pregap of at least 2 seconds. There are rules governing pregaps and postgaps around data tracks. Those are not written here yet. They are not very interesting to us, except insofar as pregaps and postgaps may occasionally appear indistinguishable in various situations.
+	$LF
+]p
+[h3 
+	" More details on Lead-in
+	$LF
+]h3
+[p 
+	"The Q subchannel entries in the lead-in area are coded as track 0, index 0. This sort of makes sense, since it is before track 1.
+	$LF
+]p
+[h2 
+	" CUE Format (CUE+BIN)
+	$LF
+]h2
+[p 
+	"CUE SUCKS
+	$LF
+]p
+[p 
+	"This is a good reference for CUE files: http://digitalx.org/cue-sheet/
+	$LF
+]p
+[p 
+	"The first rule of CUE files is that all timestamps are relative to the current blob. At any given point in a cue file, it is not readily apparent where you are on the disc unless you think about it really hard.
+	$LF
+]p
+[p 
+	"A cue file must not contain an entry for track 1, index 0. This is because the CD spec mandates 2 seconds minimum here. If you want additional pregap, you must use a PREGAP command.
+	$LF
+]p
+[p 
+	"Information regarding cue commands can be found at the digitalx.org URL. What follows are notes or reinforcements. 
+	$LF
+]p
+[p 
+	"A PREGAP command causes zeros to be emitted to the disc, without consuming data from the current blob. It can be mixed with a INDEX 00 command. *In this case it is not clear where the previous track ends or where this track starts. Bizhawk does not cope with it yet*
+	$LF
+]p
+[p 
+	"A POSTGAP command causes zeros to be emitted to the disc, without consuming data from the current blob. 
+	$LF
+]p
+[h2 
+	" .TOC format (TOC+BIN)
+	$LF
+]h2
+[p 
+	".TOC format is made by the cdrdao program. Despite having a high quality Windows port, cdrdao seems almost solely used by linux folks. As a consequence, there is very little support for this format among Windows tools.
+	$LF
+]p
+[p 
+	"Mysteries:
+	$LF
+	".TOC may start with CD_DA or CD_ROM. Differences? (session type>)
+	$LF
+]p
+[p 
+	"the .TOC contains entries like this: TRACK data_mode subcode_mode.
+	$LF
+	"The track will consume data from the specified DATAFILE in blocks consisting of 2048/2336/2352/etc user data, followed by some bytes of subcode data. For instance, "TRACK MODE1_RAW RW_RAW" will result in 2352+96 bytes per block, a 2352 byte userdata sector plus 96 bytes of all 8 subchannels R-W. This pattern is repeated.
+	$LF
+]p
+[h2 
+	" .CCD format
+	$LF
+]h2
+[p 
+	"TBD
+	$LF
+]p
+[h2 
+	" Discussion
+	$LF
+]h2
+[p 
+	"Find zeromus on freenode or at zeromus@users.sf.net to argue about these contents
+]p

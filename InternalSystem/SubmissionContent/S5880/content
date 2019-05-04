@@ -1,0 +1,260 @@
+4
+[p 
+	(youtube|v=OHnRSkEQLGQ)
+	$LF
+]p
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"After my recent 
+	(__wikiLink|5876S|Dragster)
+	" submission, it was 
+	[a href=/forum/p/467606#467606 
+		"suggested
+	]a
+	" that 
+	(__wikiLink|3545M|Barnstorming)
+	" is another game that merits a closer look.
+	$LF
+	"It has a more confusing but equally dubious history of records around it featuring everybody's favorite Todd Rogers.
+	$LF
+	(__wikiLink|Alyosha)
+	" wrote down the 
+	[a href=/forum/p/460574#460574 
+		"short version
+	]a
+	" of this story, or you can read a way more detailed write-up on 
+	[a class=extlink href=https://www.reddit.com/r/speedrun/comments/710yi3/history_i_have_reason_to_believe_todd_rogers_was/ rel=nofollow 
+		"reddit
+	]a
+	".
+	$LF
+]p
+[p 
+	"So I started to look into it. As for many Atari 2600 games, they are small and simple, so a 
+	[a class=extlink href=https://github.com/MrWint/barnstorming/blob/master/barnstorming.asm rel=nofollow 
+		"disassembly
+	]a
+	" was fairly easy to create.
+	$LF
+	"Also, the code structure had a lot of similarities to the code of Dragster, which helped a lot in understanding it.
+	$LF
+	"Steve Cartwright, the creator of this game, mentions in the game's manual: "
+	(__wikiLink|...)
+	" I'd particularly like to thank David Crane for his help in 'getting me off the ground'", and David Crane is the creator of Dragster. That's probably where the similarities come from.
+	$LF
+	"All further explanations and discoveries are based on this disassembly.
+	$LF
+]p
+[p 
+	[b 
+		"Note:
+	]b
+	" This movie contains two runs as a showcase of different ways to beat the game.
+	$LF
+	"I figured this game doesn't merit branches so I bundled them this way, but if you think otherwise I can trivially split them into separate movies, or drop one of them.
+	$LF
+]p
+[h3 
+	" Game mechanics
+	$LF
+]h3
+[p 
+	"The game as a whole is very simple: fly through the barns in the shortest amount of time.
+	$LF
+]p
+[h4 
+	" Game modes
+	$LF
+]h4
+[p 
+	"The game features 4 game modes, which differ in the amount of barns you need to fly through and the pattern of buildings and geese on the map.
+	$LF
+	"Game mode 4 is supposed to be random, but all it randomizes is the starting position in the pattern, the patters themselves are still fixed.
+	$LF
+]p
+[p 
+	"This run only considers game mode 1, which requires the least amount of barns and can be completed the fastest.
+	$LF
+]p
+[h4 
+	" Movement
+	$LF
+]h4
+[p 
+	"The movement looks like a simple auto-scroller, but has quite some oddities to it which make it hard to optimize.
+	$LF
+	"The plane moves forward at 1.5 pixels/frame by default, and up to 2.3125 pixels/frame when pressing B.
+	$LF
+	"However, when pressing up or down, it only moves at 15/16 its normal speed, so you want to fly straight as much as possible.
+	$LF
+]p
+[p 
+	"Vertically, the plane moves up to 1.4375 pixels/frame up or down. The vertical speed gradually builds up and resets to 0 immediately once you stop the input.
+	$LF
+]p
+[p 
+	"Fractional movement amounts are stored in subpixel variables. However, the fractional amounts don't have any direction, it's easier to think of them as movement potential: potential build up moving upwards can also be used to accelerate moving downwards.
+	$LF
+	"One of the quirks is that the speeds are only updated every second frame, but they are applied to your movement every frame.
+	$LF
+	"This, in combination with the fractional movement buffers, means that it's not optimal to hold up or down to move vertically.
+	$LF
+	"It's better to only press up every second frame to keep the speed up, and use the in-between frames only if you have enough fractional potential stored up to move 2 pixels instead of one.
+	$LF
+	"That way, for each frame you press up or down and therefore lose out on horizontal distance, you get more vertical distance on average.
+	$LF
+]p
+[h4 
+	" Buildings
+	$LF
+]h4
+[p 
+	"Another quirk is that the barns and windmills don't have a fixed distance between them.
+	$LF
+	"They're not laid out on a fixed track, instead the next building spawns as soon as the last building left the screen (there are "blank" buildings which sometimes create gaps, but they follow the same rules).
+	$LF
+	"The new building always spawns at the same relative position to you at the right edge of the screen, independent of how much you were moving.
+	$LF
+	"That means it's possible to overshoot and waste a pixel of distance during this transition, depending on how your position aligns with the one of the current building.
+	$LF
+	"To avoid that, you can intentionally slow down, using the extra slack to start moving vertically early for free, or aligning your subpixels better.
+	$LF
+]p
+[h4 
+	" Collisions
+	$LF
+]h4
+[p 
+	"Collisions in this game are kind of painful to predict, because it is based on the hardware collision detection of the Atari 2600 console, which does pixel-perfect collision detection.
+	$LF
+	"That means you collide if and only if your pixels overlap.
+	$LF
+	"And this is affected by the animation cycles of the different objects, so you may or may not hit a windmill at a certain height depending on where it is in its animation when you pass over.
+	$LF
+	"But it also means you can thread the needle through objects in some instances, and this runs shows some instances of that.
+	$LF
+]p
+[h4 
+	" Geese
+	$LF
+]h4
+[p 
+	"Whenever you are moving at more than 2 pixels/frame, geese spawn at the top of the screen.
+	$LF
+	"Their patterns are based on a fixed cycle, hitting them costs a lot of time, and avoiding them also costs time since you need to move up and down around them, costing you horizontal distance.
+	$LF
+	"So the best situation is when they don't get in your way at all.
+	$LF
+	"There are two ways to manipulate the geese. The first one is slowing down to avoid spawning them, but this is not practical for obvious reasons.
+	$LF
+	"The second, way more effective method shown in this run is using the difficulty switch.
+	$LF
+	"The right difficulty switch controls the number of geese that spawn, when switched it doubles the rate at which the game cycles through the geese patterns.
+	$LF
+	"So toggling it mid-game can be used to speed up or slow down where you are in the pattern cycle, making the geese spawn earlier or later.
+	$LF
+	"By using this strategically, you can avoid the geese ever getting in your way without slowing down.
+	$LF
+]p
+[h3 
+	" Glitches
+	$LF
+]h3
+[p 
+	"During my investigation, I not only found the described movement tech that allows you to move faster compared to the naive way, but also looked for ways to beat the game faster altogether.
+	$LF
+]p
+[p 
+	"As it turns out, it is actually possible to clip into a barn in such a way to both count them for your score and have it repel you backwards so you can score it again.
+	$LF
+]p
+[p 
+	"The setup is fairly simple: whether you score or hit the barn only depends on your vertical position, and which direction you are repelled in only depends on your horizontal position.
+	$LF
+	"By entering the barn at the top-most valid height in the first frame, it scores the barn, and by then moving up to collide with it on the second frame while not moving into the barn too much, it repels you backwards.
+	$LF
+	"The balance it tricky to get right, and it's not possible while going full speed, but it can be repeated with the same barn multiple times.
+	$LF
+]p
+[p 
+	"In order to make the second frame collision easier without needing to move vertically inside the barn, you can actually use the difficulty switches yet again.
+	$LF
+	"The left difficulty switch lowers the clearance of the barns, so doing that at the second frame inside the barn guarantees a collision without needing to move vertically.
+	$LF
+]p
+[p 
+	"Doing this 9 times on the first barn of the stage allows beating the game significantly faster than otherwise possible.
+	$LF
+]p
+[h3 
+	" Applications to RTA
+	$LF
+]h3
+[p 
+	"Most of the movement tech requires rapidly changing precise inputs and are likely infeasible for RTA.
+	$LF
+	"The Goose manipulation on the other hand is not at that precise, the time window is ~1 second for each flip of the difficulty switch, and should be feasible, if a bit awkward to execute.
+	$LF
+]p
+[p 
+	"As for the glitch scoring a barn multiple times, it's fairly precise and hard to set up, it's probably feasible in RTA but highly inconsistent.
+	$LF
+	"A realistic route probably aims to do it once or twice to cut down on the overall distance, but still does most of the course normally.
+	$LF
+]p
+[h3 
+	" Verdict
+	$LF
+]h3
+[p 
+	"So as it turns out, the claimed time of 32.67 and 32.50 are in fact technically possible.
+	$LF
+	"A time of 32.50 is virtually impossible to be achievable with human inputs though, and a time of 32.04 is clearly impossible without using glitches, and there's no indication they were known (or allowed) at that time.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": Judging...
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": This is a very neat idea, it was really interesting to resolve, thanks for coming up with it! Perfect timing too.
+	$LF
+]p
+[p 
+	"Let's look into the least obvious option - accepting this as an unusual goal with a 
+	(__wikiLink|MovieClassGuidelines#Demonstration|demonstration tag)
+	". It is theoretically possible, because this run got Moons feedback, and it does showcase something quite unconventional: completing the game twice in a row with slightly different rules.
+	$LF
+]p
+[p 
+	"The question though is, is this run a concept demonstration? What concept does it demonstrate? Strictly speaking, it doesn't demonstrate any concept. It just contains 2 separate and unrelated movies, stitched together for the sake of being compact and attracting all the attention at once, instead of posting two usual submissions. I can say that it worked out well.
+	$LF
+]p
+[p 
+	"But this is the goal of the submission itself, not of the movie it contains: completing the game twice with slightly different goals is unrelated to in-game conditions, and as a self-imposed goal it doesn't represent anything solid and unique, neither does it add any restrictions that would make gameplay more impressive and therefore Moons-worthy. And also the same effect can be achieved if one simply makes 2 different movies: watching them one after another will result in identical experience, and would also not be questionable in terms of legitimacy.
+	$LF
+]p
+[p 
+	"We can compare this "goal" with other examples of concept demos, like 
+	(__wikiLink|2593M|ring attack)
+	", 
+	(__wikiLink|2676M|walkathon)
+	", 
+	(__wikiLink|871M|several games in one movie)
+	". We will see that all of them add some TAS challenge, make the runs harder to make, and make them stand out from gameplay we usually see here. Stitching 2 runs in one does neither.
+	$LF
+]p
+[p 
+	"Even if we try to treat this particular run as a concept demo in order to accept it, it doesn't actually demonstrate a unique impressive concept that we require from that category. Rejecting for goal choice.
+	$LF
+]p
+[p 
+	"MrWint, by all means make two separate submissions so we could judge them normally! This is the option a few people in the thread called for, and I agree with them.
+]p

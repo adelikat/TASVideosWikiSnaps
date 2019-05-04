@@ -1,0 +1,272 @@
+10
+[h2 
+	"City Connection
+	$LF
+]h2
+[p 
+	"City Connection is a side view driving game. The game was originally developed for the arcade by Jaleco in 1985, it later received a port on the NES in 1988. The story is fantastic, and oddly specific. You've broken into an exclusive paint store in New York City and are now on the run whilst carrying leaking 10 gallon cans of paint. You must inexplicably drive over every mile of highway in order to make your escape.
+	$LF
+]p
+[p 
+	"Just another day in the city.
+	$LF
+]p
+[p 
+	(youtube|v=zIFUAIXVTkI)
+	$LF
+]p
+[h2 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.2.2
+		$LF
+	]li
+	[li 
+		" Complete all 16 unique stages. True to the arcade style, the game loops indefinitely (the stage rolls from 255 back to 0). The stage number is masked so if you keep playing you'd actually repeat stages 9-16 until the counter rolled over and took you back to the first stage. The backgrounds for the 6 cities rotate and are tracked independantly from the stage counter.
+		$LF
+	]li
+]ul
+[h2 
+	" Game Mechanics
+	$LF
+]h2
+[h3 
+	" Controls
+	$LF
+]h3
+[ul 
+	[li 
+		" up - hold up when jumping to jump to a higher platform
+		$LF
+	]li
+	[li 
+		" left - turn left
+		$LF
+	]li
+	[li 
+		" right - turn right
+		$LF
+	]li
+	[li 
+		" down - makes the car fall down faster, doesn't work when jumping
+		$LF
+	]li
+	[li 
+		" B - shoot oil can
+		$LF
+	]li
+	[li 
+		" A - jump
+		$LF
+	]li
+	[li 
+		" select - select 1 or 2 players
+		$LF
+	]li
+	[li 
+		" start - pause
+		$LF
+	]li
+]ul
+[h3 
+	" Backgrounds
+	$LF
+]h3
+[ul 
+	[li 
+		" New York
+		$LF
+	]li
+	[li 
+		" London
+		$LF
+	]li
+	[li 
+		" Paris
+		$LF
+	]li
+	[li 
+		" Frankfurt - not seen in this run
+		$LF
+	]li
+	[li 
+		" New Delhi
+		$LF
+	]li
+	[li 
+		" Tokyo
+		$LF
+	]li
+]ul
+[h3 
+	" Items
+	$LF
+]h3
+[ul 
+	[li 
+		" Oil cans - You can collect and shoot these at police cars to take them out, but any extra left over are counted for extra points at the end of a stage, costing some time.  So we want to end each level with no cans left (only acception is the last stage)
+		$LF
+	]li
+	[li 
+		" Balloons - collecting 3 balloons rewards you with a warp. The warp takes you to the next "stage" (increments the stage counter), but strangely it also tries to increment the background counter by 2. Additionally the memory address that stores the controller inputs is involved in the calculation, so by manipulating with the select button you can get it to increment by 3 instead.
+		$LF
+	]li
+	[li 
+		" Hearts - under certain specific conditions hearts will spawn in Paris. Besides spawn conditions and the sprite the hearts are the same as balloons. I may be missing some criteria, but it seems you need to press B when your speed is 4 or less (while you're turnning around). I'm a little unsure if it requres that you have 0 oil cans.
+		$LF
+	]li
+	[li 
+		" UFO - if certain specific criteria are met a UFO will spawn. Collecting a UFO nets you an extra life. Unfortunately the UFO is not seen in this TAS. It looks like you again need to hit B when you have speed 4 or less (not sure about having 0 oil cans), but your X position must also be greater than 0xE0. Also there is what appears to be a shot or kill counter that must be 10, the counter does seem to get decremented sometimes, but I didn't really quantify when that happens.
+		$LF
+	]li
+	[li 
+		" Rabbit - if you jump over a spike in Tokyo a rabbit can spawn. It uses the same slot as the UFO, but if you collect the rabbit it is treated as a balloon. Also not seen in this TAS.
+		$LF
+	]li
+]ul
+[h3 
+	" Enemies
+	$LF
+]h3
+[ul 
+	[li 
+		" Police cars - you lose a life if you hit them, but you can take them out with oil cans
+		$LF
+	]li
+	[li 
+		" Cat - you lose a life if you run into a cat. Cats are impervious to oil cans
+		$LF
+	]li
+	[li 
+		" Spikes - these appear if you spend too long on the same level of platforms, but they're not seen in this run.
+		$LF
+	]li
+]ul
+[h2 
+	" Strategies and Tricks
+	$LF
+]h2
+[p 
+	"The most difficult part of this TAS is the routing. The route is simple enough that stage by stage details probably aren't necessary, but the high level strategy is to keep turning and changing platform levels to a minimum. It turns out that the best way to achieve this is to work from top down, finishing each layer as you go. The second to last stage in this run is the exception. The stage has platforms so small that you don't have time to jump (unless you do some pause manipulations) because the cooldown animation is still going when you hit the end of the platform.
+	$LF
+]p
+[p 
+	"The other part of the route is the warp route. The warp animation is extremely long. So long that it isn't worth using the normal balloons that spawn when the spawn counter hits 0x700 and 0xE00 (the counter resets after a completed stage). You can manipulate a heart spawn right at the beginning of the stage if you're on the Paris background, and 2nd heart even spawns right after. The early heart spawn makes the warp worth while, even though you're actually only skipping to the next stage (rather than over the next stage). Since we can get the background counter to increment by 3 this means we can warp on the 3rd stage and every 4th stage after that if we want. It turned out to be most efficient to get one balloon in the first two stages and then two hearts on the 3rd stage, but because the spawn counter keeps running across a warp for the rest of the background loops it made more sense to collect two balloons in stages and just one heart in Paris for the next warp. Lastly to end as soon as possible it was much faster to head to New Delhi for once and shift the last warp to the 16th stage so we could end on a warp.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"If you hold up and jump, you can jump towards the next layer up, but if there is a platform in your way you'll bonk against the ceiling. It turns out that you gain control to turn around about 5 frames earlier when you bonk into a ceiling, so this is used as much as possible to save time.
+	$LF
+]p
+[p 
+	"You can gain a little extra hang-time during a jump by pausing and unpausing at the right time. This is used to avoid wasting time switching platform levels in a number of places, especially in later levels. Conversely it is possible to us the pause buffering to buy more time on a platform to run out the cool down animation and allow for a jump. Credit to L33Tz0rs (ツ ツ) on youtube who used this strategy in his good, but slightly slower TAS of this game.
+	$LF
+]p
+[h2 
+	" Improvements
+	$LF
+]h2
+[ul 
+	[li 
+		" Route testing was by no means exhaustive, so I wouldn't rule out the possibility of saving a few frames with an improved route, but I think what we came up with is pretty good.
+		$LF
+	]li
+]ul
+[h2 
+	" Thanks to:
+	$LF
+]h2
+[ul 
+	[li 
+		" EZGames69 for the collaboration and for suggesting this project.
+		$LF
+	]li
+	[li 
+		" Takanawa for his WIP showing how warps could save time and how to manipulate hearts and the UFO.
+		$LF
+	]li
+	[li 
+		" mtvf1 for pointing me to Takanawa's WIP and advocating for a warps route
+		$LF
+	]li
+	[li 
+		" Alyosha for doing more research on finding the difficulty cap.
+		$LF
+	]li
+	[li 
+		" LackAttack24 and other RTA runners for their interest in the project
+		$LF
+	]li
+	[li 
+		" my Twitch chat for the ideas and encouragement
+		$LF
+	]li
+	[li 
+		" The TASMania team
+		$LF
+	]li
+]ul
+[h4 
+	" Screenshots:
+	$LF
+]h4
+[p 
+	"372, 2600, 4204, 6133, 7389, 29080
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|Memory)
+	": Claiming for judging (and redemption)
+	$LF
+]p
+[p 
+	(__wikiLink|Memory)
+	": So it turned out last time that there was no real significance to only beating 6 stages and that there are a total of 16 unique stages and the last 8 loop when you beat the 16th. 
+	[a href=/forum/p/471844#471844 
+		"Alyosha confirmed this through disassembly
+	]a
+	"  and I've confirmed through cheating the level counter that the game does this. The 
+	(__wikiLink|3722M|current publication)
+	" only beats 6 stages, therefore not actually completing the game.
+	$LF
+]p
+[p 
+	"The optimization of this submission is well done. The warps especially seemed to be well planned.
+	$LF
+]p
+[p 
+	"The audience seems to have received this movie better than the last one, but it's still not great. Aside from the planning of how to use the warps, this movie is just as repetitive as the last one, which received 
+	[a href=/rating.exe/3722/details 
+		"fairly poor ratings
+	]a
+	".
+	$LF
+]p
+[p 
+	"Accepting to Vault to obsolete the 
+	(__wikiLink|3722M|current publication)
+	".
+	$LF
+]p
+[p 
+	[small 
+		[small 
+			[small 
+				"Please don't find out this doesn't actually beat the game again, thanks
+			]small
+		]small
+	]small
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub, after some others.
+]p

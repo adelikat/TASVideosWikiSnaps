@@ -1,0 +1,239 @@
+1
+[p 
+	"This post attempts to explain how NesVideoAgent's automatic screenshot feature works.
+	$LF
+	"It should answer all questions, though it is a little technically oriented. 
+	$LF
+]p
+[h3 
+	" Architecture
+	$LF
+]h3
+[h4 
+	" Outer layer: A php program
+	$LF
+]h4
+[p 
+	"It is run manually by me, though it could be run automatically too.
+	$LF
+	"This commandline program searches the database for submissions that
+	$LF
+	"match these rules:
+	$LF
+]p
+[ul 
+	[li 
+		" Status is not published, rejected or canceled
+		$LF
+	]li
+	[li 
+		" Has no screenshots yet
+		$LF
+	]li
+	[li 
+		" Is for NES, SNES, GB, SGB, GBC, GBA or Genesis
+		$LF
+	]li
+]ul
+[p 
+	"For each matching submission, it does the following:
+	$LF
+]p
+[ul 
+	[li 
+		" Tries to determine which ROM should be used to watch the submission
+		$LF
+		[ul 
+			[li 
+				" Scans the list of Good* ROM names and selects ~90 ones that most closely match the submitted ROM name or game's name
+				$LF
+			]li
+			[li 
+				" If it finds one whose checksum (CRC32, MD5 or other) matches what the submitted movie file has, uses it
+				$LF
+			]li
+		]ul
+		" Runs the emulator with specific parameters
+		$LF
+		[ul 
+			[li 
+				" A requirement is that the emulator can run on parameters without need for keyboard or mouse input
+				$LF
+			]li
+			[li 
+				" The emulator must also accept the fact that it can't produce sound (server has no soundcard)
+				$LF
+			]li
+			[li 
+				" The emulator is run under Xvfb so it can be graphical yet non-interactive
+				$LF
+			]li
+		]ul
+		" Updates the submission message with
+		$LF
+		[ul 
+			[li 
+				" links to images produced by the emulator
+				$LF
+			]li
+			[li 
+				" notes about the ROM selection
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 
+	" Inner layer: Modified emulator
+	$LF
+]h4
+[p 
+	"The emulator is slightly patched version of the normal emulator
+	$LF
+	"used to run the movies.
+	$LF
+]p
+[ul 
+	[li 
+		" It is completely uninteractive (movie file, sync options, play length specified on command line)
+		$LF
+	]li
+	[li 
+		" It includes a beauty analysis module.
+		$LF
+	]li
+]ul
+[h3 
+	" The beauty analysis module
+	$LF
+]h3
+[p 
+	"The beauty analysis module is a component in the emulator that
+	$LF
+	"works like this:
+	$LF
+]p
+[ul 
+	[li 
+		" At every frame when the movie plays, it observes the emulated screen (in a similar manner as AVI encoder does).
+		$LF
+	]li
+	[li 
+		" At every frame, it can also save or load a savestate, or terminate the emulator.
+		$LF
+	]li
+]ul
+[h4 
+	" Description of operation
+	$LF
+]h4
+[p 
+	"First, it plays the movie normally.
+	$LF
+]p
+[ul 
+	[li 
+		" Every frame, it analyses the image for beauty, and records it as a numeric value for that particular frame.
+		$LF
+	]li
+	[li 
+		" Every 100 frames, it makes a savestate.
+		$LF
+	]li
+]ul
+[p 
+	"When the movie ends (actually, 2 frames before but that's a detail):
+	$LF
+]p
+[ul 
+	[li 
+		" It divides the movie into N evenly long sections
+		$LF
+		[ul 
+			[li 
+				" Where N is selected so that N <= 50 but that a section length must be at least 1 second and not more than 10 seconds
+				$LF
+			]li
+			[li 
+				" And from that section, it determines the most beautiful shot, using the numeric values recorded earlier.
+				$LF
+			]li
+			[li 
+				" Then it picks the 20 most beatiful sections, and remembers the frame numbers where the single most beatiful screen occured during that section.
+				$LF
+			]li
+		]ul
+		" For each selected beauty:
+		$LF
+		[ul 
+			[li 
+				" It loads the latest savestate that was recorded before that particular frame
+				$LF
+			]li
+			[li 
+				" Runs the emulator until the framenumber matches the desired frame
+				$LF
+			]li
+			[li 
+				" And saves the screen as a PNG file.
+				$LF
+			]li
+		]ul
+		" Then it terminates the emulator.
+		$LF
+	]li
+]ul
+[h4 
+	" Analysis of beauty
+	$LF
+]h4
+[p 
+	"The algorithm used by the emulator for determining the beauty of a particular screenshot
+	$LF
+	"is written hoping to meet the following guidelines. A good screenshot contains:
+	$LF
+]p
+[ul 
+	[li 
+		" distinctly different colours at different sections of the screen (saturated colors preferred over grayish ones)
+		$LF
+	]li
+	[li 
+		" a lot of movement at each portion of the screen (less desirable to have it localized in a single corner)
+		$LF
+	]li
+]ul
+[p 
+	"The algorithm works by dividing the screen into 12 sections (4 horizontally, 3 vertically),
+	$LF
+	"and for each section, determining:
+	$LF
+]p
+[ul 
+	[li 
+		" The average tint on that section of the screen
+		$LF
+	]li
+	[li 
+		" The number of sprites that have changed position on that section of screen compared to the previous frame
+		$LF
+	]li
+]ul
+[p 
+	"The score is determined by the sum of sprite jitter in all sections, and matching each diagonal pair of sections and calculating how much the tint differs in them. 
+	$LF
+]p
+[p 
+	"The tint is calculated by sampling the pixels in that section (actually,
+	$LF
+	"about a third of them in a random gridlike pattern for speed but that's
+	$LF
+	"again an implementation detail), converting
+	$LF
+	"them to the YIQ colorspace and calculating average of the complex number
+	$LF
+	"comprised by the I and Q components, weighted using the Y value, and the
+	$LF
+	"final number weighted using a logarithmic transformation.
+	$LF
+]p

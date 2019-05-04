@@ -1,0 +1,712 @@
+4
+[h2 
+	"Player mechanics
+	$LF
+]h2
+[p 
+	"As you control a character, it is important to know how your character works.
+	$LF
+]p
+[p 
+	"The game's internal numbers will be converted into pixels. The internal unit is equivalent to 1/1024 of a pixel.
+	$LF
+]p
+[p 
+	"Character positions and speeds are difficult to obtain in memory watch, as the game dynamically allocates the player object's stats using a linked list. A lua script is necessary to track your character after death or between stages.
+	$LF
+]p
+[h4 
+	" Movement, left or right
+	$LF
+]h4
+[p 
+	"When you hold left or right, the player accelerates 0.25 pixels/frame every frame. Maximum speed is 1.50 pixels/frame. Maximum speed when ducking is 0.75 pixels/frame.
+	$LF
+]p
+[p 
+	"When not holding either button or holding both left+right (no left+right glitches here), the player's speed is cut in half each frame. If you want to turn around quickly from full speed, it is beneficial to release for one or two frames, so as to cut the 1.5 speed to 0.75 in one frame instead of three, and down to 0.375 instead of 0.5 for the second frame.
+	$LF
+]p
+[p 
+	"However, if it is desired to advance the RNG, release for one frame, then hold the direction. This lets your speed hit exactly 0 for a frame, advancing the RNG once. Releasing for two frames then holding the direction will skip over the 0 speed, and this will not advance the RNG.
+	$LF
+]p
+[h4 
+	" Dashes and backflips
+	$LF
+]h4
+[p 
+	"Initiate a dash or a backflip by holding either left or right and pressing L. If the direction you press is the same direction the player is facing that frame, it will be a dash. If it's in the opposite direction, a backflip instead.
+	$LF
+]p
+[p 
+	[b 
+		"Dash
+	]b
+	": Forward + L, 3 pixels/frame, 26 frames (first frame at speed zero), ducking hitbox, advances RNG once
+	[br 
+	]br
+	$LF
+	[b 
+		"Backflip
+	]b
+	": Back + L, 2 pixels/frame, 18 frames, (first frame at speed zero), standing hitbox, does not affect RNG
+	$LF
+]p
+[p 
+	"As dashing is faster than walking, you are encouraged to roll when traveling.
+	$LF
+]p
+[p 
+	"You will exit the dash or backflip at speed zero. If you were ducking when you dashed or did a backflip, you will exit the animation in a ducking pose. The standing pose advances the RNG once, so if you did not want the RNG to advance as much, you may want to duck before dashing or backflipping.
+	$LF
+]p
+[p 
+	"Notably, during a dash or backflip, you may release B without losing charge. On exit of the animation, you may then press B to fire your gun without destroying your charge.
+	$LF
+]p
+[h4 
+	" Jumps
+	$LF
+]h4
+[p 
+	"Hit A to jump. You have no control over the player's height with the A button alone, as the alien will always attempt to jump high. The initial upward velocity is 4.50 pixels/frame, gravity pulls you down at 0.125 pixels/frame each frame, and maximum downward velocity is 4 pixels/frame.
+	$LF
+]p
+[p 
+	"Your horizontal velocity works exactly like with walking, same acceleration, same top speed. If you were ducking when you jumped, your max speed is equal to the ducking max speed, 0.75 pixels/frame, for the duration of the jump. You will land in the same standing or ducking pose as when you initiated the jump.
+	$LF
+]p
+[p 
+	"If standing on certain fall-through platforms, a ducking jump instead lets you drop through with an initial vertical velocity of zero. Your speed still maxes out at 0.75 pixels/frame throughout this fall, as it was done from a ducking pose.
+	$LF
+]p
+[p 
+	"When landing, you will be in a standing or ducking position for one frame, even if you are moving at non-zero speed. This will advance the RNG once if you did not duck when jumping.
+	$LF
+]p
+[p 
+	"You may release B without losing charge on the frame you jump, and on the frame you land. This enables you to shoot on the next frame while keeping the charge.
+	$LF
+]p
+[h2 
+	"Weapon mechanics
+	$LF
+]h2
+[p 
+	"All guns deal 1 damage per hit and grenades deal 3 damage per hit. Charged shots deal 5 to 10 damage depending on how long the charge was held.
+	$LF
+]p
+[h4 
+	" Weapon related memory addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"03000470
+			]th
+			[td 
+				"Weapon ID
+			]td
+		]tr
+		[tr 
+			[th 
+				"03000472
+			]th
+			[td 
+				"Ammo left
+			]td
+		]tr
+		[tr 
+			[th 
+				"03000474
+			]th
+			[td 
+				"Grenade count
+			]td
+		]tr
+		[tr 
+			[th 
+				"03000476
+			]th
+			[td 
+				"Frames until you can fire again
+			]td
+		]tr
+		[tr 
+			[th 
+				"03000478
+			]th
+			[td 
+				"Shots left to auto-fire (weapon ID 6 only)
+			]td
+		]tr
+		[tr 
+			[th 
+				"0300047A
+			]th
+			[td 
+				"Are you allowed to charge a shot by holding B?
+			]td
+		]tr
+		[tr 
+			[th 
+				"0300047C
+			]th
+			[td 
+				"Are you currently charging a shot?
+			]td
+		]tr
+		[tr 
+			[th 
+				"0300047E
+			]th
+			[td 
+				"Frames charged for charge shot
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Quick stats
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"ID
+			]th
+			[th 
+				"Appearance
+			]th
+			[th 
+				"Ammo
+			]th
+			[th 
+				"Projectiles
+			]th
+			[th 
+				"Notes
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"Basic
+			]td
+			[td 
+				"infinite
+			]td
+			[td 
+				"Single shot
+			]td
+			[td 
+				"Default weapon
+				[br 
+				]br
+				"Grenades have small hitbox
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"Green cloud
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"Cloud
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"Flame
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"Cloud + shot
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"Ice
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"Cloud + shot
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"Red slicey
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"Piercing shot
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"Big shot
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"Piercing shot
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"Purple auto-fire
+			]td
+			[td 
+				"240
+			]td
+			[td 
+				"3 auto-shots
+			]td
+			[td 
+				"RNG rolled once per shot
+				[br 
+				]br
+				"Short enemy death animation
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"Spread
+			]td
+			[td 
+				"40
+			]td
+			[td 
+				"3 simultaneous shots
+			]td
+			[td 
+				"RNG rolled three times per shot
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Weapon cooldown
+	$LF
+]h4
+[p 
+	"You can only fire your gun once per 8 frames. There is no cooldown for throwing grenades.
+	$LF
+]p
+[p 
+	"It is possible to reset the cooldown by changing weapons. This is done either by running out of ammo or by picking up a weapon power-up.
+	$LF
+]p
+[h4 
+	" Charged shots
+	$LF
+]h4
+[p 
+	"Hold the B button. You will begin charging once the weapon cooldown finishes. You can't begin charging until you have fired a shot -- Doing a different action that prevents you from firing (such as a backflip) will not allow you to initiate charge.
+	$LF
+]p
+[p 
+	"The amount of damage your charged shot deals depends on what address 0300047E happens to be at the moment.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Frames of charge
+				[br 
+				]br
+				[small 
+					"Address 0300047E
+				]small
+			]th
+			[th 
+				"Effect
+			]th
+		]tr
+		[tr 
+			[td 
+				"0 to 50
+			]td
+			[td 
+				"Nothing
+			]td
+		]tr
+		[tr 
+			[td 
+				"51 to 71
+			]td
+			[td 
+				"5 damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"72 to 97
+			]td
+			[td 
+				"6 damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"98 to 127
+			]td
+			[td 
+				"7 damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"128 to 161
+			]td
+			[td 
+				"8 damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"162 to 199
+			]td
+			[td 
+				"9 damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"200 (maximum)
+			]td
+			[td 
+				"10 damage
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Maintain charge while shooting uncharged shots
+	$LF
+]h4
+[p 
+	"Under the following conditions, you may shoot without losing charge:
+	$LF
+]p
+[ul 
+	[li 
+		" At the end of a dash or backflip
+		$LF
+	]li
+	[li 
+		" After the frame you jump
+		$LF
+	]li
+	[li 
+		" After the frame you come into contact with the ground
+		$LF
+	]li
+	[li 
+		" As you walk off a ledge
+		$LF
+	]li
+]ul
+[p 
+	"Simply release the B button during a dash or backflip. Once the animation finishes, press B to fire a shot without losing charge. Release B on the same frame you press A to jump, and you can shoot without losing charge. Find the frame you land, you can release B at that moment without losing charge, and you can fire on the next frame.
+	$LF
+]p
+[h4 
+	" Cloud Stacking glitch
+	$LF
+]h4
+[p 
+	"Named such for the use of the cloud effect of three weapons. The unusual thing about these weapons is the fact they leave a lingering hitbox unlike any other weapon. Even a grenade's explosion hits only for one frame.
+	$LF
+]p
+[p 
+	"The game keeps a list of things that has hit some enemy. This is to prevent the cloud from re-hitting the same enemy repeatedly. However, this list can only hold four objects. Once the boss takes damage from four other sources before the cloud disappears, the same cloud can hit the enemy again.
+	$LF
+]p
+[p 
+	"If one can get five clouds at once, the enemy will take five hits every frame, as by the time the next frame comes around, the first cloud has already been forgotten. As the cooldown normally only allows three clouds to exist at once, this will take some acrobatic weapon manipulation in order to get the power-ups necessary for repeated weapon switching to get around the cooldown. This is a particularly difficult trick to set up.
+	$LF
+]p
+[p 
+	"Even without stacking five clouds at once, having only three clouds will tend to increase the damage of every hit you deal by 1. This is achievable by merely shooting with usual TAS precision, and is a decent choice against some bosses.
+	$LF
+]p
+[h2 
+	"RNG manipulation
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"The RNG address: 030019E0 (4 bytes)
+			]th
+		]tr
+	]tbody
+]table
+[p 
+	"Many things in the game depends on the random number generator. Are you going to get a good weapon? Will you have plenty of grenades to throw? Will the enemy spawn where you need them? Even the position of shots from certain guns are affected.
+	$LF
+]p
+[p 
+	"While it is true the player doesn't need any of those fancy weapons to win, it is true that in order to win 
+	[em 
+		"fast
+	]em
+	", one is encouraged to always have the best weapon and enough grenades to kill stuff with.
+	$LF
+]p
+[h4 
+	" RNG formula
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"NewRNG = RNG*0x19660D + 0x3C6EF35F
+			]th
+		]tr
+	]tbody
+]table
+[p 
+	"The result is cropped to within a 4-byte value. Every time a random number is needed, this formula is used to advance the RNG.
+	$LF
+]p
+[p 
+	"The RNG is rolled whenever the following happens:
+	$LF
+]p
+[ul 
+	[li 
+		" Player character enters standstill animation
+		[br 
+		]br
+		"The RNG rolls once. When the player goes to a standstill, gets up from ducking at zero speed, lands from a jump, or finishes whatever animation while standing still, the RNG is rolled once. By repeated ducking or wobbling, one can advance the RNG by 1 per 2 frames.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Player character initiates a dash (backflips do not affect the RNG)
+		[br 
+		]br
+		"dashing by pressing L and holding the direction the character is facing will initiate a dash. The direction opposite would be a backflip instead, which doesn't advance the RNG.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Player shoots weapon 6; the purple auto-firing weapon
+		[br 
+		]br
+		"One roll per shot. Determines height of shots. As you are compelled to shoot the other two shots, you're almost certain to advance the RNG three times.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Player shoots weapon 7; the spread shots
+		[br 
+		]br
+		"Three rolls per shot. Determines a small X variance of shots. If you have this weapon or the above listed weapon, it can be used alongside ducking or wobbling to advance the RNG faster.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Random enemy spawns
+		[br 
+		]br
+		"Whether it's the typical agent in many levels, scorpions of 3-1, or the panic runners of 3-4, the game randomly determines several factors relating to the new enemy, such as what edge of the screen to appear from.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Enemy figures out next action. Walk, roll, shoot, something
+		[br 
+		]br
+		"Applies to the typical agents. Most other enemies aren't so random.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Random enemy is shot. Death animation, whether to drop a power-up, etc.
+		[br 
+		]br
+		"The typical agents roll the RNG twice if hit by a bullet, or three times if hit by grenade or charged shot. Either case, the second roll determines whether an item drops.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Something on the screen, or the screen itself, is shaking, or other animation.
+		[br 
+		]br
+		"Animation, mostly. You can trigger this by throwing a grenade at a building.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" What power-up appears should one show up
+		[br 
+		]br
+		"Whether a helpful kid hands you one, something pops out of the wrecked building, or an enemy you just shot dropped something, the game needs to determine what it is. It uses a "roll until success" system to determine what shows up, advancing the RNG a variable number of times.
+		$LF
+	]li
+]ul
+[h4 
+	" Item drops
+	$LF
+]h4
+[p 
+	"When killing something, that something is sometimes kind enough to drop a neat weapon for you. Some bits in the RNG must be cleared for it to happen. In particular, 0x000
+	[b 
+		"X
+	]b
+	"0000 this digit is important:
+	$LF
+]p
+[ul 
+	[li 
+		" Typical agent: 0 only
+		$LF
+	]li
+	[li 
+		" 3-4 panic runners: 0 or 8
+		$LF
+	]li
+	[li 
+		" 3-1 scorpions: 0 4 8 or C
+		$LF
+	]li
+	[li 
+		" Buildings: Not checked; will always drop.
+		$LF
+	]li
+]ul
+[p 
+	"Once a drop takes place, the game then makes repeated rolls until this next check succeeds. Again, it uses the same digit, 0x000
+	[b 
+		"X
+	]b
+	"0000 to determine success, and this time, it needs to be 7 or F.
+	$LF
+]p
+[p 
+	"The number of failures determine what item finally drops:
+	[br 
+	]br
+	$LF
+	"0: Green cloud
+	[br 
+	]br
+	$LF
+	"1: Fire
+	[br 
+	]br
+	$LF
+	"2: Ice
+	[br 
+	]br
+	$LF
+	"3: Red slicey
+	[br 
+	]br
+	$LF
+	"4: Big shot
+	[br 
+	]br
+	$LF
+	"5: Purple auto-fire
+	[br 
+	]br
+	$LF
+	"6: Spread shot
+	[br 
+	]br
+	$LF
+	"7: 10-pack of grenades
+	[br 
+	]br
+	$LF
+	"8+: Loop back to 0
+	$LF
+]p
+[p 
+	"Some drops are rare. Rare enough that the RNG can be in a bad spot where even advancing it several hundred times won't allow a grenade drop from a random agent.
+	$LF
+]p
+[p 
+	"There are specific distinct RNG values that trigger a drop. From this, there are a specific number of failures to determine what drops. This number of failures can be tweaked with certain actions on the frame you kill the agent.
+	$LF
+]p
+[ul 
+	[li 
+		" Killing the agent with a bullet: 0 RNG advance before type check
+		$LF
+	]li
+	[li 
+		" Kill using a charged shot or grenade: 1 RNG advance before type check
+		$LF
+	]li
+	[li 
+		" Kill two agents simultaneously with bullets: 2 RNG advance before type check
+		$LF
+	]li
+]ul

@@ -1,0 +1,329 @@
+4
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"After the Brock through Walls glitch recently brought new life and improvements to the Gen I Pokémon games, it may also have broken some of the categories.
+	$LF
+	"This movie is supposed to not only contest for the fastest time in the so-called "any%" category, but also contest the categorization itself, which has shifted a considerable amount with the new findings and may need to be adjusted.
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Forgoes save corruption
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 1.8.0 (syncs on 1.1.0 - 1.6.1 and 1.8.0+)
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[h4 
+	" Goal choice
+	$LF
+]h4
+[p 
+	"This run tries to finish the game, contesting with what is currently the (awkwardly named) "any%" category, which forbids certain kinds of heavy exploits.
+	$LF
+	"It specifically disallows:
+	$LF
+]p
+[ul 
+	[li 
+		" save corruption - separating it from the "SRAM glitch" category (see 
+		(__wikiLink|1860M|here)
+		")
+		$LF
+	]li
+	[li 
+		" manipulating warp locations - separating it from the "warp glitch" category (see 
+		(__wikiLink|2457M|here)
+		")
+		$LF
+	]li
+]ul
+[p 
+	"Note that this run is faster than the currently published "warp glitch" movie, which doesn't use the Brock through Walls glitch.
+	$LF
+	"It does not, however, compete with this publication, there is a much faster route for this category using the new glitch.
+	$LF
+]p
+[h4 
+	" Emulator Choice
+	$LF
+]h4
+[p 
+	"This movie uses the pre-1.7 frame timing and syncs on all pre-1.7 versions as well as 1.8 which allows to adjust the timing method.
+	$LF
+]p
+[h4 
+	" Version Choice
+	$LF
+]h4
+[p 
+	"Both the Red and Blue version work for the chosen route, and there are only very minor time differences between them.
+	$LF
+	"I chose the Red version merely for convenience, since the needed Weedle encounters are more frequent in Red, plus minor time savings in having a faster intro sequence and having a shorter default player name.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Brock through Walls
+	$LF
+]h3
+[p 
+	"Even though this glitch has apparently been known about for a long time for the Japanese version of the game, it was not until recently that it is understood and usable in the UE version as well.
+	$LF
+	"It allows using the Pewter gym guy to exploit the game's cutscene mechanics in order to walk through any overworld object.
+	$LF
+]p
+[p 
+	"The game stores the player movement during a cutscene as a sequence of simulated joypad inputs (at $ccd3).
+	$LF
+	"The inputs will be played back one by one, and the cutscene ends when all movements are finished.
+	$LF
+	"After performing the Brock Skip glitch, it's possible to talk to the Pewter gym guy from the right, which is not supposed to be possible, so there's no cutscene path defined for it.
+	$LF
+	"The mapping from the player's coordinates to the path he'll walk in the cutscene is defined in d:7d06.
+	$LF
+	"Each entry consists of four bytes:
+	$LF
+]p
+[pre 
+	"<y> <x> <2-byte address of the path to walk>
+	$LF
+]pre
+[p 
+	"With no mapping defined for the right side of the NPC (coordinates (36, 16) ), the game searches on in the memory areas beyond, and will eventually reach the RAM starting at $c000.
+	$LF
+	"If it doesn't find the coordinates anywhere, it will loop around the game memory forever, effectively soft-locking the game.
+	$LF
+	"The coordinates must be aligned properly to the 4 byte blocks at d:7d06, that means the block must start at an address ending in 2, 6, a or e.
+	$LF
+	"If aligned properly, the two bytes after the coordinates are used as the address that points to the joypad inputs the player will execute during the cutscene.
+	$LF
+	"This list is terminated by an 0xff byte, and the game will continue copying bytes until it is found.
+	$LF
+	"If there is no 0xff byte in time, it will overwrite other memory areas, specifically $cd3b.
+	$LF
+	"This address is used to define joypad inputs that can override the simulated ones during a cutscene.
+	$LF
+	"The feature is (to my knowledge) not used in the game, and causes the cutscene to pause while overriding inputs are pressed, while still preserving all other effects of the cutscene, specifically the ability to walk through any object.
+	$LF
+	"Using any warp (e.g. entering a building) cancels the cutscene and the associated effects.
+	$LF
+]p
+[p 
+	"In this run, Charmander's DVs are used to put the coordinates at $d186.
+	$LF
+	"The PP for the first and second move (at $d188) are therefore used to determine the address from which to read, which will be 33 for Tackle and 34 for Growl at the time of execution.
+	$LF
+	"These spell out the address $2221, which sets $cd3b to 0xe0, enabling exactly the left, up and down directional buttons, which happen to be the exact directions that are necessary.
+	$LF
+	"Note that the required buttons don't need to be enabled in order to use them, as long as there is an enabled button you can press whilst going in the desired direction (like B, Select, or even a different directional button).
+	$LF
+	"Also, if the memory corruption goes further, $cd60 and $cd6b can be affected, which can influence the ability to use certain buttons or do interactions, but they stay unmodified in this run.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Route
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" The enemy is named "B", since displaying shorter names is faster.
+		$LF
+	]li
+	[li 
+		" The player is given the default name, it's not shown often enough for a shorter name to make up for the time lost in renaming it.
+		$LF
+	]li
+]ul
+[h4 
+	" Pallet town
+	$LF
+]h4
+[ul 
+	[li 
+		" The options are changed to fast text speed, no battle animations and a set battle style, which speeds up all upcoming battles. Changing the options in-game is faster than doing it in the main menu.
+		$LF
+	]li
+	[li 
+		" Charmander is chosen as the starter, since it knows Growl and can be poisoned. Bulbasaur would be faster in the rival fight, but it can't be poisoned which would lose more time later.
+		$LF
+	]li
+	[li 
+		" Charmander's DVs are manipulated to be 1/0/2/4, which is needed for the Brock through Walls glitch later on.
+		$LF
+	]li
+	[li 
+		" Losing to the rival is faster than winning, and we won't need the experience.
+		$LF
+	]li
+	[li 
+		" Note that Charmander's Growl misses exploit the fact that all moves (except for Swift or when using X-Accuracy) have at least 1/256 chance of failing, even if they are supposed to always hit.
+		$LF
+	]li
+	[li 
+		" When delivering Oak's package, it's faster to stand next to or above Oak instead of in front of him. This will cause the rival to walk less steps, and NPCs walk at only half of your speed.
+		$LF
+	]li
+]ul
+[h4 
+	" Viridian City
+	$LF
+]h4
+[ul 
+	[li 
+		" The Pokecenter is used to set the warp location for the upcoming death-warp.
+		$LF
+	]li
+	[li 
+		" Buying a Pokeball in the mart is faster than picking up the one in Viridian Forest.
+		$LF
+	]li
+]ul
+[h4 
+	" Viridian Forest
+	$LF
+]h4
+[ul 
+	[li 
+		" Charmander is poisoned by a wild Weedle to drain its HP and faint to an encounter right in front of the Bug Catcher. This sets up a Trainer-Fly.
+		$LF
+	]li
+	[li 
+		" A wild Rattata with a Spc stat of 7 is growled 6 times to set up a L1 Nidoking encounter.
+		$LF
+	]li
+	[li 
+		" Nidoking's Atk DV is manipulated to be 15, as it will do all upcoming trainer fights.
+		$LF
+	]li
+	[li 
+		" Using the Experience Underflow glitch, Nidoking is raised to L100 on a L3 Weedle.
+		$LF
+	]li
+]ul
+[h4 
+	" Pewter city
+	$LF
+]h4
+[ul 
+	[li 
+		" The selected start menu item is set to "save" in preparation of the Brock Skip glitch.
+		$LF
+	]li
+	[li 
+		" The north-east house is entered to manipulate Route 23 later on.
+		$LF
+	]li
+	[li 
+		" After performing the Brock skip glitch, we turn around and talk to the guy again to trigger the Brock Through Walls glitch, allowing us to ignore any obstacles in our path and go directly to the Indigo Plateau.
+		$LF
+	]li
+]ul
+[h4 
+	" Route 23
+	$LF
+]h4
+[ul 
+	[li 
+		" All overworld maps (cities and routes) are connected at their edges, so you can traverse the world without loading zones. The connection between Route 22 and Route 23 is special though, since it is the only one that can't be used legitimately (you need to go through the gate house), even though it works and is defined in a perfectly valid way. This allowed the 
+		(__wikiLink|950M|current publication)
+		" to skip two of the badge checks, and allows this run to skip all eight badges. The tileset used in the two routes is different, which not only creates visual glitches when crossing maps, it also confuses the game about where to place the player in the map, putting it at the coordinates of the warp with the ID of the last used warp. By entering and exiting the house in Pewter city, this ID is set to 4, which allows us to skip all guards checking for badges.
+		$LF
+	]li
+]ul
+[h4 
+	" Indigo Plateau
+	$LF
+]h4
+[ul 
+	[li 
+		" Depositing Charmander seems tempting, but ends up costing more time than can be saved in the Hall of Fame.
+		$LF
+	]li
+	[li 
+		" When using Thrash, you are bound to use it for 3-4 turns. This saves time by skipping the move selection, but causes confusion after it finishes, so it's only used to end a fight.
+		$LF
+	]li
+	[li 
+		" Agatha is the most painful fight, her Gengars and Haunter can only be damaged with Poison Sting, which is doubly non-effective and has only 15 base power. Even being at L100 with optimal DVs and having the STAB bonus, it takes 7 hits to kill the L60 Gengar.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Accepting to Moons as an improvement to both 
+	(__wikiLink|950M)
+	" and 
+	(__wikiLink|2457M)
+	".
+	$LF
+]p
+[p 
+	"Regarding primorial#soup's run, it does much of the same things this run does: use underflow to glitch a Pokémon to level 100 instantly, skip badges and skip badge checks by walking through walls. There isn't really much that primo's run does that this run doesn't, except show off more of the game because the walk through walls glitch comes much later in that run. Primo's run has no real limitation that would make it a different category from this run, so this run will obsolete it.
+	$LF
+]p
+[p 
+	"The "warp glitch" run by MrWint is pretty much any% (sans save corruption), and this run beats the game faster under at the same restrictions (and more, in fact), so that will be obsoleted as well. While there may be an improvement incoming that uses a glitched warp, it will have to be seen when that is submitted whether that would obsolete this run, or whether this run would remain as "no warp glitch", like primo's current run is now.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing....
+]p

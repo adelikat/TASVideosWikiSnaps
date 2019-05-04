@@ -1,0 +1,1026 @@
+8
+[ul 
+	[li 
+		" RPG
+		$LF
+	]li
+	[li 
+		" Contains speed/entertainment tradeoffs
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Uses death to save time
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+]ul
+[p 
+	(youtube|v=bM3oh6d8Xtg)
+	$LF
+]p
+[h2 
+	"Introduction
+	$LF
+]h2
+[p 
+	"Hello and welcome to this Riviera TAS, my name is Flameberger. Riviera is a somewhat obscure turn based jrpg. It was originally released on the Wonderswan Color and was later remade first for the GBA (my version of choice,) and then for the PSP. Compared to my action packed platformer submissions this one will take a bit of a slower pace. Above anything else this was an exercise in routing, putting the actual TAS together was relatively simple after I finalized the route, a process that I worked on for around two and a half months. Apart from finding specific strategies for each battle, managing the big picture was a struggle because of how interconnected everything is. Didn't get enough levels on Fia in Chapter 4? Guess she'll die to Malice in Chapter 7.
+	$LF
+]p
+[p 
+	"Thankfully I did start with a lot of game knowledge from my experience running the game in RTA. The basic structure of the route turned out pretty similar in terms of which characters are good, which items are worth picking up, etc. Naturally I was able to trim a lot of fat by ignoring safety and it was possible to set up for very efficient battles using RNG manipulation.
+	$LF
+]p
+[h2 
+	"RNG Manipulation
+	$LF
+]h2
+[p 
+	"In terms of optimizing the TAS RNG manipulation is by far the next biggest thing after routing. Riviera uses values from three separate memory addresses to create the random number that's used to determine outcomes. The first is a value that starts with a seeded value and is then changed via some formula everytime a random event occurs, it does not change on every frame. Second is a simple frame counter that counts up to some value and then resets to 0.
+	$LF
+]p
+[p 
+	"The last one is the oddball. It changes chaotically every frame based on things I don't entirely understand involving one of the system's I/O registers. It's listed as vcount in the memory map I found, 0x4000006. As far as I can tell it has something to do with how the hardware handles drawing things to the screen. I mentioned it changes chaotically, this is very significant. There are cases where I have multiple options on how to go through a menu or do something else, even if different options take the same number of frames and have the same number of random events involved the vcount rng will usually end up different. This gives me more options on manipulating but it also makes any kind of resynching after a hex edit unfeasible. Also of note, inputs which should have no impact on the game can cause very minor changes to the value (usually, a decrease by 1.) This is handy as an option to manipulate RNG without wasting frames, but it has some major limitations. Firstly, it's not as if every input has this effect, I might be able to only trigger it once or twice in 50 frames. Secondly I can't cause too large of a total change in the value, even over a large number of frames, it will gradually become stubborn. Thirdly, certain things are easier to affect than others.
+	$LF
+]p
+[p 
+	"Because it just decreases the final RNG value by 1 the most common impact on damage rolls is to also decrease their damage by 1. I use this to reduce damage I take in certain spots, if you see me survive with 1 or 2 hp you can bet there was probably some vcount manipulation that made that happen. It is also possible to wrap around from minimum to maximum damage so there are a few cases where I use it to increase my damage done or taken. Affecting Miss or Guards is generally impractical because these are determined by taking the RNG (compressed to a value in 0 to 99) and checking to see if it's greater or less than some other stat. Changing the RNG by just a few points won't change the outcome unless it was already very close to the critical value. Changing who gets targeted by randomized targeting is very easy though, I guess it just modulo the amount of targets and each change in value gives a new result. Gainfully affecting initial turn orders seemed impossible, shifting everyone up or down with no meaningful effect was about the best I could do.
+	$LF
+]p
+[h2 
+	"Game Mechanics
+	$LF
+]h2
+[p 
+	"Detailed information about damage calculations and various other things can be found here: 
+	[a class=extlink href=https://docs.google.com/document/d/1HtgIZJMbDr9pyT_wag1x_24GfXXqUw3d_AM9z7Mg-OE/pub rel=nofollow 
+		"Riviera Game Mechanics
+	]a
+	$LF
+]p
+[p 
+	"In Riviera characters do not equip items or have innate skills. Instead, on every battle I choose four items to bring and my characters can use the skills that they have associated with those items. Picking the right items for a battle is a major part of the game's strategy. Additionally, character's can earn levelups by using specific items enough times. Earning levels increases stats and also unlocks an Overskill that the character can use with that item, assuming the Overdrive meter is sufficiently filled. Items have durability and can only be used a certain number of times. Basic weapons like swords and bows are generally available in very large stacks, while more powerful items are limited in uses.
+	$LF
+]p
+[p 
+	"Offensive skills are divided into two categories, Attacks and Magics. They are functionally identical except that Attack damage is based on the attacker and the defender's strength stat, whereas Magics use the magic stat. The fact that strength and magic are not just offensive, but also defensive stats is very important. In the run I'll be mostly focused on collecting large amounts of strength and killing enemies with Attacks, this will leave me very vulnerable to enemy Magic.
+	$LF
+]p
+[p 
+	"Turn orders are determined by wait times. After using a skill a character or enemy will have some number of these time units before their next turn. Wait time is determined by the skill being used and the agility stat of the user. At the start of a battle the initial wait times of each unit are chosen randomly from a range of values, also affected by agility.
+	$LF
+]p
+[p 
+	"Enemies choose skills based on the rage meter in the bottom right of the screen. Each enemy has three main types of skill: Normal, Rage and Max. The small line at 60% indicates where Rage skills will be used. If the bar is completely filled the next enemy turn will be a Max skill and the meter gets reset. Generally power and wait times are proportional to the type of skill being used. I often deliberately trigger Rage or Max skills in order for the enemy to get less turns than they would if they were using faster Normal skills. Enemies can also use a fourth type, called ETC skills, under special circumstances. There aren't general rules for when ETC skills other than the fact that an enemy will never use one on their first turn. Their use is determined on a case by case basis by an enemy's particular AI.
+	$LF
+]p
+[p 
+	"Player characters and enemies are placed on two 3x2 grids. Which units get attacked is based on the targeting type of the skill and where things are located on the grids. For example when Ein swings a sword it targets the nearest enemy, when he uses Einherjar it hits all enemies in the front row.
+	$LF
+]p
+[p 
+	"The game has multiple endings based on which party member has the highest of an invisible affection stat. This is significant because that character will not be available for the final battle. I go out of my way a few times to ensure that the chosen character isn't someone I need for that battle. Party members can also get minor combat bonuses based on these systems, this is not a significant part of the routing. My most important character is pretty much always in a good mood from killing enemies anyways.
+	$LF
+]p
+[h2 
+	"Individual Battles
+	$LF
+]h2
+[h4 
+	" Unleashed Beast
+	$LF
+]h4
+[p 
+	"Ein is terribly inaccurate when casting Fire with Lorelei, nothing a bit of RNG manipulation can't handle. It's considerably more damaging on the wolf than swinging Einherjar because it is weak to fire.
+	$LF
+]p
+[p 
+	"Ledah's Lost Seraph is a special, so called execution level, overskill. It can be used at any level of overdrive. A level 0 Lost Seraph isn't terribly powerful but it is enough to kill the wolf in one round when combined with Ein's Fire.
+	$LF
+]p
+[p 
+	"I set my preferences how I want them for the rest of the run. Formation Memory will be significant starting early in Chapter 2 when I'm given the option on every battle of which characters and in which I arrangement I want. With Formation Memory it will default to my previous selection. This saves roughly half a second when it's to my advantage, and it also costs around that much when I need to cancel and switch to a different setup. Because there are many more battles where I can just stick with what I was already using this is definitely a good option to set.
+	$LF
+]p
+[p 
+	"Skill Memory makes the cursor remember which item a character used last within a single battle. This will only save or lose a handful of frames at a time but it is much more common for it to work in my favor.
+	$LF
+]p
+[p 
+	"Item Memory remembers which four items I brought to the previous battle. This one is not worth selecting because it only saves around 10 frames when it helps but it costs way more than that if I need to cancel and select different items, which would be much more common.
+	$LF
+]p
+[p 
+	"I switch from displaying status, which shows icons on units that have buffs or status ailments, to showing the wait bars. This is purely aesthetic, giving viewers the ability to see more about how the turn order setups are working. Unfortunately they are only shown in the brief times between turns, so it can be tough to get a good look.
+	$LF
+]p
+[p 
+	"I turn Enemy Cutscene off, otherwise every enemy Max skill would be preceded by an extra screen and it would waste tons of time.
+	$LF
+]p
+[p 
+	"Lastly, I leave voices on. This is the speed/entertainment tradeoff I make. This probably costs me two or three minutes over the course of the run but it doesn't impact gameplay in any meaningful way, and in my opinion a significant portion of the game's charm comes from the voiced lines. For a GBA game they are really quite good.
+	$LF
+]p
+[h4 
+	" Snarling Demons
+	$LF
+]h4
+[p 
+	"The enemies all start with 0 wait time for this fight, so I don't have much control over the turn order. It's important that Ein doesn't dodge the ape's Boulder Dash because if he did I wouldn't get up to level 1 overdrive in time for the Lost Seraph, and the gnome guy would survive.
+	$LF
+]p
+[p 
+	"Ein's forced to drink the potion on his first turn as part of a tutorial, otherwise he just spams a few Fires as an efficient way to finish off the enemies.
+	$LF
+]p
+[h4 
+	" Savage Demon
+	$LF
+]h4
+[p 
+	"The ideal initial turn order for this fight is a bit picky, I want both the gremlin and the axe guy to get only one turn each. I need Ein and Ledah to be faster than the axe guy and I need Ein and the gremlin to be just about as fast and as slow as they can be, respectively. I delay for a noticeable amount of frames before entering the fight to set that up. Otherwise the strategy is trivial.
+	$LF
+]p
+[p 
+	"Ein is forced to use Einherjar as a tutorial on how to learn Overskills and a lvl 2 Lost Seraph is enough to wipe out the axe guy from full health.
+	$LF
+]p
+[p 
+	"You'll notice the gremlin's health is very low after a single round of attacks, you might wonder if it's possible to kill him with sufficiently good damage rolls. Technically this is possible but the feasibility is not good. Getting a perfect roll on Ein's attack is fine since it's just one hit. With Ledah's attack on the other hand, since it's four hits in a row with no possibility of rng manipulation between them the odds of getting all perfect rolls (and no misses) are abysmal.
+	$LF
+]p
+[p 
+	"As an aside, I tested killing the axe guy with normal skills instead of the very lengthy Lost Seraph and it was a bit over 12 seconds slower. This serves as a demonstration on how important it is to minimize turns, even when doing so involves painfully long animations.
+	$LF
+]p
+[p 
+	"Before the next fight there is an optional detour to collect a Mana Wisp, which would give both of my party members a small stat boost. Things like this are difficult to route around. I can measure the amount of time it takes to collect, but I can't easily say how many fights would be improved and by how much from those stat boosts. My instinct was that it would not be worth the cost, and then as I routed I kept in mind the possibility of having that stat boost and was on the lookout for fights where it would make a difference. Overall Ein's insignificance convinced me that it wasn't worth powering him up here.
+	$LF
+]p
+[h4 
+	" Tiny Magician
+	$LF
+]h4
+[p 
+	"The tutorial continues. In this battle Ein is required to use his new overskill Double Slash anytime the overdrive allows it. I have him start by casting Fire, a skill with a very long wait time, specifically to delay Ein's second turn until after the ape dies. The fire misses because I don't need it's damage and it would be a waste of time to watch the enemy health deplete. Using a double slash on the ape would be wasted because it takes two Ledah turns to kill him either way, using it on the gremlin on the other hand is quite practical.
+	$LF
+]p
+[p 
+	"The gremlin likes to use a spell called Charm to heal the ape. As I mentioned in the overview, enemies will never use ETC skills as their first action, so I aim for an order where Ledah kills the ape before the gnome takes his second turn.
+	$LF
+]p
+[p 
+	"I throw a rock at a spider to get 20x Spider Web. This is a neat item that adds wait time to all enemies. It's not very practical for most situations, but it does serve a critical role on a Chapter 2 miniboss.
+	$LF
+]p
+[h4 
+	" Soul Hunter
+	$LF
+]h4
+[p 
+	"This fight required a very specific turn order: Ein -> Vampire -> Ledah -> Wolf, with Ein at least 5 units faster than the Vampire. If the vampire uses her Rage Skill she will regenerate some health, wasting a lot of time and making it difficult to get the damage rolls. If the wolf uses it's Normal Skill it will be fast enough to get a second turn, so Ledah needs to be between them. I ended up having to wait a bit under an entire second to get this setup but it was worth it.
+	$LF
+]p
+[h4 
+	" Boulder Dragon
+	$LF
+]h4
+[p 
+	"My goal here is to have the dragon use Rage Skills repeatedly, minimizing the number of turns he gets without allowing his very lengthy Max Skill animation. The Dragon Killer is pretty annoying to use. I want to get good enough damage rolls so that I only have to use 3 of them, sneaking in an Einherjar swing on one of Ein's turns lets me end the Dragon before it gets a fourth turn. I also need it to not miss, obviously. And lastly, everytime he uses it Ein has a chance to say some lines about slaying evil wyrms; so I need to manipulate that to not happen as well.
+	$LF
+]p
+[p 
+	"This fight is a good demo on the significance of elemental resistances. Ledah, who is usually our powerhouse, can barely scratch the dragon because of it's fire resistance. That said the damage rolls end up close enough that I don't want him to miss any hits.
+	$LF
+]p
+[p 
+	"I pick up a stack of Power Wrists, these can be used to get a very significant +30 strength buff for a few turns. They will be a major part of several strategies throughout the run. Unfortunately Ledah refuses to use them, Lorelei is the only weapon he needs.
+	$LF
+]p
+[p 
+	"Going further to the right leads to the optional Wind Splitter battle. S-Ranking it nets a stack of Naga Fangs which are critical to the RTA route. In TAS I managed to find enough other ways to deal with the Chapter 2 enemies that I was able to skip the encounter.
+	$LF
+]p
+[h4 
+	" Dark Queen
+	$LF
+]h4
+[p 
+	"Nothing crazy here, just need Ledah fast enough to get his second turn before the vampire that survives the Double Slash. I have Ein go for P.Wrist -> Double Slash over the simpler Slash -> Double Slash because the latter would cause the vampires to use their Rage skills, wasting a lot of time at best or healing them outside of kill range at worst.
+	$LF
+]p
+[p 
+	"I could manipulate for both of them to miss their attacks but in such lines I don't get enough overdrive for Ein to use the Double Slash, I need at least one of them to hit.
+	$LF
+]p
+[p 
+	"I pick up a stack of 01x Rosier out of the ground. This is a Chapter 7 quality weapon, very strong but not anything that will dramatically impact the route. I'll end up using it for some quick kills early in Chapter 2. If you've cleared the game and gotten an S-Rank kill on the final boss this item will be Longinus instead, the second strongest weapon in the game. Obviously this isn't available to a TAS starting from blank SRAM.
+	$LF
+]p
+[h4 
+	" The Holy Beast
+	$LF
+]h4
+[p 
+	"This thing has way too much HP. There's not a whole lot I can do other than get good damage rolls and set Aghart up to not get many turns.
+	$LF
+]p
+[p 
+	"In Elendia there's a bunch of people to talk to and various items you can collect. I'm not interested in any of that. Moving on to the next chapter involves hitting various flags and watching a long scene at the elder's house. After that Fia and Lina join my party and I'm off to Lacrima Castle.
+	$LF
+]p
+[p 
+	"Lina is a speedster, she has the highest agility in the party (and also tied for the highest in the game if you get all the mana wisps.) She's pretty good early on so I'll be relying on her a lot in chapter 2 and 3 before her power drops off.
+	$LF
+]p
+[p 
+	"Fia is also quite fast but lacks powerful items in the early game. In chapter 2 it might seem like I'm only bringing her due to a lack of other options, and her almost total absence from chapter 3 will strengthen that perception, don't be fooled.
+	$LF
+]p
+[p 
+	"It's worth noting that after Chapter 1 Ein's stats are dropped substantially (lore-wise this is because he was benefiting from a magical item that Hector had given him.) After this change Ein is quite slow. If diligently leveled he can become strong, but it's not really practical. It takes more than a high strength value to make a character good. Unfortunately I am forced to bring him to all battles during the run, he makes himself useful as best he can but I don't expect much from him.
+	$LF
+]p
+[p 
+	"Overall Chapter 2 is going to have a very different feel from Chapter 1. The game's options start to open up so I can do more than just getting good turn orders and high damage rolls. I need Lina to get the Longbow level pretty early (8 uses to level) so I'll be grinding that out on some of the first fights. Other than that I don't care too much about leveling these characters so it will be a mad dash to unlocking Serene near the end of the chapter, abusing powerful and terribly unreliable items to wipe out my enemies quickly.
+	$LF
+]p
+[h4 
+	" Demon Shrub
+	$LF
+]h4
+[p 
+	"One of the two big EXP grinds of the chapter. Against a single, slow, enemy is about the best I can ask for in terms of opportunities for farming. Lina getting 3 EXP with the plant using only one Normal skill is a bargain.
+	$LF
+]p
+[h4 
+	" Gatekeepers
+	$LF
+]h4
+[p 
+	"I do some major damage with the Rosier and then finish the knight by throwing a Fire Orb at him. If you were wondering why I picked those orbs up this is how I'll be using them. I've no use for the fire resistance buffs. Throwing orbs like this is really only a reasonable strat in TAS. It's targeting is completely random, the accuracy isn't terrific, and whether or not you get the extra fire damage (the majority of the skill's power) is also random with less than stellar odds. Being able to kill enemies with them is a big part of how I was able to skip getting the Naga Fangs in Chapter 1.
+	$LF
+]p
+[p 
+	"Starting from this fight I get to choose my formation before each battle. Once I have more party members this is also when I pick which three to bring. I get a choice between Attack and Magic formations, these give small bonuses to skills of their respective types. I pretty much always use Attack Formation, either because I'm primarily using attacks or because the bonuses are so small that it's not worth going out of my way to switch. In some cases I need to arrange my party members in a specific way to control who is getting hit by what.
+	$LF
+]p
+[h4 
+	" Wandering Beast
+	$LF
+]h4
+[p 
+	"Very simple fight, I need to finish Lina's longbow level before the upcoming miniboss so that's what I do. Manipulating all the misses I wanted was rather a hassle. I did end up on a nice line where I only had to delay for a moderate amount of frames once, on Ein's Longbow use, and then everything else fell into place pretty well. Having my own party members miss so much was necessary to prevent the wolf from using Rage or Max skills and also just so he wouldn't die before I got the EXP I needed.
+	$LF
+]p
+[h4 
+	" Jet Black Wind
+	$LF
+]h4
+[p 
+	"This enemies Max Skill, Gale Wind, would kick my party out of the battle and send me to an extra area with a forced battle. To make matters worse, he's scripted so that the first time I fight him the rage meter gets set to max any time one of my characters uses a skill. In order to avoid this I need to either kill him in a single round (not feasible without Longinus,) or prevent him from getting any turns after his first. This is what the Spider Webs are for.
+	$LF
+]p
+[p 
+	"The Spider Web delays the Wyrm by 20 units, Lina has 22 units of wait time after using it. So it's not a true stunlock, he will gradually catch up and get a turn. This is why I allow him to go first, with Lina going first it's simply not possible for her to keep him from acting for the entire fight. I could have Fia help out but she's busy getting important Rapier EXP.
+	$LF
+]p
+[p 
+	"The reason it was essential for me to get the Longbow level is so that I could S-Rank the battle and acquire 03x Wyrm Wing. You'll see why these are so precious a few battles from now.
+	$LF
+]p
+[p 
+	"Catch the Bat! I have the option to try and catch it or throw a rock at it. Interestingly if I didn't have a rock I would lose both options, and it would just fly away.
+	$LF
+]p
+[p 
+	"This bat is the other major item that allows the TAS to skip the Naga Fang. Normally in RTA these aren't viable because when anyone other than Serene (conspicuously nonexistent) uses them they have a significant chance to attack the user instead. They are also significantly more deadly when used by Serene, but I have more immediate uses for them.
+	$LF
+]p
+[h4 
+	" Runt Squad
+	$LF
+]h4
+[p 
+	"These ghosts are surprisingly resilient. Thankfully their Max skill is a self destruct. I take advantage of this so I only need to kill one of them.
+	$LF
+]p
+[p 
+	"My inventory has finally filled up and you can see all the time I have to spend discarding the extra item. Most of the time It's not realistic for me to avoid getting items, but when it's possible or if I can completely exhaust an item stack I will try to do so to minimize the number of these screens I get.
+	$LF
+]p
+[h4 
+	" Midnight Bats
+	$LF
+]h4
+[p 
+	"Lina's Arrow Rain has bonus damage against flying units. Combined with the Power Wrist buff it's a devastating skill against these enemies, especially the weak imps. All I need to do is soften up the vampire a bit and build up to level 3 Overdrive before Lina's 2nd turn, and then get lucky with the targeting.
+	$LF
+]p
+[h4 
+	" Bolio's Necro Team
+	$LF
+]h4
+[p 
+	"This fight would have been an absolute nightmare. Battles like this are what the Wyrm Wings are for. It targets all enemies and has a chance (roughly 50%?) to vanish each one, does not work on bosses. Conveniently every character can use the wings effectively, so I just needed any party member to get the first turn.
+	$LF
+]p
+[h4 
+	" Courtyard Guard Dog
+	$LF
+]h4
+[p 
+	"This fight would also be pretty awful but thankfully the two enemies in the front are very weak to fire, a couple well rolled Fire Orb throws can take them out. I use the Hourglass to give Lina two quick turns so I don't need to let either of them get a turn. This will be my only use of that item, it's pretty good here but was found to be largely impractical elsewhere.
+	$LF
+]p
+[h4 
+	" Black-Winged Woman
+	$LF
+]h4
+[p 
+	"I don't know why my formation memory doesn't work on this fight, maybe the Serene vs Malice fight before this messes with it.
+	$LF
+]p
+[p 
+	"This fight is scripted to end after Malice uses her Max Skill. This will happen automatically if the fight goes on long enough but it can also be triggered regularly by filling the rage meter. This makes the strategy very simple, I just have all three of my characters go first and land enough hits to fill the meter before her first turn.
+	$LF
+]p
+[p 
+	"At last, Serene joins the party. At first she's just like any other party member in terms of power, but by the end of the run she's going to have the entire team on her back. In order to get to that point I need her to level up a relatively large amount, so there's going to be another pretty noticeable change in strategies from here as I emphasize getting her all the strength I can get my hands on.
+	$LF
+]p
+[p 
+	"There are a few reasons why Serene is best suited for the role of leveling up and carrying me through the end. First, she is the only character with a 3 times multiplier on strength gains from levels (3, 6, 9 str from lvl 1, 2, 3 weapons mastered.) Second, the items I want her to level up with are largely very convenient to pick up. Third, she has some really good skills available on her weapons, including one in particular that will dominate the endgame.
+	$LF
+]p
+[h4 
+	" Castle Wanderers
+	$LF
+]h4
+[p 
+	"My strategy here is something we'll be seeing a lot of. I want to farm EXP but I don't want to watch a bunch of enemy attack animations while I'm doing it. I instantly eliminate all but one and then farm against the lonely enemy.
+	$LF
+]p
+[h4 
+	" Accursed
+	$LF
+]h4
+[p 
+	"This fight works in very much the same way as the battle against Malice earlier. The major difference is that the enemy is immune to all skills, so I can't end the fight faster by maxing the rage meter. It's also not an option to farm EXP during this battle. You only get to keep EXP if you win a fight properly, having it end due to a scripted event does not count. So instead I take this opportunity to clean out my inventory a bit. Depleting item stacks here means less times I need to go through the inventory-is-full screen.
+	$LF
+]p
+[p 
+	"I don't go through the entire stack of Dragon Killers because I'll need several of them later.
+	$LF
+]p
+[h4 
+	" The Demon Knight
+	$LF
+]h4
+[p 
+	"I get a bunch of hits in early so that he starts with his Rage skill. This has twofold purpose. First it gets me the overdrive I need for the level 2 Disaresta. Second it inverts Ein's wait time very shortly after he takes his turn, allowing him to act again almost immediately. This, combined with her long wait time after using the powerful Ignis Spear, is how Ein gets his third turn in before Lina gets a second.
+	$LF
+]p
+[p 
+	"Isher has a major weakness to all non-physical elements and a very low magic stat, hence the massive damage from the Ignis Spear. Being able to use it against him is so good, in RTA I wouldn't dare because if he guarded against it I would be hecked.
+	$LF
+]p
+[p 
+	"I pick up an upgraded form of the bats as well as a stack of Harpie Talons in Elendia. Normally I'd rather grab weapons from a treasure chest along the way, instead of walking around town talking to people, but the chests that have talons are too late into the chapter for my purposes.
+	$LF
+]p
+[p 
+	"Chapter 3 has a major emphasis on earning EXP, mostly for Serene but also for Ein and Lina. Fia will be largely absent but not because she's unimportant. This is simply because she doesn't need many level ups, and is in fact better off being underleveled. More on that later.
+	$LF
+]p
+[h4 
+	" Flowery Melissa
+	$LF
+]h4
+[p 
+	"I'm still using bats with Lina instead of Serene because Serene's turns are a precious resource that I can't afford to waste. Against squishy enemies like Melissa I don't need Serene's extra power anyways.
+	$LF
+]p
+[h4 
+	" Melissa Again
+	$LF
+]h4
+[p 
+	"Just farming some more EXP.
+	$LF
+]p
+[p 
+	"There's something very peculiar about the Formation Memory feature that comes up here. My previous formation was forgotten because Cierra joined the party, so I get the chance to pick a new setup without having to spend any time canceling the previously remembered arrangement. I thought this was going to be very handy because my strategy three battles from now requires that I have Ein in the backrow in Attack formation. I figured I would just go to that now and be all set when I need it. However, for reasons completely unknown to me, in certain setups the Formation Memory will get mixed up on the next battle and put you in Magic formation instead. I haven't bothered to check all possible formations since most of them are uninteresting to me. Basically it comes down to Ein -> Serene -/-> Lina and Ein -> Serene -/-> Fia are my only options if I want to avoid being switched to Magic. I've called this the Formation Memory Glitch, it inconveniences me a few times during the run and is used to my advantage once.
+	$LF
+]p
+[p 
+	"When I switched back to just doing the standard Ein -> Serene -/-> Lina formation I ended up having much worse luck on the fight, so I left it as is and you'll get to see the change happen on the next fight.
+	$LF
+]p
+[h4 
+	" Bunch o' Bullies
+	$LF
+]h4
+[p 
+	"Bunch o' Bull-something-else, more like. The fact that I use a Wyrm Wing on this fight might seem a bit surprising, these little gnome guys are normally pretty weak and easy to kill. These particular ones however were imported from Chapter 4 and thus have surprisingly high stats. Killing them regularly would be very time consuming.
+	$LF
+]p
+[p 
+	"Serene gets a really good levelup with the Wings so I prefer to have her use them when it's convenient.
+	$LF
+]p
+[h4 
+	" Crawling Beasts
+	$LF
+]h4
+[p 
+	"Literally invincible enemies. Each of her next three fights Lina is going to need the Harpie Talon overskill, so I had to finish it here.
+	$LF
+]p
+[h4 
+	" Descendants of Nelde
+	$LF
+]h4
+[p 
+	"I need Ein in the back row for this because he can't survive both an Ice Breath and a Stormbringer. Lina's use of the Ogre Blade is basically just passing her turn until I'm ready to end the fight, she won't be leveling that up.
+	$LF
+]p
+[p 
+	"I have Serene switch to the Ogre Blade for this fight before she's finished leveling the Hell Scythe. This is because the latter would simply not do enough damage to clear the lizardmen in one turn. She'll be going back to it next fight.
+	$LF
+]p
+[h4 
+	" Beastmaster Ludo
+	$LF
+]h4
+[p 
+	"Hey, Fia's back. Just finishing off that Rapier level in preparation for her return to the party. Serene can get a big level from Wyvern Wings, just like the Wyrm Wings, but finishing that Hell Scythe level is my more immediate concern.
+	$LF
+]p
+[h4 
+	" Air Riders
+	$LF
+]h4
+[p 
+	"The harpie is a bit stronger than the other enemies I've killed with bats, I have Serene step up for this one. Lina finishes her Hell Scythe level so she doesn't die on the next battle. Incidentally this is the last levelup that Lina gets. Other than that it's just S-Ranking the Wyvern for another stack of wings.
+	$LF
+]p
+[h4 
+	" The Heavenly Wyvern
+	$LF
+]h4
+[p 
+	"This was the first battle that gave me a sense of hopelessness. My characters are just too weak to deal with Lindwurms 2,000 HP and 20% physical resistance. Serene and Lina aren't doing anything with their normal skills, Ein does some damage with the Dragon Killer but it's not nearly enough on it's own. Lina's High Claw overskill really bails me out and also foreshadows some of the most critical strategies I'll be using in the endgame.
+	$LF
+]p
+[p 
+	"High Claw has two major points going for it. First it takes advantage of Lindwurm's lightning weakness, my only other option for doing so would be to collect and level the Thunder Bow, which would be just awful. Second it has Revenge, pretty much the most powerful special effect a skill can have. With Revenge the Power of the skill can be up to doubled based on how low the user's HP is. 
+	$LF
+]p
+[p 
+	"Because of the Formation Memory glitch I need to reset my formation. It's essential that Lina is in the front row to take half of the first hit, powering up the High Claw.
+	$LF
+]p
+[p 
+	"Lina will mostly fall into obscurity starting in the next chapter but she can be proud of how useful she was in chapters 2 and 3, as well as how she saved the route from getting ended by Lindwurm.
+	$LF
+]p
+[p 
+	"Very short trip to Elendia this time.
+	$LF
+]p
+[p 
+	"The Chapter 4 encounters are going to be pretty similar to what we've seen in Chapter 3: Eliminate all but one enemy and then farm EXP on the remainder. Fia will mostly take over as my third party member because she does need to get her stats up a tiny bit, whereas Lina is all set on stats for the rest of the run.
+	$LF
+]p
+[h4 
+	" Squirming Slime
+	$LF
+]h4
+[p 
+	"Setting up my formation as Ein -> Fia -/-> Serene would be marginally faster in the menuing, but then I would run into the Formation Memory glitch again.
+	$LF
+]p
+[p 
+	"Because of the way rage increases when enemies die it's important for Fia to go first in this battle, otherwise the meter would not get maxed after my first three turns, and if the slime uses it's Rage Skill it would lower the durability on my valuable Wyvern Wings.
+	$LF
+]p
+[p 
+	"Lindwurm's Crystal Breath killing Ein outright, and this slime's Splatter Bomb nearly killing Ein and Fia are demonstrations of my character's increasing vulnerability. They really are getting to be quite underleveled.
+	$LF
+]p
+[h4 
+	" Water Bug
+	$LF
+]h4
+[p 
+	"Just another Chapter 4 fight, doing what they do.
+	$LF
+]p
+[h4 
+	" Rotten Scoundrels
+	$LF
+]h4
+[p 
+	"Good thing I picked up a new Scythe to level up, almost had to change my strategy there.
+	$LF
+]p
+[h4 
+	" Barbarian King
+	$LF
+]h4
+[p 
+	"Slime ball out of nowhere. 
+	$LF
+]p
+[h4 
+	" Sniper Squad
+	$LF
+]h4
+[p 
+	"We made it! After this we've got some bosses and in general more interesting fights. Still a lot of EXP to pick up in this chapter and the next but the worst is over, in terms of strategically bland segments of the run.
+	$LF
+]p
+[p 
+	"You'll notice I go over a bit on Ein and Fia's EXP. Putting the Slime Ball in on the previous fight was a way for me to make better use of Ein's turn based on the fact that he would finish his levels a little before Serene. I would have done it a few more times but I couldn't get it to be practical in any of the other fights. Turn orders or damage values just didn't work out.
+	$LF
+]p
+[h4 
+	" Silver-Bell Winds
+	$LF
+]h4
+[p 
+	"His Max Skill would banish me from the fight and waste a ton of time, similar to the Jet Black Wind in Chapter 2. He's not scripted to auto-max rage though so it's pretty manageable.
+	$LF
+]p
+[p 
+	"I let Ein die instead of dodging the attacks in order to get the overdrive I need for Serene Inferno. S-Ranking this fight gets me a fresh stack of Wyrm Wings to bail me out of the worst of the upcoming non-boss battles.
+	$LF
+]p
+[h4 
+	" The Blue Fool
+	$LF
+]h4
+[p 
+	"He's not as weak as he looks. This fight is legitimately very difficult, the two gnomes up front make it impossible for me to take him out before he can do major damage to my party. Even with manipulating a lot of misses and favorable targeting I'm still only barely able to survive.
+	$LF
+]p
+[p 
+	"On S-Rank he drops 3 Blue Bombers. When Lina uses these they have a chance to Vanish the target, so they will basically be used as Wyvern Wings. The major differences being that Lina needs to be the one using it and that it targets the enemy with the highest HP, as opposed to the wings that target at long range.
+	$LF
+]p
+[p 
+	"Fia's Thunder Blade level on this fight is her final levelup in the route. 280 HP for my second most important endgame character? Perfect.
+	$LF
+]p
+[h4 
+	" Colossal Warriors
+	$LF
+]h4
+[p 
+	"idk how this guy got to be the champion of the colosseo, him and his pal are pretty wimpy compared to that last fight.
+	$LF
+]p
+[p 
+	"I get Ein the buff from the Battle Lion. Honestly I was pretty loathe to spend so much time (~25 seconds) on an event to buff a character of such minor importance to the route, but there are a few fights where he really needs that strength to make the damage rolls. Also the agility bonus saves me time on RNG manipulation throughout the rest of the route. Any fight where I need Ein to start faster than enemies or other party members becomes a lot less finicky to manipulate for. There is also at least one case where the turn order I need is actually impossible without this +3 AGL. He would also not be able to survive the Chapter 5 boss without this boost.
+	$LF
+]p
+[h4 
+	" Carnean Bandits
+	$LF
+]h4
+[p 
+	"Thanks to the way ties are resolved when killing multiple enemies simultaneously I get the Lizardman's Flags from this fight. This is a handy strategic item that can either instantly give me two bars of overdrive (if Ein uses it,) or reduce the other two party members wait times (If anyone else uses it.)
+	$LF
+]p
+[h4 
+	" White Plateau Wyvern
+	$LF
+]h4
+[p 
+	"Fia has her first katana use in this fight, giving us a glimpse into her true role in the run. I mentioned earlier that Revenge is basically the most powerful effect a skill can have, the second best is probably Not-VIT and the katanas have both. Not-VIT causes the damage calculations to treat the enemy as having 0 vitality, potentially increasing damage output dramatically by ignoring the target's defense. More on the details and significance of that later.
+	$LF
+]p
+[p 
+	"In this fight I didn't take advantage of the Revenge property because it wasn't necessary. I can't really do this strategy any faster because if I took out any of my characters' turns I wouldn't get to level 3 overdrive in time for Serene's finishing move.
+	$LF
+]p
+[p 
+	"I use the rock I picked up in Chapter 2 to get the final bat. The bats so far have been quite good but this version is just tremendously powerful. I'll be using them to one-shot Chapter 7 enemies, among other things.
+	$LF
+]p
+[h4 
+	" Tethyian Robbers
+	$LF
+]h4
+[p 
+	"I hope I did the math right on how many Dragon Killers I need, cause this is my last one.
+	$LF
+]p
+[h4 
+	" Treasure Hunter Z
+	$LF
+]h4
+[p 
+	"If you've been keeping count you'll have noticed that Serene has been picking up a lot of big levels this chapter. That strength is starting to add up and is going to do some damage.
+	$LF
+]p
+[h4 
+	" The Red Sage
+	$LF
+]h4
+[p 
+	"Another tough one. Fia has to take some pretty big damage from the Swing Around to make her Zantetsu uses strong enough. Technically she could take that damage after her first use, it wouldn't be strong enough to kill the imp in that case but I could have Ein finish it off with his scythe. Having it work out like this with taking the hits first and not needing Ein is a bit more efficient though. Speaking of Ein, it's fortunate that I have a character to spare because I don't think there's anyone in my party that could survive her Nightmare Waltz without getting an unreasonable numbers of misses. He's not farming any EXP or contributing to the kill so he can just take one for the team. When Serene gets her wait time inverted by the imp's Paradox it actually accelerates her turn by a lot. This allows her to max the rage before the Sage's second turn which in turn ensures she doesn't get a third turn.
+	$LF
+]p
+[p 
+	"She drops the Red Vipers, which are effectively identical to the Blue Bombers, more single target vanishes.
+	$LF
+]p
+[h4 
+	" Elementalist
+	$LF
+]h4
+[p 
+	"Theoretically this fight can be done with the witch only getting one turn. A setup like that would require all three of my characters to each be faster than all four of the enemies. This proved to be too improbable, I couldn't find any RNG manipulation to set that up within a reasonable number of frames.
+	$LF
+]p
+[p 
+	"It would have been nice for Serene to have a stronger scythe to use here over the Chapter 3 quality Ogre Blade. Unfortunately her normal skills with both the Burning Sun and the Black Scythe are physical, which the elementals are immune to.
+	$LF
+]p
+[h4 
+	" The Fallen Angel
+	$LF
+]h4
+[p 
+	"I originally routed to not use a bat on this fight. This seemed pretty silly to me because her weakness to physical and low strength make her basically the perfect target. That strategy involved taking more turns, getting absurd damage rolls and setting up to have Fia in a good mood. I ended up having bats to spare in the route, so I changed my mind.
+	$LF
+]p
+[p 
+	"My use of Magic formation is necessary for Fia to be able to survive the Plasma Spark, though it does throw a bit of a wrench into the next battle. 
+	$LF
+]p
+[h4 
+	" Soul Returner
+	$LF
+]h4
+[p 
+	"So my idea here is that I tank a Mortem Dance in order to get the level 2 overdrive I need for the Disaresta to kill. The problem is that because of the formation I used on the Archangel it's Fia taking the hits instead of Ein. Fia with her pathetic stats and a major weakness to the dark element is a poor choice for surviving such a skill. I had to manipulate for either 2 / 5 missed hits and low damage rolls, or as I was lucky enough to get pretty quickly, 3 or more misses. Simply letting Fia die to the skill would not be acceptable because the death animation would waste some time and it would also bring me up to level 3 overdrive, causing the Disaresta to do a much longer animation.
+	$LF
+]p
+[h4 
+	" Hungry Hungry Monsters
+	$LF
+]h4
+[p 
+	"Need a very rare turn order for this to work out right. The relatively slow slime needs to go before Ein and Fia, and I also need Ein to be before the wolf.
+	$LF
+]p
+[h4 
+	" Disciples of Xenon
+	$LF
+]h4
+[p 
+	"We have a special guest appearance for this battle. I don't know who this lady is but she can do some damage with the Saint Scepter, apparently.
+	$LF
+]p
+[p 
+	"My use of the Flag here to accelerate my first turn might seem a bit strange, normally I just happen to get the initial turn order that I want. The fact is that Cierra is so slow that it's actually impossible for her first turn to come in before the imp or the ghost, I need to use the Flag to get ahead of them. I went out of my way on formation select to put Cierra before Ein so that she would win the tiebreak after the Flag (Otherwise Ein would vanish the imp instead of the golem.)
+	$LF
+]p
+[h4 
+	" Disciples of Askus
+	$LF
+]h4
+[p 
+	"Turn order is finicky here. Lina and Serene obviously need to go before their respective targets, no reason to let them get turns before they are vanished. The tricky part is I need the knight to be faster than Ein so that he doesn't use his Max skill, wasting time with the long animation, and he needs to be slower than Serene and Lina so he doesn't use his Normal skill and get a second turn before the fight ends.
+	$LF
+]p
+[h4 
+	" Disciples of Lokin
+	$LF
+]h4
+[p 
+	"Exact same strategy but the turn order is a lot easier to hit because the lizardman is much faster than the knight from the previous fight.
+	$LF
+]p
+[h4 
+	" Misel the Fencer
+	$LF
+]h4
+[p 
+	"This is the only optional encounter I go for in the route. The time cost is very significant, I estimate it at being around 3 minutes counting both the time of the fight and the time spent hitting all the stakes to open the door. The benefits to me are one point of Blood Fang EXP on Serene, 10x Rosier and 5x Kiku-Ichimonji. The one point of EXP is obviously nothing huge, maybe saves me 10 or 15 seconds. The Rosier is essential for the boss rush but I could pick up a stack from the Giant Fortress fight in Chapter 7 instead. I would miss out on the two uses in Chapter 6 and it would add a lot of time to that Giant Fortress battle, it's tough to say but I'd count it as around a minute in my advantage. This leaves nearly 2 minutes that needs to be accounted for by 5x Kiku-Ichimonji. On one hand that's a lot of time to make up, on the other hand the route wouldn't work without those katnas. No two ways about it, I get to the boss rush without any of these and I'm just done, not enough damage.
+	$LF
+]p
+[p 
+	"You might think I also get Fia a point of Holy Sabre EXP, but she actually won't be finishing that level so it's inconsequential.
+	$LF
+]p
+[p 
+	"The strategy for the fight itself is quite simple, I get a ton of overdrive from his Max skill (conveniently the fight starts with maxed meter,) and then I abuse his holy weakness with a level 3 Disaresta. Getting at least 7/8 hits was a bit of a trick because this skeleton does have a guard rate of about 1/3.
+	$LF
+]p
+[h4 
+	" Cemetary Dwellers
+	$LF
+]h4
+[p 
+	"Nothing too crazy here. I need Serene to take a fair number of hits from the plant's Max skill or else her Blood Rave wouldn't do enough damage.
+	$LF
+]p
+[p 
+	"The reason I was running around collecting those three Ankhs is because I need them to solve the lake puzzle in this upcoming area. The basic idea is that there are three crystal shrines, one at the entrance and two in the lake. At each shrine I can place an Ankh and it will lower the water in certain rooms in the lake. The rooms that are affected are based on the shape of the letter of the Ankh (L Ankh affects the left and bottom sides, for example.) I can only traverse rooms that have had the water lowered at least once, and if a room is being lowered by two or more Ankhs at the same time there might be something special, like a treasure chest or an item, that's otherwise inaccessible. I completely ignored the Southern Catacombs where I could have fought a bunch more and gotten three more Ankhs, conveniently the puzzle can be solved with just the northern Ankhs. In fact I can make it all the way across the lake with just A and X active, the problem is that neither of those will allow me to reach a second crystal shrine. I need to temporarily use L to get to the yellow shrine. The top left corner has a chest with Wyvernzem, a powerful claw weapon. Conveniently the water is lowered twice there by L and X and I can collect it without any trouble.
+	$LF
+]p
+[h4 
+	" Toxic Substances
+	$LF
+]h4
+[p 
+	"I honestly have no idea how I got a Normal skill from the slime after using a 3 hit attack and vanishing one of them.
+	$LF
+]p
+[h4 
+	" The Grim Reaper
+	$LF
+]h4
+[p 
+	"This was a tough turn order to get. Ein and Serene faster than the elementals (which are quite fast,) and Serene at least 11 units faster than Death.
+	$LF
+]p
+[p 
+	"If you were wondering why I was continuing to hold on to the Chapter 3 Ogre Blades it's actually for the exact same reason that I used them for on the Elementalist: I need a non-physical front row skill to clear out these PHY immune elementals. Serene and Ein have gotten stronger since last time so I don't need a third party member to help finish them off, which is important because I just barely avoid maxing the rage meter as is.
+	$LF
+]p
+[p 
+	"I've mentioned all the way back in Chapter 1 that enemies won't ever use their ETC skills as their first turn, this comes into play again here. Normally after clearing his elemental support Death would switch to his Cardinal form which has much higher stats and resistances. Having that happen would dramatically reduce my damage output. By getting him to incur a long delay time on his first turn, when it's impossible for him to change forms, gives me a lot of time to bring him down before he gets a chance. Having him use his Max skill would give me even more time to work with (saving me from needing Serene to be so much faster at the start,) but I need the Rage specifically to bring Fia's hp low for her katana use. She would have no chance of surviving his Max skill.
+	$LF
+]p
+[p 
+	"Fia breaking 2k damage with the Kiku-Ichimonji is a nice early demo of the item's value. Probably looks a bit odd how I don't actually get the kill with the Disaresta. In my first routing I had Serene use a Rosier here and that did set me up for an S-Rank with the Disaresta kill. There were three problems with this line. First, the Night Scythe that Death drops really didn't turn out to be very practical. It seems pretty strong but I just had too much other important stuff for Serene and my other characters to do. Second the Rosier stack is precious, I need 8 for the boss rush and that leaves me only 2 to use elsewhere. Lastly, Serene needs Wyvernzem EXP really fast, I want that level before the third battle of the next chapter. Getting a couple points here makes that much smoother.
+	$LF
+]p
+[h4 
+	" Hinderance
+	$LF
+]h4
+[p 
+	"A good chance to finish that Wyvernzem level I need. You'll note that I use two of those precious Rosiers to kill some random bug. As it happens all three of the bosses in this chapter are highly resistant or immune to holy, so using them on non-boss enemies is the only reasonable choice. This bug is a good pick because Serene really can't do much through his physical resistance and high defense (ignored by the Rosier's Not-VIT.)
+	$LF
+]p
+[h4 
+	" Cretier Mobile Unit
+	$LF
+]h4
+[p 
+	"later, nerds.
+	$LF
+]p
+[h4 
+	" Phantasmic Winds
+	$LF
+]h4
+[p 
+	"Same as the previous Wyrms, can't let him Max skill or I get blown away.
+	$LF
+]p
+[p 
+	"Holy smokes I'm a big fan of this fight. The setup to have Serene nearly kill herself with the Fenrir Attack's Self-DMG is so satisfying, especially when I get the payoff with a devastating second use.
+	$LF
+]p
+[h4 
+	" Alisha of the Wind
+	$LF
+]h4
+[p 
+	"I could S-Rank the harpy to get Leyte Claws instead of grabbing them from the chest, but that would slow down the fight a bit and prevent me from getting two experience points. Similar to the Wyvernzem I'm in a pretty big rush to get that Leyte Claw level because I need the overskill soon.
+	$LF
+]p
+[p 
+	"I have Ein die because I want him to lose the point of Spiral Arch EXP he got. I only picked those up because I needed some kind of a weapon he could do a little damage with, him actually getting the level would be a waste of time.
+	$LF
+]p
+[h4 
+	" Guardians
+	$LF
+]h4
+[p 
+	"Enemies are getting to be way too strong at this point in the game, I really don't want to fight them if I can avoid it.
+	$LF
+]p
+[p 
+	"I pick up a gem in the water and give it to Cierra so I can get the ending I want.
+	$LF
+]p
+[h4 
+	" Aqua Dog
+	$LF
+]h4
+[p 
+	"Does whatever an aqua dog does.
+	$LF
+]p
+[h4 
+	" The Solitary Angel
+	$LF
+]h4
+[p 
+	"Ledah has 98 strength, Fia has 31. Normally this would make it basically impossible for her to deal any significant amount of attack damage. Thankfully in the calculations the amount of damage that a defender can block by having higher strength is limited by how much vitality they have. Because the katanas have Not-VIT Ledah's vitality is effectively zero, and thus he can't block any of the damage no matter how much stronger he is. This also means that Fia's strength is not a factor in her damage done, any amount of strength that's less than or equal to the target's would do the same amount of damage. More than anything else this is what makes Fia so good in the route, she can deal major damage to endgame bosses without needing to pick up a ton of levels throughout the run. In fact it's preferable to have her underleveled so that it's easier to get her hp low for good Revenge multipliers. The few levels she does pick up are just enough for her to survive certain skills.
+	$LF
+]p
+[p 
+	"I get to ignore his strength when I'm on the offensive, not so much when Ledah is the one attacking Fia, even missing 1/2 hits his normal skill is almost enough to take her out. Later his Rage skill just barely leaves Serene alive as well (with a little help from her self damage.) This is because that skill is actually a Magic, not an Attack. If you've been keeping track you'll know that Serene has collected a grand total of 0 magic from levelups so far in the route. Normally Ledah using magic is pretty laughable but in this case Serene having even less (27 to 30) and a sizable weakness to fire makes it a pretty powerful skill. It should be readily apparent to the viewers that my barely surviving to these two skills is a setup for my Revenge skills.
+	$LF
+]p
+[p 
+	"This fight is the main reason I picked up the Spiral Arch in Chapter 5. I just needed Ein to do a solid ~200 damage but my inventory really doesn't have anything else that he can use effectively (Ledah is highly resistant to holy, so Einherjar would not work.)
+	$LF
+]p
+[h4 
+	" Purula Air Force
+	$LF
+]h4
+[p 
+	"I get a bit of help from Ein and Lina killing the elementals and softening up the harpie before letting them die and farming up the rest of the Leyte Claw level. Basically it's just faster to have them not there getting turns.
+	$LF
+]p
+[h4 
+	" Dragon Master Milia
+	$LF
+]h4
+[p 
+	"Order of operations is important here because I'm going to need the Mage Rings that the witch drops. They are a basic +magic buff, similar to the Power Wrist.
+	$LF
+]p
+[h4 
+	" The Devilish Angel
+	$LF
+]h4
+[p 
+	"Ein has one job: Land a hit with anything to generate some rage. He performs his role admirably and is then promptly slain by the Rage skill he induced. My original plan was for Ein to be the one directly targeted by the Brandish because the amount of damage Serene can afford to take from it is very small. She ended up becoming the dodge master though so it worked out.
+	$LF
+]p
+[p 
+	"This is the only battle where I rotate my formation. In RTA and casual play this feature is extremely useful for controlling which enemies you target and which of your characters are targeted. In TAS it was largely unnecessary because I could just get lucky on all the 50/50 targeting situations. 
+	$LF
+]p
+[p 
+	"Serene's final form is unleashed on this fight. She's gotten all of her significant levelups and is ready to start wiping out everything with her most powerful skill: No Mercy.
+	$LF
+]p
+[p 
+	"It will look like I'm going to overkill by a ton but my Power Wrist buff times out before my third No Mercy. Speaking of that is was essential that Serene did not get the Purify debuff from the Trie. Purify is actually a glitched status which has no effect. However, even a glitched debuff would overwrite buffs and cancel my Power Wrist.
+	$LF
+]p
+[h4 
+	" Diabolical Fang
+	$LF
+]h4
+[p 
+	"I refuse to properly fight any non-boss battles in this chapter. I mentioned this already in Chapter 6 but it bears repeating that the enemies are just too strong.
+	$LF
+]p
+[p 
+	"I've got my levels, I've got my power items, I'm going to the boss rush.
+	$LF
+]p
+[h4 
+	" Destroyer
+	$LF
+]h4
+[p 
+	"These battle pixies are really quite inaccurate, it's a bit of a trick getting at least 5/6 hits on both the gnome and the axe guy. I also ran into the problem of getting too many hits on the Wyvern, who needs to survive long enough to die to the Disaresta instead.
+	$LF
+]p
+[h4 
+	" Bombastic Bunch
+	$LF
+]h4
+[p 
+	"I had to specifically manipulate for Serene to not be the one using the wing here. If she had gotten the bonus from ending the battle she would have been put in a good mood. If she was in a good mood upon my entering 7-4 she would have gotten an affection bonus that would put her in the lead and mess up which ending I get.
+	$LF
+]p
+[h4 
+	" Prideful Wings
+	$LF
+]h4
+[p 
+	"Got a fresh stack of Wyvern Wings and only two fights left to use them in.
+	$LF
+]p
+[h4 
+	" Giant Fortress
+	$LF
+]h4
+[p 
+	"The final regular fight before the boss rush.
+	$LF
+]p
+[h4 
+	" The Grim Avenger
+	$LF
+]h4
+[p 
+	"It wasn't relevant in Chapter 6 but both Ledah and Malice had a second form they would switch to if I had given them the chance. In this refight Malice only has half HP but she starts in her awakened form, which has dramatically higher stats and more powerful skills. To top things off the rage meter is maxed from the start so she's going to use her Max Skill: Trie Noir. With Serene being directly targeted and Fia taking collateral damage from the final hits they are both only barely able to survive with +30 magic from the Mage Rings and +7 from Magic Formation. Serene has good ice resistance but it only goes so far when she's got 27 magic to awakened Malice's 106. Ein obviously has no chance.
+	$LF
+]p
+[h4 
+	" Dark Progenitor I
+	$LF
+]h4
+[p 
+	"Throwing Ice Emblems here is actually not the reason I picked them up. Originally I had Lina shooting a Wind Bowgun which served the same purpose. Once I added the emblems to the route I no longer had inventory space for the bowguns so it was really fortunate that I could substitute them in like this. I kept a Holy Sabre for this fight because I don't have any other weapons that Ein can get at least two hits with, which is needed for getting back to level 2 overdrive between the No Mercy.
+	$LF
+]p
+[h4 
+	" Dark Progenitor II
+	$LF
+]h4
+[p 
+	"I could have had Lina throw an Emblem here as well to make the damage rolls easier to hit, they ended up not being too bad to manipulate for though.
+	$LF
+]p
+[p 
+	"Serene gets the Power Wrist level, honestly I would have been better off without it but I need the strength buffs and the EXP just adds up eventually.
+	$LF
+]p
+[h4 
+	" Dark Progenitor III
+	$LF
+]h4
+[p 
+	"Lindwurm is back but this time Serene is ready for him. I definitely don't have any problems with: "how am I going to exploit his lightning weakness?"
+	$LF
+]p
+[p 
+	"I have Lina throwing emblems again but this time I actually need them to not proc the extra ice hit. I don't need the damage and the extra rage generated would mess up the strat.
+	$LF
+]p
+[h4 
+	" Dark Progenitor IV
+	$LF
+]h4
+[p 
+	"Fia's Power Wrist usage is primarily defensive. Because of the Not-VIT property any amount of strength Fia has that's less than or equal to the target will all do the same amount of damage (I explained how this works a bit on the fight against Ledah.) The Darkangel's strength is low enough that Fia does pass her by 7 points, so there is some amount of damage increase. But mostly it's just to survive 2/3 hits for a big Revenge multiplier.
+	$LF
+]p
+[h4 
+	" Dark Progenitor V
+	$LF
+]h4
+[p 
+	"This is the only battle where Serene dies. Death absorbs HP based on the damage done by his Max Skill, so letting Fia take it and keeping Serene around to do damage isn't an option cause he would heal for a lot more. Letting Ein die doesn't work because I need the extra 500 or so damage the Disaresta does over the No Mercy (Serene wouldnt have enough time to use it twice before Death's next turn.)
+	$LF
+]p
+[h4 
+	" The Traitorous Magus
+	$LF
+]h4
+[p 
+	"This is by far the most difficult fight in the run. Normally it could be a tossup between this and the other final boss but not in TAS because I do have Fanelia for that fight but I don't have Longinus for this one. After Lindwurm this was the only other fight that really made me despair. 11,000 HP is just so much to get through, even when I'm getting juicy 2500 damage No Mercy and strong Katana hits. There was no reasonable way to survive long enough. Then I had the idea to pick up the Ice Emblems and the route was saved. My first draft had 1 Kiku-Ichimonji and 1 Zantetsu, instead of 2 of the former, so that made it even more unreasonable. 
+	$LF
+]p
+[p 
+	"Hector's resistances and the element type of his skills are determined by which of four forms he is in. I didn't disassemble it to be certain, but as far as I can tell the AI is that anytime Hector would use a Normal Skill except for his first turn in a form he will use Element Transition. The ice form he starts in is by far the ideal because it's weak to lightning and it doesn't murder Serene too badly. I'll be preventing him from ever transitioning by having him use Max Skills in each of his turns after his first. Fia can not survive one of those Ether Bursts, even with the Mage Ring buff, and Serene can only take one. That's what I picked up those Ice Emblems for in Chapter 6. You'll notice Serene becomes outright immune to the element after using it, her base resistance of +40 with an extra +60 from the emblem renders his spell invalid. This was actually a bit of a problem in the first draft when I only had 1 Kiku-Ichimonji because I needed to do another No Mercy but I wasn't getting any overdrive from being hit by spells I was immune to.
+	$LF
+]p
+[h4 
+	" The Holy Demon
+	$LF
+]h4
+[p 
+	"Without Fanelia this fight would be a nightmare. With it it's pretty managable, I mostly just whittle her down with Rosiers while she's in her magic formation (weak to holy) and then finish with a No Mercy when she switches to attack form (weak to fire / ice / lightning.)
+	$LF
+]p
+[h2 
+	"Closing Thoughts
+	$LF
+]h2
+[p 
+	"This project was a lot of fun and I'm happy with the final product. The overall slower pace might make it a bit of a niche offering but I'm optimistic that people will be entertained by the tricky routing, rng manipulation and the game's charm.
+	$LF
+]p
+[p 
+	"Suggested screenshot:
+	$LF
+	"531411
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": Claiming for judgment and setting to delayed for an 
+	[a href=/forum/p/468622 
+		"improvement
+	]a
+	".
+]p

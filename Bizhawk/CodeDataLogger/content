@@ -1,0 +1,332 @@
+11
+[h3 
+	" Backgrounder
+	$LF
+]h3
+[p 
+	"Currently supported for: PCE, GB/GBC, SMS/GG, Genesis, SNES
+	$LF
+]p
+[p 
+	"The CodeData (CD) Logger primarily tracks information for each byte in the ROM about how it's used by the game program: the most useful distinction is between code and data, but in some cases more fine-grained information is useful. This data is helpful for reverse engineering games, so that automated disassembly tools can produce .db tables for stuff known to be data, and disassemble stuff known to be code. Typically you will want to turn on the CD logger and play through as much of the game as possible, to trigger reading of every level, script, sound, and art, to get the coverage as near to 100% as you can. 
+	$LF
+]p
+[h3 
+	" File Format
+	$LF
+]h3
+[h4 
+	" Type definitions
+	$LF
+]h4
+[ul 
+	[li 
+		" A "string" is an LEB128 encoded number which is the number of bytes in the string, followed by that many bytes of UTF-8 character data.
+		$LF
+	]li
+	[li 
+		" A "number" is a little endian 32 bit integer.
+		$LF
+	]li
+]ul
+[h4 
+	" File Format
+	$LF
+]h4
+[p 
+	"Header:
+	$LF
+]p
+[ul 
+	[li 
+		" string id: file identifier, always "BIZHAWK-CDL-2"
+		$LF
+	]li
+	[li 
+		" string sub-id: a string, padded at the end to a length of 15 with spaces, saying which platform the CDL file is for: PCE or GB
+		$LF
+	]li
+	[li 
+		" number sub-version: another version number, in case the console-specifics change but not the overall format
+		$LF
+	]li
+	[li 
+		" number NumberOfBlocks: number of memory areas represented in this file
+		$LF
+	]li
+]ul
+[p 
+	"For each block:
+	$LF
+]p
+[ul 
+	[li 
+		" string BlockName: identifying name of the block. These usually (but not always) follow the naming of a corresponding MemoryDomain. In the future we'll try to normalize these more.
+		$LF
+	]li
+	[li 
+		" number bytelength: length of the block in bytes.
+		$LF
+	]li
+	[li 
+		" byte data(bytelength): one byte of information for each byte in the original block.
+		$LF
+	]li
+]ul
+[h4 
+	" PCE
+	$LF
+]h4
+[p 
+	"The PCE implementation is pretty complex due to the diversity of memory mapping options and the general thoroughness with which the CD logger has been designed. This core supports disassembling from the CD logger. Only the PCE implementation currently tracks writes (the remainder track only reads)
+	$LF
+]p
+[p 
+	"For PCE, the BlockNames are:
+	$LF
+]p
+[p 
+	"ROM
+	$LF
+]p
+[pre 
+	" HUCard ROM, or syscard bios ROm
+	$LF
+]pre
+[p 
+	"Cart Battery RAM
+	$LF
+]p
+[pre 
+	" 32K of battery backed ram in the Populous cart
+	$LF
+]pre
+[p 
+	"Super System Card RAM
+	$LF
+]p
+[pre 
+	" 192K of ram in the super system card
+	$LF
+]pre
+[p 
+	"TurboCD RAM
+	$LF
+]p
+[pre 
+	" 64K of ram in the turboCD
+	$LF
+]pre
+[p 
+	"BRAM
+	$LF
+]p
+[pre 
+	" 8K of TurboCD backup RAM.  The actual RAM is smaller, but the CDL will record all
+	$LF
+	" activity in that 8K region.
+	$LF
+]pre
+[p 
+	"Main Memory
+	$LF
+]p
+[pre 
+	" 8K or 32K (SGX) of main memory
+	$LF
+]pre
+[p 
+	"MMIO
+	$LF
+]p
+[pre 
+	" 8K of space in block ff, containing system IO ports.
+	$LF
+]pre
+[p 
+	"UNKNOWN
+	$LF
+]p
+[pre 
+	" 8K long area which any unknown block maps to.
+	$LF
+]pre
+[p 
+	"Each byte has 8 bits of flags on what the byte has been observed to do:
+	$LF
+]p
+[pre 
+	"// was fetched as an opcode
+	$LF
+	"Code = 0x01,
+	$LF
+	"// was read or written as data
+	$LF
+	"Data = 0x02,
+	$LF
+	"// was read and used as a pointer to data via indirect addressing
+	$LF
+	"DataPtr = 0x04,
+	$LF
+	"// was read or written as stack
+	$LF
+	"Stack = 0x08,
+	$LF
+	"// was read or written as data via indirect addressing
+	$LF
+	"IndirectData = 0x10,
+	$LF
+	"// was read and used as function pointer
+	$LF
+	"// NB: there is no "IndirectCode"; all code is marked simply as code regardless of  how it is reached
+	$LF
+	"FcnPtr = 0x20,
+	$LF
+	"// was used as a source or destination (either initial or during the loop) of a block xfer
+	$LF
+	"BlockXFer = 0x40,
+	$LF
+	"// was fetched as an operand byte to an opcode
+	$LF
+	"CodeOperand = 0x80
+	$LF
+]pre
+[h4 
+	" GB (gambatte)
+	$LF
+]h4
+[p 
+	"CartRAM may or may not be present. Of course CartRAM may vary in size (and WRAM will depend on gb/gbc type)
+	$LF
+]p
+[p 
+	"Blocknames: ROM, CartRAM, WRAM, HRAM
+	$LF
+]p
+[p 
+	"Flags:
+	$LF
+]p
+[pre 
+	"ExecFirst = 0x01
+	$LF
+	"ExecOperand = 0x02
+	$LF
+	"Data = 0x04
+	$LF
+]pre
+[h4 
+	" GBHawk
+	$LF
+]h4
+[p 
+	"CartRAM may or may not be present. Of course CartRAM may vary in size (and WRAM will depend on gb/gbc type)
+	$LF
+]p
+[p 
+	"Blocknames: ROM, CartRAM, WRAM, HRAM (note: these do not match the memory domain names)
+	$LF
+]p
+[p 
+	"Flags:
+	$LF
+]p
+[pre 
+	"ExecFirst = 0x01
+	$LF
+	"ExecOperand = 0x02
+	$LF
+	"Data = 0x04
+	$LF
+	"Write = 0x08 (this is used to distinguish data writes from data reads)
+	$LF
+]pre
+[h4 
+	" Genesis (GPGX core only)
+	$LF
+]h4
+[p 
+	"SRAM may or may not be present. I suppose it may vary in size. MD Cart will vary in size, of course. All the Sega CD stuff hasn't been analyzed yet.
+	$LF
+]p
+[p 
+	"Blocknames: MD Cart, 68K RAM, Z80 RAM, SRAM
+	$LF
+]p
+[p 
+	"Flags:
+	$LF
+]p
+[pre 
+	"Exec68k = 0x01
+	$LF
+	"Data68k = 0x04
+	$LF
+	"ExecZ80First = 0x08
+	$LF
+	"ExecZ80Operand = 0x10
+	$LF
+	"DataZ80 = 0x20
+	$LF
+	"DMASource = 0x40 -- Should be useful for identifying the origin of graphics data on the cart ROM.
+	$LF
+]pre
+[h4 
+	" SMS/GG
+	$LF
+]h4
+[p 
+	"Save RAM and Cart (Volatile) RAM may or may not be present, and most of it may vary in size.
+	$LF
+]p
+[p 
+	"Blocknames: ROM, Main RAM, Save RAM, Cart (Volatile) RAM
+	$LF
+]p
+[p 
+	"Flags:
+	$LF
+]p
+[pre 
+	"ExecFirst = 0x01
+	$LF
+	"ExecOperand = 0x02
+	$LF
+	"Data = 0x04
+	$LF
+]pre
+[h4 
+	" SNES
+	$LF
+]h4
+[p 
+	"CARTRAM may be variable. APURAM is full 64KB despite some of the space being mapped to registers. The Exec* and CPUData flags are set for the SMP+CPU both. Since each CPU can only access its respective memories, there are no conflicts.
+	$LF
+]p
+[p 
+	"Blocknames: CARTROM, CARTRAM, WRAM, APURAM
+	$LF
+]p
+[p 
+	"Flags:
+	$LF
+]p
+[pre 
+	"ExecFirst = 0x01
+	$LF
+	"ExecOperand = 0x02
+	$LF
+	"CPUData = 0x04
+	$LF
+	"DMAData = 0x08 //not supported yet
+	$LF
+	"BRR = 0x80 //triggered by DSP sample reading
+	$LF
+]pre
+[h4 
+	" NES
+	$LF
+]h4
+[p 
+	"Use FCEUX
+]p

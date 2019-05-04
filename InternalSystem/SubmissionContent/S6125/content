@@ -1,0 +1,456 @@
+4
+[p 
+	(__wikiLink|user:HappyLee)
+	": Definitely not intended for publication because it's not as fast as 
+	(__wikiLink|3728M|me and Mars608's latest SMB warpless TAS)
+	", but pardon me for submitting it here, as it may make an interesting submission (for some).
+	$LF
+]p
+[p 
+	(youtube|v=pSiQgHZhKjk)
+	$LF
+	"This is a full-length TAS done entirely by a bot, an Lua script that I call it SMBbot. It's not an artificial intelligence, but what I call an "artificial idiot", as it's really dumb.
+	$LF
+]p
+[p 
+	"It doesn't read map or level information, doesn't evolve, doesn't have much memory. It basically just jumps randomly, and loads savestates after dying or bumping into a wall.
+	$LF
+]p
+[p 
+	"As dumb as it is, but it's the first bot ever to complete SMB, and in speedrun style! Only 7416 retries, 4:49 in real-time computing, it completes SMB warpless in 19:26.35. Not exactly as fast as best human speedrunners, but surely more stable and fast in average.
+	$LF
+]p
+[h3 
+	"Idea
+	$LF
+]h3
+[p 
+	"One day I was watching LuigI/O (a neural network playing SMB), and I thought, "this isn't intelligent", because after tens of thousands times of improving, LuigI/O still doesn't seem to know what it's doing or basic principles of the game. So I decided to build a smarter AI manually, and see how well it can play the game.
+	$LF
+]p
+[p 
+	"At first, my plan was to let the bot calculate map and analyze possible routes, and calculate jumping time and strength. It's rather complicated, so I wrote random jumping code initially and gave it a go. To my surprise, the bot finished 1-1 easily, and completed the whole World 1 after many attempts at 1-2 pipe jump. And I thought, "this could work", so I continued developing the bot and kept it jumping randomly instead of reading the map.
+	$LF
+]p
+[p 
+	"The basic function is to save state when Mario lands. Each savestate has 10 chances. Mario will do jump randomly in the range between the savestate and the frame Mario will die or fall. This basic function alone is enough to complete World 1, but will be stopped by the high wall in 2-1, so I added some features:
+	$LF
+]p
+[ul 
+	[li 
+		" Backward jump acceleration: by playing a series of inputs at the beginning, just for fun. Used for every stage start.
+		$LF
+	]li
+	[li 
+		" Wall-allow: if Mario bumps into the same wall over 99 times and still can't jump over it, Mario would be allowed to touch that wall. This allows Mario to jump over the high wall in 2-1 (by walljump or Springboard), and will be used again in places like 8-2.
+		$LF
+	]li
+	[li 
+		" Swimming mode: two swimming probabilities (frequent and not frequent); Mario presses down when X speed > 16; savestate is made every 2 seconds. This allows Mario to complete water stages.
+		$LF
+	]li
+	[li 
+		" Death state: if Mario dies in similar ways too many times from a savestate point, that point might become a death state, which Mario land on the same spot again and then retry. This helps reduce retry count in places like 1-3 where Mario easily falls on the same spot and die meaninglessly too many times.
+		$LF
+	]li
+	[li 
+		" Retry 1/3 of the times when Mario falls. This helps prevent Mario from falling too much, and increase chances like passing 4-4 first maze.
+		$LF
+	]li
+	[li 
+		" Maze detection: if Mario walks through a maze check point and triggered a loop, it would trigger retry. If Mario fails to pass the check point correctly over 20 times, it starts over from the stable state (usually the beginning of the stage, but in maze levels, the last correct check point).
+		$LF
+	]li
+	[li 
+		" Wall-free mode: if Mario bumps into walls over 800 times (would be reduced when screen stops scrolling or Mario fails to solve a maze) and still fails to make progress, Mario would be allowed to touch any wall. There are one or two timers that will judge how Mario is doing after hitting the wall, to prevent meaningless wall bumps. If it's regular maze stage (like 4-4), Mario has 2/3 chance to walk towards left. Mario also has higher chance to do walljumps. Wall-free mode opens till Mario makes real progress. This allows Mario to solve the maze in 4-4 and 8-4, and may become useful in other places, too.
+		$LF
+	]li
+	[li 
+		" Every 1000 unsuccessful deaths brings Mario to the stable state (usually the beginning of the stage). Too many wall bumps from the right side of the screen also, to prevent Mario from being stuck in Warp Zone in 4-2 and 1-2 (sometimes happens).
+		$LF
+	]li
+	[li 
+		" First-frame jump chance increases as Mario's death grows without real progress. This helps to solve hard stages with hard jumps like 4-3.
+		$LF
+	]li
+	[li 
+		" If Mario dies from enemies over 500 times, it starts over from the stable state with a random chance of pressing left for 0 to 2 seconds. This helps if Mario is stuck with a bad Firebar in 5-4 or 6-4.
+		$LF
+	]li
+	[li 
+		" Number of allowed attempts from a savestate (originally 10) increases if Mario dies too much before making to the savestate. This helps to prevent Mario from losing valuable progress.
+		$LF
+	]li
+	[li 
+		" Pipe maze detection: if Mario's in a maze with pipe exits information, a part of pipe exit information is stored to prevent loop. If Mario's in the pipe maze with a non-loop pipe exit information, down is pressed every time Mario lands and sometimes during Mario running. This allows Mario to enter pipes to solve 8-4 maze.
+		$LF
+	]li
+]ul
+[p 
+	"Source code of the script: https://pastebin.com/vNHjw7Ca
+	$LF
+]p
+[p 
+	"I did this experiment of running it 20 times, and here are the results:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Attempt
+			]th
+			[th 
+				"TAS time
+			]th
+			[th 
+				"Retry
+			]th
+			[th 
+				"Real-time
+			]th
+			[th 
+				"Note
+			]th
+		]tr
+		[tr 
+			[td 
+				"#01
+			]td
+			[td 
+				"19:28.71
+			]td
+			[td 
+				"11180
+			]td
+			[td 
+				"5:48
+			]td
+		]tr
+		[tr 
+			[td 
+				"#02
+			]td
+			[td 
+				"19:29.91
+			]td
+			[td 
+				"11946
+			]td
+			[td 
+				"6:42
+			]td
+		]tr
+		[tr 
+			[td 
+				"#03
+			]td
+			[td 
+				"19:26.35 (2nd)
+			]td
+			[td 
+				"7416 (1st)
+			]td
+			[td 
+				"4:49 (1st)
+			]td
+		]tr
+		[tr 
+			[td 
+				"#04
+			]td
+			[td 
+				"19:30.95
+			]td
+			[td 
+				"8703 (3rd)
+			]td
+			[td 
+				"5:14 (2nd)
+			]td
+			[td 
+				"Desynced at 5-3 first lift
+			]td
+		]tr
+		[tr 
+			[td 
+				"#05
+			]td
+			[td 
+				"19:33.62
+			]td
+			[td 
+				"11146
+			]td
+			[td 
+				"6:52
+			]td
+		]tr
+		[tr 
+			[td 
+				"#06
+			]td
+			[td 
+				"19:28.09
+			]td
+			[td 
+				"11007
+			]td
+			[td 
+				"6:52
+			]td
+		]tr
+		[tr 
+			[td 
+				"#07
+			]td
+			[td 
+				"19:35.1
+			]td
+			[td 
+				"11202
+			]td
+			[td 
+				"6:45
+			]td
+		]tr
+		[tr 
+			[td 
+				"#08
+			]td
+			[td 
+				"19:28.86
+			]td
+			[td 
+				"8943
+			]td
+			[td 
+				"5:30
+			]td
+		]tr
+		[tr 
+			[td 
+				"#09
+			]td
+			[td 
+				"19:32.2
+			]td
+			[td 
+				"11287
+			]td
+			[td 
+				"6:26
+			]td
+		]tr
+		[tr 
+			[td 
+				"#10
+			]td
+			[td 
+				"19:30.94
+			]td
+			[td 
+				"8572 (2nd)
+			]td
+			[td 
+				"5:20
+			]td
+		]tr
+		[tr 
+			[td 
+				"#11
+			]td
+			[td 
+				"19:29.76
+			]td
+			[td 
+				"11500
+			]td
+			[td 
+				"6:21
+			]td
+		]tr
+		[tr 
+			[td 
+				"#12
+			]td
+			[td 
+				"19:34.58
+			]td
+			[td 
+				"11884
+			]td
+			[td 
+				"6:57
+			]td
+			[td 
+				"Desynced in 8-4 water stage
+			]td
+		]tr
+		[tr 
+			[td 
+				"#13
+			]td
+			[td 
+				"19:32.09
+			]td
+			[td 
+				"14097
+			]td
+			[td 
+				"7:48
+			]td
+		]tr
+		[tr 
+			[td 
+				"#14
+			]td
+			[td 
+				"19:35.18 (last)
+			]td
+			[td 
+				"11530
+			]td
+			[td 
+				"7:32
+			]td
+		]tr
+		[tr 
+			[td 
+				"#15
+			]td
+			[td 
+				"19:25.25 (1st)
+			]td
+			[td 
+				"11253
+			]td
+			[td 
+				"6:48
+			]td
+			[td 
+				"Desynced in 8-4 water stage
+			]td
+		]tr
+		[tr 
+			[td 
+				"#16
+			]td
+			[td 
+				"19:30.97
+			]td
+			[td 
+				"9434
+			]td
+			[td 
+				"5:17 (3rd)
+			]td
+		]tr
+		[tr 
+			[td 
+				"#17
+			]td
+			[td 
+				"19:30.51
+			]td
+			[td 
+				"11479
+			]td
+			[td 
+				"7:06
+			]td
+		]tr
+		[tr 
+			[td 
+				"#18
+			]td
+			[td 
+				"19:30.11
+			]td
+			[td 
+				"14670 (last)
+			]td
+			[td 
+				"7:43
+			]td
+		]tr
+		[tr 
+			[td 
+				"#19
+			]td
+			[td 
+				"19:29.42
+			]td
+			[td 
+				"14507
+			]td
+			[td 
+				"8:37 (last)
+			]td
+		]tr
+		[tr 
+			[td 
+				"#20
+			]td
+			[td 
+				"19:27.23 (3rd)
+			]td
+			[td 
+				"11701
+			]td
+			[td 
+				"7:26
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"19:30.49
+			]td
+			[td 
+				"11172.9
+			]td
+			[td 
+				"6:36
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Unfortunately, the best TAS time attempt (#15) desynced in 8-4 water stage, probably due to a bug in my script or a bug of FCEUX. It happens so rarely that I can't detect it or fix it. Since the best attempt is not usable, I have to choose the second best attampt (#03).
+	$LF
+]p
+[p 
+	"Such bug won't happen if I run the bot while recording the movie. In order to save computing time (loading savestates in FCEUX while recording a movie can be quite slow), I used some arrays to store input, and sort them into .fm2 input format after meeting the Princess. Would be best if I can fix this bug so it can generate movies without desync and as fast as possible.
+	$LF
+]p
+[p 
+	"To see the bot working in normal speed (without fast-forward): https://youtu.be/9Tlif_XU4Jg
+	$LF
+]p
+[h3 
+	"Conclusion
+	$LF
+]h3
+[p 
+	"I think the biggest contribution this project has made is to prove that this game can be solved by a dumb random jumping bot that doesn't know where it is or what it's doing.
+	$LF
+]p
+[p 
+	"Also, since real-time SMB speedrunners have become so good, and generating a decent speedrun by a bot has become so easy, SMB TASers should work hard to bring entertainment to a new level, more like a superplay and less like RTA speedruns or bot playing, which exactly was my idea in the discussion of the 
+	(__wikiLink|3728M|the latest SMB warpless TAS)
+	".
+	$LF
+]p
+[hr 
+]hr
+[blockquote 
+	" "Definitely not intended for publication"
+	$LF
+]blockquote
+[p 
+	(__wikiLink|user:Masterjun)
+	": Okay. Cancelled for not being a serious submission.
+]p

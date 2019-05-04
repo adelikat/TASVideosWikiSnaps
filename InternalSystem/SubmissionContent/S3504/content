@@ -1,0 +1,259 @@
+11
+[p 
+	(youtube|v=ZQ_siAn6l5E)
+	$LF
+]p
+[p 
+	"Keitai Denjuu Telefang is a Pokemon-like 
+	[del 
+		"ripoff
+	]del
+	" game in which the protagonist, Shigeki, is tasked to beat the crap out of the world's civilians for their phone number, all while saving them from 
+	[del 
+		"Umbrella
+	]del
+	" the Sanaeba Pharmaceutical Company. Our hero however, decides that instead of traversing around the world saving people you just beat up, why not simply eliminate the source of all evil? In the end, the world is saved, and Shigeki is given the best award life can offer - a blue tinted slideshow of names with a grammatically incorrect congratulation message.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: vba-v24m-svn422
+		$LF
+	]li
+	[li 
+		" Breaks the game
+		$LF
+	]li
+	[li 
+		" Breaks the previous record
+		$LF
+	]li
+	[li 
+		" Breaks the site 
+		[del 
+			"rules
+		]del
+		" guidelines
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"This run improves upon the previous run by better use of the map glitch originally discovered by accident. It also uses a password, but for good reasons. The previous submission had complaints about the battles in the begining being too long, so this time, for the sake of entertainment, a secret denjuu was used to speed up a battle. I'm  sure its reasonable, since not much people here would enjoy watching a 2 minute text based battle...in blue.
+	$LF
+]p
+[p 
+	"Oh, and while MisterChess did not do any actual TASing, his knowledge in how the glitches work was so valuable, that without it, this run would've never existed. It is for this reason he deserves to be a coauthor.
+	$LF
+]p
+[h3 
+	" Glitch by glitch comments
+	$LF
+]h3
+[p 
+	"While I was the one who discovered the glitches, it was MisterChess who figured out the details behind them. So the following is mostly a copy-paste of what MisterChess figured out.
+	$LF
+]p
+[h4 
+	" Map Glitch
+	$LF
+]h4
+[p 
+	"When you open the map (or go into battle or open the menu), the values from C0A0-C39F are stored to SRAM at A000-A2FF, and erased. They're copied back when you close the map. These addresses contain things like Shigeki's position and some NPC data.
+	$LF
+]p
+[p 
+	"Now every frame, the gameboy does what's called a V-Blank interrupt, where it stops executing whatever code it's executing and calls a different section of code. This happens at regular intervals, and can interrupt any part of the game program, including the part where those values are copied.
+	$LF
+]p
+[p 
+	"Now the thing with SRAM. The game can turn it off. When that happens, it can't be written to, and reads will return hexadecimal FF. At least I think it's FF. Anyway, every few frames when the phone is ringing, SRAM gets turned off during V-Blank. Which means when it goes back to storing those values, it fails to store them. And some of the values that were already there don't get changed. So only part of the data there is saved.
+	$LF
+]p
+[h4 
+	" Forced Teleport
+	$LF
+]h4
+[p 
+	"First off the screen you warp to is determined by C906. Writing there isn't what causes the warp though. C3E1 is responsible for that. Unfortunately C3E1 is out of range with the map glitch. You don't really need to use C3E1 to warp; Saving, resetting and going to another location works too.
+	$LF
+]p
+[p 
+	"The destination is also determined by C904, which tells you where you are... overworld, a house or cave, datacrystal has a list of locations. And the overworld is divided into quadrants. So if you want to warp somewhere in say the lower-left quadrant, it would be easier if you're already in the lower-left quadrant. Or if C906 is already what you need it to be you can change C904 instead.
+	$LF
+]p
+[h4 
+	" NPC Corruption & Glitch State
+	$LF
+]h4
+[p 
+	"At C2BE-C2BF, C2DE-C2DF, C2FE-C2FF, and so on, there's a pointer that points to... uh... well, it's a pointer. Eventually it determines what part of the code will be executed. So when C33F got overwritten, it messed up that pointer, and jumped to a part of code it shouldn't execute. Initially it jumps to 6F0B of ROM bank C (32F0B) and executes that. That address is actual code, but it's not being used the way it's supposed to. This produces the glitchy textbox. It also corrupts the NPC data. And while it hasn't been figured out how the corruption changes things, it is known that it results in a jump to 8BFA, in video memory (VRAM).
+	$LF
+]p
+[p 
+	"The thing about VRAM though is every so often, every 100 microseconds or so, it turns off for a little while. And just like SRAM, reading it and executing it will treat it as FF (255 decimal). So slight timing issues will give different code.
+	$LF
+]p
+[p 
+	"The problem is that in order to get to the glitchy state, The timing with the interrupt needs to be very precise. If the timing is even slightly different, it won't work. Anyway, once in the glitchy state, we could've use the code we're not supposed to be in to write to C3E1, activating the credits, and finishing the game in five minutes. But that failed to occur, so C906 was changed instead. 
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Other comments
+	$LF
+]h3
+[h4 
+	" Important Addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Function
+			]th
+			[th 
+				"Notes
+			]th
+		]tr
+		[tr 
+			[td 
+				"C906
+			]td
+			[td 
+				"Warp Destination
+			]td
+			[td 
+				"Change this with Glitch State
+			]td
+		]tr
+		[tr 
+			[td 
+				"C23E-C23F
+			]td
+			[td 
+				"NPC Pointer
+			]td
+			[td 
+				"Change this with Map Glitch
+			]td
+		]tr
+		[tr 
+			[td 
+				"C2BE-C2BF
+			]td
+			[td 
+				"NPC Pointer
+			]td
+			[td 
+				"Change this with Map Glitch
+			]td
+		]tr
+		[tr 
+			[td 
+				"C2DE-C2DF
+			]td
+			[td 
+				"NPC Pointer
+			]td
+			[td 
+				"Change this with Map Glitch
+			]td
+		]tr
+		[tr 
+			[td 
+				"C2FE-C2FF
+			]td
+			[td 
+				"NPC Pointer
+			]td
+			[td 
+				"Change this with Map Glitch
+			]td
+		]tr
+		[tr 
+			[td 
+				"C31E-C31F
+			]td
+			[td 
+				"NPC Pointer
+			]td
+			[td 
+				"Change this with Map Glitch
+			]td
+		]tr
+		[tr 
+			[td 
+				"C33E-C33F
+			]td
+			[td 
+				"NPC Pointer
+			]td
+			[td 
+				"Change this with Map Glitch
+			]td
+		]tr
+		[tr 
+			[td 
+				"C3E0-C3E1
+			]td
+			[td 
+				"Event Trigger
+			]td
+			[td 
+				"Change this with Glitch State to 51 for the Credits
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Possible Improvements
+	$LF
+]h4
+[p 
+	"Write to C3E1, activate the credits; finishing the game in five minutes. :)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Baxter)
+	": Submission file replaced at the author's request.
+	$LF
+]p
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:FractalFusion)
+	": The use of "passwords" here to avoid a very long battle is justified by 
+	(__wikiLink|user:jlun2)
+	". I don't even consider the secret numbers as passwords, and in any case, it doesn't break the game any more than it is already broken. Accepting as an improvement to the 
+	(__wikiLink|1791M|published run)
+	".
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:natt)
+	": processing
+]p

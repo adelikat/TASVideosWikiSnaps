@@ -1,0 +1,1022 @@
+5
+[p 
+	(youtube|v=ykJyvOiXjAQ)
+	$LF
+]p
+[ul 
+	[li 
+		" Emulator: lsnes rr2-beta23
+		$LF
+	]li
+	[li 
+		" Rom: Final Fantasy VI (J)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+	[li 
+		" Features mid-frame resets
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+	[li 
+		" Ends input early
+		$LF
+	]li
+]ul
+[p 
+	"We have shown a proof of concept for arbitrary code execution in the Japanese version of the game a year ago. However, it requires to gather one of several items that are only available in the late game (after about 2 hours of run), so we let it go. After the discovery of the game over glitch that lead to the 
+	(__wikiLink|2922M|latest TAS)
+	", featuring 15 boring minutes of game overs, we were eager to find another route that could beat this time and be more fun to watch. This is where we remembered of the mid-frame reset technique used in a couple of published TAS, that might lead to getting these items much quicker. This was the beginning of our third work on this game. Comments are embedded in the above video and are available 
+	[a class=extlink href=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/ff6ace_captions.srt rel=nofollow 
+		"here
+	]a
+	".
+	$LF
+]p
+[h3 
+	" Glitch leading to ACE
+	$LF
+]h3
+[p 
+	"The glitch used to get control over the game is based on the Japanese exclusive equip glitch. This glitch allows you to equip any item in any equipment slot. To equip an item on a weapon slot, for example, you must:
+	$LF
+]p
+[ul 
+	[li 
+		" get rid of every weapon that a character can equip, so that the equip menu on that slot would show an empty list
+		$LF
+	]li
+	[li 
+		" place the item in the last (256th) slot
+		$LF
+	]li
+	[li 
+		" select "Optimize"
+		$LF
+	]li
+]ul
+[p 
+	"In unassisted speedruns, this glitch is used to equip items that raise your defense and/or magic defense drastically. In this TAS, we are using this glitch on the weapon slot.
+	$LF
+]p
+[p 
+	"During a fight, when you attack with a weapon, the game loads the weapon graphics properties from address 
+	[tt 
+		"$ECE400+8*id
+	]tt
+	" into 
+	[tt 
+		"$623B-$6242
+	]tt
+	". Address 
+	[tt 
+		"$6240
+	]tt
+	", which stores if the weapon has a short or long range animation, takes values between 0 and 4. According to this value, the game calls a different function, as shown below: 
+	$LF
+]p
+[pre 
+	"$C1/C217 AD 40 62    LDA $6240       load $6240
+	$LF
+	"$C1/C21A 29 7F       AND #$7F               
+	$LF
+	"$C1/C21C 0A          ASL A           multiply by 2
+	$LF
+	"$C1/C21D AA          TAX
+	$LF
+	"$C1/C21E 7C 21 C2    JMP ($C221,x)   call one of the routines below
+	$LF
+	$LF
+	"Function pointers:
+	$LF
+	"$C1/C221 34 C2                       call $C1/C234 when $6240 = 0
+	$LF
+	"$C1/C223 47 C2                       call $C1/C247 when $6240 = 1
+	$LF
+	"$C1/C225 2B C2                       call $C1/C22B when $6240 = 2
+	$LF
+	"$C1/C227 C0 C2                       call $C1/C2C0 when $6240 = 3
+	$LF
+	"$C1/C229 21 C3                       call $C1/C321 when $6240 = 4
+	$LF
+]pre
+[p 
+	"However, for items that are not weapons, address 
+	[tt 
+		"$6240
+	]tt
+	" can store any value, so that the jump instruction above leads to many wrong addresses. Among all the wrong jumps, the case with address 
+	[tt 
+		"$6240 = 0x07
+	]tt
+	" (weapons X-Ether, Gold Hairpin, Czarina Ring or Charm Bangle) is interesting because the game jumps to address 
+	[tt 
+		"C1/8D7A
+	]tt
+	" which starts with instruction:
+	$LF
+]p
+[pre 
+	"$C1/8D7A 1B          TCS      Push accumulator to the stack pointer
+	$LF
+]pre
+[p 
+	"This instructions corrupts the stack, and will lead us to full control of the game (detailed in another section). The goal of the present TAS is then to collect one of the four items to trigger the ending sequence.
+	$LF
+]p
+[h3 
+	" Mid-frame reset
+	$LF
+]h3
+[p 
+	"As said in the introduction, all of the four items are only found in the later part of the game. This is why we will be using mid-frame reset to corrupt the game saves. Here are the different options that we used in this TAS:
+	$LF
+]p
+[h4 
+	" World Map teleport
+	$LF
+]h4
+[p 
+	"World Map coordinates are stored in addresses 
+	[tt 
+		"$1F60
+	]tt
+	" (X) and 
+	[tt 
+		"$1F61
+	]tt
+	" (Y). We can save once at coordinates (X1,Y1), then move to coordinates (X2,Y2), save on the same slot and reset just after the game overwrites the X coordinate. We will be left with a savefile containing (X2,Y1) stored coordinates. This helps to move rather freely around the World Map. Only a few spots are not accessible with this technique (Thamasa and the Triangle Island).
+	$LF
+]p
+[h4 
+	" World Map teleport anywhere
+	$LF
+]h4
+[p 
+	"This technique can only be used once. The principle is that the game starts inside a town (Narshe) for the first 15 minutes, and the World Map coordinates are never written until you leave the town. They contain uninitialized values until then. When you exit Narshe normally, the game copies the parent coordinates (
+	[tt 
+		"$1F6B-$1F6C
+	]tt
+	") to current coordinates (
+	[tt 
+		"$1F60-$1F61
+	]tt
+	"). We can manage to load the uninitialized values as coordinates:
+	$LF
+]p
+[ul 
+	[li 
+		" We save before leaving Narshe in slot 1
+		$LF
+	]li
+	[li 
+		" We save in the World Map in slot 2
+		$LF
+	]li
+	[li 
+		" We load slot 1
+		$LF
+	]li
+	[li 
+		" We save on slot 2 and reset just after 
+		[tt 
+			"$1F61
+		]tt
+		" is overwritten
+		$LF
+	]li
+	[li 
+		" When loading slot 2, we will be on the World Map at coordinates corresponding to the uninitialized values.
+		$LF
+	]li
+]ul
+[p 
+	"In lsnes emulator, it is possible to manipulate the initial RAM values to some extend by setting the value of the Real Time Clock that acts as a seed. The first value of the RAM is set to the lower byte of the RTC, and each consecutive value is generated using a recursive formula:
+	$LF
+]p
+[pre 
+	"value = (value >> 1) ^ ( ( (value & 1) - 1) & 0xedb88320)
+	$LF
+]pre
+[h4 
+	" Map warping
+	$LF
+]h4
+[p 
+	"Map id is stored as a 2-bytes value in address 
+	[tt 
+		"$1F64
+	]tt
+	". Using the same principle as with coordinates, it is possible to warp to a new map by using one byte from one map and another byte from a second map. Here is the list of (hopefully) all save points in the World of Balance, and the new interesting maps that we have access using this trick:
+	$LF
+]p
+[pre 
+	"Map                            | Map ID
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+		"--WoB Save Points
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	"--
+	$LF
+	"World Map                      | 0000
+	$LF
+	"Narshe cave entrance           | 0029
+	$LF
+	"Narshe cave                    | 0032
+	$LF
+	"Narshe class room              | 006B
+	$LF
+	"Mt. Kolts                      | 0067
+	$LF
+	"Returners Hideout              | 006E
+	$LF
+	"Lete River                     | 0072
+	$LF
+	"Lete River                     | 0072
+	$LF
+	"Scenario Choice                | 0009
+	$LF
+	"Phantom Train - Tail           | 0092
+	$LF
+	"Phantom Train - Middle         | 0095
+	$LF
+	"Phantom Train - Head           | 0099
+	$LF
+	"South Figaro - Duncan          | 0054
+	$LF
+	"South Figaro - Basement        | 0058
+	$LF
+	"Narshe - Kefka fight           | 0016
+	$LF
+	"Magitek Factory                | 010E
+	$LF
+	"Minecart                       | 0110
+	$LF
+	"Magitek Factory Exit           | 00F0
+	$LF
+	"Cave to the Sealed Gate        | 0182
+	$LF
+	"Esper Cave                     | 0177
+	$LF
+	"Floating Continent - beginning | 018A
+	$LF
+	"Floating Continent - cave      | 0166
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+		"--Interesting Maps 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	$LF
+	"Daryll's Tomb                  | 0129
+	$LF
+	"Fanatics Tower                 | 016B, 0167, 016E, 0172
+	$LF
+	"Caves to the Ancient Castle    | 0192
+	$LF
+	"Hidon's Cave                   | 0195
+	$LF
+	"Kefka's Domain--Pipe Room      | 0199
+	$LF
+	"Gogo's Room                    | 0116
+	$LF
+]pre
+[h4 
+	" Checksum
+	$LF
+]h4
+[p 
+	"The game has a mechanism to detected corrupted savefiles, so we have to bypass it. When saving, it computes the sum of all values of the savefile in a 2-bytes value (
+	[tt 
+		"$1FFE-$1FFF
+	]tt
+	") and stores it at the end of the savefile. When loading, it computes the checksum and compares to the stored value. If they differ, the savefile is considered as corrupted and cannot be loaded. To overcome this check, we have to modify values in our save so that the checksum match after the sub-frame reset. The easiest way to change a lot of values is to modify the colors of the different window themes.
+	$LF
+]p
+[h3 
+	" Route planning
+	$LF
+]h3
+[p 
+	"We investigated the quickest way to collect one of the four items (X-Ether, Gold Hairpin, Czarina Ring, Charm Bangle). The fastest route we found was to enter the Ancient Castle using map warping, where there is both an X-Ether and a Gold Hairpin. To enter the Ancient Castle, we need to save in a map with id 
+	[tt 
+		"01xx
+	]tt
+	" (we chose the Cave to the Sealed Gate) and in the Phantom Train. To enter the Phantom Train, we need both Sabin and Cyan in our team, otherwise the game will softlock. There are several ways to quickly get Cyan and Sabin in our team:
+	$LF
+]p
+[ul 
+	[li 
+		" Manage to enter Narshe (using save corruption), and reach the snowfields where you can trigger the Kefka fight. At the end, you have a character selection screen and you can place Sabin and Cyan in your team. Estimated time: 6 minutes
+		$LF
+	]li
+	[li 
+		" Enter Zozo and climb to the top with Terra. After the cutscene, you have a character selection screen and you can place Sabin and Cyan in your team. Estimated time: 8-10 minutes
+		$LF
+	]li
+	[li 
+		" Go to the Imperial Camp and do the whole sequence. You will recruit Cyan and Sabin will be placed in your party as well. Estimated time: 10 minutes
+		$LF
+	]li
+]ul
+[h4 
+	" Checksum bug
+	$LF
+]h4
+[p 
+	"The initial route we designed involved an early Narshe escape. When you load the game for the first time, it sets all values in the SRAM to 0. We could take this in our advantage because the map id of the World Map is 
+	[tt 
+		"0000
+	]tt
+	". By reaching the first save point in Narshe and save/reset just before the map id is overwritten, we could produce a savefile that spawns you on the World Map. Then, we could enter Narshe again and trigger the Kefka at Narshe sequence. However, this did not work because of a flaw in the game programming.
+	$LF
+]p
+[pre 
+	$UNPRINTABLE TEXT!!!
+]pre
+[p 
+	"The consequence of this code is that a savefile is considered as corrupted if the checksum does not match, or if the checksum is 0. In our case, because the checksum is stored at the end of the savefile, it will be 0. So even if the checksum is correct, we won't be able to load the savefile.
+	$LF
+]p
+[h4 
+	" Actual route
+	$LF
+]h4
+[p 
+	"The first option was still thought to be possible at first, by transferring the event flags from one save at the beginning of Narshe to another save after Narshe. However, we could not do it in practice because we could not control the checksum to match between both savefiles. This was due to the fast that we have 11 Moogles joining the party, which modifies a lot of values in memory and greatly altered the checksum. With only the game options at our disposal to modify the checksum we are limited by the range we can access. In the end, we had to drop this quickest choice.
+	$LF
+]p
+[p 
+	"The current route uses the third way of recruiting Sabin and Cyan. Although it may be slower, the Imperial Camp is very close to the Phantom Train, meaning less travelling. Also, Zozo's boss would be difficult to beat quickly because of an underleveled party.
+	$LF
+]p
+[h3 
+	" Arbitrary code execution
+	$LF
+]h3
+[h4 
+	" The setup
+	$LF
+]h4
+[p 
+	"As started in the previous section, attacking with one of the four items corrupts the stack by setting the stack pointer to 
+	[tt 
+		"0x000E
+	]tt
+	". The game eventually reaches a 
+	[tt 
+		"RTS
+	]tt
+	" instruction, so that it loads the 16-bit integer 
+	[tt 
+		"$0F-$10
+	]tt
+	" and jumps to 
+	[tt 
+		"C1/$10$0F
+	]tt
+	". In address 
+	[tt 
+		"$0E-$0F
+	]tt
+	" we have the &16-bit battle timer. It starts at 0 at the beginning of the battle and increases by one every frame. In 
+	[tt 
+		"$10
+	]tt
+	" we have a temporary variable that, at the moment of the glitch, can be either 
+	[tt 
+		"0x0E
+	]tt
+	", 
+	[tt 
+		"0xAE
+	]tt
+	", 
+	[tt 
+		"0xCE
+	]tt
+	" or 
+	[tt 
+		"0xEE
+	]tt
+	". In consequence, we can jump to any address 
+	[tt 
+		"C1/0Exx
+	]tt
+	", 
+	[tt 
+		"C1/AExx
+	]tt
+	", 
+	[tt 
+		"C1/CExx
+	]tt
+	" or 
+	[tt 
+		"C1/EExx
+	]tt
+	".
+	$LF
+]p
+[p 
+	"We are looking at jumping into RAM or SRAM, and this means getting out of the 
+	[tt 
+		"C1
+	]tt
+	" address bank. We only have limited options to leave this bank: executing jump instructions 
+	[tt 
+		"JSL (22)
+	]tt
+	" or 
+	[tt 
+		"JML (5C, DC)
+	]tt
+	" that use a full 24-bit address; 
+	[tt 
+		"RTL (6B)
+	]tt
+	" is also possible. By examining if there is such instruction in our accessible addresses, we found a good candidate:
+	$LF
+]p
+[pre 
+	"$C1/CEC7 5C 6F 60 AE  JML $AE606F
+	$LF
+]pre
+[p 
+	"This jumps to address 
+	[tt 
+		"$006F
+	]tt
+	" in SRAM, which is just before Shadow's name (
+	[tt 
+		"$0071-$0076
+	]tt
+	"). This is not part of the game code but starts at the middle on a instruction. By carefully renaming Shadow's name, we could jump to some other places where we have full control of the values, like the color windows. But there is a drawback to this: address 
+	[tt 
+		"$0F
+	]tt
+	" must contain 
+	[tt 
+		"0xC7
+	]tt
+	", meaning we have to wait 14 minutes in the fight.
+	$LF
+]p
+[p 
+	"So we looked at another solution, by trying to increase our range of accessible addresses. Now we looked at any jump and return instructions. Because 
+	[tt 
+		"$10
+	]tt
+	" and subsequent addresses correspond to temporary variables, we looked at some places where 
+	[tt 
+		"$11
+	]tt
+	" and 
+	[tt 
+		"$12
+	]tt
+	" were modified, so that we can hit another 
+	[tt 
+		"RTS
+	]tt
+	" instruction to jump to 
+	[tt 
+		"C1/$12$11
+	]tt
+	" and reach other places in the 
+	[tt 
+		"C1
+	]tt
+	" bank. We found a really interesting piece of code:
+	$LF
+]p
+[pre 
+	"$C1/CE59 A5 0E       LDA $0E    Loads battle counter $0E-$0F
+	$LF
+	"$C1/CE5B 0A          ASL A      Multiply by 2
+	$LF
+	"$C1/CE5C 85 12       STA $12    Stores in $12-$13
+	$LF
+	"$C1/CE5E 0A          ASL A      Multiply by 2
+	$LF
+	"$C1/CE5F 0A          ASL A      Multiply by 2
+	$LF
+	"$C1/CE60 85 10       STA $10    Stores in $10-$11
+	$LF
+]pre
+[p 
+	"By choosing carefully our battle counter value, we could control 
+	[tt 
+		"$11
+	]tt
+	" and 
+	[tt 
+		"$12
+	]tt
+	" and jump to new addresses. Now, we looked again at 
+	[tt 
+		"JML
+	]tt
+	" and 
+	[tt 
+		"JSL
+	]tt
+	" instructions but in the whole 
+	[tt 
+		"C1
+	]tt
+	" bank. We found the instruction 
+	[tt 
+		"JSL $A41E20
+	]tt
+	" at several places in the code (
+	[tt 
+		"C1/A21C
+	]tt
+	", 
+	[tt 
+		"C1/A239
+	]tt
+	", 
+	[tt 
+		"C1/A256
+	]tt
+	", 
+	[tt 
+		"C1/A276
+	]tt
+	", 
+	[tt 
+		"C1/A30C
+	]tt
+	", 
+	[tt 
+		"C1/A32E
+	]tt
+	", 
+	[tt 
+		"C1/A3CE
+	]tt
+	", 
+	[tt 
+		"C1/A3E6
+	]tt
+	"). This jumps to the RAM address 
+	[tt 
+		"$7E1E20
+	]tt
+	" which is at the beginning of a unused segment. Like with the teleport anywhere trick, we manipulated the first two values to be 
+	[tt 
+		"70 98 (BVS $1DBA)
+	]tt
+	", so that we jump to 
+	[tt 
+		"$1DBA
+	]tt
+	" which is at the end of the menu configuration. Then we change the colors to write in 
+	[tt 
+		"$1DBA
+	]tt
+	" 
+	[tt 
+		"70 A5 (BVS $1D61)
+	]tt
+	" to jump again at the beginning of the menu color configuration, because we won't have enough place to write the full code.
+	$LF
+]p
+[p 
+	"Before writing the full code, we must be sure to be able to execute the above 
+	[tt 
+		"JML
+	]tt
+	" instruction. If we write the battle counter in binary and look at the obtained values for 
+	[tt 
+		"$11
+	]tt
+	" and 
+	[tt 
+		"$12
+	]tt
+	", we get:
+	$LF
+]p
+[pre 
+	"Battle counter:  $0F = ...abcde | $0E = fghijklm
+	$LF
+	"Return address:  $12 = ghijklm0 | $11 = abcdefgh
+	$LF
+]pre
+[p 
+	"So the constraints on the return address are:
+	$LF
+]p
+[ul 
+	[li 
+		" the high byte must be even
+		$LF
+	]li
+	[li 
+		" the highest 2 bits of the high byte must match the lowest 2 bits of the low byte
+		$LF
+	]li
+]ul
+[p 
+	"We found one good match which is:
+	$LF
+]p
+[pre 
+	"Battle counter: 01000110 11010001 (4A 51)
+	$LF
+	"Return address: 10100010 01010010 (A2 52)
+	$LF
+]pre
+[p 
+	"The game will first jump to 
+	[tt 
+		"C1/CE4A
+	]tt
+	", which will execute the code above that writes to 
+	[tt 
+		"$11
+	]tt
+	" and 
+	[tt 
+		"$12
+	]tt
+	". Then, when hitting the 
+	[tt 
+		"RTS
+	]tt
+	" instruction, it will jump to the value in 
+	[tt 
+		"$11-$12 + 1
+	]tt
+	":
+	$LF
+]p
+[pre 
+	"$C1/A253 0E 00 A7      ASL $A700
+	$LF
+	"$C1/A256 22 20 1E A4   JSL $A41E20
+	$LF
+	$LF
+]pre
+[p 
+	"Thanks to this new setup, we lowered the time to wait to 
+	[tt 
+		"0x4A51 = 19025
+	]tt
+	" frames, or 5 minutes and 17 seconds. However, because TAS convention times to the last input, we will use this to our advantage.
+	$LF
+]p
+[h4 
+	" The code
+	$LF
+]h4
+[p 
+	"We need to write a code that will trigger the ending without any input to do. In details, we need to:
+	$LF
+]p
+[ul 
+	[li 
+		" Place the ending sequence as the current event
+		$LF
+	]li
+	[li 
+		" Fix the ending softlock that occurs when skipping the transition to the World of Ruin
+		$LF
+	]li
+	[li 
+		" Fix the stack pointer value
+		$LF
+	]li
+	[li 
+		" Finish the fight
+		$LF
+	]li
+	[li 
+		" Avoid any message at the end of the fight that would need to be manually confirmed
+		$LF
+	]li
+	[li 
+		" Return to the normal game execution
+		$LF
+	]li
+]ul
+[p 
+	"Also, there are some constraints on writing using window colors: every other value must be < 0x80.
+	$LF
+]p
+[p 
+	"Here is the following code used in this TAS:
+	$LF
+]p
+[pre 
+	"C2 20          REP #$20              16-bit accumulator
+	$LF
+	"A9 62 13       LDA #$1362            Loads the ending sequence event address
+	$LF
+	"18             CLC                   Dummy
+	$LF
+	"9D 4E 12       STA $124E,x 
+	"[$12E5]
+	"   Set event pointer to the ending
+	$LF
+	"0C 4F 1F       TSB $1F4F             Set NPC event bit to avoid the ending softlock
+	$LF
+	"69 7F 02       ADC #$027F            A = 0x15E1
+	$LF
+	"1B             TCS                   Fix the stack pointer
+	$LF
+	"E2 20          SEP #$20              8-bit accumulator
+	$LF
+	"9E 59 3E       STZ $3E59,x 
+	"[$3EF0]
+	"   Unflag enemy 1 death, to avoid an XP/Gold message
+	$LF
+	"7B             TDC                   A = 0
+	$LF
+	"9E 5B 3E       STZ $3E5B,x 
+	"[$3EF2]
+	"   Unflag enemy 2 death, to avoid an XP/Gold message
+	$LF
+	"3A             DEC                   A = 0xFF
+	$LF
+	"8D 3A 3A       STA $3A3A             Remove enemies from the fight
+	$LF
+	"5C EA 4D C1    JML $C14DEA           Or any address in the C1 bank that leads to a RTS
+	$LF
+]pre
+[h4 
+	" The fight
+	$LF
+]h4
+[p 
+	"We need to find a fight where eventually the holder of the glitched weapon will attack at exactly 19025 frames after the beginning. There are several way to provoke an attack without any input, the one we chose was to get the character muddled, so that he automatically executes a random command. We found the Goblin enemy in the Cave to the Ancient Castle that has a very interesting battle script:
+	$LF
+]p
+[pre 
+	" If 1 or fewer monster(s) (total) is/are remaining:
+	$LF
+	"   Rand. spell: L.5 Doom or L.4 Flare or L.3 Muddle
+	$LF
+	"   Rand. spell: Blaze or Nothing or Nothing
+	$LF
+]pre
+[p 
+	"Locke is naturally level 6 as we are doing Narshe with Terra level 4 and he gets a +2 bonus when joining, so he will be the holder of the glitched weapon as he is sensible to L.3 Muddle. The battle strat is then to kill all enemies except one Goblin, and manipulate his RNG so that we will cast L.3 Muddle and Locke will attack at the exact moment to trigger ACE. This took about 20 hours of work actually, more than the entire rest of the TAS, but the result is good.
+	$LF
+]p
+[h3 
+	" Run comments
+	$LF
+]h3
+[h4 
+	" Movie creation
+	$LF
+]h4
+[p 
+	"We starts the TAS by checking "Random initial state" and setting "Initial RTC value" to 
+	[tt 
+		"29857
+	]tt
+	". This will write 
+	[tt 
+		"$1F60 = 9B-CD
+	]tt
+	" for world map teleport and 
+	[tt 
+		"$1E20 = 70-98
+	]tt
+	" for ACE.
+	$LF
+]p
+[h4 
+	" Narshe
+	$LF
+]h4
+[p 
+	"Nothing special about Narshe itself. We must get Terra to level 4 so Locke joins at level 6. Level 4 Terra is mandatory anyway to get a quick kill on Whelk.
+	$LF
+]p
+[p 
+	"Before leaving Narshe, we save at the beginners class so that the uninitialized values for world map coordinates does not get rewritten. Then, we go up and open the menu so the map Y coordinate takes the value of 
+	[tt 
+		"0x34
+	]tt
+	" and save. We enter Narshe again and go again at the coordinate X = 
+	[tt 
+		"0x18
+	]tt
+	" and save/reset on the previous slot so that it now contains the map coordinates 
+	[tt 
+		"18-34
+	]tt
+	".
+	$LF
+]p
+[h4 
+	" Outside Narshe
+	$LF
+]h4
+[p 
+	"We load the save file in the class room and save/reset on the save outside Narshe to overwrite the world map coordinates. By loading the file, we will be placed at coords 
+	[tt 
+		"9B-CD
+	]tt
+	" in the World Map in the Vector continent.
+	$LF
+]p
+[h4 
+	" To the Sealed Gate
+	$LF
+]h4
+[p 
+	"We use another world map teleport using Y coord from Narshe save and X coord from Vector to arrive near Gau's father house. We buy here a Sprint Shoes and sell Locke's weapon. We use another teleport to arrive in the bridge to the cave. We enter the cave, grab the Assassin weapon for Locke and make our way to the save point. We save/reset once to transfer the weapon to the savefile around Gau's father house, and another save/reset to write the map id on the savefile that has the map coords 
+	[tt 
+		"18-34
+	]tt
+	".
+	$LF
+]p
+[h4 
+	" Imperial Camp
+	$LF
+]h4
+[p 
+	"We continue our way until the Imperial Camp, and do the whole sequence (almost) normally. We have help from Locke's weapon which has a 1/4 chance of killing the target. This does not work on MTek Armor, too bad.
+	$LF
+]p
+[h4 
+	" Phantom Train
+	$LF
+]h4
+[p 
+	"We use a save/reset to teleport over the tile of the Forest entrance. This allows us to enter from the exit, and cut a part of the Forest. We enter the train and save/reset to overwrite only the first byte of the map id. By loading this savefile, we appear in the cave to the Ancient Castle at coordinates 
+	[tt 
+		"18-34
+	]tt
+	". If we didn't manipulate the coordinates in Narshe, we would appear in the walls out of bounds, and we would be stuck.
+	$LF
+]p
+[h4 
+	" Ancient Castle
+	$LF
+]h4
+[p 
+	"We enter the Castle, and use the fights to move Locke's Assassin at the bottom of the inventory. We can then equip the Assassin on Cyan using the equip glitch. We grab the X-Ether and leave the Castle. We equip the X-Ether on Locke and a Shield. The shield is mandatory, otherwise Locke would attack with bare hands during the fight and the glitch won't trigger. We write the code to execute by changing the colors in the menu.
+	$LF
+]p
+[h4 
+	" Last fight
+	$LF
+]h4
+[p 
+	"We kill the two enemies with Cyan, using the wait trick (opening a menu to freeze the enemies ATB during an animation). Then we produce lag in the RNG counter by selecting and un-selecting a weapon, to get the right setup. When we confirm Locke's steal command, the movie ends. After 5 minutes of fight, Locke attacks and the ending triggers.
+	$LF
+]p
+[h3 
+	" Special Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[b 
+			"bover_87
+		]b
+		" for the enemy battle script FAQ
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"ff6hacking website
+		]b
+		" for centralizing and showing new data on ff6
+		$LF
+	]li
+]ul
+[h3 
+	" Suggested screenshots
+	$LF
+]h3
+[p 
+	"Frames 73132
+	$LF
+]p
+[p 
+	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6ace_73132_low.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Replaced with a LSMV that removes an empty SRM file. The total time remains unchanged.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Samsara)
+	": (J)udging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Samsara)
+	": 
+	[a href=/forum/viewtopic.php?p=436101#436101 
+		"This is not the fastest run in the "game end glitch" category.
+	]a
+	" Therefore, we cannot accept it.
+	$LF
+]p
+[p 
+	"I see three big arguments in the submission thread, so let me break them down real quick.
+	$LF
+]p
+[p 
+	[b 
+		"1. "This is a different kind of ACE, so it should be a separate category"
+	]b
+	$LF
+	[br 
+	]br
+	"That's not how we do things. This specifically aims for the fastest glitched time. The Nico TAS that's 18 seconds faster than this one (and that's not counting this submission ending input 5 minutes early, but I won't be pedantic about that) also aims for the fastest glitched time. For the purposes of this site, "game end glitch" refers to any way that the ending is reached far earlier than expected. This could be something as simple as 
+	(__wikiLink|5109S|holding two buttons on an elevator and landing somewhere)
+	", or 
+	(__wikiLink|3990S|crashing the game in a way that lets you manipulate your way to the ending)
+	", or just 
+	(__wikiLink|2816M|going up and down stairs a bunch)
+	". "Game end glitch" is exactly how it sounds: The run uses a glitch to end the game. Both this run and the Nico TAS use glitches to end the game. Therefore, they are both "game end glitch" runs. We have a 
+	(__wikiLink|2513M|separate ACE branch)
+	", but 
+	(__wikiLink|2341M|it is only used)
+	" for 
+	(__wikiLink|3050M|playaround runs)
+	". Since this was treated as an improvement to the published run (thus, the fastest run) and not as an entertainment-based category, we have to treat it as such as well.
+	$LF
+]p
+[p 
+	[b 
+		"2. "This run is more entertaining, so it should be a separate category"
+	]b
+	$LF
+	[br 
+	]br
+	"That is also not how we do things. This is not a playaround run, we cannot treat it as such. The authors intended for this to be an improvement to the published run as the fastest time for this game. Unfortunately for them, a separate team completed a run with a faster time that just so happens to not be nearly as entertaining. Sure, entertainment is a huge focus for us as TASers, but for years now it has not been the primary focus. We do publish new categories if people find them entertaining enough, but not two runs in the same category. And yes, all of these arguments do end up going in circles and coming around to the same point, that the detractors are almost literally saying "publish this run in the same category as a different category".
+	$LF
+]p
+[p 
+	[b 
+		"3. "The faster run is not being submitted, so this should be published anyway"
+	]b
+	$LF
+	[br 
+	]br
+	"Pop quiz: Is this how we do things? No. The existence of the faster run is the reason why we can't accept it. It doesn't matter where it exists, how it exists, or when it exists. What matters is that we have it as public knowledge. There's an input file for us to easily verify it. There's an encode for people to watch it. It's there. It's faster. We don't publish RTA runs here, but if a TAS is slower than an RTA run then we reject it exactly because of that. Part of the judgement process is verifying that the run in question is the fastest known record for the game. We're human, we do miss clear and known improvements sometimes, especially ones hosted nowhere except on a OneDrive link that's only shared on Twitter to a small group of people, and yes there are times where we accidentally publish a run before we find a known improvement. But this is not the case.
+	$LF
+]p
+[p 
+	"Trust me, I think this is a great run and I would have loved to see it accepted and published, but this particular run in its current state, as I and others have mentioned several times before, cannot be published, even as a different category. I extended some leniency, hoping that there was a way the run could be salvaged and improved or at least explained in a way that makes it drastically different enough to publish, but over the responses I see in the thread it doesn't look like anything I suggested is going to be met. There was a slight ray of hope in the Nico TAS starting from dirty SRAM, but looking at the file more closely the SRAM is blank, much in the same way that this submission was at first, so it turned from a ray of hope into the final nail in the coffin.
+	$LF
+]p
+[p 
+	"Rejecting for not beating the 
+	[a href=/userfiles/info/31600816429815863 
+		"fastest known time
+	]a
+	".
+]p

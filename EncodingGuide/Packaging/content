@@ -1,0 +1,409 @@
+31
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-765 
+						" Introduction
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-766 
+						" Muxing
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-767 
+						" Uploading
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Introduction
+	$LF
+	[a id=heading-765 
+	]a
+]h3
+[p 
+	"If you've come this far, all of the grunt work is out of the way - now you just need to put together the separate video and audio tracks into one final package and show it to the world (or at least the TASVideos community).
+	$LF
+]p
+[h3 
+	" Muxing
+	$LF
+	[a id=heading-766 
+	]a
+]h3
+[p 
+	"This step differs slightly depending on if you are using the DeDup plugin for AVISynth or not.
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-82 
+				"MKV (most cases)
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-83 
+				"MKV (AVISynth DeDup)
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-84 
+				"MP4 (most cases)
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-85 
+				"MP4 (AVISynth DeDup /w NHMLTransform)
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-86 
+				"MP4 (AVISynth DeDup /w NHMLFixup)
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-82 
+			[p 
+				"Assuming your video track is 
+				[tt 
+					"video.mp4
+				]tt
+				" and your audio track is 
+				[tt 
+					"audio.ogg
+				]tt
+				", you will need to use one of the following two command lines to mux together your audio and video.
+				$LF
+			]p
+			[p 
+				"If you are encoding for a console intended to be displayed on a TV, you will need to specify a 4:3 aspect ratio thus:
+				$LF
+			]p
+			[blockquote 
+				" mkvmerge --aspect-ratio 1:4/3 video.mp4 audio.ogg -o encode.mkv
+				$LF
+			]blockquote
+			[p 
+				"If you are encoding for a handheld console, this is not necessary:
+				$LF
+			]p
+			[blockquote 
+				" mkvmerge video.mp4 audio.ogg -o encode.mkv
+				$LF
+			]blockquote
+			[p 
+				"If your encode is meant to be uploaded to streaming video site with time limit, add 
+				[tt 
+					"--split duration:hh:mm:ss.sss
+				]tt
+				", where actual time limit is set, to your command.
+				$LF
+			]p
+			[p 
+				"If all goes well, after running the command and a brief delay you will have your final 
+				[tt 
+					"encode.mkv
+				]tt
+				".  Congratulations!
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-83 
+			[p 
+				"You will need to instruct 
+				[tt 
+					"mkvmerge
+				]tt
+				" to use the 
+				[tt 
+					"times.txt
+				]tt
+				" file output from DeDup; this is done by adding 
+				[tt 
+					"--timecodes 1:times.txt
+				]tt
+				" to the command line 
+				[b 
+					"before the video track
+				]b
+				" as follows:
+				$LF
+			]p
+			[p 
+				"(for TV consoles)
+				$LF
+			]p
+			[blockquote 
+				" mkvmerge --aspect-ratio 1:4/3 --timecodes 1:times.txt video.mp4 audio.ogg -o encode.mkv
+				$LF
+			]blockquote
+			[p 
+				"(for handhelds)
+				$LF
+			]p
+			[blockquote 
+				" mkvmerge --timecodes 1:times.txt video.mp4 audio.ogg -o encode.mkv
+				$LF
+			]blockquote
+		]div
+		[div class=tab-pane fade id=y-84 
+			[p 
+				[b 
+					"Note:
+				]b
+				" OGG Vorbis audio is effectively incompatible with the MP4 container; you should be using AAC audio if you are muxing to MP4.
+				$LF
+			]p
+			[p 
+				[b 
+					"Note:
+				]b
+				" If x264 output was to raw .264 file, add 
+				[tt 
+					"-fps 60
+				]tt
+				" (or whatever the fps is). Otherwise the final .mp4 will play at wrong speed.
+				$LF
+			]p
+			[p 
+				"Use the following command line to mux the two into an MP4:
+				$LF
+			]p
+			[blockquote 
+				" MP4Box -add video.mp4 -add audio.mp4 -new encode.mp4
+				$LF
+			]blockquote
+			[p 
+				"If all goes well, after running the command and a brief delay you will have your final 
+				[tt 
+					"encode.mp4
+				]tt
+				".  Congratulations!
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-85 
+			[p 
+				"You will need a copy of 
+				(__wikiLink|user:Aktan)
+				"'s NHMLTransform program; grab it from http://forum.doom9.org/showthread.php?t=150890
+				$LF
+			]p
+			[p 
+				"Run
+				$LF
+			]p
+			[blockquote 
+				" MP4Box video.mp4 -nhml 1 
+				[br 
+				]br
+				$LF
+				" MP4Box audio.mp4 -nhml 1 
+				[br 
+				]br
+				$LF
+				" NHMLTransform.bat -i video_track1.nhml -t times.txt -o video2.nhml -ia audio_track1.nhml -oa audio2.nhml 
+				[br 
+				]br
+				$LF
+				" MP4Box -add video2.nhml -add audio2.nhml -new encode.mp4
+				$LF
+			]blockquote
+		]div
+		[div class=tab-pane fade id=y-86 
+			[p 
+				"You will need a copy of 
+				(__wikiLink|user:Ilari)
+				"'s NHMLFixup program; grab it from 
+				[a href=/forum/p/246798#246798 
+					"/forum/p/246798#246798
+				]a
+				" (the Lua executable it requires can be obtained from http://luabinaries.sourceforge.net/ (windows), distribution package repositories (Linux) or compiled from source (Unix) ).
+				$LF
+			]p
+			[p 
+				"Assume you have saved the audio track as 
+				[b 
+					[tt 
+						"audio.mp4
+					]tt
+				]b
+				", video track as 
+				[b 
+					[tt 
+						"video.mp4
+					]tt
+				]b
+				", timecode file as 
+				[b 
+					[tt 
+						"times.txt
+					]tt
+				]b
+				", the NHMLFixup script as 
+				[tt 
+					"NHMLFixup.lua
+				]tt
+				"[
+				[a id=1 
+				]a
+				[a href=#r1 
+					"1
+				]a
+				"]
+				", and your Lua binary is 
+				[tt 
+					"lua
+				]tt
+				"[
+				[a id=2 
+				]a
+				[a href=#r2 
+					"2
+				]a
+				"]
+				", Then run (assuming non-handheld game):
+				$LF
+			]p
+			[blockquote 
+				" MP4Box -nhml 1 video.mp4 
+				[br 
+				]br
+				$LF
+				" MP4Box -nhml 1 audio.mp4 
+				[br 
+				]br
+				$LF
+				" lua NHMLFixup.lua video_track1.nhml audio_track1.nhml times.txt tvaspect 
+				[br 
+				]br
+				$LF
+				" MP4Box -add video_track1.nhml -add audio_track1.nhml -new encode.mp4
+				$LF
+			]blockquote
+			[p 
+				"If this is handheld (GBx, GG, DS, etc..) game, replace the NHMLFixup command with
+				$LF
+			]p
+			[blockquote 
+				" lua NHMLFixup.lua video_track1.nhml audio_track1.nhml timecodes.txt
+				$LF
+			]blockquote
+			[p 
+				"That is, leave out the 
+				[b 
+					[tt 
+						"tvaspect
+					]tt
+				]b
+				" option (since aspect ratio correction is not wanted in that case).
+				$LF
+			]p
+			[p 
+				"This saves the resulting encode as 
+				[b 
+					[tt 
+						"encode.mp4
+					]tt
+				]b
+				".
+				$LF
+			]p
+			[p 
+				[b 
+					"Note:
+				]b
+				" The audio track ID may not be 1! If you convert raw .aac file to .mp4 using some versions of MP4Box, the resulting track ID will be 101, not 1!
+				$LF
+			]p
+		]div
+	]div
+]div
+[h3 
+	" Uploading
+	$LF
+	[a id=heading-767 
+	]a
+]h3
+[p 
+	"Prior to uploading, you should rename your encode according to the 
+	(__wikiLink|Publisher Guidelines)
+	".  This usually takes the form of 
+	[tt 
+		"<gamename>-tas<version>-<branch>-<author>.{mkv|mp4} 
+	]tt
+	" with 
+	[tt 
+		"<version>
+	]tt
+	" or 
+	[tt 
+		"<branch>
+	]tt
+	" being omitted as necessary.
+	$LF
+]p
+[p 
+	"Although all published encodes are mirrored on 
+	[a class=extlink href=http://www.archive.org rel=nofollow 
+		"archive.org
+	]a
+	", we prefer that you only upload a movie there if you know that it is going to be the encode that is published (i.e. when the movie has been accepted and the publisher has informed you that your encode will be published).  Many of our encoders use 
+	[a class=extlink href=http://www.mediafire.com rel=nofollow 
+		"MediaFire
+	]a
+	" for temporary hosting of encodes when the above conditions are not met, though you can use any other file hosting service at your discretion.
+	$LF
+]p
+[p 
+	"Once your encode has been uploaded, post a link in the discussion thread to your encode.  You're done!  Now everyone can enjoy the end result of your hard work.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"Previous page: 
+	(__wikiLink|EncodingGuide/Encoding|Encoding)
+	$LF
+]p
+[p 
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	": The default filename for the script is NHMLFixup-v<#>.lua, e.g. NHMLFixup-v10.lua; feel free to adjust the .bat to account for this.
+	$LF
+]p
+[p 
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	": This may not be the case for Windows binaries; it may be, for example, 
+	[tt 
+		"lua5.1
+	]tt
+	".
+]p

@@ -1,0 +1,448 @@
+6
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-1990 
+						" Game aspects
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-1991 
+								" Object handling in the game
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-1992 
+								" Avoiding an object to be spawned
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-1993 
+								" "Removing" a sound effect being played
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-1994 
+								" Lag mechanism
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-1995 
+								" Movement specific techniques
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-1996 
+								" Enemy "state" manipulation in order of "possibility" / good chances
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-1997 
+						" Weapons
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-1998 
+								" Power of fist (5 dmg)
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-1999 
+								" Handgun (15 dmg)
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-2000 
+								" Machine gun (15 dmg)
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-2001 
+								" Laser gun (20 dmg)
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-2002 
+						" Level checkpoints
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-2003 
+						" Miscellaneous
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Game aspects
+	$LF
+	[a id=heading-1990 
+	]a
+]h3
+[h4 
+	" Object handling in the game
+	$LF
+	[a id=heading-1991 
+	]a
+]h4
+[ul 
+	[li 
+		" There's maximum 16 objects in the memory
+		$LF
+	]li
+	[li 
+		" 4 of these are always reserved, 1 reserved for player = 11 objects free
+		$LF
+	]li
+	[li 
+		" Each level has specific objects that spawn either before the 1st ingame frame (after the last cutscene/level during the lag frames) or timed (by an object that loaded earlier and it's timer reaches 0) or player reached an X position or an event flag changed (flags @ 0xE0~0xEF) )
+		$LF
+	]li
+	[li 
+		" Whenever the game tries to spawn an object, it checks is there a free place in the object list. 
+		[b 
+			"There's no "else"
+		]b
+		". This means that if you avoid a crucial checkpoint (not spawning the boss) you stuck forever in an unwinnable state.
+		$LF
+	]li
+]ul
+[h4 
+	" Avoiding an object to be spawned
+	$LF
+	[a id=heading-1992 
+	]a
+]h4
+[ul 
+	[li 
+		" You need to make lag to make it happen. The more objects are there, the easier to pull it off. There's 11 free object slots maximum which filled in with level objects (health, enemies, 2x rotating sprite for level 1 cinema), so you don't eventully need to fire 11 times to cover all object slots.
+		$LF
+	]li
+]ul
+[h4 
+	" "Removing" a sound effect being played
+	$LF
+	[a id=heading-1993 
+	]a
+]h4
+[ul 
+	[li 
+		" If you fire on the same frame as the sound effect plays (health picked up), you won't have to wait until they are finished, so you can pick up health before ending a level without waiting the sound being played.
+		$LF
+	]li
+]ul
+[h4 
+	" Lag mechanism
+	$LF
+	[a id=heading-1994 
+	]a
+]h4
+[ul 
+	[li 
+		" There are hidden lag frames in the game.
+		$LF
+	]li
+	[li 
+		" There's also a "favored" frame parity (even or odd), sometimes you need to use the "unfavored" to remove an enemy (for example when you don't have fists)
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"TODO: there's 3 different "lag level", elaborate plz
+		]b
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"TODO: debug more around $EA01 subroutine since sometimes you can't abuse "+1 extra shoot"
+		]b
+		$LF
+	]li
+]ul
+[h4 
+	" Movement specific techniques
+	$LF
+	[a id=heading-1995 
+	]a
+]h4
+[dl 
+	[dt 
+		"Movement pattern
+	]dt
+	[dd 
+		" The next boost you will get for your next frame is depends on the frame count. Generally the pattern is 1,0,1,1. So placement of lag frames are also important.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Damage boosting from objects
+	]dt
+	[dd 
+		"If you are on the ground, you can boost to the same direction where you are facing and where the other object goes.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Avoiding movement effects
+	]dt
+	[dd 
+		"If you are being hit in air, your movement pattern won't be changed (no slowdown / boost).
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Longer horizontal jumping
+	]dt
+	[dd 
+		"If the game lags, you can optimize your movement pattern by changing lag frame positions (see lag mechanism above). This way your jump can be longer to skip the first level's basic route (going all to the right and trace back on the stairs/blocks.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Jumping before using ladders
+	]dt
+	[dd 
+		"Your "ladder" speed movement pattern depends on your previous "jumping speed" pattern.
+		$LF
+	]dd
+]dl
+[h4 
+	" Enemy "state" manipulation in order of "possibility" / good chances
+	$LF
+	[a id=heading-1996 
+	]a
+]h4
+[p 
+	"For example, manipulating the X-ray "skeletons"
+	$LF
+]p
+[ul 
+	[li 
+		" You need to be out of distance (X pos)
+		$LF
+	]li
+	[li 
+		" You need a specific RNG (non lagged frames count) = You need to position lag frames carefully
+		$LF
+	]li
+	[li 
+		" You need a specific Y position
+		$LF
+	]li
+	[li 
+		" However, sometimes you just can't manipulate it if their spawn is depends on player's actual position (like X-ray skeletons), but you won't even need to manipulate the "walking toward player" action everytime.
+		$LF
+	]li
+]ul
+[h3 
+	" Weapons
+	$LF
+	[a id=heading-1997 
+	]a
+]h3
+[h4 
+	" Power of fist (5 dmg)
+	$LF
+	[a id=heading-1998 
+	]a
+]h4
+[ul 
+	[li 
+		" You can punch "infinite" times (if there's free place in objects)
+		$LF
+	]li
+	[li 
+		" Everytime you punch, a hitbox object will be spawned for 13 frames
+		$LF
+	]li
+]ul
+[h4 
+	" Handgun (15 dmg)
+	$LF
+	[a id=heading-1999 
+	]a
+]h4
+[ul 
+	[li 
+		" You can shoot only 1 bullet at a time, but if you fire on a 
+		[b 
+			"specific
+		]b
+		" lag frame, you can make an extra shoot on the next lag frame. Only 1.
+		$LF
+	]li
+]ul
+[h4 
+	" Machine gun (15 dmg)
+	$LF
+	[a id=heading-2000 
+	]a
+]h4
+[ul 
+	[li 
+		" You can shoot only 3 bullet at a time, but if you fire on a 
+		[b 
+			"specific
+		]b
+		" lag frame, you can make an extra shoot on the next lag frame. Only 1.
+		$LF
+	]li
+]ul
+[h4 
+	" Laser gun (20 dmg)
+	$LF
+	[a id=heading-2001 
+	]a
+]h4
+[ul 
+	[li 
+		" You can shoot only 3 bullet at a time, but if you fire on a 
+		[b 
+			"specific
+		]b
+		" lag frame, you can make an extra shoot on the next lag frame. Only 1.
+		$LF
+	]li
+]ul
+[h3 
+	" Level checkpoints
+	$LF
+	[a id=heading-2002 
+	]a
+]h3
+[dl 
+	[dt 
+		"Level 1 (streets)
+	]dt
+	[dd 
+		"no checkpoints
+		$LF
+		[dt 
+			"Level 2 (apartman)
+		]dt
+		[dd 
+			"both "Spandex Lady" and "door really open" are timed and unimprovable
+			$LF
+			[dt 
+				"Level 3 (X-ray)
+			]dt
+			[dd 
+				"there's a remaining kills counter (4) and the "jump off X-ray" checkpoint is instant after counter is 0 (and Xpos = 586~587)
+				$LF
+				[dt 
+					"Level 4 (subway)
+				]dt
+				[dd 
+					"there are "cam scroll locker" guards, all of them are avoidable except the first one (loads in at start of the level)
+					$LF
+					[dt 
+						"Level 5 (hobos)
+					]dt
+					[dd 
+						"you need to kill the boss and pick up the case to leave the level
+						$LF
+						[dt 
+							"Level 6 (mars rooms)
+						]dt
+						[dd 
+							"the "open door" object spawns at end of each scene if the UFO isn't alive at that point (so all of them are avoidable except the first one). But don't remove the "open door" object!
+							$LF
+							[dt 
+								"Level 7 (mars driving)
+							]dt
+							[dd 
+								"nothing
+								$LF
+								[dt 
+									"Level 8 (walking)
+								]dt
+								[dd 
+									"nothing
+									$LF
+									[dt 
+										"Level 9 (dungeon)
+									]dt
+									[dd 
+										"kill boss (impossible to avoid)
+										$LF
+										[dt 
+											"Level 10 (lightning bridge)
+										]dt
+										[dd 
+											"3x cam scroll locker guards (1st one unavoidable) and boss (impossible to avoid)
+											$LF
+										]dd
+									]dd
+								]dd
+							]dd
+						]dd
+					]dd
+				]dd
+			]dd
+		]dd
+	]dd
+]dl
+[h3 
+	" Miscellaneous
+	$LF
+	[a id=heading-2003 
+	]a
+]h3
+[dl 
+	[dt 
+		"0 health point trick
+	]dt
+	[dd 
+		"If you end a level with 0 HP but finish it within 4 frames, you won't die. However, if the player will be replaced (for example a tank in mars driving), he will instantly die.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Enemy invulnerability
+	]dt
+	[dd 
+		"Different enemies have different type of invulnerability. This isn't because they coded this way, this is mostly a bug. The only "common" invulnerability is when they land after a jump (1 frame)
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Removing enemies from the screen
+	]dt
+	[dd 
+		"You can shoot them away from the screen, but most of the times you will also need to go to the border of the screen to "block" their way. Note that doesn't "kills" them (X-ray skeletons won't work) but removes it (which actually logical since they have more than 0 HP).
+	]dd
+]dl

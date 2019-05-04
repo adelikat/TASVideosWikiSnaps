@@ -1,0 +1,547 @@
+32
+[p 
+	"This page describes tools used for traditional method of TASing. If you are new, this method can seem unintuitive and complicated to you. Then for first TAS sessions you can try using a more 
+	(__wikiLink|TasingGuide/AdvancedTools#HighLevelInterface|user-friendly all-in-one interface)
+	" developed by TASers exclusively - 
+	(__wikiLink|EmulatorResources/TASEditor|TASEditor)
+	".
+	$LF
+]p
+[h2 
+	" Theory
+	$LF
+]h2
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-1016 
+				"Emulation speed
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1017 
+				"Frame Advance
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1018 
+				"Manual input control
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1019 
+				"Movie recording
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1020 
+				"Savestates
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1021 
+				"Heads-up display
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1022 
+				"Autofire and autohold
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-1016 
+			[p 
+				"Since emulation process consists of emulating isolated frames, you can affect the speed. But emulation of a hardware takes much more powers than that hardware used. Emulators have different code, and its execution takes different time. If your computer is powerful enough to handle it, you can 
+				[b 
+					"increase
+				]b
+				" the emulation speed. Either gradually (if the emulator allows), to some fixed speed, or by pressing Fast Forward key, which speeds the process up to maximum possible speed.
+				$LF
+			]p
+			[p 
+				"But most commonly we 
+				[b 
+					"slow down
+				]b
+				" emulation. It allows to trace every process as it flows. Combined with Frame Advance, this provides quite a useful method of navigation - you press FA emulating particular frames, then hold it down to let the game run for some time (usually at slower speed), then release FA back, pausing all. Some emulators provide slower speed when holding down FA, than the original emulation speed.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1017 
+			[p 
+				"Emulation speed may be adjusted, because the process, that looks uniform and seamless, is actually gradual. A game is emulated frame by frame at a rate determined by the emulated platform. Your computer usually takes less time to prepare every next frame, than the original system took, so emulation gets internally suspended to match the original framerate.
+				$LF
+			]p
+			[p 
+				"That gradualness allows pausing emulation, which freezes the game at the state it was at. And if we can pause, nothing prohibits us from unpausing it and pausing back any time we wish, say, next frame. This is how 
+				[b 
+					"Frame Advance
+				]b
+				" was born. Once you press the key assigned for frame-advancing, the game emulates one more frame and gets hanged up on pause.
+				$LF
+			]p
+			[p 
+				"Being able to emulate each frame on command allows the desired precision of actions and gives time to examine everything before entering input. See how exactly emulators 
+				(__wikiLink|EmulatorResources/Using#FrameAdvance|provide Frame Advance)
+				".
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1018 
+			[p 
+				"2d control sticks in particular benefit from this by allowing exact direction and velocity control.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1019 
+			[p 
+				"Emulators record your play to input files, that allow to navigate through, edit, replay, share. These are traditionally called 
+				[b 
+					"movies
+				]b
+				", though they have nothing to do with video. They provide enough determinism to make games react similarly to similar input each time it's replayed. Input file is a foundation of tool-assistance.
+				$LF
+			]p
+			[p 
+				"When you start movie recording (refer to Emulators Usage for how to access 
+				(__wikiLink|EmulatorResources/Using#StartingANewMovieToRecord|this function)
+				"), you must record from the game's initial state it has on load (
+				[b 
+					"Power On
+				]b
+				"), that would be a base for further manipulations. You don't start a movie from a savestate normally, because this way it won't have a preliminary input to approve that game state. In some cases though, it's allowed to start from a savestate, when your movie requires unlocking some special mode. Then you record how you unlock it from load, make a savestate, and start recording from such approved one.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1020 
+			[p 
+				"Each savestate represents a complete snapshot of a game memory, that normally changes depending on your actions 
+				[b 
+					"gradually
+				]b
+				". It can be stored (saved) and restored (loaded), and loading it will 
+				[b 
+					"instantly
+				]b
+				" bring the game to the saved state.
+				$LF
+			]p
+			[p 
+				"Competently combined with movies, savestates create a whole new concept - 
+				[b 
+					"stable rerecording
+				]b
+				". That means it gets remembered what frame the state was saved on, what input preceded it, what values some useful counters had at that point. This allows to restore not just the 
+				[b 
+					"game state
+				]b
+				", but the entire 
+				[b 
+					"movie state
+				]b
+				" as well. Good emulators also allow undoing saves and loads. The final trait of savestates used for tool-assistance is that we have 10 slots for them (some cases allow even more), not just one.
+				$LF
+			]p
+			[p 
+				"You should have one savestate which you use extremely often (termed "quicksave" although any savestate is arguably a quicksave). There should be a 2nd savestate trailing the quicksave that can be used for backup. Other savestates are for replaying your movie and/or resuming recording at some point. You should have at least one savestate around the beginning of the level that you are on. 
+				[a href=/forum/viewtopic.php?t=11157 
+					"Here
+				]a
+				" is how experienced TASers use their savestate slots.
+				$LF
+			]p
+			[p 
+				"There are two systems of saveslot switching. The first system is a couple of keys used to change the saveslot number and a couple of keys to save and load. The second system consists of 20 keys, with each pair controlling save and load of a distinct saveslot. Emulators have either the second system, or both. Default keys vary by emulator.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1021 
+			[p 
+				"Our emulators internally allow to show some useful info on top of the game window.
+				$LF
+			]p
+			[ul 
+				[li 
+					" 
+					[b 
+						"Frame count
+					]b
+					" - Basic value to keep track on, it is helpful to know exactly how many frames your movie has used by a certain point, when comparing different routes or movies.
+					$LF
+				]li
+				[li 
+					" 
+					[b 
+						(__wikiLink|Glossary#Lag|Lag)
+						" count
+					]b
+					" - Second most basic value, allows to determine how much time you lose due to game freezes. Lag can sometimes depend on your actions, and thus be manipulatable.
+					$LF
+				]li
+				[li 
+					" 
+					[b 
+						"Input display
+					]b
+					" - When reviewing movies, it is often helpful to see when keys are pressed. It shows which keys the author pressed in the movie as it is played. You can figure out macros used for tricks. It also helps during recording to see which buttons registered during a frame.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=y-1022 
+			[p 
+				"Autofire (turbo-buttons emulation) causes the emulator to press a designated button every second frame. Autohold causes the emulator to press the button every frame. There may be many other types of autofire options. 
+				$LF
+			]p
+			[p 
+				"Autofire is strictly unnecessary for making TASes, as frame advance is the most precise form of slow motion (lag or some limit can break autofire patterns). Autohold may be necessary when pressing a mass of keys that will likely cause some not to register (depends on a keyboard).
+				$LF
+			]p
+		]div
+	]div
+]div
+[p 
+	"See 
+	(__wikiLink|TasingGuide/AdvancedTools|Advanced tools)
+	" for the ones that need quite some work to get working, but offer new levels of precision and abstraction.
+	$LF
+]p
+[h2 
+	" Practice
+	$LF
+]h2
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-1023 
+				"Movies
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1024 
+				"Controls
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1025 
+				"Savestates
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1026 
+				"Multitrack recording
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-1023 
+			[p 
+				[b 
+					"Playing back
+				]b
+				$LF
+			]p
+			[p 
+				"To play back a movie, a ROM must be loaded. There should be a menu option (which may be under any heading) named "(Re)play movie", "(Re)play input", "Movie > Play", or similar.
+				$LF
+			]p
+			[p 
+				"To play back the movie correctly is another issue. See 
+				(__wikiLink|desync help)
+				".
+				$LF
+			]p
+			[p 
+				"In the Unix version of FCEU, you either
+				$LF
+			]p
+			[ul 
+				[li 
+					" have to place the movie into the FCEU preferences directory (~/.fceu) with a name composed of the ROM name, the ROM md5sum and .fcm extension, and then press shift-F6 to load it.
+					$LF
+				]li
+				[li 
+					" start the emulator with a command line like this: "fceu -play moviefile.fcm moviefile.nes"
+					$LF
+				]li
+				[li 
+					" start the emulator and hit shift+2 and enter the movie filename 
+					$LF
+				]li
+			]ul
+			[p 
+				"depending which version of FCEU you have.
+				$LF
+			]p
+			[p 
+				[b 
+					"Read-Only/Read+Write
+				]b
+				$LF
+			]p
+			[p 
+				"If a movie is in a "read-only" mode (Playback), the user input has no affect on the playback, and savestates & loadstates can not alter the movie in any way. Loading a state in Read-Only mode will jump to that frame in the movie, allowing to watch the following events if they exist.
+				$LF
+			]p
+			[p 
+				"If a movie is in a "read+write" mode (Recording), the user input is dumped into the movie file during emulation, and savestates affect movie data when loaded. Savestates only include input before the saved frame, so if you load a state in Read+Write mode, it will contain no input afterwards, you're supposed to record it.
+				$LF
+			]p
+			[p 
+				[b 
+					"Resuming recording
+				]b
+				$LF
+			]p
+			[p 
+				"To resume recording of a movie, play it back until it reaches the point where you want to resume recording. Then make a savestate, turn off Read-Only (default is usually 
+				[b 
+					"Q
+				]b
+				" but can be configured), and load the savestate. You can use existing savestates (in read-only mode) to reach the point sooner.
+				$LF
+			]p
+			[p 
+				"Some emulators have an option such as "Resume recording from now" or such.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1024 
+			[p 
+				"Assign keys so that one hand takes care of directional input (up, down, ...), the other hand common button input (A, B, ...). Assign keys that are rarely used out of the way.
+				$LF
+			]p
+			[p 
+				"The frame advance button should be close to the hand that is least involved (usually the hand using directional input). The quickload button should be close to the other hand. The quicksave button can be anything as long as it is not easy to press by accident. All other savestate buttons should be out of the way.
+				$LF
+			]p
+			[p 
+				"Avoid assigning keys to the control keys on your keyboard. However, in cases when a keyboard doesn't allow too many keys to be pressed at once (which is what we're doing while recording movies), frame advance can be assigned to Ctrl or alike, to let it work above the limit. Sometimes using arrows for D-pad also helps with that problem.
+				$LF
+			]p
+			[p 
+				"It is recommended to change the frame advance key once in a while, unless you are fine with wearing that button out.
+				$LF
+			]p
+			[p 
+				(__wikiLink|user:FractalFusion)
+				" uses, for example:
+				$LF
+			]p
+			[ul 
+				[li 
+					" Directional input: Numpad 8, 2, 4, 6 for up, down, left, right.
+					$LF
+				]li
+				[li 
+					" Common button input: N,G, and possibly H and nearby buttons.
+					$LF
+				]li
+				[li 
+					" Other input: Usually [ for select and ] for start.
+					$LF
+				]li
+				[li 
+					" Frame advance: Page Up (could use a better button)
+					$LF
+				]li
+				[li 
+					" Quickload: T
+					$LF
+				]li
+				[li 
+					" Quicksave: Shift+T
+					$LF
+				]li
+				[li 
+					" 2nd savestate: F3 for load, Shift+F3 for save
+					$LF
+				]li
+				[li 
+					" 3rd savestate: F5 for load, Shift+F5 for save
+					$LF
+				]li
+			]ul
+			[p 
+				"Refer to 
+				[a href=/forum/viewtopic.php?t=11157 
+					"that thread
+				]a
+				" for which control schemes our TASers actually use.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1025 
+			[p 
+				"Most games have a title screen requiring you to push a button (in general or a specific button) to advance to the main menu or to the game itself.  As an exercise in basic tool-assistance, try to find the first frame at which pushing a button will advance the game in this fashion. This works as follows:
+				$LF
+			]p
+			[ol 
+				[li 
+					" Save a state well before it is possible to advance the screen (this can be as early as starting to record the movie).
+					$LF
+				]li
+				[li 
+					" Run the game (frame advance or otherwise) until it is clearly possible to advance.  Using the frame number display, make a note of that frame number.
+					$LF
+				]li
+				[li 
+					" Load your earlier save state.
+					$LF
+				]li
+				[li 
+					" Advance until shortly before the frame number you found earlier and try to cause the game to advance past the title screen by pushing the appropriate button and advancing a few frames to see if it will fade out.
+					$LF
+				]li
+				[li 
+					" If this works, make a note of the frame number, reload your earlier state and proceed as above.  If it doesn't work, note the frame number and try a later frame.
+					$LF
+				]li
+				[li 
+					" By repeating the above, narrow down the range of frames until you reach the desired target frame.
+					$LF
+				]li
+			]ol
+			[p 
+				"Use of more save states during this process is encouraged, as it can help things go considerably faster.
+				$LF
+			]p
+			[p 
+				"Much of TASing can be boiled down to this basic procedure - repeating a short segment over and over again until the best possible result is achieved.  Here the desired input is relatively trivial (finding the best frame at which to push one button).
+				$LF
+			]p
+			[p 
+				[b 
+					"I loaded a previous savestate by accident; what do I do?
+				]b
+				$LF
+			]p
+			[p 
+				"Load your quicksave, or the most recent savestate that works. This is a feature called 
+				[em 
+					"bulletproof rerecording
+				]em
+				", which protects your movie. There also might be an option to 
+				[b 
+					"undo
+				]b
+				" last save or load.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1026 
+			[p 
+				"Available only in some emulators (TODO: elaborate). Where it's not, there probably is a 
+				[a href=/userfiles/info/6680317080319470 
+					"lua script for that
+				]a
+				".
+				$LF
+			]p
+			[p 
+				"While recording, load your savestate and enter the input you want for player 1. When you're satisfied, pause the emulation without saving and cycle through the different input tracks until you reach player 2. The default keybind for this action is ">" (shift + ".") and "<" (shift + ","). 
+				$LF
+			]p
+			[p 
+				"Then simply load that same savestate again and enter player 2's input. During this time, player 1 will automatically repeat the input you entered previously. When you're finished, you can then save over the savestate and both inputs will be recorded.
+				$LF
+			]p
+		]div
+	]div
+]div
+[h2 
+	" Video
+	$LF
+]h2
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-1027 
+				"Super Mario Bros
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1028 
+				"Puss 'n Boots: Pero's Great Adventure
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1029 
+				"Sonic
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1030 
+				"Contra 4
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1031 
+				"GoldenEye 007
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-1027 
+			[p 
+				(youtube|v=OS75JLwJExk|w=320|h=224)
+				$LF
+			]p
+			[p 
+				"In this introduction video, 
+				(__wikiLink|user:adelikat)
+				" describes what is a Tool-assisted Movie and basic concepts of how to record and play a movie. Then he introduce the concepts of rerecording, savestates, slow-downs and frame advance. Basic optimization concepts are covered.
+				$LF
+			]p
+			[p 
+				"He uses FCEUX for this tutorial and covers how the user can aquire it. Super Mario Bros was picked to show basic rerecording. 
+				[a class=extlink href=http://www.ustream.tv/recorded/15997028 rel=nofollow 
+					"Watch on Ustream
+				]a
+				" if YouTube sound desyncs.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1028 
+			[p 
+				(youtube|v=6tJniMaR2Ps|w=320|h=224)
+				$LF
+			]p
+			[p 
+				"In this video, dwangoAC guides Sand_Knight through everything from the basics of creating a Tool-Assisted Speedrun movie file to using frame advance and other tools like TAS Editor within FCEUX. This is also a good overview of various techniques used to route a game and test a game's mechanics. Basics like performing a binary search are included as well as a deep dive of various topics such as a demonstration on how to recover from accidentally advancing more frames than you intended to before making a savestate. At the end the different techniques we used get put to the test in a head-to-head comparison of who had the fastest time.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1029 
+			[p 
+				(youtube|v=ZIR6GS-wlUU|w=320|h=224)
+				$LF
+			]p
+			[p 
+				"This video features an actual TAS session by Aglar, where  he is TASing in Gens with Sonic HeadsUpDisplay script.
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1030 
+			[p 
+				(youtube|v=kfCrgbFTdGc|w=320|h=224)
+				$LF
+			]p
+			[p 
+				"TASing in DeSmuME recorded by paul_t
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-1031 
+			[p 
+				(youtube|v=KwiXClsrXWU|w=320|h=224)
+				$LF
+			]p
+			[p 
+				"TASing in Mupen64 done by Rising Tempest
+				$LF
+			]p
+		]div
+	]div
+]div

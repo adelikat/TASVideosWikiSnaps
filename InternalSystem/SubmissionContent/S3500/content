@@ -1,0 +1,716 @@
+11
+[h2 
+	" About the run
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: lsnes rr1-Δ4ε1 (should sync on any rr1 version)
+		$LF
+	]li
+	[li 
+		" Bsnes core version used: v085 compat (syncs on v086 and v087)
+		$LF
+	]li
+	[li 
+		" ROM SHA256: df02d0f4f40e2732138309d38e91b48aef482490979007ecb63359a35115dfd4
+		$LF
+	]li
+	[li 
+		" Aims for fastest time.
+		$LF
+	]li
+	[li 
+		" Does not rescue all mice.
+		$LF
+	]li
+	[li 
+		" Takes damage to save time.
+		$LF
+	]li
+	[li 
+		" Abuses death to save time.
+		$LF
+	]li
+	[li 
+		" Final time: 23:27.416 (84,584 frames)
+		$LF
+	]li
+	[li 
+		" Final rerecord count: 18249
+		$LF
+	]li
+	[li 
+		" Recommended dump parameters, 256x224@10738636/178683fps, 106,452 frames.
+		$LF
+	]li
+]ul
+[p 
+	"Emulator download (lsnes rr1-Δ5ε2): 
+	[a class=extlink href=http://www.elisanet.fi/ilari_l/lsnes-rr1-delta5epsilon2.7z rel=nofollow 
+		"http://www.elisanet.fi/ilari_l/lsnes-rr1-delta5epsilon2.7z
+	]a
+	$LF
+]p
+[h2 
+	" Comments about run.
+	$LF
+]h2
+[p 
+	"This run is 531 frames (about 8.8 seconds) faster than the first (oh, and that was no WIP run). The difference is
+	$LF
+	"mainly due to some new tricks and better application of known tricks. Also lag optimization shaved some frames.
+	$LF
+]p
+[h2 
+	" Tricks
+	$LF
+]h2
+[h3 
+	" Speed physics:
+	$LF
+]h3
+[p 
+	"The game keeps internal speed, which is related to visible speed by a lookup table having 160 entries.
+	$LF
+]p
+[p 
+	"How high the game allows the speed to rise depends on conditions (downhill, flat ground without boots, flat ground with
+	$LF
+	"boots, uphill).
+	$LF
+]p
+[p 
+	"If maximum speed is exceeded, Speedy just won't accelerate more, the speed does not decrease.
+	$LF
+]p
+[h3 
+	" Overshoot into hill
+	$LF
+]h3
+[p 
+	"Sometimes it is better to overshoot a turn in order to land further on slope, giving higher final speed.
+	$LF
+]p
+[h3 
+	" Undershoot into hill
+	$LF
+]h3
+[p 
+	"Sometimes it is better to undershoot trampoline jumps so you land on start of hill, giving greater final speed.
+	$LF
+]p
+[h3 
+	" Speed locking
+	$LF
+]h3
+[p 
+	"The table values in speed table are not monotonous. Some higher internal speeds are really slower than lower ones.
+	$LF
+]p
+[p 
+	"If you don't have speed boots and are in downslope, by hitting jump or attack two frames before visible speed flashes
+	$LF
+	"to higher value, it is possible to keep that value.
+	$LF
+]p
+[p 
+	"This is only useful if it allows you to keep higher speed than what fully running the hill down would.
+	$LF
+]p
+[h3 
+	" Speed table overflow
+	$LF
+]h3
+[p 
+	"The code that increases speed in downslope is special. It just checks if the speed is 150, incrementing the speed by 1
+	$LF
+	"if not. However, if Speedy already has 151 speed, the speed increments without bound (by 2 every frame).
+	$LF
+]p
+[p 
+	"However, when speed reaches 161, the code attempts to read outside the speed table, reading garbage. It loads 15 from
+	$LF
+	"there, causing speed to increase to 15px per frame, which is over twice what is normally possible.
+	$LF
+]p
+[p 
+	"But the speed will still increase. However, next up it increases to 163. Now the loaded value is 75, giving speed of
+	$LF
+	"75px/frame. The speed is so great that Speedy is forcibly ripped off the slope and shoots forwards at great speed.
+	$LF
+]p
+[p 
+	"Briefly tapping the opposite direction drops speedy off this hyperspeed.
+	$LF
+]p
+[p 
+	"Currently the only known way to get 151 speed is via pneumatic pipes in Galatical Galaxies. Those things spit you at
+	$LF
+	"that speed.
+	$LF
+]p
+[h3 
+	" Running on moving platforms
+	$LF
+]h3
+[p 
+	"The speed of Speedy is relative to surface, so if surface is moving (moving platforms/conveyors, the speed of surface
+	$LF
+	"is added/subtracted.
+	$LF
+]p
+[p 
+	"For this reason, if platforms moves the wrong way, it should be jumped off as soon as possible, but if it is moving the
+	$LF
+	"right way, it should be run on as long as possible.
+	$LF
+]p
+[h3 
+	" Lag elimination via attack
+	$LF
+]h3
+[p 
+	"One may be able to remove lag frames by attacking (just make sure the attack won't hit anything!) at suitable times.
+	$LF
+]p
+[h3 
+	" Attack as jump
+	$LF
+]h3
+[p 
+	"Attack also can double as very short jump. This is useful in some close quaters (again, don't hit anything).
+	$LF
+]p
+[p 
+	"Also, attack is often less laggy than jump.
+	$LF
+]p
+[h3 
+	" Modifying hitbox via attack
+	$LF
+]h3
+[p 
+	"Also, attack can subtly modify Speedy's hitbox. This is usually useless, but if there is very narrow margin between
+	$LF
+	"success and failure, it might just make the difference between success and failure.
+	$LF
+]p
+[h3 
+	" Vertical zipping
+	$LF
+]h3
+[p 
+	"Certain types of edges zip you upwards if you hit slightly below the top. This also has effect of resetting or at least
+	$LF
+	"greatly reducing Speedy's vertical speed (which is useful).
+	$LF
+]p
+[h3 
+	" Horizontal zipping
+	$LF
+]h3
+[p 
+	"If you can get inside a wall, autofiring left+right causes you to zip at 5px per frame. There is only one place where
+	$LF
+	"this is known possible (Galatical Galaxies Part 1, where the magnet picks the platform) and there are better ways
+	$LF
+	"to do that part anyway.
+	$LF
+]p
+[h3 
+	" Taking damage
+	$LF
+]h3
+[p 
+	"There is no damage knockback, so taking damage has no pretty much no speed penalty (except finding best spots to take
+	$LF
+	"damage).
+	$LF
+]p
+[p 
+	"However, there is attack knockback if enemy doesn't die (and lesser one even if it dies).
+	$LF
+]p
+[h3 
+	" HP mechanics
+	$LF
+]h3
+[ul 
+	[li 
+		" Each level entry (world transitions don't matter) resets your HP to 3.
+		$LF
+	]li
+	[li 
+		" Each time Speedy dies, both HP and MaxHP are reset to 3.
+		$LF
+	]li
+	[li 
+		" Small heart increases HP by 1 if below MaxHP.
+		$LF
+	]li
+	[li 
+		" Large heart increases HP by 1 if HP is below MaxHP or MaxHP is below 5 and increases MaxHP if MaxHP is below 5.
+		$LF
+	]li
+]ul
+[h3 
+	" Speed reset via wall
+	$LF
+]h3
+[p 
+	"Slamming into a wall resets your horizontal momentum but not vertical momentum. This is useful if you need to turn
+	$LF
+	"quickly after jump to ledge.
+	$LF
+]p
+[p 
+	"This is also useful if you need to turn and there is wall just behind.
+	$LF
+]p
+[h2 
+	" The actual run
+	$LF
+]h2
+[h3 
+	" Pre-first level
+	$LF
+]h3
+[ul 
+	[li 
+		" Those three initial screens seem uncancelable.
+		$LF
+	]li
+	[li 
+		" The story however is cancelable.
+		$LF
+	]li
+	[li 
+		" Some careful buttonwork speeds up the start screen.
+		$LF
+	]li
+	[li 
+		" On map screen, you must reach the target before you can enter level.
+		$LF
+	]li
+]ul
+[h3 
+	" Sleepy Rock, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" The theme of this world is mountain
+		$LF
+	]li
+	[li 
+		" Soon the way splits into 3. Bottom path is slowest. The middle and upper one are virtual tie speedwise. I choose the
+		$LF
+	]li
+]ul
+[p 
+	"upper one, as that avoids elevator segment.
+	$LF
+]p
+[h3 
+	" Sleepy Rock, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" This level also have some alternate paths, but none is even remotely as fast as the main one.
+		$LF
+	]li
+]ul
+[h3 
+	" Surely Wood, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" Forest theme
+		$LF
+	]li
+	[li 
+		" Those dropping cages are instadeath if you get caught.
+		$LF
+	]li
+	[li 
+		" No, that horizontal ropetrack can't be jumped over.
+		$LF
+	]li
+]ul
+[h3 
+	" Surely Wood, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" I jump briefly in order to not have the upslope stop acceleration.
+		$LF
+	]li
+]ul
+[h3 
+	" Surely Wood, Part 3
+	$LF
+]h3
+[ul 
+	[li 
+		" Yes, part 3... Most worlds just have two parts.
+		$LF
+	]li
+	[li 
+		" The exit isn't to right, it is in cave.
+		$LF
+	]li
+	[li 
+		" No, you can't jump down to cave, you would hit the ropetrack, costing time.
+		$LF
+	]li
+]ul
+[h3 
+	" Surely Wood, BOSS
+	$LF
+]h3
+[ul 
+	[li 
+		" The first of three bosses.
+		$LF
+	]li
+	[li 
+		" This boss can be hit trice per cycle, first on top of tree stump, then on the bottom (he can jump either left or right) and then back on tree stump.
+		$LF
+	]li
+	[li 
+		" On the top and on bottom (but not back up) he jumps twice. After the second jump slams into ground, he becomes vulnerable to Speedy's attack and some acorns drop.
+		$LF
+	]li
+	[li 
+		" Oh, he can't hurt you if stunned.
+		$LF
+	]li
+	[li 
+		" He has 8 HP, so it takes 3 rounds to defeat him.
+		$LF
+	]li
+]ul
+[h3 
+	" Fiesta City, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" City/Construction theme
+		$LF
+	]li
+	[li 
+		" Looking up on that lift causes second one to be at better position.
+		$LF
+	]li
+	[li 
+		" Again, multiple paths.
+		$LF
+	]li
+	[li 
+		" That enemy is a PITA. Firstly, he can't be jumped over (too tall) without higher ground (which is rare). Secondly, he has 3HP, so killing him takes way way too long.
+		$LF
+	]li
+	[li 
+		" Not to mention, they sound horrible.
+		$LF
+	]li
+	[li 
+		" The jump in end is pixel-precise. Even one pixel off and you won't make it.
+		$LF
+	]li
+]ul
+[h3 
+	" Fiesta City, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" I get those hearts because I need those.
+		$LF
+	]li
+	[li 
+		" You can't jump so you miss both roof and girder.
+		$LF
+	]li
+	[li 
+		" If jumpdown or falling was faster on each turn in final segment was carefully timed (seemed to depend on phase of the moon).
+		$LF
+	]li
+]ul
+[h3 
+	" Ancient Keep, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" Castle theme
+		$LF
+	]li
+	[li 
+		" Those armors are just background. None of those attacks you or anything.
+		$LF
+	]li
+	[li 
+		" You need to drink that bottle (some sort of super-spicy chili sauce?)
+		$LF
+	]li
+	[li 
+		" Okay, how to lit that pot (and get a cloud to ride up)... Oh, Speedy can breath fire due to that item.
+		$LF
+	]li
+]ul
+[h3 
+	" Ancient Keep, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" The crusher will instakill you, and you can't make it without waiting.
+		$LF
+	]li
+]ul
+[h3 
+	" Snowy Cabins, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" Snow theme.
+		$LF
+	]li
+	[li 
+		" This is the first of four nasty levels.
+		$LF
+	]li
+	[li 
+		" Those seals are the only thing that uses real RNG in this game. Forget hexing Snowy Cabins, even with lag compensation.
+		$LF
+	]li
+]ul
+[h3 
+	" Snowy Cabins, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" Nothing special.
+		$LF
+	]li
+]ul
+[h3 
+	" Galactical Galaxies, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" Space Theme.
+		$LF
+	]li
+	[li 
+		" Another nasty world. This time, the nastiness is those barriers. Those take forever to disappear, and if you hit one, those stun Speedy for a long time (TWO AND HALF SECONDS!) and do one damage (except sometimes those just stun).
+		$LF
+	]li
+	[li 
+		" Oh, and if you have just 4 speed and no mercy invincibility, those hit you without fail.
+		$LF
+	]li
+	[li 
+		" That pit can be jumped over (pixel precision needed).
+		$LF
+	]li
+	[li 
+		" I don't hit that infamous button, as it would create 1 lag (at least not infinite lag like in other emulators).
+		$LF
+	]li
+	[li 
+		" I need to go hit that button in or field will block the way.
+		$LF
+	]li
+	[li 
+		" I need to hit that button. But I also need to avoid that mouse, as if I rescued it, it would be game over.
+		$LF
+	]li
+	[li 
+		" I can't make it out alive, so I kill Speedy into barrier.
+		$LF
+	]li
+]ul
+[h3 
+	" Galactical Galaxies, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" WHO THE FUCKING ASS DESIGNED THIS LEVEL???
+		$LF
+	]li
+	[li 
+		" I hate this level.
+		$LF
+	]li
+	[li 
+		" This level has lots of those star barriers.
+		$LF
+	]li
+	[li 
+		" Yes, you have to hit that button or you face a long backtrack.
+		$LF
+	]li
+	[li 
+		" No, that mercy invincibility is not long enough to pass through the first barrier.
+		$LF
+	]li
+	[li 
+		" See if you can spot pair of emitters on floor and ceiling. Remember that switch? Yes, it was THAT.
+		$LF
+	]li
+	[li 
+		" I wait to hit enemy in order to not get stunned.
+		$LF
+	]li
+	[li 
+		" I kill Speedy for second time in order to have HP.
+		$LF
+	]li
+]ul
+[h3 
+	" Galatical Galaxies, BOSS
+	$LF
+]h3
+[ul 
+	[li 
+		" 2nd of 3 bosses.
+		$LF
+	]li
+	[li 
+		" The boss AI is stupid, it goes the same pattern over and over.
+		$LF
+	]li
+	[li 
+		" No, it doesn't care where you are.
+		$LF
+	]li
+	[li 
+		" To hurt him, activate the star barrier and have him hit it.
+		$LF
+	]li
+	[li 
+		" To hurt him optimally, activate barrier as early as possible.
+		$LF
+	]li
+	[li 
+		" 6HP, but each hit does 2HP damage, so 3 rounds.
+		$LF
+	]li
+]ul
+[h3 
+	" Ye Olde Bounty, Part 1
+	$LF
+]h3
+[ul 
+	[li 
+		" Pirate ship theme.
+		$LF
+	]li
+]ul
+[h3 
+	" Ye Olde Bounty, Part 2
+	$LF
+]h3
+[ul 
+	[li 
+		" I don't have enough health for entire level if I don't slow down on that one section.
+		$LF
+	]li
+]ul
+[h3 
+	" Ye Olde Bounty, Part 3
+	$LF
+]h3
+[ul 
+	[li 
+		" Another three-parter.
+		$LF
+	]li
+	[li 
+		" I jump on plank and from there. Surely not intended.
+		$LF
+	]li
+]ul
+[h3 
+	" Ye Olde Bounty, BOSS
+	$LF
+]h3
+[ul 
+	[li 
+		" The final showdown!
+		$LF
+	]li
+	[li 
+		" The enemy has 12 HP.
+		$LF
+	]li
+	[li 
+		" Pattern A: Just popping up from barrel and shooting.
+		$LF
+	]li
+	[li 
+		" Pattern B: Jumping to the box and shooting.
+		$LF
+	]li
+	[li 
+		" Pattern A allows 3 hits, pattern B 4.
+		$LF
+	]li
+	[li 
+		" I can manipulate pattern B at most 2 times.
+		$LF
+	]li
+	[li 
+		" Oh, he can't hurt you while blinking.
+		$LF
+	]li
+	[li 
+		" If both attacks would connect at the same frame, you will win the race.
+		$LF
+	]li
+]ul
+[h3 
+	" Ye Olde Bounty, FINAL
+	$LF
+]h3
+[ul 
+	[li 
+		" The final level
+		$LF
+	]li
+	[li 
+		" Holy shit this level is laggy.
+		$LF
+	]li
+]ul
+[h3 
+	" THE END
+	$LF
+]h3
+[ul 
+	[li 
+		" Final cutscene and credits.
+		$LF
+	]li
+	[li 
+		" After that, the game will restart. Frame 106451 is the final non-black frame before the restart.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Very nice run. Some of the levels were poorly designed and the bosses idiotic, but you did a nice job nonetheless. I'm accepting this as a first run for this game. Also, congratulations on lsnes!
+]p

@@ -1,0 +1,988 @@
+15
+[h2 
+	" Rockman technical data
+	$LF
+	[a id=heading-350 
+	]a
+]h2
+[h3 
+	" Introduction
+	$LF
+	[a id=heading-351 
+	]a
+]h3
+[p 
+	"This is technical data that has been analyzed from the Rockman game ROM
+	$LF
+	"for the purpose of making Rockman tool-assisted speedruns as precise as possible.
+	$LF
+]p
+[p 
+	"The 
+	[a class=extlink href=http://bisqwit.iki.fi/jutut/megamansource/ rel=nofollow 
+		"disassembly
+	]a
+	" of the game
+	$LF
+	"has been an invaluable help in discovering these.
+	$LF
+]p
+[p 
+	"All numbers on this page are 
+	[em 
+		"hexadecimal
+	]em
+	" unless otherwise mentioned.
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-350 
+				" Rockman technical data
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-351 
+						" Introduction
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-352 
+						" Coordinate system
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-353 
+						" Vertical motion
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-354 
+								" Jump curve
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-355 
+								" Walking on lifts / magnet beam
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-356 
+								" Walking on solid ground
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-357 
+								" Magical Y coordinates
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-358 
+								" Climbing
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-359 
+								" Transforming
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-360 
+						" Horizontal motion
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-361 
+								" Jumping
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-362 
+								" Walking
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-363 
+						" Magnet beams (Rockman 1)
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-364 
+								" Lifecycle
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-365 
+								" Beam center position
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-366 
+						" Randomness
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-367 
+						" Memory addresses
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Coordinate system
+	$LF
+	[a id=heading-352 
+	]a
+]h3
+[p 
+	"In Rockman and Rockman 2, every object of the game has the following properties:
+	$LF
+]p
+[ul 
+	[li 
+		" Screen number (00―FF), it tells which screen the object resides in.
+		$LF
+	]li
+	[li 
+		" X position (00.00―FF.FF), it tells where in the screen the object is in.
+		$LF
+	]li
+	[li 
+		" Y position (00.00―FF.FF), it tells where in the screen the object is in.
+		$LF
+	]li
+	[li 
+		" X speed (−80.00―7F.FF).
+		$LF
+	]li
+	[li 
+		" Y speed (−80.00―7F.FF).
+		$LF
+	]li
+]ul
+[p 
+	"The position of the object has 8 bits of decimal part,
+	$LF
+	"but only the integer part can be observed on the screen.
+	$LF
+]p
+[ul 
+	[li 
+		" Y coordinates increase towards the bottom of the screen
+		$LF
+	]li
+	[li 
+		" X coordinates increase towards the right
+		$LF
+	]li
+	[li 
+		" Negative Y speed means falling, positive Y speed means ascending
+		$LF
+	]li
+	[li 
+		" X speed is always positive. It is subtracted or added depending on Rockman’s facing.
+		$LF
+	]li
+]ul
+[h3 
+	" Vertical motion
+	$LF
+	[a id=heading-353 
+	]a
+]h3
+[h4 
+	" Jump curve
+	$LF
+	[a id=heading-354 
+	]a
+]h4
+[ul 
+	[li 
+		" In Rockman 1 and 2, when Rockman jumps, his Y speed is set to 04.DF.
+		$LF
+	]li
+	[li 
+		" In Rockman 3, when Rockman jumps, his Y speed is set to 04.A5.
+		$LF
+	]li
+	[li 
+		" In Rockman 4, when Rockman jumps, his Y speed is set to 04.C0.
+		$LF
+	]li
+	[li 
+		" Every frame, 00.40 is subtracted from his Y speed (0.25 in decimal).
+		$LF
+	]li
+	[li 
+		" In Rockman 1 and 2, if the Y speed grows smaller than −0C.00 (−12 in decimal), it is set to −0C.00.
+		$LF
+	]li
+	[li 
+		" In Rockman 3 and 4, if the Y speed grows smaller than −07.00, it is set to −07.00.
+		$LF
+	]li
+	[li 
+		" In Rockman 1 and 2, if the Y speed is larger than 02.1F and the player is not holding the A button, the speed is immediately set to 01.00.
+		$LF
+	]li
+	[li 
+		" In Rockman 3 if [rules unknown and] the player is not holding the A button, the speed is immediately set to −00.80.
+		$LF
+	]li
+	[li 
+		" In Rockman 4 if [rules unknown and] the player is not holding the A button, the speed is immediately set to −00.00.
+		$LF
+	]li
+]ul
+[h4 
+	" Walking on lifts / magnet beam
+	$LF
+	[a id=heading-355 
+	]a
+]h4
+[p 
+	"During walking on a magnet beam or a lift, Rockman’s Y speed grows
+	$LF
+	"continuously as if he was falling. However the lift/beam forces
+	$LF
+	"his Y position (actually, only the integer part of it) to be stable.
+	$LF
+]p
+[p 
+	"This effect happens in Rockman, but not in Rockman 2.
+	$LF
+]p
+[ul 
+	[li 
+		" In Rockman 2, Item 1 forces Rockman’s Y speed to be 01.00.
+		$LF
+	]li
+	[li 
+		" In Rockman 3, RC makes Rockman’s Y speed first 06.AE, then the rest is decided by gravity.
+		$LF
+	]li
+]ul
+[h4 
+	" Walking on solid ground
+	$LF
+	[a id=heading-356 
+	]a
+]h4
+[p 
+	"Every frame when Rockman bumps into an platform either from top or below
+	$LF
+	"(magnet beams and lifts don’t count), Rockman’s Y speed is set into a constant.
+	$LF
+]p
+[ul 
+	[li 
+		" Rockman 1: −00.C0.
+		$LF
+	]li
+	[li 
+		" Rockman 2: −00.40.
+		$LF
+	]li
+]ul
+[p 
+	"Top collision checked only when moving upwards, bottom collision
+	$LF
+	"checked only when moving downwards.
+	$LF
+]p
+[p 
+	"If he has an obstacle below him, his Y position is adjusted accordingly.
+	$LF
+]p
+[h4 
+	" Magical Y coordinates
+	$LF
+	[a id=heading-357 
+	]a
+]h4
+[ul 
+	[li 
+		" Y coordinate F8 (−08) means a dead object.
+		$LF
+	]li
+	[li 
+		" When Rockman jumps, the game prevents the coordinate from decreasing below −04 (FC). (Only true in Rockman 1.)
+		$LF
+		[ul 
+			[li 
+				" However it is possible to land on a beam that forces the coordinate to be −05. This is the highest possible coordinate where Rockman can be.
+				$LF
+			]li
+		]ul
+		" To zip through ceiling at screen top, Y speed must be −08.C0 or faster. (Smaller speed leads to death on attempt to zip.)
+		$LF
+	]li
+	[li 
+		" To survive the spikes in Bombman stage when performing 
+		(__wikiLink|user:finalfighter)
+		"’s 
+		[tt 
+			"r1bombsuper.mpg
+		]tt
+		" trick, Y speed must be −01.C0 or faster before scrolling.
+		$LF
+	]li
+]ul
+[h4 
+	" Climbing
+	$LF
+	[a id=heading-358 
+	]a
+]h4
+[ul 
+	[li 
+		" In Rockman 1 and 2, Rockman climbs at speed of 00.C0.
+		$LF
+	]li
+	[li 
+		" In Rockman 3, Rockman climbs at speed of 01.4C.
+		$LF
+	]li
+]ul
+[h4 
+	" Transforming
+	$LF
+	[a id=heading-359 
+	]a
+]h4
+[ul 
+	[li 
+		" In Rockman 1, Rockman’s Y speed and position are accumulated even during transforming. (Which allows him to pass through enemies without hurting himself.)
+		$LF
+	]li
+	[li 
+		" In Rockman 2, Y speed is reset when pausing. During transforming, enemies move. (Which allows them to pass through Rockman without hurting him.)
+		$LF
+	]li
+	[li 
+		" In Rockman 3, transformation is an extension to pause. Game continues after transformation from the same situation that was before pause.
+		$LF
+	]li
+	[li 
+		" Since Rockman 4, Rockman no longer transforms after pause/weapon switch.
+		$LF
+	]li
+]ul
+[h3 
+	" Horizontal motion
+	$LF
+	[a id=heading-360 
+	]a
+]h3
+[h4 
+	" Jumping
+	$LF
+	[a id=heading-361 
+	]a
+]h4
+[ul 
+	[li 
+		" In Rockman 1 and 2, during jumping/falling into some direction, Rockman’s X speed is 01.50.
+		$LF
+	]li
+	[li 
+		" In Rockman 3 and 4, during jumping/falling, Rockman’s X speed is the same as when walking.
+		$LF
+	]li
+	[li 
+		" If the player stops pressing the directional button, the speed falls immediately into 00.00.
+		$LF
+	]li
+	[li 
+		" In Rockman 1, if Rockman starts moving after not moving, his X speed first goes to 00.20, then back to 01.50.
+		$LF
+	]li
+	[li 
+		" In Rockman 2, if Rockman starts moving after not moving, his X speed goes immediately back to 01.50.
+		$LF
+	]li
+]ul
+[h4 
+	" Walking
+	$LF
+	[a id=heading-362 
+	]a
+]h4
+[p 
+	[b 
+		"Walking speed
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" In Rockman 1 and 2, during walking, Rockman’s X speed is 01.60.
+		$LF
+	]li
+	[li 
+		" In Rockman 3 and 4, during walking, Rockman’s X speed is 01.4C.
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Sliding speed
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" In Rockman 3 and 4, during sliding, Rockman’s X speed is 02.80.
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Acceleration
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" In Rockman 1, when Rockman accelerates from non-full speed (full halt or deacceleration), his X speed is 00.20 for 9 frames before gaining full speed.
+		$LF
+	]li
+	[li 
+		" In Rockman 2, when Rockman accelerates from non-full speed (full halt or deacceleration, item-throwing halt excluded), his X speed is 00.20 for 7 frames before gaining full speed.
+		$LF
+	]li
+	[li 
+		" In Rockman 3, when Rockman accelerates from non-full speed, he walks normally the first frame (as far as speed is concerned), then is completely in stall for 8 frames, after which he has the full speed again.
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Deceleration
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" In Rockman 1, when Rockman decelerates from full speed (not from acceleration), his X speed is 00.80 for 13 (decimal) frames before halting completely.
+		$LF
+	]li
+	[li 
+		" In Rockman 2, when Rockman decelerates from full speed (not from acceleration), his X speed is 00.80 for 8 (decimal) frames before halting completely.
+		$LF
+	]li
+	[li 
+		" In Rockman 3, when Rockman decelerates from full speed (not from acceleration), he moves normally for 1 frame, after which he halts immediately (though the sprite indicates deceleration for 8 frames).
+		$LF
+	]li
+]ul
+[h3 
+	" Magnet beams (Rockman 1)
+	$LF
+	[a id=heading-363 
+	]a
+]h3
+[p 
+	"There may be at maximum 5 magnet beams simultaneously active.
+	$LF
+]p
+[p 
+	"Every magnet beam has the following properties:
+	$LF
+]p
+[ul 
+	[li 
+		" Screen number where the 
+		[em 
+			"center
+		]em
+		" of the beam is anchored in
+		$LF
+	]li
+	[li 
+		" X position within that screen (00―FF)
+		$LF
+	]li
+	[li 
+		" Y position within that screen (00―FF)
+		$LF
+	]li
+	[li 
+		" Length (00―41)
+		$LF
+	]li
+	[li 
+		" Life (00―9C)
+		$LF
+	]li
+	[li 
+		" Cycle position (00―10) 
+		$LF
+	]li
+]ul
+[h4 
+	" Lifecycle
+	$LF
+	[a id=heading-364 
+	]a
+]h4
+[p 
+	[b 
+		"Beams die when
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Their Life is 00
+		$LF
+	]li
+	[li 
+		" A boss battle starts
+		$LF
+	]li
+	[li 
+		" A stage is loaded (death for example)
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Beams don’t die when
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Screen scrolls
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"When a new magnet beam is created:
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Length=1
+		$LF
+	]li
+	[li 
+		" Cycle=0
+		$LF
+	]li
+	[li 
+		" Life=9C
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"As long as B button is held:
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Life does not decrease
+		$LF
+	]li
+	[li 
+		" Length increases by 1 every frame, unless it is already 41
+		$LF
+	]li
+	[li 
+		" Beam center position is readjusted, see below
+		$LF
+	]li
+	[li 
+		" If the beam far end is inside a wall, the beam is released (as if B button was no longer held)
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"When B button is no longer held:
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Life decreases by 1 every frame, unless it is already 00
+		$LF
+	]li
+	[li 
+		" If Life is 0, the beam is forgotten
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Every frame when the beam exists:
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Cycle position is increased by 1
+		$LF
+	]li
+	[li 
+		" If (Cycle_position×8) == (Length×2), Cycle position is reset to 0
+		$LF
+	]li
+]ul
+[h4 
+	" Beam center position
+	$LF
+	[a id=heading-365 
+	]a
+]h4
+[p 
+	"Note: All numbers in this section are decimal, not hexadecimal.
+	$LF
+]p
+[p 
+	"As long as the player holds B, the beam center is adjusted according to Rockman’s position.
+	$LF
+]p
+[ul 
+	[li 
+		" Beam Y position is set to Rockman’s Y position
+		$LF
+	]li
+	[li 
+		" A temporary variable is calculated:
+		$LF
+		[ul 
+			[li 
+				" Temp = (Beam_length_before_growth × 2 + 16)
+				$LF
+			]li
+			[li 
+				" If(Temp & 7)==0, then Temp = Temp+8
+				$LF
+			]li
+		]ul
+		" If Rockman looks to the right, then Beam X position = Rockman’s X position + Temp
+		$LF
+	]li
+	[li 
+		" If Rockman looks to the left, then Beam X position = Rockman’s X position − Temp
+		$LF
+	]li
+]ul
+[p 
+	"For lengths 1-65, the X position of the beam is therefore adjusted in the following ways:
+	$LF
+]p
+[pre 
+	" 1:+24[1]M>32  17:+56[5]M>96    33:+88[9]M>160   49:+120[13]M>224 65:+152[17]M>288  
+	$LF
+	" 2:+18[1]>26   18:+50[5]>90     34:+82[9]>154    50:+114[13]>218  65:+146[17]>282   
+	$LF
+	" 3:+20[1]>28   19:+52[5]>92     35:+84[9]>156    51:+116[13]>220  
+	$LF
+	" 4:+22[2]m>38  20:+54[6]m>102   36:+86[10]m>166  52:+118[14]m>230 
+	$LF
+	" 5:+24[2]>40   21:+56[6]>104    37:+88[10]>168   53:+120[14]>232  
+	$LF
+	" 6:+26[2]>42   22:+58[6]>106    38:+90[10]>170   54:+122[14]>234  
+	$LF
+	" 7:+28[2]>44   23:+60[6]>108    39:+92[10]>172   55:+124[14]>236  
+	$LF
+	[em 
+	]em
+	$LF
+	" 8:+30[3]m>54  24:+62[7]m>118   40:+94[11]m>182  56:+126[15]m>246 
+	$LF
+	" 9:+40[3]M>64  25:+72[7]M>128   41:+104[11]M>192 57:+136[15]M>256 
+	$LF
+	"10:+34[3]>58   26:+66[7]>122    42:+98[11]>186   58:+130[15]>250  
+	$LF
+	"11:+36[3]>60   27:+68[7]>124    43:+100[11]>188  59:+132[15]>252  
+	$LF
+	"12:+38[4]m>70  28:+70[8]m>134   44:+102[12]m>198 60:+134[16]m>262 
+	$LF
+	"13:+40[4]>72   29:+72[8]>136    45:+104[12]>200  61:+136[16]>264  
+	$LF
+	"14:+42[4]>74   30:+74[8]>138    46:+106[12]>202  62:+138[16]>266  
+	$LF
+	"15:+44[4]>76   31:+76[8]>140    47:+108[12]>204  63:+140[16]>268  
+	$LF
+	"16:+46[5]m>86  32:+78[9]m>150   48:+110[13]m>214 64:+142[17]m>278 
+	$LF
+]pre
+[p 
+	"Note: The second “65” is when the beam no longer grows. The number in [brackets] is the beam length in units.
+	$LF
+]p
+[ul 
+	[li 
+		" Add 1 and multiply by 16 to get the carrying width of the beam.
+		$LF
+		[ul 
+			[li 
+				" 32 at minimum, 272 at maximum.
+				$LF
+			]li
+			[li 
+				" The game actually uses half of this value (range for each side from the center of the beam), so it does not overflow even when ≥ 256.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		" m = nearest distance of beam for each length (important when operating on next screen (different than displayed))
+		$LF
+	]li
+	[li 
+		" M = biggest distance of beam (often the optimal choice for zipping)
+		$LF
+	]li
+	[li 
+		" >number = location of the far end of the beam
+		$LF
+	]li
+]ul
+[h3 
+	" Randomness
+	$LF
+	[a id=heading-366 
+	]a
+]h3
+[p 
+	"See the main article: 
+	(__wikiLink|RandomGenerators|randomness generators)
+	".
+	$LF
+]p
+[h3 
+	" Memory addresses
+	$LF
+	[a id=heading-367 
+	]a
+]h3
+[p 
+	"Read from the 
+	[a class=extlink href=http://bisqwit.iki.fi/jutut/megamansource/ rel=nofollow 
+		"disassembly
+	]a
+	".
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Game    
+			]th
+			[th 
+				" Screen# 
+			]th
+			[th 
+				" X (hi,lo) 
+			]th
+			[th 
+				" Xspd (hi,lo) 
+			]th
+			[th 
+				" Y (hi,lo) 
+			]th
+			[th 
+				" Yspd (hi,lo)
+				$LF
+			]th
+		]tr
+		[tr 
+			[td 
+				" Rockman 1 
+			]td
+			[td 
+				" $460     
+			]td
+			[td 
+				" $480:$4A0  
+			]td
+			[td 
+				" $4C0:$4E0     
+			]td
+			[td 
+				" $600:$620  
+			]td
+			[td 
+				" $660:$680
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" Rockman 2 
+			]td
+			[td 
+				" $440     
+			]td
+			[td 
+				" $460:$480  
+			]td
+			[td 
+				" $600:$620     
+			]td
+			[td 
+				" $4A0:$4C0  
+			]td
+			[td 
+				" $640:$660
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" Rockman 3 
+			]td
+			[td 
+				" $380     
+			]td
+			[td 
+				" $360:$340  
+			]td
+			[td 
+				" no RAM address? 
+			]td
+			[td 
+				" $3C0:$3A0  
+			]td
+			[td 
+				" $460:$440
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" Rockman 4 
+			]td
+			[td 
+				" $348     
+			]td
+			[td 
+				" $330:$318  
+			]td
+			[td 
+				" no RAM address? 
+			]td
+			[td 
+				" $378:$360  
+			]td
+			[td 
+				" $3F0:$3D8
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" Rockman 5 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Rockman 6 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The variables for object #
+	[tt 
+		"n
+	]tt
+	" can be found by adding 
+	[tt 
+		"n
+	]tt
+	" to each address.
+	[br 
+	]br
+	$LF
+	"Boss has 
+	[tt 
+		"n
+	]tt
+	"=1 in RM1/2, Rockman always has 
+	[tt 
+		"n
+	]tt
+	"=0.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[ul 
+	[li 
+		" 
+		(__wikiLink|GameResources/NES/Rockman|Rockman Tricks)
+	]li
+]ul

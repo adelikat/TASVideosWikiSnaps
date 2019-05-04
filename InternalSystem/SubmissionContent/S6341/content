@@ -1,0 +1,209 @@
+4
+[p 
+	"Tetris on the Nintendo Entertainment System. We are all familiar with this all-time classic where you arrange these 7 iconic pieces into neat lines. Except this run only seems to know about a single one of them.
+	$LF
+]p
+[h3 
+	" Encode
+	$LF
+]h3
+[p 
+	"Edit: I put up a video now so you can skip the boring parts 
+	[del 
+		"so the whole thing
+	]del
+	" of this madness.
+	$LF
+	(youtube|v=-_qJec90LQ8)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.3.1
+		$LF
+	]li
+	[li 
+		" Main objective: Get the best score possible of 999,999 points
+		$LF
+	]li
+	[li 
+		" Real main objective: Achieving the maximum score possible while absolutely deny the existence of randomness by getting the same piece over and over
+		$LF
+	]li
+	[li 
+		" Actual real main objective: Make a dumb joke for April fools day
+		$LF
+	]li
+]ul
+[h3 
+	" What is "square%"
+	$LF
+]h3
+[p 
+	"As you may notice quickly, the whole point of this run was to get a whole 999,999-point run while not ever seeing a piece that is not the square piece.
+	$LF
+]p
+[p 
+	"You may be wondering why I went with the square piece (also called the O piece) for this run. Here are the two main reasons:
+	$LF
+]p
+[ol 
+	[li 
+		" The O piece is kind of a joke in the Tetris community, so since this run is an April fools I was content with it. (not main reason)
+		$LF
+	]li
+	[li 
+		" It was the only piece I was able to do this with from the start.
+		$LF
+	]li
+]ol
+[p 
+	"You see, I am only able to manipulate what piece is picked by the RNG by delaying when the piece is picked. In game this is not much of a problem, since I only need to manipulate one piece at a time - the one that goes in the NEXT box. For the start though, I need to manipulate two pieces - The one that's in the NEXT box 
+	[em 
+		"and
+	]em
+	" the one that spawns on the field as the first piece. I seemed to only get the same sequences, but one of them was an O piece on the field and another in the NEXT box, so I went with it.
+	$LF
+]p
+[h3 
+	" About the randomiser
+	$LF
+]h3
+[p 
+	"With the help of 
+	[a class=extlink href=https://meatfighter.com/nintendotetrisai/#Picking_Tetriminos rel=nofollow 
+		"this wonderful article
+	]a
+	" which goes in depth about every detail of the NES version of Tetris, I was able to create a Lua script to predict what the next piece is gonna be if it's picked in an arbitrary number of frames.
+	$LF
+]p
+[p 
+	"The general idea is that the RNG seed gives out a 16-bit number, from which we take the lower 3 bits to get a number between 0 and 7.
+	$LF
+	"If that number is 7 or if it corresponds to the same piece as the one that was dealt before, get a new number from the RNG and get a number between 0 and 6 using modulo.
+	$LF
+	"It then deal the piece that corresponds to the number it had.
+	$LF
+]p
+[p 
+	"The article goes in more detail, but the point is that the game keeps track of the previous piece and tries not to have repeats in the sequence of pieces it gives you, Which is the exact opposite of what we want. Luckily though, since the RNG is called at least once per frame, even when the game is paused, we can simply pause and wait for a good seed to come up.
+	$LF
+]p
+[h3 
+	" How the run goes
+	$LF
+]h3
+[h4 
+	" Step 1: Before scoring a line
+	$LF
+]h4
+[p 
+	"I figured the best strategy for this would be to start by stacking as high as I could, since this would minimise the time it takes for pieces to drop if they have to cover less distance.
+	$LF
+	"I also figured starting on level 19 (by holding A while selecting level 9) would also help, since the level acts as a multiplier on the score, and level 19 is the fastest I can start on, with gravity pulling down the piece every 2 frames (this is as fast as softdrop).
+	$LF
+]p
+[h4 
+	" Step 2: Clearing lines
+	$LF
+]h4
+[p 
+	"And it was at this moment I realised the terrible truth: with O pieces only, I am stuck clearing doubles, so this is going to take a while.
+	$LF
+	"It would take so much of a while, in fact, that I decided I would not do it manually, but instead just run a script that would bruteforce RNG for me on every piece drop, and even record the inputs on its own.
+	$LF
+	"The algorithm looks like this:
+	$LF
+]p
+[pre 
+	[code class=language-lua 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[p 
+	"After a bit of tweaking to get the values right, I set this running and watched as it started clearing lines by itself, until 230 lines where it hit the transition into level 29.
+	$LF
+]p
+[h4 
+	" Step 3: Getting in and playing level 29+
+	$LF
+]h4
+[p 
+	"If you are familiar with high-level gameplay of Nintendo Tetris, you may have heard of level 29 being called "The Killscreen". From this level onwards, the gravity pulls the blocks down every frame, forcing the game into a speed that is unsustainable for most human players. Unless you can tap the D-pad more than 3 times a second, which is what very few people like 
+	[a class=extlink href=https://www.youtube.com/watch?v=Z7OW_z2XHjI rel=nofollow 
+		"Joseph Saelee
+	]a
+	" manage to do.
+	$LF
+	"But since this is Tool-Assisted, we can tap the D-pad 15 times a second easily. I did have to lower my stack though to accommodate to the new highest height I could build, and then ran my script again, with adjusted timing values:
+	$LF
+]p
+[pre 
+	[code class=language-lua 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[p 
+	"I found it strange that placing a block two cells lower on the field didn't change how long it takes between drops (both take 25 frames), but I didn't question it and just let it run while I went away from my computer to cook some burgers for my family.
+	$LF
+	"I then came back to my computer, only to find that my script had been playing for way longer than necessary, to the point where the O piece count in the statistics box showed U29 (3,029 pieces, while the final TAS ends after 1,396).
+	$LF
+]p
+[h4 
+	" Step 4: Ending this stupid thing
+	$LF
+]h4
+[p 
+	"Since I didn't check up on my script to stop it when I should have, I went back to end it at the right moment, downstacking all the lines I currently had on my screen, and topping out manually, after nearly fourteen hundred piece drops. I then went went into the name entry and entered an appropriate name, ending the TAS after pressing start to go back to the level select screen.
+	$LF
+]p
+[h3 
+	" Possible improvements
+	$LF
+]h3
+[ul 
+	[li 
+		" Coming up with a better script, of course.
+		$LF
+	]li
+	[li 
+		" The start of the game can definitely be improved. I didn't use the fact that I could create multiple options by stacking all columns at once on different heights, leaving more possibility to place a piece without pausing and get another O-piece in the NEXT box.
+		$LF
+	]li
+	[li 
+		" The transition to level 29 may have been better if I downstacked the whole field and upstacked again with the faster drop speed. I didn't compare and assumed keeping the blocks high before the transition made up for it, but I may be wrong.
+		$LF
+	]li
+]ul
+[h3 
+	" Am I serious with this
+	$LF
+]h3
+[p 
+	"Yes and no.
+	$LF
+]p
+[p 
+	"No because, of course, this is an April fools submission, and I thought I was being hilarious. In reality, this probably was not nearly as funny as I thought it was, and this submission is probably gonna get rejected right away, because this is the most repetitive game of Tetris, and it goes on for 20 minutes.
+	$LF
+]p
+[p 
+	"Yes because while I was doing this, I learnt more about how to use Lua scripting applied to Tool-Assisted Speedrunning. I also learnt and understood more about how NES Tetris works, especially on the randomiser, and I am still happy with the fact that I was able to accurately predict the next pieces.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"If you read this far, I respect your dedication, and I must thank you for the attention you put towards this ridiculous submission. Have a wonderful first of April.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Masterjun)
+	": Should have used the Left+Down+Right trick to make less use of pausing! Neat goal, unfortunately unwatchable. Rejected due to the Tetris community thinking the letter O is a square.
+]p

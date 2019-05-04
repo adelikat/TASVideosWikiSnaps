@@ -1,0 +1,390 @@
+15
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-2519 
+						" Input polling
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-2520 
+						" Rules
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-2521 
+						" Movement system
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-2522 
+								" Vertical movement speed
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-2523 
+								" Horizontal movement speed
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-2524 
+								" Horizontal movement speed limits
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-2525 
+								" Movement factor groups
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-2526 
+								" Movement tricks
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-2527 
+						" Probably useless tricks
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Input polling
+	$LF
+	[a id=heading-2519 
+	]a
+]h3
+[p 
+	"Dirty and messy. The game avoids lag frames by disabling checking for input when there are too many objects needs to be treated/using (as the objects stay alive as long as no other object take it's place from the total of 16 slots).
+	$LF
+]p
+[ul 
+	[li 
+		" Default input process:
+		$LF
+		[ul 
+			[li 
+				" polls input,
+				$LF
+			]li
+			[li 
+				" wait until every button released.
+				$LF
+			]li
+		]ul
+		" In-game input process:
+		$LF
+		[ul 
+			[li 
+				" takes input on input frames 4 times in a row,
+				$LF
+			]li
+			[li 
+				" check input validity and process if it's true else continue processing.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"The in-game input stored after each input frame into 0x785, 0x786, 0x787 and finally to 0x784 (think it like 0x785~0x787 is the buffer and the 4th one is the final).
+	[br 
+	]br
+	$LF
+	"If you change input within this 4 frame window, it will start to overwrite values starting from 0x785.
+	$LF
+]p
+[p 
+	"More details:
+	$LF
+]p
+[pre 
+	"0x41c~0x420 (0x41d is empty) main input processing.
+	$LF
+	"0x421 timer1 starts from 30, decreases after 2 frames on each frame the input is still same.
+	$LF
+	"Once 0x421 becomes 1, timer2 cycles from 8 to 1 and updates "last input" with the preserved input when restarting from 8.
+	$LF
+	"Probably this is the game's method of "auto-firing" while holding buttons.
+	[br 
+	]br
+	$LF
+	"0x784~0x787 is the in-game input processing which happens after the main input processing which is still active.
+	$LF
+	"Pressing start won't fire in-game input processing for that frame.
+	[br 
+	]br
+	$LF
+	"Since you can't combine inputs for next processing, you should always start actions right after the last 4th frame (or 4 frames after the 1st one).
+	$LF
+]pre
+[h3 
+	" Rules
+	$LF
+	[a id=heading-2520 
+	]a
+]h3
+[ul 
+	[li 
+		" On specific levels, the player's subpixel position are carried over. Can be monitored by position or object state (start of object structure right after level structure)
+		$LF
+	]li
+	[li 
+		" On specific levels, you are required to pick up a key (which requires you to stop and bend over it) before entering the last door.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Soda can
+		]b
+		" refreshes you with 2 health bar.
+		$LF
+	]li
+	[li 
+		" Your own bomb explodes 75 frames later after initializing (which is 4 frames after first B press)
+		$LF
+	]li
+	[li 
+		" Throwing a bomb decreases your speed to zero over-time.
+		$LF
+	]li
+	[li 
+		" Using special powers (charging forward with Bullwinkle, flying with Rocky) decreases health. You need at least 2 health to perform special power.
+		$LF
+	]li
+]ul
+[h3 
+	" Movement system
+	$LF
+	[a id=heading-2521 
+	]a
+]h3
+[h4 
+	" Vertical movement speed
+	$LF
+	[a id=heading-2522 
+	]a
+]h4
+[p 
+	"You gain it on the 5th frame instead of the 6th frame. You can't reach top of the stairs from 1 jump.
+	$LF
+]p
+[h4 
+	" Horizontal movement speed
+	$LF
+	[a id=heading-2523 
+	]a
+]h4
+[p 
+	"Your speed increases starting from the 5th frame after action started.
+	$LF
+]p
+[ul 
+	[li 
+		" Horizontal speed increase on 5th frame: 19 units per frame, 20 frames + 4 units (1 frame) for maximum speed (384)
+		$LF
+	]li
+	[li 
+		" Horizontal position increase: 6th frame: +19, +38, +57...
+		$LF
+	]li
+]ul
+[p 
+	"Regarding walls/stairs some enemies, your speed is nullified once collided with an object. After that, 
+	$LF
+]p
+[h4 
+	" Horizontal movement speed limits
+	$LF
+	[a id=heading-2524 
+	]a
+]h4
+[ul 
+	[li 
+		" 640 @ Bullwinkle/Rocky + pow boost
+		$LF
+	]li
+	[li 
+		" 576 @ Bullwinkle charge
+		$LF
+	]li
+	[li 
+		" 384 @ Bullwinkle run, Rocky run, Rocky flying, Levitation trick
+		$LF
+	]li
+	[li 
+		" 192 @ Bullwinkle stairs
+		$LF
+	]li
+	[li 
+		" 0 @ Rocky on stairs... (he can't use stairs)
+		$LF
+	]li
+]ul
+[h4 
+	" Movement factor groups
+	$LF
+	[a id=heading-2525 
+	]a
+]h4
+[p 
+	"Specific enemies/objects applies various speed value when you collide with them.
+	$LF
+	"For example: -1 * actual speed + 256 = -256 speed change if you hit enemy from left to right, throwing back to the originating left side.
+	$LF
+	"Some enemies can be further abused if you can jump off from that.
+	$LF
+]p
+[ul 
+	[li 
+		" Stairs: 0 when hit, jumpable
+		$LF
+	]li
+	[li 
+		" Bomb (POW): 672 when hit, jumpable
+		$LF
+	]li
+	[li 
+		" Red spikeball: 0 as long as you are being hit (inside hitbox), jumping ignored
+		$LF
+	]li
+	[li 
+		" Everything else: 256 when hit, jumping ignored
+		$LF
+	]li
+]ul
+[h4 
+	" Movement tricks
+	$LF
+	[a id=heading-2526 
+	]a
+]h4
+[dl 
+	[dt 
+		"Optimal stair jumping
+	]dt
+	[dd 
+		"Since you can't bypass stairs with 1 jump, you are supposed to either make a two jumps (A*4,empty*2,A*4) or A*4,U*4,A*4. Depending on your position+subpositions and the stair steps positions, one of them probably will have a better value because of the minimally better X/Y trade between jumping (with scaling X speed and Y speed) and stairwalking (192 X speed and slight Y increases)
+		$LF
+		[dt 
+			"Horizontal slowdown
+		]dt
+		[dd 
+			"L*4 4 frames before touching the ground and D*4 when it won't take additional frames to further reduce speed reducement.
+			$LF
+			[dt 
+				"Rocky fly cancelling
+			]dt
+			[dd 
+				"If you jump after flying, you can land earlier on the floor instead of waiting your travel time.
+				$LF
+				[dt 
+					"POW boost
+				]dt
+				[dd 
+					"If you jump from a bomb explosion (saying "POW") hitbox while holding a direction button, your speed will be 640 (672 - 1 frame of speed reduction) units which can be preserved with the speed holding trick.
+					$LF
+				]dd
+			]dd
+		]dd
+	]dd
+]dl
+[p 
+	"You can decrease your speed reduction by using 4 frames of direction (R*4) right before jumping+boosting off, resultin in a 653 speed, which seems impossible in the air since you can't jump
+	$LF
+	"(
+	[b 
+		"TODO
+	]b
+	": verify it, maybe it's also state (0x563) dependent)
+	$LF
+]p
+[dl 
+	[dt 
+		"Speed holding
+	]dt
+	[dd 
+		"You can hold a higher speed than your maximum charging speed (576 units) by holding S (or any other button you won't use while doing this) after increasing it, which will still be reduced for 1 frame. Your previous action will be preserved as long as you hold that button. This way Bullwinkle won't try to charge on the ground which would decrease his speed to 576 units
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Speed holding after throwing a bomb
+	]dt
+	[dd 
+		"Throwing a bomb reduces your speed to zero over-time but you can hold A after throwing it to hold it. The glitch works the same way as holding a higher speed but you need to use A.
+		$LF
+	]dd
+]dl
+[p 
+	[b 
+		"TODO: verify why does S not works for this glitch, bug probably at speed handling subroutine, not at the (in-game) input processing subroutine
+	]b
+	$LF
+]p
+[h3 
+	" Probably useless tricks
+	$LF
+	[a id=heading-2527 
+	]a
+]h3
+[dl 
+	[dt 
+		"Holding bomb
+	]dt
+	[dd 
+		"You can start throwing a bomb (B*4) and hold U (U*4) and then do whatever you want, the bomb will stick to your back.
+		$LF
+		[dt 
+			"Levitation from stairs
+		]dt
+		[dd 
+			"Doing the holding bomb trick starting with U and then jumping lets you levitate with 384 units.
+			$LF
+			[dt 
+				"Eternal levitation
+			]dt
+			[dd 
+				"If you throw a bomb, fall down to a stair, start levitating inside the wall and getting hit by a bomb and you hold B (only tested pow boost, a positive speed-changing enemy), you can fly up as long as you don't press A*4 (direction not needed because you just preserve the Y boost from explosion which couldn't be altered because of inside a wall). Other than you can get 65536 or whatever high positons, currently seems totally pointless.
+				$LF
+			]dd
+		]dd
+	]dd
+]dl
+[p 
+	[b 
+		"TODO
+	]b
+	": the speed value can be negative while it's still accounted as a positive (right side) boost.
+	[br 
+	]br
+	$LF
+	[b 
+		"TODO
+	]b
+	": game tries to nullify Y subpixels, but sometimes it doesn't works. probably worth to check it
+	$LF
+	[b 
+		"TODO
+	]b
+	": self note, the A button has the most glitches in this game.
+]p

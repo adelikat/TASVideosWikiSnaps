@@ -1,0 +1,140 @@
+4
+[p 
+	"This game will probably end up in the vault due to its rather slow pace. Nonetheless there are a few interesting tricks and glitches, maybe someone wants to give it a try nonetheless. 
+	$LF
+]p
+[p 
+	"There are multiple versions of this game and later versions fix bugs that are useful for TAS so it's best to stick with version 1.0.
+	$LF
+]p
+[p 
+	"The DOS version is the original version of the game, it runs at about 9.1 frames per second and all player and enemy movement is done in steps of half a tile's size. There are 8 levels, each one consisting of 3 segments, each one of those being 128 tiles (= 256 steps) wide. Thus it takes 28 seconds to traverse a single segment, hence the slow pace.
+	$LF
+]p
+[p 
+	"The NES version is completely different from this one, it uses a completely different engine and even the levels look like they were completely remade.
+	$LF
+]p
+[h2 
+	" Objectives
+	$LF
+]h2
+[p 
+	"To win the player must collect gems, crown and gold. These are the only items the game checks for.
+	$LF
+]p
+[h2 
+	" Collision detection oddities
+	$LF
+]h2
+[p 
+	"The game engine only separates between solid and non-solid tiles. It makes sure that you cant enter any solid tiles moving vertically, however when moving horizontally only the foot level is checked for collisions. You can see this for example right at the start of the game can just walk into the 1st platform and then jump up onto it whereas you can't jump through the 2nd platform, even though they are technically identical.
+	$LF
+]p
+[h2 
+	" Enemy logic
+	$LF
+]h2
+[p 
+	"Each level segment has up to 4 enemies, each one having one out of 5 behaviours (zigzag across the screen, bounce towards the player, roll towards the player, fly towards the player, zigzag horizontally and home player vertically respectively fly upward when being looked at) and one out of 2 speeds (player speed or half player speed).
+	$LF
+]p
+[p 
+	"When entering a level segment or respawning after death all enemies are scheduled for spawning after 20 frames. When an enemy is destroyed (shot, hit the player, outran by more than 30 steps, bouncing/rolling enemy fell into a pit) it is rescheduled for spawning using a "PRNG" that counts through 20, 40, 60, 80, 100 in a cycle and is never reset. 
+	$LF
+]p
+[p 
+	"Algorithm for spawning enemies (useful for knowing how to manipulate them):
+	$LF
+]p
+[ul 
+	[li 
+		" has another enemy already been successfully spawned this frame? If yes: skip this enemy
+		$LF
+	]li
+	[li 
+		" compute its horizontal position using another "PRNG" that counts through 1, 2, 3, 4 tiles beyond the screen area in the direction the player is facing
+		$LF
+	]li
+	[li 
+		" if the player is facing left and the computed horizontal position would have been below 0 then this enemy is skipped
+		$LF
+	]li
+	[li 
+		" if the player is facing right and its horizontal position is below 128 but the computed enemy position is above or equal 128 then this enemy is skipped (this is a bug obviously), however if the enemy's position would be 256 or above it wraps around to 0 (and despawned the next frame when the game finds out that it is totally out of range). 
+		$LF
+	]li
+	[li 
+		" The game then looks for an empty tile on top of a solid tile at the computed horizontal coordinate, starting at the player's foot level and searching upward, skipping that enemy if no such tile is found. This makes sure that enemies mostly spawn on the same level as the player but never below and not in mid-air either. 
+		$LF
+	]li
+	[li 
+		" If the game finds out that it just tried to spawn an undefined enemy it skips that one and reschedules it for spawning 100 frames later
+		$LF
+	]li
+	[li 
+		" the game has now successfully spawned an enemy and will not try to spawn another enemy the same frame.
+		$LF
+	]li
+]ul
+[p 
+	"The game will normally try to spawn enemies that got skipped again the next frame.
+	$LF
+]p
+[p 
+	"The enemies themselves have small bugs too, for example some fast enemies become slow after 28 seconds and bouncing enemies sometimes bounce out of the level horizontally and get despawned.
+	$LF
+]p
+[h2 
+	" Hover glitch
+	$LF
+]h2
+[p 
+	"Holding space when starting the game or respawning after death allows the player to jump very far; the jump counter that normally restricts upward acceleration to a few frames for a normal-sized jump is in these cases initialised incorrectly and allows accelerating upward for 255 frames, that is as long as it takes to traverse one segment of a level. You can even let go of space for a while, as long as the ground isn't touched the counter isn't reset (but it still keeps on counting down). Touching the ceiling resets your vertical velocity, however touching the top of the level doesn't and holding space there for too long will lead to your vertical velocity underflowing, sending you downward so quickly that the next frame you will be almost at the bottom of the screen and if you don't land on anything there you will be below the screen and dead the following frame.
+	$LF
+]p
+[p 
+	"This glitched state can be carried across level segments but not across doors since you can only enter the door when on ground.
+	$LF
+]p
+[p 
+	"This glitch can be abused for collecting the Crown early. It is located right at the start of the castle level where you enter it, just protected by an L-shaped wall that normally prevents you from grabbing it without traversing the level first. You can however suicide after entering the level, then use this glitch to hover next to it with your head at the height of the horizontal piece of the wall and your feet below it, then hover to the right so your head will glitch into the wall (since only your feet are checked for collisions at this point), and once you have hovered beyond the vertical piece of the wall you can just fly up because only the tiles above your head are checked for collisions when trying to fly upward. But once you are in this area you can't easily get out again, you would have to either use the door and traverse the whole level, use the wand to teleport out (if you have it) or make sure you have spawned some enemies in this area so you can just death-warp back to the castle entrance.
+	$LF
+]p
+[h2 
+	" Teleport-run-left trick
+	$LF
+]h2
+[p 
+	"Teleporting when standing between blocks teleports by 3.5 blocks to the left but also takes you 0.5 blocks closer to the left edge of the screen. This can be used for moving a bit faster to the left until you touch the left edge of the screen at which point you can no longer use this trick. This trick also allows for obtaining the lantern early (apart from the hover glitch) because it allows for teleporting across the gap that wasn't supposed to be crossable that way.
+	$LF
+]p
+[h2 
+	" Proposed route
+	$LF
+]h2
+[ul 
+	[li 
+		" walk right, pick up the key, immediately enemy suicide warp back to the last segment start, walk back to Castle, enemy suicide glitch hover into the Crown room, enemy suicide warp back to the entrance, take door to forest, walk right, take door to seaside, walk to the left, when passing the 2nd transition immediately turn right and gap suicide, after re-spawning glitch hover left and fly all the way to the cave entrance, enter cave, suicide, then: 
+		$LF
+	]li
+	[li 
+		" either glitch hover to the 1st door and enemy suicide hover out of the cave, walk to the right and pick up the wand, suicide warp back to last transition, walk left and pick up gold
+		$LF
+	]li
+	[li 
+		" or glitch hover to the 2nd door, walk left and pick up the wand, walk/teleport left and pick up gold
+		$LF
+	]li
+	[li 
+		" drop down into pit, take door, teleport to level entrance, take door to seaside, walk towards spaceship door, take it, walk right and teleport to the basement door, take it, maybe take a single step to the left or right, teleport left, walk towards moon door, enter it, pick up jewels.
+		$LF
+	]li
+]ul
+[p 
+	"There are more than enough extra lives on the way: shields collected with full energy as well as reaching certain score levels.
+	$LF
+]p
+[p 
+	"The major difficulty here is manipulating enemies for those suicide warps/hover glitches. Manipulating enemies to just get out of our way is rather trivial.
+]p

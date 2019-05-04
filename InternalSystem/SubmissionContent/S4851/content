@@ -1,0 +1,154 @@
+6
+[p 
+	"Movie made using the TAS editor in FCEUX v2.2.2.
+	$LF
+	"For those of you not familiar with Shadowgate, it's a point-and-click puzzle adventure game where you play as a glasses-loving, suicidal hero who must defeat the evil warlock.
+	$LF
+]p
+[p 
+	"The following apply:
+	$LF
+]p
+[ul 
+	[li 
+		" uses death to save time
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+]ul
+[p 
+	"This run saves approximately 3 minutes and 24 seconds or 12,291 frames over the 
+	(__wikiLink|1858M|previous run)
+	".
+	$LF
+]p
+[h4 
+	" Improvements
+	$LF
+]h4
+[p 
+	"The main improvement over the previous run is the discovery of a large-skip glitch using the glasses trick. When interacting with the unlabeled item spaces past the end of the normal inventory, it's possible to execute random memory as a command. I use this to execute the command that is normally called when defeating the final boss.
+	$LF
+]p
+[h4 
+	" About the skip
+	$LF
+]h4
+[p 
+	"The familiar glasses trick makes its return, which allows us to overflow the inventory past its intended bounds. The memory just after the inventory -- memory accessible to us after overflowing -- contains flags about the current item state in the world. You can continue to overflow past these flags and access memory containing torch burn duration, sprite animation frame counters, etc. but for this run we don't use anything past the flags.
+	$LF
+]p
+[p 
+	"The goal of this run is to manipulate item state so that we can use an invalid item code with value #$DD (though this is not the only usable value for this glitch). In certain rooms, this results in executing the end-of-game event, defeating the behemoth. After using an action on an item, the game has a series of lookup tables to figure out what scripting command to execute as a result. It first looks by type to ensure the verb is appropriate, then by specific item code. By using the world-state flags as item values, we gain access to a large number of invalid values, i.e. values that don't correspond to an actual item. When taking an action on invalid values, garbage data gets interpreted as a list of addresses to load the resulting event from. In this case, the resulting address points to palette data for the current screen. In this room the palette data at the loaded address is value #$50, which is the value for the command to run the end-of-game event.
+	$LF
+]p
+[p 
+	"In order to get value #$DD in memory, we raise the bucket in the courtyard well and take the torch from the red carpet hallway.
+	$LF
+]p
+[p 
+	"Many thanks to HHS for details about how this skip works.
+	$LF
+]p
+[h4 
+	" About the route
+	$LF
+]h4
+[p 
+	"The actual setup for the skip is on the way to getting the glasses, which are the only other prerequisite for the glitch. So, the main goal is to get to the library as quickly as possible.
+	$LF
+]p
+[p 
+	"The main time saver early on is to die and continue to get into the fire drake room without the cloak -- this saves detouring by 3 rooms and a lot of actions.
+	$LF
+]p
+[p 
+	"I take 3 stones instead of 1 in the waterfall room for the sake of inventory management. Taking these extra 2 prevents having to change inventory pages somewhere along the route. Almost any item saves time to pick up if it prevents page turns, because having more items also saves time later when trying to overflow the inventory with glasses. These 3 were the fastest items to take, and additional items do not prevent any more page turns.
+	$LF
+]p
+[p 
+	"During the inventory overflow section (while taking the glasses repeatedly), I avoid having to scroll through the entire inventory by ensuring we have no torches, so the one I pick up goes to the end of the list. Lighting a torch during this section is not required -- the other strategy is to use a room where torch charges don't diminish. Randil used this alternate strategy in the previous run. However, the closest rooms with this property take more time to travel to than simply using the torch.
+	$LF
+]p
+[h4 
+	" Making of
+	$LF
+]h4
+[p 
+	"Many years ago I thought a skip like this might be possible, and managed to find it despite lack of tools. However, I was unable to reproduce it, and so abandoned it.
+	$LF
+]p
+[p 
+	"The first steps were to spend a few days doing a test run and re-finding the original skip. After that I worked on optimizations and inventory management for a while.
+	$LF
+]p
+[p 
+	"Most of the work this time around was spent on figuring out which values could be used to do the skip and where the skip could be done. The second question was handily answered by HHS, but for the first I tested every invalid value with every possible verb in a few rooms. This was done to be sure I had the fastest skip and the fastest setup. I wrote a python script to calculate the possibilities and the setups for these to help with this process.
+	$LF
+]p
+[h4 
+	" Potential further improvements
+	$LF
+]h4
+[p 
+	"Having tested all possible invalid values, I can confidently say that there remains no known significant improvement to a route using this skip. This route takes barely any actions past a basic inventory overflow, so the most I see any glasses glitch related skip saving is maybe 100-300 frames.
+	$LF
+]p
+[p 
+	"I did find that certain invalid item values ended up pointing to frame-variable data, which I have used to successfully run the end-of-game event once. This could potentially lead to a room-independent skip that could avoid moving rooms and reduce the inventory actions needed.  However, the only setup I found to do this required waiting a large number of frames before the data was the correct value, and so was much slower.
+	$LF
+]p
+[p 
+	"Of course, any additional glitch/skip discoveries in the early rooms would save time.
+	$LF
+]p
+[h4 
+	" Major thanks to
+	$LF
+]h4
+[ul 
+	[li 
+		" HHS, for providing details on his disassembly and for helping me understand various technical details.
+		$LF
+	]li
+	[li 
+		" Randil, for advice, data, and scripts to help me out during testing, and also for his previous movie, from which input and strategies were heavily reused.
+		$LF
+	]li
+	[li 
+		" Jiseed, a runner who originally showed that the skip was possible in the grand hall. My original route at the time backtracked to an early room. This finding pushed me to test every invalid value in relevant rooms and generally make sure I was using the fastest setup.
+		$LF
+	]li
+	[li 
+		" Everyone else who participated in the Shadowgate thread now and so many years ago -- reading through it has been immensely helpful.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Tompa)
+	": I'll judge this!
+	$LF
+	[br 
+	]br
+	$LF
+	(__wikiLink|user:Tompa)
+	": It's interesting to see that this, not incredibly complex, game still have new things up its bytes 11½ years after the first TAS! 
+	[br 
+	]br
+	$LF
+	"Congrats on your first submission, and a very good one too. Accepting as an improvement to the published movie and will also give back the moon!
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Glasses.
+]p

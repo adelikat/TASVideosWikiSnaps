@@ -1,0 +1,148 @@
+22
+[p 
+	"TASing emulators make extensive use of emulator projects initially unrelated to TASing. Existing emulator cores often get forked to include TAS functionality. TASing emulators heavily depend on how those cores are being developed by the community. And the open source community happens to have moved from SVN to Git, therefore Git workflow is usually involved in developing TASing emulators.
+	$LF
+]p
+[h4 
+	" Main project
+	$LF
+]h4
+[ul 
+	[li 
+		" When committing to the branch that several people are using, don't use merge, use fetch/rebase.
+		$LF
+	]li
+	[li 
+		" For significant and important changes, make pull requests and ask for code review.
+		$LF
+	]li
+	[li 
+		" Never merge a pull request without actually making sure it's good.
+		$LF
+		[ul 
+			[li 
+				" Sometimes it might be acceptable to let the users test something new and figure out if it has problems, but adding critical bugs to releases is also highly possible! So do the checking.
+				$LF
+			]li
+			[li 
+				" Always demand that coding conventions are met. This also implies those must exist!
+				$LF
+			]li
+			[li 
+				" Use Squash when it fits.
+				$LF
+			]li
+		]ul
+		" Set up automatic building for commits (at least for master and pull requests). This allows to always have the latest build available.
+		$LF
+	]li
+	[li 
+		" Enforce code style, possibly in some automated way that's not too hard to set up and is accurate.
+		$LF
+	]li
+	[li 
+		" TODO: Make sure to follow renames and copies.
+		$LF
+	]li
+	[li 
+		" Don't underestimate bisect!
+		$LF
+	]li
+]ul
+[h4 
+	" Forking
+	$LF
+]h4
+[p 
+	"Git is really powerful and quite complicated, so it requires a lot of paperwork to keep things clean, but if you do it consistently, you can always be sure everything is perfectly clean.
+	$LF
+]p
+[ul 
+	[li 
+		" Fork the project to the appropriate organization.
+		$LF
+	]li
+	[li 
+		" Set up "upstream" remote to always be able to easily pull updates from the original project.
+		$LF
+	]li
+	[li 
+		" Keep the "master" branch intact. That way it's easier to pull upstream changes, and allows to always have a clean backup branch. Also helps to keep the pull requests clean.
+		$LF
+	]li
+	[li 
+		" Do the needed diverging work in separate branches.
+		$LF
+		[ul 
+			[li 
+				" Each rerecording feature (and fixes to it) should be in its own branch.
+				$LF
+			]li
+			[li 
+				" Each bug-fix to upstream should be in its own branch.
+				$LF
+			]li
+			[li 
+				" There should be the main branch that the fork exists for (not to be confused with upstream's main branch). That branch would be used directly by the main TASing emulator project and have all the needed feature branches merged.
+				$LF
+			]li
+		]ul
+		" If some edit relevant to TASing is possible to send upstream, 
+		[b 
+			"it should always be done
+		]b
+		". Separated branches help to isolate work that can be potentially sent upstream. Ideally there would be no need to support diverging features compared to upstream. This means all the TAS related features are refined and sent as pull requests to the original project, and then no branch dedicated to TASing would be needed.
+		$LF
+	]li
+	[li 
+		" The fork should be included in the main project repository as a submodule. This allows to have a pointer to a specific branch and commit that's guaranteed to work with the main project, and updating this pointer is saved in the main project history.
+		$LF
+		[ul 
+			[li 
+				" TODO: Submodules require a bit of paperwork overhead, so list all the safeguard steps here.
+				$LF
+			]li
+		]ul
+		" Duly incorporate upstream changes. Keeping up-to-date is very important in the long run, after some time it might be too hard to update.
+		$LF
+		[ul 
+			[li 
+				" It makes sense to rebase (rather than merge) your fork's edits on top of all upstream updates every time you update.
+				$LF
+			]li
+			[li 
+				" Rebasing means you will need to have versions of your main branch, based on new master, with rebased feature branches merged from scratch.
+				$LF
+			]li
+			[li 
+				" If some of your features breaks as a result of update, a fix should be squashed with the past commit that is now breaking it.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 
+	" Commands
+	$LF
+]h4
+[p 
+	"This is how fork branches are managed:
+	$LF
+]p
+[pre 
+	"git checkout master
+	$LF
+	"git pull upstream/master
+	$LF
+	"git push master
+	$LF
+	"git checkout [feature_branch]
+	$LF
+	"git rebase master
+	$LF
+	"git checkout master
+	$LF
+	"git checkout -b [main_branch_version_N]
+	$LF
+	"git merge [feature_branch]
+]pre

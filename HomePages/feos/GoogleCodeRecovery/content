@@ -1,0 +1,351 @@
+17
+[h2 
+	" 
+	[a class=extlink href=https://dominikdorn.com/2016/05/how-to-recover-a-google-code-svn-project-and-migrate-to-github/ rel=nofollow 
+		"How to recover a Google Code SVN Project and migrate to Github
+	]a
+	$LF
+]h2
+[p 
+	[br 
+	]br
+	"Google Code shut down a year ago, and recently also their “Migrate to Github” feature was disabled.
+	$LF
+]p
+[p 
+	"Because I have/had also a old project hosted (and some people where asking about it recently), I had to find a way on how to migrate the project to Github anyway.
+	$LF
+]p
+[p 
+	"I did these steps
+	$LF
+]p
+[ol 
+	[li 
+		" Download the svn dump'ed repo: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  wget https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/spring-security-facelets-taglib/repo.svndump.gz
+		]tt
+		$LF
+	]li
+	[li 
+		" Unzip: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  gunzip repo.svndump.gz
+		]tt
+		$LF
+	]li
+	[li 
+		" Create the repo: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  svnadmin create /tmp/testgc
+		]tt
+		$LF
+	]li
+	[li 
+		" Restore it: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  svnadmin load /tmp/testgc/ < repo.svndump
+		]tt
+		$LF
+	]li
+	[li 
+		" Launch a local svn daemon: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  svnserve --foreground -d
+		]tt
+		$LF
+	]li
+	[li 
+		" In another terminal, checkout the repo from localhost in order to generate authors.txt: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  svn checkout svn://localhost/tmp/testgc/ testgc-svn
+		]tt
+		$LF
+	]li
+	[li 
+		" Enter the svn repo: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  cd testgc-svn/
+		]tt
+		$LF
+	]li
+	[li 
+		" Dump the authors to the list: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  svn log -q | awk -F '|' '/^r/ {sub("^ ", "", $2); sub(" $", "", $2); print $2" = "$2" <"$2">"}' | sort -u > ../authors.txt
+		]tt
+		$LF
+	]li
+	[li 
+		" Edit the file so that each name on the left remains the same, and on the right you have git hosting site account names for every person and their email addresses in the brackets (resolve different svn credentials a single person might have with the same git credential) 
+		[br 
+		]br
+		" 
+		[tt 
+			"  author1@mail.com = author1 <author1@mail.com> 
+			[br 
+			]br
+			"   author1 = author1 <author1@mail.com> 
+			[br 
+			]br
+			"   author2 = author2 <author2@mail.com>
+		]tt
+		$LF
+	]li
+	[li 
+		" Exit the svn repo: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  cd ..
+		]tt
+		$LF
+	]li
+	[li 
+		" Clone your repo now using git svn 
+		[a id=r1 
+		]a
+		[sup 
+			"[
+			[a href=#1 
+				"1
+			]a
+			"]
+		]sup
+		": 
+		[br 
+		]br
+		" 
+		[tt 
+			"  git svn --stdlayout -A authors.txt clone svn://localhost/tmp/testgc/
+		]tt
+		$LF
+	]li
+	[li 
+		" Go into the cloned git repo: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  cd testgc/
+		]tt
+		$LF
+	]li
+	[li 
+		" Add the upstream github repo: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  git remote add origin https://github.com/domdorn/spring-security-facelets-taglib.git
+		]tt
+		$LF
+	]li
+	[li 
+		" Push it: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  git push --set-upstream origin master
+		]tt
+		$LF
+	]li
+	[li 
+		" Till now, we only have the trunk / master branch
+		$LF
+	]li
+	[li 
+		" Get atlassians svn-migration-scripts.jar from 
+		[a class=extlink href=https://bitbucket.org/atlassian/svn-migration-scripts/downloads/ rel=nofollow 
+			"https://bitbucket.org/atlassian/svn-migration-scripts/downloads/
+		]a
+		": 
+		[br 
+		]br
+		" 
+		[tt 
+			"  wget https://bitbucket.org/atlassian/svn-migration-scripts/downloads/svn-migration-scripts.jar
+		]tt
+		$LF
+	]li
+	[li 
+		" Run the scripts and expect the suggested actions: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  java -Dfile.encoding=utf-8 -jar svn-migration-scripts.jar clean-git
+		]tt
+		$LF
+	]li
+	[li 
+		" If you like what you see (usually you do..), perform the actions: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  java -Dfile.encoding=utf-8 -jar svn-migration-scripts.jar clean-git --force 
+		]tt
+		$LF
+	]li
+	[li 
+		" After this i had a branch structure like this: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  git branch -a
+		]tt
+		" 
+		[br 
+		]br
+		" * master 
+		[br 
+		]br
+		"     remotes/origin/0.2_nate 
+		[br 
+		]br
+		"     remotes/origin/0.4_gblaszczyk 
+		[br 
+		]br
+		"     remotes/origin/jsf-1.2-spring-2 
+		[br 
+		]br
+		"     remotes/origin/jsf-1.2-spring-3 
+		[br 
+		]br
+		"     remotes/origin/jsf-2.0-spring-2 
+		[br 
+		]br
+		"     remotes/origin/jsf-2.0-spring-3 
+		[br 
+		]br
+		"     remotes/origin/master 
+		[br 
+		]br
+		"     remotes/origin/site 
+		[br 
+		]br
+		"     remotes/origin/site@17 
+		[br 
+		]br
+		"     remotes/origin/tags/0.1 
+		[br 
+		]br
+		"     remotes/origin/tags/0.3_jsf-1.2-spring-2 
+		[br 
+		]br
+		"     remotes/origin/tags/0.3_jsf-1.2-spring-3 
+		[br 
+		]br
+		"     remotes/origin/tags/0.3_jsf-2.0_spring-2 
+		[br 
+		]br
+		"     remotes/origin/tags/0.3_jsf-2.0_spring-3 
+		[br 
+		]br
+		"     remotes/origin/tags/0.5 
+		[br 
+		]br
+		"     remotes/origin/trunk
+		$LF
+	]li
+	[li 
+		" Checkout each branch (except tags and trunk) and push it: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  for i in `git branch -r | grep -v 'tags\|trunk' `; do git checkout ${i/origin\// }; git push;  done
+		]tt
+		$LF
+	]li
+	[li 
+		" Push the branches: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  git push --all origin
+		]tt
+		$LF
+	]li
+	[li 
+		" Checkout each tag and create a tag with the same name: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  for i in `git branch -r | grep 'tags'`; do git checkout $i; git tag ${i/origin\/tags\// }; done  
+		]tt
+		$LF
+	]li
+	[li 
+		" Push the tags: 
+		[br 
+		]br
+		" 
+		[tt 
+			"  git push --tags origin
+		]tt
+		$LF
+	]li
+]ol
+[p 
+	"Thanks to @chrsmith for responding quickly to my google code email (4 minutes, wow!) and telling me about how to download the repo in the svn dump file format.
+	$LF
+]p
+[p 
+	"Thanks to Atlassian for their 
+	[a class=extlink href=https://www.atlassian.com/git/tutorials/migrating-convert/ rel=nofollow 
+		"svn migration scripts
+	]a
+	$LF
+]p
+[p 
+	"You can see the result of this work at my 
+	[a class=extlink href=https://github.com/domdorn/spring-security-facelets-taglib rel=nofollow 
+		"Spring Security JSF Taglib Github Project
+	]a
+	".
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	": Use the --no-metadata switch, if you don't want every commit message to contain "git-svn-id ...", or clean it up in some other way, as mentioned at http://stackoverflow.com/questions/16092509/how-to-remove-svn-url-from-commit-messages
+]p

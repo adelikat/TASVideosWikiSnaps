@@ -1,0 +1,1035 @@
+15
+[h2 
+	""Locked" jumps:
+	$LF
+]h2
+[p 
+	"If some tile is adjacent to either burning block or empty space, then jumps can "lock" onto that edge. This can be good or bad, depending on what edge is "locked".
+	$LF
+]p
+[p 
+	"If left or right edge are locked, then the jump will be horizontally either shorter or longer, depending on where the edge is relative to ship.
+	$LF
+]p
+[p 
+	"If the far edge is locked onto then you will slow down (this is bad, but sometimes unavoidable). But if the near edge is locked onto, you will speed up (good thing, but only possible if your speed is below the maximum).
+	$LF
+]p
+[p 
+	"Note that your height at the time of jump is taken correctly into account, but the height of the block at target isn't. So trying to lock onto the near edge of block is almost suicidal and the far edges of blocks tend to lock when you don't want it (especially with tall blocks)
+	$LF
+]p
+[p 
+	"Finding the optimum places for locked jumps is tricky because earlier suboptimal locked jump may yield better position for the next locked jump, yielding net improvement in time. Also sometimes delaying the jump for 1 frame can yield a faster time.
+	$LF
+]p
+[p 
+	"Locked jumps are known to be possible up to 700 units gravity and as far as it is known, are not possible with 900 units gravity. No standard level has the only possible intermediate gravity (800 units), so behavior with 800 gravity has not been tested.
+	$LF
+]p
+[h3 
+	"Racing against the lock:
+	$LF
+]h3
+[p 
+	""Racing against the lock" is variant of locked jump, useful when jumping onto block locking either to the near or far edge. In this variant, brake momentarily before "Jump-O-Master: idle" changes to "Jump-O-Master: in use", then start to accelerate again. The game calculates the jump as you were decelerating, but executes it with you actually accelerating.
+	$LF
+]p
+[p 
+	"This is useful for reducing time loss due to spurious lock onto the far edge of block and also useful for getting the near edge lock without blowing up (do this from jump bounce, since even short blocks are too tall otherwise).
+	$LF
+]p
+[h2 
+	"When one can jump:
+	$LF
+]h2
+[p 
+	"The game maintains a flag telling if there is jump in progress. This flag gets set if you start a jump and is cleared on any hit to ground, even if ship is above void at time of landing (one of the engines hits adjacent block). So for purposes of jump, post-jump bounces count as being on the ground.
+	$LF
+]p
+[p 
+	"Additionally (from the requirement that the game must not consider jump to be in progress) when jumping, there must be some kind of ground below. It can be any type of ground, even burning. Note that 1700 gravity disables jumping completely.
+	$LF
+]p
+[p 
+	"Certain invalid values for gravity cause any attempt at jumping to end in death (by overflowing the height value).
+	$LF
+]p
+[h2 
+	"Steering in air
+	$LF
+]h2
+[p 
+	"If you could jump and are not in bounce from slippery floor, you can steer the ship. This is sometimes useful.
+	$LF
+]p
+[h2 
+	"Riding kill floors:
+	$LF
+]h2
+[p 
+	"Floor effects of the special tile types are only in effect to ship if ship touches the ground
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" and if X and Y coordinates are within the special tile. Thus one can bounce above kill floor and not be destroyed and also ride on edge of a kill floor (with ship supported by one engine) and not be destroyed.
+	$LF
+]p
+[p 
+	"It is possible to push the ship on top of a burning block and jump from it even if horizontally adjacent block is void. But that sort of jump drifts a bit, so one has to have enough height to push the bounce far enough.
+	$LF
+]p
+[h2 
+	"Taking "damage":
+	$LF
+]h2
+[p 
+	"If ship hits tunnel edge or block in suitable manner, it will be quickly ejected horizontally and not destroyed. This slows you down (causing loss of about one frame), but some places you would have to slow much more to avoid the impact. Note that vertical ejections do not happen, if one would be required, you either stop or be destroyed.
+	$LF
+]p
+[p 
+	"Each hit is independent. There is no hit counter and no hitpoints. So each hit either kills you or not, independently of others.
+	$LF
+]p
+[h2 
+	"Jumping from and to tunnels:
+	$LF
+]h2
+[p 
+	"It is possible to both jump into and out of tunnels without requiring an extra block. Both require frame-precise timing. For jumping out of tunnel, simply do the jump on the last frame the ship is in the tunnel.
+	$LF
+]p
+[p 
+	"Note that jumps into tunnel that have horizontal momentum are much harder and will likely scratch the ship a bit (giving you bit of slowdown).
+	$LF
+]p
+[h2 
+	"Keeping as much speed in pipes with slowdown floors as possible:
+	$LF
+]h2
+[p 
+	"Best way to keep speed in pipes that have slowdown floors is to hold space (jump). The ship jumps a lot, cutting the contact to slowdown floor. This won't prevent slowdown but reduces it.
+	$LF
+]p
+[h2 
+	"Fuel use:
+	$LF
+]h2
+[p 
+	"The only thing that determines fuel use is speed. Jumping and steering do not use fuel. The more speed you have, the more fuel per frame ship uses (fuel use also varies between levels).
+	$LF
+]p
+[p 
+	"When looking at fuel needed for covering some distance, the result is sawtooth pattern with different sized peaks since fuel consumption is discretized to integer decrements (the only standard level this matters in a TAS is Druidia Road 1 of the original game).
+	$LF
+]p
+[h2 
+	"Numeric parameters
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Parameter
+			]th
+			[th 
+				"Value
+			]th
+		]tr
+		[tr 
+			[td 
+				"Normal Acceleration or Deceleration
+			]td
+			[td 
+				"75 units/(frame)^2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Slowdown due to glancing blow
+			]td
+			[td 
+				"151 units/frame
+			]td
+		]tr
+		[tr 
+			[td 
+				"Maximum possible speed
+			]td
+			[td 
+				"10922 units/frame
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tile subdivisions (longitudinal)
+			]td
+			[td 
+				"65536 units/block
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tile subdivisions (horizontal)
+			]td
+			[td 
+				"5888 units/block
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tile subdivisions (height)
+			]td
+			[td 
+				"2560 units/block
+			]td
+		]tr
+		[tr 
+			[td 
+				"Base height
+			]td
+			[td 
+				"10240 units
+			]td
+		]tr
+		[tr 
+			[td 
+				"Center horizontal
+			]td
+			[td 
+				"32768 units
+			]td
+		]tr
+		[tr 
+			[td 
+				"Frame rate
+			]td
+			[td 
+				"59659/1657 fps = 36.00422450211225105... fps
+			]td
+		]tr
+		[tr 
+			[td 
+				"Horizontal step (normal)
+			]td
+			[td 
+				"(29*<speed>+45240)/512 units 
+				[a id=r2 
+				]a
+				[sup 
+					"[
+					[a href=#2 
+						"2
+					]a
+					"]
+				]sup
+			]td
+		]tr
+		[tr 
+			[td 
+				"Horizontal step (on sticky floor)
+			]td
+			[td 
+				"(29*<speed>)/512 units 
+				[a id=r2 
+				]a
+				[sup 
+					"[
+					[a href=#2 
+						"2
+					]a
+					"]
+				]sup
+			]td
+		]tr
+		[tr 
+			[td 
+				"Oxygen usage
+			]td
+			[td 
+				"30000/(36*<per-level-constant>) units/frame
+				[a id=r2 
+				]a
+				[sup 
+					"[
+					[a href=#2 
+						"2
+					]a
+					"]
+				]sup
+				[a id=r3 
+				]a
+				[sup 
+					"[
+					[a href=#3 
+						"3
+					]a
+					"]
+				]sup
+			]td
+		]tr
+		[tr 
+			[td 
+				"Fuel usage
+			]td
+			[td 
+				"floor(30000/<per-level-constant>)*<speed>/65536 units/frame
+				[a id=r2 
+				]a
+				[sup 
+					"[
+					[a href=#2 
+						"2
+					]a
+					"]
+				]sup
+				[a id=r3 
+				]a
+				[sup 
+					"[
+					[a href=#3 
+						"3
+					]a
+					"]
+				]sup
+			]td
+		]tr
+		[tr 
+			[td 
+				"Horizontal ejection
+			]td
+			[td 
+				"928 units
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	"Memory addresses
+	$LF
+]h2
+[p 
+	"These all are relative to Data segment base, which can vary in memory.
+	$LF
+]p
+[p 
+	"Value 0x0BE70 has been seen in Skyroads and 0x0BE80 in Skyroads Xmas Special.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Size
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0BA2
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Up pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA3
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Down pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA4
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Left pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA5
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Right pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA6
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Up-Left pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA7
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Up-Right pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA8
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Down-Left pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BA9
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Down-Right pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BAA
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Space pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BAB
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if Escape pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0BAC
+			]td
+			[td 
+				"Byte
+			]td
+			[td 
+				"Bit 7 set if P pressed (set by IRQ1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"160C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Frame tick counter (incremented by IRQ0)
+			]td
+		]tr
+		[tr 
+			[td 
+				"41CE
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Track length
+			]td
+		]tr
+		[tr 
+			[td 
+				"4566
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Number of frames after death (0 if alive or just died)
+			]td
+		]tr
+		[tr 
+			[td 
+				"4568
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"1 if locked jump is active, 0 otherwise
+			]td
+		]tr
+		[tr 
+			[td 
+				"456E
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Gravity
+			]td
+		]tr
+		[tr 
+			[td 
+				"4574
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Amount of oxygen
+			]td
+		]tr
+		[tr 
+			[td 
+				"4576
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Horizontal speed (signed)
+			]td
+		]tr
+		[tr 
+			[td 
+				"4578
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"0 if ship hasn't blown up, otherwise number of frames after blowup + 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"457C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Cause of death (0: Still alive, 1: Collided, 2: Touched burning, 3: Drifting in space, 4:Out of fuel, 5:Out of oxygen)
+			]td
+		]tr
+		[tr 
+			[td 
+				"5488
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Active controls (nonzero: try to jump, zero: don't jump)
+			]td
+		]tr
+		[tr 
+			[td 
+				"54A0
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Fuel left (30000 is full load)
+			]td
+		]tr
+		[tr 
+			[td 
+				"54A2
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Horizontal drift speed (signed)
+			]td
+		]tr
+		[tr 
+			[td 
+				"54AE
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Amount of fuel
+			]td
+		]tr
+		[tr 
+			[td 
+				"54B8
+			]td
+			[td 
+				"Dword
+			]td
+			[td 
+				"Longitudinal speed
+			]td
+		]tr
+		[tr 
+			[td 
+				"54B6
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Acceleration of gravity (signed, always negative)
+			]td
+		]tr
+		[tr 
+			[td 
+				"933C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Active controls (1: Try to accelerate, 0: Neutral, -1: Try to decelerate)
+			]td
+		]tr
+		[tr 
+			[td 
+				"9342
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Vertical speed (signed)
+			]td
+		]tr
+		[tr 
+			[td 
+				"9600
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Active controls (1: Steer right, 0: Go straight, -1: Steer left)
+			]td
+		]tr
+		[tr 
+			[td 
+				"9602
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Controller (0: Keyboard, 1: Joystick, 2: Mouse, 3: Demo)
+			]td
+		]tr
+		[tr 
+			[td 
+				"9628
+			]td
+			[td 
+				"Dword
+			]td
+			[td 
+				"Longitudinal position
+			]td
+		]tr
+		[tr 
+			[td 
+				"AF2C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Horizontal position
+			]td
+		]tr
+		[tr 
+			[td 
+				"AF3C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Vertical position (signed)
+			]td
+		]tr
+		[tr 
+			[td 
+				"AF3E
+			]td
+			[td 
+				"Dword
+			]td
+			[td 
+				"Temporary extra jump speed (not shown in speed gauge, lost after jump ends)
+			]td
+		]tr
+		[tr 
+			[td 
+				"B14C
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Oxygen left (30000 is full load)
+			]td
+		]tr
+		[tr 
+			[td 
+				"B8EE
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Direction ship is partially unsupported (-1: left, 0: none, 1: right)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"B8F0
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Dword
+			]td
+			[td 
+				"Projected longitudinal position
+			]td
+		]tr
+		[tr 
+			[td 
+				"B8F4
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Projected vertical position (signed)
+			]td
+		]tr
+		[tr 
+			[td 
+				"B8F6
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Projected horizontal position
+			]td
+		]tr
+		[tr 
+			[td 
+				"B8F8
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"How much the ship is on top of nothing?
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"B8FE
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"1 if ship is on top of nothing, 0 otherwise
+			]td
+		]tr
+		[tr 
+			[td 
+				"B900
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"1 if ship is on sticky floor, 0 otherwise.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"B902
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"1 if slippery floor effect is active, 0 otherwise.
+			]td
+		]tr
+		[tr 
+			[td 
+				"B904
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"1 if ship is on ground, 0 otherwise
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"B906
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Jump base height
+			]td
+		]tr
+		[tr 
+			[td 
+				"B908
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Set to 1 when ship is in jump
+			]td
+		]tr
+		[tr 
+			[td 
+				"B90A
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Normally 0, but set to 1 after jump has tried to lock
+			]td
+		]tr
+		[tr 
+			[td 
+				"B90E
+				[a id=r4 
+				]a
+				[sup 
+					"[
+					[a href=#4 
+						"4
+					]a
+					"]
+				]sup
+			]td
+			[td 
+				"Word
+			]td
+			[td 
+				"Frames done counter
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" Slippery is special. Its effect lasts until you hit ground on non-slippery block. 
+	$LF
+]p
+[p 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" If accelerating or slowing down, uses the speed post-change. Truncated to an integer.
+	$LF
+]p
+[p 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" Oxygen and fuel start from 30000. The constants come from level data.
+	$LF
+]p
+[p 
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" BP-relative. BP=B910 assumed here.
+	$LF
+]p

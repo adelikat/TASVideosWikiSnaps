@@ -1,0 +1,404 @@
+11
+[p 
+	"Pokemon Fire Red in 1:46:22 by MKDasher.
+	$LF
+]p
+[p 
+	(youtube|v=d4p-YN1FXEo|w=512|h=256)
+	$LF
+]p
+[h2 
+	" Game Objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: VBA-RR v23.6 with Save Type Flash 128k.
+		$LF
+	]li
+	[li 
+		" Aims for fastest time.
+		$LF
+	]li
+	[li 
+		" Heavy Luck Manipulation
+		$LF
+	]li
+	[li 
+		" Takes Damage to save time
+		$LF
+	]li
+]ul
+[h2 
+	" Introduction
+	$LF
+]h2
+[p 
+	"I never thought I’d have ended up completing a TAS of this game. At first, I just wanted to learn a bit more about its RNG mechanics, and since there was already a lot of information about it and I could understand it pretty well, I decided to try doing a TAS of this game.
+	$LF
+]p
+[h2 
+	" Luck Manipulation
+	$LF
+]h2
+[p 
+	"Like any Pokémon game, knowing how to luck manipulate correctly (and therefore knowing its RNG mechanics) is very important. First of all, I have to thank FractalFusion for collecting most of the RNG information used for this run and providing some lua scripts that has helped me when optimizing this run.
+	$LF
+]p
+[h3 
+	" RNG Mechanics
+	$LF
+]h3
+[p 
+	"This game uses two RNGs. First RNG is very similar to the one used in Ruby/Sapphire, and basically determines almost every luck-based event on this game. Its formula can be obtained from 
+	[a class=extlink href=http://www.smogon.com/ingame/rng/pid_iv_creation#what_is_a_pid rel=nofollow 
+		"smogon
+	]a
+	". However, this game additionally uses a second RNG that is used to determine wild encounters.
+	$LF
+	"This second RNG (formula is: val <- val*0x41C64E6D + 0x3039 ) only advances if you step in grass, cave, water, etc. So this means that it’s not possible to avoid wild encounters during the whole run.
+	$LF
+]p
+[h3 
+	" Pokémon Center’s extra RNG cycle
+	$LF
+]h3
+[p 
+	"At the start of the game, RNG goes forward at two per frame in battle, and one per frame outside a battle. This means it’s possible to switch the parity of the RNG by delaying one frame before starting a battle, but it’s not possible to control this parity later, meaning you would be forced to skip some RNG values that you may have want to use (a RNG that determines a critical hit earlier, for example).
+	$LF
+]p
+[p 
+	"However, after entering on a Pokemon Center for the first time (I do on Cerulean City), it advances twice outside a battle and three per frame in battle except when changing the move selection of a Pokemon (the RNG advances twice in this case). This means you have a much better control of the RNG cycles, and you get a good luck manipulation quicker. Because of this, Route 3 was probably one of the hardest parts to luck manipulate. Also, because of how RNG cycles works, if waiting is needed for a certain event to happen, it is better to wait during a battle than outside.
+	$LF
+]p
+[h3 
+	" Battle luck manipulation
+	$LF
+]h3
+[p 
+	"It is important to know how RNG determines critical hits, misses, side effects, etc.
+	$LF
+]p
+[p 
+	"Critical hits are determined just after the “X used Y!” message, and right after, damage percentage is determined (from 85% to 100%). There’s a chance of 1/16 to get a critical hit, 1/16 to get a max damage hit, and 1/256 to get a critical max damage hit, which is necessary sometimes on this run. (And obviously quite hard to luck manipulate).
+	$LF
+]p
+[p 
+	"Side effects were needed too (lowering speed with Bubble, or paralyzing with Secret Power). Chances of paralyzing with Secret Power and making opponent not attack is 3/40 while lowering speed with bubble is 1/10. The main problem of manipulating this is when more than one rare event needs to be manipulated together (for example, critical hit, then making the opponent to miss, then making the opponent to use a certain attack). The chances of getting that right is too low, and waiting is usually needed. If it is still not possible to get it fast enough, there is still an alternative: opening the help menu screen.
+	$LF
+]p
+[p 
+	"Of course, I learned how RNG determines all of these things, so I could optimize the battles the best I could.
+	$LF
+]p
+[h3 
+	" Opening help menu in a battle
+	$LF
+]h3
+[p 
+	"When it is not possible to control the parity of the RNG (beginning of the run), or you need to hit a Critical Max Damage and you do not want to wait for too long or any other rare events, it is also possible to open the help menu screen for luck manipulation. When the help menu screen is opened, RNG advances one per frame before getting to a Pokemon Center, and two per frame after entering, meaning it is another way to control RNG parity (even before entering on a Pokemon Center). Another use of this is that if help menu is opened between Critical hit determination and damage percentage determination, you can control those two events separately, making it easier to luck manipulate (this also works to any other event that normally would happen together but you need to control them separately to get a faster luck manipulation).
+	$LF
+]p
+[p 
+	"There are two inconveniences of this, obvious ones; it makes the battle look worse (I personally do not find very clean to see how help screen is opened on a battle), and it forces you to waste some frames. So this trick is used on this run when it is really necessary to use it. I tried to use it as few times as possible.
+	$LF
+]p
+[h3 
+	" Wild encounter manipulation
+	$LF
+]h3
+[p 
+	"Unlike previous generations, and Ruby/Sapphire, wild encounters work differently, and they are determined with a new RNG. As explained before, this RNG only advances when doing a step over something that could generate a wild encounter, so it is not possible to avoid getting them. Well, there is only one possibility to avoid them, which is using Repels, so I need some of them during the run. However, it is still possible to luck manipulate to get the lowest possible number of wild encounters. Since I can buy Repels on Pewter City, I luck manipulated the number of wild encounters until that city.
+	$LF
+]p
+[p 
+	"Wild encounter manipulation was probably the hardest thing I did on this TAS, and I run some simulator search programs to help me with this. First of all, the seed of this RNG is generated just after the Charizard screen clears in the intro. It is known which address generates the seed, but it is not known how it exactly generates it. So I used a brute-force search script in VBA to find the seed, which gave me the seed I wanted after waiting for only 8 frames. The script used around 20000 rerecords to find the optimal seed as soon as possible (the 50000 rerecords left were done by hand). The help menu noise at the very beginning is intended and completely necessary to get the perfect seed as soon as possible. I know there are 65536 possible seeds you can get, so I just made a quick program to know how many encounters each seed would give me until Pewter City. The search had the following results:
+	$LF
+]p
+[ul 
+	[li 
+		" 2 encounters: 23 seeds
+		$LF
+	]li
+	[li 
+		" 3: 339 seeds
+		$LF
+	]li
+	[li 
+		" 4: 2461 seeds
+		$LF
+	]li
+	[li 
+		" 5: 9150 seeds
+		$LF
+	]li
+	[li 
+		" 6: 19871 seeds
+		$LF
+	]li
+	[li 
+		" 7: 21941 seeds
+		$LF
+	]li
+	[li 
+		" 8: 10348 seeds
+		$LF
+	]li
+	[li 
+		" 9: 1382 seeds
+		$LF
+	]li
+	[li 
+		" 10: 20 seeds
+		$LF
+	]li
+]ul
+[p 
+	"This estimation was done with grass encounter ratio (If top half of this RNG mod 1600 is less than 343, you get an encounter). Since getting 2 encounters is fine (I need to catch Rattata and Pidgey as HM slaves), I used the seed the search recommended me. Only 1 of those 23 seeds with 2 encounters works for this run, since I need to get the 2 encounters on Route 1. (Getting 2nd encounter in Viridian Forest or getting an encounter before getting Oak's Parcel would not work, and only 1 of those 23 encounters gave me what I wanted). On a side note, there are 3472 seeds that would give you no encounters until Viridian City. This is the rarest even in the TAS, since the chances of getting the perfect seed is 1/65536. It is not necessary to say that getting this with just waiting 8 frames is a good result.
+	$LF
+]p
+[p 
+	"Also, there were two other places I had to luck manipulate. First one was Abra, getting him on the first grass step. The other one was the beginning of Safari Zone, which made me avoid using an extra Repel there.
+	$LF
+]p
+[h3 
+	" Manipulating Squirtle’s IV’s
+	$LF
+]h3
+[p 
+	"Getting good IV’s wasn’t so easy. The main RNG seed is generated just after choosing a name for your character (“I” in my case). After that, I could check if I could get a Squirtle with good stats with that seed without having to wait too much. At first, I wasn’t doing this search with RNG Reporter, but since I didn’t want to keep inserting seeds on that program, I created a lua script that would already tell me if a good Squirtle is feasible or not. Also, it wouldn’t give me data about my seed, but it would give me data about some other seeds I could easily find from the previous search. This really saved me time searching what I want.
+	$LF
+]p
+[p 
+	"What I need in this run is a Squirtle with 31 IVs for both Attack and Special Attack, and a Naughty nature (+Attack, - Special Defense). This itself has a chance of 1/24025 to happen. Additionally, I managed to get a high enough speed IV (26. Note that 31 IV would not give any benefit over 26 on this run).
+	$LF
+]p
+[h2 
+	" Route planning
+	$LF
+]h2
+[p 
+	"cstrakm’s run on the Japanese version really helped me route planning this TAS. Actually, I faced the same opponents he did on his TAS. The runs are different in other aspects though. The major differences are: using Rattata instead of Diglett, buying potions to avoid curing my Pokemon team in a Pokemon Center an extra time, and move selection during the run (which saved me a lot of critical hits).
+	$LF
+]p
+[p 
+	"Also, J version is much faster. With all the improvements, my TAS is still over 2 minutes slower than his run. However I decided to use U version since I think understanding language is important to understand this run properly and enjoy it.
+	$LF
+]p
+[h2 
+	" Run info
+	$LF
+]h2
+[h3 
+	" Pallet Town
+	$LF
+]h3
+[p 
+	"Picking boy or girl makes no difference on this run, so I decided to pick being a girl for no particular reason. Then, I set the options, and I set text speed to FAST. For those who have seen Pokemon Ruby TAS, MID text was set there because it could be scrolled as fast as possible anyway, and it was better for luck manipulation. Well, it is different on this game, since MID text loses one frame each time you talk to somebody no matter what you do.
+	$LF
+	"Another thing to mention is it sounds as if I hit Prof. Oak just before going and choose my first Pokemon, and I hit the table too just before battling Gary (his actual name is "U"). Yeah, I actually hit those for one frame; it saves time to do this rather than turning as fast as possible (A comparison vid can be found 
+	[a class=extlink href=http://www.youtube.com/watch?v=76SmqD4-4JM rel=nofollow 
+		"here
+	]a
+	"). This trick will be used in all the run.
+	$LF
+]p
+[p 
+	"Some things to say about Gary’s battle: first attack can’t be a critical hit because of being a tutorial battle, but I can critical on the next one. This is the first time I have to open the help menu since I need a critical max damage attack to defeat that Bulbasaur. (else I would need 2 critical hits, which is slower). The first time that the menu is opened takes longer than the other times.
+	$LF
+]p
+[h3 
+	" Pewter City
+	$LF
+]h3
+[p 
+	"Before reaching Pewter City I have to battle that Bug catcher. Notice that I did not talk to him. Instead, he stopped me to talk (getting that “!” thing). I was forced to do that since I would have gotten an extra wild encounter if I didn’t. 3 critical hits and Weedle has fainted. I had to open the help menu again for luck manipulation.
+	$LF
+	"Brock is pretty easy; just critical both of his Pokemon and receive damage from Onix, meaning that I will be able to use Torrent ability soon. Now time to buy 2 potions, 3 escape ropes, and 6 repels. I actually would have wanted four escape ropes, but I don’t have enough money for that. Selling to earn money, or finding an Escape Rope later is slower, so I will end up teaching Dig to Rattata to use it once.
+	$LF
+]p
+[h3 
+	" Route 3 + MT. moon
+	$LF
+]h3
+[p 
+	"Probably the most important thing to mention on Route 3 is why I battled that Lass (2nd trainer). The bug catcher has 4 pokemon, and Lass has only 2, so it is still faster to battle her, then coming back to Pewter City to reset her, and then continue. (It saves around 7 seconds). On that battle, I need Squirtle to lower Foe’s Rattata speed to attack first on the second turn. Now I have less than 1/3 of my HP, so my special attack is 50% higher.
+	$LF
+	"I have to use Repels in MT moon since I can’t avoid encounters anymore.
+	$LF
+]p
+[h3 
+	" Cerulean City
+	$LF
+]h3
+[p 
+	"Before getting to Cerulean City, I use a potion for Squirtle or else I would not be able to survive Misty. Since I have opened the bag, I’ll also Register the MT case to use it faster later (notice I don’t have the bike yet).
+	$LF
+]p
+[p 
+	"Then I enter in the Pokemon Center just for Abra to teleport me there. Now I go into the gym. I have to receive just enough damage from Misty to keep Torrent ability as much as possible, but not too much since receiving more damage would make Gary’s Pidgeotto use Quick Attack on me all the time. After Gary, I wait three trainers to teach Water Pulse. If I had done that before, I would not have been able to get to Celadon City with enough PPs later.
+	$LF
+]p
+[p 
+	"After defeating Team Rocket Grunt, I wild encounter an Abra, on my first grass step!
+	$LF
+]p
+[p 
+	"Time to visit Bill. He gives me a SS Anne ticket, so let’s go to the party! To go to Vermilion City, I first teleport to Cerulean City because is faster.
+	$LF
+]p
+[h3 
+	" Vermilion City
+	$LF
+]h3
+[p 
+	"Only thing I do in SS Anne is face U and getting Cut. Now it’s time to teach Dig and Cut to Rattata. I get the Bike Voucher before entering into the gym because I only want to cut that tree once.
+	$LF
+]p
+[p 
+	"Just before LT Surge, I use a potion. If I didn’t, Raichu would use Shock Wave every time, and 1 hit KO my Wartortle. I could actually survive with 41 HP as well, but since I needed enough HP for Gary’s Pidgeotto in Cerulean City, 42 HP is optimal. Everything done in this city. Let’s go back to Cerulean City. (Now it’s easy to see how catching an Abra is useful).
+	$LF
+]p
+[h3 
+	"Celadon City
+	$LF
+]h3
+[p 
+	"Nothing really important to say about Route 9, and actually, nothing really important to say about Rock Tunnel. I just have to battle all the trainers that are in my way. After defeating those 2 Clefairys, I have no PPs left, so I’ll need to heal in Celadon Pokemon Center. I could have got an Elixir in Rock Tunnel, but I wouldn't have enough moves by just using an Elixir, and that I have to go to the Pokemon Center anyway.
+	$LF
+]p
+[p 
+	"Time to go to Rocket Hideout. The only interesting battle to talk about is Giovanni. His Kangaskhan is strong enough to where I have to double crit him with Strength. I want Kangaskhan to do enough damage, so I can use Torrent ability later.
+	$LF
+]p
+[p 
+	"Erika is easy since Mega Kick can easily KO Victreebel and Vileplume. I use a critical max damage Mega Punch on Tangela, saving an extra Mega Kick for later. Because of that, I open the help screen to get that critical max damage faster. After exiting the gym, I teleport to the Pokemon Center, which is faster than cycling to get there.
+	$LF
+]p
+[p 
+	"A few more things to do in this city. First, getting Tea to give to the guards, so I can go to Saffron City later. Then, buying Secret Power, some Super Repels, and X Attacks. Thanks to Torrent ability, I won’t need X Sp. Atks in all the run. Even though I don’t use 11 Super Repels, I buy 11 because it’s faster to do that. Finally I visit the girl that gives me the HM for Fly. I managed to make her move down, so it takes less time to talk to her inside her house (and also saving time to exit that house).
+	$LF
+]p
+[h3 
+	" Lavender Town
+	$LF
+]h3
+[p 
+	"Again, I find U who wants to battle. Nothing much to say about the battle. Only that Pidgeotto would have needed a critical hit if I wouldn’t be able to use Torrent Ability.
+	$LF
+]p
+[p 
+	"Wartortle evolves to Blastoise, so I do not have too many problems defeating all those Team Rocket Grunts. Finally, I get the PokeFlute so I can finally wake up that Snorlax. I find a Max Elixir hidden on the floor on Route 17. It will be useful for later.
+	$LF
+]p
+[h3 
+	" Fuchsia City
+	$LF
+]h3
+[p 
+	"First thing I want to do is go to Safari Zone. I can avoid some wild encounters at the beginning, so I only need one Super Repel. It’s faster to stop using the bike just before entering in a new Safari Zone Area, because it reduces music change lag. That’s the same reason why I run to get the Golden Teeth.
+	$LF
+]p
+[p 
+	"Flying to Fuchsia City, defeating Koga, and getting the HM for Strength is barely faster than Retire, getting Strength, and then defeating Koga. As a consequence, I use the first method.
+	$LF
+]p
+[p 
+	"Since I still have Mega Punch, and it is as strong as Strength, I do not really need Strength for Fuchsia’s Gym. I take damage from Koga’s Muk to be able to use Blastoise’s Torrent ability again (I exactly need to have 19HP after Muk’s attack. Anything higher would not work later).
+	$LF
+]p
+[h3 
+	" Cinnabar Island
+	$LF
+]h3
+[p 
+	"Fastest way to get here is flying to Pallet Town (no, I’m not visiting Mum), and then surfing. Before using fly, I already used a Super Repel, and gave Quick Claw to Blastoise since I want to open the menu as few times as possible.
+	$LF
+]p
+[p 
+	"I find an Elixir on Cinnabar Mansion. I’ll use it later. I escape from here with a Dig. I chose using Dig here because it was the place were Escape Rope saved the least.
+	$LF
+]p
+[p 
+	"Blaine is easy. I use Strength + Critical hit on Growlithe because it’s slightly faster than Surf + Super Effective and because I will need to use all the Surf PPs later. Quick claw effect is first used on Rapidash, and Arcanine would need a Critical Hit if I had more than 1/3 of my HP. Then after exiting the gym, Bill asks me if I want to go with him to some weird Islands, unless I’m too busy. And yeah I'm too busy, I want to become the Pokemon Champion as fast as possible!
+	$LF
+]p
+[h3 
+	" Saffron City
+	$LF
+]h3
+[p 
+	"For some reason, after talking to Bill, if I tell Abra to teleport, it would teleport to Cinnabar Island, so I have to use Fly to go to Celadon City. I give the Tea to the guard, and I can go to Saffron City. I can’t go to Saffron’s gym yet, so I’ll have to go to Silph CO. first, and again, Gary wants to fight. Gyarados’s defense is high enough to where I need to attack him twice (I don’t have any Mega Kicks left, but that move would have not one hit KO Gyarados either). I receive damage from Gyarados. This is the last time I receive damage from a Pokemon. Thanks to this damage received, I’ll be able to keep my HP under 1/3 all the run.
+	$LF
+]p
+[p 
+	"Giovanni is easier than before since Kangaskhan is not a problem anymore. I can critical hit him with Surf. I don’t have any Surfs left after this battle, so I use the Max Elixir I got. Finally, Sabrina is probably the easiest Gym Leader; not even critical hits are needed.
+	$LF
+]p
+[h3 
+	" Viridian City
+	$LF
+]h3
+[p 
+	"I really thought carefully about what moves to use for each trainer. I chose them the way I did so I would need as few Critical Hits / Super Effective attacks as possible. U’s team is getting stronger, so it’s time for a new strategy. Secret Power, paralyzing, 2 x attacks, and 1 hit KO all his team. (Note: using 1 x attack and 1 hit is faster than 2 hits).
+	$LF
+]p
+[h3 
+	" Elite Four
+	$LF
+]h3
+[p 
+	"Victory Road is just about moving boulders, so I don’t have to say much about it.
+	$LF
+]p
+[p 
+	"Lorelei is probably the hardest of the Elite Four, so Secret Power + 2 x Attacks are needed. Except for Cloyster. Cloyster’s ability does not let me critical hit him (Shell Armor), so I have to hit him 3 times. (An extra X Attack would not have been enough to defeat Cloyster in 2 hits). Luckily, Lorelei's Lapras does not have Shell Armor ability so I can use a critical hit as well. (Note: Pokémon stats and abilities of trainers can't be luck manipulated).
+	$LF
+]p
+[p 
+	"Bruno and Agatha are a bit easier; no X items needed, and I can Surf all of their teams. However, I redid those battles a lot of times. The position where I start talking to them is purely for luck manipulation, as well as when I used the Max Repel (I could have used it before Bruno, before Agatha, or before Lance). I had to test all the possible combinations, which were a lot. A great number of rerecords were spent here.
+	$LF
+]p
+[p 
+	"Lance is not too hard to luck manipulate thanks to Gyarados’ Hyper Beam (I don’t need Secret Power). 3 X attacks are needed to 1 hit KO Dragonite.
+	$LF
+]p
+[p 
+	"Finally U again. Pidgeot is weak enough to use a Critical Surf. Then, 3 x attacks to 1 hit KO Gyarados, which has the strongest defense. (In Japanese version I would have needed only 2 X attacks, because Gyarados’ defense is weaker there).
+	$LF
+]p
+[h2 
+	" Special Thanks
+	$LF
+]h2
+[p 
+	"Thanks specially to 
+	(__wikiLink|user:FractalFusion)
+	". His knowledge of 3rd generation Pokemon games, mainly about luck manipulation, as well as his script, and his Pokemon Ruby TAS (done with GoddessMaria) really helped me and motivated me to finish this run. If this TAS has ended up being optimized correctly, it’s on a great part thanks to him.
+	$LF
+	"Thanks to cstrakm for his TAS on the Japanese game, since it helped me for route planning.
+	$LF
+]p
+[p 
+	"Thanks to 
+	[a class=extlink href=http://www.youtube.com/user/LukasLoucks rel=nofollow 
+		"LukasLoucks
+	]a
+	" for proofreading this submission and correcting some grammar mistakes on it. I’m from Spain so my level of English is not good enough to write all of this perfectly.
+	$LF
+]p
+[p 
+	"And finally thanks to the comments and the support I have been given on the Pokemon Fire Red / Leaf Green thread!
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Very positive audience response. Accepting for Moons.
+]p

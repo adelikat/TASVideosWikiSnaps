@@ -1,0 +1,193 @@
+8
+[p 
+	"Some streaming sites, in particular YouTube, don't support frame rates much larger than 30 fps. As such, they do a poor job of displaying 30Hz flicker effects present in games such as Super Metroid and the Mega Man X series.
+	$LF
+]p
+[p 
+	"To combat this, creaothceann 
+	[a href=/forum/viewtopic.php?p=279714#279714 
+		"proposed some frame blending techniques
+	]a
+	". The best-received of these has been one which combines pairs of frames in a 33%/67% ratio, with which frame in a pair being more visible alternating for every pair (thus, 33%/67% for one pair, 67%/33% for the following pair, and so on). This technique has come to be known as TASBlend.
+	$LF
+]p
+[p 
+	"Some implementations of TASBlend follow.
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-100 
+				"AVISynth
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-101 
+				"Command-line filter (C)
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-100 
+			[p 
+				"function TASBlend(clip c, float "ratio")  { 
+				$LF
+			]p
+			[pre 
+				"       # reduces framerate to 1/2 but leaves flicker effects partly visible 
+				$LF
+				"       # blends frame pairs with alternating opacity (default is 2/3+1/3;1/3+2/3) 
+				$LF
+				"       # optional "ratio" is the opacity of the first frame out of the four 
+				$LF
+				"       ratio    = default(ratio, 2.0 / 3) 
+				$LF
+				"       opacity1 = round
+				[small 
+					"1 - ratio) * 257) 
+					$LF
+					"       opacity2 = round
+					[small 
+						"    ratio) * 257) 
+						$LF
+						"       c 
+						$LF
+						"       Interleave(Layer(SelectEvery(4, 0), SelectEvery(4, 1), level=opacity1), 
+						$LF
+						"       \          Layer(SelectEvery(4, 2), SelectEvery(4, 3), level=opacity2
+					]small
+					" 
+					$LF
+				]small
+			]pre
+			[p 
+				"}
+				$LF
+				"%%END_EMBED
+				$LF
+				"If only certain segments of the clip are to be blended, creaothceann 
+				[a href=/forum/viewtopic.php?p=280007#280007 
+					"suggests
+				]a
+				" using this in the following fashion:
+				$LF
+			]p
+			[pre 
+				[code class=language-sh 
+					"function Replace(clip c, int i, int j, clip d)  { 
+					$LF
+					"        Assert(i >= 0, "Replace: parameter i is negative") 
+					$LF
+					"        Assert(j >= 0, "Replace: parameter j is negative") 
+					$LF
+					"        p1 = c.Trim(0    , -i) 
+					$LF
+					"        p2 = d.Trim(i    ,  j) 
+					$LF
+					"        p3 = c.Trim(j + 1,  0) 
+					$LF
+					"        p1 = (i == 0)  ?  c.Trim(0, -1).DeleteFrame(0)  :  p1 
+					$LF
+					"        p3 = (j == 0)  ?  c.Trim(0, -1).DeleteFrame(0)  :  p3 
+					$LF
+					"        p1 + p2 + p3 
+					$LF
+					"        return (c.HasAudio)  ?  last.AudioDub(c)  :  last 
+					$LF
+					"}
+					$LF
+					$LF
+					"AVISource("video.avi") 
+					$LF
+					$LF
+					"blended = TASBlend 
+					$LF
+					"ChangeFPS(FrameRate / 2) 
+					$LF
+					$LF
+					"Replace(  500,   999, blended) 
+					$LF
+					"Replace( 2000,  2999, blended) 
+					$LF
+					"Replace(70000, 71999, blended) 
+					$LF
+					"... 
+					$LF
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-101 
+			[p 
+				"Usage is:
+				$LF
+			]p
+			[blockquote 
+				" tasblend <width> <height>　<startframe> <endframe> 
+				"[<startframe> <endframe> [...] ]
+				"]
+				$LF
+			]blockquote
+			[p 
+				"where
+				$LF
+			]p
+			[ul 
+				[li 
+					" 
+					[tt 
+						"<width>
+					]tt
+					" and 
+					[tt 
+						"<height>
+					]tt
+					" are the height of a frame; and
+					$LF
+				]li
+				[li 
+					" each pair of 
+					[tt 
+						"<startframe>
+					]tt
+					" and 
+					[tt 
+						"<endframe>
+					]tt
+					" signifies frame ranges from the input to be blended - to blend an entire clip, set 
+					[tt 
+						"<startframe>
+					]tt
+					" to 0 and 
+					[tt 
+						"<endframe>
+					]tt
+					" to a value larger than the number of frames in the clip.
+					$LF
+				]li
+			]ul
+			[p 
+				"This has not been tested thoroughly, so use at your own risk (and report bugs to 
+				(__wikiLink|user:sgrunt)
+				").
+				$LF
+			]p
+			[p 
+				"A version that has gamma correction is available at http://engelsish.org/tasblend-lookup.c
+				$LF
+			]p
+			[pre 
+				[code class=language-sh 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[hr 
+]hr
+[p 
+	"Return to the 
+	(__wikiLink|Encoding Guide)
+	".
+]p

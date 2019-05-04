@@ -1,0 +1,1886 @@
+7
+[p 
+	(youtube|v=VJKG38cXXHI|w=648|h=380)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Allow Left+Right / Up+Down
+		$LF
+	]li
+	[li 
+		" Emulator used: FCEUX 2.2.2 (Old PPU)
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+	[li 
+		" Genre: RPG
+		$LF
+	]li
+	[li 
+		" Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Heavily abuses programming errors
+		$LF
+	]li
+	[li 
+		" Manipulates Luck
+		$LF
+	]li
+]ul
+[h3 
+	" Usable memory address
+	$LF
+]h3
+[ul 
+	[li 
+		" $00F5 = RNG index
+		$LF
+	]li
+	[li 
+		" $00F6 = RNG index direction, if it is more than 80, it is leftward.
+		$LF
+	]li
+	[li 
+		" $F900-$F9FF = RNG table
+		$LF
+	]li
+	[li 
+		" $F900+($00F5) = RNG
+		$LF
+	]li
+	[li 
+		" $00F7 = The encounter number of times
+		$LF
+	]li
+	[li 
+		" $00F8 = The encounter threshold in UW
+		$LF
+	]li
+]ul
+[h3 
+	" Save and Restart
+	$LF
+]h3
+[p 
+	"Even if a game is reset, the encounter table is held. 
+	$LF
+	"1. You save a game
+	$LF
+	"2. You move it one pixel
+	$LF
+	"3. You reset a game
+	$LF
+	"4. The encounter is skipped
+	$LF
+	"When you overwrite a game, the confirmation message is very slow.
+	$LF
+	"Because a game is saved before confirmation, it is fast that a game is reset than it closes a menu.
+	$LF
+	"It is faster to touch a power supply, but 1/4 time is good at a good balance with the distance to walk.
+	$LF
+]p
+[h3 
+	" To Paloom
+	$LF
+]h3
+[p 
+	"The route going around the world to the west obtains a canoe and is faster than a route across the river by more than 50 seconds.
+	$LF
+]p
+[h3 
+	" Chocobo Forest
+	$LF
+]h3
+[p 
+	"Because the power supply was initialized, NPC RNG is not manipulated.
+	$LF
+	"On the way, I adjusted it to be able to encounter the Land Turtle.
+	$LF
+]p
+[h3 
+	" Takeover of the shuttle ship
+	$LF
+]h3
+[p 
+	"When you push the start button just before you enter the paid sailing ship, the autopilot is concluded with a menu screen and becomes able to steer it by yourself.
+	$LF
+	"But you can never get into a ship if you got it off in the island.
+	$LF
+]p
+[h3 
+	" Deist Cavern
+	$LF
+]h3
+[p 
+	"The monster of this place cannot escape. 
+	$LF
+	"I pushed forward RNG for encounter evasion twice using Potion.
+	$LF
+	"Because the encounter number of times is 4, the land turtle appears.
+	$LF
+]p
+[h3 
+	" 45-floor bug
+	$LF
+]h3
+[h4 
+	" Outline
+	$LF
+]h4
+[p 
+	"Please refer to the 
+	$LF
+	[a href=/forum/p/247074#247074 
+		"post of TaoTao.
+	]a
+	$LF
+]p
+[p 
+	"This game has room movement of "goto" and "return".
+	$LF
+	"5 bytes are pushed to stack domain by "goto" movement, and it is popped for "return" movement.
+	$LF
+	""goto" movement is repeated between the rooms with complicated divergence of stairs.
+	$LF
+	""goto" movement is restricted by 45 times, but that's insufficient, so when a battle was accomplished, a stack overflow occurs.
+	$LF
+]p
+[h4 
+	" Top of the stack and NMI
+	$LF
+]h4
+[p 
+	"When Non-Maskable Interrupts (NMI) occurs by this game, $0100 are run.
+	$LF
+	"$0100 are the top of the stack domain that is 256 bytes, and ReTurn from Interrupt (RTI) and JMP are written in dynamically here.
+	$LF
+	"When the stack is pushed up to $0101-$0102, unjust JMP is carried out at the time of NMI,
+	$LF
+	"the game almost freezes, and the save data often disappear, too.
+	$LF
+]p
+[h4 
+	" Why were $6785 called?
+	$LF
+]h4
+[p 
+	"When the second character attacked the Land Turtle, a stack domain was renewed to $0101 by a recursive Jump SubRoutine (JSR).
+	$LF
+]p
+[pre 
+	"27364 frame
+	$LF
+	"A:FF X:04 Y:08 S:02 P:NvUbdIzc                              $9B4A:20 B6 9B  JSR $9BB6
+	$LF
+	"A:FF X:04 Y:08 S:00 P:NvUbdIzc                                $9BB6:A5 C4     LDA $00C4 = #$FF
+	$LF
+]pre
+[p 
+	"NMI occurs in the middle of a calculation, and return address and P-Register are pushed to stack up as "$010F:27 A0 FC". 
+	$LF
+]p
+[ul 
+	[li 
+		" P:nvUbdIZC = 0b00100111 = 0x27
+		$LF
+	]li
+]ul
+[pre 
+	"A:00 X:10 Y:EE S:11 P:nvUbdIZC               $FC9E:85 04     STA $0004 = #$00
+	$LF
+	"A:00 X:10 Y:EE S:0E P:nvUbdIZC                  $0100:4C 4C 9B  JMP $9B4C
+	$LF
+	"A:00 X:10 Y:EE S:0E P:nvUbdIZC                  $9B4C:6A        ROR
+	$LF
+]pre
+[p 
+	"NMI jumped to $9B4C, and a Stack-Pointer slipped off when the Program-Counter returned from many subroutines.
+	$LF
+	"RTI using 3 bytes at the end of NMI is usually appropriate, but the Program-Counter goes to $A028 because RTS, which in this case only 2 bytes uses, was run.
+	$LF
+]p
+[pre 
+	"27374 frame
+	$LF
+	"A:00 X:03 Y:00 S:0E P:nvUbdIZC                  $9B84:60        RTS 
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+		"-
+		$LF
+		"A:00 X:03 Y:00 S:10 P:nvUbdIZC                $A028:04        NOP (illgal)
+		$LF
+		"A:00 X:03 Y:00 S:10 P:nvUbdIZC                $A02A:66 A9     ROR $00A9 = #$76
+		$LF
+		"A:00 X:03 Y:00 S:10 P:NvUbdIzc                $A02C:15 85     ORA $85,X @ $0088 = #$04
+		$LF
+		"A:04 X:03 Y:00 S:10 P:nvUbdIzc                $A02E:67        RRA $20 (illgal)
+		$LF
+		"A:40 X:03 Y:00 S:10 P:nvUbdIzc                $A030:2F        RLA $A997 (illgal)
+		$LF
+		"A:40 X:03 Y:00 S:10 P:nvUbdIzc                $A033:05 85     ORA $0085 = #$0E
+		$LF
+		"A:4E X:03 Y:00 S:10 P:nvUbdIzc                $A035:66 A9     ROR $00A9 = #$BB
+		$LF
+		"A:4E X:03 Y:00 S:10 P:nvUbdIzC                $A037:69 85     ADC #$85
+		$LF
+		"A:D4 X:03 Y:00 S:10 P:NvUbdIzc                $A039:67        RRA $20  (illgal)
+		$LF
+		"A:F2 X:03 Y:00 S:10 P:NvUbdIzc                $A03B:2F        RLA $A997 (illgal)
+		$LF
+		"A:40 X:03 Y:00 S:10 P:nvUbdIzc                $A03E:06 85     ASL $0085 = #$0E
+		$LF
+		"A:40 X:03 Y:00 S:10 P:nvUbdIzc                $A040:66 A9     ROR $00A9 = #$5D
+		$LF
+		"A:40 X:03 Y:00 S:10 P:nvUbdIzC                $A042:20 85 67  JSR $6785
+		$LF
+	]del
+]pre
+[ul 
+	[li 
+		" $A041:"A9 20 85 67" is "LDA #$20" and "STA $0067"
+		$LF
+	]li
+	[li 
+		" $A042:"20 85 67" becomes "JSR $6785", because 1 byte slips off than a right program.
+		$LF
+	]li
+]ul
+[pre 
+	"27374 frame
+	$LF
+	"A:40 X:03 Y:00 S:0E P:nvUbdIzC                  $6785:4C 42 64  JMP $6442
+	$LF
+	"A:40 X:03 Y:00 S:0E P:nvUbdIzC                  $6442:CE CF D0  DEC $D0CF = #$85
+	$LF
+	"A:40 X:03 Y:00 S:0E P:NvUbdIzC                  $6445:4C 4D F3  JMP $F34D
+	$LF
+]pre
+[p 
+	"It can arrive at the credits by "JMP $F34D",
+	$LF
+	"but MMC1, which became unstable because of "RLA $A997", will fail in bank changing.
+	$LF
+	"I initialize MMC1 with "DEC $D0CF" to evade it.
+	$LF
+]p
+[h3 
+	" The details of the character
+	$LF
+]h3
+[h4 
+	" SRAM Addresses
+	$LF
+]h4
+[p 
+	"Save Data 1
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"$6440
+			]th
+			[td 
+				"01
+			]td
+			[td 
+				"00
+			]td
+			[th 
+				"CE
+			]th
+			[th 
+				"CF
+			]th
+			[th 
+				"D0
+			]th
+			[th 
+				"4C
+			]th
+			[th 
+				"4D
+			]th
+			[th 
+				"F3
+			]th
+			[td 
+				"14
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Save Data 2
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"$6700
+			]th
+			[td 
+				"00
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"95
+			]td
+			[td 
+				"1E
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"1E
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+		]tr
+		[tr 
+			[th 
+				"$6740
+			]th
+			[td 
+				"01
+			]td
+			[td 
+				"00
+			]td
+			[th 
+				"CE
+			]th
+			[th 
+				"CF
+			]th
+			[th 
+				"D0
+			]th
+			[th 
+				"4C
+			]th
+			[th 
+				"4D
+			]th
+			[th 
+				"F3
+			]th
+			[td 
+				"14
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+		]tr
+		[tr 
+			[th 
+				"$6780
+			]th
+			[td 
+				"02
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"D0
+			]td
+			[td 
+				"DA
+			]td
+			[td 
+				"D1
+			]td
+			[th 
+				"4C
+			]th
+			[th 
+				"42
+			]th
+			[th 
+				"64
+			]th
+			[td 
+				"28
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+		]tr
+		[tr 
+			[th 
+				"$67C0
+			]th
+			[td 
+				"08
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"A2
+			]td
+			[td 
+				"B6
+			]td
+			[td 
+				"A2
+			]td
+			[td 
+				"B6
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"1E
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"1E
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"05
+			]td
+			[td 
+				"00
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Meaning of the character name
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"1st
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"し
+			]td
+			[td 
+				" Five space that were skipped
+			]td
+			[td 
+				""Shi" is death 
+			]td
+		]tr
+		[tr 
+			[td 
+				"2nd
+			]td
+			[th 
+				"オ
+			]th
+			[th 
+				"カ
+			]th
+			[th 
+				"キ
+			]th
+			[th 
+				"び
+			]th
+			[th 
+				"ぶ
+			]th
+			[th 
+				"レ
+			]th
+			[td 
+				" "O KA KI" is DEC $D0CF 
+			]td
+			[td 
+				""Bi Bu Re" is JMP $F34D
+			]td
+		]tr
+		[tr 
+			[td 
+				"3rd
+			]td
+			[td 
+				"キ
+			]td
+			[td 
+				"チ
+			]td
+			[td 
+				"ク
+			]td
+			[th 
+				"び
+			]th
+			[th 
+				"じ
+			]th
+			[th 
+				"ぱ
+			]th
+			[td 
+				" "Ki Chi Ku" is without meaning
+			]td
+			[td 
+				""Bi Ji Pa" is JMP $6442
+			]td
+		]tr
+		[tr 
+			[td 
+				"4th
+			]td
+			[td 
+				"の
+			]td
+			[td 
+				"ん
+			]td
+			[td 
+				"の
+			]td
+			[td 
+				"ん
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				"  
+			]td
+			[td 
+				" "No N No N" is without meaning
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Nameable Text Table
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"あ
+			]td
+			[td 
+				"い
+			]td
+			[td 
+				"う
+			]td
+			[td 
+				"え
+			]td
+			[td 
+				"お
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"か
+			]td
+			[td 
+				"き
+			]td
+			[td 
+				"く
+			]td
+			[td 
+				"け
+			]td
+			[td 
+				"こ
+			]td
+		]tr
+		[tr 
+			[td 
+				"8A
+			]td
+			[td 
+				"8B
+			]td
+			[td 
+				"8C
+			]td
+			[td 
+				"8D
+			]td
+			[td 
+				"8E
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"8F
+			]td
+			[td 
+				"90
+			]td
+			[td 
+				"91
+			]td
+			[td 
+				"92
+			]td
+			[td 
+				"93
+			]td
+		]tr
+		[tr 
+			[td 
+				"さ
+			]td
+			[th 
+				"し
+			]th
+			[td 
+				"す
+			]td
+			[td 
+				"せ
+			]td
+			[td 
+				"そ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"た
+			]td
+			[td 
+				"ち
+			]td
+			[td 
+				"つ
+			]td
+			[td 
+				"て
+			]td
+			[td 
+				"と
+			]td
+		]tr
+		[tr 
+			[td 
+				"94
+			]td
+			[th 
+				"95
+			]th
+			[td 
+				"96
+			]td
+			[td 
+				"97
+			]td
+			[td 
+				"98
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"99
+			]td
+			[td 
+				"9A
+			]td
+			[td 
+				"9B
+			]td
+			[td 
+				"9C
+			]td
+			[td 
+				"9D
+			]td
+		]tr
+		[tr 
+			[td 
+				"な
+			]td
+			[td 
+				"に
+			]td
+			[td 
+				"ぬ
+			]td
+			[td 
+				"ね
+			]td
+			[th 
+				"の
+			]th
+			[td 
+				" 
+			]td
+			[td 
+				"は
+			]td
+			[td 
+				"ひ
+			]td
+			[td 
+				"ふ
+			]td
+			[td 
+				"へ
+			]td
+			[td 
+				"ほ
+			]td
+		]tr
+		[tr 
+			[td 
+				"9E
+			]td
+			[td 
+				"9F
+			]td
+			[td 
+				"A0
+			]td
+			[td 
+				"A1
+			]td
+			[th 
+				"A2
+			]th
+			[td 
+				" 
+			]td
+			[td 
+				"A3
+			]td
+			[td 
+				"A4
+			]td
+			[td 
+				"A5
+			]td
+			[td 
+				"A6
+			]td
+			[td 
+				"A7
+			]td
+		]tr
+		[tr 
+			[td 
+				"ま
+			]td
+			[td 
+				"み
+			]td
+			[td 
+				"む
+			]td
+			[td 
+				"め
+			]td
+			[td 
+				"も
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"ら
+			]td
+			[td 
+				"り
+			]td
+			[td 
+				"る
+			]td
+			[td 
+				"れ
+			]td
+			[td 
+				"ろ
+			]td
+		]tr
+		[tr 
+			[td 
+				"A8
+			]td
+			[td 
+				"A9
+			]td
+			[td 
+				"AA
+			]td
+			[td 
+				"AB
+			]td
+			[td 
+				"AC
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"B0
+			]td
+			[td 
+				"B1
+			]td
+			[td 
+				"B2
+			]td
+			[td 
+				"B3
+			]td
+			[td 
+				"B4
+			]td
+		]tr
+		[tr 
+			[td 
+				"や
+			]td
+			[td 
+				"ゆ
+			]td
+			[td 
+				"よ
+			]td
+			[td 
+				"わ
+			]td
+			[th 
+				"ん
+			]th
+			[td 
+				" 
+			]td
+			[td 
+				"が
+			]td
+			[td 
+				"ぎ
+			]td
+			[td 
+				"ぐ
+			]td
+			[td 
+				"げ
+			]td
+			[td 
+				"ご
+			]td
+		]tr
+		[tr 
+			[td 
+				"AD
+			]td
+			[td 
+				"AE
+			]td
+			[td 
+				"AF
+			]td
+			[td 
+				"B5
+			]td
+			[th 
+				"B6
+			]th
+			[td 
+				" 
+			]td
+			[td 
+				"3C
+			]td
+			[td 
+				"3D
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"3F
+			]td
+			[td 
+				"40
+			]td
+		]tr
+		[tr 
+			[td 
+				"ざ
+			]td
+			[th 
+				"じ
+			]th
+			[td 
+				"ず
+			]td
+			[td 
+				"ぜ
+			]td
+			[td 
+				"ぞ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"だ
+			]td
+			[td 
+				"ぢ
+			]td
+			[td 
+				"づ
+			]td
+			[td 
+				"で
+			]td
+			[td 
+				"ど
+			]td
+		]tr
+		[tr 
+			[td 
+				"41
+			]td
+			[th 
+				"42
+			]th
+			[td 
+				"43
+			]td
+			[td 
+				"44
+			]td
+			[td 
+				"45
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"46
+			]td
+			[td 
+				"47
+			]td
+			[td 
+				"48
+			]td
+			[td 
+				"49
+			]td
+			[td 
+				"4A
+			]td
+		]tr
+		[tr 
+			[th 
+				"ぱ
+			]th
+			[td 
+				"ぴ
+			]td
+			[td 
+				"ぷ
+			]td
+			[td 
+				"ぺ
+			]td
+			[td 
+				"ぽ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"ば
+			]td
+			[th 
+				"び
+			]th
+			[th 
+				"ぶ
+			]th
+			[td 
+				"べ
+			]td
+			[td 
+				"ぼ
+			]td
+		]tr
+		[tr 
+			[th 
+				"64
+			]th
+			[td 
+				"65
+			]td
+			[td 
+				"66
+			]td
+			[td 
+				"67
+			]td
+			[td 
+				"68
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"4B
+			]td
+			[th 
+				"4C
+			]th
+			[th 
+				"4D
+			]th
+			[td 
+				"4E
+			]td
+			[td 
+				"4F
+			]td
+		]tr
+		[tr 
+			[td 
+				"ゃ
+			]td
+			[td 
+				"ゅ
+			]td
+			[td 
+				"ょ
+			]td
+			[td 
+				"っ
+			]td
+			[th 
+				"  
+			]th
+			[td 
+				" 
+			]td
+			[td 
+				"０
+			]td
+			[td 
+				"１
+			]td
+			[td 
+				"２
+			]td
+			[td 
+				"３
+			]td
+			[td 
+				"４
+			]td
+		]tr
+		[tr 
+			[td 
+				"7D
+			]td
+			[td 
+				"7E
+			]td
+			[td 
+				"7F
+			]td
+			[td 
+				"7C
+			]td
+			[th 
+				"FF
+			]th
+			[td 
+				" 
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"81
+			]td
+			[td 
+				"82
+			]td
+			[td 
+				"83
+			]td
+			[td 
+				"84
+			]td
+		]tr
+		[tr 
+			[td 
+				"ア
+			]td
+			[td 
+				"イ
+			]td
+			[td 
+				"ウ
+			]td
+			[td 
+				"エ
+			]td
+			[th 
+				"オ
+			]th
+			[td 
+				" 
+			]td
+			[th 
+				"カ
+			]th
+			[th 
+				"キ
+			]th
+			[td 
+				"ク
+			]td
+			[td 
+				"ケ
+			]td
+			[td 
+				"コ
+			]td
+		]tr
+		[tr 
+			[td 
+				"CA
+			]td
+			[td 
+				"CB
+			]td
+			[td 
+				"CC
+			]td
+			[td 
+				"CD
+			]td
+			[th 
+				"CE
+			]th
+			[td 
+				" 
+			]td
+			[th 
+				"CF
+			]th
+			[th 
+				"D0
+			]th
+			[td 
+				"D1
+			]td
+			[td 
+				"D2
+			]td
+			[td 
+				"D3
+			]td
+		]tr
+		[tr 
+			[td 
+				"サ
+			]td
+			[td 
+				"シ
+			]td
+			[td 
+				"ス
+			]td
+			[td 
+				"セ
+			]td
+			[td 
+				"ソ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"タ
+			]td
+			[td 
+				"チ
+			]td
+			[td 
+				"ツ
+			]td
+			[td 
+				"テ
+			]td
+			[td 
+				"ト
+			]td
+		]tr
+		[tr 
+			[td 
+				"D4
+			]td
+			[td 
+				"D5
+			]td
+			[td 
+				"D6
+			]td
+			[td 
+				"D7
+			]td
+			[td 
+				"D8
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"D9
+			]td
+			[td 
+				"DA
+			]td
+			[td 
+				"DB
+			]td
+			[td 
+				"DC
+			]td
+			[td 
+				"DD
+			]td
+		]tr
+		[tr 
+			[td 
+				"ナ
+			]td
+			[td 
+				"ニ
+			]td
+			[td 
+				"ヌ
+			]td
+			[td 
+				"ネ
+			]td
+			[td 
+				"ノ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"ハ
+			]td
+			[td 
+				"ヒ
+			]td
+			[td 
+				"フ
+			]td
+			[td 
+				"ヘ
+			]td
+			[td 
+				"ホ
+			]td
+		]tr
+		[tr 
+			[td 
+				"DE
+			]td
+			[td 
+				"DF
+			]td
+			[td 
+				"E0
+			]td
+			[td 
+				"E1
+			]td
+			[td 
+				"E2
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"E3
+			]td
+			[td 
+				"E4
+			]td
+			[td 
+				"E5
+			]td
+			[td 
+				"E6
+			]td
+			[td 
+				"E7
+			]td
+		]tr
+		[tr 
+			[td 
+				"マ
+			]td
+			[td 
+				"ミ
+			]td
+			[td 
+				"ム
+			]td
+			[td 
+				"メ
+			]td
+			[td 
+				"モ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"ラ
+			]td
+			[td 
+				"リ
+			]td
+			[td 
+				"ル
+			]td
+			[th 
+				"レ
+			]th
+			[td 
+				"ロ
+			]td
+		]tr
+		[tr 
+			[td 
+				"E8
+			]td
+			[td 
+				"E9
+			]td
+			[td 
+				"EA
+			]td
+			[td 
+				"EB
+			]td
+			[td 
+				"EC
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"F0
+			]td
+			[td 
+				"F1
+			]td
+			[td 
+				"F2
+			]td
+			[th 
+				"F3
+			]th
+			[td 
+				"F4
+			]td
+		]tr
+		[tr 
+			[td 
+				"ヤ
+			]td
+			[td 
+				"ユ
+			]td
+			[td 
+				"ヨ
+			]td
+			[td 
+				"ワ
+			]td
+			[td 
+				"ン
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"ガ
+			]td
+			[td 
+				"ギ
+			]td
+			[td 
+				"グ
+			]td
+			[td 
+				"ゲ
+			]td
+			[td 
+				"ゴ
+			]td
+		]tr
+		[tr 
+			[td 
+				"ED
+			]td
+			[td 
+				"EE
+			]td
+			[td 
+				"EF
+			]td
+			[td 
+				"F5
+			]td
+			[td 
+				"F6
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"50
+			]td
+			[td 
+				"51
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"53
+			]td
+			[td 
+				"54
+			]td
+		]tr
+		[tr 
+			[td 
+				"ザ
+			]td
+			[td 
+				"ジ
+			]td
+			[td 
+				"ズ
+			]td
+			[td 
+				"ゼ
+			]td
+			[td 
+				"ゾ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"ダ
+			]td
+			[td 
+				"ヂ
+			]td
+			[td 
+				"ヅ
+			]td
+			[td 
+				"デ
+			]td
+			[td 
+				"ド
+			]td
+		]tr
+		[tr 
+			[td 
+				"55
+			]td
+			[td 
+				"56
+			]td
+			[td 
+				"57
+			]td
+			[td 
+				"58
+			]td
+			[td 
+				"59
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"5A
+			]td
+			[td 
+				"5B
+			]td
+			[td 
+				"5C
+			]td
+			[td 
+				"5D
+			]td
+			[td 
+				"5E
+			]td
+		]tr
+		[tr 
+			[td 
+				"パ
+			]td
+			[td 
+				"ピ
+			]td
+			[td 
+				"プ
+			]td
+			[td 
+				"ペ
+			]td
+			[td 
+				"ポ
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"バ
+			]td
+			[td 
+				"ビ
+			]td
+			[td 
+				"ブ
+			]td
+			[td 
+				"ベ
+			]td
+			[td 
+				"ボ
+			]td
+		]tr
+		[tr 
+			[td 
+				"69
+			]td
+			[td 
+				"6A
+			]td
+			[td 
+				"6B
+			]td
+			[td 
+				"6C
+			]td
+			[td 
+				"6D
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"5F
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"61
+			]td
+			[td 
+				"62
+			]td
+			[td 
+				"63
+			]td
+		]tr
+		[tr 
+			[td 
+				"ャ
+			]td
+			[td 
+				"ュ
+			]td
+			[td 
+				"ョ
+			]td
+			[td 
+				"ッ
+			]td
+			[td 
+				"－
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"５
+			]td
+			[td 
+				"６
+			]td
+			[td 
+				"７
+			]td
+			[td 
+				"８
+			]td
+			[td 
+				"９
+			]td
+		]tr
+		[tr 
+			[td 
+				"BD
+			]td
+			[td 
+				"BE
+			]td
+			[td 
+				"BF
+			]td
+			[td 
+				"BC
+			]td
+			[td 
+				"C2
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"85
+			]td
+			[td 
+				"86
+			]td
+			[td 
+				"87
+			]td
+			[td 
+				"88
+			]td
+			[td 
+				"89
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Special Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" cheap: Cheap showed that Deist Cavern was the shortest route.
+		$LF
+	]li
+	[li 
+		" FinalFighter: FinalFighter made the LuaScript which told that a PC passed a specific address.
+		$LF
+	]li
+	[li 
+		" naruko: Naruko taught me code where MMC1 did not freeze. And he also offered various documents.
+		$LF
+	]li
+	[li 
+		" TaoTao: TaoTao made a movie of the 45-floor bug. I was able to discover the jump to SRAM of $6785 by investigating the movie with LuaScript of FinalFighter.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:ars4326)
+	": (Made some minor grammatical corrections for better readability).
+	$LF
+]p
+[p 
+	(__wikiLink|user:ars4326)
+	": Judging underway!
+	$LF
+]p
+[p 
+	(__wikiLink|user:ars4326)
+	": Hello, pirohiko.  This run was an outstanding technical display of arbitrary code execution (ACE), which, despite a considerable trek through the overworld, provided an entertaining payoff.  The included overlay in the encode made the process easier to understand and added to the viewing experience.  Thread feedback, also, was mostly enthusiastic and appreciative of the amount of effort put in.  Great work on another well-made TAS!
+	$LF
+]p
+[p 
+	"Accepting for publication to Moons!
+	$LF
+]p
+[p 
+	(__wikiLink|user:Guga)
+	": Processing...
+]p

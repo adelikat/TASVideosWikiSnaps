@@ -1,0 +1,204 @@
+12
+[p 
+	"The BizHawk Display Configuration is not as powerful yet as some other multi-system emulators, but it's pretty complicated anyway. In a lot of ways, it isn't finished yet.
+	$LF
+]p
+[h4 
+	" Display Process, Scaling & Filtering
+	$LF
+]h4
+[p 
+	"The main display process works generally as follows:
+	$LF
+]p
+[ul 
+	[li 
+		" Screenshot(raw) happens. I'm not sure I like this sometimes, I think it should optionally move to before Prescale. Record AVI (no OSD) happens.
+		$LF
+	]li
+	[li 
+		" `Game Extra Padding` is added as blackness. You can't see this in the Display Configuration, but it can be enabled through Lua. This is used for displaying debug data on the `emu` surface while running lua scripts on. Imagine tacking on a sidebar to the side of the game
+		$LF
+	]li
+	[li 
+		" Lua's `emu` surface is composited
+		$LF
+	]li
+	[li 
+		" Prescale is applied. This simply multiplies the game's display area. The main use of this is to reduce the overall blurriness of highly scaled Final Filtered results. This comes after the prior steps because the lua-related stuff needs to get scaled precisely along with the game content. Prescale does not affect the View > Window Size (1x, 2x, etc.) logic, it is best viewed as strictly an assist to the subsequent scaling+filtering steps. This is a little unusual, and while it's useful sometimes to view a filter as literally mutating the console's output, there are more senses in which this prescaling concept is useful. Nonetheless, I'm sorry it's confusing.
+		$LF
+	]li
+	[li 
+		" Scaling filter is applied.
+		$LF
+	]li
+	[li 
+		" Final filter is applied to get the game up to the window size.
+		$LF
+		[ul 
+			[li 
+				" Auto-Prescaling happens here if bilinear or bicubic is selected--this will result in a less blurry result for large scale factors, so it should almost always be desireable. It should only be disabled to increase performance (since it's accomplished with two scaling passes)
+				$LF
+			]li
+		]ul
+		" Letterboxing or Pillarboxing along with some stretching logic occurs if `Maintain Aspect Ratio` is selected. Letterbox(es) are maybe black, or maybe the color of the overscan area indicated by the emulated system (this may be broken right now).
+		$LF
+		[ul 
+			[li 
+				" If `Expand pixels by integers only` is selected, the chosen PAR will be approximated, with the constraint that pixels will never be expanded to fractional values. This maintains a clear image for scrolling, and is usually wanted unless you're using a blurry Final Filter. This is a severe constraint, and you will probably get both pillarboxes and letterboxes. This option still allows pixels to be shrunk in case a small window is used--*box logic only applies to fit a smaller image in a larger area.
+				$LF
+			]li
+			[li 
+				" `Use 1:1 pixel size` locks the Pixel Aspect Ratio (PAR) to 1. Otherwise, you can use a PAR suggested by the emulator core or enter your own (since opinions vary).
+				$LF
+			]li
+			[li 
+				" `Client Extra Padding` just as if it was letterbox/pillarbox
+				$LF
+			]li
+		]ul
+		" Lua's `native` surface is composited
+		$LF
+	]li
+	[li 
+		" OSD is composited. Gui.Text from Lua is currently implemented with the OSD.
+		$LF
+	]li
+	[li 
+		" Screenshot(client) happens; record AVI (with OSD) happens.
+		$LF
+	]li
+]ul
+[p 
+	"The Aspect Ratio options also affect the View > Window Size (1x, 2x, etc.) sizes selected by the emulator frontend. The chosen sizes will be those that result in the requested PAR settings being met, without requiring letterboxing. It's worth noting that given this complex definition for 1x, 2x, etc., the results won't necessarily be literal 2x or 3x scales. Ideally they'll be the next-higher size which meets the criteria. This logic isn't completely working right now, so what it actually does is kind of confusing. Moreover, sometimes nothing will happen when you increase the window zoom level because it would be too big for the monitor it's on. It may not always seem that way, but it's true. It's easy to be off by like 10 pixels. You could try shrinking the window chrome.
+	$LF
+]p
+[p 
+	"The "User" shader must be a retroarch-style .CGP, accompanied by .cg files
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	". These obviously won't work GDI+ display method. In D3D display method, some shaders can take 1-2 seconds to compile, due to MS's parts going slow. This will cause pauses when selecting that filter and subsequently when the emulator is booted.
+	$LF
+]p
+[p 
+	"A lot of these options are complicatedly related to how the 
+	(__wikiLink|Bizhawk/PSX|PSX)
+	" core displays its output, so you may want to read more there.
+	$LF
+]p
+[h4 
+	" Display Methods
+	$LF
+]h4
+[p 
+	"These are described pretty well in the dialog. When changing the selection, the emulator needs restarting. When you try to start the emulator in OpenGL mode, it may silently fail and revert to GDI+. Currently the Direct3d9 display method doesn't do this, but it will probably change.
+	$LF
+]p
+[p 
+	"One noteworthy point: The OpenGL display method was originally added in anticipation of accelerating GL-accelerated cores by avoiding texture fetching. However, this hasn't been implemented yet. Mupen is too badly structured internally to facilitate this (isn't inherently using render-to-texture but archaic GL backbuffers). Yabause could handle it, but this work isn't being done yet. It will be useful for modern 3d consoles PCSX2, dolphin) capable of HD rendering. It won't be useful for desmume though, since it has software processing for the 2D graphics and HD 2d+3d composition.  It will probably be nice for libretro cores though.
+	$LF
+]p
+[h4 
+	" Misc
+	$LF
+]h4
+[p 
+	"The options here are advanced and otherwise described well in the dialog. See more at 
+	(__wikiLink|Bizhawk/Speed|Speed & Throttling)
+	$LF
+]p
+[h4 
+	" Window
+	$LF
+]h4
+[p 
+	"Here we have some options largely relating to the window chrome that's visible in Windowed and Fullscreen mode. It's pretty self-explanatory. 
+	$LF
+]p
+[p 
+	"Auto-Hide mouse cursor causes the mouse cursor to disappear after 2 seconds of disuse (Fullscreen mode only). 
+	$LF
+]p
+[p 
+	"Emuhawk.exe can also be launched with --chromeless which will cause the chrome-related options to be _ignored_ and set to pretty much all disabled.
+	$LF
+]p
+[p 
+	"The default double-click to toggle fullscreen behaviour can be disabled here. Ordinarily double-clicking will toggle fullscreen, unless you're playing a zapper game and have bound zapping to the left mouse button. Even in that case, holding shift will force double-click to toggle. By disabling this option, every game will be treated as a zapper game: doubleclick won't toggle fullscreen, but holding shift will allow it to happen.
+	$LF
+]p
+[h4 
+	" Screen Shots
+	$LF
+]h4
+[h4 
+	" Future Work
+	$LF
+]h4
+[p 
+	"I have a lot of cool stuff planned for this. Here's some of the ideas:
+	$LF
+]p
+[ul 
+	[li 
+		" User Filters:
+		$LF
+		[ul 
+			[li 
+				" Listing inventory
+				$LF
+			]li
+			[li 
+				" Configuration panel
+				$LF
+			]li
+			[li 
+				" exotic retro shader features
+				$LF
+			]li
+		]ul
+		" Multiple viewports
+		$LF
+	]li
+	[li 
+		" Virtualdub-style filter chain builder
+		$LF
+	]li
+	[li 
+		" Hardware-accelerated Lua drawing
+		$LF
+	]li
+	[li 
+		" Superior options for fonts (what does lsnes do?)
+		$LF
+	]li
+	[li 
+		" Display Config options per-core.
+		$LF
+	]li
+]ul
+[h4 
+	" Addendum
+	$LF
+]h4
+[p 
+	"Apologies for confusing Pixel Aspect Ratio and Display Aspect Ratio here. This topic isn't my strong suit, and it confuses me. The wording in the docs and dialog box need revising. Additionally the emulator mixes up the words `client` and `native`. `Native` in particular is a really bad word, but it's kind of stuck.
+	$LF
+]p
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" Some of the retroarch features are supported yet: temporal blending, lookup tables (needed by HQ2X etc.). The latter will be supported in the near term. Other retroarch shaders may suffer from some compatibility problems. The aim is total compatibility, but it's kind of hard.
+]p

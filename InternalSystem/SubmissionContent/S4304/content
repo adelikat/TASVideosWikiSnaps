@@ -1,0 +1,185 @@
+7
+[p 
+	(youtube|v=zdEKlfdTyc8|w=640|h=360)
+	$LF
+]p
+[h2 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: VBA-RR v24 svn391 (should work on latest svn)
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Genre: Platform
+		$LF
+	]li
+]ul
+[h2 
+	" Comments by MUGG
+	$LF
+]h2
+[p 
+	[br 
+	]br
+	" 
+	[br 
+	]br
+	[b 
+		"Please watch the run first if you want to be surprised.
+	]b
+	[br 
+	]br
+	" 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"Step by step we get closer to beating every single game by magically warping to the end. This run is the result of intensively trying to find ways to make use of the Pause Glitch to finish the game even faster than the 
+	(__wikiLink|3299S|previous run)
+	". The previous run used the v1.0 exclusive Pipe Glitch to travel through ROM, VRAM and SRAM to destroy a block corresponding to address $A2D5. If this address is non-zero, the game will run the credits the next time you enter a level.
+	$LF
+]p
+[p 
+	"In this run, however, the Pipe Glitch is never used. Instead we use the Pause Glitch that was found in 
+	[a class=extlink href=https://www.youtube.com/watch?v=38yjiBqhJN8 rel=nofollow 
+		"2011
+	]a
+	". The game would reset itself or create blocks above Mario's head when pausing rapidly at the same time the game is lagging from having too many enemies onscreen. I didn't really understand why this glitch occurs but I went on and used a lot of trial-and-error to come up 
+	[a class=extlink href=https://www.youtube.com/watch?v=juCu_Zfsk6c rel=nofollow 
+		"with
+	]a
+	" 
+	[a class=extlink href=https://www.youtube.com/watch?v=7eWBPPoAQTo rel=nofollow 
+		"some
+	]a
+	" 
+	[a class=extlink href=https://www.youtube.com/watch?v=5xcET7f6syM rel=nofollow 
+		"interesting
+	]a
+	" 
+	[a class=extlink href=https://www.youtube.com/watch?v=YAiuGusrjsk rel=nofollow 
+		"results
+	]a
+	". Later on, Spikeman would contact me to ask questions and investigate the glitch for me which I really appreciated. Please read 
+	[a href=/forum/p/332393#332393 
+		"this post
+	]a
+	" to learn more about the Pause Glitch. It was thanks to his investigation that we found that the Pause Glitch sometimes executes code starting at $A201. Back then, I didn't really understand anything about opcodes, registers, and all that so I couldn't do much more than keep asking for help and keep using trial-and-error blindly.
+	$LF
+]p
+[p 
+	"In 2014, I became a bit more familiar with opcodes after I googled for  
+	[a class=extlink href=http://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html rel=nofollow 
+		"this page
+	]a
+	". I tried to actively look into how different code causes different stuff to happen. The first idea was to set 
+	[b 
+		"$A2D5 to nonzero
+	]b
+	" or 
+	[b 
+		"$FFB9 to 12,13 or 23
+	]b
+	", which would trigger the credits. The former could be easily done by EA D5 A2 or 08 D5 A2 so I tried to make $A203~$A205 read this code.
+	$LF
+]p
+[p 
+	"($A2D5 is an address whose purpose I don't really know. It never changes throughout a playthrough, but if it is nonzero, it will start the credits the next time you enter a level. $FFB9 tells the game what mode it is currently in. "01" for title screen, "0C" for being on the map, "04" for being in a level, "08" for when you paused the game, etc. "12", "13", "23" will trigger the credits immediately.)
+	$LF
+]p
+[p 
+	"$A203 depends on the screen X position in the level and can become 08 at the beginning of a level and EA at the end of some levels.
+	$LF
+]p
+[p 
+	"$A204 seems to depend on Mario's Y position and can become D4 which is sufficient to reach $A2D5.
+	$LF
+]p
+[p 
+	"$A205 was the trouble maker though because it cannot become A2 in the first level. This address changes when you hit a breakable block or touch a coin in a certain location in the level. Spelling A2 can only be done with a coin and there is no such coin in the first level. It took way too much time to go to another level to touch a certain coin, and then go to yet another level to get in the right position and make the game lag.
+	$LF
+]p
+[p 
+	"The next idea was to use the Demo Mode. On version 1.0, you can press certain button combinations on the title screen to start in a level immediately. Up+Select makes you start in the first level for example. While in this mode, there is no music and the game records input and input durations in $A300~$A3FF. This mode was probably used by the developers to create the title screen demo sequences and they might have forgotten to remove it for version 1.0. Being an ingame code, we always neglected using this in a TAS but this seemed to be the last resort to make Pause Glitch work for us. So what I tried was spelling a code in $A203~$A205 that jumps to anywhere after $A300 to execute any code we want. Unfortunately, I discovered later that the Pause Glitch doesn't work at all in Demo Mode, apparently due to the absence of the function that handles the music.
+	$LF
+]p
+[p 
+	"I didn't really expect much after this happened, but somehow I found later that jumping to certain parts of ROM (around $05C8 for example) can cause interesting stuff, like gameovers or instant level finishes. I found that $9BFF could be set to 12,13 or 23 and it was easy to spell code in $A203~$A205 that jumps to ROM but unfortunately the game would always reset or freeze after jumping. With help from Masterjun, who became interested in SML2 after I kept asking for help in IRC, it didn't take long to find the one good way to start the credits and keep the game from freezing. Masterjun was also the first one to accomplish this while testing.
+	$LF
+]p
+[p 
+	"C4 CZ 05 ... C0, where Z can be almost any value, was the code that managed to do what we wanted. 
+	$LF
+]p
+[p 
+	"$A203 and $A204 were made to read C4 CZ easily.
+	$LF
+	"$A205 was made to read 05 by touching a certain coin in the underground in the first level.
+	$LF
+	"$A227 (Mario Xposition) was made to read C0 by standing in the correct pixel position. C0 would return to where the program counter left off. The game would then silently and slowly fade into a mute credits sequence. Success! :)
+	$LF
+]p
+[p 
+	[img class=embedright src=http://i.imgur.com/Nat4uuj.png 
+	]img
+	$LF
+]p
+[p 
+	"I used the Pixel Trick from the previous runs to improve my speed. I want to try to explain it here again. The game doesn't use subpixels but still uses speeds that are more precise than 1 pixel/frame or 2 pixels/frame. The game does this by using pixel oscillations. When running, Mario moves 1, 2, 1, 2, 1, 2... pixels. By switching between different oscillation sequences, you can squeeze out an additional 2 every 8th frame or so. I watched $A200 (oscillation pattern that is currently used. I think it points to a certain location in ROM somewhere) and $A202 (Mario's speed) to optimize it as best as I could.
+	$LF
+]p
+[p 
+	"I also want to show you the latest version of the lua script that I used. It is Spikeman's lua script that helps use the Pause Glitch, with amateurish additions by me (lol).
+	$LF
+]p
+[p 
+	"http://pastebin.com/3LjC9MVa
+	$LF
+]p
+[h2 
+	" Special Thanks to
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[b 
+			"Spikeman
+		]b
+		" for investigation the Pause Glitch and finding that it executes $A201 onwards
+		$LF
+	]li
+]ul
+[p 
+	"Honorable mention to
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[b 
+			"andymac
+		]b
+		" although he hasn't been involved since 2011, I want to thank him for finding the best way to do the Pixel Trick and for the previous runs that we worked on together
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": After doing way more research than is sane, and speaking to some emulator authors, it looks like what this movie does has a reasonable chance at being possible. Since feedback is good, and it's a considerable improvement over the previous run, I'm accepting this as an improvement.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Fog)
+	": Publishing with an encode from sheela901...
+]p

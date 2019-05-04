@@ -1,0 +1,231 @@
+3
+[p 
+	[b 
+		"NOTE: This appiles to r10.x versions. r11/r11.x versions are different.
+	]b
+	$LF
+]p
+[h2 
+	"Making dump files
+	$LF
+]h2
+[ul 
+	[li 
+		" Load the movie file (as savestate or as movie, it doesn't matter if it starts from poweron).
+		$LF
+	]li
+	[li 
+		" If you have some sort of subtitle Lua script, start it.
+		$LF
+	]li
+	[li 
+		" Go to system -> dumping control
+		$LF
+	]li
+	[li 
+		" There's box on line called "<video>". Fill something like 
+		[em 
+			"foo-video.dump
+		]em
+		" as destination. Hit start button that just got enabled.
+		$LF
+	]li
+	[li 
+		" Now, there is box on line called org.jpc.emulator.peripheral.PCSpeaker-0. This is the PC Speaker sound output. If it is the only other output besides video, then you want to capture it. If there are others as well, chances are PC speaker is not used and can be left uncaptured. If you need to capture it, fill something like 
+		[em 
+			"foo-speaker.dump
+		]em
+		" as destination. See section "using skip" for explanation of what skip field is for.
+		$LF
+	]li
+	[li 
+		" Other output you may see are org.jpc.modules.FMCard-0 / org.jpc.modules.SoundCard-1 (FM synth output). If this line is present, that output should be captured. Fill something like 
+		[em 
+			"foo-fm.dump
+		]em
+		" as destination and apporiate skip value (see "using skip").
+		$LF
+	]li
+	[li 
+		" Other output you may see is org.jpc.modules.SoundCard-0 (PCM digital output). If this line is present, that output should be captured. Fill something like 
+		[em 
+			"foo-pcm.dump
+		]em
+		" as destination and apporiate skip value (see "using skip").
+		$LF
+	]li
+	[li 
+		" Hit start button on all channels to capture.
+		$LF
+	]li
+	[li 
+		" Hit close.
+		$LF
+	]li
+	[li 
+		" If you want to, you may want to enter 
+		[em 
+			"command trap-timed <duration-in-ns>
+		]em
+		" to JPC-RR command line (it is the console window you started JPC-RR from). <duration-in-ns> is duration of the movie in nanoseconds (put 9 zeros after number of seconds). This way the dumping automatically cuts out at specified time. This is optional.
+		$LF
+	]li
+	[li 
+		" Hit System -> Start. The movie dumping starts.
+		$LF
+	]li
+	[li 
+		" Wait until the dumped segment ends. Then just close the emulator (either from close window button of JPC-RR window or System -> Quit). The emulator closes dumps as part of orderly shutdown, even if there is active dump going on.
+		$LF
+	]li
+	[li 
+		" Now you have the dump files.
+		$LF
+	]li
+]ul
+[h3 
+	" Notes:
+	$LF
+]h3
+[ul 
+	[li 
+		" If you want to, you can dump to named pipe / named FIFO.
+		$LF
+	]li
+	[li 
+		" Concatenation of dump files is concatenation of their contents.
+		$LF
+	]li
+]ul
+[h3 
+	" Using skip:
+	$LF
+]h3
+[p 
+	"Skip delays the audio by specified amount. This is useful for compensating the length of encoder logo and codec delay. For instance, if your logo is 2 seconds long and audio codec delay 105ms, you might want to put 1.895 to skip box. Few notes:
+	$LF
+]p
+[ul 
+	[li 
+		" Put the same skip value to all used outputs or audio channels will be off-sync.
+		$LF
+	]li
+	[li 
+		" If value has . in it, then the unit is seconds, otherwise nanoseconds. So 
+		[em 
+			"2.0
+		]em
+		" is 2 seconds but 
+		[em 
+			"2
+		]em
+		" is 2 nanoseconds (
+		[em 
+			"2000000000
+		]em
+		" is 2 seconds).
+		$LF
+	]li
+	[li 
+		" Blank skip value means no delay.
+		$LF
+	]li
+	[li 
+		" Negative skip values are not currently possible.
+		$LF
+	]li
+]ul
+[h2 
+	" Converting dump files to RGB / RAW / WAV:
+	$LF
+]h2
+[p 
+	"After you got the dump files, you need to convert them to some usable format. For this, you need rawtoaudio2.exe and rawtorgb.exe. There are prebuilt versions for Windows and they can be built from sources (the sources are included in JPC-RR sources).
+	$LF
+]p
+[h3 
+	" Converting video to raw RGB file.
+	$LF
+]h3
+[p 
+	"rawtorgb.exe foo-video.dump foo-video.rgb lanczos2 640 400 16666667
+	$LF
+]p
+[p 
+	"This instructs to dump the video dump as raw RGB dump of 640x400@60fps. Note that while most games use 320x200 that gets scan-doubled/doublescanned to 640x400, not all games do. See the size of window when in-game for proper value. lanczos2 sets resizing algorithm to Lanczos resizer with alpha of 2.
+	$LF
+]p
+[p 
+	"The raw RGB dump is in in RGBx format, with framerate of 60fps and specified frame size. Tools like mencoder, ffmpeg or gst-launch can be used to encode these further. Watch out, the dumps are large! You might want to send them to pipe (this also avoids 2GB problems on some platforms).
+	$LF
+]p
+[h3 
+	" Converting audio to WAV file.
+	$LF
+]h3
+[ul 
+	[li 
+		" For PCSpeaker output: 
+		[em 
+			"rawtoaudio2.exe --input-file foo-speaker.dump --input-format=pcm --output-file=foo-speaker.wav --output-rate=44100 --output-attenuation=20 --output-format=wav
+		]em
+		$LF
+	]li
+	[li 
+		" For FM synthetizer output: 
+		[em 
+			"rawtoaudio2.exe --input-file foo-fm.dump --input-format=fm --output-file=foo-fm.wav --output-rate=44100 --output-format=wav
+		]em
+		$LF
+	]li
+	[li 
+		" For PCM digital output: 
+		[em 
+			"rawtoaudio2.exe --input-file foo-pcm.dump --input-format=fm --output-file=foo-pcm.wav --output-rate=44100 --output-format=wav
+		]em
+		$LF
+	]li
+]ul
+[p 
+	"The --output-attenuation=20 is to attenuate the otherwise extremely loud PC Speaker channel. If there are multiple used channels, you need to mix them together (using something like sox).
+	$LF
+]p
+[p 
+	"Then encode the resulting wav with whatever codec desired.
+	$LF
+]p
+[h3 
+	" Converting audio to raw file.
+	$LF
+]h3
+[p 
+	"Use this only for runs over 3 hours (for smaller runs, use the wav file method). This method avoids the Wav file size limit.
+	$LF
+]p
+[ul 
+	[li 
+		" For PCSpeaker output: 
+		[em 
+			"rawtoaudio2.exe --input-file foo-speaker.dump --input-format=pcm --output-file=foo-speaker.raw --output-rate=44100 --output-attenuation=20 --output-format=raw
+		]em
+		$LF
+	]li
+	[li 
+		" For FM synthetizer output: 
+		[em 
+			"rawtoaudio2.exe --input-file foo-fm.dump --input-format=fm --output-file=foo-fm.raw --output-rate=44100 --output-format=raw
+		]em
+		$LF
+	]li
+	[li 
+		" For PCM digital output: 
+		[em 
+			"rawtoaudio2.exe --input-file foo-pcm.dump --input-format=fm --output-file=foo-pcm.raw --output-rate=44100 --output-format=raw
+		]em
+		$LF
+	]li
+]ul
+[p 
+	"The output files are 44100Hz signed 16bit little-endian stereo. Convert them using suitable program.
+	$LF
+]p

@@ -1,0 +1,273 @@
+11
+[p 
+	"Pwn Adventure Z is an adventure game where you kill zombies. It was created by Peter LaFosse, Rusty Wagner, and Jordan Wiens of 
+	[a class=extlink href=https://vector35.com rel=nofollow 
+		"Vector35
+	]a
+	". You can read more about it here https://github.com/Vector35/PwnAdventureZ/blob/agdq/README.md
+	$LF
+]p
+[p 
+	(youtube|v=G6t94p2anVA)
+	$LF
+]p
+[h2 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: Bizhawk 1.11.4
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Makes use of a save corruption glitch
+		$LF
+	]li
+]ul
+[h2 
+	" The competition:
+	$LF
+]h2
+[p 
+	"This game was chosen for the AGDQ 2016 TAS competition which you can read more about 
+	[a href=/forum/t/17560 
+		"here
+	]a
+	".
+	$LF
+]p
+[p 
+	"The game was originally developed for a capture-the-flag hacking/reverse engineering competition. As such, it contains some intentional glitches (including an ACE glitch). Additionally, the developers found a few glitches (such as the campfire glitch) during testing and chose not to fix them. During the TAS competition, details of some of these glitches were given to the competitors to save them time in glitch-finding.
+	$LF
+]p
+[h2 
+	" The routes:
+	$LF
+]h2
+[p 
+	"There are various possible routes that could be used to complete the game; some of them were envisaged by the developers, others weren't.
+	$LF
+]p
+[h3 
+	" "Intended" route:
+	$LF
+]h3
+[p 
+	"The developers didn't expect anyone to actually do this, but it is possible to complete the game without exploiting any glitches. Doing so requires you to beat a number of bosses in order to gather keys to unlock a final area, and is clearly slower than any of the alternatives listed below.
+	$LF
+]p
+[h3 
+	" Campfire glitch:
+	$LF
+]h3
+[h4 
+	" Explanation:
+	$LF
+]h4
+[p 
+	"The game has a craftable item, the "campfire", which allows you to change your respawn point upon death (by default you respawn at the last shop you visited, or at the start of the game if you haven't visited a shop). Using the campfire item allows you to set a spawn point at your current location; however, it only records your x and y coordinates and not which map you are on. The game has an overworld map as well as a cave map that use a common coordinate system; the campfire respawn assumes the overworld map and it just so happens that one of the cave rooms is at the same coordinates as the final boss room. As a result you can set a campfire in the cave and deathwarp to the final boss room.
+	$LF
+]p
+[h4 
+	" Evaluation:
+	$LF
+]h4
+[p 
+	"This glitch was not intentionally added to the game by the developers, but they discovered it before release and decided to leave it in. It was one of the two recommended routes for use in the TAS competition, and the route that was eventually used by both the human competitors and all the fastest TASes; it is considerably easier to optimize than the ACE route, and thus better for a human to run in realtime and easier to figure out in the limited time required for the TAS competition.
+	$LF
+	"The main difficulties with the route are that you need to obtain the crafting components for the campfire, and that it places you in an out-of-bounds area of the final boss arena (meaning that you need to obtain a weapon that can fire through walls to be able to damage the final boss).
+	$LF
+]p
+[h3 
+	" ACE:
+	$LF
+]h3
+[h4 
+	" The short version:
+	$LF
+]h4
+[p 
+	"The game by design has 28 inventory slots, but 29 unique items. This means that the 29th item/count will stomp on the next two bytes (in this case a jump table for screen loading). This can be used to execute some code that makes the game believe that the boss is dead and get it to trigger the ending.
+	$LF
+]p
+[h4 
+	" The long version:
+	$LF
+]h4
+[p 
+	"Specifically the two bytes that get stomped on (0x60-0x61) are used for loading the initial cave screen. As a result of this you can configure those bytes (within the restrictions of values easily obtained by inventory items), and simply walk into the first cave screen to make the execution jump to whatever address you've stored there. It was pointed out in the information provided with the competition that a campfire puzzle (a screen with 6 columns of 4 campfires that you can light/extinguish) may be useful. The state of the puzzle is stored in 0x302-0x304 and you can easily go the the room and set those bytes as you please. It would probably take much more setup to take total control, but I was able to find a clever way to complete the game. Address 0x300 is a boss_beaten flag, when it is set to a non-zero value the main loop of the game will trigger a countdown and then jump to the end credits. I was able to achieve this by putting an SMG with an empty clip in the overflow (29th item), this leaves a value of 0x300. I also set up the campfire puzzle to store the values 0x96 0x60 0x60 in addresses 0x302-0x304. It is worth noting that the item overflow can be sped up by an infinite money glitch (if you buy and sell the more expensive SMG first you can get it again from the buyback screen for $0 and resell for profit). Additionally since you are rich you can buy/sell guns to fill up the buyback screen and then buy the whole stack back to boost your item count (for both guns, this greatly reduces the number of unique items you really need to cause an overflow). Once you finally go to the start screen to trigger this setup the execution will first jump to 0x300 (because that is what we stomped into the jump table). There it will execute:
+	$LF
+	"BRK
+	$LF
+	"BRK
+	$LF
+	"STX $60,Y
+	$LF
+	"RTS
+	$LF
+	"The execution will fall through the breakpoints and store the value of x to the address in location 0x60 + the value of Y. As it happens the value of Y at the time this triggers is 0 and X is non-zero. By genius design we had already put 0x300 in location 0x60 to jump the execution in the first place, but now it is used as the address to store whatever was in X. We just stored a non-zero value to 0x300 so once we return to the main loop the game will think we have beaten the boss. So we do an RTS and return. It was important to be clever here and use a 2 byte instruction to leave us a byte to do a return instruction, had we used a 3 byte instruction the flag would be set but the execution would go off into the weeds and not run the main loop or finish the game.
+	$LF
+]p
+[h4 
+	" Evaluation:
+	$LF
+]h4
+[p 
+	"It's incredibly convenient for a pointer value to occur just after a buffer overflow; unsurprisingly, this glitch was placed into the game intentionally by the developers. It was one of the two suggested routes for the TAS competition, but as many teams discovered to their cost during the competition, doing it in a naive way is slower than the (much simpler) route involving the campfire. (This is partly because the infinite money glitch was, although known to the developers, unknown to the competition participants.) link_7777 thinks that this route may be faster than the campfire route if fully optimized, but that it's hard to be sure without doing a full TAS of each route: it would be a bit too close to call merely with intuition.
+	$LF
+]p
+[h3 
+	" Save corruption:
+	$LF
+]h3
+[h4 
+	" The short version:
+	$LF
+]h4
+[p 
+	"If you reset during a screen transition, the resulting save file is a merge of the save files from before and after the screen transition. If the checksum and reset timing happen to be correct, the effect is that you load at the wrong side of the resulting screen; you move to the next screen, but load at the position within the screen at which you entered the previous screen. For example, if you move one screen to the right, then one screen to the left and reset at the correct point during the transition, you load at the left hand side of the left hand screen.
+	$LF
+]p
+[h4 
+	" The long version:
+	$LF
+]h4
+[p 
+	"The saving in this game happens during screen transitions or when you say so from the pause menu. The save data includes a 4 byte signature, ram values 0x0-0xFF, 0x300-0x4FF, and a 30-byte header. The data is saved three times, and each of the three copies has its own 16-bit CRC. The game attempts to use the first copy which has a correct CRC (but due to a bug, will delete the save data if the first copy has the wrong CRC).
+	$LF
+]p
+[p 
+	"The save data includes, most notably, the current x/y position of the screen on the map as well as the x/y position at which the character entered the screen (which is used as a position at which to reload the character). As it happens, the map position is copied to the save file before the screen position, and since the saving process takes a number of frames it is possible to reset after the map position change, but before the screen position change. The main issue with this is the CRC, which has to match for the corrupted save data to be used. Fortunately, the CRC is only 16 bits wide, so only 16 bits need to match to manipulate a collision. Even more fortunately, the save data saves the entirety of zero page, which includes some things that change over time (such as a frame counter and the current note of the background music), and even more notably a copy of the controller input. Both of these appear early in the save data and thus can be used to manipulate the CRC of the resulting merged save file to equal the CRC of the original; for this run, link_7777 used brute forcing when doing save corruption to get the CRCs to match.
+	$LF
+]p
+[p 
+	"ais523 was the first to work on the save corruption route, during play-testing for the TAS competition. The very first plan was to use save corruption to get through the 6-key barrier and thus sequence break the plot of the game, but that route is quite slow because you face a mandatory boss ("horde") battle on the way. An obvious improvement was to go to the screen to the right of the final boss room (which is accessible from the overworld map), then go right, left, and reset; this places the character in the final boss room directly. ais523's proof of concept used this route, and it looked obviously faster than the other possibilities.
+	$LF
+]p
+[h4 
+	" Evaluation:
+	$LF
+]h4
+[p 
+	"The game developers went to a lot of effort to prevent anything like this working (and remarked to ais523 during the playtesting that looking for a route like this was a waste of time). However, having three copies of the save file is pointless if you're simply trusting the checksum on them to see whether they're corrupted, and not comparing them against each other; a simple CRC-16 collision is enough to completely bypass all the save protection. Unfortunately, the game autosaves very aggressively (which is why map transitions are so laggy); typical save approaches like merging an x coordinate from one save file with a y coordinate from a different save file don't work because there's no quick way to change both the x and y coordinates from one save to the next (you could probably use a campfire, but there's a simpler way to win with one of those). The benefits are thus restricted to moving within a screen, and possibly duplicating items (something we didn't look into because it wasn't necessary for the run).
+	$LF
+]p
+[p 
+	"The save corruption route is clearly faster than the intended glitch routes because it doesn't need to go very far out of its way; it can go almost anywhere on the map directly via glitching through walls. The other routes all require detours to pick up items necessary for the route to work, and to map locations to fight bosses, place the campfire or manipulate the torches for ACE.
+	$LF
+]p
+[h3 
+	" Out of bounds
+	$LF
+]h3
+[p 
+	"Since we can effectively save corrupt through intended barriers, link_7777 began to wonder what was outside the intended map. As it turns out there is quite a bit of interesting stuff (as you can see from 
+	[a class=extlink href=https://www.youtube.com/watch?v=p3NXuNJgRPg rel=nofollow 
+		"this cool video
+	]a
+	" made by Masterjun). As a result the route that this run uses (shown below) starts the game by going right 1 screen and then save corrupting twice to go left 2 screens (1 isn't sufficient since you are stuck in a wall that is too thick). From there we can indirectly make our way down 8 screens to one of several out-of-bounds screens that happens to spawn the boss.
+	$LF
+	"I'll note that I pause at a couple of the screen transitions to set up the corruption. I wait 45 frames before going to the right and another 29 before going back to the left in order to set up the in-game time to a value capable of giving us the correct CRC. After the restart I wait an additional 166 frames for the right in-game time to set up the 2nd reset. This means we spend a total of 240 frames setting up these corruptions which was the best I was able to find with my brute forcing scripts.
+	$LF
+	"You can visualize the route here (thanks to Masterjun) in red, the dotted yellow shows movements made by save corruption:
+	$LF
+]p
+[p 
+	[img class=embed src=http://imgur.com/RvxgoJB.png 
+	]img
+	$LF
+]p
+[h4 
+	" Evaluation
+	$LF
+]h4
+[p 
+	"Once you can get to the final boss almost directly via glitching through walls, the only real improvement is to find a closer final boss to fight. Sometimes thinking outside the box is a good idea. In this case, we don't even leave the starting cave via the intended route, destroying both the intended "intended" gameplay and the intended glitched gameplay of the game.
+	$LF
+]p
+[h2 
+	" Boss fight:
+	$LF
+]h2
+[p 
+	"Even though we only have the initial weapon (the axe), BrunoVisnadi brings down the final boss pretty quickly. This is largely due to the splash damage from the exploding zombies that the boss spawns (generally blowing up as a result of his grenade, this requires good but not precise positioning). The boss starts with 1280 health, each axe hit does 10 and each zombie explosion does a base of 120 (240 if another enemy is in the mix, zombie not required).
+	$LF
+]p
+[p 
+	"The boss has 4 different phases he can be in, which are: spawning, walking, throwing bomb and shooting. It is impossible to manipulate how many spiders he will spawn before he spawns the 2 last zombies, so the best thing to do is to make him to spawn the spiders as fast as possible. BrunoVisnadi is hitting with the axe constantly and manipulating the phases and spawns into position. The spawning phase can be skipped by hitting the boss in his left half, which is useful to make him to walk immediately after spawning the second sprite (he spawns 2 sprites in each phase, and normally he takes some time to start walking again). The walking phase can't be skipped, but it's possible to manipulate how far and to which direction he will walk to, depending of the player's position and the position the axe hits the boss. Normally, the best thing to do is to make him to walk as little as possible, so that he spawns more sprites quicker, but sometimes it is useful to make him to walk a bit further to improve the position. The bomb throwing stage can't be skipped, and it wouldn't be useful to skip it as the bombs are essential to kill the spiders (there is a spawn limit in the room, if the spiders don't die, the zombies wouldn't get to spawn); and the shooting phase can also be skipped by hitting the boss in his left half. Additionally taking damage reduces the cooldown time for the axe swing, so damage is taken to pack in the axe hits as quickly as possible. In the end he does 56 axe hits (for 560) and manipulates 3 zombies to do 240 each for the 1280 total. BrunoVisnadi was even able to end the input a number of frames early while waiting for the last zombie to take a grenade hit and finish the boss.
+	$LF
+]p
+[h3 
+	" Boss suicide potential:
+	$LF
+]h3
+[p 
+	"It is worth noting that there is an alternative strategy for ending input, via getting the final boss to commit suicide. With this route this boss room has a different shape than the intended one and as a result the suicide isn't possible using this strategy, but if you save corrupt into the intended boss room in a position where you don't get hit by the boss laser attack, you can end input and the boss will eventually suicide as he will eventually take enough hits from exploding zombies that he hits with grenades. This takes a number of minutes since the exploding zombies tend to congregate around you instead of wandering near the boss where they could do damage.
+	$LF
+]p
+[h2 
+	" Special Thanks To:
+	$LF
+]h2
+[ul 
+	[li 
+		" BrunoVisnadi for the collaboration (and most of the actual input)
+		$LF
+	]li
+	[li 
+		" ais523 for the save corruption idea
+		$LF
+	]li
+	[li 
+		" Masterjun for the ideas, suggestions, and new route video
+		$LF
+	]li
+	[li 
+		" dwangoAC for running and commentating the TAS competition
+		$LF
+	]li
+	[li 
+		" Games Done Quick for hosting the TAS competition at AGDQ 2016
+		$LF
+	]li
+	[li 
+		" The developers at Vector35 for creating the game and letting us use it for the TAS competition
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Samsara)
+	": Congrats on beating my initial test time by 25 minutes! Judging!
+	$LF
+]p
+[p 
+	(__wikiLink|user:Samsara)
+	": Removed the branch name.
+	$LF
+]p
+[p 
+	"This is an impressive run on a technical level, especially in regards to the competition. I knew of two possible routes, the campfire glitch route and the ACE route with the torches, but the emergence of this much shorter route was mind-blowing, and the thread feedback shows that everyone else felt the same way. However, the thread feedback also showed that the audience didn't find the game too entertaining to watch.
+	$LF
+]p
+[p 
+	"Because of the thread feedback, I'm accepting this to Vault, though I do hope the publication votes are good enough to push it up to Moons.
+	$LF
+]p
+[p 
+	"Publishers: 
+	[a class=extlink href=https://www.dropbox.com/s/xfnhcas5v1qszp7/pwn%20adventure%20z.rar?dl=0 rel=nofollow 
+		"Here's the link to the game.
+	]a
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Right.
+]p

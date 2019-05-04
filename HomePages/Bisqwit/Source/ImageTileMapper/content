@@ -1,0 +1,2123 @@
+7
+[h3 
+	" Image tilemapper
+	$LF
+]h3
+[p 
+	"The tilemapper is a feature I have created for compressing
+	$LF
+	"the numerous images shown on this site into "blobs" that contain
+	$LF
+	"a number of screenshots in a single file. It also removes redundancy
+	$LF
+	"from the files by detecting identical tiles and storing them only once.
+	$LF
+]p
+[p 
+	"There is 
+	[a href=/forum/p/182607#182607 
+		"discussion about this feature
+	]a
+	" on the forums.
+	$LF
+]p
+[p 
+	"Back to:
+	[br 
+	]br
+	(listparents)
+	$LF
+]p
+[h4 
+	" 
+	[tt 
+		"tableoptimizer.cc
+	]tt
+	$LF
+]h4
+[p 
+	"Table optimizer is a stand-alone C++ program for optimizing HTML tables.
+	$LF
+	"You feed it a list of table cells, and it tells you which cells can be merged together using colspan & rowspan settings. It uses a greedy algorithm which tries to maximize the number of cells that are made redundant by colspan&rowspan.
+	$LF
+]p
+[p 
+	"Each cell contains the following properties:
+	$LF
+]p
+[ul 
+	[li 
+		" The background image (filename)
+		$LF
+	]li
+	[li 
+		" X and Y coordinates inside the image from where the background image for this cell can be found
+		$LF
+	]li
+	[li 
+		" The background color (optional). A non-empty background color implies that the background image will be ignored.
+		$LF
+	]li
+]ul
+[p 
+	"The table contains the following properties:
+	$LF
+]p
+[ul 
+	[li 
+		" tilexsize and tileysize: The pixel dimensions of each cell (i.e. tile)
+		$LF
+	]li
+	[li 
+		" xsize and ysize: The number of tiles horizontally and vertically in the table.
+		$LF
+	]li
+	[li 
+		" The cells.
+		$LF
+	]li
+]ul
+[p 
+	"The output of this program lists the following properties for all the cells:
+	$LF
+]p
+[ul 
+	[li 
+		" removed: Zero if this cell should be rendered, nonzero if it should be ignored when rendering.
+		$LF
+	]li
+	[li 
+		" colspan, rowspan: The colspan & rowspan attributes for this cell.
+		$LF
+	]li
+]ul
+[pre 
+	[code class=language-c_white 
+		"#include <string>
+		$LF
+		"#include <vector>
+		$LF
+		"#include <cstdio>
+		$LF
+		"#include <cstdlib>
+		$LF
+		"#include <cstring>
+		$LF
+		$LF
+		"/*
+		$LF
+		$LF
+		"This program reads a description of a table,
+		$LF
+		"and outputs a plan of which cells can be merged using
+		$LF
+		"a combination of colspan&rowspan, still such that no
+		$LF
+		"two cell-spans overlap.
+		$LF
+		$LF
+		"Copyright (C) 1992,2008 Joel Yliluoma - http://iki.fi/bisqwit/
+		$LF
+		"*/
+		$LF
+		$LF
+		"#include "tableoptimizer.hh"
+		$LF
+		$LF
+		"struct Cell: public TableOptimizer::CellBase
+		$LF
+		"{
+		$LF
+		"    std::string blobfile, bgcolor;
+		$LF
+		"    unsigned xpos, ypos;
+		$LF
+		"    
+		$LF
+		"public:
+		$LF
+		"    Cell(const std::string& bf,
+		$LF
+		"         const std::string& bg,
+		$LF
+		"         unsigned xp, unsigned yp)
+		$LF
+		"     : CellBase(),
+		$LF
+		"       blobfile(bf),
+		$LF
+		"       bgcolor(bg),
+		$LF
+		"       xpos(xp), ypos(yp)
+		$LF
+		"    {
+		$LF
+		"    }
+		$LF
+		$LF
+		"    bool CanExtend(const Cell& b,
+		$LF
+		"        unsigned x,unsigned y,
+		$LF
+		"        unsigned tx,unsigned ty) const
+		$LF
+		"    {
+		$LF
+		"        if(blobfile != b.blobfile) return false;
+		$LF
+		"        if(bgcolor  != b.bgcolor)  return false;
+		$LF
+		"        if(ty && bgcolor.empty())
+		$LF
+		"        {
+		$LF
+		"            if(xpos != b.xpos + x*tx) return false;
+		$LF
+		"            if(ypos != b.ypos + y*ty) return false;
+		$LF
+		"        }
+		$LF
+		"        return true;
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"static const Cell ReadCell(const char* arg)
+		$LF
+		"{
+		$LF
+		"    const char* cp = std::strchr(arg, ':');
+		$LF
+		"    std::string blobfile(arg, cp);
+		$LF
+		"    arg = cp+1;
+		$LF
+		"    int xp=0, yp=0, chars_ate = 0;
+		$LF
+		"    std::sscanf(arg, "%d:%d:%n", &xp, &yp, &chars_ate);
+		$LF
+		"    arg += chars_ate;
+		$LF
+		"    
+		$LF
+		"    /*std::fprintf(stderr, "Created cell[%d,%d]: (%d,%d)\n",
+		$LF
+		"        (unsigned)cells.size()%width,
+		$LF
+		"        (unsigned)cells.size()/width,
+		$LF
+		"        xp,yp);*/
+		$LF
+		"    
+		$LF
+		"    return Cell(blobfile, arg, xp, yp);
+		$LF
+		"}
+		$LF
+		$LF
+		"int main(int argc, const char* const* argv)
+		$LF
+		"{
+		$LF
+		"    if(argc < 5)
+		$LF
+		"    {
+		$LF
+		"        std::fprintf(stderr,
+		$LF
+		"            "Usage: tableoptimizer <xsize> <ysize> <tilexsize> <tileysize> {<cell>}\n"
+		$LF
+		"            "\n"
+		$LF
+		"            "       Where <cell> is <blobfile>:<xpos>:<ypos>:<bgcolor>\n"
+		$LF
+		"            "\n"
+		$LF
+		"            "       Output consists of lines of <masked>:<colspan>:<rowspan>\n"
+		$LF
+		"            "       Where <masked> is 0 if the cell should be rendered, 1 if skipped\n"
+		$LF
+		"            "\n"
+		$LF
+		"            "Copyright (C) 1992,2008 Joel Yliluoma - http://iki.fi/bisqwit/\n"
+		$LF
+		"            "\n");
+		$LF
+		"        return -1;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    unsigned width = std::atoi(argv[1]);
+		$LF
+		"    unsigned height = std::atoi(argv[2]);
+		$LF
+		"    
+		$LF
+		"    TableOptimizer::Table<Cell> table(
+		$LF
+		"        width,
+		$LF
+		"        height,
+		$LF
+		"        std::atoi(argv[3]),
+		$LF
+		"        std::atoi(argv[4])
+		$LF
+		"    );
+		$LF
+		"    
+		$LF
+		"    for(unsigned p=0; p<width*height; ++p)
+		$LF
+		"    {
+		$LF
+		"        table.AddCell(ReadCell(argv[5+p]));
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    table.Optimize();
+		$LF
+		"    
+		$LF
+		"    table.Dump();
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"tableoptimizer.hh
+	]tt
+	$LF
+]h4
+[pre 
+	[code class=language-c_white 
+		"#include <string>
+		$LF
+		"#include <vector>
+		$LF
+		"#include <cstdio>
+		$LF
+		"#include <cstdlib>
+		$LF
+		"#include <cstring>
+		$LF
+		$LF
+		"namespace TableOptimizer
+		$LF
+		"{
+		$LF
+		$LF
+		"    /* The core of tableoptimizer.cc ...
+		$LF
+		"     * Here because also binpack2d.cc uses it
+		$LF
+		"     */
+		$LF
+		"     
+		$LF
+		"    struct CellBase
+		$LF
+		"    {
+		$LF
+		"        unsigned colspan, rowspan;
+		$LF
+		"        bool     masked;
+		$LF
+		"        bool     tried_1x1;
+		$LF
+		"        bool     decided;
+		$LF
+		"        
+		$LF
+		"        CellBase()
+		$LF
+		"          : colspan(1), rowspan(1),
+		$LF
+		"            masked(false),
+		$LF
+		"            tried_1x1(false),
+		$LF
+		"            decided(false)
+		$LF
+		"        {
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        bool CanExtend(const CellBase& /*b*/,
+		$LF
+		"            unsigned /*x*/,unsigned /*y*/,
+		$LF
+		"            unsigned /*tx*/,unsigned /*ty*/) const { return false; }
+		$LF
+		"    };
+		$LF
+		$LF
+		"    template<typename CellType>
+		$LF
+		"    struct Table
+		$LF
+		"    {
+		$LF
+		"        unsigned width, height;
+		$LF
+		"        unsigned tilewidth, tileheight;
+		$LF
+		"        std::vector<CellType> cells;
+		$LF
+		"        
+		$LF
+		"    public:
+		$LF
+		"        Table(unsigned w,unsigned h, unsigned tw,unsigned th)
+		$LF
+		"            : width(w), height(h),
+		$LF
+		"              tilewidth(tw), tileheight(th),
+		$LF
+		"              cells()
+		$LF
+		"        {
+		$LF
+		"            cells.reserve(w*h);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        void AddCell(const CellType& cell)
+		$LF
+		"        {
+		$LF
+		"            cells.push_back(cell);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        void Optimize()
+		$LF
+		"        {
+		$LF
+		"            unsigned bestw = 0, besth = 0, bestx = 0, besty = 0;
+		$LF
+		"            
+		$LF
+		"            for(unsigned x=0; x<width; ++x)
+		$LF
+		"                for(unsigned y=0; y<height; ++y)
+		$LF
+		"                {
+		$LF
+		"                    // Find out what kind of rowspan/colspan would be possible at this slot
+		$LF
+		"                    CellType& cell = cells[cp(x,y)];
+		$LF
+		"                    if(cell.masked) continue;    // part of another span-cell
+		$LF
+		"                    if(cell.tried_1x1) continue; // already found to be simply 1x1
+		$LF
+		"                    if(cell.decided) continue;   // already decided to be a span-cell
+		$LF
+		"                    
+		$LF
+		"                    unsigned maxcol = width, maxw = 1, maxh = 1;
+		$LF
+		"                    for(unsigned y2=y; y2<height; ++y2)
+		$LF
+		"                    {
+		$LF
+		"                        unsigned w=0, h=y2-y;
+		$LF
+		"                        for(unsigned x2=x; x2<maxcol; ++x2)
+		$LF
+		"                        {
+		$LF
+		"                            const CellType& cell2 = cells[cp(x2,y2)];
+		$LF
+		"                            if(cell2.masked || cell2.decided) break;
+		$LF
+		"                            
+		$LF
+		"                            if(!cell2.CanExtend(cell, w,h, tilewidth,tileheight)) break;
+		$LF
+		"                            ++w;
+		$LF
+		"                        }
+		$LF
+		"                        if(w < 1) break;
+		$LF
+		"                        ++h;
+		$LF
+		"                        unsigned size = h*w;
+		$LF
+		"                        if(size >= maxw*maxh) { maxw=w; maxh=h; }
+		$LF
+		"                        w += x;
+		$LF
+		"                        if(w < maxcol) maxcol = w;
+		$LF
+		"                    }
+		$LF
+		"                    //fprintf(stderr, "Suggest(%d,%d): %d,%d\n", x,y, maxw,maxh);
+		$LF
+		"                    if(maxw*maxh > bestw*besth)
+		$LF
+		"                    {
+		$LF
+		"                        bestw = maxw;
+		$LF
+		"                        besth = maxh;
+		$LF
+		"                        bestx = x;
+		$LF
+		"                        besty = y;
+		$LF
+		"                    }
+		$LF
+		"                    if(maxw == 1 && maxh == 1)
+		$LF
+		"                    {
+		$LF
+		"                        cell.tried_1x1 = true;
+		$LF
+		"                    }
+		$LF
+		"                }
+		$LF
+		"            
+		$LF
+		"            if(bestw > 1 || besth > 1)
+		$LF
+		"            {
+		$LF
+		"                //fprintf(stderr, "yay, %dx%d at %d,%d\n", bestw,besty, bestx,besty);
+		$LF
+		"                MarkRectangle(bestx,besty, bestw,besth);
+		$LF
+		"                Optimize(); // tail call, find more spans
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        void MarkRectangle(unsigned xpos,unsigned ypos, unsigned width,unsigned height)
+		$LF
+		"        {
+		$LF
+		"            for(unsigned y=ypos; y<ypos+height; ++y)
+		$LF
+		"                for(unsigned x=xpos; x<xpos+width; ++x)
+		$LF
+		"                {
+		$LF
+		"                    CellType& cell = cells[cp(x,y)];
+		$LF
+		"                    if(x == xpos && y == ypos)
+		$LF
+		"                    {
+		$LF
+		"                        cell.colspan = width;
+		$LF
+		"                        cell.rowspan = height;
+		$LF
+		"                        cell.decided = true;
+		$LF
+		"                        cell.masked = false;
+		$LF
+		"                    }
+		$LF
+		"                    else
+		$LF
+		"                        cell.masked = true;
+		$LF
+		"                }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        void Dump()
+		$LF
+		"        {
+		$LF
+		"            unsigned ncells = width*height;
+		$LF
+		"            for(unsigned cellno=0; cellno<ncells; ++cellno)
+		$LF
+		"            {
+		$LF
+		"                std::printf("%d:%d:%d\n",
+		$LF
+		"                    cells[cellno].masked,
+		$LF
+		"                    cells[cellno].colspan,
+		$LF
+		"                    cells[cellno].rowspan);
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        unsigned cp(unsigned x,unsigned y) const { return x + y*width; }
+		$LF
+		"    };
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"image_tilemapper_fun.php
+	]tt
+	$LF
+]h4
+[p 
+	"This module contains the function 
+	[tt 
+		"TilemapImage()
+	]tt
+	", which, when given an image collection image and a list of sections describing the locations of individual images inside that collection image, generates a compressed image and the description how to decode each of the individual source images from it.
+	$LF
+]p
+[pre 
+	[code class=language-php_white 
+		"<?php
+		$LF
+		$LF
+		"function TilemapImage($im, &$sections)
+		$LF
+		"{
+		$LF
+		"  $alltiles = Array(); // crc32 => (xs,ys, xpos,ypos, doneflag)
+		$LF
+		"  
+		$LF
+		"  foreach($sections as $sectname => &$sectcoords) // xs,ys, xpos,ypos, sizex,sizey,tilelist
+		$LF
+		"  {
+		$LF
+		"    $width  = $sectcoords[0];
+		$LF
+		"    $height = $sectcoords[1];
+		$LF
+		"    $xpos = $sectcoords[2];
+		$LF
+		"    $ypos = $sectcoords[3];
+		$LF
+		"    $sizex = $sectcoords[4];
+		$LF
+		"    $sizey = $sectcoords[5];
+		$LF
+		"    
+		$LF
+		"    if(!$sizex || !$sizey)
+		$LF
+		"    {
+		$LF
+		"      CalculateOptimalTilesize($width,$height, $sizex,$sizey);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    #print "Chose $sizex,$sizey for $width,$height\n";
+		$LF
+		"    
+		$LF
+		"    $tilelist = Array();
+		$LF
+		"    
+		$LF
+		"    for($y=0; $y<$height; $y+=$sizey)
+		$LF
+		"      for($x=0; $x<$width; $x+=$sizex)
+		$LF
+		"      {
+		$LF
+		"        $sx = min($sizex,$width-$x);
+		$LF
+		"        $sy = min($sizey,$height-$y);
+		$LF
+		"        $crc32 = Crc32Image($im, $xpos+$x,$ypos+$y, $sx,$sy);
+		$LF
+		"        if(!isset($alltiles[$crc32]))
+		$LF
+		"          $alltiles[$crc32] = Array($sx,$sy, $xpos+$x,$ypos+$y, false);
+		$LF
+		"        $tilelist[] = Array($x,$y, $crc32);
+		$LF
+		"      }
+		$LF
+		"    
+		$LF
+		"    $sectcoords[4] = $sizex;
+		$LF
+		"    $sectcoords[5] = $sizey;
+		$LF
+		"    $sectcoords[6] = $tilelist;
+		$LF
+		"  }
+		$LF
+		"  
+		$LF
+		"  $puzzle = Array();
+		$LF
+		"  
+		$LF
+		"  foreach($sections as $sectname => &$sectcoords)
+		$LF
+		"  {
+		$LF
+		"    $width  = $sectcoords[0]; $sizex = $sectcoords[4]; $xpos = $sectcoords[2];
+		$LF
+		"    $height = $sectcoords[1]; $sizey = $sectcoords[5]; $ypos = $sectcoords[3];
+		$LF
+		"    $tilelist = &$sectcoords[6]; // crc32, doneflag. doneflags: 0=not, 1=new, 2=irrelevant
+		$LF
+		"    
+		$LF
+		"    $localset = Array();
+		$LF
+		"    $piece = Array();
+		$LF
+		"    $wid = ceil($width/$sizex);
+		$LF
+		"    $hei = ceil($height/$sizey);
+		$LF
+		"    
+		$LF
+		"    $p=0;
+		$LF
+		"    for($y=0; $y<$hei; ++$y)
+		$LF
+		"      for($x=0; $x<$wid; ++$x)
+		$LF
+		"      {
+		$LF
+		"        $crc32 = $tilelist[$p++][2];
+		$LF
+		"        $piece[$y][$x] = (!(isset($localset[$crc32]) || $alltiles[$crc32][4]));
+		$LF
+		"        //     ? $crc32
+		$LF
+		"        //     : false;
+		$LF
+		"        $localset[$crc32] = true;
+		$LF
+		"      }
+		$LF
+		"    unset($localset);
+		$LF
+		"    
+		$LF
+		"    PutMask($piece,        /* false/true map of which tiles need placing */
+		$LF
+		"            $puzzle,       /* Currently organized blocks */
+		$LF
+		"            $wid,$hei,     /* Geometry of this block */
+		$LF
+		"            $sizex,$sizey  /* Geometry of the tiles */
+		$LF
+		"           );
+		$LF
+		$LF
+		"    $p=0;
+		$LF
+		"    for($y=0; $y<$hei; ++$y)
+		$LF
+		"      for($x=0; $x<$wid; ++$x)
+		$LF
+		"      {
+		$LF
+		"        $dx = $piece[$y][$x][0];
+		$LF
+		"        $dy = $piece[$y][$x][1];
+		$LF
+		$LF
+		"        $sx = min($sizex,$width -$x*$sizex);
+		$LF
+		"        $sy = min($sizey,$height-$y*$sizey);
+		$LF
+		"        
+		$LF
+		"        $crc32 = $tilelist[$p][2];
+		$LF
+		"        if(!$alltiles[$crc32][4])
+		$LF
+		"        {
+		$LF
+		"          $alltiles[$crc32][0] = $dx;
+		$LF
+		"          $alltiles[$crc32][1] = $dy;
+		$LF
+		"          $alltiles[$crc32][4] = true;
+		$LF
+		"          $puzzle[$dy][$dx] = Array($sx,$sy,$crc32, "$sectname $x,$y");
+		$LF
+		"        }
+		$LF
+		"        else
+		$LF
+		"        {
+		$LF
+		"          $dx = $alltiles[$crc32][0];
+		$LF
+		"          $dy = $alltiles[$crc32][1];
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        $tilelist[$p][0] = $dx;
+		$LF
+		"        $tilelist[$p][1] = $dy;
+		$LF
+		"        ++$p;
+		$LF
+		"      }
+		$LF
+		"    #print_r($puzzle);
+		$LF
+		"    #print "$sectname:\n";
+		$LF
+		"    #dump($tilelist);
+		$LF
+		"  }
+		$LF
+		"  unset($tilelist);
+		$LF
+		"  
+		$LF
+		"  #print "plan:\n";
+		$LF
+		"  #print_r($puzzle);
+		$LF
+		"  //dump($puzzle);
+		$LF
+		$LF
+		"  /* Figure out the extents of the puzzle */
+		$LF
+		"  $minx=0; $maxx=0;
+		$LF
+		"  $miny=0; $maxy=0;
+		$LF
+		"  foreach($puzzle as $y=>$row)
+		$LF
+		"    foreach($row as $x=>$cell)
+		$LF
+		"    {
+		$LF
+		"      $maxx = max($maxx, $x+$cell[0]);
+		$LF
+		"      $maxy = max($maxy, $y+$cell[1]);
+		$LF
+		"      
+		$LF
+		"      #print "{$cell[0]},{$cell[1]} at $x,$y\n";
+		$LF
+		"    }
+		$LF
+		"  
+		$LF
+		"  //print_r($alltiles);
+		$LF
+		"  
+		$LF
+		"  $result = ImageCreateTrueColor($maxx,$maxy);
+		$LF
+		"  ImageAlphaBlending($result, false);
+		$LF
+		"  $tp = ImageColorAllocateAlpha($result, 0,0,0,127);
+		$LF
+		"  ImageFilledRectangle($result, 0,0, $maxx,$maxy, $tp);
+		$LF
+		"  ImageSaveAlpha($result, true);
+		$LF
+		"  ImageAlphaBlending($result, true);
+		$LF
+		"  foreach($puzzle as $y=>$row)
+		$LF
+		"    foreach($row as $x=>$cell)
+		$LF
+		"    {
+		$LF
+		"      $crc32 = $cell[2];
+		$LF
+		"      ImageCopy($result,$im,
+		$LF
+		"        // target position
+		$LF
+		"        $x,$y,
+		$LF
+		"        // source position
+		$LF
+		"        $alltiles[$crc32][2],
+		$LF
+		"        $alltiles[$crc32][3],
+		$LF
+		"        // width, height
+		$LF
+		"        $cell[0],
+		$LF
+		"        $cell[1]);
+		$LF
+		"    }
+		$LF
+		"  
+		$LF
+		"  return $result;
+		$LF
+		"}
+		$LF
+		$LF
+		"function CalculateOptimalTilesize($width,$height, &$sizex,&$sizey)
+		$LF
+		"{
+		$LF
+		"  $sizex = CalculateOptimalDivisor($width);
+		$LF
+		"  $sizey = CalculateOptimalDivisor($height);
+		$LF
+		"}
+		$LF
+		"function CalculateOptimalDivisor($value)
+		$LF
+		"{
+		$LF
+		"  //if($value % 2 == 0)  return 2;
+		$LF
+		"  //if($value % 10 == 0)  return 10;
+		$LF
+		"  //if($value % 4 == 0)  return 4;
+		$LF
+		"  if($value >= 480)
+		$LF
+		"  {
+		$LF
+		"    if($value % 128 == 0)  return 128;
+		$LF
+		"    if($value % 64 == 0)  return 64;
+		$LF
+		"  }
+		$LF
+		$LF
+		"  if($value >= 160)
+		$LF
+		"  {
+		$LF
+		"    if($value % 32 == 0)  return 32;
+		$LF
+		"    if($value % 16 == 0)  return 16;
+		$LF
+		"  }
+		$LF
+		$LF
+		"  //if($value % 2 == 0) return $value / 2;
+		$LF
+		$LF
+		"  //if($value % 8 == 0)  return 8;
+		$LF
+		"  //if($value % 5 == 0)  return 5;
+		$LF
+		"  //return 8;
+		$LF
+		"  
+		$LF
+		"  return $value;
+		$LF
+		"}
+		$LF
+		$LF
+		"function Crc32Image($tile, $xpos,$ypos, $sx,$sy)
+		$LF
+		"{
+		$LF
+		"  $result = '';
+		$LF
+		"  for($y=0; $y<$sy; ++$y)
+		$LF
+		"    for($x=0; $x<$sx; ++$x)
+		$LF
+		"      $result .= pack('V', ImageColorAt($tile, $xpos+$x,$ypos+$y));
+		$LF
+		"  return crc32($result);
+		$LF
+		"}
+		$LF
+		$LF
+		"/* piece: the image to put into the collection
+		$LF
+		" * (divided into tiles, tiles may be holes, holes indicated by false)
+		$LF
+		" * puzzle: the collection
+		$LF
+		" * wid,hei: the dimensions of the piece, in tiles
+		$LF
+		" * sizex,sizex: the dimensions of a tile, in pixels
+		$LF
+		" */
+		$LF
+		"function PutMask(&$piece, $puzzle, $wid,$hei, $sizex,$sizey)
+		$LF
+		"{
+		$LF
+		"  $pack_cmd = "util/binpack2d -ci -sr -x$wid -y$hei -X$sizex -Y$sizey ";
+		$LF
+		"  for($y=0; $y<$hei; ++$y)
+		$LF
+		"    for($x=0; $x<$wid; ++$x)
+		$LF
+		"      $pack_cmd .= ($piece[$y][$x] !== false) ? '1' : '0';
+		$LF
+		$LF
+		"  foreach($puzzle as $y=>$row)
+		$LF
+		"    foreach($row as $x=>$cell)
+		$LF
+		"      $pack_cmd .= " $x,$y,{$cell[0]},{$cell[1]}";
+		$LF
+		$LF
+		"  file_put_contents('php://stderr', "$pack_cmd\n");
+		$LF
+		"  
+		$LF
+		"  exec($pack_cmd, $pack_result);
+		$LF
+		$LF
+		"  $i=0;
+		$LF
+		"  for($y=0; $y<$hei; ++$y)
+		$LF
+		"    for($x=0; $x<$wid; ++$x)
+		$LF
+		"    {
+		$LF
+		"      $line = $pack_result[$i++];
+		$LF
+		"      sscanf($line, '%d %d', $xp,$yp);
+		$LF
+		"      #print "Gets($xp)($yp)\n";
+		$LF
+		"      $piece[$y][$x] = Array($xp,$yp);
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"binpack2d.cc
+	]tt
+	$LF
+]h4
+[p 
+	"This program does the actual tough algorithm for the tilemapper.
+	$LF
+	"Shortly described, given a puzzle and a puzzle piece, it figures out
+	$LF
+	"where to place the puzzle piece. Except that given the right options,
+	$LF
+	"it can pulverize the puzzle piece and scatter the pulver uniformly
+	$LF
+	"around to populate the puzzle ;)
+	$LF
+]p
+[pre 
+	[code class=language-c_white 
+		"#include <vector>
+		$LF
+		"#include <map>
+		$LF
+		"#include <algorithm>
+		$LF
+		"#include <cmath>
+		$LF
+		$LF
+		"#include <getopt.h>
+		$LF
+		$LF
+		"#include "tableoptimizer.hh"
+		$LF
+		$LF
+		"enum PieceCompressionMethod
+		$LF
+		"{
+		$LF
+		"    PIECE_COMPRESSION_INTACT,
+		$LF
+		"    PIECE_COMPRESSION_DELETE_EMPTY_COLUMNS_AND_ROWS,
+		$LF
+		"    PIECE_COMPRESSION_MAKE_SQUARE,
+		$LF
+		"    PIECE_COMPRESSION_MAKE_SQUARE_FROM_LARGE_RECTANGLES
+		$LF
+		"};
+		$LF
+		"enum PieceSplitMethod
+		$LF
+		"{
+		$LF
+		"    PIECE_SPLIT_INTACT,
+		$LF
+		"    PIECE_SPLIT_EACH_TILE,
+		$LF
+		"    PIECE_SPLIT_LARGE_RECTANGLES
+		$LF
+		"};
+		$LF
+		$LF
+		"struct XY
+		$LF
+		"{
+		$LF
+		"    unsigned x, y;
+		$LF
+		$LF
+		"    bool operator< (const XY& b) const { if(y!=b.y) return y<b.y; return x<b.x; }
+		$LF
+		"    bool operator==(const XY& b) const { return x==b.x && y==b.y; }
+		$LF
+		$LF
+		"    XY(unsigned xx,unsigned yy) : x(xx), y(yy) { }
+		$LF
+		"    XY() : x(),y() { }
+		$LF
+		$LF
+		$LF
+		"    unsigned size() const { return std::max(x,y); }
+		$LF
+		"};
+		$LF
+		$LF
+		"struct Piece
+		$LF
+		"{
+		$LF
+		"    XY size;
+		$LF
+		"    std::vector<bool> exists;
+		$LF
+		"    std::vector<XY>   solution;
+		$LF
+		"    
+		$LF
+		"    Piece() : size(), exists(), solution() { }
+		$LF
+		"    
+		$LF
+		$LF
+		"    Piece(unsigned x,unsigned y, bool existsinit=false)
+		$LF
+		"        : size(x,y), exists(x*y, existsinit), solution(x*y)
+		$LF
+		"    {
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"typedef std::map<XY/*where*/, XY/*tilesize*/> Puzzle; /* What areas are reserved? */
+		$LF
+		$LF
+		"struct PieceCell: public TableOptimizer::CellBase
+		$LF
+		"{
+		$LF
+		"    bool exists;
+		$LF
+		"    PieceCell(bool m) : exists(m) { }
+		$LF
+		$LF
+		"    bool CanExtend(const PieceCell& b,
+		$LF
+		"      unsigned,unsigned,unsigned,unsigned) const { return exists && b.exists; }
+		$LF
+		"};
+		$LF
+		$LF
+		"typedef std::vector<unsigned char> BitMaskType;
+		$LF
+		$LF
+		"static int FitBitMask
+		$LF
+		"    (const BitMaskType& puzzle_map, const XY& puzsize,
+		$LF
+		"     const BitMaskType& piece_map, const XY& piesize,
+		$LF
+		"     const XY& puzpos,
+		$LF
+		"     const XY& piepos, const XY& slicesize)
+		$LF
+		"{
+		$LF
+		"    int result = 0;
+		$LF
+		$LF
+		"    for(unsigned y=0; y<slicesize.y; ++y)
+		$LF
+		"        for(unsigned x=0; x<slicesize.x; ++x)
+		$LF
+		"        {
+		$LF
+		"            XY piebitpos(x+piepos.x, y+piepos.y);
+		$LF
+		"            unsigned piebit =
+		$LF
+		"                (piebitpos.x < piesize.x && piebitpos.y < piesize.y)
+		$LF
+		"                    ? piece_map[piebitpos.y * piesize.x + piebitpos.x]
+		$LF
+		"                    : 2; // not-exist
+		$LF
+		$LF
+		"            XY puzbitpos(x+puzpos.x, y+puzpos.y);
+		$LF
+		"            unsigned puzbit =
+		$LF
+		"                (puzbitpos.x < puzsize.x && puzbitpos.y < puzsize.y)
+		$LF
+		"                    ? puzzle_map[puzbitpos.y * puzsize.x + puzbitpos.x]
+		$LF
+		"                    : 0; // not-exist
+		$LF
+		$LF
+		"            /*      &      piebit
+		$LF
+		"             *   puzbit    1=exists 2=empty
+		$LF
+		"             *   0=free       0       0
+		$LF
+		"             *   1=resv       1       0
+		$LF
+		"             *
+		$LF
+		"             *      ^      piebit
+		$LF
+		"             *   puzbit    1=exists 2=empty
+		$LF
+		"             *   0=free       1       2
+		$LF
+		"             *   1=resv       0       3
+		$LF
+		"             */
+		$LF
+		$LF
+		"            if( (piebit & puzbit) != 0)
+		$LF
+		"                return -1; // collision
+		$LF
+		$LF
+		"            result += (piebit ^ puzbit);
+		$LF
+		"            // Score:
+		$LF
+		"            //    Empty  -> free:  2
+		$LF
+		"            //    Empty  -> resv:  3
+		$LF
+		"            //    Exists -> free:  1
+		$LF
+		"        }
+		$LF
+		"    return result;
+		$LF
+		"}
+		$LF
+		$LF
+		"void PutPieceInPuzzle(
+		$LF
+		"    Piece& piece,
+		$LF
+		"    const Puzzle& puzzle,
+		$LF
+		"    const XY& tilesize,
+		$LF
+		"    PieceCompressionMethod compression = PIECE_COMPRESSION_INTACT,
+		$LF
+		"    PieceSplitMethod split = PIECE_SPLIT_INTACT)
+		$LF
+		"{
+		$LF
+		"    /* Assign coordinates for each tile of the piece, relative
+		$LF
+		"     * to the origin of the tile. These coordinates are stored
+		$LF
+		"     * into piece.solution[]. It is not the final solution, but
+		$LF
+		"     * just numbers that help the actual algorithm to know where
+		$LF
+		"     * each tile is located.
+		$LF
+		"     */
+		$LF
+		$LF
+		"    // Check out which columns/rows of the piece are unused
+		$LF
+		"    std::vector<bool> x_used(piece.size.x), y_used(piece.size.y);
+		$LF
+		"    unsigned n_used=0;
+		$LF
+		"    for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"        for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"            if(piece.exists[y*piece.size.x+x])
+		$LF
+		"            {
+		$LF
+		"                x_used[x]=true;
+		$LF
+		"                y_used[y]=true;
+		$LF
+		"                ++n_used;
+		$LF
+		"            }
+		$LF
+		$LF
+		"    switch(compression)
+		$LF
+		"    {
+		$LF
+		"        case PIECE_COMPRESSION_INTACT:
+		$LF
+		"            for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"                for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"                {
+		$LF
+		"                    piece.solution[y*piece.size.x+x].x = x*tilesize.x;
+		$LF
+		"                    piece.solution[y*piece.size.x+x].y = y*tilesize.y;
+		$LF
+		"                }
+		$LF
+		"            break;
+		$LF
+		"        case PIECE_COMPRESSION_DELETE_EMPTY_COLUMNS_AND_ROWS:
+		$LF
+		"            for(unsigned yp=0, y=0; y<piece.size.y; ++y)
+		$LF
+		"            {
+		$LF
+		"                for(unsigned xp=0, x=0; x<piece.size.x; ++x)
+		$LF
+		"                {
+		$LF
+		"                    piece.solution[y*piece.size.x+x].x = xp;
+		$LF
+		"                    piece.solution[y*piece.size.x+x].y = yp;
+		$LF
+		"                    if(x_used[x]) xp += tilesize.x;
+		$LF
+		"                }
+		$LF
+		"                if(y_used[y]) yp += tilesize.y;
+		$LF
+		"            }
+		$LF
+		"            break;
+		$LF
+		"        case PIECE_COMPRESSION_MAKE_SQUARE:
+		$LF
+		"        {
+		$LF
+		"            unsigned scramblewidth = (unsigned)(0.5+std::ceil(std::sqrt(n_used)));
+		$LF
+		"            for(unsigned p=0, xp=0, yp=0, y=0; y<piece.size.y; ++y)
+		$LF
+		"                for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"                    if(piece.exists[y*piece.size.x+x])
+		$LF
+		"                    {
+		$LF
+		"                        piece.solution[y*piece.size.x+x].x = xp*tilesize.x;
+		$LF
+		"                        piece.solution[y*piece.size.x+x].y = yp*tilesize.y;
+		$LF
+		"                        ++p;
+		$LF
+		"                        if(++xp >= scramblewidth) { ++yp; xp=0; }
+		$LF
+		"                    }
+		$LF
+		"            break;
+		$LF
+		"        }
+		$LF
+		"        case PIECE_COMPRESSION_MAKE_SQUARE_FROM_LARGE_RECTANGLES:
+		$LF
+		"        {
+		$LF
+		"            // Place each rectangle of this piece into a private puzzle,
+		$LF
+		"            // and use that data for the placement of the tiles in the piece.
+		$LF
+		$LF
+		"            PutPieceInPuzzle(piece, Puzzle(), tilesize,
+		$LF
+		"                             PIECE_COMPRESSION_INTACT,
+		$LF
+		"                             PIECE_SPLIT_LARGE_RECTANGLES);
+		$LF
+		"            break;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		$LF
+		"    TableOptimizer::Table<PieceCell> table(piece.size.x, piece.size.y, 0,0);
+		$LF
+		"    for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"        for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"        {
+		$LF
+		"            PieceCell cell(piece.exists[y*piece.size.x+x]);
+		$LF
+		"            if(!cell.exists) cell.masked = true;
+		$LF
+		"            table.AddCell(cell);
+		$LF
+		"        }
+		$LF
+		$LF
+		"    switch(split)
+		$LF
+		"    {
+		$LF
+		"        case PIECE_SPLIT_INTACT:
+		$LF
+		"        {
+		$LF
+		"            /* The whole piece is a single cell */
+		$LF
+		"            table.MarkRectangle(0,0, piece.size.x, piece.size.y);
+		$LF
+		"            break;
+		$LF
+		"        }
+		$LF
+		"        case PIECE_SPLIT_EACH_TILE:
+		$LF
+		"        {
+		$LF
+		"            /* Every tile of the piece marks a separate cell */
+		$LF
+		"            // Nothing to do, the cells in the table are configured like that by default.
+		$LF
+		"            break;
+		$LF
+		"        }
+		$LF
+		"        case PIECE_SPLIT_LARGE_RECTANGLES:
+		$LF
+		"        {
+		$LF
+		"            /* Mark maximally large rectangles */
+		$LF
+		"            table.Optimize();
+		$LF
+		"            break;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    if(split != PIECE_SPLIT_INTACT)
+		$LF
+		"    {
+		$LF
+		"        /* The piece was split into multiple parts.
+		$LF
+		"         * Our current algorithm cannot find the location
+		$LF
+		"         * for multiple parts simultaneously, so we must
+		$LF
+		"         * use recursion.
+		$LF
+		"         */
+		$LF
+		"        /* Get a read-write copy of the puzzle. We need it
+		$LF
+		"         * because we will be calling ourselves multiple
+		$LF
+		"         * times in a row, and we must have a way of marking
+		$LF
+		"         * which locations have already been assigned.
+		$LF
+		"         */
+		$LF
+		"        Puzzle tmppuzzle = puzzle;
+		$LF
+		$LF
+		"        for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"            for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"                if(piece.exists[y*piece.size.x+x])
+		$LF
+		"                {
+		$LF
+		"                    const PieceCell& cell = table.cells[y*piece.size.x+x];
+		$LF
+		"                    if(cell.masked) continue;
+		$LF
+		$LF
+		"                    unsigned w = cell.colspan, h = cell.rowspan;
+		$LF
+		$LF
+		"                    // Create a solid rectangle and place it in tmppuzzle.
+		$LF
+		"                    Piece tmppiece(w,h, true);
+		$LF
+		$LF
+		"                    PutPieceInPuzzle(
+		$LF
+		"                        tmppiece, tmppuzzle, tilesize,
+		$LF
+		"                        PIECE_COMPRESSION_INTACT,
+		$LF
+		"                        PIECE_SPLIT_INTACT);
+		$LF
+		$LF
+		"                    // Update the actual piece's solution coordinates
+		$LF
+		"                    // for this rectangle's area.
+		$LF
+		"                    for(unsigned y2=0; y2<h; ++y2)
+		$LF
+		"                        for(unsigned x2=0; x2<w; ++x2)
+		$LF
+		"                        {
+		$LF
+		"                            XY d = tmppiece.solution[y2*w+x2];
+		$LF
+		"                            tmppuzzle[d] = tilesize;
+		$LF
+		"                            piece.solution[(y+y2)*piece.size.x + (x+x2)] = d;
+		$LF
+		"                        }
+		$LF
+		"                }
+		$LF
+		"        return;
+		$LF
+		"    }
+		$LF
+		"    else
+		$LF
+		"    {
+		$LF
+		"        /* We can discard "table" at this point,
+		$LF
+		"         * because we won't be using it.
+		$LF
+		"         */
+		$LF
+		"    }
+		$LF
+		$LF
+		"    /* Figure out the extents of the puzzle */
+		$LF
+		"    XY puzmax(0,0);
+		$LF
+		"    for(Puzzle::const_iterator i=puzzle.begin(); i!=puzzle.end(); ++i)
+		$LF
+		"    {
+		$LF
+		"        puzmax.x = std::max(puzmax.x, i->first.x + i->second.x);
+		$LF
+		"        puzmax.y = std::max(puzmax.y, i->first.y + i->second.y);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    /* Convert the puzzle into a bitmap */
+		$LF
+		"    BitMaskType puzzle_map(puzmax.x * puzmax.y); // initialized to 0
+		$LF
+		"    for(Puzzle::const_iterator i=puzzle.begin(); i!=puzzle.end(); ++i)
+		$LF
+		"        for(unsigned y=0; y<i->second.y; ++y)
+		$LF
+		"            for(unsigned x=0; x<i->second.x; ++x)
+		$LF
+		"                puzzle_map[(x+i->first.x) + puzmax.x*(i->first.y+y)] = 1;
+		$LF
+		$LF
+		"    /* Figure out the extents of the piece */
+		$LF
+		"    XY piemax(piece.size.x * tilesize.x, piece.size.y * tilesize.y);
+		$LF
+		$LF
+		"    /* Convert the piece into a bitmap */
+		$LF
+		"    BitMaskType piece_map(piemax.x * piemax.y);
+		$LF
+		"    int hole_sum = 0;
+		$LF
+		"    for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"        for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"        {
+		$LF
+		"            unsigned xp = piece.solution[y*piece.size.x+x].x;
+		$LF
+		"            unsigned yp = piece.solution[y*piece.size.x+x].y;
+		$LF
+		"            unsigned bit = piece.exists[y*piece.size.x+x] ? 1 : 2;
+		$LF
+		"            for(unsigned py=0; py<tilesize.y; ++py)
+		$LF
+		"                for(unsigned px=0; px<tilesize.x; ++px)
+		$LF
+		"                    piece_map[(yp+py) * piemax.x + (xp+px)] = bit;
+		$LF
+		"            if(bit != 1) ++hole_sum;
+		$LF
+		"        }
+		$LF
+		$LF
+		"    /* Decide the granularity for spots to test */
+		$LF
+		"    XY step = tilesize;
+		$LF
+		"    // XY step(1,1);
+		$LF
+		$LF
+		"    /* Find the best spot. */
+		$LF
+		"    int best=-1;
+		$LF
+		"    XY bestpos;
+		$LF
+		"    XY bestsize(puzmax.x + piece.size.x*tilesize.x, puzmax.y + piece.size.y*tilesize.y);
+		$LF
+		"    XY origsize(puzmax.x, puzmax.y);
+		$LF
+		$LF
+		"    // max{x,y} = puzmax rounded up to step increments
+		$LF
+		"    unsigned maxx = ((puzmax.x + step.x-1) / step.x) * step.x;
+		$LF
+		"    unsigned maxy = ((puzmax.y + step.y-1) / step.y) * step.y;
+		$LF
+		"    for(unsigned y=0; y<=maxy; y+=step.y)
+		$LF
+		"        for(unsigned x=0; x<=maxx; x+=step.x)
+		$LF
+		"        {
+		$LF
+		"            int good = FitBitMask(puzzle_map, puzmax,
+		$LF
+		"                                  piece_map, piemax,
+		$LF
+		"                                  XY(x,y),
+		$LF
+		"                                  XY(0,0), piemax);
+		$LF
+		"            if(good < 0) continue;
+		$LF
+		$LF
+		"            XY newsize(std::max(puzmax.x, x + piece.size.x*tilesize.x),
+		$LF
+		"                       std::max(puzmax.y, y + piece.size.y*tilesize.y));
+		$LF
+		$LF
+		"            bool yay = best == -1;
+		$LF
+		$LF
+		"            // Prefer a positioning that does not enlarge the picture very much.
+		$LF
+		"            if(newsize.size() < bestsize.size())
+		$LF
+		"                yay = true;
+		$LF
+		$LF
+		"            if(newsize.size() == bestsize.size())
+		$LF
+		"                yay = good > best;
+		$LF
+		$LF
+		"            if(yay)
+		$LF
+		"            {
+		$LF
+		"                best = good;
+		$LF
+		"                bestpos  = XY(x,y);
+		$LF
+		"                bestsize = newsize;
+		$LF
+		"                
+		$LF
+		"                // Have we found a dream position?
+		$LF
+		"                // A dream position is one where each hole of the piece
+		$LF
+		"                // overlaps with material from the puzzle and the image
+		$LF
+		"                // size is not incremented.
+		$LF
+		"                if(bestsize == origsize && best == hole_sum) goto FoundBestSpot;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"FoundBestSpot:;
+		$LF
+		"    // Save the position.
+		$LF
+		"    for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"        for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"        {
+		$LF
+		"            piece.solution[y*piece.size.x+x].x += bestpos.x;
+		$LF
+		"            piece.solution[y*piece.size.x+x].y += bestpos.y;
+		$LF
+		"        }
+		$LF
+		"}
+		$LF
+		$LF
+		$LF
+		$LF
+		"int main(int argc, char** argv)
+		$LF
+		"{
+		$LF
+		"    /* Define the variables and the default options */
+		$LF
+		"    Piece piece;
+		$LF
+		"    Puzzle puzzle;
+		$LF
+		"    XY tilesize(1,1);
+		$LF
+		"    PieceCompressionMethod compression = PIECE_COMPRESSION_MAKE_SQUARE_FROM_LARGE_RECTANGLES;
+		$LF
+		"    PieceSplitMethod       split       = PIECE_SPLIT_INTACT;
+		$LF
+		"    
+		$LF
+		"    unsigned piecesizex = 1;
+		$LF
+		"    unsigned piecesizey = 1;
+		$LF
+		$LF
+		"    for(;;)
+		$LF
+		"    {
+		$LF
+		"        int c = getopt(argc, argv, "c:s:x:y:X:Y:h");
+		$LF
+		"        if(c == -1) break;
+		$LF
+		"        switch(c)
+		$LF
+		"        {
+		$LF
+		"            case 'c':
+		$LF
+		"                /***/if(strcmp(optarg, "i") == 0) compression = PIECE_COMPRESSION_INTACT;
+		$LF
+		"                else if(strcmp(optarg, "i") == 0) compression = PIECE_COMPRESSION_DELETE_EMPTY_COLUMNS_AND_ROWS;
+		$LF
+		"                else if(strcmp(optarg, "s") == 0) compression = PIECE_COMPRESSION_MAKE_SQUARE;
+		$LF
+		"                else if(strcmp(optarg, "r") == 0) compression = PIECE_COMPRESSION_MAKE_SQUARE_FROM_LARGE_RECTANGLES;
+		$LF
+		"                else goto ArgErr;
+		$LF
+		"                break;
+		$LF
+		"            case 's':
+		$LF
+		"                /***/if(strcmp(optarg, "i") == 0) split = PIECE_SPLIT_INTACT;
+		$LF
+		"                else if(strcmp(optarg, "e") == 0) split = PIECE_SPLIT_EACH_TILE;
+		$LF
+		"                else if(strcmp(optarg, "r") == 0) split = PIECE_SPLIT_LARGE_RECTANGLES;
+		$LF
+		"                else goto ArgErr;
+		$LF
+		"                break;
+		$LF
+		"            case 'x': piecesizex = std::atoi(optarg); break;
+		$LF
+		"            case 'y': piecesizey = std::atoi(optarg); break;
+		$LF
+		"            case 'X': tilesize.x = std::atoi(optarg); break;
+		$LF
+		"            case 'Y': tilesize.y = std::atoi(optarg); break;
+		$LF
+		"            case 'h'://thru
+		$LF
+		"            default: goto ArgErr;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    piece = Piece(piecesizex,piecesizey);
+		$LF
+		"    
+		$LF
+		"    if(optind == argc)
+		$LF
+		"    {
+		$LF
+		"    ArgErr:
+		$LF
+		"        std::fprintf(stderr,
+		$LF
+		"            "Usage: binpack2d -x<piecesizex> -y<piecesizey>\n"
+		$LF
+		"            "                 -X<tilesizex> -Y<tilesizey>\n"
+		$LF
+		"            "                 [-c<compressionmethod>]\n"
+		$LF
+		"            "                 [-s<splitmethod>]\n"
+		$LF
+		"            "                 <piecedesc> [<puzzledesc> [...]]\n"
+		$LF
+		"            "\n"
+		$LF
+		"            "       Where piecedesc is a string of 0 or 1\n"
+		$LF
+		"            "             Length of the string must be piecesizex*piecesizey\n"
+		$LF
+		"            "             0=hole, 1=exists\n"
+		$LF
+		"            "       And puzzledesc is xpos,ypos,xsize,ysize (all units are pixels)\n"
+		$LF
+		"            "             Each entry describes a reserved section\n"
+		$LF
+		"            "       Unit of piecesize is tiles\n"
+		$LF
+		"            "       Unit of tilesize is pixels\n"
+		$LF
+		"            "\n"
+		$LF
+		"            "       Compressionmethods:\n"
+		$LF
+		"            "           i = keep the shape of the piece intact\n"
+		$LF
+		"            "           d = delete empty columns and rows\n"
+		$LF
+		"            "           s = reshape the piece into a square\n"
+		$LF
+		"            "           r = reshape the piece into a square of optimal rectangles (default)\n"
+		$LF
+		"            "       Splitmethods:\n"
+		$LF
+		"            "           i = intact, arrange the piece as whole (default)\n"
+		$LF
+		"            "           e = each tile of the piece is arranged separately\n"
+		$LF
+		"            "           r = each optimal rectangle of the piece is arranged separately\n"
+		$LF
+		"            "\n"
+		$LF
+		"            "       Output is lines of: <xpos> <ypos>\n"
+		$LF
+		"            "       Units of position are pixels\n"
+		$LF
+		"            "       Each line tells the positioning for one part of the piece\n"
+		$LF
+		"            "\n");
+		$LF
+		"        return -1;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    for(unsigned a=0; a<piecesizex*piecesizey; ++a)
+		$LF
+		"        piece.exists[a] = argv[optind][a] != '0';
+		$LF
+		"    
+		$LF
+		"    for(int a=optind+1; a<argc; ++a)
+		$LF
+		"    {
+		$LF
+		"        int xpos=0,ypos=0, xsize=0,ysize=0;
+		$LF
+		"        std::sscanf(argv[a], "%d,%d,%d,%d", &xpos,&ypos,&xsize,&ysize);
+		$LF
+		"        if(xsize && ysize)
+		$LF
+		"            puzzle[XY(xpos,ypos)] = XY(xsize,ysize);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* Do the bulk of the work */
+		$LF
+		"    PutPieceInPuzzle(piece, puzzle, tilesize, compression, split);
+		$LF
+		"    
+		$LF
+		"    /* Output the solution */
+		$LF
+		"    for(unsigned y=0; y<piece.size.y; ++y)
+		$LF
+		"        for(unsigned x=0; x<piece.size.x; ++x)
+		$LF
+		"            printf("%u %u\n",
+		$LF
+		"                piece.solution[y*piece.size.x+x].x,
+		$LF
+		"                piece.solution[y*piece.size.x+x].y);
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[h4 
+	" Example use of image_tilemapper_fun.php
+	$LF
+]h4
+[p 
+	"This is an example program that utilizes the image_tilemapper.
+	$LF
+	"It reads in an image and creates another image and some HTML code that demonstrates that it still works. It is used in a certain easter egg on the site.
+	$LF
+]p
+[p 
+	"Note: This code is provided only for illustration; you may need to alter it for your needs.
+	$LF
+]p
+[pre 
+	[code class=language-php_white 
+		"<?php
+		$LF
+		$LF
+		"require 'image_tilemapper_fun.php';
+		$LF
+		$LF
+		"error_reporting(E_ERROR);
+		$LF
+		$LF
+		"$im = ImageCreateFromPng('../css/ratingbg.png');
+		$LF
+		"ImageAlphaBlending($im, false);
+		$LF
+		$LF
+		"$sections = Array(
+		$LF
+		"  'tasvideos'    => Array(76,15, 50,36),
+		$LF
+		"  'stuff'        => Array(52,10, 51,51),
+		$LF
+		"  'background'   => Array(300,20, 0,0,    5,5),
+		$LF
+		"  'xkeeper'      => Array(54,8, 50,60),
+		$LF
+		"  'megaman'      => Array(25,13, 103,51, 5,13),
+		$LF
+		"  'cursor_c'     => Array(20,20, 0,40, 5,5),
+		$LF
+		"  'cursor_i'     => Array(5,20, 38,40, 5,5),
+		$LF
+		"  'indicator_c'  => Array(20,20, 0,20, 5,5),
+		$LF
+		"  'indicator_i'  => Array(5,20, 38,20, 5,5),
+		$LF
+		"  'petA0' => Array(16,24,128+16*0,20,   8,8),
+		$LF
+		"  'petA1' => Array(16,24,128+16*1,20,   8,8),
+		$LF
+		"  'petA2' => Array(16,24,128+16*2,20,   8,8),
+		$LF
+		"  'petA3' => Array(16,24,128+16*3,20,   8,8),
+		$LF
+		"  'petA4' => Array(16,24,128+16*4,20,   8,8),
+		$LF
+		"  'petA5' => Array(16,24,128+16*5,20,   8,8),
+		$LF
+		"  'petA6' => Array(16,24,128+16*6,20,   8,8),
+		$LF
+		"  'petA7' => Array(16,24,128+16*7,20,   8,8),
+		$LF
+		"  'petB0' => Array(16,24,128+16*0,44,   8,8),
+		$LF
+		"  'petB1' => Array(16,24,128+16*1,44,   8,8),
+		$LF
+		"  'petB2' => Array(16,24,128+16*2,44,   8,8),
+		$LF
+		"  'petB3' => Array(16,24,128+16*3,44,   8,8),
+		$LF
+		"  'petB4' => Array(16,24,128+16*4,44,   8,8),
+		$LF
+		"  'petB5' => Array(16,24,128+16*5,44,   8,8),
+		$LF
+		"  'petB6' => Array(16,24,128+16*6,44,   8,8),
+		$LF
+		"  'petB7' => Array(16,24,128+16*7,44,   8,8),
+		$LF
+		"  'fb0g' => Array(8,8, 56+8*0,20),
+		$LF
+		"  'fb1g' => Array(8,8, 56+8*1,20),
+		$LF
+		"  'fb2g' => Array(8,8, 56+8*2,20),
+		$LF
+		"  'fb3g' => Array(8,8, 56+8*3,20),
+		$LF
+		"  'fb4g' => Array(8,8, 56+8*4,20),
+		$LF
+		"  'fb5g' => Array(8,8, 56+8*5,20),
+		$LF
+		"  'fb6g' => Array(8,8, 56+8*6,20),
+		$LF
+		"  'fb7g' => Array(8,8, 56+8*7,20),
+		$LF
+		"  'fb8g' => Array(8,8, 56+8*8,20),
+		$LF
+		"  'fb0r' => Array(8,8, 56+8*0,28),
+		$LF
+		"  'fb1r' => Array(8,8, 56+8*1,28),
+		$LF
+		"  'fb2r' => Array(8,8, 56+8*2,28),
+		$LF
+		"  'fb3r' => Array(8,8, 56+8*3,28),
+		$LF
+		"  'fb4r' => Array(8,8, 56+8*4,28),
+		$LF
+		"  'fb5r' => Array(8,8, 56+8*5,28),
+		$LF
+		"  'fb6r' => Array(8,8, 56+8*6,28),
+		$LF
+		"  'fb7r' => Array(8,8, 56+8*7,28),
+		$LF
+		"  'fb8r' => Array(8,8, 56+8*8,28)
+		$LF
+		");
+		$LF
+		$LF
+		"$result = TilemapImage($im, $sections);
+		$LF
+		$LF
+		"ImagePng($result, '/WWW/imagemergetest.png');
+		$LF
+		$LF
+		"echo '<img src="/imagemergetest.png">';
+		$LF
+		$LF
+		"$gdata = Array();
+		$LF
+		"foreach($sections as $sectname => &$sectcoords)
+		$LF
+		"{
+		$LF
+		"  $width  = $sectcoords[0]; $sizex = $sectcoords[4]; $xpos = $sectcoords[2];
+		$LF
+		"  $height = $sectcoords[1]; $sizey = $sectcoords[5]; $ypos = $sectcoords[3];
+		$LF
+		"  $tilelist = $sectcoords[6]; // crc32, doneflag. doneflags: 0=not, 1=new, 2=irrelevant
+		$LF
+		"  $wid = $width /$sizex;
+		$LF
+		"  $hei = $height/$sizey;
+		$LF
+		"  
+		$LF
+		"  $data = '';
+		$LF
+		"  for($y=$p=0; $y<$hei; ++$y)
+		$LF
+		"    for($x=0; $x<$wid; ++$x)
+		$LF
+		"      $data .= chr(65+$tilelist[$p++][0] / $sizex);
+		$LF
+		"  for($y=$p=0; $y<$hei; ++$y)
+		$LF
+		"    for($x=0; $x<$wid; ++$x)
+		$LF
+		"      $data .= chr(65+$tilelist[$p++][1] / $sizey);
+		$LF
+		"  $data = Array('x'=>$sizex,'y'=>$sizey, $data);
+		$LF
+		"  $gdata[$sectname] = $data;
+		$LF
+		"  
+		$LF
+		"  echo "<h3>$sectname</h3>";
+		$LF
+		"  echo '<table cellspacing=0 cellpadding=0>';
+		$LF
+		"  $p=0;
+		$LF
+		"  for($y=0; $y<$hei; ++$y)
+		$LF
+		"  {
+		$LF
+		"    echo '<tr>';
+		$LF
+		"    for($x=0; $x<$wid; ++$x)
+		$LF
+		"    {
+		$LF
+		"      $dx = $tilelist[$p][0];
+		$LF
+		"      $dy = $tilelist[$p][1];
+		$LF
+		"      $style = 'background:url("/imagemergetest.png")'." no-repeat -{$dx}px -{$dy}px";
+		$LF
+		"      echo "<td width=$sizex height=$sizey style='".htmlspecialchars($style)."'>";
+		$LF
+		"      ++$p;
+		$LF
+		"    }
+		$LF
+		"    echo '</tr>';
+		$LF
+		"  }
+		$LF
+		"  echo '</table>';
+		$LF
+		"}
+		$LF
+		"print_r($gdata);
+		$LF
+	]code
+]pre
+[p 
+	"The code that finds which images are commonly loaded together and packs them, is not provided, as it's a little too specific for the internal structure of this site.
+	$LF
+]p

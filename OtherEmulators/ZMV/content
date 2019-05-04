@@ -1,0 +1,471 @@
+20
+[p 
+	[tt 
+		"zmv
+	]tt
+	" is the movie capture format of 
+	(__wikiLink|OtherEmulators|ZSNES)
+	", a SNES emulator.
+	$LF
+]p
+[h3 
+	" ZMV file format description
+	$LF
+]h3
+[p 
+	"ZMV file is structured as follows:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Header              
+			]th
+			[td 
+				" Fixed size, see below.
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Beginning savestate 
+			]th
+			[td 
+				" Always present, but not always used, see below.
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Stream              
+			]th
+			[td 
+				" Consists of the key input and chapter data for the movie.
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Internal chapter index 
+			]th
+			[td 
+				" This is an array of pointers to all the chapters embedded in the "stream". The length of this array is described in the header.
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"External chapters   
+			]th
+			[td 
+				" Consists of a number of "external chapters". The length of this array is described next.
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"External chapter count 
+			]th
+			[td 
+				" Surprise, this field isn't in the header.
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Author name         
+			]th
+			[td 
+				" Author name.
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Header
+	$LF
+]h4
+[pre 
+	"  000 3-byte signature: 5A 4D 56 "ZMV"
+	$LF
+	"  003 2-byte little-endian unsigned int: zsnes version number
+	$LF
+	"  005 4-byte little-endian integer: CRC32 of the ROM
+	$LF
+	"  009 4-byte little-endian unsigned int: number of frames
+	$LF
+	"  00D 4-byte little-endian unsigned int: number of rerecords
+	$LF
+	"  011 4-byte little-endian unsigned int: number of frames removed by rerecord
+	$LF
+	"  015 4-byte little-endian unsigned int: number of frames advanced step by step
+	$LF
+	"  019 1-byte: average recording frames per second
+	$LF
+	"  01A 4-byte little-endian unsigned int: number of key combos
+	$LF
+	"  01E 2-byte little-endian unsigned int: number of internal chapters
+	$LF
+	"  020 2-byte little-endian unsigned int: length of the author name field in bytes   
+	$LF
+	"  022 3-byte little-endian unsigned int: size of an uncompressed save state in bytes
+	$LF
+	"  025 1-byte: reserved
+	$LF
+	"  026 1-byte flags: initial input configuration
+	$LF
+	"     bit 7: first input enabled
+	$LF
+	"     bit 6: second input enabled
+	$LF
+	"     bit 5: third input enabled
+	$LF
+	"     bit 4: fourth input enabled
+	$LF
+	"     bit 3: fifth input enabled
+	$LF
+	"     bit 2: mouse in first port
+	$LF
+	"     bit 1: mouse in second port
+	$LF
+	"     bit 0: super scope in second port
+	$LF
+	"  027 1-byte flags:
+	$LF
+	"     bits 7,6:
+	$LF
+	"         if "00", movie begins from savestate
+	$LF
+	"         if "10", movie begins from reset
+	$LF
+	"         if "01", movie begins from power-on
+	$LF
+	"         if "11", movie begins from power-on with SRAM clear
+	$LF
+	"     bit 5: if "0", movie is NTSC (60 fps); if "1", movie is PAL (50 fps)
+	$LF
+	"     other: reserved, set to 0
+	$LF
+	"  028 3-byte little-endian unsigned int: initial save state size, highest bit specifies compression, next 23 specifies size
+	$LF
+]pre
+[h4 
+	" Savestate
+	$LF
+]h4
+[p 
+	"Next follows a ZST format savestate.
+	$LF
+	"This save state is only loaded if the movie begins from savestate or the version of ZSNES used to make the movie is the different than the one playing it.
+	$LF
+]p
+[p 
+	"On reset or power on without SRAM clear where the version matches, only the SRAM is loaded from the Savestate.
+	$LF
+]p
+[h4 
+	" Stream
+	$LF
+]h4
+[p 
+	"After the optional savestate, comes the actual stream of movie data.
+	[br 
+	]br
+	$LF
+	"The number of events in the stream is equal to
+	$LF
+	"(number_of_frames + number_of_internal_chapters).
+	[br 
+	]br
+	$LF
+	"Each event is at least 1 byte long.
+	$LF
+]p
+[p 
+	"The first byte of the event has the following format:
+	$LF
+]p
+[pre 
+	"  000 1-byte flags:
+	$LF
+	"     bit 7: "1" if controller 1 changed, "0" otherwise
+	$LF
+	"     bit 6: "1" if controller 2 changed, "0" otherwise
+	$LF
+	"     bit 5: "1" if controller 3 changed, "0" otherwise
+	$LF
+	"     bit 4: "1" if controller 4 changed, "0" otherwise
+	$LF
+	"     bit 3: "1" if controller 5 changed, "0" otherwise
+	$LF
+	"     bit 2: "1" if this is a "chapter" update, "0" if it's a "controller" update
+	$LF
+	"     bit 1: "1" if this is RLE data instead of any of the above
+	$LF
+	"     bit 0: "1" if this is command data instead any of the above
+	$LF
+]pre
+[p 
+	"If the event is a command, the other seven bits define the command. The command could be "reset now" or similar things.
+	$LF
+]p
+[p 
+	"If the event is RLE data, next follows 4 bytes which is the frame to repeat current input until (inclusive).
+	$LF
+]p
+[p 
+	"If the event is a "chapter" update, the packet follows with a ZST format savestate. Using a header of:
+	$LF
+]p
+[pre 
+	"  000 3-byte little endian unsigned int: save state size in format defined above
+	$LF
+	"  001 above size: save state
+	$LF
+	"  above size+001 4-byte little endian unsigned int: frame number save state loads to
+	$LF
+	"  above size+005 2-byte: controller status bit field, see below
+	$LF
+	"  above size+007 9-byte: previous controller input bits
+	$LF
+]pre
+[p 
+	[br 
+	]br
+	$LF
+]p
+[p 
+	"If the event is a "controller" update, next comes the controller data
+	$LF
+	"for each changed controller, 12 bits per controller, or 20 bits in the case of the super scope, zeropadding up to full bytes. The minimum length of the controller data is 2 bytes, and the maximum length is 9 bytes. Controller format:
+	$LF
+]p
+[pre 
+	"   bit 11: A
+	$LF
+	"   bit 10: X
+	$LF
+	"   bit 9:  L
+	$LF
+	"   bit 8:  R
+	$LF
+	"   bit 7:  B
+	$LF
+	"   bit 6:  Y
+	$LF
+	"   bit 5:  Select
+	$LF
+	"   bit 4:  Start
+	$LF
+	"   bit 3:  Up
+	$LF
+	"   bit 2:  Down
+	$LF
+	"   bit 1:  Left
+	$LF
+	"   bit 0:  Right
+	$LF
+]pre
+[p 
+	"For example, if this frame contained input for controllers 1 and 2:
+	$LF
+]p
+[pre 
+	"   byte 1:
+	$LF
+	"       bit 7:  P1 B
+	$LF
+	"       bit 6:  P1 Y
+	$LF
+	"       bit 5:  P1 Select
+	$LF
+	"       bit 4:  P1 Start
+	$LF
+	"       bit 3:  P1 Up
+	$LF
+	"       bit 2:  P1 Down
+	$LF
+	"       bit 1:  P1 Left
+	$LF
+	"       bit 0:  P1 Right
+	$LF
+	"   byte 2:
+	$LF
+	"       bit 7:  P2 B
+	$LF
+	"       bit 6:  P2 Y
+	$LF
+	"       bit 5:  P2 Select
+	$LF
+	"       bit 4:  P2 Start
+	$LF
+	"       bit 3:  P1 A
+	$LF
+	"       bit 2:  P1 X
+	$LF
+	"       bit 1:  P1 L
+	$LF
+	"       bit 0:  P1 R
+	$LF
+	"   byte 3:
+	$LF
+	"       bit 7:  P2 Up
+	$LF
+	"       bit 6:  P2 Down
+	$LF
+	"       bit 5:  P2 Left
+	$LF
+	"       bit 4:  P2 Right
+	$LF
+	"       bit 3:  P2 A
+	$LF
+	"       bit 2:  P2 X
+	$LF
+	"       bit 1:  P2 L
+	$LF
+	"       bit 0:  P2 R
+	$LF
+]pre
+[p 
+	"The number of "controller" update events in the stream should be equal
+	$LF
+	"to the "number of frames" field in the file header.
+	[br 
+	]br
+	$LF
+	"The number of "chapter" update events in the stream should be equal
+	$LF
+	"to the "number of internal chapters" field in the file header.
+	$LF
+]p
+[h4 
+	" Internal chapter index
+	$LF
+]h4
+[p 
+	"Position in file: (file_size - author_name_length - 2 - external_chapter_count * (zst_size + 4+2+9+4) - internal_chapter_count*4)
+	$LF
+]p
+[p 
+	"Internal chapters are "chapters" made during the movie recording.
+	$LF
+]p
+[p 
+	"The internal chapter index is an index for quickly finding all the internal
+	$LF
+	"chapters in the movie stream. Finding the internal chapter index is another
+	$LF
+	"story though...
+	$LF
+]p
+[p 
+	"Each item in the internal chapter index is 4 bytes long, and follows this format:
+	$LF
+]p
+[pre 
+	"  000 4-byte little-endian unsigned int: offset of the chapter in the file
+	$LF
+]pre
+[p 
+	"The offset is counted from the file beginning (zerobased), and points to the
+	$LF
+	"chapter data in the movie stream (after the flag byte).
+	$LF
+]p
+[h4 
+	" External chapters
+	$LF
+]h4
+[p 
+	"Position in file: ( file_size - author_name_length - 2 - external_chapter_count * (zst_size + 4+2+9+4) )
+	$LF
+]p
+[p 
+	"External chapters are "chapters" made during the movie playback.
+	$LF
+]p
+[p 
+	"Each item in the external chapter begins with a savestate,
+	$LF
+	"followed by this table:
+	$LF
+]p
+[pre 
+	"   000 4-byte little-endian unsigned int: frame number
+	$LF
+	"   004 2-byte: bit field of controller status
+	$LF
+	"   006 9-byte array: previous input data (1 scope 
+	"[
+	[a id=20 
+	]a
+	[a href=#r20 
+		"20
+	]a
+	"]
+	" + 4 regular 
+	"[12*4]
+	" + 4 padded bits)
+	$LF
+	"   00F 4-byte little-endian unsigned int: offset to movie stream from beginning of file
+	$LF
+]pre
+[p 
+	"The size of an external chapter is therefore (zst_size + 4+2+9+4) bytes.
+	$LF
+]p
+[h4 
+	" External chapter count.
+	$LF
+]h4
+[p 
+	"Position in file: (file_size - author_name_length - 2)
+	$LF
+]p
+[p 
+	"This is a 2-byte field.
+	$LF
+]p
+[pre 
+	"  000 2-byte little-endian unsigned int: number of external chapters
+	$LF
+]pre
+[h4 
+	" Author name
+	$LF
+]h4
+[p 
+	"Position in file: (file_size - author_name_length)
+	$LF
+]p
+[p 
+	"Last in the file comes the author name field, which is an
+	$LF
+	[a class=extlink href=http://www.php.net/utf8_encode rel=nofollow 
+		"UTF-8 encoded
+	]a
+	" text
+	$LF
+	"string, no zero terminator. The length of this field is described in the header.
+	[br 
+	]br
+	$LF
+	"The number of characters in this field can be calculated only by iterating it.
+	$LF
+]p
+[p 
+	"(Surprise, the length of this field is in the header, even though
+	$LF
+	"the number of external chapters isn't.)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"See also: 
+	(__wikiLink|Emulator resources)
+	", 
+	(__wikiLink|FAQ|frequently asked questions)
+]p

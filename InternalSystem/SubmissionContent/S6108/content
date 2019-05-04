@@ -1,0 +1,701 @@
+9
+[p 
+	(youtube|v=0s3Q-JF1YfE)
+	$LF
+]p
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"Pokemon Crystal is known to have a trick to clone Pokemon. If the system loses power as the game saves, after it updates stored Pokemon but before it updates party Pokemon, some data could now be in both locations. Crystal accepts this despite a 16-bit checksum in the save because it does not apply to auxiliary data like stored Pokemon. The checksum is to keep corruption in the main data unlikely. “Unlikely.”
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 2.3
+	$LF
+]p
+[h3 
+	" Objectives
+	$LF
+]h3
+[h4 
+	" Save corruption
+	$LF
+]h4
+[p 
+	"Crystal stores a 16-bit checksum of the main save data in the save to try to detect corruption and load the backup save if necessary. While it is unlikely that this value can accidently match, it is not impossible. When save data is cleared from the title screen, all of save memory is set to $00. Undetected save corruption can occur here if the values written to the main save data before power off still sum to $0000 and match the zeroed checksum. As the checksum is 16 bits, the theme becomes “push the checksum over $ffff to overflow to $0000.” This can be done and controlled through box names, which let the player enter up to 8 characters to label boxes of stored Pokemon. This movie names additional boxes past those required for the arbitrary code execution to increase the checksum and cause the collision. Thank you to luckytyphlosion who asked again if checksum collision could be set up.
+	$LF
+]p
+[p 
+	"This movie wants to corrupt the save to have a Cyndaquil with no string terminator in its nickname. All this requires is a reset after Cyndaquil's data saves and before its nickname's terminator saves, but BizHawk movies are only designed to reset on frame boundaries. The subframe precision required can still be found with the equal frame lengths setting. A Game Boy frame completes every 70224 cycles while the LCD is on but the time between is arbitrary while the LCD is off. The default setting syncs frame boundaries to frame completions, yet EFLs have a frame boundary every 70224 cycles regardless of when frames complete. Over the course of this movie, the Game Boy frame timing is shifted relative to the EFL frame boundary with the variable lengths of LCD off periods. This allows a reset between when the L and the terminator in Cyndaquil are written to the save data.
+	$LF
+]p
+[h4 
+	" 15 00 or <DAY>
+	$LF
+]h4
+[p 
+	"see also: 
+	[a class=extlink href=https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310 rel=nofollow 
+		"https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310
+	]a
+	$LF
+]p
+[p 
+	"To summarize the link, if the text engine reads the control character $15 and it is followed by a $00, the program counter will end up at $cd52, an address near manipulable memory. This movie has the text engine try to read Cyndaquil's unterminated nickname to display it on the STATS screen. The nickname is copied to a string buffer which the text engine reads past because of the lack of a terminator. An item quantity buffer is not far from this string buffer, and the Antidote quantity scrolled to in the Cherrygrove Mart menu provides a $15 there for the text engine to read. A max item quantity buffer is the next byte and is set to $63 at the Antidotes, but is then set to $00 when CANCEL is used to leave the mart menu.
+	$LF
+]p
+[p 
+	"Once the text engine reads the $15 $00, code execution begins at $cd52 and the address that follows the $15 $00 is on the stack. That address is the location of the last loaded Pokemon data. One step up after the mart window places 
+	[tt 
+		"ret nz
+	]tt
+	" at $cd70, memory of pointers for the background map, which is reached without issue and sends execution to the Pokemon data. The manipulated trainer ID and DV bytes in Cyndaquil's data there are interpreted as the instructions below. This is enough to jump into the memory for box names where more values can be controlled. The box names require a couple lower bytes in addresses to be character values, and the number of entry points from here is already limited.
+	$LF
+]p
+[pre 
+	"; af = $0100
+	$LF
+	"; bc = $c569
+	$LF
+	"; de = $00ff
+	$LF
+	"; hl = $002b from ld hl, $002b in moves
+	$LF
+	$LF
+	"ld h, $36
+	$LF
+	$LF
+	"add hl, bc ; hl = $fb94, the 5th character of Box 4's name
+	$LF
+	"jp hl
+	$LF
+]pre
+[h4 
+	" Arbitrary code execution
+	$LF
+]h4
+[p 
+	"see also: 
+	(__wikiLink|4233S)
+	$LF
+]p
+[p 
+	"This movie uses a modified version of MrWint's box names that execute code input from the joypad. Aside from address changes between the games and setups, there are two small changes: 
+	[tt 
+		"or [hl]
+	]tt
+	" is used to reset the carry flag and the 
+	[tt 
+		"jp nc
+	]tt
+	" jumps before the first of the two boxes. I thought 
+	[tt 
+		"or [hl]
+	]tt
+	" was faster to input before I learned the mechanics below, but it's the same, yet the higher value still contributes to the checksum. The jump before the first box is fast to input and does not cause any issues with a clever box name there. That box is covered after the two primary boxes. Note it is faster to scroll the list to boxes before they are named, and hold to scroll as opposed to press -> release a bunch is break even for Box 4 and faster for Box 5 and up.
+	$LF
+]p
+[dl 
+	[dt 
+		"Box names
+	]dt
+	[dd 
+		" One input every other frame. The first input cannot be A B START or SELECT. The same button cannot be pressed two inputs in a row (or it's a hold). Directionals can be pressed consecutively if a new button or directional is also pressed. Example: Up 2 can be done in two inputs with UP -> UP|LEFT. Priority for two directionals at once is UP > DOWN > LEFT > RIGHT. If A and a direction are input together the A is processed then the cursor moves.
+		$LF
+	]dd
+]dl
+[p 
+	"Also thank you to MrWint's submission for how to format this section.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 5
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"aa
+				]tt
+			]td
+			[td 
+				[tt 
+					"xor d
+				]tt
+			]td
+			[td 
+				"d stores last joypad input: find out differences to current input
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"ea a1 fb
+				]tt
+			]td
+			[td 
+				[tt 
+					"ld [$fba1], a
+				]tt
+			]td
+			[td 
+				"Write difference; will be executed as opcode later in the cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"aa
+				]tt
+			]td
+			[td 
+				[tt 
+					"xor d
+				]tt
+			]td
+			[td 
+				"Restore current joypad input value
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"f5
+				]tt
+			]td
+			[td 
+				[tt 
+					"push af
+				]tt
+			]td
+			[td 
+				"Copy current joypad input from a...
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"d1
+				]tt
+			]td
+			[td 
+				[tt 
+					"pop de
+				]tt
+			]td
+			[td 
+				"... to d (store it as last joypad input)
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"f1
+				]tt
+			]td
+			[td 
+				[tt 
+					"pop af
+				]tt
+			]td
+			[td 
+				"Restore a and f from the previous cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"50 ($fba1)
+				]tt
+			]td
+			[td 
+				[tt 
+					"(any)
+				]tt
+			]td
+			[td 
+				"Execute opcode written earlier this cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 6
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"f5
+				]tt
+			]td
+			[td 
+				[tt 
+					"push af
+				]tt
+			]td
+			[td 
+				"Save a and f for next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"b6
+				]tt
+			]td
+			[td 
+				[tt 
+					"or [hl]
+				]tt
+			]td
+			[td 
+				"Clears carry flag, needed for the jump
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"fa a4 ff
+				]tt
+			]td
+			[td 
+				[tt 
+					"ld a, [$ffa4]
+				]tt
+			]td
+			[td 
+				"Reads current joypad inputs into a
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"d2 95 fb
+				]tt
+			]td
+			[td 
+				[tt 
+					"jp nc, $fb95
+				]tt
+			]td
+			[td 
+				"Loop back to Box 4; carry will never be set
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Box 4 has two more goals in addition to high values for the checksum. The 6th character is where Box 6 loops back to, because it was fast to input. However, the string terminator opcode is 
+	[tt 
+		"ld d, b
+	]tt
+	" and the box name program relies on d to store the last joypad input. The 5th character is where the 
+	[tt 
+		"15 00
+	]tt
+	" setup used in this movie jumps to, because of the limited entry point options. The slide into Box 5 needs to avoid an unsafe opcode from 
+	[tt 
+		"xor d
+	]tt
+	". With the initial values of a=$02 and d=$c5 (from 
+	[tt 
+		"ld d, b
+	]tt
+	") the result would be 
+	[tt 
+		"rst $00
+	]tt
+	", an instruction that resets the game. Box 4 is named in such a way where both jump locations interpret different instructions to satisfy those goals.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 4
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"(from 5th character)
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"f6 fe
+				]tt
+			]td
+			[td 
+				[tt 
+					"or $fe
+				]tt
+			]td
+			[td 
+				"Sets a to $fe
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"f6 fe
+				]tt
+			]td
+			[td 
+				[tt 
+					"or $fe
+				]tt
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"50
+				]tt
+			]td
+			[td 
+				[tt 
+					"ld d, b
+				]tt
+			]td
+			[td 
+				"Sets d to $c5
+			]td
+		]tr
+	]tbody
+]table
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 4
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"(from 6th character)
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"fe f6
+				]tt
+			]td
+			[td 
+				[tt 
+					"cp $f6
+				]tt
+			]td
+			[td 
+				"Preserves a
+			]td
+		]tr
+		[tr 
+			[td 
+				[tt 
+					"fe 50
+				]tt
+			]td
+			[td 
+				[tt 
+					"cp $50
+				]tt
+			]td
+			[td 
+				"Preserves d
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Below are the joypad inputs and commands executed to reach the usual end. Refer to MrWint's submission for the nuances of this process. It accomplishes many of the same things as that submission so the comments are mimicked for comparison. One difference here is the warp data pointer is set to the player coordinates and the map values are written in that area. Warp data entries start with coordinates that need to match to warp, and this way there is already a match. An idea from luckytyphlosion was to end input early through Crystal's auto input system, which uses a pointer to run-length encoded inputs. For this movie, there happens to be a (properly terminated!) series of bytes in memory that plays out the rest almost perfectly.
+	$LF
+]p
+[pre 
+	"Joypad     Command
+	$LF
+	"97         69 (ld l, c)      // setup cycle
+	$LF
+	"fd         6a (ld l, d)
+	$LF
+	"ae         53 (ld d, e)      // setup cycle
+	$LF
+	"dc         72 (ld [hl], d)   // fbfd <- dc; Set warp pointer to our fake warp data
+	$LF
+	"f1         2d (dec l)
+	$LF
+	"c5         34 (inc [hl])     // setup cycle
+	$LF
+	"b7         72 (ld [hl], d)   // fbfc <- b7; ^
+	$LF
+	"34         83 (add e)        // setup cycle
+	$LF
+	"5e         6a (ld l, d)
+	$LF
+	"6b         35 (dec [hl])     // fb5e <- 43; Enable Red in Mt. Silver
+	$LF
+	"d2         b9 (cp c)         // setup cycle
+	$LF
+	"b8         6a (ld l, d)
+	$LF
+	"9c         24 (inc h)
+	$LF
+	"b6         2a (ld a, [hli])
+	$LF
+	"94         22 (ld [hli], a)  // fcb9 <- 03; (Glitch) map entrance $03, close to Red
+	$LF
+	"b6         22 (ld [hli], a)  // fcba <- 03; Map group
+	$LF
+	"3e         88 (adc b)        // setup cycle
+	$LF
+	"4c         72 (ld [hl], d)   // fcbb <- 4c; Map index: In Mt. Silver
+	$LF
+	"bd         f1 (pop af)       // setup cycle
+	$LF
+	"d7         6a (ld l, d)
+	$LF
+	"e2         35 (dec [hl])     // fcd7 <- 00; Having no Pokémon in your party wins all battles instantly
+	$LF
+	"1a         f8 (ld hl, sp-$0b)
+	$LF
+	"b7         ad (xor l)        // setup cycle
+	$LF
+	"dd         6a (ld l, d)
+	$LF
+	"24         f9 (ld sp, hl)    // Fix the stack pointer*; leave directly to overworld
+	$LF
+	"8e         aa (xor d)        // setup cycle
+	$LF
+	"e4         6a (ld l, d)
+	$LF
+	"b6         52 (ld d, d)      // setup cycle
+	$LF
+	"d4         62 (ld h, d)
+	$LF
+	"0a         de (sbc $f5)      // setup cycle; *after this skips a push
+	$LF
+	"78         72 (ld [hl], d)   // d4e4 <- 78; Change tile the character stands on, needed for warping
+	$LF
+	"a0         d8 (ret c)        // setup cycle
+	$LF
+	"c2         62 (ld h, d)
+	$LF
+	"ad         6f (ld l, a)      // setup cycle
+	$LF
+	"c7         6a (ld l, d)
+	$LF
+	"f2         35 (dec [hl])     // c2c7 <- ff; Enable auto input
+	$LF
+	"de         2c (inc l)
+	$LF
+	"9e         40 (ld b, b)      // setup cycle
+	$LF
+	"ec         72 (ld [hl], d)   // c2c8 <- ec; Set auto input pointer
+	$LF
+	"c0         2c (inc l)
+	$LF
+	"62         a2 (and d)
+	$LF
+	"40         22 (ld [hli], a)  // c2c9 <- 60; ^
+	$LF
+	"77         37 (scf)          // setup cycle
+	$LF
+	"05         72 (ld [hl], d)   // c2ca <- 05; Set auto input bank
+	$LF
+	"29         2c (inc l)
+	$LF
+	"1d         34 (inc [hll])    // c2cb <- 01; Delay first auto input
+	$LF
+	"d4         c9 (ret)          // Return to normal game code
+	$LF
+]pre
+[h3 
+	" Route
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" Save data is cleared because it's the totally moral thing to do before a save corruption TAS. Gambatte fills uninitialized save memory with $ff bytes so the clear sets the values to something objective. A setup with Gambatte's $ff bytes may exist.
+		$LF
+	]li
+	[li 
+		" Options are not set as text can print at the fast speed when A or B is held anyway.
+		$LF
+	]li
+	[li 
+		" The trainer ID is manipulated to be $2636 for the 15 00 setup. This is done with 23 expected frames of delay between power on and NEW GAME. Two other 16-bit values are rolled at the same time that affect the checksum, but are secondary in priority.
+		$LF
+	]li
+	[li 
+		" The player is selected to be the girl. A few values in memory like a sprite index are higher with her. This helps avoid an extra box name for the checksum in combination with the player name and is worth the frames to move the cursor down.
+		$LF
+	]li
+	[li 
+		" She is named five multiplication symbols. Each character has the value of $f1 and is in memory twice for the player name and Cyndaquil's original trainer name. This is an efficient way to increase the checksum despite the extra frames it takes to display.
+		$LF
+	]li
+]ul
+[h4 
+	" New Bark Town
+	$LF
+]h4
+[ul 
+	[li 
+		" Mom is talked to directly to avoid the exclamation point animation that plays if the player tries to walk past. It is only a couple frames faster to do this and some luck manipulations may take the exclamation point for the variance it provides.
+		$LF
+	]li
+	[li 
+		" Cyndaquil is manipulated to have $09e9 DVs for the 15 00 setup. The actual delay used here is difficult to estimate because of “lag frame rules” when sprites are decompressed relative to the timer interrupt, but it is around 10-13 frames.
+		$LF
+	]li
+]ul
+[h4 
+	" Cherrygrove City
+	$LF
+]h4
+[ul 
+	[li 
+		" The PC is opened with a buffered A press from the left side. In general, buffered menus from the overworld will open before sprites update and possibly deload. An extra sprite stays in memory from this side and increases the checksum at no cost.
+		$LF
+	]li
+	[li 
+		" Boxes 1 through 8 are named for the arbitrary code execution and checksum. The 9 character has the highest value at $ff, but the filler boxes input a 1 on the way to save an input in exchange for a slightly lower character value.
+		$LF
+	]li
+	[li 
+		" The game is saved from the PC through the change box action. It is a couple seconds faster than a save from the menu in the overworld, though a save from where the PC is misses out on a few more sprites loaded in memory to increase the checksum.
+		$LF
+	]li
+	[li 
+		" An almost-purchase of 21 Antidotes in Cherrygrove Mart completes the 15 00 setup.
+		$LF
+	]li
+	[li 
+		" The auto input that takes over from the arbitrary code execution presses UP x4, RIGHT x9, A x12 to end the movie. Note each character in the textboxes consumes an input so at least 11 inputs are needed to reach the credits from next to Red.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": This is going to require some time. Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": Adding the label "save glitch".
+	$LF
+]p
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": Not only this TAS introduces a new glitch that breaks the game with an unprecedented speed, but it's also highly optimized. A possible faster setup has been theorized, but after some discussion and research, it seemed to me that it would not be verifiable on real console due to the fact that it would rely on non-deterministic data. In any case, such hypothetical improvement would require to remake the run from scratch, and it wouldn't save much time compared to this submission, nor would it prove the setup used for this submission to be poorly executed. Clearing the data at beginning was the best choice.
+	$LF
+]p
+[p 
+	"For what concerns the branching, there are two separate aspects to take in account: similarity between games and similarity between movies. Since Pokémon Crystal is a Gen II Pokémon game, it can obsolete and be obsoleted by Pokémon Gold and Silver, even though the glitch abused in this movie is only available in Crystal. Since the 
+	(__wikiLink|2565M|current fastest-completion movie)
+	" features much unique and entertaining contents, it shouldn't be obsoleted by this submission; however I have to note that we have an 
+	(__wikiLink|2504M|obsoleted movie)
+	" with the "save glitch" label, and even though it's much longer and uses a different glitch, its movie goal is the same as the one for this submission, so the obsoletion chain will be changed in order for this submission to obsolete it.
+	$LF
+]p
+[p 
+	"The audience reception was vastly positive, so this submission is accepted for Moons as an improvement of the 
+	(__wikiLink|2504M|published "save glitch" movie)
+	" .
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing.
+]p

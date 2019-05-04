@@ -1,0 +1,300 @@
+10
+[p 
+	[tt 
+		"dsm
+	]tt
+	" is the movie capture format of 
+	(__wikiLink|EmulatorResources|DeSmuMe)
+	", a Nintendo DS emulator.
+	$LF
+]p
+[h3 
+	" DSM file format description
+	$LF
+]h3
+[ul 
+	[li 
+		"It is completely text based; allowing easy movie editing/splicing
+		$LF
+	]li
+	[li 
+		"An embedded GUID so DeSmuMe can tell if a savestate belongs to a movie file
+		$LF
+	]li
+	[li 
+		"Records stylus input
+		$LF
+	]li
+]ul
+[h3 
+	"Format
+	$LF
+]h3
+[p 
+	"DSM is ascii plain text. It is derived from the FCEUX FM2 format.
+	$LF
+	"It consists of several key-value pairs followed by an inputlog section.
+	$LF
+]p
+[p 
+	"The inputlog section can be identified by its starting with a | (pipe).
+	$LF
+	"The inputlog section terminates at eof.
+	$LF
+	"Newlines may be \r\n or \n
+	$LF
+]p
+[p 
+	"Key-value pairs consist of a key identifier, followed by a space separator, followed by the value text.  Value text is always terminated by a newline, which the value text will not include.  The value text is parsed differently depending on the type of the key.  The key-value pairs may be in any order, except that the first key must be version.
+	$LF
+]p
+[p 
+	"Integer keys (also used for booleans, with a 1 or 0) will have a value that is a simple integer not to exceed 32bits
+	$LF
+]p
+[ul 
+	[li 
+		"version (required) - the version of the movie file format; for now it is always 3
+		$LF
+	]li
+	[li 
+		"emuVersion (required) - the version of the emulator used to produce the movie
+		$LF
+	]li
+	[li 
+		"rerecordCount (optional) - the rerecord count
+		$LF
+	]li
+]ul
+[h3 
+	" Header
+	$LF
+]h3
+[p 
+	"String keys have values that consist of the remainder of the key-value pair line. As a consequence, string values cannot contain newlines.
+	$LF
+]p
+[ul 
+	[li 
+		"romFilename (required) - the name of the file used to record the movie
+		$LF
+	]li
+	[li 
+		"comment (optional) - simply a memo. 
+		$LF
+		[ul 
+			[li 
+				"by convention, the first token in the comment value is the subject of the comment.
+				$LF
+			]li
+			[li 
+				"by convention, subsequent comments with the same subject will have their ordering preserved and may be used to approximate multiline comments.
+				$LF
+			]li
+			[li 
+				"by convention, the author of the movie should be stored in comment(s) with a subject of: author
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"Hex string keys (used for binary blobs) will have a value that is like 0x0123456789ABCDEF...
+	$LF
+]p
+[ul 
+	[li 
+		"romChecksum (required) - this is currently unused.
+		$LF
+	]li
+]ul
+[p 
+	"GUID keys have a value which is in the standard guid format: 452DE2C3-EF43-2FA9-77AC-0677FC51543B
+	$LF
+]p
+[ul 
+	[li 
+		"guid (required) - a unique identifier for a movie, generated when the movie is created, which is used when loading a savestate to make sure it belongs to the current movie.
+		$LF
+	]li
+]ul
+[h4 
+	" Header sync information
+	$LF
+]h4
+[p 
+	"The following keys are used (0.9.6 and later) to check sync:
+	$LF
+]p
+[ul 
+	[li 
+		"useExtBios - External BIOS, 0 if not used.
+		$LF
+	]li
+	[li 
+		"advancedTiming - Advanced timing, 0 if not used.
+		$LF
+	]li
+	[li 
+		"useExtFirmware - External Firmware, 0 if not used.
+		$LF
+	]li
+	[li 
+		"firmNickname - Firmware Nickname.
+		$LF
+	]li
+	[li 
+		"firmMessage - Firmware Message.
+		$LF
+	]li
+	[li 
+		"firmFavColour - Firmware favorite color (0-15).
+		$LF
+	]li
+	[li 
+		"firmBirthMonth - Firmware birth month (1-12).
+		$LF
+	]li
+	[li 
+		"firmBirthDay - Firmware birth day (1-31).
+		$LF
+	]li
+	[li 
+		"firmLanguage - Firmware language (0-5).
+		$LF
+	]li
+	[li 
+		"rtcStart - Real Time Clock, default is 
+		[tt 
+			"2009-01-01T00:00:00Z
+		]tt
+		" .
+		$LF
+	]li
+]ul
+[h4 
+	" Inputlog
+	$LF
+]h4
+[p 
+	"The inputlog section consists of lines beginning and ending with a | (pipe).
+	[br 
+	]br
+	$LF
+	"The fields are as follows, except as noted in note C.
+	[br 
+	]br
+	$LF
+]p
+[pre 
+	"|c|.............XXX YYY Z|
+	$LF
+]pre
+[p 
+	"'R','L','D','U','T','S','B','A','Y','X','W','E','G'
+	$LF
+]p
+[p 
+	"Field c is a variable length decimal integer which is a bitfield corresponding to miscellaneous input states which are valid at the start of the frame.
+	$LF
+]p
+[ol 
+	[li 
+		" microphone input
+		$LF
+	]li
+	[li 
+		" reset
+		$LF
+	]li
+	[li 
+		" lid switch
+		$LF
+	]li
+]ol
+[p 
+	"The format of the main section is as follows:
+	$LF
+]p
+[ul 
+	[li 
+		" the field begins with 13 characters which constitute a bitfield.
+		$LF
+	]li
+	[li 
+		" any character other than ' ' or '.' means that the button was pressed.
+		$LF
+	]li
+	[li 
+		" by convention, the following mnemonics will be used in a column to remind us of which button corresponds to which column:
+		$LF
+		[ul 
+			[li 
+				"   RLDUTSBAYXWEG (Right,Left,Down,Up,sTart,Select,B,A,Y,X,lshoulder,rshoulder,debuG)
+				$LF
+			]li
+		]ul
+		" This ordering is based on FCEUX to a certain extent, and arbitrary after that.
+		$LF
+	]li
+	[li 
+		" W and E were chosen for shoulders to suggest West and East for Left and Right.
+		$LF
+	]li
+	[li 
+		" The emulator also allows the actions 'lid', 'blow', and 'reset', which are supported (as commands) in movies.
+		$LF
+	]li
+	[li 
+		" XXX: %03d, the x position of the stylus (0,0 topleft, 255,191 bottomright)
+		$LF
+	]li
+	[li 
+		" YYY: %03d, the y position of the stylus
+		$LF
+	]li
+	[li 
+		" Z: %1d, 1 if the stylus is pressed; 0 if not
+		$LF
+	]li
+]ul
+[p 
+	"Additional fields after this main section may be added later without breaking the file format.
+	$LF
+]p
+[h4 
+	" Notes
+	$LF
+]h4
+[ul 
+	[li 
+		" There is no key-value pair that indicates the length of the movie. This must be read by scanning the inputlog and counting the number of lines.
+		$LF
+	]li
+	[li 
+		" All movies start from power-on.
+		$LF
+	]li
+	[li 
+		" The emulator uses these framerate constants
+		$LF
+		[ul 
+			[li 
+				"   arm7_cycles_per_frame = 560190
+				$LF
+			]li
+			[li 
+				"   frames_per_second = 59.8261
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[hr 
+]hr
+[p 
+	"See also: 
+	(__wikiLink|EmulatorResources)
+	", 
+	(__wikiLink|FAQ|frequently asked questions)
+]p

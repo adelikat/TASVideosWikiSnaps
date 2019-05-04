@@ -1,0 +1,94 @@
+5
+[p 
+	"Psycho Fox is a simple platformer for the Sega Master System. This run is a real time improvement over the currently published run thanks to some devious abuse of the SMS architecture.
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 1.12.2
+		$LF
+	]li
+	[li 
+		" Beats the game as fast as possible
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+]ul
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"This one might be a bit controvertial but I figured it's an interesting enough circumstance that is was worth trying to put on the workbench. This trick was originally pointed out by MESHUGGAH 
+	[a href=/forum/t/19132 
+		"here
+	]a
+	" as a possible emulator bug. But as it turns out, this is a valid trick that just so happens to be possible due to a simple programming oversight.
+	$LF
+]p
+[p 
+	"The improvement in this run is entirely due to reducing loading times by abusing non-maskable interrupts (NMIs) that are generated in the SMS when the 'pause' button is hit. It might seem counter-intuitive that pressing the pause button would make a game go faster, but it does turn out to be the case if pressed at the right time. 
+	$LF
+]p
+[p 
+	"Here is what the game is doing during typical loading screen frame:
+	$LF
+]p
+[pre 
+	"Halt, wait for interrupt (~50000 cycles)
+	$LF
+	"Vblank, Execute necessary code for the frame (~7000 cycles)
+	$LF
+	"Repeat
+	$LF
+]pre
+[p 
+	"What happens when you press pause, is that an NMI occurs in those ~50000 cycles where nothing is happening. The NMI itslef doesn't do anything important except for Return to where the code would be executing after a normal interrupt, so basically it's doing two frames in one. EX:
+	$LF
+]p
+[pre 
+	"Halt, wait for interrupt (zero cycles in this case since pause is pressed immediately)
+	$LF
+	"NMI
+	$LF
+	"Execute frame code
+	$LF
+	"Halt again
+	$LF
+	"VBlank, frame code again
+	$LF
+]pre
+[p 
+	"The basic idea is that the return from interrupt returns to the same place regardless of which interrupt is triggered.
+	$LF
+	"There is plenty of time in a frame to add another interrupt without effecting anything else. 
+	$LF
+]p
+[p 
+	"And that's all there is to it! 
+	$LF
+]p
+[p 
+	"So is it legit? Personally I think so, it's valid input that is doable real time (since on average you'd hit an NMI during HALT about 75% of the time.) And, why would you not want loading screens to go faster? 
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": At the first glance it looked like a rejection to me, because not a single frame of gameplay was improved through optimization. But I double-checked, and there's no rule demanding that for every obsoletion, only for switching game regions. So yeah, as long as something can be sped up with player input alone, it is considered an optimization technique. Accepting as an improvement to 
+	(__wikiLink|1996M)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

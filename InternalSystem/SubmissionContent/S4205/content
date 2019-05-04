@@ -1,0 +1,950 @@
+7
+[p 
+	(youtube|v=soSW252LMnI)
+	$LF
+]p
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"As I felt Generation II of the Pokémon games has been neglected in terms of TASing, I decided to look into it and maybe do a TAS of it myself.
+	$LF
+	"At that time, there was only 
+	(__wikiLink|user:FractalFusion)
+	"'s glitchless run (see 
+	(__wikiLink|564M|here)
+	").
+	$LF
+	"But during the making of this run, interest in Gen II TASing increased significantly, and I was beat to the punch twice by 
+	(__wikiLink|user:TheZZAZZGlitch)
+	"'s run (
+	(__wikiLink|4126S|here)
+	") and later 
+	(__wikiLink|user:bobmario511)
+	"'s run (
+	(__wikiLink|2504M|here)
+	").
+	$LF
+	"I decided to continue anyway, as I planned on using a different route that promised to beat the game even faster, and this is the final result.
+	$LF
+]p
+[p 
+	"It is using the Coin Case glitch which was already used in TheZZAZZGlitch's submission, but it uses a different strategy to achieve an arbitrary code execution out of it.
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Aims for the fastest completion time
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 1.5.3
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[h4 
+	" Emulator choice
+	$LF
+]h4
+[p 
+	"I already did my emulator research for my Pokémon Blue TAS (see 
+	(__wikiLink|2434M|here)
+	"), so I knew that BizHawk would be the only suitable emulator for this run.
+	$LF
+	"Unfortunately, BizHawk had an awful desync problem with this game. I dug into the source code and found out that the RTC code was broken (
+	[a class=extlink href=http://code.google.com/p/bizhawk/issues/detail?id=122 rel=nofollow 
+		"bug report
+	]a
+	"), and the BizHawk team was nice enough to include my fix for it.
+	$LF
+	"That means that you will need at least version 1.5.3 of BizHawk to run this movie without desyncs.
+	$LF
+	"Sadly, that does not mean you can create movies in BizHawk without encountering desyncs now, I found that rewinding, at least in the TASEditor, can still be somewhat buggy (due to an apparently unrelated bug).
+	$LF
+	"But since I'm using using BizHawk merely as a playback device for the movie file I create with an external program, and at least the movie playback works correctly now, it does all I need it to do.
+	$LF
+]p
+[h4 
+	" Version choice
+	$LF
+]h4
+[p 
+	"Pokémon Gold and Silver are considered the same category and there is no significant difference between them in terms of speed.
+	$LF
+	"The version differences in terms of encounters are irrelevant to this run, so I went with the version that was used in all the previous movies.
+	$LF
+]p
+[h4 
+	" The goal
+	$LF
+]h4
+[p 
+	"Unfortunately, this game does not have a very well defined end state, since rolling the credits does not actually mark the end of the game.
+	$LF
+	"The credits are played twice, once after beating the Elite Four, and once after beating Red.
+	$LF
+	"To make it even worse, beating Red does not actually do anything to your game state other than hiding his sprite on the map and rolling the credits, so there is no such thing as tricking the game into believing you beat Red, since it doesn't keep track of it anyway.
+	$LF
+]p
+[p 
+	"It's easy to see that having the goal defined as "beat Red" is not a good position to be in, since it is not clear whether a run actually beats the game.
+	$LF
+	"Here are some examples, gradually skipping more and more of the game:
+	$LF
+]p
+[ul 
+	[li 
+		" Fight the Elite Four, go to Mt. Silver and beat Red.
+		$LF
+	]li
+	[li 
+		" Go to Mt. Silver and beat Red without beating the Elite Four by tricking the game into making him appear.
+		$LF
+	]li
+	[li 
+		" Go to Mt. Silver, talk to Red, but trick the game into skipping the fight.
+		$LF
+	]li
+	[li 
+		" Manipulating another NPC to become Red and therefore beat Red without going to Mt. Silver.
+		$LF
+	]li
+	[li 
+		" Don't talk to Red at all and jump straight to the text script that plays when he is defeated.
+		$LF
+	]li
+	[li 
+		" Ignore Red completely, and just manipulate the bytes to make him visible (simulates beating the Elite Four), invisible again (simulates beating Red) and jump to the credits.
+		$LF
+	]li
+]ul
+[p 
+	"It's obvious that there needs to be a line somewhere. The rules I used in this run are chosen to both be compatible with what the currently published runs do and also provide adequate visual feedback that you actually just beat Red.
+	$LF
+]p
+[ul 
+	[li 
+		" You must be in Mt. Silver on the map Red is in.
+		$LF
+	]li
+	[li 
+		" You must talk to Red and run his unaltered NPC scripts until the credits roll.
+		$LF
+	]li
+]ul
+[h4 
+	" Luck manipulation
+	$LF
+]h4
+[p 
+	"As in any Pokémon TAS, luck manipulation is an important factor. The RNG is basically the same as in Gen I: a hardware clock is used to generate the two random bytes at 0xFFE3 and 0xFFE4, which are used to determine all random events in the game.
+	$LF
+	"As in Gen I, the RNG is considered to be unpredictable, so in order to get the results you want there is pretty much no other way than to try out different input combinations until you find one that works.
+	$LF
+	"To aid me in grinding this out, and also to do common tasks like walking or scrolling through text optimally, I used a computer program (which is a modified version of the one I wrote for my Pokémon Blue TAS).
+	$LF
+	"This run was entirely generated using it, which is also the cause for the high rerecord count.
+	$LF
+]p
+[h3 
+	" The Coin Case Glitch
+	$LF
+]h3
+[p 
+	"Unlike Gen I, Gen II is generally considered to be solidly programmed and contains only a few known useful glitches.
+	$LF
+	"This run uses only a single glitch, named Coin Case glitch.
+	$LF
+]p
+[p 
+	"When displaying the amount of coins the player has in his coin case, the developers accidentally put the wrong termination character at the end of the text string.
+	$LF
+	"Incidentally, this minuscule mistake of getting a single byte wrong in an otherwise pretty solid game can be used to rip the game apart and execute arbitrary code.
+	$LF
+	"The glitch itself was known to exist for a long time, but the actual research on what is going on and how to exploit it was initiated by Sanqui on the Glitch City forums (see 
+	[a class=extlink href=http://forums.glitchcity.info/index.php?topic=6716.0 rel=nofollow 
+		"here
+	]a
+	"). 
+	$LF
+]p
+[h4 
+	" Code execution goals
+	$LF
+]h4
+[p 
+	"In this run, the goal is to execute code such that we are able to beat Red (using the definition above) as fast as possible.
+	$LF
+	"In order to be able to beat Red we need to do several things:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[em 
+			"Make Red appear in Mt. Silver:
+		]em
+		" This is controlled by bit 2 of flag $d8a3. It is initially set ( = hidden) and is usually reset upon beating the Elite Four.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Teleport to Mt. Silver:
+		]em
+		" Maps are specified using a map group and an index. Red is on map 0x44 in map group 3. To get there, we manipulate the map we are in to contain a warp straight to this map.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Skip the fight with Red:
+		]em
+		" The Game has several fail-safes that will skip a fight. We can make the game believe we have no Pokémon in our party to trigger such a fail-safe by setting the number of Pokémon in our party to 0.
+		$LF
+	]li
+]ul
+[h4 
+	" Code execution setup
+	$LF
+]h4
+[p 
+	"In order to escalate a single faulty byte into an arbitrary code execution, some setup is required.
+	$LF
+	"After failing to finish processing the text properly, the game reads an invalid pointer and jumps to address $e112, which is in ECHO RAM and is actually $c112.
+	$LF
+	"In this chunk of RAM the game stores parameters for playing sound effects, more specifically SFX channels 5-8. 
+	$LF
+	"Those parameters are reset frequently and are therefore usually filled with 0s (read: NOPs) and by chance end in a "ret" instruction eventually.
+	$LF
+	"That is the reason the bug is unnoticeable most of the time.
+	$LF
+	"If the game happened to play a sound effect right before you use the coin case, however, the parameters will contain data which will be interpreted as machine instructions.
+	$LF
+	"Most of the sound effects are harmless (read: not useful), with 5 exceptions: The cries of Bellsprout, Machop, Machoke, Omanyte and Celebi all happen to contain an "inc sp" instruction which corrupts the stack pointer (stack entries are 2 byte wide, but the stack pointer is incremented by only 1 byte).
+	$LF
+	"After corrupting the stack, the execution jumps to $eb12 (which is ECHO RAM for $cb12).
+	$LF
+]p
+[p 
+	"The memory $cb12 until $cbff is the end bit of a segment that stores the (meta-)tiles the current map is composed of.
+	$LF
+	"It is safe to assume that this is filled this 0s, since almost no map is big enough to acutally use the whole segment, so the execution will simply slide through to the next addresses.
+	$LF
+]p
+[p 
+	"Starting at $cc20, the game stores the new tiles the game needs to load when the player moves in the overworld.
+	$LF
+	"Every time a player moves, the newly visible tiles are loaded to here before transferring them to Video RAM.
+	$LF
+	"These are 40 (20x2) tiles when moving vertically, and 36 (2x18) tiles when moving horizontally.
+	$LF
+	"The addresses $cc20 to $cc48 contain the index numbers of the tiles in the current tileset.
+	$LF
+	"These values can only go up to 0x7f, which makes it impossible to trigger a (far) jump instruction, not to mention you would need to find a spot on some map that actually contains the data you want.
+	$LF
+	"The addresses $cc48 to $cc70 contain the corresponding palette IDs and are also way too small and too hard to manipulate for our purposes.
+	$LF
+	"The following addresses are what is useful to us: $cc70 to $cc98 contain pointers to the positions where the newly loaded tiles should be inserted in the BG map.
+	$LF
+	"The BG map is a 32x32 tile buffer located at $9800-$9C00 which holds the current background tiles.
+	$LF
+	"It features a "window", that defines the (20x18 tiles) portion of the buffer that is actually visible on screen.
+	$LF
+	"When moving, the new tiles are inserted at the respective edge of the window and then the window is moves smoothly to that side to create the moving effect.
+	$LF
+	"The position of this window resets every time the whole screen needs to be redrawn, which is every time something partially covers the screen, like menus, text boxes, battle screens, etc, so its position can be manipulated easily.
+	$LF
+	"If moving in a particular way, we can make these pointers include $98DA, $98FA, which spell out to the machine code "jp c,FA98".
+	$LF
+]p
+[p 
+	"So our journey continues at $da98 ($fa98 is ECHO RAM again), which is in the middle of the data for the third Pokémon in the players party.
+	$LF
+	"The next bytes look roughly as follows:
+	$LF
+]p
+[pre 
+	"$da97-$da98   Attack EV
+	$LF
+	"$da99-$da9a   Defense EV
+	$LF
+	"$da9b-$da9c   Speed EV
+	$LF
+	"$da9d-$da9e   Special EV
+	$LF
+	"$da9f         Attack and Defense DVs
+	$LF
+	"$daa0         Speed and Special DVs
+	$LF
+]pre
+[p 
+	"Up to now we just bounced around in the game's RAM randomly, this is the first place where we can manipulate the data so that we go where we want it to.
+	$LF
+	"We can manipulate the DVs to be a RAM address we want to go to and the lower byte of the Special EV to be a jump instruction to bring us there.
+	$LF
+	"This run uses DVs 0xe3d8 and special EV 0x4c2 to spell out "jp nz,d8e3".
+	$LF
+	"Note that this is not the only address that would have worked, but it was the fastest DVs to manipulate and also the DV differences are irrelevant during the battles fought in this run.
+	$LF
+]p
+[p 
+	"So we arrived at our final destination, $d8e3, which is the name of the fifth PC Box.
+	$LF
+	"PC boxes can be renamed individually and their names are a single block of memory, which is ideal for manipulation.
+	$LF
+	"We can name the boxes to spell out any code we want, but we are limited to the characters in the alphabet that is provided.
+	$LF
+	"For some odd reason, you can actually use more different characters for box names than for other names, like the player name or the nickname for Pokémon.
+	$LF
+	"This is why other such blocks of names, like the nicknames of the party Pokémon, are not as useful.
+	$LF
+]p
+[h4 
+	" The executed code
+	$LF
+]h4
+[p 
+	[b 
+		"Disclaimer:
+	]b
+	" The paragraphs below describe in detail what code is executed to achieve the goals stated above and how it works. It is very lengthy and technical, so if you're not interested you can just call it magic and skip the rest of this section.
+	$LF
+]p
+[p 
+	"The names used in this run are:
+	$LF
+]p
+[pre 
+	"Box 5: 'v O  é  1  2  D  i  ♀
+	$LF
+	"Box 6: T  é  2  2  T  é  7  2
+	$LF
+	"Box 7: pk 's X  Y  Q  4  g  9
+	$LF
+	"Box 8: Z  'm 0  2  p  1
+	$LF
+]pre
+[p 
+	"which give the following block of bytes:
+	$LF
+]p
+[pre 
+	"d6 8e ea f7 f8 83 a8 f5 50
+	$LF
+	"93 ea f8 f8 93 ea fd f8 50
+	$LF
+	"e1 d4 XX XX 90 fa a6 ff 50 // XX means that the values are actually irrelevant, they will be overwritten.
+	$LF
+	"99 d2 f6 f8 af f7 50
+	$LF
+]pre
+[p 
+	"and spell out the following code:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes           
+			]th
+			[th 
+				"Instruction    
+			]th
+			[th 
+				" Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Box 5
+				]b
+				"       
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" d6 8e           
+			]td
+			[td 
+				" sub 8e         
+			]td
+			[td 
+				" a is bc initially -> a := 2e 
+			]td
+		]tr
+		[tr 
+			[td 
+				" ea f7 f8        
+			]td
+			[td 
+				" ld (f8f7),a    
+			]td
+			[td 
+				" alter third byte in box 7 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 83              
+			]td
+			[td 
+				" add e          
+			]td
+			[td 
+				" e is e1 -> a := 0f 
+			]td
+		]tr
+		[tr 
+			[td 
+				" a8              
+			]td
+			[td 
+				" xor b          
+			]td
+			[td 
+				" b is eb -> a := e4 
+			]td
+		]tr
+		[tr 
+			[td 
+				" f5              
+			]td
+			[td 
+				" push af        
+			]td
+			[td 
+				" push e400 on to stack 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 50              
+			]td
+			[td 
+				" ld d,b         
+			]td
+			[td 
+				" end of string byte, harmless 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Box 6
+				]b
+				"       
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 93              
+			]td
+			[td 
+				" sub e          
+			]td
+			[td 
+				" e is e1 -> a := 03 
+			]td
+		]tr
+		[tr 
+			[td 
+				" ea f8 f8        
+			]td
+			[td 
+				" ld (f8f8),a    
+			]td
+			[td 
+				" alter fourth byte in box 7 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 93              
+			]td
+			[td 
+				" sub e          
+			]td
+			[td 
+				" e is e1 -> a := 22 
+			]td
+		]tr
+		[tr 
+			[td 
+				" ea fd f8        
+			]td
+			[td 
+				" ld (f8fd),a    
+			]td
+			[td 
+				" alter ninth byte in box 7 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 50              
+			]td
+			[td 
+				" ld d,b         
+			]td
+			[td 
+				" end of string byte, harmless 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Box 7
+				]b
+				"       
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" e1              
+			]td
+			[td 
+				" pop hl         
+			]td
+			[td 
+				" pop e400 from stack 
+			]td
+		]tr
+		[tr 
+			[td 
+				" d4 (2e) (03)    
+			]td
+			[td 
+				" call nc,032E   
+			]td
+			[td 
+				" this function delays the game by one frame; carry will never be set here 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 90              
+			]td
+			[td 
+				" sub b          
+			]td
+			[td 
+				" a is 0 after the call returns, this sets the carry flag 
+			]td
+		]tr
+		[tr 
+			[td 
+				" fa a6 ff        
+			]td
+			[td 
+				" ld a,(FFA6)    
+			]td
+			[td 
+				" reads the joypad buttons that were pressed (which are fetched during the frame transition) 
+			]td
+		]tr
+		[tr 
+			[td 
+				" (22)            
+			]td
+			[td 
+				" ldi (hl),a     
+			]td
+			[td 
+				" writes joypad input to hl (e4XX) and increments hl 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+				[b 
+					"Box 8
+				]b
+				"       
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 99              
+			]td
+			[td 
+				" sbc c          
+			]td
+			[td 
+				" c is always 0, subtract with carry will set the carry flag if a is 0 
+			]td
+		]tr
+		[tr 
+			[td 
+				" d2 f6 f8        
+			]td
+			[td 
+				" jp nc,(F8F6)   
+			]td
+			[td 
+				" jumps back to "call nc,032E" if the joypad input was not 0 
+			]td
+		]tr
+		[tr 
+			[td 
+				" af              
+			]td
+			[td 
+				" xor a          
+			]td
+			[td 
+				" a := 0 
+			]td
+		]tr
+		[tr 
+			[td 
+				" f7              
+			]td
+			[td 
+				" rst 30         
+			]td
+			[td 
+				" execute code from e400 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 50              
+			]td
+			[td 
+				" ld d,b         
+			]td
+			[td 
+				" dead code 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"This piece of code is a fully functional bootstrapping program for executing (almost) arbitrary code.
+	$LF
+	"It uses the joypad input as its code (note that there are exactly 8 buttons on a Gameboy that correspond to the 8 bits in the input byte).
+	$LF
+	"It continues reading inputs until the input is 0 (no buttons are pressed) for one frame and then executes the inputs.
+	$LF
+	"Most bytes can be inputed using this method, with the exception of the byte 0 (marks the end of the input sequence) and all bytes with a lower nibble of 0xf (i.e. 0x0f, 0x1f, 0x2f...), because pressing A+B+START+SELECT is used by the game for soft resets.
+	$LF
+]p
+[p 
+	"The code relies heavily on the initial values of the registers, which depends on every byte we went through during the coin case glitch, but is ultimately deterministic.
+	$LF
+	"The "rst 30" which is used to execute the code is not an actual reset handler function but the end bit of the actual reset handler at $28.
+	$LF
+	"What is does is essentially a "ld l,a" followed by "jp (hl)".
+	$LF
+	"That means as long as the number of written bytes is smaller than 256, this will bring us to the start of our written code.
+	$LF
+]p
+[p 
+	"The memory from $c400 onwards belongs to the tiles which are currently shown on the screen.
+	$LF
+	"I chose this memory location because it both is harmless to write to and gives nice visual feedback when the bytes are written literally on the screen.
+	$LF
+]p
+[p 
+	"The actual bytes which are written in this run are:
+	$LF
+]p
+[pre 
+	"21 46 d9 36 18 23 36 c4
+	$LF
+	"3e 76 ea 0b d2 97 ea 22
+	$LF
+	"da ea a3 d8 f8 25 f9 c9
+	$LF
+	"19 03 17 03 44 00
+	$LF
+]pre
+[p 
+	"which spell out:
+	$LF
+]p
+[pre 
+	"ld hl,d946     // stores pointer to warp data
+	$LF
+	"ld (hl),18
+	$LF
+	"inc hl
+	$LF
+	"ld (hl),c4     // overwrite warp data pointer with $c418 (which is the address of the bytes after the "ret")
+	$LF
+	"ld a,76
+	$LF
+	"ld (d20b),a    // $d20b contains the tile the player currently stands on, tile $76 allows the warp we are going to perform.
+	$LF
+	"sub a          // a := 0 (Note that "xor a" or "ld a,0" can't be used because of the limitations on the bytes we can input).
+	$LF
+	"ld (da22),a    // $da22 stores the number of Pokémon currently in our party. Settings this to 0 will allow us to skip the Red fight.
+	$LF
+	"ld (d8a3),a    // $d8a3 contains the flag that determines whether Red is visible on the map. Resetting the flag makes him visible.
+	$LF
+	"ld hl,sp+25
+	$LF
+	"ld sp,hl       // fixes the (still corrupted) stack pointer and lets us return straight to the overworld without leaving the main menu first.
+	$LF
+	"ret            // return to the normal game code
+	$LF
+	"19 03          // Position of the warp on the map. ($3,$19) is the exact position we will be standing when executing this code.
+	$LF
+	"17 03 44       // Where the warp takes us. This is "entrance 0x17 of map 0x44 in map group 3". The map only has one intended entrance,
+	$LF
+	"               //     entrance 0x17 reads invalid coordinates which happen to put us right next to Red.
+	$LF
+	"00             // ends inputting bytes and starts execution.
+	$LF
+]pre
+[p 
+	"A short explanation of warps in this game: There are two kinds of warps, "tile warps" and "edge warps".
+	$LF
+	"Tile warps are triggered when walking onto a specific position on the map. These are used e.g. for stairs or doors.
+	$LF
+	"Edge warps on the other hand are triggered when standing on it and moving towards a certain direction. They are used e.g. when exiting buildings.
+	$LF
+	"Which type some warp belongs to is determined by the index of the tile. By setting the current tile to $76, we enable an edge warp when walking to the left.
+	$LF
+]p
+[h3 
+	" Comments on the route
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" I set the text speed to fast, turn off battle animations and set the battle style to "SET" to make the overall game play faster.
+		$LF
+	]li
+	[li 
+		" Date and time are irrelevant, so I simply go with the defaults.
+		$LF
+	]li
+	[li 
+		" I name the player "I". Like in Gen I, each character printed on the screen cost one frame, making shorter names faster.
+		$LF
+	]li
+]ul
+[h4 
+	" New Bark Town
+	$LF
+]h4
+[ul 
+	[li 
+		" Totodile is the fastest starter for this route, very closely followed by Cyndaquil (they might actually be about the same).
+		$LF
+	]li
+	[li 
+		" I manipulate the DVs to be 14 Attack, 3 Defense, 13 Speed and 8 Special, which spell out the address $d8e3 needed to the arbitrary code execution. Having a suboptimal Special DV of 8, however, means that we will lose a total of three turns during the course of this run compared for having a DV of 15. Also, it is by far the hardest luck manipulation in this run.
+		$LF
+	]li
+]ul
+[h4 
+	" Route 30
+	$LF
+]h4
+[ul 
+	[li 
+		" After beating Youngster Mikey, a wild Caterpie is fought in order to increase Totodile's special EV by 20. As explained above, we will need a specific amount of Special EV in order to be able to perform our arbitrary code execution out of the Coin Case glitch. Doing all mandatory fights, Croconaw ends up exactly 50 EV short (other EV values are possible but slower), so wild encounters are used to compensate. Unfortunately, you can't get 50 Special EV with a single wild encounter until Route 36, and we'll never get there in this run.
+		$LF
+	]li
+]ul
+[h4 
+	" Violet City
+	$LF
+]h4
+[ul 
+	[li 
+		" The AI of Bird Keepers forces them to use a damaging move whenever possible, so taking damage from Spearow's Peck and Pidgeotto's Gust is unavoidable.
+		$LF
+	]li
+	[li 
+		" After beating Falkner and talking to the lab assistant in the Pokémon Center, I rename the Boxes to spell out the program I want to run during the Coin Case glitch, since this is the closest I'll get to a PC in this run.
+		$LF
+	]li
+]ul
+[h4 
+	" Route 32
+	$LF
+]h4
+[ul 
+	[li 
+		" After beating Albert, I catch a Bellsprout. This Bellsprout serves several functions:
+		$LF
+		[ul 
+			[li 
+				" Adding Bellsprout to my PokeDex. This allows me to play Bellsprout's cry whenever I want, which is important to triggering the Coin Case glitch.
+				$LF
+			]li
+			[li 
+				" Increasing the number of party Pokémon to 3. I need to manipulate the third Pokémon's data, so I need to have at least 3 Pokémon.
+				$LF
+			]li
+			[li 
+				" Beating Russell. His Geodudes take a long time to kill using Totodile, since it doesn't know Water Gun yet. Using Bellsprout in the Russell fight is actually important to this route: Totodile's resulting Special EV, when using it instead, would require at least 3 wild encounters to fix.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 
+	" Union Cave
+	$LF
+]h4
+[ul 
+	[li 
+		" After Russell is beaten using Bellsprout, a wild Zubat is fought in order to increase Totodile's special EV by 30. Now the Special EV will be 0x4c2 (1218) at the end, the exact value we need.
+		$LF
+	]li
+]ul
+[h4 
+	" Slowpoke Well
+	$LF
+]h4
+[ul 
+	[li 
+		" The first Rocket has two identical Rattatas, but the first one needs two hits whereas the second one only needs one. The level-up to 13 after the first Rattata provides us with the extra damage needed.
+		$LF
+	]li
+]ul
+[h4 
+	" Azalea City
+	$LF
+]h4
+[ul 
+	[li 
+		" In Azalea Gym you can choose between fighting Bug Catcher Josh or Al. Josh is about 7 seconds faster. I considered fighting Al nonetheless, because the resulting Special EV differs by 10, but it won't help in reducing the number of wild encounters.
+		$LF
+	]li
+	[li 
+		" The Bugsy fight is the only occasion in this run where using Rage is actually faster, but only because my DVs are suboptimal and 3 Water Gun crits won't kill.
+		$LF
+	]li
+	[li 
+		" Besides increasing our Special DV, fighting the wild Caterpie and Zubat help Totodile to reach level 18 after Bugsy and evolve into Croconaw, which saves time in the upcoming rival fight.
+		$LF
+	]li
+]ul
+[h4 
+	" Ilex Forest
+	$LF
+]h4
+[ul 
+	[li 
+		" When hunting Farfetch'd, the route used here is not the shortest route in terms of steps, but it is faster by around 1.5 seconds (assuming you get no encounters of course).
+		$LF
+	]li
+	[li 
+		" Cut is taught to Bellsprout, since it still has an empty move slot.
+		$LF
+	]li
+]ul
+[h4 
+	" Goldenrod City
+	$LF
+]h4
+[ul 
+	[li 
+		" Super Nerd Eric is the last trainer before finally getting the Coin Case and performing the glitch.
+		$LF
+	]li
+	[li 
+		" The text box for picking up the Coin Case resets the BG map window, so taking 3 steps to the left puts us in the right position to enable the jump to $fa98 when activation the Coin Case.
+		$LF
+	]li
+	[li 
+		" Croconaw is swapped to the third spot in our party. His special EV ans DVs contain values to allow jumping to $d8e3, where our code we put in as the Box names waits to be executed.
+		$LF
+	]li
+	[li 
+		" Bellsprout's cry is played by checking its stats and the Coin Case glitch is triggered. The glitchy characters that appear on the screen is the actual code written by the bootstrapping program.
+		$LF
+	]li
+	[li 
+		" Due to the executed code, there now is an edge warp to Mt. Silver directly to our left, so by walking to the left we end up in Mt. Silver right in front of Red. Also, because we returned directly to the overworld without leaving the item menu first, the screen is not redrawn and we see the item menu instead of the overworld until the map transition is done.
+		$LF
+	]li
+	[li 
+		" When I talk to Red, the fight is skipped since the game thinks we have no Pokémon in our party, and the credits roll.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Add Youtube.
+	$LF
+]p
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Replaced movie file with one that is about 10 seconds faster, and replaced temp Youtube encode.
+]p

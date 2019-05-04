@@ -1,0 +1,476 @@
+31
+[p 
+	"(TODO: make this page prettier)
+	$LF
+]p
+[p 
+	"This is a resource page showcasing tips and tricks for the game 'Super Monkey Ball: Touch&Roll' for TASing use. 
+	$LF
+	"At the time of writing, I (xy2_) is mainly running this game and is free to accept anyone who is interested in TASing this game: PM me on the tasvideos forum. 
+	$LF
+	"I also recommend checking my channel for progress: https://www.youtube.com/user/Videoteur
+	$LF
+]p
+[hr 
+]hr
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-3169 
+				"Input - How does 
+				[em 
+					"input
+				]em
+				" work in this game? 
+				$LF
+			]a
+		]li
+		[li 
+			[a href=#heading-3170 
+				"Movement - What is movement and how to optimise it?
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-3171 
+								" Ground movement
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3172 
+								" Air time
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3173 
+								" Falling
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3174 
+								" Grinding
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-3175 
+						" Optimizing Movement
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-3176 
+				" Collision - How does collision work? How to optimise and abuse it?
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-3177 
+								" Bouncing
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3178 
+								" Boosting
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3179 
+								" Reverse Boosting
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3180 
+								" Coiling
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3181 
+								" Passing through solid objects
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3182 
+								" Quickgrinding
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3183 
+								" Goal collision
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3184 
+								" Sidegoal
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3185 
+								" Sliding (Passing through thin objects with lesser speed)
+								$LF
+							]a
+						]li
+					]ul
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-3186 
+				"Useful RAM addresses
+				$LF
+			]a
+		]li
+	]ul
+]div
+[hr 
+]hr
+[h2 
+	"Input - How does 
+	[em 
+		"input
+	]em
+	" work in this game? 
+	$LF
+	[a id=heading-3169 
+	]a
+]h2
+[p 
+	"Input in this game is very special because it is based on 
+	[em 
+		"touch screen input
+	]em
+	" (what is referred as 'input'). There are 256 * 196 (size of the touch screen) = 50196!! different inputs possible each frame; for one X input there are 196 Y inputs and for one Y input there is 256 X inputs.
+	$LF
+]p
+[hr 
+]hr
+[h2 
+	"Movement - What is movement and how to optimise it?
+	$LF
+	[a id=heading-3170 
+	]a
+]h2
+[p 
+	"Before going into optimising movement, we must define what is movement. 
+	$LF
+	[br 
+	]br
+	"There are quite a few types of movement, but I will define the main types:
+	$LF
+]p
+[h4 
+	" Ground movement
+	$LF
+	[a id=heading-3171 
+	]a
+]h4
+[p 
+	"Ground movement is defined as having speed while Aiai (your character; he is referred when talking about the player) has a solid platform (generally under him) that can be used for movement.
+	$LF
+]p
+[h4 
+	" Air time
+	$LF
+	[a id=heading-3172 
+	]a
+]h4
+[p 
+	"Air time is defined when Aiai is not into contact with any solid platform and has velocity. Air time is very different to optimise from ground movement.
+	$LF
+]p
+[h4 
+	" Falling
+	$LF
+	[a id=heading-3173 
+	]a
+]h4
+[p 
+	"Falling is when Aiai is in air but is falling downwards. In this state, the fastest way to gain downward velocity is to not do any inputs once you are getting the position you want (see How movement works). Not doing input at the start is the fastest, as this will increase Aiai's speed much more than if you do your input then not hold anything: the falling speed at the start will be amplified.
+	$LF
+]p
+[h4 
+	" Grinding
+	$LF
+	[a id=heading-3174 
+	]a
+]h4
+[p 
+	"Grinding is defined when Aiai is in contact with a solid platform but has very little to no ground for walking on it: he also has a sliding animation in his ball, not a walking one like in air time and ground movement. This is the hardest to optimise.
+	$LF
+]p
+[h3 
+	" Optimizing Movement
+	$LF
+	[a id=heading-3175 
+	]a
+]h3
+[p 
+	"While doing ground movement, the fastest way to move is moving diagonally (up right, up left, down left, down right). Hovewer, ground movement is limited to a mere 70 speed if on a exactly flat platform. As such, you want to get air time as much as possible, and grind when possible; grinding is best used in long sections, such as Coil.
+	$LF
+]p
+[p 
+	"How movement 
+	[a class=extlink href=http://imgur.com/0CtdWZV rel=nofollow 
+		"actually works:
+	]a
+	" while holding the stylus in the blue part, you gain speed; while in the red part, you lose speed. The reason for this is that you automatically turn, so this rule is always true except at the beginning, where you can do a 
+	[em 
+		"reverse boost
+	]em
+	" (see Boost section).
+	$LF
+]p
+[p 
+	"Optimising air time is 
+	[a class=extlink href=http://imgur.com/leDigNA rel=nofollow 
+		"completely different:
+	]a
+	" when falling off, there are two 'arrays' of inputs: the outer array and the inner array. The limit is at which point the game considers the input is diagonal and massively slows you down (you lose from 2 to 6 speed). In the 'inner' array, all directions give you the highest speed possible you can have when holding that direction, but they all are slower or faster when bouncing: the middle one (here in blue) is generally always the fastest. When the median input is uneven (for example 131,5) you want to hold up on the touch screen 131 and 132 for the same number of frames, which amounts like you were holding up 131,5. This array of inputs and position changes each time, but the consensus is that holding up center (128) is always in the 'inner array', unless your angle is very diagonal, and the diagonal inputs in air (up left, up right) are always slower.
+	$LF
+]p
+[p 
+	"For optimising grinding, the general goal is to be balanced but with the last input where you would fall off otherwhise. For example, if for one frame, you would fall off starting at 197,0, you would hold 196,0 and do that for a frame-by-frame basis.
+	$LF
+]p
+[hr 
+]hr
+[h2 
+	" Collision - How does collision work? How to optimise and abuse it?
+	$LF
+	[a id=heading-3176 
+	]a
+]h2
+[h4 
+	" Bouncing
+	$LF
+	[a id=heading-3177 
+	]a
+]h4
+[p 
+	"Bouncing is the most basic form of collision. If you enter in contact with a solid object with enough speed, you will do a bounce off it and gain speed relative to the angle at which you bounced. The game registers the collision 2 frames before it happens (although this can be 1 frame sometimes), so this is the timeframe at which you must be ready to do your input relative to the bounce.
+	$LF
+]p
+[p 
+	"A simple example: Aiai approaches the border of a platform at 12 speed, going up-right. 2 frames before the collision with this border happens, the game registers the collision and changes the speed. Since Aiai hit the platform going up-right, he will bounce a little bit upwards but keep going upright.
+	$LF
+]p
+[p 
+	"To go the fastest possible while bouncing, go in the direction opposite to where Aiai is going when the collision triggers. If we take the previous example, if Aiai goes up-left as soon as the collision registers, he will gain about 2 more speed, his bouncing height will be increased (and as such, his air time) and he will go in a direction more to the left.
+	$LF
+]p
+[h4 
+	" Boosting
+	$LF
+	[a id=heading-3178 
+	]a
+]h4
+[p 
+	"Boosting can only be done at the start of a level, and abuses the fact that you fall on the starting platform at the start of a level. There are two ways to boost: go up-right then up-left (left boost), and go up-left then up-right (right boost). 
+	$LF
+]p
+[p 
+	"The direction of a boost has no effect on its speed, but you should do it relative of where you want to go after boosting. The duration you want to hold up-left and up-right is a case-by-case basis, although the second direction should be held as least twice longer than the first direction held.
+	$LF
+]p
+[h4 
+	" Reverse Boosting
+	$LF
+	[a id=heading-3179 
+	]a
+]h4
+[p 
+	"Reverse Boosting (RB) is exactly the same as boosting, except instead of going up-left and up-right, you go down-left and down-right. This is useful if you want to gather speed, for example for a bounce which needs speed for it to land at the desired location. After doing the RB, input the direction opposite of which you did your initial boost; a left RB should go up-right immediatly after. This gathers more speed than a normal boost, but takes longer to setup.
+	$LF
+]p
+[p 
+	"If you need less speed than what a RB offers, do a Half Reverse Boost (HRB): instead of doing a full RB, only input one direction of a RB, then follow up the second part normal boost. A left HRB inputs down-left, then goes up-right after.
+	$LF
+]p
+[h4 
+	" Coiling
+	$LF
+	[a id=heading-3180 
+	]a
+]h4
+[p 
+	"Coiling is a fancy name for 'bad collision'. Coiling happens when you collide with two solid objects on top of each other at an angle such that you get pushed into both of them: this puts you on top of the topmost platform and you do not lose speed. Very situational, can be replicated best in Coil (hence the name).
+	$LF
+]p
+[h4 
+	" Passing through solid objects
+	$LF
+	[a id=heading-3181 
+	]a
+]h4
+[p 
+	"Because of how the game treats movement (you 'blink' a certain distance every frame), high speeds can cause you to pass through objects. If you manage to travel into more than 50% of a platform before the game registers a collision, you will pass through an object. Even if it registers the collision, you have 1 frame to get a sufficient distance into the object.
+	$LF
+]p
+[p 
+	"As such, if you travel exactly 50% into a solid object, you will get stuck into it and wonder about life in a plastic fiber ball.
+	$LF
+]p
+[h4 
+	" Quickgrinding
+	$LF
+	[a id=heading-3182 
+	]a
+]h4
+[p 
+	"A variant of coiling. Certain platforms are sloped enough that the game will register Aiai as grinding, even though he is falling, allowing him to get in the grinding state very easily and gain horizontal velocity.
+	$LF
+]p
+[h4 
+	" Goal collision
+	$LF
+	[a id=heading-3183 
+	]a
+]h4
+[p 
+	[a class=extlink href=http://i.imgur.com/G5fkxig rel=nofollow 
+		"It's bad.
+	]a
+	" Everything up to half of the party ball is considered hitting the goal.
+	$LF
+]p
+[h4 
+	" Sidegoal
+	$LF
+	[a id=heading-3184 
+	]a
+]h4
+[p 
+	"Sidegoaling is a variant of passing through solid objects. While doing a sidegoal, you want to hit the goal from the side and completely pass through one platform, hitting the goal collision box afterwards.
+	$LF
+]p
+[h4 
+	" Sliding (Passing through thin objects with lesser speed)
+	$LF
+	[a id=heading-3185 
+	]a
+]h4
+[p 
+	"Most notable in Anaconda (try sliding through the edge of the curves) For very thin objects, having an angle that is completely to the opposite of the position of the object allows you to 'slide' into it and completely pass through them, whether or not you have high speed.
+	$LF
+]p
+[hr 
+]hr
+[h2 
+	"Useful RAM addresses
+	$LF
+	[a id=heading-3186 
+	]a
+]h2
+[p 
+	"These addresses only work on the EU version. Recommended watching levels with these.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"021FB8E4
+			]td
+			[td 
+				"Aiai's speed
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E95DC
+			]td
+			[td 
+				"Aiai's facing direction
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E95AC
+			]td
+			[td 
+				"Aiai's 'inertia' (this address is only updated in case of collision and determines the direction in which you go after bouncing)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E8630
+			]td
+			[td 
+				"Camera 1
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E95CC
+			]td
+			[td 
+				"Camera 2
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E8640
+			]td
+			[td 
+				"Camera?
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E8660
+			]td
+			[td 
+				"Aiai's angle (this is the angle the ball is facing, not Aiai's facing direction)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E8670
+			]td
+			[td 
+				"Aiai's angle 2
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"020E959C
+			]td
+			[td 
+				"Collision direction + lock (after a collision, this address determines your angle for about 8-34 frames, then locks it to a direction). Very useful for boosting.
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"(TODO: more stuff)
+]p

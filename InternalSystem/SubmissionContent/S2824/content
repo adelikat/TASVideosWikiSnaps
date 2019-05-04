@@ -1,0 +1,326 @@
+7
+[p 
+	"MP4 download at archive.org: http://www.archive.org/details/PokemonTradingCardGame 
+	[br 
+	]br
+	$LF
+	"Youtube Part 1: http://www.youtube.com/watch?v=uuLSTwLC2K4 
+	[br 
+	]br
+	$LF
+	"Youtube Part 2: http://www.youtube.com/watch?v=DFt_OGz4Cdg
+	$LF
+]p
+[p 
+	"Lua script used: http://pastebin.com/gRCDfWSq
+	$LF
+]p
+[h2 
+	" 
+	(__wikiLink|user:p4wn3r)
+	"'s comments
+	$LF
+]h2
+[h3 
+	" Run attributes
+	$LF
+]h3
+[ul 
+	[li 
+		"Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		"Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		"Uses loss as a shortcut
+		$LF
+	]li
+	[li 
+		"Attempts to color a dinosaur, but fails miserably
+		$LF
+	]li
+]ul
+[h3 
+	" Emulator used
+	$LF
+]h3
+[p 
+	"Visual Boy Advance re-recording v23-interim svn217
+	$LF
+]p
+[p 
+	"The movie should synch on v19.3 and newer, with the exception of the "problematic" v20
+	$LF
+]p
+[h3 
+	" Overall comments
+	$LF
+]h3
+[p 
+	"(From Wikipedia)
+	$LF
+	"Pokémon Trading Card Game (ポケモンカードGB Pokemon Kādo Jī Bī?, Pokémon Card GB) is the video game incarnation
+	$LF
+	"of the popular Pokémon Trading Card Game (TCG). There are currently two games in the series. Both the series
+	$LF
+	"and the card game are based on the famous Pokémon video game series.
+	$LF
+	"Mimicking the style of the original Pokémon video games, this series featured the protagonist, Mark, that wanted
+	$LF
+	"to be the best at the Pokémon Trading Card Game. He would then travel between areas collecting cards and challenging
+	$LF
+	"Club Masters (equivalent to Gym Leaders). Upon defeating all of the Club Masters, he would face the Grand Masters
+	$LF
+	"(equivalent to the Elite Four). Afterwards he would fight his rival Ronald for the title of Champion. Winning would
+	$LF
+	"win him the four Legendary Pokémon Cards: Moltres, Zapdos, Articuno, and Dragonite. Each of the Grand Masters
+	$LF
+	"built their decks around one of these cards. Ronald uses a deck containing all four.
+	$LF
+	"The first game in the series was released in Japan for the Game Boy Color on December 18, 1998.
+	$LF
+	"It was then released in North America on March 31, 2000 and in Europe on December 8, 2000.
+	$LF
+]p
+[p 
+	"Pokémon TCG is one of the best spin-off games of the Pokémon franchise. The game is quite challenging when played on
+	$LF
+	"Game Boy, to win, you have to defeat your opponents many times to collect booster packs to build a deck that counters
+	$LF
+	"your opponent's strategy. However, none of this happens in this TAS, the battles won are just enough to complete
+	$LF
+	"the game, even losing forced battles when it's faster to do so. Luck is manipulated to its limit, allowing opponents
+	$LF
+	"to be beaten in 1 or 2 turns. As a consequence, the game is completed in less than 22 minutes, whereas a normal gameplay
+	$LF
+	"would last hours.
+	$LF
+]p
+[h3 
+	" Luck manipulation
+	$LF
+]h3
+[p 
+	"Luck is obviously the most time-saving aspect of this run and what makes the movie interesting.
+	$LF
+]p
+[p 
+	"Pseudo-randomality in this game is controlled by the bytes in addresses CACA-CACB. They don't change at all during battles,
+	$LF
+	"except when a random event is called (for example, shuffling the deck or doing an attack that requires a coin flip). That means
+	$LF
+	"that the random map for a battle is completely set before it takes place. However, it's still possible to manipulate a good
+	$LF
+	"random result with the use of cards that shuffle the deck (like Computer/Energy Search), which change the RNG seed.
+	$LF
+]p
+[p 
+	"Manipulation in this run abuses the fact that the RNG is affected only by frame delay, doesn't roll when changing decks and
+	$LF
+	"only card offsets are randomized. The method used to manipulate luck consists of:
+	$LF
+]p
+[ul 
+	[li 
+		"Open and close the menu to simulate a deck change before a battle
+		$LF
+	]li
+	[li 
+		"Check every frame observing opponent's hand. Look for one that has few weak basic pokemon.
+		$LF
+	]li
+	[li 
+		"Take note of the values at CACA-CACB and the position of the cards that went into your hand.
+		$LF
+	]li
+	[li 
+		"Observe the randomness in the battle, mostly coin flips
+		$LF
+	]li
+	[li 
+		"Change the deck, putting the cards necessay to win the match in the hand positions.
+		$LF
+	]li
+	[li 
+		"If the coin flips aren't favorable, put Computer/Energy Search to try to manipulate, or remove all pokemon to redraw the hand.
+		$LF
+	]li
+	[li 
+		"Start the battle when the values at CACA-CACB are the same you wrote down.
+		$LF
+	]li
+	[li 
+		"Watch your enemy cry in agony as you deliver the mortal blow.
+		$LF
+	]li
+]ul
+[p 
+	"Player card positions during battle start at C200, ther IDs start at C400. For the opponent, the addreses are, respectively, C280
+	$LF
+	"and C480. A Lua script was used to visualize this better.
+	$LF
+]p
+[p 
+	"When removing a card from the deck, the first card of that type in the array is removed and the remaining cards are shifted left.
+	$LF
+	"When adding a card, it's appended to the end of the deck.
+	$LF
+]p
+[p 
+	"This way, it's possible to manipulate "normal" opponents to have only one basic pokemon in hand, making them lose when you KO
+	$LF
+	"their only pokemon. For "bosses" (club leaders, Ronald and grand masters), things work quite differently. Shortly before the
+	$LF
+	"prizes are put, the game changes their hand to have a minimum of two basic pokemon and some energy cards. Because of this, two
+	$LF
+	"turns is the minimum necessary to defeat bosses. Courtney, Steve, Jack and the final Ronald are an exception to this rule, since
+	$LF
+	"they carry a legendary basic card and the AI will choose not to put those cards at the start of the match to abuse their poképower.
+	$LF
+]p
+[p 
+	"Since changing decks costs time, we often went for sub-optimal 1-turn battles that would be slower if manipulated flawlessly. In
+	$LF
+	"two-turn wins, though, since the result expected is harder to achieve, this strategy is applied everytime.
+	$LF
+]p
+[h3 
+	" Cards used
+	$LF
+]h3
+[ul 
+	[li 
+		"Ponyta, Rattata, Staryu and Hitmonchan - 20 damage with one energy card
+		$LF
+	]li
+	[li 
+		"NidoranM and Farfetch'd - 30 damage with one energy card and coin flip
+		$LF
+	]li
+	[li 
+		"Energy Search and Computer Search - used to manipulate coin flips
+		$LF
+	]li
+	[li 
+		"Pluspower - raises the amount of damage you deal, allowing OHKO
+		$LF
+	]li
+	[li 
+		"Defender - blocks 20 damage from opponent, the AI doesn't attack when it won't deal damage, saving time.
+		$LF
+	]li
+]ul
+[h3 
+	" Possible Improvements
+	$LF
+]h3
+[p 
+	"Like any other luck-based TAS, this run is quite improvable. Most of the improvements may come from an in-depth analysis
+	$LF
+	"of the RNG, which would allow victory with the fewest amount of deck changes. Better luck manipulation in general could
+	$LF
+	"also be used, as there were some sub-optimal battles in this run simply because changing the deck for the fastest solution
+	$LF
+	"would take too much time. Also, booster packs received could be manipulated not to give new types of cards, that would reduce
+	$LF
+	"the amount of options in the card menu and make deck changing faster.
+	$LF
+]p
+[h2 
+	" 
+	(__wikiLink|user:FractalFusion)
+	"'s comments
+	$LF
+]h2
+[p 
+	"I didn't work on it much (just the first two clubs), and that was three years ago, but I set the groundwork that 
+	(__wikiLink|user:p4wn3r)
+	" eventually
+	$LF
+	"took up. I remember 
+	(__wikiLink|user:kirbymuncher)
+	" also worked on it even earlier than I did.
+	$LF
+]p
+[p 
+	"Anyway, before I gave up, I decided to beat Ronald even though losing to him was faster. However 
+	(__wikiLink|user:p4wn3r)
+	$LF
+	"decided that losing to Ronald was better, and so redid the Ronald battle I beat. Anyway, I found it rather surprising that
+	$LF
+	(__wikiLink|user:p4wn3r)
+	" had TASed so fast, faster than I could have done. I would have thought manipulating would be hard enough.
+	$LF
+]p
+[p 
+	"Too bad the tutorial was so long, it consumed 1/3 of the movie. At least you have a chance to see how a TCG battle works.
+	$LF
+	"You can read the 
+	[a class=extlink href=http://en.wikipedia.org/wiki/Pok%C3%A9mon_Trading_Card_Game rel=nofollow 
+		"Wikipedia page
+	]a
+	", which covers the rules of
+	$LF
+	"the game. I'll summarize it here.
+	$LF
+]p
+[p 
+	"After drawing hands and placing prize cards, each player puts down one or more basic Pokemon in play (if no basic Pokemon, hand is redrawn),
+	$LF
+	"designating one Pokemon each as an active Pokemon. Flip a coin to see who goes first. From then on, players take turns
+	$LF
+	"doing stuff such as drawing a card from the deck (mandatory), putting energy cards (optional, one max per turn),
+	$LF
+	"evolving a Pokemon (optional),
+	$LF
+	"using trainer cards (optional),
+	$LF
+	"and ending the turn with a move by the active Pokemon (optional).
+	$LF
+	"A player who knocks out a Pokemon claims a prize card. A player wins if he/she claims
+	$LF
+	"all of his/her prize cards, or the other player has no Pokemon remaining,
+	$LF
+	"or the other player has no cards left in the deck.
+	$LF
+]p
+[p 
+	"To win really quickly, this run manipulates so that the opponent has as few (one or two)
+	$LF
+	"basic Pokemon left as possible, and that they are weak.
+	$LF
+	"These Pokemon are beaten in one move each, using basic Pokemon that do 20 or 30 damage
+	$LF
+	"with one energy. Manipulation can be done with
+	$LF
+	"altering the deck, waiting outside battle, redrawing own hand, and using cards that randomize (such as energy search and computer search).
+	$LF
+	"The game cheats for leaders (and Ronald) by giving them at least two basic Pokemon and some energy cards.
+	$LF
+]p
+[p 
+	"There are a couple instances where losing is faster than winning.
+	$LF
+]p
+[p 
+	"By the way, the four "legendary cards" are inventions of this game and do not exist in real life.
+	$LF
+]p
+[p 
+	"Suggested screenshot:
+	$LF
+]p
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/zpng053750.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Baxter)
+	": Accepting due to good audience response.
+]p

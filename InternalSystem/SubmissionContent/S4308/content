@@ -1,0 +1,412 @@
+8
+[p 
+	(youtube|v=pEIxrT7auwI|w=645|h=365)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		"Aims for fastest time
+		$LF
+	]li
+	[li 
+		"Manipulates luck
+		$LF
+	]li
+	[li 
+		"Uses game-breaking glitches
+		$LF
+	]li
+	[li 
+		"Achieves credits early
+		$LF
+	]li
+]ul
+[h3 
+	" DelayFFObjectGlitch
+	$LF
+]h3
+[p 
+	"DelayObject is taken out from bank2 (usually bank6, instead) when NMI interrupts the process of objectFF. Object 00-FF appears in the Iceman stage. FinalFighter discovered that $600 was executed, when DelayObject55 appeared. We increase the number of instructions executed in one frame by manipulating music, drop items and Rockman's action so that NMI interrupts the particular process in the frame.
+	$LF
+]p
+[h3 
+	"Instructions
+	$LF
+]h3
+[p 
+	"ObjectFireDelay is manipulated by DropItems. $23 increases every frame, and DelayObject55 may appear when $23 is 55.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"$0023
+			]th
+			[th 
+				"55
+			]th
+		]tr
+		[tr 
+			[th 
+				"$0600
+			]th
+			[th 
+				"54
+			]th
+			[td 
+				"F8
+			]td
+			[th 
+				"50
+			]th
+			[th 
+				"4D
+			]th
+			[td 
+				"54
+			]td
+			[td 
+				"F8
+			]td
+			[td 
+				"F8
+			]td
+		]tr
+		[tr 
+			[th 
+				"$0650
+			]th
+			[td 
+				"00
+			]td
+			[th 
+				"AC
+			]th
+			[th 
+				"21
+			]th
+			[td 
+				"00
+			]td
+			[th 
+				"6B
+			]th
+			[th 
+				"17
+			]th
+			[td 
+				"00
+			]td
+		]tr
+		[tr 
+			[th 
+				"$06F0
+			]th
+			[td 
+				"1B
+			]td
+			[td 
+				"3C
+			]td
+			[td 
+				"3E
+			]td
+			[td 
+				"1B
+			]td
+			[td 
+				"3D
+			]td
+			[td 
+				"3C
+			]td
+			[td 
+				"20
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"DelayObjects is taken out
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"$0023
+			]th
+			[td 
+				"56
+			]td
+		]tr
+		[tr 
+			[th 
+				"$0600
+			]th
+			[th 
+				"54
+			]th
+			[td 
+				"F8
+			]td
+			[th 
+				"50
+			]th
+			[th 
+				"4D
+			]th
+			[td 
+				"54
+			]td
+			[td 
+				"F8
+			]td
+			[td 
+				"F8
+			]td
+		]tr
+		[tr 
+			[th 
+				"$0650
+			]th
+			[td 
+				"3C
+			]td
+			[th 
+				"AD
+			]th
+			[th 
+				"22
+			]th
+			[th 
+				"1F
+			]th
+			[th 
+				"6C
+			]th
+			[th 
+				"18
+			]th
+			[th 
+				"00
+			]th
+		]tr
+		[tr 
+			[th 
+				"$06F0
+			]th
+			[th 
+				"03
+			]th
+			[td 
+				"3C
+			]td
+			[td 
+				"3E
+			]td
+			[th 
+				"01
+			]th
+			[td 
+				"3D
+			]td
+			[td 
+				"3C
+			]td
+			[th 
+				"55
+			]th
+		]tr
+	]tbody
+]table
+[p 
+	"DelayObject55 calls $600
+	$LF
+]p
+[pre 
+	"0600: 54 F8 NOP F8,X               ; Y of Rockman = 54
+	$LF
+	"0602: 50 4D BVC $0651              ; Y of Rockbuster1,2 = 50,4D
+	$LF
+	"0650: 3C UNDEFINED (NO USE)        ; ObjectFireDelay of DelayObject3 = 3C
+	$LF
+	"0651: AD 22 1F LDA $1F22 = #$0A    ; ObjectFireDelay of DropItems = AD,22
+	$LF
+	"                                   ; ObjectFireDelay of DelayObject1 = 1F
+	$LF
+	"0654: 6C 18 00 JMP ($0018) = $C460 ; (instruction of StageClear)
+	$LF
+	"                                   ; ObjectFireDelay of DropItems = 6C,18
+	$LF
+	"                                   ; ObjectFireDelay of DelayObject55 = 00
+	$LF
+	"                                   ; Input of Controllers = $0018 = 60,C4
+	$LF
+	"C45E: A9 00 lda #$00
+	$LF
+	"C460: 85 31 sta $31(CurrentStage)  ; <-- Jumped here
+	$LF
+	"C462: 4C 0C C1 jmp $C10C
+	$LF
+]pre
+[h3 
+	" History
+	$LF
+]h3
+[ul 
+	[li 
+		" 11/01/21 - FinalFighter found DelayObjectFFGlitch.
+		$LF
+	]li
+	[li 
+		" 14/04/29 - FinalFighter read about the article of SMB3 ACE TAS. http://ch.nicovideo.jp/TAS/blomaga/ar516177
+		$LF
+	]li
+	[li 
+		" 14/04/30 - FinalFighter remembered that some objects had called a RAM address. http://www.yuko2ch.net/rockman/JumpAddressList.txt
+		$LF
+	]li
+	[li 
+		" 14/05/01 - Creation of LuaScripts. FinalFighter and pirohiko confirmed by some cheats that DelayEnding in IceManStage was possible.
+		$LF
+	]li
+	[li 
+		" 14/05/08 - We began to work on a new TAS. 
+		$LF
+	]li
+	[li 
+		" 14/05/13 - New TAS completed!
+		$LF
+	]li
+]ul
+[h3 
+	" Detailed article with some pictures (written in Japanese)
+	$LF
+]h3
+[p 
+	"http://ch.nicovideo.jp/TASVideos/blomaga/ar529967
+	[br 
+	]br
+	$LF
+	"こちらには日本語による詳細な解説・図説があります。
+	$LF
+]p
+[h3 
+	" Special Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" Shinryuu - He looked at and encouraged our TAS. 
+		$LF
+	]li
+	[li 
+		" cstrakm - He discovered the DelayWaterCurrent. It led to the discovery of DelayObjectGlitch.
+		$LF
+	]li
+	[li 
+		" Inzult - He verified DelayObjectGlitch with the real NES.
+		$LF
+	]li
+	[li 
+		" Tekepen - Explanation of 6502 was helpful. 
+		$LF
+	]li
+	[li 
+		" Kureyuni - Explanation of undefined code of 6502 was helpful. 
+		$LF
+	]li
+	[li 
+		" AlphaBeta, NinjyaSuperK, Vagla, Bisqwit - Rockman1's analysis data were helpful. 
+		$LF
+	]li
+	[li 
+		" adelikat, Nach, Dwedit - The problem of Old PPU of FCEUX was solved by them. 
+		$LF
+	]li
+]ul
+[p 
+	"And...
+	$LF
+]p
+[ul 
+	[li 
+		" Thank you, everyone of TASVideos. 
+		$LF
+	]li
+]ul
+[h3 
+	" P.S.
+	$LF
+]h3
+[p 
+	"Rockman went to the Iceman stage and felt like going back home. It'll come out after the credits that Rockman actually doesn't complete the game. Press start after the credits, and you'll see...
+	$LF
+]p
+[p 
+	"The next is renewal of Rockman2!
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": So this is quite a TAS to deal with. No matter how I handle it, someone is going to want to strap a bomb to my car. I'm surprised I even have the guts to judge this run, as some of the comments leave me feeling the heat of the fire and gasping for air. Hopefully, now you'll understand why I did not rush to judge this, and I'm sorry for the delay.
+	$LF
+]p
+[p 
+	"On the one hand, most of the gameplay is cut, and all we're left with is a quick jump to the ending credits. On the other hand, only a single icy level is played (with a different single level marked as completed). This run crashes part of the game mechanics as the previous run does, albeit a bit differently, and that run's glitch usage's doesn't beat the game in a flash.
+	$LF
+]p
+[p 
+	"Now, unless you were living under a rock, inside a bubble, or in a wood shed for the past few years, you saw the previous run, loved it, and don't want the previous movie obsoleted. The completion state is also controversial, as to whether the game is really completed or not, and possibly this run should be rejected.
+	$LF
+]p
+[p 
+	"I personally tango to my own metal, and like to handle things in a shocking and most electrifying manner, although fairly so. I find the 
+	[em 
+		"cool
+	]em
+	" thing to do in this situation would be to create a new branch, but being mindful of the issues, not the one you were thinking. This is setting a new precedent, one which may require further recategorization of existing movies, and that's okay.
+	$LF
+]p
+[p 
+	"I deem the following branches viable:
+	$LF
+]p
+[ul 
+	[li 
+		" All levels completed using every technique available (the currently published run).
+		$LF
+	]li
+	[li 
+		" All levels completed without using the magnet beam, which incidentally is responsible for most of the glitches seen in the above branch, and is also deemed 
+		[em 
+			"impossible
+		]em
+		" by the creators.
+		$LF
+	]li
+	[li 
+		" A quick as possible run (this run).
+		$LF
+	]li
+]ul
+[p 
+	"This kind of branching also helps with other problematic games we've seen like Super Mario World, Super Mario Land 2, Super Metroid, and Kirby Super Star, which incidentally, all those games actually report some sort of completion percentage.
+	$LF
+]p
+[p 
+	"Accepting this run for the new low completion branch for this game (which also happens to be game-end glitch or whatever we're currently calling it).
+	$LF
+]p
+[p 
+	(__wikiLink|user:Guga)
+	": Processing...
+]p

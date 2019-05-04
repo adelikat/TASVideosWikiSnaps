@@ -1,0 +1,1229 @@
+2
+[p 
+	[b 
+		"This page is only an old draft and will be updated and cleaned eventually.
+	]b
+	$LF
+]p
+[h2 
+	" Random Number Generator (RNG)
+	$LF
+]h2
+[h3 
+	" Mechanics
+	$LF
+]h3
+[h4 
+	" RNG Calculation
+	$LF
+]h4
+[p 
+	"You can calculate the next RNG state with the following lua script.
+	$LF
+]p
+[pre 
+	[code class=language-lua 
+		"function getNextRNG(lowRNG, upRNG)
+		$LF
+		" local temp = upRNG + ((2^0x2 * upRNG) % 2^0x10)
+		$LF
+		" lowRNG = lowRNG * 2 + math.floor(temp / 2^0x10) + upRNG + math.floor((lowRNG * 2 + math.floor(temp / 2^0x10)) / 2^0x10)
+		$LF
+		" return lowRNG % 0x10000, temp % 0x10000 -- return RNG L, RNG U
+		$LF
+		"end
+		$LF
+	]code
+]pre
+[h4 
+	" RNG Addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x2063760
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"RNG Lower 2 bytes
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2063762
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"RNG Upper 2 bytes
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Passed Value
+	$LF
+]h4
+[p 
+	"A 16-bit value is passed to the function in register 0. The function then returns a value between 0 (inclusive) and the passed value (exclusive).
+	$LF
+]p
+[pre 
+	[code class=language-c 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[h3 
+	" Battle Uses
+	$LF
+]h3
+[h4 
+	" Item Drop Test
+	$LF
+]h4
+[p 
+	"Return address (r14): 0x020BB710
+	[br 
+	]br
+	"Passed Value: 0x2710 (10,000)
+	$LF
+]p
+[p 
+	"The item's drop rate is multiplied by the drop rate multiplier and stored in register 8 during the RNG execution. If the returned value is less than the value in register 8, the test is passed and the item is dropped. Else, the drop test is considered failed and continues to the next item in the table.
+	$LF
+]p
+[h2 
+	" Overworld Movement
+	$LF
+]h2
+[h3 
+	" Important Addresses
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x207415C
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Current X Coordinate
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2074160
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Current Y Coordinate
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	" Battle Mechanics
+	$LF
+]h2
+[h3 
+	" Light Puck (Puck)
+	$LF
+]h3
+[h4 
+	" Travel Time
+	$LF
+]h4
+[p 
+	"The Puck begins moving to the next partner two frames after the character holding the Puck (either character if the Puck is not in play) damages an enemy with a combo finisher. The value is set, when the Puck begins moving, to the base value of 89 and is reduced by 1 every frame until 0.
+	$LF
+	"Upon turning 0 from traveling, the value becomes 1 the next frame and the pass is considered complete. The value becomes 0 afterwards. Attempting to change this value directly to 0 will cause the game to reset the value to the base value.
+	$LF
+]p
+[p 
+	"This value is signed. All negative values are treated like 1 and will turn to 0 on the next frame to complete the pass normally.
+	$LF
+]p
+[h4 
+	" Hold Time
+	$LF
+]h4
+[p 
+	"The Puck can only be held for a limited amount of time before disappearing from play. The value is reset, when passing the Puck, to the base value of 930 and reduced by 30 for every pass. This includes the pass the puck is created so maximum base value without clothes is 900. The value is reduced by 1 every frame until 0.
+	$LF
+]p
+[p 
+	"This value is signed. All negative values are treated like 1 and will turn to 0 on the next frame for the Puck to disappear from play normally.
+	$LF
+]p
+[p 
+	"This value is used the frame before a combo finisher by the character holding the Puck deals damage to determine the increase/decrease of the Puck's Damage Multiplier.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Value/Max Value
+			]th
+			[th 
+				"Multiplier Change
+			]th
+		]tr
+		[tr 
+			[td 
+				"98%
+			]td
+			[td 
+				"+50 (+x0.5)
+			]td
+		]tr
+		[tr 
+			[td 
+				"92%
+			]td
+			[td 
+				"+20 (+x0.2)
+			]td
+		]tr
+		[tr 
+			[td 
+				"70%
+			]td
+			[td 
+				"+10 (+x0.1)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0%
+			]td
+			[td 
+				"-100 (-x1.0)
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Damage Multiplier
+	$LF
+]h4
+[p 
+	"The Puck multiplies the damage dealt by a combo finisher if the character is currently holding it. The value is reset, when the Puck is created by the first pass, to the base value of 200. The value is then increased or decreased, when passing the Puck, based on the Puck Hold Time value. The value is a percentage so the value must be divided by 100 to get the true multiplier.
+	$LF
+]p
+[p 
+	"The minimum value is 200 (x2) and maximum is 500 (x5). Any values beyond this range will be set to the minimum (if under) or the maximum (if over). This value is signed and all negative values will be set to 200.
+	$LF
+]p
+[p 
+	"The Damage Multiplier applied to damage is after the increase or decrease. This must be noted because the Damage Multiplier in RAM is updated after the affected damage is dealt.
+	$LF
+]p
+[h4 
+	" Useful Puck Addresses
+	$LF
+]h4
+[p 
+	"All Puck addresses are stored in the Battle GUI Linked List except the following:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x23918CD
+			]td
+			[td 
+				"8-bit
+			]td
+			[td 
+				"Current Puck Pass Count
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Hit Points
+	$LF
+]h3
+[p 
+	"A single address contains the current amount of Hit Points despite the two characters seeming to have their own Hit Point bars. The game only uses the current Hit Points. The damage received by the characters is only for graphical purposes and specific clothing abilities.
+	$LF
+]p
+[h4 
+	" HP Related Addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x23918B0
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Current HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x23918B2
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Maximum HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x23918B4
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Damage Received on Top Screen
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x23918B6
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Damage Received on Bottom Screen
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Item Drop
+	$LF
+]h3
+[h4 
+	" Drop Rate Multiplier (for Battles)
+	$LF
+]h4
+[p 
+	"The Drop Rate Multiplier can be temporarily multiplied by the amount of chained battles. This value is moved to a new address after the chain is finalized for use in battle.
+	$LF
+]p
+[h4 
+	" Item Drop Table
+	$LF
+]h4
+[p 
+	"Each enemy has an item drop table containing one item and drop rate for each difficulty. Starting at the item for the current difficulty, a drop test is executed. If the test is successful, the item is dropped. If the test is unsuccessful, the game moves down a difficulty and tries again. If the game reaches the end of the enemy's drop table without dropping an item, no item is dropped.
+	$LF
+]p
+[h4 
+	" Useful Item Drop Related Addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x2071D24
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Drop Rate Multiplier
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2391872
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Drop Rate Multiplier for Battle(s)
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Battle Field Object/GUI Linked Lists
+	$LF
+]h3
+[h4 
+	" Linked Lists
+	$LF
+]h4
+[p 
+	"All GUI elements and Field Objects are stored within Linked Lists during battles.
+	$LF
+	[br 
+	]br
+	"Known heads and tails of these linked lists are listed below:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Head Address
+			]th
+			[th 
+				"Tail Address
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x235406C
+			]td
+			[td 
+				"0x235408C
+			]td
+			[td 
+				"Field Objects, Bottom Screen
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x235C0F8
+			]td
+			[td 
+				"0x235C118
+			]td
+			[td 
+				"Field Objects, Top Screen
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2364184
+			]td
+			[td 
+				"0x23641A4
+			]td
+			[td 
+				"GUI Elements
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Basic Struct
+	$LF
+]h4
+[p 
+	"This is used by all following structs, which are extended from this struct.
+	$LF
+	[br 
+	]br
+	"0x08 maybe be used to point to where the assets for the object are located.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x00
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Unknown Purpose
+				[br 
+				]br
+				"0x51342403 if Valid Object
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x04
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Pointer to Data Name
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x08
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Size of Object
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0C
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"End of List if 0xFFFFFFFF
+				[br 
+				]br
+				"Additional Objects if 0x0
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x10
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Pointer to Head if Tail
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x14
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Pointer to Tail if Head
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x18
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Pointer to Next Object
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1C
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Pointer to Previous Object
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Puck Data Struct
+	$LF
+]h4
+[p 
+	"Found in the GUI Linked List.
+	$LF
+]p
+[p 
+	"This is available when a partner is present. This struct contains a preallocated linked list which is consistent enough for the following addresses to be static.
+	$LF
+	[br 
+	]br
+	"The value of 0x08 is usually 0x7E0.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x032
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Unknown
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x034
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Unknown
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0E4
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Random 1a
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0E8
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Random 1b
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7BC
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Travel Time
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7CC
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Puck Decay
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7D0
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Damage Multiplier
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7D4
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Hold Time
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Random 1: Set at beginning of battle. Unknown purpose
+	$LF
+]p
+[h4 
+	" Rebootable Pin Struct
+	$LF
+]h4
+[p 
+	"Found in the GUI Linked List.
+	$LF
+]p
+[p 
+	"This is used by most pins that are able to reboot.
+	$LF
+	[br 
+	]br
+	"The value of 0x08 is usually 0x2C0. Occasionally, a newly created GUI Object would share this value during battle.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x3E
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Attack Power
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x64
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Uses Left
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x66
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Maximum Uses
+				[br 
+				]br
+				"Not set until after a boot
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x68
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Boot Time Left
+				[br 
+				]br
+				"0x0 if never booted yet
+				[br 
+				]br
+				"0xFFFF after a complete boot
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Enemy Struct
+	$LF
+]h4
+[p 
+	"Found in the Field Object Linked List.
+	$LF
+]p
+[p 
+	"This is used by all enemies.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x7A
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Invulnerability Left
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x8C
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Current Hp
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x8E
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Maximum Hp
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x98
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Pointer to Mirrored Enemy
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1C2
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Unknown
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Prize Struct
+	$LF
+]h4
+[p 
+	"Found in the Field Object Linked List.
+	$LF
+]p
+[p 
+	"This is used by Item Drops that float to a character and is collected.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x8C
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Prize Collect Time
+				[br 
+				]br
+				"Collect Prize on 0
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Static enemy data
+	$LF
+]h3
+[h4 
+	" Starting address
+	$LF
+]h4
+[p 
+	"You can find the starting address of an enemy's data at 0x20E0E24 + (0x2670 * Enemy Id). The enemy id is their noise report number minus one.
+	$LF
+]p
+[h4 
+	" Data Map
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x2C
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Item Id for the "Easy Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2E
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Item Id for the "Normal Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x30
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Item Id for the "Hard Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x32
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Item Id for the "Ultimate Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x34
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Drop rate for the "Easy Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x36
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Drop rate for the "Normal Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x38
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Drop rate for the "Hard Drop"
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3A
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Drop rate for the "Ultimate Drop"
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	" Other Useful Addresses
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x2066A44
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Total Session Time (In frames)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2071D29.0
+			]td
+			[td 
+				"2-bit
+			]td
+			[td 
+				"Difficulty
+				[br 
+				]br
+				"0 = Easy
+				[br 
+				]br
+				"1 = Normal
+				[br 
+				]br
+				"2 = Hard
+				[br 
+				]br
+				"3 = Ultimate
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2071D29.2
+			]td
+			[td 
+				"2-bit
+			]td
+			[td 
+				"Auto Partner
+				[br 
+				]br
+				"0 = Manual
+				[br 
+				]br
+				"1 = Slow
+				[br 
+				]br
+				"2 = Mid
+				[br 
+				]br
+				"3 = Fast
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2071D29.4
+			]td
+			[td 
+				"2-bit
+			]td
+			[td 
+				"Current Pin Deck
+				[br 
+				]br
+				"0 = Deck 1
+				[br 
+				]br
+				"1 = Deck 2
+				[br 
+				]br
+				"2 = Deck 3
+				[br 
+				]br
+				"3 = Deck 4
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2071D29.6
+			]td
+			[td 
+				"1-bit
+			]td
+			[td 
+				"Quick Buy Items
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2071D29.7
+			]td
+			[td 
+				"1-bit
+			]td
+			[td 
+				"Quick Sell Pins
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2073AA4
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Gameplay Time (In frames)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2074E7C
+			]td
+			[td 
+				"8-bit
+			]td
+			[td 
+				"Current Level (Max)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2074E80
+			]td
+			[td 
+				"16-bit
+			]td
+			[td 
+				"Xp until Next Level
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2074E98
+			]td
+			[td 
+				"32-bit
+			]td
+			[td 
+				"Battle Time (In frames)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x23A22D4
+			]td
+			[td 
+				"8-bit
+			]td
+			[td 
+				"Current Level (Reduced)
+			]td
+		]tr
+	]tbody
+]table

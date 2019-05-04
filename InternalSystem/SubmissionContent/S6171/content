@@ -1,0 +1,2959 @@
+16
+[h2 
+	" Categories
+	$LF
+]h2
+[ul 
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Colors a DNA
+		$LF
+	]li
+	[li 
+		" Staves off alien invasion using only the power of multi-layered time paradoxes
+		$LF
+	]li
+	[li 
+		" Jumps through a bunch of arbitrarily placed hoops
+		$LF
+	]li
+	[li 
+		" Does not drive author to verge of suicide this time
+		$LF
+	]li
+	[li 
+		" Drives main character to suicide
+		$LF
+	]li
+	[li 
+		" Gains advantage through the dark power of Dolphin sacrifice
+		$LF
+	]li
+	[li 
+		" Is possibly the Chosen Undead
+		$LF
+	]li
+]ul
+[h2 
+	" About the Game
+	$LF
+]h2
+[p 
+	"Ecco: The Tides of Time is the sequel to Ecco the Dolphin, and has been one of my favorite games for a long, long time. It is also highly resistant to speed-running. At top speed, Ecco swims just under 40% faster than Super Sonic can run, but has an eight-frame rule on steering (except orthogonal flips), and no way to slow down, except for orthogonal flips, which take too long, or crashing into walls, which slow Ecco too much. Otherwise it takes 30 frames without any form of acceleration before Ecco begins to lose speed, and even then does so at a maddeningly slow rate. Additionally, the way acceleration works is obscure, requiring a repeated pattern holding the button for 11 frames, than releasing for 1, the fastest way to get to top speed from a dead stop is to accelerate for 5 frames, charge, immediately cancel the charge, and then charge again eight-frames later when the cool-down wears off (maintaining the optimal acceleration input all the while). On top of all this, the game tracks position to the 65536th of each pixel, which combines with the eight-frame steering rule to snowball tiny variations in position and timing into gigantic differences in result. And, of course, the developers must have thought they were developing a PS2 game or something, because the game uses a wide variety of polygonal hit-boxes and detection boxes, and terrain collision is achieved by a bunch of invisible collision polygons that vaguely conform to where it looks like walls/floors/ceilings are supposed to be.
+	$LF
+]p
+[p 
+	"Also, there's an entire set of levels that involves navigating along mostly dry-land while the gravity changes almost at random, many levels are sprinkled liberally with obstacles or enemies that will kill you instantly upon contact, and there are five long 3D sequences that require literally jumping through hoops to complete.
+	$LF
+]p
+[p 
+	"Fortunately for a TASer, the game's engine is essentially composed of a multi-layered wad of gum and floss, which exposes a large variety of bizarre corner cases in game logic to exploit.
+	$LF
+]p
+[h2 
+	" About the Movie
+	$LF
+]h2
+[p 
+	"This movie completes the game on hard mode. Hard Mode differs from easy mode in that there are two additional autoscrollers, bosses have more HP, the collection quests are longer, and several levels have additional barriers that slow you down.
+	$LF
+	"Oh also there’s one added level that’s not an autoscroller.
+	$LF
+]p
+[p 
+	"This movie does not use the Japanese version of the game, because I did not learn that the Japanese version has less lag on 3D stages until I was nearly halfway through the run and would have had to spend an excessive amount of time retiming everything and probably rewriting portions of the special tools I used to help make this TAS easier.
+	$LF
+]p
+[h2 
+	" Some videos
+	$LF
+]h2
+[h3 
+	" Vanilla Encode
+	$LF
+]h3
+[p 
+	"This is just the TAS in the plain way you would normally see it in an unmodified emulator.
+	$LF
+	(youtube|v=E-hWVDQClnA)
+	$LF
+]p
+[h3 
+	" Hud Encode
+	$LF
+]h3
+[p 
+	"This is the TAS as it appeared to me while I was making it. 
+	$LF
+	(youtube|v=Cj7qR1pqQwc)
+	$LF
+]p
+[h3 
+	" Comparison Encode
+	$LF
+]h3
+[p 
+	"This is the TAS compared with the original, and the first draft of this improvement.
+	$LF
+	(youtube|v=1GiTyrulz30)
+	$LF
+]p
+[h2 
+	" Techniques used
+	$LF
+]h2
+[h3 
+	" Faster Acceleration
+	$LF
+]h3
+[p 
+	"About halfway through my first draft of this movie, I realized that there was a faster way to reach top speed that I had been unaware of on my prior TAS.
+	$LF
+]p
+[p 
+	"There are three ways to accelerate in this game: 
+	$LF
+]p
+[ul 
+	[li 
+		" Pressing the accelerate, which increases Ecco’s speed by a varying amount depending on his current speed and how long the button has been held down. This is most efficient in 12 frame cycles of 11 frames down 1 frame up.
+		$LF
+	]li
+	[li 
+		" Performing a short charge (charging with initial speed of at least 3 pixels per frame), which immediately increases Ecco’s speed by 4 pixels per frame, followed by overriding normal acceleration for 19 frames of charge acceleration (slower than standard swim acceleration at low initial speeds, faster at high initial speeds), then decreasing Ecco’s speed by .5 pixels per frame for 5 frames before ending and allowing a new charge. (Normal acceleration is possible during these final five frames of the charge). 
+		$LF
+	]li
+	[li 
+		" Performing a long charge (charging with initial speed below 3 pixels per frame), which immediately increases Ecco’s speed by 4 pixels per frame for 1 frame, followed by 23 frames of base 0.15625 pixels per frame (during which 1 frame worth of standard acceleration can apply for speeds of up to 0.65376 pixels per frame), then 2 frames of 4 pixels per frame per frame acceleration, 3 frames of charge acceleration, and then getting the full cycle of a short charge without the initial speed boost.
+		$LF
+	]li
+]ul
+[p 
+	"Additionally, any charge can be cancelled at any point via the sonar button, unleashing a damaging sonar blast, and skipping immediately to the final 8 frames of the charge sequence.
+	$LF
+]p
+[p 
+	"On my prior TAS, I believed fastest acceleration was simply 5 cycles of holding accelerate for 11 frames than releasing it for 1, which achieves maximum speed in 60 frames. 
+	$LF
+	"While a long charge achieves nearly top speed in 48 frames, it has the long period of near standstill, and then the unavoidable tail of deceleration, resulting in overall less distance covered in the 60 frames it would take to achieve top speed normally. 
+	$LF
+	"Additionally, I tested performing a single short charge as soon as possible during standard acceleration, and found that it was even slower at the 60 frame mark than a long charge.
+	$LF
+]p
+[p 
+	"However, if you immediately cancel that short charge, and then follow it with another, non-cancelled short charge, this gets top speed faster than 60 frames, and results in a larger distance travelled at the 60 frame benchmark.
+	$LF
+]p
+[h3 
+	" Angle Optimization
+	$LF
+]h3
+[p 
+	"Ecco’s swimming angle can only be changed once every eight frames, and only by intervals of 45 degrees. However, Ecco does not immediately turn to his target angle, but rotates smoothly at 4.21875 degrees per frame until reaching his target angle. As a result, you can achieve average swimming angles in between those 45 degree set-points by alternating directional inputs every 8 frames. In many cases, this results in a shorter distance travelled to navigate around distant obstacles than the old technique of travelling at the nearest 45-degree angle until it’s possible to swim in a straight line past the obstacle.
+	$LF
+]p
+[h3 
+	" Nudging
+	$LF
+]h3
+[p 
+	"Because it takes more than 8 frames to turn 45 degrees, hitting a direction once for just eight frames before returning to Ecco’s original angle allows for relatively small position adjustments. Useful for adjusting position in narrow tubes without bumping into walls.
+	$LF
+]p
+[h3 
+	" Cutting Corners
+	$LF
+]h3
+[p 
+	"First, some dolphin anatomy:
+	$LF
+	"Ecco’s collision is a composite of two boxes mounted on a spine of five test-points.
+	$LF
+]p
+[ul 
+	[li 
+		" Head box
+		$LF
+	]li
+	[li 
+		" Nosehole
+		$LF
+	]li
+	[li 
+		" Mid-front vertebra
+		$LF
+	]li
+	[li 
+		" Blowhole (absolute midpoint)
+		$LF
+	]li
+	[li 
+		" Mid-back vertebra
+		$LF
+	]li
+	[li 
+		" Butthole
+		$LF
+	]li
+	[li 
+		" Tail box
+		$LF
+	]li
+]ul
+[p 
+	"Each collision or detection polygon tests a specific point, box, or subset of these 7 possibilities. With proper information about the shapes and test point of these polygons, it’s possible to swim safely past certain enemies or obstacles in positions that would appear dangerous.
+	$LF
+]p
+[h3 
+	" Super-breach
+	$LF
+]h3
+[p 
+	"By charging on the exact frame Ecco leaves a body of water, he can exit with a velocity of 4 pixels per frame above maximum swim speed.
+	$LF
+]p
+[h3 
+	" Jump control
+	$LF
+]h3
+[p 
+	"When out of the water, if moving upward quickly enough, Ecco can initiate a spin-jump by pressing C. While spin jumping, every frame in which C is held increases Ecco’s height by two pixels versus if C had not been pressed. This allows for very precise control over the timing of re-entering water, so that Ecco can re-enter water at any desired time within the 8-frame steering cycle.
+	$LF
+]p
+[h3 
+	" Breaching speed
+	$LF
+]h3
+[p 
+	"When it is necessary to travel long distances horizontally, speed can be gained by traveling along the ocean surface and repeatedly super-breaching with a very low exit angle.
+	$LF
+]p
+[h3 
+	" Camera Manipulation
+	$LF
+]h3
+[p 
+	"Camera position is based on Ecco’s position, angle, and movement speed. Game objects are loaded and unloaded based on their position relative to the camera, and even when loaded, many objects are not fully processed while off-screen. This can used to reduce lag, propel objects through obstacles, and a whole host of other things too varied to list.
+	$LF
+]p
+[h3 
+	" Kill Boosting
+	$LF
+]h3
+[p 
+	"Destroying an enemy immediately ends a charge without going through the end-of-charge deceleration sequence. The most common way of doing this is by colliding with the enemy while charging, but that immediately sets your speed to 0, which is even worse than losing a tiny bit of speed to the charge ending.
+	$LF
+	"However, hitting an enemy with a charge-sonar blast also immediately ends the charge, and doesn’t set your speed to zero. In this way, whenever there’s an enemy in our path, we can gain ~4 pixels by hitting charge to get the single frame 4 pixel speed boost, and then hitting sonar to destroy it before we collide.
+	$LF
+	"Unfortunately, when an enemy is destroyed, it spawns a remnant star object which changes the meaning of the charge button from “perform a charge” to “prevent this enemy from respawning” when you are within its detection radius, so it’s not possible to get 8 pixel boosts from two enemies that are close together.
+	$LF
+]p
+[h3 
+	" Charge Strafing
+	$LF
+]h3
+[p 
+	"During a charge, Ecco will home onto enemies in a certain detection area. This allows movement perpendicular to the swim direction without a related reduction in swim speed. Helpful to adjust position slightly without having to go through the slow process of changing angles.
+	$LF
+]p
+[h3 
+	" 3D Level Lag Reduction
+	$LF
+]h3
+[p 
+	"In 3D levels, enemies cause lag.
+	$LF
+	"In 3D levels, sonar blasts kill enemies.
+	$LF
+	"In 3D levels, sonar blasts cause lag.
+	$LF
+]p
+[h3 
+	" Situational Tricks
+	$LF
+]h3
+[h4 
+	" Ring Manipulation
+	$LF
+]h4
+[p 
+	"The teleport rings in 3D Levels appear in fixed positions. However, their movement type (stationary, slow moving, or fast moving) depends on the random number seed when they are spawned. And the random number seed updates every four frames.
+	$LF
+	"Teleport rings with the highest spawn location are fastest to pass through when they are slow moving, as their vertical position requires a low enough jump that it’s possible to return to water within a single charge cycle.
+	$LF
+]p
+[h4 
+	" Barrier Clipping
+	$LF
+]h4
+[p 
+	"In certain situations, there are barrier walls composed of a number of smaller objects that check head and tail box collisions. However, within a given frame, the game will stop checking for head collisions after finding a single one, and the game will stop checking for tail collisions after finding a single one. Therefore, depending on the loading order of these objects, it can be possible to swim through these barriers by overlapping the collision box with multiple objects at the same time.
+	$LF
+]p
+[p 
+	"Used in: Crystal Springs, Lunar Bay, and possibly in Four Islands (other stuff is going on and I’m not sure whether this technically happens or not).
+	$LF
+]p
+[h4 
+	" Rocket Propelled Rocks
+	$LF
+]h4
+[p 
+	"Falling rocks that shield Ecco from currents will assume Ecco’s full vertical speed when his nosehole collides with them closer to their top or bottom than their left or right sides.
+	$LF
+	"In most cases, though, colliding with one of these rocks will kill most or all of Ecco’s downward speed just before it gets transferred to the rock. However, it is possible to avoid this effect somehow through careful approaches that I was not able to determine full boundary conditions on, but seemed somehow related cases involving corners.
+	$LF
+]p
+[p 
+	"Also, turtles are technically rocks.
+	$LF
+	"Used in: Two Tides, Maze of Stone, Four Islands (Entertainment only), Sea of Green, Atlantis
+	$LF
+]p
+[h4 
+	" Barrier Skipping
+	$LF
+]h4
+[p 
+	"When a barrier glyph is placed to block a mid-air water tube, it is possible to skip around it by exiting the tube with a vertical super-breach, and using mid-air directional control to move left and right around the force-field trigger box, splashing back into the tube above the barrier.
+	$LF
+]p
+[p 
+	"Used in: Trellia’s Bay, Skyway
+	$LF
+]p
+[h4 
+	" Hover-turns
+	$LF
+]h4
+[p 
+	"The game doesn’t seem to test if Ecco has left water if Ecco is in the middle of a quick flip turn when he would leave it.
+	$LF
+]p
+[p 
+	"Used in: Sky Tides, Aqua Tubeway, Gravitorbox
+	$LF
+]p
+[h4 
+	" Trigger Squeezing
+	$LF
+]h4
+[p 
+	"Almost all end of level triggers test against Ecco’s blowhole. In auto scrollers, it’s possible to get this much closer to the leading edge of the screen by turning to be parallel to that edge, which allows for squeezing into the end-of-level trigger a few frames sooner.
+	$LF
+]p
+[p 
+	"Used in: Sky Tides, Dark Sea, New Machine.
+	$LF
+]p
+[h4 
+	" Eight-way Swooping
+	$LF
+]h4
+[p 
+	$UNPRINTABLE TEXT!!!
+]p
+[h4 
+	" Eagle Clipping
+	$LF
+]h4
+[p 
+	"Eagles can fly through walls, and will capture and care you in their talons.
+	$LF
+]p
+[p 
+	"Used in: Eagle’s Bay
+	$LF
+]p
+[h4 
+	" Suicide
+	$LF
+]h4
+[p 
+	"When Ecco gets caught between the level boundaries (or the camera boundaries during autoscrollers) and a solid obstacle, or a wall and another solid obstacle, he will be crushed to death, which restarts the level.
+	$LF
+	"This is somehow useful.
+	$LF
+]p
+[p 
+	"Accidentally discovered by Dolfinh, of the real-time Ecco speedrunning community.
+	$LF
+]p
+[p 
+	"Used in: Level id 30
+	$LF
+]p
+[h4 
+	" Forcefield Clipping
+	$LF
+]h4
+[p 
+	"If Ecco is caught in a barrier glyph forcefield in the same frame that the game transitions to a dialogue screen, the forcefield will fling him at extremely high speeds (potentially through walls) as soon as normal gameplay resumes. 
+	$LF
+]p
+[p 
+	"This was discovered by Aludra, of the real-time Ecco speedrunning community.
+	$LF
+]p
+[p 
+	"Used in: The Eye, Big Water
+	$LF
+]p
+[h4 
+	" Zipping
+	$LF
+]h4
+[p 
+	"When Ecco is caught clipping two or more solid walls at the same time, a chaotic system results that can have great impact on Ecco’s speed values.
+	$LF
+]p
+[p 
+	"Used in: Deep Ridge, Vortex Future
+	$LF
+]p
+[h4 
+	" Swimming Through Walls
+	$LF
+]h4
+[p 
+	"When Ecco would otherwise be crushed, but is near enough to the seam between two wall collision boxes, they simply both eject him to the seam and consider him not to be stuck.
+	$LF
+	"There is more to this that I don’t fully understand, which prevented it from being used in Black Clouds or City of Forever.
+	$LF
+]p
+[p 
+	"Used in: Dark Sea, New Machine
+	$LF
+]p
+[h4 
+	" Transformation Skipping
+	$LF
+]h4
+[p 
+	"Although the Metasphere in Fish City has a much larger bounding box than it appears, it still only tests against Ecco’s nosehole, making it possible to avoid being transformed into a very slow moving school of fish.
+	$LF
+	"This trick also works on the levels that don’t appear in this TAS because I avoided being carried off by Vortex Drones or swallowed by the Vortex Queen.
+	$LF
+]p
+[p 
+	"Used in: Fish City. Duh.
+	$LF
+]p
+[h2 
+	" Level by Level notes:
+	$LF
+]h2
+[h4 
+	" Selection screen
+	$LF
+]h4
+[p 
+	"The two frames saved here are entirely due to emulation timing differences during the loading sequences.
+	$LF
+]p
+[h4 
+	" Home Bay
+	$LF
+]h4
+[p 
+	"Fastest acceleration pattern plus angle optimization results in a slightly faster trip to the teleport ring.
+	$LF
+]p
+[h4 
+	" 3D Shells
+	$LF
+]h4
+[p 
+	"Horizontal and Vertical camera motion slow the camera’s Z-ward movement slightly, which delays the spawning of teleport rings, so I save a few frames by moving the minimum amount necessary to make it through each ring without being slowed by the poison bubbles.
+	$LF
+]p
+[h4 
+	" Crystal Springs
+	$LF
+]h4
+[p 
+	"5 Frames saved by faster acceleration and better angle optimization
+	$LF
+]p
+[h4 
+	" Fault Zone
+	$LF
+]h4
+[p 
+	"So, during the first TAS I assumed that bumping into walls was always slower. But, when I have to wait on other things, and bumping into walls is the fastest way to brake, which gives much better control over position, it turns out bumping into walls is absolutely the way to go.
+	$LF
+	"Saved a bunch of time with better positioning to push the rock after breaking the first barrier.
+	$LF
+]p
+[h4 
+	" Two Tides
+	$LF
+]h4
+[p 
+	"Faster acceleration, better angle control, and faster/more productive turtle harassment. There are a few points where you’re forced to stop in this level, so the faster acceleration methods really shine.
+	$LF
+	"From now on, just assume that faster acceleration and better angle control save frames on every level except auto scrollers. They do. I won’t mention it every time.
+	$LF
+]p
+[h4 
+	" Trellia’s Bay
+	$LF
+]h4
+[p 
+	"Biggest time-save here comes from a better understanding of how psychic dolphins work, so I could boost faster away from the one that’s necessary to use.
+	$LF
+]p
+[h4 
+	" Skyway
+	$LF
+]h4
+[p 
+	"Angle optimization, mostly.
+	$LF
+]p
+[h4 
+	" Sky Tides
+	$LF
+]h4
+[p 
+	"First instance of trigger-squeezing to shave frames off the end of an autoscroller.
+	$LF
+]p
+[h4 
+	" Tube of Medusa
+	$LF
+]h4
+[p 
+	"So, The Medusa’s spawn triggers are at set locations, but The Medusa’s spawning position is camera dependent. The Medusa always spawns with Ecco’s horizontal position, and a vertical position a set distance offscreen. Whether it’s above the screen or below the screen depends on whether the spawn trigger is above or below the mid-point of the screen. Because I want to ride The Medusa upward, I want it to spawn at the highest possible point below me, which is a job for camera manipulation.
+	$LF
+	"Camera manipulation also allows me to prevent The Medusa from re-spawning at a second location later, reducing lag.
+	$LF
+]p
+[h4 
+	" Aqua Tubeway
+	$LF
+]h4
+[p 
+	"So, normally I would only be able to use trigger-squeezing to save a few frames, but because the next level spawns Ecco in midair, and because midair rotation speed is capped, but not reset, on level load, there’s some extra considerations to take at the end of the level. In my first TAS I had no idea what affected midair rotation speed, and just took the first ending I could get that let me splash down with a favorable angle in the next level. Turns out this can be accomplished at least a second faster.
+	$LF
+]p
+[h4 
+	" Skylands
+	$LF
+]h4
+[p 
+	"Lots of use of super-breaching for horizontal speed at the start of the level. Most of the time savings here come from better angle control when breaching.
+	$LF
+]p
+[h4 
+	" Fin to Feather
+	$LF
+]h4
+[p 
+	"Eight way swooping.
+	$LF
+]p
+[h4 
+	"3D Vines
+	$LF
+]h4
+[p 
+	"The Vines cause some lag, but there’s no way to destroy them or prevent them from spawning, so we fall back to minimizing horizontal and vertical movement to save frames.
+	$LF
+]p
+[h4 
+	" Eagle’s Bay
+	$LF
+]h4
+[p 
+	"So, you’re supposed to transform into a gull, fly left to get a key song from a glyph, turn back into a gull, fly right to get past a giant rock wall, and then sing to the barrier glyph to get it out of your way. Which is exactly what the old TAS did.
+	$LF
+	"It’s much faster just to fly right and find a friendly eagle to carry you out of bounds, where you can swim around the barrier glyph without singing it out of your way.
+	$LF
+]p
+[h4 
+	" Asterite’s Cave
+	$LF
+]h4
+[p 
+	"Some better strategies for pushing around the top-halves of the broken glyphs. Some better strategies for pushing around the rock eating worm. Also, when the top half of a broken glyph gets within the detection range of a bottom half, it instantly stops and then slowly magnets toward the bottom half, where it will heal into a key-glyph when it gets close enough. I saved some time by using camera manipulation to prevent this from happening until the top half was much closer to the target point. Also, on the first one, I use sonar to make the bottom half bounce around so that the target point would oscillate closer to the top half and save a few more frames.
+	$LF
+	"Swimming through the giant DNA is a huge, slow pain, but I couldn’t manage to get swimming around it to work.
+	$LF
+]p
+[h4 
+	" The Lost Orcas
+	$LF
+]h4
+[p 
+	"Whole bunch of time saved by letting myself bump into walls. Also, more optimal destruction of shell barriers, so I don’t have to stop for them multiple times. Also, better breaching angles. Also, better approach vectors to the lost orcas to make them follow me faster. Also, some lag  reduction by being careful about which enemies I let respawn for future kill boosts.
+	$LF
+	"Nothing to be done about having to follow the slow orca to the end of the level. There’s a rock barrier in the way if I try to swim there without the orca’s guidance. And even if I could clip past or swim through that barrier, the end of level trigger doesn’t spawn unless the guiding orca got close enough. 
+	$LF
+]p
+[h4 
+	" Maze of Stone
+	$LF
+]h4
+[p 
+	"Rocket propelled turtle. Rocket propelled rock. Oh, and some better positioning for pushing the initial, barrier-breaking rock. Oh, and better positioning for sonaring the rock-breaking star wreath around. Oh, and damage boosting through part of the swarm of falling shells.
+	$LF
+]p
+[h4 
+	" Four Islands
+	$LF
+]h4
+[p 
+	"Slightly faster strategy for getting through the shell barrier. Slightly faster strategy for singing the rock barriers apart at the end. Nothing to be done about the slow dolphin I have to follow to get the rock breaking song, 
+	(flowplayer|v= https://res.cloudinary.com/upthorn/video/upload/v1542337231/StupidDolphin_0001.mp4|w=640|h=448)
+	" 
+	$LF
+]p
+[pre 
+	"Except hope he doesn’t randomly get drunk and break physics for no reason, of course.
+	$LF
+]pre
+[p 
+	"At least the level end spawns without having to find and follow the second slow dolphin guide.
+	$LF
+]p
+[h4 
+	" Sea of Darkness
+	$LF
+]h4
+[p 
+	$UNPRINTABLE TEXT!!!
+]p
+[h4 
+	" Vents of Medusa
+	$LF
+]h4
+[p 
+	"Better understanding of the no-charge area around remnant stars allows me to take a better path through the swarm of jellyfish. Also, damage boosting through part of it.
+	$LF
+]p
+[h4 
+	" Gateway
+	$LF
+]h4
+[p 
+	"Nothing special.
+	$LF
+]p
+[h4 
+	" 3D Jellyfish
+	$LF
+]h4
+[p 
+	"So, in 3D levels, constantly charging is the fastest way to move. But Ecco homes very strongly onto 3D Jellyfish, while charging which can make it difficult or impossible to navigate into the rings if jellyfish are in the other direction. So I spent a lot of time manipulating the spawn positions of jellyfish, and sonaring jellyfish to kill them so that I could constantly charge without missing hoops. Jellyfish are also the laggiest of the 3D level enemies.
+	$LF
+]p
+[h4 
+	" Sea of Green
+	$LF
+]h4
+[p 
+	"I think rocket propelled rocks, were the biggest improvement.
+	$LF
+]p
+[h4 
+	" Moray Abyss
+	$LF
+]h4
+[p 
+	"This level is essentially a long boss fight. There’s a giant conch shell which floats down an undersea ravine, occasionally trying to crush you against the walls, or summoning gigantic eels that kill you nearly instantly. Once the shell settles at the bottom of a ravine, a large eel comes out that you can kill, ending the level.
+	$LF
+	"So, it turns out that Ecco can push the giant conch shell around. In the first TAS, I never learned this, because you take damage every time you bump it, so I never thought to check actively swimming into it.
+	$LF
+	"Simply constantly swimming down into it from above saves about 39 seconds. But the speed you run into it also matters, so hitting charge against it whenever possible saves just over 12 seconds more.
+	$LF
+	"There are some other factors like needing to refill health from occasional schools of fish, and regularly spaced eels in the walls that will kill you in two hits and don’t grant invincibility frames, but these are minor details (that happen to add a huge amount of complication to TASing this boss.)
+	$LF
+]p
+[h4 
+	" Sea of Birds
+	$LF
+]h4
+[p 
+	"In Lordran, the flow of time itself is convoluted, the past, present, and future can intertwine with each other, and you can experience things from a timeline not your own.
+	$LF
+]p
+[h4 
+	" The Eye
+	$LF
+]h4
+[p 
+	"This level is long and annoying, so I skip it.
+	$LF
+]p
+[h4 
+	" Big Water
+	$LF
+]h4
+[p 
+	"This level is not long or annoying, but I skip the important part anyway. (Even though this skip is much, much harder and more frustrating to make work.)
+	$LF
+]p
+[h4 
+	" Deep Ridge
+	$LF
+]h4
+[p 
+	"Like all undead, Ecco will respawn from the nearest bonfire upon death, as though no time had past since resting there, and yet, some of his prior life's effects upon the world may remain…
+	$LF
+]p
+[h4 
+	" The Hungry Ones
+	$LF
+]h4
+[p 
+	"Although the shark has a higher top speed than the dolphin, the shark cannot cancel charges, and thus cannot super breach as often. Thus, it is faster to use the dolphin.
+	$LF
+]p
+[h4 
+	" Secret Cave
+	$LF
+]h4
+[p 
+	"That was short.
+	$LF
+]p
+[h4 
+	" 3D Sharks
+	$LF
+]h4
+[p 
+	"While, in 2D levels, charging into an enemy brings you to a complete stop, in 3D levels, it has no effect on your speed whatsoever, but allows you to charge again immediately. 
+	$LF
+	"In 3D levels, charging provides acceleration based on a continuous formula that depends only on how many frames are left in the charge. The more frames left, the more acceleration you get.
+	$LF
+	"Combined, this means that running into as many sharks as possible actually makes the level go faster. So long as you don’t get carried away and forget to hit each ring.
+	$LF
+	"Also, Sharks aren’t very laggy, so there’s no need to kill them with sonar.
+	$LF
+]p
+[h4 
+	" Lunar Bay
+	$LF
+]h4
+[p 
+	"That thing I did in Crystal Springs? Turns out it also works here. But only on the second barrier. Still have to ask a glyph to suck the first barrier into a black hole.
+	$LF
+]p
+[h4 
+	" Vortex Future
+	$LF
+]h4
+[p 
+	"Did you know that dolphins can fly?
+	$LF
+]p
+[h4 
+	" Black Clouds
+	$LF
+]h4
+[p 
+	"Because I enter the final tube from the side, there’s no need to sonar the first barrier-eating glyph which removes the top-most barrier. It was dumb of me to do it the first time.
+	$LF
+]p
+[h4 
+	" Gravitorbox
+	$LF
+]h4
+[p 
+	"Because of super-breaching, it’s faster to enter the middle tube along the bottom. Even if it does cut short the fun bizarre-gravity section.
+	$LF
+]p
+[h4 
+	" Globe Holder
+	$LF
+]h4
+[p 
+	"Gained about eight seconds by learning how the boss works.
+	$LF
+]p
+[h4 
+	" Convergence
+	$LF
+]h4
+[p 
+	"Sadly, there is nothing for Ecco to gain by killing himself here.
+	$LF
+]p
+[h4 
+	" Dark Sea
+	$LF
+]h4
+[p 
+	"A combination of camera manipulation and swimming through walls makes it possible to start the autoscroller section partway through, saving a bit over a minute. Also, some trigger squeezing action at the end.
+	$LF
+]p
+[h4 
+	" New Machine
+	$LF
+]h4
+[p 
+	"Just a trigger squeeze, nothing important.
+	$LF
+]p
+[h4 
+	" Vortex Queen
+	$LF
+]h4
+[p 
+	"It turns out that making the queen pop out at the start of the fight actually makes her take longer to become vulnerable. Also, it turns out that it’s barely possible to get one extra hit in on her first cycle. Also, after she vomits up her tongue, the fight won’t proceed until all the pieces fly off camera and despawn.
+	$LF
+]p
+[h4 
+	" Home Bay Again
+	$LF
+]h4
+[p 
+	"Nothing major, only 13 frames found.
+	$LF
+]p
+[h4 
+	" 3D Mixed
+	$LF
+]h4
+[p 
+	"Unbeknownst to the other 3D levels, the dark lord forged one additional lag in secret. One lag to rule over the bearers of all other lag. That lag is in this level. I fought it off as best as possible, but still managed only to gain 8 piddling frames over the original.
+	$LF
+]p
+[h4 
+	" Atlantis
+	$LF
+]h4
+[p 
+	"Better angled-jumps for the surface portion. Better stone-handling makes up most of the rest of the difference. And one last instance of a rocket propelled rock.
+	$LF
+]p
+[h4 
+	" Fish City
+	$LF
+]h4
+[p 
+	"As a dolphin, this is a pretty short level, but I still found some time savings by more optimal maneuvering around the currents, and strategic use of the 4-pixel boost from starting a charge to get out of the strongest current segments faster.
+	$LF
+]p
+[h4 
+	" City of Forever
+	$LF
+]h4
+[p 
+	"More like City of Takes forever to TAS. This level is littered with stone gateways that only open for an enemy that can kill you instantly if it gets mad. It’s supposed to be a stealth mission where you follow the Vortex Larva as it wanders aimlessly through the mazelike ruins of Atlantis.
+	$LF
+	"But it turns out to be faster to just swim right in front of it in a few places to get it to swim directly at the gate, instead of through a convoluted series of waypoints.
+	$LF
+	"Also, when it’s angry, you can push it with your sonar, and how hard it gets pushed depends on how fast you were swimming when you loosed the sonar blast.
+	$LF
+]p
+[h2 
+	" It’s an improvement so there has to be a
+	$LF
+]h2
+[h3 
+	" Timing Comparison Table
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Level
+			]td
+			[td 
+				"Original End Time
+			]td
+			[td 
+				"Draft End Time
+			]td
+			[td 
+				"Draft Level Savings
+			]td
+			[td 
+				"Draft Overall Savings
+			]td
+			[td 
+				"Final End Time
+			]td
+			[td 
+				"Final Level Savings
+			]td
+			[td 
+				"Final Overall Savings
+			]td
+			[td 
+				"Total Level Savings
+			]td
+			[td 
+				"Total Overall Savings
+			]td
+		]tr
+		[tr 
+			[td 
+				"DiffSelect
+			]td
+			[td 
+				"1027
+			]td
+			[td 
+				"1025
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"1025
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Home Bay
+			]td
+			[td 
+				"1921
+			]td
+			[td 
+				"1893
+			]td
+			[td 
+				"26
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"1872
+			]td
+			[td 
+				"21
+			]td
+			[td 
+				"21
+			]td
+			[td 
+				"47
+			]td
+			[td 
+				"49
+			]td
+		]tr
+		[tr 
+			[td 
+				"3D Shells
+			]td
+			[td 
+				"4415
+			]td
+			[td 
+				"4365
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"50
+			]td
+			[td 
+				"4313
+			]td
+			[td 
+				"31
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"53
+			]td
+			[td 
+				"102
+			]td
+		]tr
+		[tr 
+			[td 
+				"Crystal Springs
+			]td
+			[td 
+				"4752
+			]td
+			[td 
+				"4697
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"55
+			]td
+			[td 
+				"4645
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"107
+			]td
+		]tr
+		[tr 
+			[td 
+				"Fault Zone
+			]td
+			[td 
+				"6210
+			]td
+			[td 
+				"6038
+			]td
+			[td 
+				"117
+			]td
+			[td 
+				"172
+			]td
+			[td 
+				"5882
+			]td
+			[td 
+				"104
+			]td
+			[td 
+				"156
+			]td
+			[td 
+				"221
+			]td
+			[td 
+				"328
+			]td
+		]tr
+		[tr 
+			[td 
+				"Two Tides
+			]td
+			[td 
+				"10588
+			]td
+			[td 
+				"10305
+			]td
+			[td 
+				"111
+			]td
+			[td 
+				"283
+			]td
+			[td 
+				"10033
+			]td
+			[td 
+				"116
+			]td
+			[td 
+				"272
+			]td
+			[td 
+				"227
+			]td
+			[td 
+				"555
+			]td
+		]tr
+		[tr 
+			[td 
+				"Trellia's Bay
+			]td
+			[td 
+				"11735
+			]td
+			[td 
+				"11408
+			]td
+			[td 
+				"44
+			]td
+			[td 
+				"327
+			]td
+			[td 
+				"11128
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"280
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"607
+			]td
+		]tr
+		[tr 
+			[td 
+				"Skyway
+			]td
+			[td 
+				"12420
+			]td
+			[td 
+				"12078
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"342
+			]td
+			[td 
+				"11766
+			]td
+			[td 
+				"32
+			]td
+			[td 
+				"312
+			]td
+			[td 
+				"47
+			]td
+			[td 
+				"654
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sky Tides
+			]td
+			[td 
+				"15237
+			]td
+			[td 
+				"14896
+			]td
+			[td 
+				"-1
+			]td
+			[td 
+				"341
+			]td
+			[td 
+				"14581
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"315
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"656
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tube of Medusa
+			]td
+			[td 
+				"16022
+			]td
+			[td 
+				"15635
+			]td
+			[td 
+				"46
+			]td
+			[td 
+				"387
+			]td
+			[td 
+				"15297
+			]td
+			[td 
+				"23
+			]td
+			[td 
+				"338
+			]td
+			[td 
+				"69
+			]td
+			[td 
+				"725
+			]td
+		]tr
+		[tr 
+			[td 
+				"Aqua Tubeway
+			]td
+			[td 
+				"19881
+			]td
+			[td 
+				"19430
+			]td
+			[td 
+				"64
+			]td
+			[td 
+				"451
+			]td
+			[td 
+				"19092
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"338
+			]td
+			[td 
+				"64
+			]td
+			[td 
+				"789
+			]td
+		]tr
+		[tr 
+			[td 
+				"Skylands
+			]td
+			[td 
+				"21524
+			]td
+			[td 
+				"21038
+			]td
+			[td 
+				"35
+			]td
+			[td 
+				"486
+			]td
+			[td 
+				"20678
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"360
+			]td
+			[td 
+				"57
+			]td
+			[td 
+				"846
+			]td
+		]tr
+		[tr 
+			[td 
+				"Fin To Feather
+			]td
+			[td 
+				"22651
+			]td
+			[td 
+				"22024
+			]td
+			[td 
+				"141
+			]td
+			[td 
+				"627
+			]td
+			[td 
+				"21649
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"375
+			]td
+			[td 
+				"156
+			]td
+			[td 
+				"1002
+			]td
+		]tr
+		[tr 
+			[td 
+				"3D Vines
+			]td
+			[td 
+				"25270
+			]td
+			[td 
+				"24506
+			]td
+			[td 
+				"137
+			]td
+			[td 
+				"764
+			]td
+			[td 
+				"24071
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"435
+			]td
+			[td 
+				"197
+			]td
+			[td 
+				"1199
+			]td
+		]tr
+		[tr 
+			[td 
+				"Eagle's Bay
+			]td
+			[td 
+				"27936
+			]td
+			[td 
+				"25650
+			]td
+			[td 
+				"1522
+			]td
+			[td 
+				"2286
+			]td
+			[td 
+				"25172
+			]td
+			[td 
+				"43
+			]td
+			[td 
+				"478
+			]td
+			[td 
+				"1565
+			]td
+			[td 
+				"2764
+			]td
+		]tr
+		[tr 
+			[td 
+				"Asterite's Cave
+			]td
+			[td 
+				"31170
+			]td
+			[td 
+				"28567
+			]td
+			[td 
+				"317
+			]td
+			[td 
+				"2603
+			]td
+			[td 
+				"27954
+			]td
+			[td 
+				"135
+			]td
+			[td 
+				"613
+			]td
+			[td 
+				"452
+			]td
+			[td 
+				"3216
+			]td
+		]tr
+		[tr 
+			[td 
+				"Time Travel 1
+			]td
+			[td 
+				"32083
+			]td
+			[td 
+				"29480
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"2603
+			]td
+			[td 
+				"28867
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"613
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"3216
+			]td
+		]tr
+		[tr 
+			[td 
+				"The Lost Orcas
+			]td
+			[td 
+				"45181
+			]td
+			[td 
+				"41842
+			]td
+			[td 
+				"736
+			]td
+			[td 
+				"3339
+			]td
+			[td 
+				"41038
+			]td
+			[td 
+				"191
+			]td
+			[td 
+				"804
+			]td
+			[td 
+				"927
+			]td
+			[td 
+				"4143
+			]td
+		]tr
+		[tr 
+			[td 
+				"Maze of Stone
+			]td
+			[td 
+				"50122
+			]td
+			[td 
+				"46156
+			]td
+			[td 
+				"627
+			]td
+			[td 
+				"3966
+			]td
+			[td 
+				"45205
+			]td
+			[td 
+				"147
+			]td
+			[td 
+				"951
+			]td
+			[td 
+				"774
+			]td
+			[td 
+				"4917
+			]td
+		]tr
+		[tr 
+			[td 
+				"Four Islands
+			]td
+			[td 
+				"54740
+			]td
+			[td 
+				"50533
+			]td
+			[td 
+				"241
+			]td
+			[td 
+				"4207
+			]td
+			[td 
+				"49552
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"981
+			]td
+			[td 
+				"271
+			]td
+			[td 
+				"5188
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sea of Darkness
+			]td
+			[td 
+				"56938
+			]td
+			[td 
+				"52543
+			]td
+			[td 
+				"188
+			]td
+			[td 
+				"4395
+			]td
+			[td 
+				"51463
+			]td
+			[td 
+				"99
+			]td
+			[td 
+				"1080
+			]td
+			[td 
+				"287
+			]td
+			[td 
+				"5475
+			]td
+		]tr
+		[tr 
+			[td 
+				"Vents of Medusa
+			]td
+			[td 
+				"58180
+			]td
+			[td 
+				"53687
+			]td
+			[td 
+				"98
+			]td
+			[td 
+				"4493
+			]td
+			[td 
+				"52607
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"1080
+			]td
+			[td 
+				"98
+			]td
+			[td 
+				"5573
+			]td
+		]tr
+		[tr 
+			[td 
+				"Gateway
+			]td
+			[td 
+				"58708
+			]td
+			[td 
+				"54212
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"4496
+			]td
+			[td 
+				"53126
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"1086
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"5582
+			]td
+		]tr
+		[tr 
+			[td 
+				"3D Jellyfish
+			]td
+			[td 
+				"61586
+			]td
+			[td 
+				"57024
+			]td
+			[td 
+				"66
+			]td
+			[td 
+				"4562
+			]td
+			[td 
+				"55620
+			]td
+			[td 
+				"318
+			]td
+			[td 
+				"1404
+			]td
+			[td 
+				"384
+			]td
+			[td 
+				"5966
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sea of Green
+			]td
+			[td 
+				"63494
+			]td
+			[td 
+				"58874
+			]td
+			[td 
+				"58
+			]td
+			[td 
+				"4620
+			]td
+			[td 
+				"57434
+			]td
+			[td 
+				"36
+			]td
+			[td 
+				"1440
+			]td
+			[td 
+				"94
+			]td
+			[td 
+				"6060
+			]td
+		]tr
+		[tr 
+			[td 
+				"Moray Abyss
+			]td
+			[td 
+				"69657
+			]td
+			[td 
+				"62699
+			]td
+			[td 
+				"2338
+			]td
+			[td 
+				"6958
+			]td
+			[td 
+				"60529
+			]td
+			[td 
+				"730
+			]td
+			[td 
+				"2170
+			]td
+			[td 
+				"3068
+			]td
+			[td 
+				"9128
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sea of Birds
+			]td
+			[td 
+				"72670
+			]td
+			[td 
+				"65654
+			]td
+			[td 
+				"58
+			]td
+			[td 
+				"7016
+			]td
+			[td 
+				"62825
+			]td
+			[td 
+				"659
+			]td
+			[td 
+				"2829
+			]td
+			[td 
+				"717
+			]td
+			[td 
+				"9845
+			]td
+		]tr
+		[tr 
+			[td 
+				"The Eye
+			]td
+			[td 
+				"89308
+			]td
+			[td 
+				"66554
+			]td
+			[td 
+				"15738
+			]td
+			[td 
+				"22754
+			]td
+			[td 
+				"63695
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"2859
+			]td
+			[td 
+				"15768
+			]td
+			[td 
+				"25613
+			]td
+		]tr
+		[tr 
+			[td 
+				"Big Water
+			]td
+			[td 
+				"91011
+			]td
+			[td 
+				"68232
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"22779
+			]td
+			[td 
+				"64621
+			]td
+			[td 
+				"752
+			]td
+			[td 
+				"3611
+			]td
+			[td 
+				"777
+			]td
+			[td 
+				"26390
+			]td
+		]tr
+		[tr 
+			[td 
+				"Deep Ridge
+			]td
+			[td 
+				"106398
+			]td
+			[td 
+				"82977
+			]td
+			[td 
+				"642
+			]td
+			[td 
+				"23421
+			]td
+			[td 
+				"77807
+			]td
+			[td 
+				"1559
+			]td
+			[td 
+				"5170
+			]td
+			[td 
+				"2201
+			]td
+			[td 
+				"28591
+			]td
+		]tr
+		[tr 
+			[td 
+				"The Hungry Ones
+			]td
+			[td 
+				"108396
+			]td
+			[td 
+				"84923
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"23473
+			]td
+			[td 
+				"79753
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"5170
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"28643
+			]td
+		]tr
+		[tr 
+			[td 
+				"Secret Cave
+			]td
+			[td 
+				"108835
+			]td
+			[td 
+				"85337
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"23498
+			]td
+			[td 
+				"80167
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"5170
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"28668
+			]td
+		]tr
+		[tr 
+			[td 
+				"3D Sharks
+			]td
+			[td 
+				"111250
+			]td
+			[td 
+				"87645
+			]td
+			[td 
+				"107
+			]td
+			[td 
+				"23605
+			]td
+			[td 
+				"82475
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"5170
+			]td
+			[td 
+				"107
+			]td
+			[td 
+				"28775
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lunar Bay
+			]td
+			[td 
+				"114509
+			]td
+			[td 
+				"90522
+			]td
+			[td 
+				"382
+			]td
+			[td 
+				"23987
+			]td
+			[td 
+				"85287
+			]td
+			[td 
+				"65
+			]td
+			[td 
+				"5235
+			]td
+			[td 
+				"447
+			]td
+			[td 
+				"29222
+			]td
+		]tr
+		[tr 
+			[td 
+				"Vortex Future
+			]td
+			[td 
+				"118395
+			]td
+			[td 
+				"94263
+			]td
+			[td 
+				"145
+			]td
+			[td 
+				"24132
+			]td
+			[td 
+				"86443
+			]td
+			[td 
+				"2585
+			]td
+			[td 
+				"7820
+			]td
+			[td 
+				"2730
+			]td
+			[td 
+				"31952
+			]td
+		]tr
+		[tr 
+			[td 
+				"Black Clouds
+			]td
+			[td 
+				"121012
+			]td
+			[td 
+				"96671
+			]td
+			[td 
+				"209
+			]td
+			[td 
+				"24341
+			]td
+			[td 
+				"88365
+			]td
+			[td 
+				"486
+			]td
+			[td 
+				"8306
+			]td
+			[td 
+				"695
+			]td
+			[td 
+				"32647
+			]td
+		]tr
+		[tr 
+			[td 
+				"Gravitorbox
+			]td
+			[td 
+				"122425
+			]td
+			[td 
+				"97969
+			]td
+			[td 
+				"115
+			]td
+			[td 
+				"24456
+			]td
+			[td 
+				"89663
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"8306
+			]td
+			[td 
+				"115
+			]td
+			[td 
+				"32762
+			]td
+		]tr
+		[tr 
+			[td 
+				"Globeholder
+			]td
+			[td 
+				"124997
+			]td
+			[td 
+				"100211
+			]td
+			[td 
+				"330
+			]td
+			[td 
+				"24786
+			]td
+			[td 
+				"91754
+			]td
+			[td 
+				"151
+			]td
+			[td 
+				"8457
+			]td
+			[td 
+				"481
+			]td
+			[td 
+				"33243
+			]td
+		]tr
+		[tr 
+			[td 
+				"Time Travel 2
+			]td
+			[td 
+				"125905
+			]td
+			[td 
+				"101449
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"24456
+			]td
+			[td 
+				"93143
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"8306
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"32762
+			]td
+		]tr
+		[tr 
+			[td 
+				"Convergence
+			]td
+			[td 
+				"127522
+			]td
+			[td 
+				"102705
+			]td
+			[td 
+				"31
+			]td
+			[td 
+				"24817
+			]td
+			[td 
+				"94245
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"8460
+			]td
+			[td 
+				"34
+			]td
+			[td 
+				"33277
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dark Sea
+			]td
+			[td 
+				"138080
+			]td
+			[td 
+				"108923
+			]td
+			[td 
+				"4340
+			]td
+			[td 
+				"29157
+			]td
+			[td 
+				"100446
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"8477
+			]td
+			[td 
+				"4357
+			]td
+			[td 
+				"37634
+			]td
+		]tr
+		[tr 
+			[td 
+				"New Machine
+			]td
+			[td 
+				"145898
+			]td
+			[td 
+				"116727
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"29171
+			]td
+			[td 
+				"108250
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"8477
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"37648
+			]td
+		]tr
+		[tr 
+			[td 
+				"Vortex Queen
+			]td
+			[td 
+				"148544
+			]td
+			[td 
+				"119378
+			]td
+			[td 
+				"-5
+			]td
+			[td 
+				"29166
+			]td
+			[td 
+				"110573
+			]td
+			[td 
+				"328
+			]td
+			[td 
+				"8805
+			]td
+			[td 
+				"323
+			]td
+			[td 
+				"37971
+			]td
+		]tr
+		[tr 
+			[td 
+				"CRD
+			]td
+			[td 
+				"155087
+			]td
+			[td 
+				"125911
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"29176
+			]td
+			[td 
+				"117110
+			]td
+			[td 
+				"-4
+			]td
+			[td 
+				"8801
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"37977
+			]td
+		]tr
+		[tr 
+			[td 
+				"Epilogue
+			]td
+			[td 
+				"155740
+			]td
+			[td 
+				"126552
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"29188
+			]td
+			[td 
+				"117750
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"8802
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"37990
+			]td
+		]tr
+		[tr 
+			[td 
+				"3D Mixed
+			]td
+			[td 
+				"158286
+			]td
+			[td 
+				"129220
+			]td
+			[td 
+				"-122
+			]td
+			[td 
+				"29066
+			]td
+			[td 
+				"120288
+			]td
+			[td 
+				"130
+			]td
+			[td 
+				"8932
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"37998
+			]td
+		]tr
+		[tr 
+			[td 
+				"Atlantis
+			]td
+			[td 
+				"162350
+			]td
+			[td 
+				"132933
+			]td
+			[td 
+				"351
+			]td
+			[td 
+				"29417
+			]td
+			[td 
+				"123887
+			]td
+			[td 
+				"114
+			]td
+			[td 
+				"9046
+			]td
+			[td 
+				"465
+			]td
+			[td 
+				"38463
+			]td
+		]tr
+		[tr 
+			[td 
+				"Fish City
+			]td
+			[td 
+				"163200
+			]td
+			[td 
+				"133758
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"29442
+			]td
+			[td 
+				"124684
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"9074
+			]td
+			[td 
+				"53
+			]td
+			[td 
+				"38516
+			]td
+		]tr
+		[tr 
+			[td 
+				"City of Forever
+			]td
+			[td 
+				"169903
+			]td
+			[td 
+				"140095
+			]td
+			[td 
+				"366
+			]td
+			[td 
+				"29808
+			]td
+			[td 
+				"129632
+			]td
+			[td 
+				"1389
+			]td
+			[td 
+				"10463
+			]td
+			[td 
+				"1755
+			]td
+			[td 
+				"40271
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Total final savings: 40271 frames = 11:11:11 in mm:ss:ff format.
+	$LF
+	"I swear I didn’t manipulate my savings to make this happen. I actually had no idea until I was dividing out the number to figure out how to render it as a human readable time. Kinda fun coincidence, though.
+	$LF
+]p
+[h3 
+	" City of Forever is special and gets a comparison table all for itself
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Gate
+			]td
+			[td 
+				"Original Trigger Level Frame
+			]td
+			[td 
+				"Draft Trigger Level Frame
+			]td
+			[td 
+				"Draft Gate Savings
+			]td
+			[td 
+				"Draft Overall Savings
+			]td
+			[td 
+				"Final Trigger Level Frame
+			]td
+			[td 
+				"Final Gate Savings
+			]td
+			[td 
+				"Final Overall Savings
+			]td
+			[td 
+				"Total Gate Savings
+			]td
+			[td 
+				"Total Overall Savings
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"586
+			]td
+			[td 
+				"559
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"403
+			]td
+			[td 
+				"156
+			]td
+			[td 
+				"156
+			]td
+			[td 
+				"183
+			]td
+			[td 
+				"183
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"1531
+			]td
+			[td 
+				"1451
+			]td
+			[td 
+				"53
+			]td
+			[td 
+				"80
+			]td
+			[td 
+				"971
+			]td
+			[td 
+				"324
+			]td
+			[td 
+				"480
+			]td
+			[td 
+				"377
+			]td
+			[td 
+				"560
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"2536
+			]td
+			[td 
+				"2439
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"97
+			]td
+			[td 
+				"1959
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"480
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"577
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"2865
+			]td
+			[td 
+				"2761
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"104
+			]td
+			[td 
+				"2280
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"481
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"585
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"3961
+			]td
+			[td 
+				"3894
+			]td
+			[td 
+				"-37
+			]td
+			[td 
+				"67
+			]td
+			[td 
+				"2646
+			]td
+			[td 
+				"767
+			]td
+			[td 
+				"1248
+			]td
+			[td 
+				"730
+			]td
+			[td 
+				"1315
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"4549
+			]td
+			[td 
+				"4430
+			]td
+			[td 
+				"52
+			]td
+			[td 
+				"119
+			]td
+			[td 
+				"3155
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"1275
+			]td
+			[td 
+				"79
+			]td
+			[td 
+				"1394
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"5071
+			]td
+			[td 
+				"4840
+			]td
+			[td 
+				"112
+			]td
+			[td 
+				"231
+			]td
+			[td 
+				"3575
+			]td
+			[td 
+				"-10
+			]td
+			[td 
+				"1265
+			]td
+			[td 
+				"102
+			]td
+			[td 
+				"1496
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"5187
+			]td
+			[td 
+				"4956
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"231
+			]td
+			[td 
+				"3686
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"1270
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"1501
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"5645
+			]td
+			[td 
+				"5186
+			]td
+			[td 
+				"228
+			]td
+			[td 
+				"459
+			]td
+			[td 
+				"3900
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"1286
+			]td
+			[td 
+				"244
+			]td
+			[td 
+				"1745
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"6300
+			]td
+			[td 
+				"5835
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"465
+			]td
+			[td 
+				"4507
+			]td
+			[td 
+				"42
+			]td
+			[td 
+				"1328
+			]td
+			[td 
+				"48
+			]td
+			[td 
+				"1793
+			]td
+		]tr
+		[tr 
+			[td 
+				"11
+			]td
+			[td 
+				"6368
+			]td
+			[td 
+				"5916
+			]td
+			[td 
+				"-13
+			]td
+			[td 
+				"452
+			]td
+			[td 
+				"4567
+			]td
+			[td 
+				"21
+			]td
+			[td 
+				"1349
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"1801
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	" Possible Improvements
+	$LF
+]h2
+[p 
+	"I did not do any of the complex math required to prove that my steering is optimal. In fact, I did not even bother to figure out how to pose those math problems. Therefore it is possible that my steering is suboptimal.
+	$LF
+]p
+[p 
+	"Multiple real time Ecco speedrunners have reported that, on occasion, for no apparent reason, after a Time Travel cut-scene, the level starts normally, instead of taking a few seconds to make Ecco spin in. I was not able to reproduce this, and, in reverse-engineering the game I was not able to find a code path that should cause this to happen. There was also speculation that it has to do with failing to power-cycle the console before starting a new run after entering the debug/level select code.
+	$LF
+]p
+[p 
+	"Multiple real time Ecco speedrunners have reported that, in Vortex Future, they were able to get an antigravity ball to push them through a wall. I could not reproduce this, but also see no reason why the same thing shouldn't work in Black Clouds. Or why Vortex Larva wouldn't be able to do it in City of Forever.
+	$LF
+]p
+[p 
+	"Multiple real time speedrunners have video evidence of Ecco "randomly" failing to collide with walls and/or floors in the vortex future levels. I could not reproduce this, but it would allow for significant skips in these levels if the mechanism were determined.
+	$LF
+]p
+[p 
+	"Both Black Clouds and Gravitorbox have the level geometry required to initiate zipping in the way I used in Vortex Future, but due to collision box loading order or other reasons, I was not able to initiate any useful zips in those locations. Again, these would produce significant time saves.
+	$LF
+]p
+[h2 
+	" Screenshot Suggestions
+	$LF
+]h2
+[p 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644058/Upthorn-Ecco2-2018-ImprovementFrame4571.png 
+	]img
+	" 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644058/Upthorn-Ecco2-2018-ImprovementFrame14879.png 
+	]img
+	" 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644058/Upthorn-Ecco2-2018-ImprovementFrame25084.png 
+	]img
+	" 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644058/Upthorn-Ecco2-2018-ImprovementFrame58974.png 
+	]img
+	[br 
+	]br
+	$LF
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644058/Upthorn-Ecco2-2018-ImprovementFrame86206.png 
+	]img
+	" 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644059/Upthorn-Ecco2-2018-ImprovementFrame95376.png 
+	]img
+	" 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644059/Upthorn-Ecco2-2018-ImprovementFrame108984.png 
+	]img
+	" 
+	[img class=embed src=https://res.cloudinary.com/upthorn/image/upload/v1543644059/Upthorn-Ecco2-2018-ImprovementFrame127508.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Memory)
+	": Claiming for judging
+	$LF
+]p
+[p 
+	(__wikiLink|user:Memory)
+	": Syncs on 2.3.0 release.
+	$LF
+]p
+[p 
+	"Optimization is superb, a gigantic improvement on the 
+	(__wikiLink|1180M|current publication)
+	".
+	$LF
+]p
+[p 
+	"The run was really fun to watch, with fast movement and various tricks and glitches. Of note was the zip sequences. Even with the additional autoscrollers of hard mode, the run never stopped being entertaining. The audience agrees with only positive comments and positive votes.
+	$LF
+]p
+[p 
+	"Accepting to Moons as an improvement to 
+	(__wikiLink|1180M)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pubthorn!
+]p

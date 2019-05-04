@@ -1,0 +1,162 @@
+5
+[p 
+	"m64 is the movie capture format of Mupen64.
+	$LF
+]p
+[p 
+	"M64 files consist of a 1024-byte header with various blocks that depend on settings, followed by some input data.
+	$LF
+]p
+[h3 
+	" Header format
+	$LF
+]h3
+[pre 
+	"000 4-byte signature: 4D 36 34 1A "M64\x1A"
+	$LF
+	"004 4-byte little-endian unsigned int: version number, should be 3
+	$LF
+	"008 4-byte little-endian integer: movie "uid" - identifies the movie-savestate relationship,
+	$LF
+	"                                  also used as the recording time in Unix epoch format
+	$LF
+	"00C 4-byte little-endian unsigned int: number of frames (vertical interrupts)
+	$LF
+	"010 4-byte little-endian unsigned int: rerecord count
+	$LF
+	"014 1-byte unsigned int: frames (vertical interrupts) per second
+	$LF
+	"015 1-byte unsigned int: number of controllers
+	$LF
+	"016 2-byte unsigned int: reserved, should be 0
+	$LF
+	"018 4-byte little-endian unsigned int: number of input samples for any controllers
+	$LF
+	"01C 2-byte unsigned int: movie start type 
+	$LF
+	"   value 1: movie begins from snapshot (the snapshot will be loaded from an externalfile
+	$LF
+	"                                        with the movie filename and a .st extension) 
+	$LF
+	"   value 2: movie begins from power-on
+	$LF
+	"   other values: invalid movie
+	$LF
+	"01E 2-byte unsigned int: reserved, should be 0
+	$LF
+	"020 4-byte unsigned int: controller flags
+	$LF
+	"   bit 0: controller 1 present
+	$LF
+	"   bit 4: controller 1 has mempak
+	$LF
+	"   bit 8: controller 1 has rumblepak
+	$LF
+	"   +1..3 for controllers 2..4.
+	$LF
+	"024 160 bytes: reserved, should be 0
+	$LF
+	"0C4 32-byte ASCII string: internal name of ROM used when recording, directly from ROM
+	$LF
+	"0E4 4-byte unsigned int: CRC32 of ROM used when recording, directly from ROM
+	$LF
+	"0E8 2-byte unsigned int: country code of ROM used when recording, directly from ROM
+	$LF
+	"0EA 56 bytes: reserved, should be 0
+	$LF
+	"122 64-byte ASCII string: name of video plugin used when recording, directly from plugin
+	$LF
+	"162 64-byte ASCII string: name of sound plugin used when recording, directly from plugin
+	$LF
+	"1A2 64-byte ASCII string: name of input plugin used when recording, directly from plugin
+	$LF
+	"1E2 64-byte ASCII string: name of rsp plugin used when recording, directly from plugin
+	$LF
+	"222 222-byte UTF-8 string: author name info
+	$LF
+	"300 256-byte UTF-8 string: author movie description info
+	$LF
+]pre
+[h3 
+	" Controller Data
+	$LF
+]h3
+[p 
+	"After the header, starting at byte 0x400 in the file, comes the input data. (NOTE: If the version number at 0x004 is 1 or 2, then the input data starts at byte 0x200 instead.) The input data is a stream of 4-byte bitvectors which indicate which buttons and/or analog directions are pressed at each point in time.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"000-001 
+			]th
+			[th 
+				" 002     
+			]th
+			[th 
+				" 003    
+			]th
+		]tr
+		[tr 
+			[td 
+				" Buttons 
+			]td
+			[td 
+				" Analog X 
+			]td
+			[td 
+				" Analog Y 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Analog values are signed (-128 to 127), with up and right being positive.
+	$LF
+]p
+[p 
+	"For buttons, each value is determined by OR-ing together values for whichever of the following are pressed:
+	$LF
+]p
+[pre 
+	" 0x0001 C-Right
+	$LF
+	" 0x0002 C-Left
+	$LF
+	" 0x0004 C-Down
+	$LF
+	" 0x0008 C-Up
+	$LF
+	" 0x0010 R
+	$LF
+	" 0x0020 L
+	$LF
+	" 0x0040 (reserved)
+	$LF
+	" 0x0080 (reserved)
+	$LF
+	" 0x0100 Digital Pad Right
+	$LF
+	" 0x0200 Digital Pad Left
+	$LF
+	" 0x0400 Digital Pad Down
+	$LF
+	" 0x0800 Digital Pad Up
+	$LF
+	" 0x1000 Start
+	$LF
+	" 0x2000 Z
+	$LF
+	" 0x4000 B
+	$LF
+	" 0x8000 A
+	$LF
+]pre
+[p 
+	"They will come in groups of however many controllers the game happens to check (note that it will never check disabled/disconnected controllers), in whatever order the game happens to check them. There is absolutely no way to correlate the amount of input data with the length of the movie, because the N64 may check input many times in 1 frame or it may not check any input at all for a large number of frames, or anything in-between.
+	$LF
+]p
+[p 
+	"Mupen64 will trigger a power off/on reset when the value for the controller info is specifically set to Reserved1 = 0x01, and Reserved2 = 0x01. The controller info is then cleared from being sent to the PIF RAM to avoid errors. This feature is only available in Mupen64 ReRecordingV2 and later versions.
+]p

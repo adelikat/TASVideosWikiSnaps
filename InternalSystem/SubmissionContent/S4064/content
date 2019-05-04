@@ -1,0 +1,1705 @@
+10
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"Well, that didn't take long. After finishing my first any% TAS on Pokémon Blue (
+	(__wikiLink|2434M|here)
+	"), I read some comments about how this run is all the same as the save corruption run (
+	(__wikiLink|1860M|here)
+	"), just with 35 minutes of extra padding to get to that point.
+	$LF
+	"In a way they were right, all recent first generation Pokémon TASes are corrupting the inventory to use it as a hex editor, shifting the right bytes to the right places and therefore tricking the game into playing the final cutscene.
+	$LF
+	"This makes them look all the same in the end: you scroll through a glitched inventory screen that is filled with hilarious items (e.g. "GARY x97") and swap them around.
+	$LF
+]p
+[p 
+	"It got me thinking whether there may be an alternative way to manipulate the bytes.
+	$LF
+	"Sure enough, I found one, which isn't that surprising, considering the multitude of game-breaking glitches that this particular game features.
+	$LF
+	"More surprising is the fact that it is actually a lot faster to do than the inventory glitching.
+	$LF
+]p
+[p 
+	"I recommend to watch the movie before reading the technical details below. The movie contains almost none of the usual graphical glitchiness and obvious game breaking that the previous movies had, which lets the end seem rather sudden and magical.
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Forgoes save data corruption
+		$LF
+	]li
+	[li 
+		" Aims for the fastest completion time
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Contains speed-entertainment tradeoffs
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 1.4.1
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[p 
+	"I mainly re-used the infrastructure I already had from my last Pokémon Blue TAS.
+	$LF
+	"Most of the reasoning behind the general properties and choices made is described in the submission text (
+	(__wikiLink|4024S|here)
+	") and is still valid for this movie.
+	$LF
+]p
+[h4 
+	" Version choice
+	$LF
+]h4
+[p 
+	"Unlike the previous run, this run is indeed version dependent.
+	$LF
+	"The route strongly depends on Bellsprout, which can only be found in the Blue version (the Red version has Oddish instead).
+	$LF
+	"Bellsprout and Oddish differ in their stats, which are highly important as will be described later.
+	$LF
+	"Other than that, there is no significant time advantage for any of the versions.
+	$LF
+]p
+[h4 
+	" General Luck manipulation
+	$LF
+]h4
+[p 
+	"Luck manipulation is a vital part in any Pokémon TAS, understanding and manipulating the random number generator (RNG) is important to get favourable outcomes quickly.
+	$LF
+]p
+[p 
+	"The game uses two addresses for random numbers, 0xFFD3 and 0xFFD4.
+	$LF
+	"Both of them are determined using the value of a hardware register (named DIV) and are considered to be unpredictable.
+	$LF
+	"Most of the time, only the value of 0xFFD3 is important, 0xFFD4 is rarely used throughout the game.
+	$LF
+	"Since the values change rather erratically and there are only 256 of them, it is quite easy to get the value you want for 0xFFD3 by simply brute-forcing some different input sequences.
+	$LF
+]p
+[p 
+	"The real problem occurs if you need to consider 0xFFD4 as well.
+	$LF
+	"Luckily, it is used only in three places thoughout the entire game:
+	$LF
+]p
+[ul 
+	[li 
+		" determining the high byte of the Trainer ID when starting a new game 
+		$LF
+	]li
+	[li 
+		" determining the species of a wild encounter
+		$LF
+	]li
+	[li 
+		" determining the initial first trash can in Vermilion gym.
+		$LF
+	]li
+]ul
+[p 
+	"Only the second point is a concern in this run.
+	$LF
+	"In each RNG cycle, 0xFFD3 is incremented by DIV, while 0xFFD4 is decremented by DIV, which makes their sum almost constant (DIV can change slightly inbetween the two operations, and there are carry values to consider).
+	$LF
+	"The sum 0xFFD3 + 0xFFD4 therefore has a special name, called the D-Sum.
+	$LF
+	"The D-Sum is known to slowly decrease in the overworld, while it increases during battles and menus.
+	$LF
+]p
+[h4 
+	" Encounter mechanics
+	$LF
+]h4
+[p 
+	"When moving in high grass, the game checks for an encounter after every step.
+	$LF
+	"Each area has its own encounter rate, which ranges from around 3% to 12%.
+	$LF
+	"Furthermore, each area has a list of 10 possible encounters with fixed probabilities.
+	$LF
+	"That is, each slot has a fixed chance, independent from the area you are in, only the encounter you get in that specific slot varies.
+	$LF
+	"For example, the encounter list for route 25 looks like this:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Slot Nr.
+			]th
+			[th 
+				"Encounter
+			]th
+			[th 
+				"Value range
+			]th
+			[th 
+				"Chance       
+			]th
+		]tr
+		[tr 
+			[td 
+				"1 
+			]td
+			[td 
+				"Lvl 8 Caterpie   
+			]td
+			[td 
+				"0x00 - 0x32 
+			]td
+			[td 
+				" 51/256 (~20%) 
+			]td
+		]tr
+		[tr 
+			[td 
+				"2 
+			]td
+			[td 
+				"Lvl 9 Metapod    
+			]td
+			[td 
+				"0x33 - 0x65 
+			]td
+			[td 
+				" 51/256 (~20%) 
+			]td
+		]tr
+		[tr 
+			[td 
+				"3 
+			]td
+			[td 
+				"Lvl 13 Pidgey    
+			]td
+			[td 
+				"0x66 - 0x8C 
+			]td
+			[td 
+				" 39/256 (~15%) 
+			]td
+		]tr
+		[tr 
+			[td 
+				"4 
+			]td
+			[td 
+				"Lvl 12 Bellsprout
+			]td
+			[td 
+				"0x8D - 0xA5 
+			]td
+			[td 
+				" 25/256 (~10%) 
+			]td
+		]tr
+		[tr 
+			[td 
+				"5 
+			]td
+			[td 
+				"Lvl 13 Bellsprout
+			]td
+			[td 
+				"0xA6 - 0xBE 
+			]td
+			[td 
+				" 25/256 (~10%) 
+			]td
+		]tr
+		[tr 
+			[td 
+				"6 
+			]td
+			[td 
+				"Lvl 12 Abra      
+			]td
+			[td 
+				"0xBF - 0xD7 
+			]td
+			[td 
+				" 25/256 (~10%) 
+			]td
+		]tr
+		[tr 
+			[td 
+				"7 
+			]td
+			[td 
+				"Lvl 14 Bellsprout
+			]td
+			[td 
+				"0xD8 - 0xE4 
+			]td
+			[td 
+				" 13/256 (~5%)  
+			]td
+		]tr
+		[tr 
+			[td 
+				"8 
+			]td
+			[td 
+				"Lvl 10 Abra      
+			]td
+			[td 
+				"0xE5 - 0xF1 
+			]td
+			[td 
+				" 13/256 (~5%)  
+			]td
+		]tr
+		[tr 
+			[td 
+				"9 
+			]td
+			[td 
+				"Lvl 7 Kakuna     
+			]td
+			[td 
+				"0xF2 - 0xFC 
+			]td
+			[td 
+				" 11/256 (~4%)  
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"Lvl 8 Weedle     
+			]td
+			[td 
+				"0xFD - 0xFF 
+			]td
+			[td 
+				"  3/256 (~1%)  
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The encounter rate of route 25 is 0x0F (~5.86%).
+	$LF
+	"If you step in high grass in route 25, the values of 0xFFD3 and 0xFFD4 are considered:
+	$LF
+	"If the value of 0xFFD3 is lower than the encounter rate 0x0F, you get an encounter.
+	$LF
+	"The value of 0xFFD4 determines the species: Depending on the value range which 0xFFD4 lies in, you get the respective encounter.
+	$LF
+]p
+[p 
+	"That means if you want to encounter a Lvl 14 Bellsprout, you need 0xFFD3 to be between 0x00 and 0x0E and 0xFFD4 to be between 0xD8 and 0xE4.
+	$LF
+	"Therefore, your D-Sum must be between 0xD8 and 0xF2.
+	$LF
+	"This makes manipulating encounters the hardest luck manipulation in this game.
+	$LF
+	"There is no way to change your D-Sum quickly, and if it is not in the desired range, there is no other way than to wait for the D-Sum to slowly change in order to get it where you want it.
+	$LF
+	"This is especially problematic if you need multiple consecutive encounters:
+	$LF
+	"After your first encounter, your D-Sum is always in a certain range (the range you needed it to be for that encounter), which might be not nearly where you need it for the second encounter.
+	$LF
+	"For specific encounter combinations, you therefore have no other option than to wait around for several seconds to manipulate the D-Sum.
+	$LF
+]p
+[p 
+	"The problem gets even worse if you need the encounters to have specific stats.
+	$LF
+	"The DVs of wild encounters are randomly determined right after the encounter species is chosen, which makes it arguably the hardest thing to manipulate.
+	$LF
+]p
+[h4 
+	" Hard luck manipulations featured in this run
+	$LF
+]h4
+[ul 
+	[li 
+		" manipulating the Trainer ID to be 0x2E5E (1/65536; ~0.0015%)
+		$LF
+	]li
+	[li 
+		" manipulating Charmanders DVs to be exactly 7 Attack, 6 Defense, 12 Speed, 9 Special (1/65536; ~0.0015%)
+		$LF
+	]li
+	[li 
+		" manipulating 4 consecutive encounters in route 25:
+		$LF
+		[ul 
+			[li 
+				" Lvl 12 Bellsprout with Special DV 0 (350/1048576; ~0.03%)
+				$LF
+			]li
+			[li 
+				" Lvl 14 Bellsprout with low Defense and HP DVs (~0.1%)
+				$LF
+			]li
+			[li 
+				" Lvl 9 Metapod (714/65536; ~1%)
+				$LF
+			]li
+			[li 
+				" Lvl 12 Bellsprout with low Defense and HP DVs (~0.4%)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 
+	" Speed-entertainment tradeoffs
+	$LF
+]h4
+[p 
+	"This run follows the usual speed-entertainment tradeoff used for this game, which is forgoing red bar:
+	$LF
+	"If a fighting Pokémon is at low health, is produces a constant warning sound that disables all other sound effects and therefore saves time, but the constant beeping is a major annoyance.
+	$LF
+	"Unlike the previous run, it does not follow the character naming convention, as the player name is actually an important part of the used route.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Glitches used in this movie
+	$LF
+]h3
+[p 
+	"Three of the used glitches were also used in the previous run, I will list them here for completion.
+	$LF
+	"A more comprehensive description of them can be found 
+	(__wikiLink|4024S|in the previous submission text)
+	".
+	$LF
+	"The fourth glitch is the newly introduced one that allowed for the great time savings and will be discussed in detail.
+	$LF
+]p
+[h4 
+	" Brock skip glitch
+	$LF
+]h4
+[p 
+	"Uses save and reset to to skip fighting Brock.
+	$LF
+]p
+[h4 
+	" Skipping mandatory trainers (Trainer-Fly)
+	$LF
+]h4
+[p 
+	"Uses the Trainer-Fly glitch to disable all trainers in an area and therefore skip them.
+	$LF
+	"Used to skip all Mt. Moon trainers.
+	$LF
+]p
+[h4 
+	" Encountering arbitrary Pokémon or Trainers (Trainer-Fly)
+	$LF
+]h4
+[p 
+	"Re-entering an area after using Trainer-Fly and fighting another trainer produces a wild encounter, the species of which is determined by the special stat of the last fought Pokémon.
+	$LF
+	"Used in this run to catch the otherwise unobtainable Pokémon Mew.
+	$LF
+]p
+[h4 
+	" Transform glitch
+	$LF
+]h4
+[p 
+	"While this gltich is known for a long time, its effects were not well-explored.
+	$LF
+	"It is triggered by using the move Transform on an enemy that has more moves than the own Pokémon.
+	$LF
+	"If the last move is swapped with the first one while transformed, the original moves will be swapped as well, except that the last transformed move does not exist in the original move list.
+	$LF
+	"Therefore, after the swap, the first move slot is empty, a fact that is not well handled by the game.
+	$LF
+	"The game expects every Pokémon to have at least one move, so it lets you use the non-existing move in battles.
+	$LF
+]p
+[p 
+	[b 
+		"Disclaimer:
+	]b
+	" The following paragraphs contain technical details of the glitch's mechanics and require a basic understanding of programming and assembly language.
+	$LF
+	"If you are not interested, you can skip this part. The bottom line is that tricky arbitrary code execution is performed to trigger the ending cutscene when the move is used.
+	$LF
+]p
+[p 
+	"Since there is no valid data defined for that move, it reads data from other areas that are not meant to be move parameters.
+	$LF
+	"This results, at least for this particular version of the game, in a damaging move of the glitch type "Cooltrainer♀" with base power 102, ~20% accuracy, 13 PP and the animation of Fissure.
+	$LF
+	"The real use of it, however, lies in its move effect.
+	$LF
+	"After a successful attack, the glitch effect 0x74 is triggered, which executes code starting from 0xF928.
+	$LF
+	"The address 0xF928 is in a memory segment called "Echo RAM", and is a replicate of the actual RAM address 0xD928.
+	$LF
+]p
+[p 
+	"To exploit this, the goal is to manipulate the memory content starting from 0xD928 to spell out assembly that
+	$LF
+]p
+[ul 
+	[li 
+		" tricks the game into running the ending cutscene
+		$LF
+	]li
+	[li 
+		" does not crash the game in the process
+		$LF
+	]li
+]ul
+[p 
+	"The following table shows the RAM map of that particular memory region:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Addresses      
+			]th
+			[th 
+				" Content                                     
+			]th
+			[th 
+				" Comment 
+			]th
+		]tr
+		[tr 
+			[td 
+				" 0xD928 - 0xD953 
+			]td
+			[td 
+				" Data of 4th enemy Pokémon                    
+			]td
+			[td 
+				" This will be the data of Squirtle, since the last trainer with four Pokémon will be the Nugget Bridge rival. Luckily, Squrtle's data does not crash the game, but it's not useful, either.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xD954 - 0xD97F 
+			]td
+			[td 
+				" Data of 5th enemy Pokémon                    
+			]td
+			[td 
+				" No trainer had a 5th Pokémon, so the data is all 0s. Not dangerous, not helpful.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xD980 - 0xD9AB 
+			]td
+			[td 
+				" Data of 6th enemy Pokémon                    
+			]td
+			[td 
+				" All 0s as well. Not dangerous, not helpful.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xD9AC - 0xD9ED 
+			]td
+			[td 
+				" Trainer name for the 6 enemy Pokémons        
+			]td
+			[td 
+				" The trainer name is always set to the player's name. Limited manipulation is possible here and will be used.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xD9EE - 0xDA2F 
+			]td
+			[td 
+				" Nickname for the 6 enemy Pokémons            
+			]td
+			[td 
+				" Empty names, not useful.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xDA30 - 0xDA31 
+			]td
+			[td 
+				" Pointer to data of current area trainers     
+			]td
+			[td 
+				" Potentially dangerous, an area is needed the trainer pointer of which doesn't trigger fatal assembly. No real manipulation potential.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xDA32 - 0xDA3F 
+			]td
+			[td 
+				" Misc. data (e.g. Cinnabar Island gym quiz)   
+			]td
+			[td 
+				" Always 0
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xDA40 - 0xDA45 
+			]td
+			[td 
+				" Game time in hours, minutes, seconds, frames 
+			]td
+			[td 
+				" Potentially dangerous, the in-game time must be chosen to not crash the game. No real manipulation potential.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xDA46 - 0xDA7F 
+			]td
+			[td 
+				" Misc. data (e.g. Safari Zone/Daycare data)   
+			]td
+			[td 
+				" Always 0
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xDA80 - 0xDA95 
+			]td
+			[td 
+				" Species of the 20 Pokémon in the current box 
+			]td
+			[td 
+				" Dangerous, the end of list marker 0xFF reads as assembly "RST 38" which crashes the game and must be avoided.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 0xDA96 - 0xDAB6 
+			]td
+			[td 
+				" Data of 1st boxed Pokémon                    
+			]td
+			[td 
+				" This is where the most manipulation potential is. The Trainer ID and the DVs can be fully manipulated, and the experience, EVs, etc. at least to some extend.
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"The ultimate manipulation goal is to write 0x76 to address 0xD35E. This address holds the current map, and 0x76 is the Hall of Fame room.
+	$LF
+	"Since this will happen during a battle, and after each battle the map is reloaded, this is everything that is necessary to trigger the ending cutscene.
+	$LF
+]p
+[p 
+	"The manipulation opportunities are quite limited, however, especially early in the game.
+	$LF
+	"The best options are the Trainer name, the Trainer ID and the stored Pokémon's EVs and DVs.
+	$LF
+	"We will consider them in reverse order:
+	$LF
+	"The EVs and DVs are the last useful information that is stored, so it needs to be the ending of the routine:
+	$LF
+	"We want to execute
+	$LF
+]p
+[pre 
+	"LD (HL) 0x76
+	$LF
+	"RET
+	$LF
+]pre
+[p 
+	"which spells out to
+	$LF
+]p
+[pre 
+	"0xDAB0   0x36   // lower byte of Special EV value
+	$LF
+	"0xDAB1   0x76   // Attack and Defense DVs
+	$LF
+	"0xDAB2   0xC9   // Speed and Special DVs
+	$LF
+]pre
+[p 
+	"What we need to achieve up to this point is getting the value 0xD35E into the registers hl, which means putting 0xD3 into h and 0x5E into l.
+	$LF
+	"Register l can be filled using the Trainer ID:
+	$LF
+]p
+[pre 
+	"LD l, 0x5E
+	$LF
+]pre
+[p 
+	"spells out to
+	$LF
+]p
+[pre 
+	"0xDAA2   0x2E   // high byte of Trainer ID
+	$LF
+	"0xDAA3   0x5E   // low byte of Trainer ID
+	$LF
+]pre
+[p 
+	"There is not much room left for manipulating h to 0xD3.
+	$LF
+	"The best option is to use the Trainer name, but since the available assembly is limited by the characters in the alphabet here, some trickery is required.
+	$LF
+]p
+[p 
+	"The name used in this run is "BD♀(pk)RT", where (pk) is the special character that displays the first half of the text "pkmn".
+	$LF
+]p
+[p 
+	"It spells out to the following assembly
+	$LF
+]p
+[pre 
+	"ADD a,c
+	$LF
+	"ADD a,e   // after this operation, a happens to have the value 0xD3
+	$LF
+	"PUSH af   // pushes af onto stack
+	$LF
+	"POP hl    // pop stack into hl, essentially copying af to hl. h now has the desired value 0xD3.
+	$LF
+	"SUB a,c   // undo all changes that were made to a. It's necessary because the name occurs four
+	$LF
+	"SUB a,e   //  times and subsequent occurences would otherwise corrupt h's value.
+	$LF
+]pre
+[p 
+	"All other assembly operations are only required to not crash and not mess up the value of hl, which is luckily quite easy to achieve.
+	$LF
+]p
+[p 
+	"For this setup to work, we therefore need to do the following
+	$LF
+]p
+[ul 
+	[li 
+		" Have a Trainer ID of 0x2E5E (11870 in decimal)
+		$LF
+	]li
+	[li 
+		" Name the player "BD♀(pk)RT"
+		$LF
+	]li
+	[li 
+		" Manipulate Charmander to have 7 Attack DV, 6 Defense DV, 12 Speed DV, 9 Special DV
+		$LF
+	]li
+	[li 
+		" Catch Mew and get it to level 10 to learn Transform (Ditto knows Transform, too, but is way harder to obtain)
+		$LF
+	]li
+	[li 
+		" Get Charmeleon to have 0x36 as the lower byte of its special EV. This is where having Bellsprout instead of Oddish is important.
+		$LF
+	]li
+	[li 
+		" Store Charmeleon in a box
+		$LF
+	]li
+	[li 
+		" Perform the Transform glitch
+		$LF
+	]li
+	[li 
+		" Hope that the game doesn't crash
+		$LF
+	]li
+]ul
+[p 
+	"The last point in the list is added because of an undesired side effect that the use of that glitch move can have, which is commonly called the "TMTRAINER effect".
+	$LF
+	"It is caused in the following way: Even though the move itself is perfectly stable and harmless, its name is not.
+	$LF
+	"There is no name for the move, so the game looks for it past the actual move name list.
+	$LF
+	"Where it ends up is determined by the number of end of string symbols (0x50) in the game's RAM at that point, which is highly unpredictable.
+	$LF
+	"This random portion of RAM (20 bytes) is then copied to the name buffer and from there to the string buffer.
+	$LF
+	"This last copy operation is where the problem occurs: the programmers assumed that each name always ends with an end of string sybmol, so the copy operation continues until it is found.
+	$LF
+	"The random move name that is picked from the memory may not have such a symbol, so the game copies far too many bytes, overwriting other important memory areas, glitching out the game and most likely crashing it.
+	$LF
+]p
+[p 
+	"A full trace log of the actual code executed during this run can be seen in the trace log below.
+	$LF
+]p
+[p 
+	[b 
+		"Trace log:
+	]b
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-223 
+				"Minimize
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-224 
+				"Expand
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-223 
+		]div
+		[div class=tab-pane fade id=y-224 
+			[pre 
+				"F928:B1        OR C            SP:dfed A:28 B:00 C:e6 D:00 E:01 F:00 H:f9 L:28  Cy:69752
+				$LF
+				"F929:00        NOP             SP:dfed A:ee B:00 C:e6 D:00 E:01 F:00 H:f9 L:28  Cy:69756
+				$LF
+				"F92A:00        NOP             SP:dfed A:ee B:00 C:e6 D:00 E:01 F:00 H:f9 L:28  Cy:69760
+				$LF
+				"F92B:00        NOP             SP:dfed A:ee B:00 C:e6 D:00 E:01 F:00 H:f9 L:28  Cy:69764
+				$LF
+				"F92C:00        NOP             SP:dfed A:ee B:00 C:e6 D:00 E:01 F:00 H:f9 L:28  Cy:69768
+				$LF
+				"F92D:15        DEC D           SP:dfed A:ee B:00 C:e6 D:00 E:01 F:00 H:f9 L:28  Cy:69772
+				$LF
+				"F92E:15        DEC D           SP:dfed A:ee B:00 C:e6 D:ff E:01 F:40 H:f9 L:28  Cy:69776
+				$LF
+				"F92F:2D        DEC L           SP:dfed A:ee B:00 C:e6 D:fe E:01 F:40 H:f9 L:28  Cy:69780
+				$LF
+				"F930:21 27 91  LD HL,#9127h    SP:dfed A:ee B:00 C:e6 D:fe E:01 F:40 H:f9 L:27  Cy:69784
+				$LF
+				"F933:37        SCF             SP:dfed A:ee B:00 C:e6 D:fe E:01 F:40 H:91 L:27  Cy:69796
+				$LF
+				"F934:2E 5E     LD L,#5Eh       SP:dfed A:ee B:00 C:e6 D:fe E:01 F:10 H:91 L:27  Cy:69800
+				$LF
+				"F936:00        NOP             SP:dfed A:ee B:00 C:e6 D:fe E:01 F:10 H:91 L:5e  Cy:69808
+				$LF
+				"F937:0C        INC C           SP:dfed A:ee B:00 C:e6 D:fe E:01 F:10 H:91 L:5e  Cy:69812
+				$LF
+				"F938:30 00     JR NC,F93Ah     SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69816
+				$LF
+				"F93A:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69824
+				$LF
+				"F93B:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69828
+				$LF
+				"F93C:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69832
+				$LF
+				"F93D:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69836
+				$LF
+				"F93E:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69840
+				$LF
+				"F93F:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69844
+				$LF
+				"F940:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69848
+				$LF
+				"F941:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69852
+				$LF
+				"F942:00        NOP             SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69856
+				$LF
+				"F943:98        SBC A,B         SP:dfed A:ee B:00 C:e7 D:fe E:01 F:10 H:91 L:5e  Cy:69860
+				$LF
+				"F944:88        ADC A,B         SP:dfed A:ed B:00 C:e7 D:fe E:01 F:40 H:91 L:5e  Cy:69864
+				$LF
+				"F945:23        INC HL          SP:dfed A:ed B:00 C:e7 D:fe E:01 F:00 H:91 L:5e  Cy:69868
+				$LF
+				"F946:1E 1E     LD E,#1Eh       SP:dfed A:ed B:00 C:e7 D:fe E:01 F:00 H:91 L:5f  Cy:69876
+				$LF
+				"F948:19        ADD HL,DE       SP:dfed A:ed B:00 C:e7 D:fe E:1e F:00 H:91 L:5f  Cy:69884
+				$LF
+				"F949:11 00 2C  LD DE,#2C00h    SP:dfed A:ed B:00 C:e7 D:fe E:1e F:10 H:8f L:7d  Cy:69892
+				$LF
+				"F94C:00        NOP             SP:dfed A:ed B:00 C:e7 D:2c E:00 F:10 H:8f L:7d  Cy:69904
+				$LF
+				"F94D:18 00     JR F94Fh        SP:dfed A:ed B:00 C:e7 D:2c E:00 F:10 H:8f L:7d  Cy:69908
+				$LF
+				"F94F:1D        DEC E           SP:dfed A:ed B:00 C:e7 D:2c E:00 F:10 H:8f L:7d  Cy:69920
+				$LF
+				"F950:00        NOP             SP:dfed A:ed B:00 C:e7 D:2c E:ff F:50 H:8f L:7d  Cy:69924
+				$LF
+				"F951:16 00     LD D,#00h       SP:dfed A:ed B:00 C:e7 D:2c E:ff F:50 H:8f L:7d  Cy:69928
+				$LF
+				"F953:18 00     JR F955h        SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69936
+				$LF
+				"F955:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69948
+				$LF
+				"F956:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69952
+				$LF
+				"F957:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69956
+				$LF
+				"F958:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69960
+				$LF
+				"F959:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69964
+				$LF
+				"F95A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69968
+				$LF
+				"F95B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69972
+				$LF
+				"F95C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69976
+				$LF
+				"F95D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69980
+				$LF
+				"F95E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69984
+				$LF
+				"F95F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69988
+				$LF
+				"F960:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69992
+				$LF
+				"F961:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:69996
+				$LF
+				"F962:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70000
+				$LF
+				"F963:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70004
+				$LF
+				"F964:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70008
+				$LF
+				"F965:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70012
+				$LF
+				"F966:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70016
+				$LF
+				"F967:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70020
+				$LF
+				"F968:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70024
+				$LF
+				"F969:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70028
+				$LF
+				"F96A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70032
+				$LF
+				"F96B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70036
+				$LF
+				"F96C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70040
+				$LF
+				"F96D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70044
+				$LF
+				"F96E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70048
+				$LF
+				"F96F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70052
+				$LF
+				"F970:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70056
+				$LF
+				"F971:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70060
+				$LF
+				"F972:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70064
+				$LF
+				"F973:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70068
+				$LF
+				"F974:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70072
+				$LF
+				"F975:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70076
+				$LF
+				"F976:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70080
+				$LF
+				"F977:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70084
+				$LF
+				"F978:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70088
+				$LF
+				"F979:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70092
+				$LF
+				"F97A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70096
+				$LF
+				"F97B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70100
+				$LF
+				"F97C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70104
+				$LF
+				"F97D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70108
+				$LF
+				"F97E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70112
+				$LF
+				"F97F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70116
+				$LF
+				"F980:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70120
+				$LF
+				"F981:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70124
+				$LF
+				"F982:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70128
+				$LF
+				"F983:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70132
+				$LF
+				"F984:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70136
+				$LF
+				"F985:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70140
+				$LF
+				"F986:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70144
+				$LF
+				"F987:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70148
+				$LF
+				"F988:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70152
+				$LF
+				"F989:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70156
+				$LF
+				"F98A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70160
+				$LF
+				"F98B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70164
+				$LF
+				"F98C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70168
+				$LF
+				"F98D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70172
+				$LF
+				"F98E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70176
+				$LF
+				"F98F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70180
+				$LF
+				"F990:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70184
+				$LF
+				"F991:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70188
+				$LF
+				"F992:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70192
+				$LF
+				"F993:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70196
+				$LF
+				"F994:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70200
+				$LF
+				"F995:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70204
+				$LF
+				"F996:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70208
+				$LF
+				"F997:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70212
+				$LF
+				"F998:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70216
+				$LF
+				"F999:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70220
+				$LF
+				"F99A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70224
+				$LF
+				"F99B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70228
+				$LF
+				"F99C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70232
+				$LF
+				"F99D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70236
+				$LF
+				"F99E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70240
+				$LF
+				"F99F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70244
+				$LF
+				"F9A0:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70248
+				$LF
+				"F9A1:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70252
+				$LF
+				"F9A2:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70256
+				$LF
+				"F9A3:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70260
+				$LF
+				"F9A4:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70264
+				$LF
+				"F9A5:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70268
+				$LF
+				"F9A6:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70272
+				$LF
+				"F9A7:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70276
+				$LF
+				"F9A8:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70280
+				$LF
+				"F9A9:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70284
+				$LF
+				"F9AA:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70288
+				$LF
+				"F9AB:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70292
+				$LF
+				"F9AC:81        ADD A,C         SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:8f L:7d  Cy:70296
+				$LF
+				"F9AD:83        ADD A,E         SP:dfed A:d4 B:00 C:e7 D:00 E:ff F:10 H:8f L:7d  Cy:70300
+				$LF
+				"F9AE:F5        PUSH AF         SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:10 H:8f L:7d  Cy:70304
+				$LF
+				"F9AF:E1        POP HL          SP:dfeb A:d3 B:00 C:e7 D:00 E:ff F:30 H:8f L:7d  Cy:70320
+				$LF
+				"F9B0:91        SUB C           SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70332
+				$LF
+				"F9B1:93        SUB E           SP:dfed A:ec B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70336
+				$LF
+				"F9B2:50        LD D,B          SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70340
+				$LF
+				"F9B3:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70344
+				$LF
+				"F9B4:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70348
+				$LF
+				"F9B5:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70352
+				$LF
+				"F9B6:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70356
+				$LF
+				"F9B7:81        ADD A,C         SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70360
+				$LF
+				"F9B8:83        ADD A,E         SP:dfed A:d4 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70364
+				$LF
+				"F9B9:F5        PUSH AF         SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70368
+				$LF
+				"F9BA:E1        POP HL          SP:dfeb A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70384
+				$LF
+				"F9BB:91        SUB C           SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70396
+				$LF
+				"F9BC:93        SUB E           SP:dfed A:ec B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70400
+				$LF
+				"F9BD:50        LD D,B          SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70404
+				$LF
+				"F9BE:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70408
+				$LF
+				"F9BF:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70412
+				$LF
+				"F9C0:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70416
+				$LF
+				"F9C1:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70420
+				$LF
+				"F9C2:81        ADD A,C         SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70424
+				$LF
+				"F9C3:83        ADD A,E         SP:dfed A:d4 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70428
+				$LF
+				"F9C4:F5        PUSH AF         SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70432
+				$LF
+				"F9C5:E1        POP HL          SP:dfeb A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70448
+				$LF
+				"F9C6:91        SUB C           SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70460
+				$LF
+				"F9C7:93        SUB E           SP:dfed A:ec B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70464
+				$LF
+				"F9C8:50        LD D,B          SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70468
+				$LF
+				"F9C9:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70472
+				$LF
+				"F9CA:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70476
+				$LF
+				"F9CB:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70480
+				$LF
+				"F9CC:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70484
+				$LF
+				"F9CD:81        ADD A,C         SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70488
+				$LF
+				"F9CE:83        ADD A,E         SP:dfed A:d4 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70492
+				$LF
+				"F9CF:F5        PUSH AF         SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70496
+				$LF
+				"F9D0:E1        POP HL          SP:dfeb A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70512
+				$LF
+				"F9D1:91        SUB C           SP:dfed A:d3 B:00 C:e7 D:00 E:ff F:30 H:d3 L:30  Cy:70524
+				$LF
+				"F9D2:93        SUB E           SP:dfed A:ec B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70528
+				$LF
+				"F9D3:50        LD D,B          SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70532
+				$LF
+				"F9D4:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70536
+				$LF
+				"F9D5:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70540
+				$LF
+				"F9D6:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70544
+				$LF
+				"F9D7:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70548
+				$LF
+				"F9D8:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70552
+				$LF
+				"F9D9:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70556
+				$LF
+				"F9DA:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70560
+				$LF
+				"F9DB:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70564
+				$LF
+				"F9DC:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70568
+				$LF
+				"F9DD:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70572
+				$LF
+				"F9DE:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70576
+				$LF
+				"F9DF:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70580
+				$LF
+				"F9E0:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70584
+				$LF
+				"F9E1:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70588
+				$LF
+				"F9E2:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70592
+				$LF
+				"F9E3:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70596
+				$LF
+				"F9E4:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70600
+				$LF
+				"F9E5:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70604
+				$LF
+				"F9E6:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70608
+				$LF
+				"F9E7:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70612
+				$LF
+				"F9E8:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70616
+				$LF
+				"F9E9:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70620
+				$LF
+				"F9EA:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70624
+				$LF
+				"F9EB:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70628
+				$LF
+				"F9EC:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70632
+				$LF
+				"F9ED:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70636
+				$LF
+				"F9EE:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70640
+				$LF
+				"F9EF:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70644
+				$LF
+				"F9F0:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70648
+				$LF
+				"F9F1:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70652
+				$LF
+				"F9F2:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70656
+				$LF
+				"F9F3:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70660
+				$LF
+				"F9F4:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70664
+				$LF
+				"F9F5:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70668
+				$LF
+				"F9F6:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70672
+				$LF
+				"F9F7:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70676
+				$LF
+				"F9F8:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70680
+				$LF
+				"F9F9:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70684
+				$LF
+				"F9FA:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70688
+				$LF
+				"F9FB:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70692
+				$LF
+				"F9FC:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70696
+				$LF
+				"F9FD:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70700
+				$LF
+				"F9FE:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70704
+				$LF
+				"F9FF:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70708
+				$LF
+				"FA00:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70712
+				$LF
+				"FA01:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70716
+				$LF
+				"FA02:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70720
+				$LF
+				"FA03:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70724
+				$LF
+				"FA04:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70728
+				$LF
+				"FA05:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70732
+				$LF
+				"FA06:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70736
+				$LF
+				"FA07:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70740
+				$LF
+				"FA08:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70744
+				$LF
+				"FA09:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70748
+				$LF
+				"FA0A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70752
+				$LF
+				"FA0B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70756
+				$LF
+				"FA0C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70760
+				$LF
+				"FA0D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70764
+				$LF
+				"FA0E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70768
+				$LF
+				"FA0F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70772
+				$LF
+				"FA10:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70776
+				$LF
+				"FA11:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70780
+				$LF
+				"FA12:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70784
+				$LF
+				"FA13:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70788
+				$LF
+				"FA14:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70792
+				$LF
+				"FA15:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70796
+				$LF
+				"FA16:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70800
+				$LF
+				"FA17:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70804
+				$LF
+				"FA18:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70808
+				$LF
+				"FA19:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70812
+				$LF
+				"FA1A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70816
+				$LF
+				"FA1B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70820
+				$LF
+				"FA1C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70824
+				$LF
+				"FA1D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70828
+				$LF
+				"FA1E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70832
+				$LF
+				"FA1F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70836
+				$LF
+				"FA20:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70840
+				$LF
+				"FA21:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70844
+				$LF
+				"FA22:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70848
+				$LF
+				"FA23:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70852
+				$LF
+				"FA24:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70856
+				$LF
+				"FA25:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70860
+				$LF
+				"FA26:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70864
+				$LF
+				"FA27:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70868
+				$LF
+				"FA28:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70872
+				$LF
+				"FA29:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70876
+				$LF
+				"FA2A:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70880
+				$LF
+				"FA2B:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70884
+				$LF
+				"FA2C:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70888
+				$LF
+				"FA2D:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70892
+				$LF
+				"FA2E:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70896
+				$LF
+				"FA2F:00        NOP             SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70900
+				$LF
+				"FA30:56        LD D,(HL)       SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70904
+				$LF
+				"FA31:89        ADC A,C         SP:dfed A:ed B:00 C:e7 D:00 E:ff F:50 H:d3 L:30  Cy:70912
+				$LF
+				"FA32:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70916
+				$LF
+				"FA33:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70920
+				$LF
+				"FA34:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70924
+				$LF
+				"FA35:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70928
+				$LF
+				"FA36:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70932
+				$LF
+				"FA37:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70936
+				$LF
+				"FA38:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70940
+				$LF
+				"FA39:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70944
+				$LF
+				"FA3A:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70948
+				$LF
+				"FA3B:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70952
+				$LF
+				"FA3C:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70956
+				$LF
+				"FA3D:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70960
+				$LF
+				"FA3E:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70964
+				$LF
+				"FA3F:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70968
+				$LF
+				"FA40:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70972
+				$LF
+				"FA41:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70976
+				$LF
+				"FA42:00        NOP             SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70980
+				$LF
+				"FA43:1A        LD A,(DE)       SP:dfed A:d5 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70984
+				$LF
+				"FA44:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70992
+				$LF
+				"FA45:06 00     LD B,#00h       SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:70996
+				$LF
+				"FA47:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71004
+				$LF
+				"FA48:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71008
+				$LF
+				"FA49:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71012
+				$LF
+				"FA4A:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71016
+				$LF
+				"FA4B:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71020
+				$LF
+				"FA4C:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71024
+				$LF
+				"FA4D:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71028
+				$LF
+				"FA4E:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71032
+				$LF
+				"FA4F:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71036
+				$LF
+				"FA50:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71040
+				$LF
+				"FA51:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71044
+				$LF
+				"FA52:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71048
+				$LF
+				"FA53:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71052
+				$LF
+				"FA54:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71056
+				$LF
+				"FA55:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71060
+				$LF
+				"FA56:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71064
+				$LF
+				"FA57:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71068
+				$LF
+				"FA58:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71072
+				$LF
+				"FA59:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71076
+				$LF
+				"FA5A:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71080
+				$LF
+				"FA5B:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71084
+				$LF
+				"FA5C:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71088
+				$LF
+				"FA5D:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71092
+				$LF
+				"FA5E:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71096
+				$LF
+				"FA5F:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71100
+				$LF
+				"FA60:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71104
+				$LF
+				"FA61:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71108
+				$LF
+				"FA62:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71112
+				$LF
+				"FA63:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71116
+				$LF
+				"FA64:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71120
+				$LF
+				"FA65:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71124
+				$LF
+				"FA66:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71128
+				$LF
+				"FA67:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71132
+				$LF
+				"FA68:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71136
+				$LF
+				"FA69:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71140
+				$LF
+				"FA6A:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71144
+				$LF
+				"FA6B:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71148
+				$LF
+				"FA6C:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71152
+				$LF
+				"FA6D:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71156
+				$LF
+				"FA6E:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71160
+				$LF
+				"FA6F:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71164
+				$LF
+				"FA70:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71168
+				$LF
+				"FA71:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71172
+				$LF
+				"FA72:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71176
+				$LF
+				"FA73:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71180
+				$LF
+				"FA74:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71184
+				$LF
+				"FA75:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71188
+				$LF
+				"FA76:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71192
+				$LF
+				"FA77:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71196
+				$LF
+				"FA78:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71200
+				$LF
+				"FA79:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71204
+				$LF
+				"FA7A:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71208
+				$LF
+				"FA7B:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71212
+				$LF
+				"FA7C:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71216
+				$LF
+				"FA7D:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71220
+				$LF
+				"FA7E:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71224
+				$LF
+				"FA7F:00        NOP             SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71228
+				$LF
+				"FA80:01 B2 FF  LD BC,#FFB2h    SP:dfed A:00 B:00 C:e7 D:00 E:ff F:10 H:d3 L:30  Cy:71232
+				$LF
+				"FA83:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71244
+				$LF
+				"FA84:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71248
+				$LF
+				"FA85:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71252
+				$LF
+				"FA86:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71256
+				$LF
+				"FA87:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71260
+				$LF
+				"FA88:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71264
+				$LF
+				"FA89:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71268
+				$LF
+				"FA8A:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71272
+				$LF
+				"FA8B:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71276
+				$LF
+				"FA8C:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71280
+				$LF
+				"FA8D:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71284
+				$LF
+				"FA8E:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71288
+				$LF
+				"FA8F:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71292
+				$LF
+				"FA90:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71296
+				$LF
+				"FA91:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71300
+				$LF
+				"FA92:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71304
+				$LF
+				"FA93:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71308
+				$LF
+				"FA94:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71312
+				$LF
+				"FA95:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71316
+				$LF
+				"FA96:B2        OR D            SP:dfed A:00 B:ff C:b2 D:00 E:ff F:10 H:d3 L:30  Cy:71320
+				$LF
+				"FA97:00        NOP             SP:dfed A:00 B:ff C:b2 D:00 E:ff F:80 H:d3 L:30  Cy:71324
+				$LF
+				"FA98:3A        LD A,(HL-)      SP:dfed A:00 B:ff C:b2 D:00 E:ff F:80 H:d3 L:30  Cy:71328
+				$LF
+				"FA99:14        INC D           SP:dfed A:00 B:ff C:b2 D:00 E:ff F:80 H:d3 L:2f  Cy:71336
+				$LF
+				"FA9A:00        NOP             SP:dfed A:00 B:ff C:b2 D:01 E:ff F:00 H:d3 L:2f  Cy:71340
+				$LF
+				"FA9B:14        INC D           SP:dfed A:00 B:ff C:b2 D:01 E:ff F:00 H:d3 L:2f  Cy:71344
+				$LF
+				"FA9C:14        INC D           SP:dfed A:00 B:ff C:b2 D:02 E:ff F:00 H:d3 L:2f  Cy:71348
+				$LF
+				"FA9D:2D        DEC L           SP:dfed A:00 B:ff C:b2 D:03 E:ff F:00 H:d3 L:2f  Cy:71352
+				$LF
+				"FA9E:34        INC (HL)        SP:dfed A:00 B:ff C:b2 D:03 E:ff F:40 H:d3 L:2e  Cy:71356
+				$LF
+				"FA9F:2D        DEC L           SP:dfed A:00 B:ff C:b2 D:03 E:ff F:00 H:d3 L:2e  Cy:71368
+				$LF
+				"FAA0:0A        LD A,(BC)       SP:dfed A:00 B:ff C:b2 D:03 E:ff F:40 H:d3 L:2d  Cy:71372
+				$LF
+				"FAA1:05        DEC B           SP:dfed A:00 B:ff C:b2 D:03 E:ff F:40 H:d3 L:2d  Cy:71380
+				$LF
+				"FAA2:2E 5E     LD L,#5Eh       SP:dfed A:00 B:fe C:b2 D:03 E:ff F:40 H:d3 L:2d  Cy:71384
+				$LF
+				"FAA4:00        NOP             SP:dfed A:00 B:fe C:b2 D:03 E:ff F:40 H:d3 L:5e  Cy:71392
+				$LF
+				"FAA5:15        DEC D           SP:dfed A:00 B:fe C:b2 D:03 E:ff F:40 H:d3 L:5e  Cy:71396
+				$LF
+				"FAA6:BB        CP E            SP:dfed A:00 B:fe C:b2 D:02 E:ff F:40 H:d3 L:5e  Cy:71400
+				$LF
+				"FAA7:05        DEC B           SP:dfed A:00 B:fe C:b2 D:02 E:ff F:50 H:d3 L:5e  Cy:71404
+				$LF
+				"FAA8:20 05     JR NZ,FAAFh     SP:dfed A:00 B:fd C:b2 D:02 E:ff F:50 H:d3 L:5e  Cy:71408
+				$LF
+				"FAAF:04        INC B           SP:dfed A:00 B:fd C:b2 D:02 E:ff F:50 H:d3 L:5e  Cy:71420
+				$LF
+				"FAB0:36 76     LD (HL),#76h    SP:dfed A:00 B:fe C:b2 D:02 E:ff F:10 H:d3 L:5e  Cy:71424
+				$LF
+				"FAB2:C9        RET             SP:dfed A:00 B:fe C:b2 D:02 E:ff F:10 H:d3 L:5e  Cy:71436
+				$LF
+			]pre
+		]div
+	]div
+]div
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" The route
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[p 
+	"The Trainer ID is manipulated to be 0x2E5E, a requirement for the Transform glitch setup. It needed 31 total frames of delay to achieve, which is the shortest delay possible for this ID.
+	$LF
+	"The player is named "BD♀(pk)RT", which is also part of the setup.
+	$LF
+	"This will cost some seconds over the course of the run, as each displayed letter delays the game by one frame, making shorter names faster.
+	$LF
+	"The rival's name is set to default, renaming it would take longer than the time saved by a shorter name.
+	$LF
+]p
+[h4 
+	" Pallet Town
+	$LF
+]h4
+[p 
+	"I pick Charmander and manipulate its DVs to be exactly 7 Attack, 6 Defense, 12 Speed and 9 Special; another part of the setup.
+	$LF
+	"As a result, Charmander's stats are not as high as they could be, and the trainer fights will therefore take longer compared to the published run.
+	$LF
+	"Also, when giving Oak the parcel, it is acutally faster to stand to the left of him instead of the front when talking to him.
+	$LF
+	"While this results in 3 additional steps, it makes Gary's walking animation 2 steps shorter, and since NPCs move only half as fast as you, it saves 15 frames.
+	$LF
+	"Even the developers hadn't thought of this it seems, as all the NPC rotations in that cutscene assume that you are standing in front of Oak.
+	$LF
+]p
+[h4 
+	" Pewter City
+	$LF
+]h4
+[p 
+	"I buy 1 escape rope and 2 Pokéballs at the mart. The Pokéballs will be used to catch Abra and Mew.
+	$LF
+	"Also, Brock skip glitch is performed.
+	$LF
+]p
+[h4 
+	" Mt. Moon
+	$LF
+]h4
+[p 
+	"I visit the Pokécenter to set the teleport location and use the escape rope to initiate Trainer-Fly and skip all the trainers in the third floor.
+	$LF
+	"A hidden Ether is picked up that will be used at the end of the run.
+	$LF
+]p
+[h4 
+	" Cerulean City
+	$LF
+]h4
+[p 
+	"I visit the Pokécenter again to set the teleport location and proceed by clearing the Nugget Bridge.
+	$LF
+]p
+[h4 
+	" Route 24
+	$LF
+]h4
+[p 
+	"I catch Abra and immediately trigger the second and last Trainer-Fly.
+	$LF
+]p
+[h4 
+	" Route 25
+	$LF
+]h4
+[p 
+	"The Hiker is fought to set up for the arbitrary encounter glitch.
+	$LF
+	"Now, a whole lot of encounters are used to finish the setup of the Transform glitch:
+	$LF
+	"A Lvl 12 Bellsprout is manipulated to have a Special DV of 0 and therefore a Special stat of 21, the number required to encounter Mew.
+	$LF
+	"It is killed to increase the Special EV of Charmeleon by 70 (This value is the reason Oddish doesn't work, as it has 75 base special).
+	$LF
+	"Mew is manipulated to have an Attack DV of 15 to make the upcoming fights faster, and is caught using the last Pokéball.
+	$LF
+	"Mew is switched to the front of the team, and is used to kill the Lvl 14 Bellsprout encounter.
+	$LF
+	"Next up is a Lvl 9 Metapod, which is killed using all three Pokémons to split up its EVs and give Charmeleon exactly 8 Special EV, which brings its lower byte to 0x36, the exact value needed as part of the setup.
+	$LF
+	"The last encounter is a Lvl 12 Bellsprout, which is manipulated to have bad defensive stats and is killed by Mew to reach level 10 where it learns Transform.
+	$LF
+	"Having finished the setup, Abra is used to teleport back to Cerulean City.
+	$LF
+]p
+[p 
+	"Note that the so-called "3 Step Rule" is used in this game and requires you to walk at least 3 steps between two consecutive encounters.
+	$LF
+]p
+[h4 
+	" Cerulean City
+	$LF
+]h4
+[p 
+	"Charmeleon is stored in the box as the last setup step, and then we are heading out to route 4.
+	$LF
+]p
+[h4 
+	" Route 4
+	$LF
+]h4
+[p 
+	"A wild Rattata is used to perform the Transform glitch.
+	$LF
+	"In order to make the glitch move usable, the Ether from Mt. Moon is used on it to restore its PP.
+	$LF
+	"After successfully using the glitch move in another encounter, I end the battle by fleeing and due to the successful setup, the ending cutscene starts.
+	$LF
+	"I need to wait 3 seconds before actually using the move to progress the in-game timer enough in order to successfully execute the code.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": Judging.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": Movie file replaced with an improvement by the author. The new movie is 902 frames faster.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": A massive improvement to a run that was already insane. Accepting for publication as an improvement to the published movie.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": (jumps out of bed) Mine.... Sorry for the delay I had to struggle with school... focusing on the final dumps now.
+]p

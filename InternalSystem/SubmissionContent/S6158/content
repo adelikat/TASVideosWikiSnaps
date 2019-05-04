@@ -1,0 +1,235 @@
+4
+[p 
+	"Axiom Verge is a metroidvania game created by Thomas Happ and released in 2015. This TAS completes the game as fast as possible in the speedrun mode. This mode shows an in-game timer, disables all cutscenes, and uses a fixed seed for the random number generator. This TAS starts at a slow pace, but once the drone-swap ability is acquired, movement changes radically.
+	$LF
+]p
+[p 
+	(youtube|v=PIS7fSi8adQ)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS 1.3.2
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		" Genre: Platform, Action, Adventure
+		$LF
+	]li
+]ul
+[h3 
+	" Framerate issue
+	$LF
+]h3
+[p 
+	"Like many modern games, Axiom Verge has framerate-independent physics, and an in-game option to deactivate vsync. Unassisted speedrunners have witnessed that having the game running at a high framerate makes the Laser Drill, the Address Disruptor (glitch gun) and the Red Coat damage more efficient, thus top speedruns are currently done with vsync off. I could confirm this behavior, and interpreted it as followed:
+	$LF
+]p
+[p 
+	"Taking the Drill as an example, it is considered as a weapon that hits continuously (every frame). But targets (enemies, blocks, etc.) have an invulnerability period after each hit of the Drill. When the Drill hits, the target has a variable that is initialized to the invulnerability time, 1 second for example. Then every subsequent frame, this variable is decremented by 1/fps. When it reaches zero, the invulnerability period ends. As a result, the effective invulnerability period for this target took 1 second 
+	[b 
+		"+ 1 frame
+	]b
+	"! This extra frame might seem small, but when invulnerability periods are short, it makes a significant difference. The actual invulnerability time (without the extra frame) of the Drill is 0.167 s, so the effective invulnerability period becomes 0.184 s at 60 fps and 0.168 at 1000 fps.
+	$LF
+]p
+[p 
+	"I could derive a formula from the values observed from the RAM watch. Here is 
+	[a class=extlink href=https://www.wolframalpha.com/input/?i=log-linear+plot+x%2F%282*%28ceil%28x%2F6%29%2B1%29%29+from+x+%3D+30+to+500 rel=nofollow 
+		"a plot
+	]a
+	" of the effectiveness of the Drill with one collected Power Node. x-axis represents the framerate in Hz and y-axis represents the number of destroyed blocks per second. This formula did match with measures from the game, except at the discontinuity points where real measure could take either the low value, the high value or a value in between. This formula converges to 3 blocks per second, which should be the intended value. If we remove the extra frame from the effective invulnerability period, we obtain 
+	[a class=extlink href=https://www.wolframalpha.com/input/?i=log-linear+plot+x%2F%282*ceil%28x%2F6%29%29+from+x+%3D+30+to+500 rel=nofollow 
+		"this plot
+	]a
+	".
+	$LF
+]p
+[p 
+	"For this TAS, I decided to take advantage of it. The default value of 60 fps gives a bad outcome (2.5 blocks per second in the above example). However, I didn't want to take very high value because it would significantly slow down the process of TASing. As a consequence, I decided to make this TAS at 120 fps. It is a common framerate value, it provides a good outcome (2.86 blocks per second in the above example) which is close to the maximum value while still being a low framerate. I realize that this is an arbitrary decision, but I find legitimate to save time by tweaking the framerate because from what I understand, we are getting closer to the intended game behavior by having high framerates. Also, I didn't have TASVideos rules or guidelines to provide some grounds at that time.
+	$LF
+]p
+[h3 
+	" Weapons
+	$LF
+]h3
+[p 
+	"Here are the stats of the weapons used in this TAS. Frame counts are given for a game running at 120 fps.
+	$LF
+]p
+[ul 
+	[li 
+		" Axiom Disruptor (base weapon): base damage of 20, cooldown of 18 frames
+		$LF
+	]li
+	[li 
+		" Nova (purple shot) - main projectile: base damage of 30, cooldown of 24 frames. There can be only one projectile on screen
+		$LF
+	]li
+	[li 
+		" Nova - shards: base damage of 18 per shard, cooldown of 48 frames (24 to fire the Nova and 24 to split)
+		$LF
+	]li
+	[li 
+		" Kilver (green burst): base damage of 34, cooldown of 36 frames
+		$LF
+	]li
+	[li 
+		" Drill: base damage of 18 (fully deployed), cooldown of 21 frames
+		$LF
+	]li
+	[li 
+		" Drone Drill: base damage of 12, cooldown of 21 frames
+		$LF
+	]li
+	[li 
+		" Red Coat: base damage of 30, cooldown of 18 frames
+		$LF
+	]li
+]ul
+[p 
+	"From the three weapons, the Nova has the highest dps, but requires to fire near the target to only have one projectile on screen. The Nova shards can deal even more damage, but there must be at least 4 shards to hit to be worth, which can only be possible if the target is moving towards the shards.
+	$LF
+]p
+[p 
+	"Each Power Node increases the damage of each weapon by 50% of base damage, which makes them worth taking.
+	$LF
+]p
+[h4 
+	" Drill combo
+	$LF
+]h4
+[p 
+	"It is possible to add Drill damage in between two shots of a weapon for extra damage. The Drill takes 10 frames to fully deploy, and then 21 frames to retract. The more deployed it is, the mode damage it deals. However, when the Drill is deployed, we cannot use our weapons. The above weapons with the Drill becomes:
+	$LF
+]p
+[ul 
+	[li 
+		" Nova + Drill: base damage of 30+18=48, cooldown of 31 frames (it is better to fully deploy the drill even if the cooldown is higher)
+		$LF
+	]li
+	[li 
+		" Kilver + Drill: base damage of 34+18=52, cooldown of 36 frames
+		$LF
+	]li
+]ul
+[h4 
+	" Dual drilling
+	$LF
+]h4
+[p 
+	"The Drill and the Drone Drill have distinct cooldowns, so it is possible to constantly swap between the character and the drone to drill with both.
+	$LF
+]p
+[h3 
+	" Save warps
+	$LF
+]h3
+[p 
+	"The game saves each time you collect something. When you die or reload a save, you keep everything you collected. This behavior allows us to use save warps to skip portions of the game. The biggest one is skipping the Grapple. After collecting the Address Disruptor, we are supposed to collect the Grapple, so that we can backtrack all the way to the beginning, where the next area is located. Instead of that, we never use a save point, we don't take the Grapple and we reload our save which sends us at the beginning of the game, very close to the next area.
+	$LF
+]p
+[p 
+	"Also, after the Vision boss, the game registers the save location at the save point in the bottom of that area. This allows us to save warp multiple times to that location without having to save there (saving animation is quite long).
+	$LF
+]p
+[h3 
+	" Drone Teleport techniques
+	$LF
+]h3
+[p 
+	"When the Drone Teleport is taken, the fastest way of moving is by constantly launching the drone and teleporting at the drone position, with dashes in between. The game implements a long cooldown between drone launches, but this cooldown can be nullified by using the Drill or the Address Disruptor. There is still another cooldown left of 21 frames between drone launches. Also, the dash cooldown is 72 frames, which is not a multiplier of 21. So, depending on the situation, movement will be:
+	$LF
+]p
+[ul 
+	[li 
+		" (drone launch, wait 21 frames, deploy and teleport) four times, then dash
+		$LF
+	]li
+	[li 
+		" (drone launch, wait 24 frames, deploy and teleport) three times, then dash
+		$LF
+	]li
+]ul
+[p 
+	"The main problem with Drone Teleport is that the character gains height, and ultimately reaches the ceiling, which prevent teleporting. So height is lost either by launching the drone downward, dashing downward or delaying the drone launch.
+	$LF
+]p
+[h3 
+	" Address Bomb skip
+	$LF
+]h3
+[p 
+	"There is a corrupted wall in Eden which requires the Address Bomb to pass. However, the wall is two tiles long. So after taking damage to benefit from invulnerability, we can go through the wall with the Trenchcoat, thus skipping the need for the Address Bomb.
+	$LF
+]p
+[h3 
+	" Door glitch
+	$LF
+]h3
+[p 
+	"By dashing with the Red Coat at the same frame as entering a Boss door, the character will continuously dash during the boss cutscene. This is used in Xedur 2 boss room to reach the other side faster.
+	$LF
+]p
+[h3 
+	" Improvements
+	$LF
+]h3
+[ul 
+	[li 
+		" Some top-door transitions where I press 
+		[tt 
+			"up
+		]tt
+		" might be non-optimal. Holding 
+		[tt 
+			"up
+		]tt
+		" extends the hitbox of the character, which makes the transition longer.
+		$LF
+	]li
+	[li 
+		" It should be able to shoot more Nova-shard shots to Xedur boss, but it is really precise.
+		$LF
+	]li
+	[li 
+		" I couldn't save a phase on Sentinel boss, but maybe by modifying how the first phases are handled, could it be possible?
+		$LF
+	]li
+	[li 
+		" I used the full life bar multiple times, but skipping the Health upgrade might still be faster.
+		$LF
+	]li
+]ul
+[p 
+	"Huge thanks to the Axiom Verge speedrunning community for suggestions, feedback and support!
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": Hoo boy, the future is now... Judging...
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Great movie, I was waiting for it for years. Everything seems good and sensible, even the framerate! Accepting to Moons.
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

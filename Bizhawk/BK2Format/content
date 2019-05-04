@@ -1,0 +1,216 @@
+6
+[p 
+	"This page documents the .bk2 file format for the 
+	(__wikiLink|BizHawk)
+	" Emulator.  This format is a replacement to the 
+	(__wikiLink|BizHawk/BkmFormat|.bkm)
+	" format that was originally released with the emulator and used up to the 1.7.2 release.
+	$LF
+]p
+[h2 
+	" Zip archive
+	$LF
+]h2
+[p 
+	[img class=embedright src=http://adelikat.tasvideos.org/Bk2ArchiveDemonstration.png 
+	]img
+	$LF
+	".bk2 is an archive file that contains movie data broken into various files.  It is a zip format and can be opened with any unzip tool, such as 7z.
+	$LF
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Archived files
+	$LF
+]h3
+[h4 
+	" Header
+	$LF
+]h4
+[p 
+	"A text file in UTF-8 encoding that contains key-value pairs for various aspects of the movie such as
+	$LF
+]p
+[ul 
+	[li 
+		" MovieVersion
+		$LF
+	]li
+	[li 
+		" rerecordCount
+		$LF
+	]li
+	[li 
+		" Author
+		$LF
+	]li
+	[li 
+		" emuVersion
+		$LF
+	]li
+	[li 
+		" Platform
+		$LF
+	]li
+	[li 
+		" GameName
+		$LF
+	]li
+	[li 
+		" SHA1
+		$LF
+	]li
+	[li 
+		" BoardName
+		$LF
+	]li
+	[li 
+		" Core
+		$LF
+	]li
+	[li 
+		" StartsFromSavestate
+		$LF
+	]li
+]ul
+[p 
+	"Note that the StartsFromSavestate is a convenience property.  The existence of a CoreState object is what makes a movie savestate-anchored.  Even if this property was false, that file will still be checked and loaded if it exists.
+	$LF
+]p
+[h4 
+	" Input Log
+	$LF
+]h4
+[p 
+	"A text file in UTF-8 encoding that contains the input log of the movie.
+	$LF
+	"Input frames are represented by lines that begin with "|".
+	$LF
+	"(The frame count can be determined by counting the number of lines that start with "|".)
+	$LF
+]p
+[p 
+	"The first line of the input log file is a Log Key.  This shows the button names, in order, that are used for this input.  Currently this is only for convenience and is not read by BizHawk when loading a movie.  Altering the Log Key has no effect.
+	$LF
+]p
+[p 
+	"All lines that start with a pipe (|) represent a frame of input.  All boolean input is represented by a single character when on, and a "." when off.  The actual character used matters only for readability, BizHawk will interpret any character other than "." as on.  
+	$LF
+]p
+[p 
+	"Analog controls are represented by a 5 digit number (left padded with spaces) followed by a comma.
+	$LF
+]p
+[p 
+	"Pipes (|) can be present anywhere in the input log and serve as logical separators, typically to separate distinct controllers (but only by convention).
+	$LF
+]p
+[p 
+	"Actual buttons and orders vary per platform and controller configuration.
+	$LF
+]p
+[h4 
+	" Comments
+	$LF
+]h4
+[p 
+	"Simply a text file of comments by the author.
+	$LF
+]p
+[h4 
+	" Subtitles
+	$LF
+]h4
+[p 
+	"The subtitle file consists of a number of lines in the following format:
+	$LF
+	[tt 
+		"subtitle frame x y length color text
+	]tt
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[tt 
+			"subtitle
+		]tt
+		" is just the string "subtitle", to indicate the line is a subtitle (artifact from old format).
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"frame
+		]tt
+		" is the first frame on which the subtitle should appear.
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"x
+		]tt
+		" is the x position of the top-left of the subtitle (emulator screen space).
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"y
+		]tt
+		" is the y position of the top-left of the subtitle (emulator screen space).
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"length
+		]tt
+		" is the number of frames the subtitle should remain visible.
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"color
+		]tt
+		" indicates the color of the subtitles in hexadecimal ARGB.
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"text
+		]tt
+		" is the text to display and is simply the rest of the line.
+		$LF
+	]li
+]ul
+[p 
+	"For example, to display "Hello, world!" (without the quotes) on screen from
+	$LF
+	"frame 78568 to 78628 (60 frames) at position (200, 100) in green, you would use:
+	$LF
+	[tt 
+		"subtitle 78568 200 100 60 FF00FF00 Hello, world!
+	]tt
+	$LF
+]p
+[h4 
+	" SyncSettings
+	$LF
+]h4
+[p 
+	"A JSON blob of all core settings required for sync.  These will be automatically loaded and applied by the emulator when the movie is loaded.
+	$LF
+]p
+[h4 
+	" CoreState
+	$LF
+]h4
+[p 
+	"If this file exists, it is a savestate-anchored movie.  This state will be loaded when the movie is loaded.
+]p

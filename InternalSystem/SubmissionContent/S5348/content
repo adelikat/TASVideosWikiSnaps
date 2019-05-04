@@ -1,0 +1,240 @@
+5
+[h2 
+	"Town & Country Surf Designs: Wood & Water Rage
+	$LF
+]h2
+[p 
+	"Town & Country Surf Designs is a manufacturer of surfboards based in Hawaii. The game features their mascot characters Joe Cool, Tiki Man, Kool Kat, and Thrilla Gorilla (who also appears in the sequel Thrilla's Sufari).
+	$LF
+]p
+[h2 
+	"Available game modes:
+	$LF
+]h2
+[ul 
+	[li 
+		[em 
+			"Street Skate Session
+		]em
+		": Skateboard levels only.
+		$LF
+	]li
+	[li 
+		[em 
+			"Big Wave Encounter
+		]em
+		": Surfing levels only.
+		$LF
+	]li
+	[li 
+		[em 
+			"Wood and Water Rage
+		]em
+		": Alternating skateboarding and surfing levels.
+		$LF
+	]li
+]ul
+[h2 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: Bizhawk 1.10.0 (syncs in 1.11.0)
+		$LF
+	]li
+	[li 
+		" Completes 10 rounds:
+		$LF
+		[ul 
+			[li 
+				" The game has no ending, the level counter in memory just wraps around indefinitely
+				$LF
+			]li
+			[li 
+				" The skateboarding rounds add more to the beginning of the stage for the first 5 stages
+				$LF
+			]li
+			[li 
+				" The surfing rounds increase the timer for the first 5 stages
+				$LF
+			]li
+			[li 
+				" After round 10 the game only increases difficulty by reducing your starting health for each stage, it does not add new content.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h2 
+	" Controls
+	$LF
+]h2
+[h3 
+	" Street Skate Session
+	$LF
+]h3
+[ul 
+	[li 
+		" Up/Down: move up and down
+		$LF
+	]li
+	[li 
+		" Left: move left/slow down
+		$LF
+	]li
+	[li 
+		" Right: move right/stand on the board and maintain speed
+		$LF
+	]li
+	[li 
+		" B: push with your foot and gain speed
+		$LF
+	]li
+	[li 
+		" A: jump (off of the board, the board stays on the ground)
+		$LF
+	]li
+	[li 
+		" Left+A: ollie (the board comes with you as you jump)
+		$LF
+	]li
+]ul
+[h3 
+	" Big Wave Encounter
+	$LF
+]h3
+[ul 
+	[li 
+		" Up/Down/Left/Right move up, down, left, or right
+		$LF
+	]li
+	[li 
+		" B: seems to slightly reduce turn speed, minimal effect
+		$LF
+	]li
+	[li 
+		" A: seems to slightly increase turn speed, minimal effect
+		$LF
+	]li
+	[li 
+		" Up+B: near the top of the wave starts a jump off the top of the wave
+		$LF
+	]li
+	[li 
+		" Down+A: while jumping will dive from the jump early
+		$LF
+	]li
+]ul
+[h2 
+	" Optimizing the time
+	$LF
+]h2
+[p 
+	"The skateboarding stages effectively have a max speed, and the surfing stages are timed. As a result the ways to save time in this run are limited, but here they are.
+	$LF
+]p
+[h3 
+	" Street Skate Session
+	$LF
+]h3
+[p 
+	"There are separate values for your speed (0x3A0) and the speed at which enemy sprites move (0x3A4), but they both have an effect on the amount the screen scrolls. Normally your max speed is 3 and the sprite speed is 7, but hitting an oil slick increases your speed slightly. Eventually you can get to a speed of 4 and a sprite speed of 0xA. In the later rounds you'll notice that I miss the last oil slick, this is because there is no way to hit it without crashing in the later levels where you get there at a higher speed.
+	$LF
+]p
+[p 
+	"If you are holding right (or other buttons) when you cross the finish line the animation will hang for an extra frame. You can let go of right just before you hit the finish line to save one frame.
+	$LF
+]p
+[h3 
+	" Big Wave Encounter
+	$LF
+]h3
+[p 
+	"These stages are timed. The timer for each round starts at 30, 35, 40, 45, 50. There are a few interesting notes about the timer though, first it starts when the stage loads and runs a few ticks before you even get control. Second it is 65 frames per tick, so it is a little more than a second. I don't do any crashing in this run, but the timer actually runs through most of the death animation so unless you crash at the end of the stage you only end up losing a handfull of frames.
+	$LF
+]p
+[p 
+	"The critical part of saving time here is to be in a favorable position when the timer runs out (rolls over to 0xFF) and the end of the stage spawns. Your position on the screen (X at 0x478, Y at 0x48C) and the amount the screen has scrolled (2 bytes at 0x2D) are independant. The dock at the end of the stage spawns on a full screen boundary, and the stage ends after you've gone off the right side of the screen. This means the ideal scenario is to be as far to the right of the screen as possible and have the screen scrolled so that the dock spawns as close to you as possible.
+	$LF
+]p
+[p 
+	"You start at an X position of 0x80. If you press left you'll move left down to an X position of 0x3F. Moving right is a bit more tricky but if you have momentum and let go of right you'll drift several pixels to the right. Also near the bottom of the screen your angle will change and you'll drift several more pixels. The game won't let you start drifting if you're at 0x90 or better, but if you start at 0x8F you can drift to a maximum X position of 0xA7. Near the bottom of the screen you can head left beyond 0x3F, but unfortunately the lowest value I could get was 0x02. If you could head left and screen wrap that would definitely save a few frames.
+	$LF
+]p
+[p 
+	"It is much easier to see how your moves affect the amount the screen has scrolled, but it is still difficult to manipulate your moves so you're scrolled to the last pixel where the dock will still spawn near you. Small changes in input can cause the screen scroll to change by several pixels making it a bit difficult to tune.
+	$LF
+]p
+[h2 
+	" Tricks
+	$LF
+]h2
+[h3 
+	" Street Skate Session
+	$LF
+]h3
+[p 
+	"The main trick here is that frame perfect mashing of up/down cause the games hit detection for obstacles to stop working (hit detection for items is still in tact). There are many places I abuse this for entertainment, and there is even a place where i abuse it to get out of bounds. Sadly this doesn't save time since I need to get back in bounds to hit an oil slick. The hit detection for the terrain doesn't work while screen wrapped, so it isn't possible to hit oil slicks from up there.
+	$LF
+]p
+[h3 
+	" Big Wave Encounter
+	$LF
+]h3
+[p 
+	"Alternately mashing up and right, or up and left causes the hit detection for the top of the wave to break down. As a result I can get out of bounds and go sky surfing, and even screen wrap.
+	$LF
+]p
+[h2 
+	" Improvements
+	$LF
+]h2
+[p 
+	"In the first surfing stage the best screen scroll position when the timer ran out was one that ended in 0xDF. In the last couple of stages it was 0xE2. A lack of diligence in the second and third surfing stage may mean you could eek out a couple of frames there.
+	$LF
+	"Going left in the surfing stages I was able to get down to an X position of 0x02. If you were somehow able to get a little further left and wrap to 0xFF you could save some frames for sure.
+	$LF
+]p
+[h2 
+	"Thanks to:
+	$LF
+]h2
+[ul 
+	[li 
+		" whitman_price_ for the RTA runs and interest in this TAS
+		$LF
+	]li
+	[li 
+		" pokota for the temp encode
+		$LF
+	]li
+	[li 
+		" my Twitch chat for the ideas and encouragement
+		$LF
+	]li
+]ul
+[h4 
+	" Screenshots:
+	$LF
+]h4
+[p 
+	"11, 4011, 13406
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Given the general lack of opportunity to speed up the action in many areas, this movie skirts the line on being too trivial, but I think it does enough to pass. Aside from that, the repetitiveness has hurt the audience response a bit. Accepting for the Vault.
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub.
+]p

@@ -1,0 +1,303 @@
+6
+[p 
+	"Going back to improve on my first submission.
+	$LF
+]p
+[p 
+	[b 
+		"Game Objectives
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		" Genre: Platform
+		$LF
+	]li
+	[li 
+		" Very minor glitch abuse
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" No damage taken and collects all hearts (mostly for "why not?" sake)
+		$LF
+	]li
+]ul
+[p 
+	(youtube|v=TmvlRIeHUNk)
+	$LF
+]p
+[p 
+	[b 
+		"Movement
+	]b
+	$LF
+]p
+[ul 
+	[li 
+		$UNPRINTABLE TEXT!!!
+	]li
+	[li 
+		$UNPRINTABLE TEXT!!!
+	]li
+	[li 
+		$UNPRINTABLE TEXT!!!
+	]li
+	[li 
+		$UNPRINTABLE TEXT!!!
+	]li
+	[li 
+		$UNPRINTABLE TEXT!!!
+	]li
+]ul
+[p 
+	"If you press “A” once Jack will do a single punch, which does 1 HP of damage each punch. 
+	$LF
+]p
+[p 
+	"If you hold “A” Jack will do 3 punches before doing a super punch which does enough damage to kill any mook in the game. The downside is that this is slow overall.
+	$LF
+]p
+[p 
+	"By holding up and pressing “A” Jack will do a roundhouse kick which does 2 HP of damage. This attack can be chained fairly quickly and as such, it’s quicker to take out an enemy with 6HP with three kicks as opposed to six punches or three punches before a super sexy hadouken attack.
+	$LF
+]p
+[p 
+	[b 
+		"Useful Addresses
+	]b
+	$LF
+	"All of these addresses are WRAM and 1 byte unsigned
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Name  
+			]th
+		]tr
+		[tr 
+			[td 
+				"0107
+			]td
+			[td 
+				"IGT
+			]td
+		]tr
+		[tr 
+			[td 
+				"0109
+			]td
+			[td 
+				"Tickets Left
+			]td
+		]tr
+		[tr 
+			[td 
+				"010D
+			]td
+			[td 
+				"Jack's HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"010F
+			]td
+			[td 
+				"Inventory
+			]td
+		]tr
+		[tr 
+			[td 
+				"0172
+			]td
+			[td 
+				"Helicopter HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0191
+			]td
+			[td 
+				"Last Boss HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0805
+			]td
+			[td 
+				"Jack's Sprite
+			]td
+		]tr
+		[tr 
+			[td 
+				"0808
+			]td
+			[td 
+				"X
+			]td
+		]tr
+		[tr 
+			[td 
+				"0809
+			]td
+			[td 
+				"X 2nd Byte
+			]td
+		]tr
+		[tr 
+			[td 
+				"080A
+			]td
+			[td 
+				"Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"080B
+			]td
+			[td 
+				"Y 2nd Byte
+			]td
+		]tr
+		[tr 
+			[td 
+				"08AA
+			]td
+			[td 
+				"Limo Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"08AB
+			]td
+			[td 
+				"Limo Y 2nd Byte
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	[b 
+		"Tickets
+	]b
+	$LF
+]p
+[p 
+	"Tickets fall 1 pixel every 36 frames provided Jack is standing perfectly still. Moving at all slows up the ticket's falling animation - actually, whenever Address $0805 value changes the ticket is slowed for a frame each time it changes (that means if you press forward for one frame the ticket pauses for the frame Jack moves forward, and one frame moving back to a stationary position). Mirrored sprites don't call on this value and are treated like the same sprite that it's mirroring. So if you twitch back and forth in mid-air it won't make the tickets fall any slower (besides jumping and landing in the first place).
+	$LF
+]p
+[p 
+	"The only exception to this I have found, oddly, is the idle animation where Jack looks behind him. I have a theory that it might be the bottom part of the sprite that causes this effect since the sprites in the memory are split in half, but I have no real way to test this.
+	$LF
+]p
+[p 
+	"This same effect happens with Jack’s special items, explosions and the final boss (except for its small pellets).
+	$LF
+]p
+[p 
+	[b 
+		"Scene 1 Double Missile Strat
+	]b
+	$LF
+]p
+[p 
+	"On the top level of Scene 1 once Jack collects enough tickets he’ll gain a missile launcher. This is intended to be used on the barriers in the stage. It’s intended that you collect a certain amount of tickets, use the missile launcher to destroy one barrier and repeat the process for the second gate.  (See: current publication)
+	$LF
+]p
+[p 
+	"Instead, if you can place a missile tank and fire a missile, despawn the tank without despawning the missile itself Jack can place a second missile.  Despawning objects is based on proximity.
+	$LF
+]p
+[p 
+	"This strat saves time not only through not having to wait to place a second missile, but I also save time on not having to jump to grab tickets for the second missile tank, Additionally, I avoid a lag frame with the second barrier being destroyed off-screen.
+	$LF
+]p
+[p 
+	[b 
+		"Driving Stage Luck Manipulation
+	]b
+	$LF
+]p
+[p 
+	$UNPRINTABLE TEXT!!!
+]p
+[p 
+	"The GPU viewer in Bizhawk is a big help with knowing what has been spawned/despawned in the memory.
+	$LF
+]p
+[p 
+	"The cardinal left and right movement done at the very beginning of the stage is important. This not only spawns the first two tickets into place, but it also spawns and despawns several cars which also affects the drops in a positive way.
+	$LF
+]p
+[ul 
+	[li 
+		$UNPRINTABLE TEXT!!!
+	]li
+]ul
+[p 
+	"In Scene 6 you have to chase down a limo. This limo has a fair bit of rubberband AI so it’ll never outrun you, especially if you obtain the booster quickly.
+	$LF
+]p
+[p 
+	"Small creation note: I’m somewhat proud how hard it was for me to optimize Scene 6. It took me a little over a week of work to gain a net total of 11 frames in the stage. I had to sit down and study what loaded into the memory given 
+	[b 
+		"every
+	]b
+	" movement and spawn situation. In order to do this I used several different instances of Bizhawk and their accompanying GPU viwers and RAM watches, and chose the best option. As such the rerecord count could be considered lower than what was actually put into the movie, but this reflects what went into the most optimal option.
+	$LF
+]p
+[p 
+	[b 
+		"Helicopter Boss
+	]b
+	$LF
+]p
+[p 
+	"First thing to note is that this boss’ damage isn’t calculated until after its invulnerability frames have worn off. The boss’ health address is $0172 and the boss has 8 HP.
+	$LF
+]p
+[p 
+	"So optimally I want shots to connect after the last one was registered (as mentioned, after the I-frames have worn off). You can constantly stun lock the boss by firing another missile as soon as possible, but that only extends the invulnerability period from the last damage, while not counting the shot you just fired.
+	$LF
+]p
+[p 
+	"Another thing to keep in mind is that this boss' pattern is based on not only how you move once you move up to it, but it's also affected by how you load the enemy in the memory (like most enemies). This is important since I need the helicopter to move into the missile that Jack fires so that it can be stunlocked. It's faster to jump up the ladder the way I did in order to load the top of the map differently (the map will load diagonally in a way that allows Jack to jump to collect the ticket, fire as soon as he lands, and the boss will move right into it) than it is to simply run up and end up having to turn around and place a missile that will connect.
+	$LF
+]p
+[p 
+	[b 
+		"Last Boss
+	]b
+	$LF
+]p
+[p 
+	"Standing still in the center of the stage is not only to illustrate how utterly broken the boss is, but the boss’ firing speed is also affected by movement like the tickets. So standing still is actually part of the optimality. 
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Accepting as an improvement to the 
+	(__wikiLink|2686M|published movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

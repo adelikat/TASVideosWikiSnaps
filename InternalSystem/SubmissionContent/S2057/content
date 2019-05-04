@@ -1,0 +1,232 @@
+6
+[h4 
+	" Final Fantasy by TheAxeMan
+	$LF
+]h4
+[ul 
+	[li 
+		"ROM: Final Fantasy (U)
+		$LF
+	]li
+	[li 
+		"Abuses glitches
+		$LF
+	]li
+	[li 
+		"Manipulates luck (a lot)
+		$LF
+	]li
+	[li 
+		"Uses power cycles
+		$LF
+	]li
+]ul
+[p 
+	"After much hard work I proudly present this highly optimized run through the US version of the original Final Fantasy. This run beats the 
+	(__wikiLink|409M|current record)
+	" by exactly 9800 frames. That's 2 minutes, 43 1/3 seconds.
+	$LF
+]p
+[p 
+	"The overall plan is about the same as before. However this time I analyzed the game's internal algorithms. I used this information to create and use an extensive amount of optimization scripting. There are also a few other odds and ends, but most of the improvement comes from the optimization scripts. I also used ffhackster and the fceu memory watch feature a lot, so many thanks to everyone who contributed to those. Maximus' tas editor was useful early on but failed me later as it doesn't support power cycles.
+	$LF
+]p
+[p 
+	"I wrote three different scripts to optimize different aspects of the run. The most important was an overall pathfinding script that would tell me what enemy groups I would encounter given a route through the game. The next most useful was a run analyzer that figured out the optimal manipulation for running from a series of battles. I also had a battle analyzer to optimize battles, but this was only used in the first few battles. The algorithm controlling which battles come up is pretty much separate from the battle randomization for hits, damage, running, etc. so it made sense to analyze these separately.
+	$LF
+]p
+[p 
+	"The pathfinding script used a little runset that listed how many steps I would take through each area. It could take some regression options, analyze all the permutations then report the best result according to a cost function. The cost function took into account the time taken to walk around, run from battles and fight if necessary. Of course the most useful aspect of this was to avoid fights with the dreaded "can't run" flag. The secondary benefit was fewer fights in general. Finally, extra pacing steps are almost completely eliminated. In order to use this, I needed to analyze and plan out every step through every area ahead of time. But the results were well worth it: I eliminated all "can't run" fights except for two in the final dungeon. Additionally, the total number of random battles is reduced from 184 to 173. So basically most of the improvement comes from this.
+	$LF
+]p
+[p 
+	"The run script figured out how to manipulate running from each battle. The highlights of this are controlling the number of enemies that show up; fewer enemies are easier to manipulate and there is an extra frame of loading for each enemy. You might notice throughout the run that the enemy groups are a little smaller than you normally see throughout the game. Another big factor is preemptive battles. It seems that the little "preemptive attack" message comes up quickly, but it actually causes 29 frames of delay. Sometimes it's worthwhile, but often it's just a waste. Generally, it's more useful early on when it increases the probability of running from very low to 100%. The last preemptive is in Ice Cave. These running issues might seem like a pretty minor thing, but it adds up to about 15-20 seconds over the course of the run.
+	$LF
+]p
+[p 
+	"The battle analyzer was really just useful on Garland and the pirates. I also ran it on the wizards, but it just confirmed that my old method was optimal. Once down to one guy it was easy to do the battles by hand. 
+	$LF
+]p
+[p 
+	"I did some extra research to find situations where I could walk without triggering an increment of the encounter mechanism. FFHackster was very useful here. In fact, I used it to create a hacked rom that identified these "free" squares for me. In particular, this showed me which squares around Coneria were free. This is why you see me walk a bit out of the way. Other free steps are the first step into or out of the canoe or ship. To take advantage of this, I get in and out of the canoe as much as I can. Of course, the ship docks are all free spaces. Interestingly, the shadow of Mirage tower and the spaces next to the Temple of Fiends are also free. Finally, in dungeons, the squares around doors and the south wall of rooms are usually free. I also used my knowledge to create another hacked rom with no random encounters that was very useful for testing. This was nice as I needed to analyze everything ahead of time to set up the pathfinding script. I actually created this run with the mark-up hack and then hexed the checksum in. Here's a screenshot. The white marks show free squares.
+	$LF
+	[img class=embed src=http://home.comcast.net/~f_amoroso/coneria.png 
+	]img
+	$LF
+]p
+[p 
+	"The main way I manipulate which battles I run into is by saving my game and cycling the power. Of course in this game I can only do it in the outer world and I need to obtain tents, cabins and houses (all three are used!). The main purpose of the pathfinding script was to tell me where to use these. But I needed to coordinate this plan with obtaining the items. In the end, it worked out very well; I cycle power five times to manipulate encounters compared to just once in the old run. Luckily, I'm able to pick up the items I need from chests until I get to Gaia where I walk right by item shop on my way to the fairy's spring.
+	$LF
+]p
+[p 
+	"Since there are essentially only 256 different outcomes for a given set of battle commands, I was able to plan the battles in the TOF in the planning phase. So the healing items used beforehand was planned for earlier.
+	$LF
+]p
+[p 
+	"It's well known that Final Fantasy has a number of glitches. However, none of them really break the game to allow for a really crazy TAS. In fact most of them are generally more harmful than good. There are two that come into play here. First, dark status actually has no effect. Second, it's only possible to get one levelup per battle. This first affects me after beating Astos. Since I got rid of the "can't run" battles, I actually have a heldover levelup through most of the game. You might think this is a disadvantage because the extra stats would be nice to have. But it ends up being a blessing by allowing me to use the bane sword against phantom and also manipulate two zombie Ds in the following battle. This is the case because a levelup pulls some random numbers out to determine stats. The phantom only gives 1 exp, so it's sort of unlikely to get a levelup here any other way. This is why I had to slug it out with him in the old run.
+	$LF
+]p
+[h4 
+	" Specific changes:
+	$LF
+]h4
+[ul 
+	[li 
+		"The fight with Garland is about the same length as before, but I manipulate luck from the levelup. This adds some extra time here (about 2 seconds), but it's an investment that pays off quickly in manipulating running from battles throughout the game. The battle plan was generated by my battle analyzer script.
+		$LF
+	]li
+	[li 
+		"The pirate fight was improved by several seconds using the battle analysis script.
+		$LF
+	]li
+	[li 
+		"Walking carefully around Coneria and on the Elfland dock helps me avoid the extra sailing that I did in the old run and cuts down the number of fights.
+		$LF
+	]li
+	[li 
+		"Instead of buying a silver sword I pick up the dragon sword from the Dwarf Cave treasure room. This is convenient because there are a couple savegame items that I need from there. It was actually a pretty close decision between coral sword and dragon sword, but after a lot of analysis I am pretty sure the dragon sword was the right choice. Anyway, not getting the silver sword lets me walk around Elfland town and I also don't need to fight a battle to get enough gold. The dragon sword isn't quite as powerful as silver sword. The only place it really makes a difference against Lich, where I need 5 rounds instead of 4. 
+		$LF
+	]li
+	[li 
+		"On the way to Melmond I do some extra sailing. This cuts out a fight later on due to how the encounter mechanics work. This is the only time I add extra steps for this reason. Other times I use slack steps to save time. For example, walking around elfland or sailing all the way into the dock.
+		$LF
+	]li
+	[li 
+		"The first power cycle happens right before entering Earth Cave the second time. This lets me avoid the nonrunnable wizard battles. The old run dealt with two of these.
+		$LF
+	]li
+	[li 
+		"The second power cycle happens on the way to Crescent Lake.
+		$LF
+	]li
+	[li 
+		"After getting the canoe, I use it to reduce my step count by getting in and out of it as I walk back to the ship.
+		$LF
+	]li
+	[li 
+		"In Ice Cave I pick up a tent in addition to the gold. The tent gets used right after exiting for the third power cycle. Since I was walking right by that chest it was better to get this and do my shopping in Gaia rather than Crescent Lake. 
+		$LF
+	]li
+	[li 
+		"In Gaia I buy one house and three cabins. Some of these will be used for luck manipulation. The rest go to restoring some hp for battle in the final dungeon.
+		$LF
+	]li
+	[li 
+		"Once again it seemed to be a better deal to do the Sea Shrine before the waterfall. This time I can run from every battle, saving time over the last run where I needed to take out a couple ghosts.
+		$LF
+	]li
+	[li 
+		"Despite being on a lower level, Kraken still takes 10 rounds. This time it happens that he successfully gets me with his ink and I can demonstrate the dark status glitch.
+		$LF
+	]li
+	[li 
+		"In the waterfall robot room I avoid the forced battle square altogether by getting the robot to walk onto it. I didn't think it was possible before.
+		$LF
+	]li
+	[li 
+		"The fourth power cycle happens after the waterfall, almost at the same spot as the only one used in the old run. This gets rid of the zombull no-run fights near Lefein.
+		$LF
+	]li
+	[li 
+		"I also get luckier on Dr. Unne, making him walk to toward me a bit more than last time.
+		$LF
+	]li
+	[li 
+		"The fifth and final power cycle happens right before entering Mirage Tower. Compared to the old run this leads to fewer fights here on out, especially in Sky Palace. But I end up getting two two-enemy fights in the final dungeon instead of one 2-enemy fight and one with 1 enemy.
+		$LF
+	]li
+	[li 
+		"Unfortunately I don't run into WarMech on Sky Palace 5F. Interestingly though, Sky Palace 5F has a much higher encounter rate than anywhere else in the game. It's 24/256 vs 10/256 in the outer world, 3/256 for the ship and 8/256 for all dungeons except the last floors of the final dungeon.
+		$LF
+	]li
+	[li 
+		"This time through Gurgu I take extra steps on lava to cut down the number of encounters.
+		$LF
+	]li
+	[li 
+		"In the final dungeon I beat two Gas Ds, one of the toughest enemies in the game. This time I'm able to use bane on the phantom and still get two zombie Ds afterwards by cashing in my heldover levelup. The rest of the game goes just about the same. Unfortunately, there's not much I can do to manipulate the bane sword to work faster. The only way to change luck is to wait while the randomization seed cyles at a rate of one seed every two frames. There is only a 3/256 chance that bane works. However, several of the fiends will kill me for sure if they attack first. In that case I only have a 1/256 chance of going first and successfully killing them. That means I may have to wait up to 510 frames to make things line up.
+		$LF
+	]li
+]ul
+[h4 
+	" Other notes
+	$LF
+]h4
+[ul 
+	[li 
+		"One suggestion I got was to transfer or drop something to get the bane sword in the first slot. However, the random seed cycles while moving the cursor so it's no problem to have the bane sword in a different slot.
+		$LF
+	]li
+	[li 
+		"As before, my solo fighter finishes at level 15. But despite fighting fewer battles, he gains more total experience due to the huge amount from the Gas Ds.
+		$LF
+	]li
+	[li 
+		"Since we don't see WarMech, this run should have a new screenshot. I propose the Gas D fight at 231249 or fighting Kraken while Dark at 171475.
+		$LF
+	]li
+	[li 
+		"I haven't analyzed Final Fantasy IV or VI encounter mechanics, but I bet you could use similar pathfinding techniques to improve those runs.
+		$LF
+	]li
+]ul
+[h4 
+	" Improvements
+	$LF
+]h4
+[ul 
+	[li 
+		"I did luck manipulation for map-walking by hand. For example, the bats in Earth Cave. I got really lucky this time. If you could automate and tweak this you might get a few frames.
+		$LF
+	]li
+	[li 
+		"There's some other source of delay after the battle that my run analyzer doesn't pick up. It's small, but could add up given the number of battles.
+		$LF
+	]li
+	[li 
+		"Could combine all the scripting together and regress the whole thing. By checking fights, walking and running there might be some advantage to be had. While you're at it you might want to set it up to work on a supercomputer or large cloud computing cluster...
+		$LF
+	]li
+]ul
+[h4 
+	" On a personal note...
+	$LF
+]h4
+[p 
+	"I'm not saying that this will be my last TAS, but it will be the last one before some major changes in my life. In that respect it's sort of a masterpiece that I've been wanting to finish for quite a while. So I hope everyone enjoys this.
+	$LF
+]p
+[p 
+	"I've been a part of the TAS community for about four years now, though lately I've regressed pretty much back to lurker status. It's been really neat to interact with so many smart people and I'd like to really thank Bisqwit and everyone else on this site for a lot of great times.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Truncated)
+	": Accepting this movie.
+	$LF
+]p
+[p 
+	"Nice to see you back, Axe
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Raiscan)
+	": 
+	[del 
+		"Processing with MKV/Chapter treatment as I have the permission and information required from the author.
+	]del
+	" 
+	$LF
+	"Delayed due to hard resets not being converted when using FCEUX's fcm --> fm2 converter. 
+	$LF
+	"I'd like to use FCEUX for capturing all new publications, so I'll wait for a hotfix on this one.
+	$LF
+]p
+[p 
+	(__wikiLink|user:DeHackEd)
+	": <voice style="seagull">Mine! Mine!</voice>
+]p

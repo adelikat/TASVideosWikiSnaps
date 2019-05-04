@@ -1,0 +1,1110 @@
+2
+[h3 
+	" Beauty analyzer
+	$LF
+]h3
+[p 
+	"Beauty analyzer is the core engine of the 
+	(__wikiLink|NesVideoAgent/AutomaticScreenshots|automatic snapshot)
+	" generator of 
+	(__wikiLink|NesVideoAgent)
+	".
+	$LF
+]p
+[p 
+	"Back to:
+	[br 
+	]br
+	(listparents)
+	$LF
+]p
+[p 
+	"This version is for VBA. It has the most complete set of
+	$LF
+	"features, hence I chose to include it. However, each emulator
+	$LF
+	"has a slightly different version to cope with the emulator's particular 'ism's.
+	$LF
+]p
+[h4 
+	" 
+	[tt 
+		"beauty.hh
+	]tt
+	$LF
+]h4
+[pre 
+	[code class=language-c_white 
+		"void Beauty_VIS(const char* Xbuf, unsigned w, unsigned h);
+		$LF
+		"void Beauty_INPUT();
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"beauty.cc
+	]tt
+	$LF
+]h4
+[pre 
+	[code class=language-c_white 
+		"#include <cmath>
+		$LF
+		"#include <cstring>
+		$LF
+		"#include <algorithm>
+		$LF
+		$LF
+		"#include <vector>
+		$LF
+		"#include <map>
+		$LF
+		$LF
+		"#include <complex>
+		$LF
+		$LF
+		"/*
+		$LF
+		"#include "../gfx.h"
+		$LF
+		"#include "../movie.h"
+		$LF
+		"#include "../screenshot.h"
+		$LF
+		"#include "../snapshot.h"
+		$LF
+		"#include "../ppu.h"
+		$LF
+		"*/
+		$LF
+		$LF
+		"#include "beauty.hh"
+		$LF
+		"#include "coroutine.h"
+		$LF
+		$LF
+		"#include "System.h"
+		$LF
+		"#include "movie.h"
+		$LF
+		"#include "gb/gbGlobals.h"
+		$LF
+		"#include "GBA.h"
+		$LF
+		"#include "Globals.h"
+		$LF
+		"extern struct EmulatedSystem emulator;
+		$LF
+		"#define theEmulator (emulator)
+		$LF
+		$LF
+		"typedef std::complex<double> complex;
+		$LF
+		$LF
+		"int do_beauty_analysis = 0;
+		$LF
+		$LF
+		"/* Analyzes beauty in the given GB/GBA screenshot.
+		$LF
+		" */
+		$LF
+		$LF
+		"static const unsigned char* xbuf = 0;
+		$LF
+		"static unsigned width;
+		$LF
+		$LF
+		"static int skippattern(int p)
+		$LF
+		"{
+		$LF
+		"    return 1 + ((p/7)%3);
+		$LF
+		"}
+		$LF
+		"/* Calculate average tint in given section of the screen. */
+		$LF
+		"static complex GetAverageTint(int x0,int y0, int x1,int y1)
+		$LF
+		"{
+		$LF
+		"    double avg_i = 0, avg_q = 0, avg_y = 0;
+		$LF
+		"    double count = 0;
+		$LF
+		$LF
+		"    for(int y=y0; y<=y1; y+=skippattern(x0+y))
+		$LF
+		"        for(int x=x0; x<=x1; x+=skippattern(y+x))
+		$LF
+		"        {
+		$LF
+		"            unsigned rr = xbuf[(x + y * width)*4+0];
+		$LF
+		"            unsigned gg = xbuf[(x + y * width)*4+1];
+		$LF
+		"            unsigned bb = xbuf[(x + y * width)*4+2];
+		$LF
+		"            
+		$LF
+		"            double r = rr / 255.0;
+		$LF
+		"            double g = gg / 255.0;
+		$LF
+		"            double b = bb / 255.0;
+		$LF
+		"            
+		$LF
+		"            double y = 0.299  * r + 0.587  * g +  0.114  * b;
+		$LF
+		"            double i = 0.5957 * r - 0.2744 * g -  0.3212 * b;
+		$LF
+		"            double q = 0.2114 * r - 0.5226 * g +  0.3111 * b;
+		$LF
+		"            
+		$LF
+		"            double pow = 1;
+		$LF
+		"            
+		$LF
+		"            avg_i += i*y;
+		$LF
+		"            avg_q += q*y;
+		$LF
+		"            avg_y += y;
+		$LF
+		"            
+		$LF
+		"            count += pow;
+		$LF
+		"        }
+		$LF
+		$LF
+		"    avg_i /= count;
+		$LF
+		"    avg_q /= count;
+		$LF
+		"    avg_y /= count;
+		$LF
+		"    
+		$LF
+		"    complex res(avg_i, avg_q); res *= 100;
+		$LF
+		"    
+		$LF
+		"    double y = std::abs(res);
+		$LF
+		"    if(y >= 0.0) res *= std::log(1 + y) / (1 + y);
+		$LF
+		"    return res;
+		$LF
+		"    
+		$LF
+		"    //return complex ( atan2(avg_i, avg_q) , std::log(1 + avg_y));
+		$LF
+		"}
+		$LF
+		$LF
+		"struct region
+		$LF
+		"{
+		$LF
+		"    int x0,x1, y0,y1;
+		$LF
+		"    
+		$LF
+		"    complex tint;
+		$LF
+		"    
+		$LF
+		"    int sprite_jitter;
+		$LF
+		"};
+		$LF
+		"struct sprite
+		$LF
+		"{
+		$LF
+		"    int x,y, width,height;
+		$LF
+		"};
+		$LF
+		"static bool SOBJcompare(const sprite& a, const sprite& b)
+		$LF
+		"{
+		$LF
+		"    return std::memcmp(&a, &b, sizeof(a)) < 0;
+		$LF
+		"}
+		$LF
+		$LF
+		"static void Do_GB_Sprites(sprite sprites[128])
+		$LF
+		"{
+		$LF
+		"  int count = 0;
+		$LF
+		"  int size = (register_LCDC & 4);
+		$LF
+		$LF
+		"  if((register_LCDC & 0x80))
+		$LF
+		"  {
+		$LF
+		"      if((register_LCDC & 2) && (layerSettings & 0x1000)) {
+		$LF
+		"        int yc = register_LY;
+		$LF
+		"        int address = 0xfe00;
+		$LF
+		"        int count = 0;
+		$LF
+		"        for(int i = 0; i < 40; i++) {
+		$LF
+		"          int y = gbMemory[address++];
+		$LF
+		"          int x = gbMemory[address++];
+		$LF
+		"          int tile = gbMemory[address++];
+		$LF
+		"          if(size) tile &= 254;
+		$LF
+		"          int flags = gbMemory[address++];
+		$LF
+		$LF
+		"          if(x > 0 && y > 0 && x < 168 && y < 160)
+		$LF
+		"          {
+		$LF
+		"            if(size) {
+		$LF
+		"              sprites[count].x = x-8;
+		$LF
+		"              sprites[count].y = y;
+		$LF
+		"              sprites[count].width = 8;
+		$LF
+		"              sprites[count].height = 16;
+		$LF
+		"              count++;   
+		$LF
+		"              if(count >= 128) return;
+		$LF
+		"            } else {
+		$LF
+		"              sprites[count].x = x-8;
+		$LF
+		"              sprites[count].y = y;
+		$LF
+		"              sprites[count].width = 8;
+		$LF
+		"              sprites[count].height = 8;
+		$LF
+		"              count++; 
+		$LF
+		"              if(count >= 128) return;
+		$LF
+		"            }
+		$LF
+		"          }
+		$LF
+		"        }   
+		$LF
+		"      }
+		$LF
+		"  }
+		$LF
+		"  while(count < 128) sprites[count++].y = 256;
+		$LF
+		"}
+		$LF
+		$LF
+		"static double CalculateBeauty(unsigned w,unsigned h)
+		$LF
+		"{
+		$LF
+		"    std::vector<region> regions;
+		$LF
+		"    regions.reserve(4*3);
+		$LF
+		"    for(unsigned x=0; x<4; ++x)
+		$LF
+		"        for(unsigned y=0; y<3; ++y)
+		$LF
+		"        {
+		$LF
+		"            region tmp;
+		$LF
+		"            tmp.tint=0;
+		$LF
+		"            tmp.sprite_jitter=0;
+		$LF
+		"            tmp.x0 = x*w/4;
+		$LF
+		"            tmp.x1 = (x+1)*w/4;
+		$LF
+		"            tmp.y0 = y*h/3;
+		$LF
+		"            tmp.y1 = (y+1)*h/3;
+		$LF
+		"            regions.push_back(tmp);
+		$LF
+		"        }
+		$LF
+		"/*    
+		$LF
+		"     regions[5] =
+		$LF
+		"    {
+		$LF
+		"        // corners: nw, ne, sw, se, middle
+		$LF
+		"        { w*0 /99,w*50/99, h*0 /99,h*50/99, 0, 0 },
+		$LF
+		"        { w*50/99,w*99/99, h*0 /99,h*50/99, 0, 0 },
+		$LF
+		"        { w*0 /99,w*50/99, h*50/99,h*99/99, 0, 0 },
+		$LF
+		"        { w*50/99,w*99/99, h*50/99,h*99/99, 0, 0 },
+		$LF
+		"        { w*33/99,w*55/99, h*33/99,h*55/99, 0, 0 }
+		$LF
+		"    };
+		$LF
+		"*/
+		$LF
+		$LF
+		"    static sprite old_sprites[128];
+		$LF
+		"    sprite new_sprites[128];
+		$LF
+		"    
+		$LF
+		"    if(true)
+		$LF
+		"    {
+		$LF
+		"        // init new_sprites
+		$LF
+		"        Do_GB_Sprites(new_sprites);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    std::sort(new_sprites, new_sprites+128, SOBJcompare);
+		$LF
+		"    
+		$LF
+		"    for(unsigned b=0; b<128; ++b)
+		$LF
+		"    {
+		$LF
+		"        sprite& spr = new_sprites[b];
+		$LF
+		"        sprite& old = old_sprites[b];
+		$LF
+		"        
+		$LF
+		"        // If the sprite appears to have moved, compensate for scrolling and try again
+		$LF
+		"        if(spr.x != old.x || spr.y != old.y)
+		$LF
+		"        {
+		$LF
+		"            //spr.x -= ScrollPointers[spr.y];
+		$LF
+		"            //spr.y -= VScroll;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        if(std::memcmp(&spr, &old, sizeof(spr)) != 0)
+		$LF
+		"        {
+		$LF
+		"            old = spr;
+		$LF
+		"            
+		$LF
+		"            int x = spr.x, y = spr.y;
+		$LF
+		"            int width = spr.width, height = spr.height;
+		$LF
+		"            
+		$LF
+		"            if(y >= 239) continue;
+		$LF
+		"            
+		$LF
+		"            for(unsigned a=0; a< regions.size(); ++a)
+		$LF
+		"            {
+		$LF
+		"                // Check if this sprite affects this region
+		$LF
+		"                region& reg = regions[a];
+		$LF
+		"                
+		$LF
+		"                if(x+width  >= reg.x0 && x < reg.x1
+		$LF
+		"                && y+height >= reg.y0 && y < reg.y1)
+		$LF
+		"                {
+		$LF
+		"                    reg.sprite_jitter += 1;
+		$LF
+		"                    if(spr.x != old.x || spr.y != old.y)
+		$LF
+		"                        reg.sprite_jitter += 2;
+		$LF
+		"                }
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		$LF
+		"    double totaltint = 0;
+		$LF
+		"    for(unsigned a=0; a< regions.size(); ++a)
+		$LF
+		"    {
+		$LF
+		"        region& reg = regions[a];
+		$LF
+		"        reg.tint = GetAverageTint(reg.x0, reg.y0, reg.x1, reg.y1);
+		$LF
+		"        totaltint += std::abs(reg.tint);
+		$LF
+		"    }
+		$LF
+		"    totaltint /= regions.size();
+		$LF
+		"    
+		$LF
+		"    /*
+		$LF
+		"    PLAN
+		$LF
+		"    
+		$LF
+		"    Analyze five sections of this screen.
+		$LF
+		"    
+		$LF
+		"    - Each four quarters of the screen
+		$LF
+		"    - And the middle (slightly larger than a quarter?)
+		$LF
+		"    
+		$LF
+		"    Analyze:
+		$LF
+		"    - Average tint
+		$LF
+		"    - Amount of motion (ignore global motion)
+		$LF
+		"    
+		$LF
+		"    Value:
+		$LF
+		"    - Non-bleak tints
+		$LF
+		"    - Different tint in each section of screen
+		$LF
+		"    - Motion appears in at least two different sections of screen
+		$LF
+		"    
+		$LF
+		"    */
+		$LF
+		"    
+		$LF
+		"    if(do_beauty_analysis >= 3)
+		$LF
+		"    {
+		$LF
+		"        fprintf(stderr, "analysis: ");
+		$LF
+		"        for(unsigned a=0; a< regions.size(); ++a)
+		$LF
+		"        {
+		$LF
+		"            region& reg = regions[a];
+		$LF
+		"            fprintf(stderr, "(%3.1f<%+3.1f)(%2d) ",
+		$LF
+		"                std::abs(reg.tint),
+		$LF
+		"                std::arg(reg.tint),
+		$LF
+		"                reg.sprite_jitter);
+		$LF
+		"        }
+		$LF
+		"        fprintf(stderr, "\n");
+		$LF
+		"    }
+		$LF
+		$LF
+		"/*
+		$LF
+		"    complex t = regions[0].tint + regions[1].tint + regions[2].tint + regions[3].tint;
+		$LF
+		"    t /= 4;
+		$LF
+		"*/
+		$LF
+		$LF
+		"    double interestingness = 0;
+		$LF
+		"    
+		$LF
+		"    if(totaltint >= 0.1)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned a=0; a<regions.size(); ++a)
+		$LF
+		"            for(unsigned b=a+1; b<regions.size(); ++b)
+		$LF
+		"            {
+		$LF
+		"                double mul = 1;
+		$LF
+		"                if(regions[a].x0 != regions[b].x0) mul *= 2;
+		$LF
+		"                if(regions[a].y0 != regions[b].y0) mul *= 2;
+		$LF
+		$LF
+		"                double tintdiff = std::abs(regions[a].tint - regions[b].tint) * 0.001;
+		$LF
+		"                interestingness += tintdiff * mul;
+		$LF
+		"                
+		$LF
+		"                interestingness += std::log(2 + regions[a].sprite_jitter / 4.0)
+		$LF
+		"                                 * std::log(2 + regions[b].sprite_jitter / 4.0)
+		$LF
+		"                                 * mul * 100;
+		$LF
+		"            }
+		$LF
+		"    }
+		$LF
+		"/*
+		$LF
+		"        std::abs(regions[0].tint - regions[1].tint)
+		$LF
+		"      + std::abs(regions[0].tint - regions[2].tint)
+		$LF
+		"      + std::abs(regions[0].tint - regions[3].tint)
+		$LF
+		"      + std::abs(regions[1].tint - regions[2].tint)
+		$LF
+		"      + std::abs(regions[1].tint - regions[3].tint)
+		$LF
+		"      + std::abs(regions[2].tint - regions[3].tint)
+		$LF
+		"      + std::abs(regions[4].tint - t)
+		$LF
+		"      +  (std::log(1 + regions[0].sprite_jitter / 8.0)
+		$LF
+		"        * std::log(1 + regions[3].sprite_jitter / 8.0)
+		$LF
+		"      +   std::log(1 + regions[1].sprite_jitter / 8.0)
+		$LF
+		"        * std::log(1 + regions[2].sprite_jitter / 8.0)
+		$LF
+		"      +   std::log(1 + regions[3].sprite_jitter / 4.0)
+		$LF
+		"         );
+		$LF
+		"*/
+		$LF
+		"    return interestingness;
+		$LF
+		"}
+		$LF
+		$LF
+		"struct SaveState
+		$LF
+		"{
+		$LF
+		"    std::vector<unsigned char> Data;
+		$LF
+		"    
+		$LF
+		"    static const unsigned StateSize = 400000;
+		$LF
+		$LF
+		"    void Create()
+		$LF
+		"    {
+		$LF
+		"        extern long LastMemStateLength;
+		$LF
+		"        Data.resize(StateSize);
+		$LF
+		"        
+		$LF
+		"        int l = theEmulator.emuWriteMemState((char*)&Data[0], Data.size());
+		$LF
+		"        
+		$LF
+		"        if(l) Data.resize(LastMemStateLength);
+		$LF
+		"        
+		$LF
+		"        fprintf(stderr, "Freeze (ret %d) : %ld bytes\n", l, LastMemStateLength); fflush(stderr);
+		$LF
+		"    }
+		$LF
+		"    void Load()
+		$LF
+		"    {
+		$LF
+		"        int l = theEmulator.emuReadMemState((char*)&Data[0], Data.size());
+		$LF
+		"        fprintf(stderr, "Unfreeze (ret %d): %u bytes\n", l, Data.size()); fflush(stderr);
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"static std::vector<double> interestingness_map;
+		$LF
+		"static std::map<int, SaveState> some_savestates;
+		$LF
+		"static std::vector<unsigned> review_results;
+		$LF
+		$LF
+		"static bool LocateBeauty(unsigned frameno)
+		$LF
+		"{
+		$LF
+		"    scrBegin;
+		$LF
+		"    if(true) /* scope */
+		$LF
+		"    {
+		$LF
+		"        std::map<int, SaveState>::iterator
+		$LF
+		"            i = some_savestates.lower_bound(frameno);
+		$LF
+		$LF
+		"        for(;;)
+		$LF
+		"        {
+		$LF
+		"            if(i != some_savestates.end())
+		$LF
+		"            {
+		$LF
+		"                if(i->first <= frameno)
+		$LF
+		"                {
+		$LF
+		"                    unsigned framecount = VBAMovieGetFrameCounter();
+		$LF
+		$LF
+		"                    if(framecount > frameno || i->first > framecount)
+		$LF
+		"                    {
+		$LF
+		"                        fprintf(stderr, "Aiming for frame %u, loading one that gives %u hopefully\n",
+		$LF
+		"                            frameno, i->first);
+		$LF
+		"                        i->second.Load();
+		$LF
+		"                    }
+		$LF
+		"                    else
+		$LF
+		"                    {
+		$LF
+		"                        fprintf(stderr, "Aiming for frame %u. Playing from %d\n",
+		$LF
+		"                            frameno, framecount);
+		$LF
+		"                    }
+		$LF
+		"                    
+		$LF
+		"                    fflush(stderr);
+		$LF
+		"                    break;
+		$LF
+		"                }
+		$LF
+		"            }
+		$LF
+		"            if(i == some_savestates.begin()) break;
+		$LF
+		"            --i;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    while(VBAMovieGetFrameCounter() < frameno)
+		$LF
+		"    {
+		$LF
+		"      //  fprintf(stderr, "Frame %u\n", VBAMovieGetFrameCounter());
+		$LF
+		"      //  fflush(stderr);
+		$LF
+		"      //  extern bool pauseNextFrame;
+		$LF
+		"      //  pauseNextFrame = true;
+		$LF
+		"        scrReturn(false);
+		$LF
+		"    }
+		$LF
+		"    scrFinish(true);
+		$LF
+		"}
+		$LF
+		$LF
+		"extern "C" void CloseStuff(int signum);
+		$LF
+		$LF
+		"static void CaptureBeauty()
+		$LF
+		"{
+		$LF
+		"    scrBegin;
+		$LF
+		"    static unsigned a;
+		$LF
+		"    for(a = 0; a < review_results.size(); ++a)
+		$LF
+		"    {
+		$LF
+		"        fprintf(stderr, "Capturing beauty %u at frame %u\n", a, review_results[a]);
+		$LF
+		"        fflush(stderr);
+		$LF
+		"        
+		$LF
+		"        while(!LocateBeauty(review_results[a]))
+		$LF
+		"        {
+		$LF
+		"            scrReturnV;
+		$LF
+		"        }
+		$LF
+		$LF
+		"        /* capture it */
+		$LF
+		$LF
+		"        char beauty_fn[64];
+		$LF
+		"        sprintf(beauty_fn, "beauty_%u.png", a);
+		$LF
+		"        fprintf(stderr, "- Capturing %s, have frame %u now\n", beauty_fn,
+		$LF
+		"            VBAMovieGetFrameCounter());
+		$LF
+		"        fflush(stderr);
+		$LF
+		"        
+		$LF
+		"        theEmulator.emuWritePNG(beauty_fn);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* all beauties have been analyzed, end stuff now */
+		$LF
+		"    fprintf(stderr, "Done with all beauties\n");
+		$LF
+		"    
+		$LF
+		"    exit(0);
+		$LF
+		"    
+		$LF
+		"    scrFinishV;
+		$LF
+		"}
+		$LF
+		$LF
+		"struct section
+		$LF
+		"  { unsigned sect; double value;
+		$LF
+		"    bool operator< (const section& sect) const
+		$LF
+		"    { return value > sect.value; }
+		$LF
+		"    bool operator== (const section& sect) const
+		$LF
+		"    { return value == sect.value; }
+		$LF
+		"  };
+		$LF
+		$LF
+		$LF
+		"static void ReviewBeauty()
+		$LF
+		"{
+		$LF
+		"    const unsigned framecount = VBAMovieGetFrameCounter();
+		$LF
+		"    const unsigned num_sections = 20;std::max(
+		$LF
+		"      std::min(50, (int)(framecount / 60)),
+		$LF
+		"        // not more than 50
+		$LF
+		"        // not more than one per each second of movie
+		$LF
+		"      (int)(framecount / 600)
+		$LF
+		"        // but still at least one per each 10 seconds of movie
+		$LF
+		"    );
+		$LF
+		"    const unsigned num_results  = 20;std::min(
+		$LF
+		"      std::min(20, (int)( framecount / (3600/5) ) ),
+		$LF
+		"         // not more than 15
+		$LF
+		"         // not more than 5 per each minute of movie
+		$LF
+		"      (int)(num_sections));
+		$LF
+		"    
+		$LF
+		"    std::vector<section> sects(num_sections);
+		$LF
+		"    
+		$LF
+		"    for(unsigned a=0; a<num_sections; ++a)
+		$LF
+		"        sects[a].sect = a;
+		$LF
+		"    
+		$LF
+		"    for(unsigned a=0; a<interestingness_map.size(); ++a)
+		$LF
+		"    {
+		$LF
+		"        const double val = interestingness_map[a];
+		$LF
+		"        const unsigned sect = a * num_sections / interestingness_map.size();
+		$LF
+		"        if(val > sects[sect].value) sects[sect].value = val;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    std::sort(sects.begin(), sects.end());
+		$LF
+		"    
+		$LF
+		"    for(unsigned a=0; a<num_results; ++a)
+		$LF
+		"    {
+		$LF
+		"        unsigned sect = sects[a].sect;
+		$LF
+		"        unsigned sect_begin = (sect) * interestingness_map.size() / num_sections;
+		$LF
+		"        unsigned sect_end = (sect+1) * interestingness_map.size() / num_sections;
+		$LF
+		"        
+		$LF
+		"        for(unsigned b=sect_begin; b<sect_end; ++b)
+		$LF
+		"            if(interestingness_map[b] == sects[a].value)
+		$LF
+		"            {
+		$LF
+		"                fprintf(stderr, "Selected beauty at frame %u (%g)\n", b, sects[a].value);
+		$LF
+		"                fflush(stderr);
+		$LF
+		"                review_results.push_back(b);
+		$LF
+		"                break;
+		$LF
+		"            }
+		$LF
+		"    }
+		$LF
+		"    std::sort(review_results.begin(), review_results.end());
+		$LF
+		"}
+		$LF
+		$LF
+		"static bool finished_recording = false;
+		$LF
+		$LF
+		"void Beauty_VIS(const char* Xbuf, unsigned w, unsigned h)
+		$LF
+		"{
+		$LF
+		"    //fprintf(stderr, "vis %d\n", do_beauty_analysis);
+		$LF
+		"    
+		$LF
+		"    if(!do_beauty_analysis) return;
+		$LF
+		"    
+		$LF
+		"    xbuf = (const unsigned char*) Xbuf;
+		$LF
+		"    width = w;
+		$LF
+		"    
+		$LF
+		"    if(!finished_recording) /* Record interestingness */
+		$LF
+		"    {
+		$LF
+		"        double interestingness = CalculateBeauty(w,h);
+		$LF
+		"        const unsigned framecount = VBAMovieGetFrameCounter();
+		$LF
+		$LF
+		"        if(do_beauty_analysis >= 2)
+		$LF
+		"        {
+		$LF
+		"            std::printf(
+		$LF
+		"                "Beauty %u: %g\n", framecount, interestingness);
+		$LF
+		"            std::fflush(stdout);
+		$LF
+		"        }
+		$LF
+		$LF
+		"        if(interestingness_map.size() <= framecount)
+		$LF
+		"            interestingness_map.resize(framecount+1);
+		$LF
+		"        interestingness_map[framecount] = interestingness;
+		$LF
+		"        
+		$LF
+		"        static unsigned maxframe = ~0;
+		$LF
+		"        if(maxframe == (unsigned)~0)
+		$LF
+		"        {
+		$LF
+		"            const char* env = getenv("MAXFRAMES");
+		$LF
+		"            maxframe = env ? atoi(env) : 0;
+		$LF
+		"        }
+		$LF
+		$LF
+		"        finished_recording = framecount == maxframe-2;
+		$LF
+		"        
+		$LF
+		"        if(!finished_recording)
+		$LF
+		"        {
+		$LF
+		"            return;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"void Beauty_INPUT()
+		$LF
+		"{
+		$LF
+		"    //fprintf(stderr, "in %d\n", do_beauty_analysis);
+		$LF
+		"    
+		$LF
+		"    if(!do_beauty_analysis) return;
+		$LF
+		"    
+		$LF
+		"    if(!finished_recording) /* Record interestingness */
+		$LF
+		"    {
+		$LF
+		"        static unsigned lastcount=0;
+		$LF
+		"        const unsigned framecount = VBAMovieGetFrameCounter();
+		$LF
+		"        if(framecount != 0 && (framecount == 1 || !(framecount % 100))
+		$LF
+		"        && framecount != lastcount)
+		$LF
+		"        {
+		$LF
+		"            fprintf(stderr, "Creating savestate @ %u\n", framecount);
+		$LF
+		"            fflush(stderr);
+		$LF
+		"            some_savestates[framecount].Create();
+		$LF
+		"            lastcount = framecount;
+		$LF
+		"        }
+		$LF
+		"        return;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    /* Analyze interestingness */
+		$LF
+		"    if(review_results.empty())
+		$LF
+		"        ReviewBeauty();
+		$LF
+		$LF
+		"    CaptureBeauty();
+		$LF
+		"}
+		$LF
+		$LF
+		$LF
+		"void BeautyInit() __attribute__ ((constructor));
+		$LF
+		"void BeautyInit()
+		$LF
+		"{
+		$LF
+		"    char* env = getenv("BEAUTY");
+		$LF
+		"    do_beauty_analysis = env ? atoi(env) : 0;
+		$LF
+		"}
+		$LF
+	]code
+]pre

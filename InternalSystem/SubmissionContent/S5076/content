@@ -1,0 +1,566 @@
+3
+[p 
+	[a href=/JudgeGuidelines.html 
+		"Judge Guidelines
+	]a
+	":
+	$LF
+]p
+[blockquote 
+	"the game should reach a stage where it complete itself, no matter how long it takes.
+	$LF
+]blockquote
+[p 
+	"...
+	$LF
+]p
+[blockquote 
+	[b 
+		"no matter how long it takes
+	]b
+	$LF
+]blockquote
+[p 
+	[img class=embed src=http://i.imgur.com/HzeDlIr.png 
+	]img
+	$LF
+]p
+[p 
+	(youtube|v=n_PylKovg5k)
+	$LF
+]p
+[h3 
+	" The Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: lsnes rr2-ß23 or 
+		[a href=/userfiles/info/29939088166456945 
+			"BizHawk 1.11.6
+		]a
+		$LF
+	]li
+	[li 
+		" ends input early
+		$LF
+	]li
+	[li 
+		" compared to the whole length, it ends 
+		[b 
+			"very
+		]b
+		" early
+		$LF
+	]li
+	[li 
+		" I mean dude, check out the chart at the bottom
+		$LF
+	]li
+	[li 
+		" finally a TAS that uses the cloud in a bowser fight
+		$LF
+	]li
+]ul
+[h3 
+	" The Comments
+	$LF
+]h3
+[p 
+	"This is probably the most amount of effort I've ever put into an April Fools submission.
+	$LF
+]p
+[p 
+	[b 
+		"Masterjun
+	]b
+	": As you've probably guessed by now, this run gains total control of SMW. While this is theoretically nothing new-
+	[br 
+	]br
+	$LF
+	[b 
+		"Viewerxyz
+	]b
+	": so its just another one of those boring ace tases?
+	[br 
+	]br
+	$LF
+	[b 
+		"Masterjun
+	]b
+	": I've actually accomplished something this time by using a different setup!
+	[br 
+	]br
+	$LF
+	[b 
+		"Viewerxyz
+	]b
+	": but it still results in the same total control as always right?
+	[br 
+	]br
+	$LF
+	[b 
+		"Masterjun
+	]b
+	": Well... yeah, but, I mean look, it even works in Biz-
+	[br 
+	]br
+	$LF
+	[b 
+		"Viewerxyz
+	]b
+	": i dont care what happened before the glitch just tell me what code you wrote and what it does
+	[br 
+	]br
+	$LF
+	[b 
+		"Masterjun
+	]b
+	": ...alright.
+	$LF
+]p
+[h3 
+	" The Code
+	$LF
+]h3
+[p 
+	"I wrote 
+	[del 
+		"flutter A.I
+	]del
+	" a program that procedurally generates every single input accepted by SMW and keeps resetting the Bowser fight until the end is reached. I left out the Start, L and R (shoulder) buttons (and of course the 4 extra buttons, but they aren't being parsed by SMW anyways) because they would just delay getting to the end... (Not that it 
+	[em 
+		"won't
+	]em
+	" take a long time anymore). The code accounts for deaths and will continue the procedure anyways, and it also checks for completion, where it will then start rolling the credits and end the game in the usual manner.
+	$LF
+]p
+[h3 
+	" The Setup
+	$LF
+]h3
+[p 
+	[small 
+		"If you're Viewerxyz just skip ahead to 
+		[b 
+			"The Length
+		]b
+		".
+	]small
+	[br 
+	]br
+	$LF
+	"What I wanted to show with that dialogue was the fact that, yes, I could have just used on of my other 
+	[em 
+		"multitap 4 controller 16 button
+	]em
+	" exploits to write the code. This is what I call the 
+	[em 
+		"lazy
+	]em
+	" method of reaching ACE. In this run however I limited myself to using only a single controller, and it turned out I was able to leave out the 4 extra buttons, too. This meant that this run could be replicated in BizHawk which doesn't support neither multitap nor the 4 extra buttons.
+	$LF
+]p
+[p 
+	"You might've noticed that I have included a lot of information into the encode. Basically the first thing I do is set up the x and y positions of 5 specific shells (the low bytes, to be more precise). In fact, I actually need to set up an additional shell, but setting it up now would only result in it being replaced later on. Then I spawned two Yoshi's and did the invisible tongue glitch to set up the chuck eating glitch. After that I set up one byte of the extended sprites (coin sparkles), the position of the additional shell and then the second byte of the extended sprites (coin sparkles again). I continued with spawning the green shell in the lowest slot and setting up its x position. Doing all this while also delaying one gametimer and finally pausing the game to offset the second gametimer from the first. Finally I spawned the chuck and killed the visible Yoshi so that the chuck is on the tongue of the now visible Yoshi (which is back at the Yoshi block).
+	$LF
+]p
+[p 
+	"This triggers a jump to open bus which executes an opcode based on the 
+	[em 
+		"green shell position
+	]em
+	". That opcode is a jump which jumps to an offset based on the 
+	[em 
+		"coin sparkles
+	]em
+	" which happens to be controller registers where I conveniently put a jump to the 
+	[em 
+		"shell sprite positions
+	]em
+	". The code there loads a value at the address in the 
+	[em 
+		"gametimer bytes
+	]em
+	", which happens to be one controller register and stores it to the stack. This is how total control is gained.
+	$LF
+]p
+[h3 
+	" The Setup Planning
+	$LF
+]h3
+[p 
+	[small 
+		"OK at this point even you should probably skip to 
+		[b 
+			"The Length
+		]b
+		", as this is getting real technical.
+	]small
+	[br 
+	]br
+	$LF
+	"First I tested the mole glitch (stunning a mole to spawn an invalid sprite to make the game crash (execute opcode 00 (
+	[tt 
+		"BRK
+	]tt
+	")
+	[b 
+	]b
+	")
+	[b 
+	]b
+	") that I used in the AGDQ run of SMAS+SMW (you might remember that Super Mario Maker on SNES), but it turned out that it doesn't work because of one ROM vector which is different for the SMAS+SMW cartridge. So I was back to the chuck eating glitch which requires a more difficult setup.
+	$LF
+]p
+[p 
+	"Eating a chuck with Yoshi can be done in different ways. The 
+	[a href=/2926M.html 
+		"game end glitch
+	]a
+	" run uses a coin which is collected while simultaneously licked by Yoshi creating a replacable sprite on Yoshi's tongue which results in the chuck spawning on said tongue. However, this creates coin sparkles which overwrite important data to manipulate where the glitch is going. Another way of eating a chuck is by using a mushroom instead of a coin, but that takes too long to set up (eating a bunch of berries and collecting the midway point). I decided on using two Yoshi's to perform the glitch. This works because when you lick a sprite with Yoshi and then overwrite that Yoshi with another Yoshi, the fact that the now invisible Yoshi has a specific sprite slot on his tongue remains. This means despawning the visible Yoshi (for example by killing) reactivates the old Yoshi and the tongue.
+	$LF
+]p
+[p 
+	"The code jump to open bus when you eat a chuck and it will execute 
+	[a class=extlink href=http://pastebin.com/1jKvFdvP rel=nofollow 
+		"shenanigans
+	]a
+	", but most importantly it needs to execute the opcode 0xFC (
+	[tt 
+		"JSR
+	]tt
+	"). Executing 0xFC requires the value at the address at address $01+chuckslot to be 0xFC. I found out that if the chuck is in slot #8, I need the sprite with the lowest slot to have the xposition low byte to be 0x81, which will turn into 0x8F (because it adds an offset of 14 apparently) which then turns into $8F01 (0x01 because of $09) and that turns into $018F01 (because DB is 0x01) and luckily that holds 0xFC.
+	$LF
+]p
+[p 
+	"So far so good, the code now jumps to whatever address $1804 points to. $1804 are the ypositions of minor extended sprites which are being used for coin sparkles for example. The only problem with coin sparkles is the fact that they spawn in bundles of 4, the 3rd takes up $1805 and the fourth uses $1804. You can avoid spawning the fourth by collecting the coin close to the edge of the screen, meaning you can manipulate the low and the high byte seperately. Now where do we jump to? Of course we simply jump to the start of yposition data of normal sprites which is followed by xposition data meaning we have a bunch of values we can manipulate right!? No, we have two problems here. The first problem is the fact that it would be address $00D8 which is impossible to get with coin sparkles at the start of the level. So we instead jump to some other location that can be manipulated more easily to jump to $00D8. Which location you ask? Controller registers of course. By holding B, Y, select, down and L the values at $4218 read 20 E4 00 (the 00 because we don't have a second controller... or at least it isn't pressing anything) which translates to 
+	[tt 
+		"JSR $00E4
+	]tt
+	"... but wait a minute, that isn't $00D8 at all! Well yeah, you can also change it to $00D8 if you want but we still have problem number 2 to discuss.
+	$LF
+]p
+[p 
+	"The second problem is the fact that the most important part of the whole glitch, the part that starts even before the TAS, the payload itself, is pretty limited in size and shape. SMW uses 12 sprites slots (#0 to #B) but in YI2 the slots #A and #B are reserved for special sprites. We also need the chuck in slot #8, two Yoshi's (preferably in slots #9 and #7 then) and the 
+	[em 
+		"lowest slot xposition
+	]em
+	" sprite (in slot #6 then). So we only have 6 ypositions and 6 xpositions to work with. The important part is that the two blocks are not back to back so each block has to jump to the other (this is also why I could simply jump to $00E4, the xpositions, instead of $00D8, the ypositions, and it turned out that switching the blocks made it faster to manipulate the values) and one of the blocks also needs to jump out.
+	$LF
+]p
+[p 
+	"So the full code I wrote was:
+	$LF
+]p
+[pre 
+	"$00D8: B2 13 D0 09 F0 60
+	$LF
+	"$00E4: CB 48 CB CB D0 EE
+	$LF
+]pre
+[p 
+	"or simply:
+	$LF
+]p
+[pre 
+	"$00D8: LDA ($13) : BNE $00E5 : BEQ $013E
+	$LF
+	"$00E4: WAI : PHA : WAI : WAI : BNE $00D8
+	$LF
+]pre
+[p 
+	[tt 
+		"LDA ($13)
+	]tt
+	": Let's explain from the start. $13 is the framecounter of SMW and $14 is the game-framecounter. You can offset them from each other by pausing the game because $14 also stops when pausing whereas $13 continues (they are the reasons why I jumped around strangely after placing the green shell and also why I pause the game just before the glitch). The timers also stop when this glitch happens. I made them read $4219 so I could use B, Y, select, Start, up, down, left and right to manipulate what's loaded into the accumulator there.
+	[br 
+	]br
+	$LF
+	[tt 
+		"BNE $00E5
+	]tt
+	": Hold on a second that doesn't even line up with the second block, are you stupid? No, the reason I did that is because I need two 
+	[tt 
+		"WAI
+	]tt
+	"'s to advance one frame, but unfortunately I start at the wrong offset meaning that I have to advance a single 
+	[tt 
+		"WAI
+	]tt
+	" before starting the loop. But I only have to execute it once so I jump to $00E4 to start off the code and to $00E5 when in the loop. Also you might notice the 
+	[tt 
+		"BNE
+	]tt
+	" opcode (branch if not equal to zero), which only branches if the previous result wasn't 0, meaning I can stop the loop if I just input 00 for one frame (this also means my written code can't include a single 00).
+	[br 
+	]br
+	$LF
+	[tt 
+		"BEQ $013E
+	]tt
+	": Since this is the exact opposite of 
+	[tt 
+		"BNE
+	]tt
+	" this will always jump. $013E lies within the stack. (Why the stack? Continue reading.)
+	[br 
+	]br
+	$LF
+	[tt 
+		"WAI
+	]tt
+	": This instructions waits for an interrupt (like NMI or IRQ). This first 
+	[tt 
+		"WAI
+	]tt
+	" was for the offset so I don't read the controller registers while they're being updated (because it puts me after IRQ instead of after NMI).
+	[br 
+	]br
+	$LF
+	[tt 
+		"PHA
+	]tt
+	": Remember that the accumulator still holds controller data, meaning that byte is pushed into the stack with this instruction. This is the reason why I can simply jump into the stack once I'm done writing code (because it's exactly where I write my code in the first place).
+	[br 
+	]br
+	$LF
+	[tt 
+		"WAI : WAI
+	]tt
+	": This effectively waits a frame.
+	[br 
+	]br
+	$LF
+	[tt 
+		"BNE $00D8
+	]tt
+	": Complete the loop. (Oh, and yes, this always jumps even if it is a 
+	[tt 
+		"BNE
+	]tt
+	".)
+	$LF
+]p
+[p 
+	"Since the amount of bytes I can write is pretty limited and I'm not able to write 00's, I simply wrote code to write code somewhere else. That 
+	[em 
+		"somewhere else
+	]em
+	" is where I put my code which simulates the main game loop with some additional hooks like overwriting parsed input or resetting the bowser fight when the end of the current input is reached or simply when you die.
+	$LF
+]p
+[h3 
+	" The Length
+	$LF
+]h3
+[p 
+	"Let's see here. We start counting the time after the arbitrary code execution is reached. This means that reaching 1-frame-inputs takes 0 seconds. We have 9 buttons to check and resetting takes about 37 frames + 1 frame execution = 38 frames each time. Thus, reaching 2-frame-inputs takes 512*38 frames or about 5:24 minutes. Reaching 3-frame-inputs takes the amount of time to reach 2 frames plus testing all the 2-frame-inputs meaning 512*38 + (512^2)*39. You can see a pattern here and the general formula for the amount of seconds it takes to reach n-frame-inputs is
+	$LF
+]p
+[pre 
+	[a class=extlink href=http://www.wolframalpha.com/input/?i=1%2F60+*+sum+(i%3D1+to+n-1)+of+(+(512%5Ei)+*+(37%2Bi)+)+seconds rel=nofollow 
+		"1/60 * sum (i=1 to n-1) of ( (512^i) * (37+i) )
+	]a
+	$LF
+]pre
+[p 
+	"I've told you all this, but you will notice that you can eventually approximate it with just 512^n because exponentials. But let's be accurate for the first few frames.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Input length
+			]th
+			[th 
+				"Time to reach
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"1 frame
+			]td
+			[td 
+				"0 seconds
+			]td
+			[td 
+				"If you want you can add the 94 seconds of the setup to each of those time spans but it might get insignificant 
+				[em 
+					"really
+				]em
+				" fast.
+			]td
+		]tr
+		[tr 
+			[td 
+				"2 frames
+			]td
+			[td 
+				"5:24 minutes
+			]td
+			[td 
+				"This is twice in the encode to show that it really works the way it works.
+			]td
+		]tr
+		[tr 
+			[td 
+				"3 frames
+			]td
+			[td 
+				"2 days
+			]td
+			[td 
+				"Looking at the next time span, it looks like 3 frames is all you can get to when starting to judge this.
+			]td
+		]tr
+		[tr 
+			[td 
+				"4 frames
+			]td
+			[td 
+				"3 years
+			]td
+			[td 
+				"It's actually 2 months short of 3 years but do you really care when you've waited that long? Another two April Fools Days will have passed when this is reached. BizHawk's framecount will have wrapped around to negative numbers 
+				[em 
+					"and
+				]em
+				" went back to positive numbers.
+			]td
+		]tr
+		[tr 
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				"At this point you might want to switch to console playback, because should you accidentally activate read+write mode and try to save your movie, your emulator will start consuming TBs of memory. So go grab your nearby console playback device and start anew, because looking at the next time span, 3 years is like nothing.
+			]th
+		]tr
+		[tr 
+			[td 
+				"5 frames
+			]td
+			[td 
+				"1491 years
+			]td
+			[td 
+				"According to Wolfram Alpha, 53 generations will have passed and I'm sure someone will celebrate the day Mario can finally reach the speed of half a pixel per frame.
+			]td
+		]tr
+		[tr 
+			[td 
+				"6 frames
+			]td
+			[td 
+				"782955 years
+			]td
+			[td 
+				"If you'd buy one lottery ticket for each month that passes, you'd almost be expected to win once.
+			]td
+		]tr
+		[tr 
+			[td 
+				"7 frames
+			]td
+			[td 
+				"10^8 years
+			]td
+			[td 
+				"This is actually very simple to reach! Just let every single person on earth watch 3 weeks of the movie one after another!
+			]td
+		]tr
+		[tr 
+			[td 
+				"8 frames
+			]td
+			[td 
+				"10^11 years
+			]td
+			[td 
+				"This is the first time lsnes' framecount has wrapped around... and also the second time... in fact it has wrapped around 22 times, but compare it to BizHawk which has wrapped around over 90000000000 times by now. Oh and the sun will have run out of fuel, became a red giant, and swallowed the earth.
+			]td
+		]tr
+		[tr 
+			[td 
+				"2.283 seconds
+			]td
+			[td 
+				"10^361 years
+			]td
+			[td 
+				"After 137 frames you can finally start seeing the first few pixels of Bowser. Also, the ultimate fate, the heat death of our universe, might have occured by now.
+			]td
+		]tr
+		[tr 
+			[td 
+				"1 minute
+			]td
+			[td 
+				"10^9744 years
+			]td
+			[td 
+				"The glitchfest almost started.
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" The Suggested Screenshot
+	$LF
+]h3
+[p 
+	[img class=embed src=http://i.imgur.com/M2oYLCw.png 
+	]img
+	[br 
+	]br
+	$LF
+	"It's right about when the earth dies.
+	$LF
+]p
+[h3 
+	" The Judge
+	$LF
+]h3
+[p 
+	(__wikiLink|user:Samsara)
+	$LF
+]p
+[h3 
+	" The Judge's Comment
+	$LF
+]h3
+[p 
+	"Also ends earl
+	$LF
+]p
+[h3 
+	" The Judge's Verdict
+	$LF
+]h3
+[p 
+	"The Judge (hereafter referred to as Sexy Queen Samsara (hereafter referred to as Samsara)) has verified that this run does achieve its goal of ending input early. Samsara (hereafter referred to as The Judge (hereafter referred to as Pablo (hereafter referred to as Samsara))) is still in the process of verifying that the run does in fact complete. Once Samsara (hereafter referred to as Samsara) verifies that the run does indeed come to a state of completion, the run (hereafter referred to as Samsara) will be rightfully placed in the "decision: accepted" (hereafter referred to as "samsara: samsara" category of the site. Until then, Samsara cannot place Samsara within the "samsara:samsara" catesara, sosara Samsara shallsara rejectsara thisara Samsarasara.
+	$LF
+]p
+[h3 
+	" The Judge's Obligatory Joke Comment
+	$LF
+]h3
+[p 
+	"ill end ur moms input early
+	$LF
+]p
+[h3 
+	" The Judge's Retraction
+	$LF
+]h3
+[p 
+	"nvm that sounds weird lmao
+]p

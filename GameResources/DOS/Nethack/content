@@ -1,0 +1,972 @@
+29
+[h3 
+	" Glitches
+	$LF
+]h3
+[h4 
+	" Cream Pie Glitch
+	$LF
+]h4
+[p 
+	"The cream pie glitch is a dangling pointer bug.  The game tracks the address of a wielded item in three ways:
+	$LF
+]p
+[ul 
+	[li 
+		" In the inventory list
+		$LF
+	]li
+	[li 
+		" Direct pointer to wielded item (called "uwep")
+		$LF
+	]li
+	[li 
+		" Flag on the object itself (specifically, the structure representing it)
+		$LF
+	]li
+]ul
+[p 
+	"The glitch causes the first two to get out of sync, so you end up wielding an item that is not in your inventory. This is interesting because the memory for the item is freed when it is removed from the inventory list. Thus you are wielding something that's stored in unallocated memory (the so called "glitch object").
+	$LF
+]p
+[p 
+	"There are three different ways to cause this glitch:
+	$LF
+]p
+[ul 
+	[li 
+		" burn out a wielded candle (very slow, takes thousands of turns)
+		$LF
+	]li
+	[li 
+		" have a cursed wielded figurine auto-transform (requires insane luck manipulation to do quickly)
+		$LF
+	]li
+	[li 
+		" apply a wielded cream pie (single turn to perform once you have the pie)
+		$LF
+	]li
+]ul
+[p 
+	"It's easy to see that likely only the last option is feasible in a TAS.
+	$LF
+]p
+[p 
+	"The uses for the glitch object are fairly limited. Most things you can do with it (such as dropping it due to fumbling) cause the game to notice the corruption and crash (and therefore these are not useful to do). There are mainly three things one can do with a glitch object that don't instantly crash the game:
+	$LF
+]p
+[ul 
+	[li 
+		" Viewing the name of the glitch object
+		$LF
+	]li
+	[li 
+		" Water-damaging the glitch object
+		$LF
+	]li
+	[li 
+		" Attacking with the glitch object
+		$LF
+	]li
+]ul
+[p 
+	"Water damage is a possibility, however viewing the name is likely more useful. Glitched Gauntlets of Power may be usable to eliminate the name-ending NUL byte at the end of the real GoP's name (since viewing the name sets the "viewed while not blind" flag, which now overwrites memory that has potentially been reused and thus might hold the object name).
+	$LF
+]p
+[p 
+	"If a user-controlled string is allocated in the space where the glitch object is the glitch object can be controlled.  Unfortunately, there are no obvious uses for a controlled glitch object except creating a superweapon (nice but not really going to complete the game in record time); however, you can then force it in reverse, getting the glitch object to alter the string; this is also mostly useless, except if you wipe out the \0 terminator at the end of the string which lets you make it longer than the system thinks it can be, and cause a buffer overflow.  Additional details are included below.
+	$LF
+]p
+[h4 
+	" The "polyself bug"
+	$LF
+]h4
+[p 
+	"This one's relatively simple, but also potentially useful, as it avoids having to worry about accidental death due to HP loss, or running out of Pw. The idea is that losing a level via level drain removes an approximately constant number of maximum HP and Pw, but gaining a level via failed polyself (when you attempt to polymorph into your current form, or occasionally at random on an uncontrolled polymorph attempt) will increase your max HP and Pw proportionally to the levels involved (so for instance, going from level 1 to level 2 will double them). Alternating the drain and gain like this can quickly allow your maximum HP and Pw to reach incredibly high values, up to the millions or even billions (although exceeding 2^31-1 causes your max HP/Pw to overflow back to a small value). This glitch is mostly suited to TAS conditions, as failed polyself is just as likely to reduce your level from 1 to 0 (killing you) as it is to raise it from 1 to 2 or 3, in the absence of luck manipulation. (It is sometimes pulled off outside TASes, though, by using a large number of farmed amulets of life saving to prevent death on the bad rolls.)
+	$LF
+]p
+[p 
+	"A variation of this can be used to perform a sort of invulnerability glitch. If you control your max HP to just below 2^31, then drive it to or over 2^31 using potions of healing (or the improved versions), rather than via the polyself bug, you end up with 0 current HP. Having an HP of 0 is the game's global signal for the player being dead, but the code for death does not run; thus, monsters assume the player is dead and won't attack. (If anything happens that can cause death via HP loss, though, you die instantly.) This is probably not as useful as just gaining millions of HP, though, due to being slower and more easily disrupted.
+	$LF
+]p
+[h4 
+	" Gold duplication
+	$LF
+]h4
+[p 
+	"The game tracks gold in two different ways. The player and monsters just have a number as a stat, representing their gold ownership. Gold is also an item in the game, for use in locations like containers and locations on the floor, which don't have gold stats of their own.
+	$LF
+]p
+[p 
+	"When you turn a monster into a statue, normally a plain statue is created (a container, technically) containing its inventory, including its gold. In most cases, the original monster isn't tracked; but in some cases (when there's something special about the monster that needs tracking), it is, such as a former pet (which needs to be flagged as such so that the player can't sacrifice it). If you break the statue of such a petrified monster, it just releases the gold inside it. However, if you cast "stone to flesh" at the statue, it turns back into the original monster, who gets its contents as their inventory; this will be a stack of gold, as an item. However, the monster still has all its original stats, including the gold stat; so it will also have a stack of gold, as a number. In order to merge these stacks back into one, the monster needs to drop (or deathdrop) the stack, and then pick it up again. This generally seems to only be possible via taming and untaming monsters, due to limitations of how far you can control the monster AI; a nymph makes a good choice due to their infinite carry capacity.
+	$LF
+]p
+[p 
+	"Of course, this glitch can increase gold exponentially, but the gold variables in-game have only finite storage. If you generate more than 2^31 gold this way, it'll overflow to a negative quantity; large amounts of gold are not generally useful in a TAS, but negative amounts definitely are, as they have negative weight, thus allowing for effectively infinite carry capacity. (Thanks to Berry/UncleBob for discovering this application for what was previously thought an irrelevant glitch.)
+	$LF
+]p
+[h3 
+	" Memory layout information (useful for glitched runs)
+	$LF
+]h3
+[ul 
+	[li 
+		" Using the seed 1223790555 starts with a cream pie and the Gauntlets of Power (the item with the longest unidentified name in NetHack). Having genuine gauntlets handy is useful even if you're going to glitch a glitched item, because glitch items cannot be type-named except indirectly via a real item of the same type.
+		$LF
+	]li
+	[li 
+		" Memory addresses for the memory allocation system (should be independent of RNG seed; note that the logical address, as seen from the program's point of view, and the physical address, as seen from the emulator's point of view, are different for DPMI programs like DOS NetHack):
+		$LF
+	]li
+]ul
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" 
+			]th
+			[th 
+				"Logical address
+			]th
+			[th 
+				"Physical address
+			]th
+		]tr
+		[tr 
+			[th 
+				"freelist[0]
+			]th
+			[td 
+				"0x19C6DC
+			]td
+			[td 
+				"0xE516DC
+			]td
+		]tr
+		[tr 
+			[th 
+				"slop
+			]th
+			[td 
+				"0x19C6BC
+			]td
+			[td 
+				"0xE516BC
+			]td
+		]tr
+		[tr 
+			[th 
+				"bytes_in_use
+			]th
+			[td 
+				"0x19C75C
+			]td
+			[td 
+				"0xE5175C
+			]td
+		]tr
+		[tr 
+			[th 
+				"chunks_in_use
+			]th
+			[td 
+				"0x19C76C
+			]td
+			[td 
+				"0xE5176C
+			]td
+		]tr
+		[tr 
+			[th 
+				"sbrked
+			]th
+			[td 
+				"0x19C77C
+			]td
+			[td 
+				"0xE5177C
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Object layout in memory
+	$LF
+]h4
+[p 
+	"Objects take up 60 bytes or more in memory, generated using malloc. Here's an annotated dump of the gauntlets of power in memory, that are automatically picked up on turn 1 with the seed 1223790555 (note that a number like 12 34 56 78 is actually 0x78563412 due to the endianness of the x86 processor):
+	$LF
+]p
+[p 
+	"GoP (at physical address 00C390B0):
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 00 00 nobj
+	]b
+	[br 
+	]br
+	$LF
+	"The next object on the object chain. This is what the game uses to iterate through inventory, etc. A glitch object isn't actually on any object chain, so this won't be checked when doing the glitch. This is, however, why you can't (for instance) make a glitch object into a real one by fumble-dropping it; it isn't in the inventory object chain (you'd need to glitch a different part of memory to do that), so the game panics as it can't find an object that ought to be in inventory.
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 00 00 vptrs
+	]b
+	[br 
+	]br
+	$LF
+	"A backreference from the object to the next object on the same floor location, the container that contains it, or the monster that carries it. Never checked for a glitch object.
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 00 00 cobj
+	]b
+	[br 
+	]br
+	$LF
+	"If this object is a container, its contents (an object chain). Doesn't matter otherwise.
+	[br 
+	]br
+	$LF
+	[b 
+		"1C 00 00 00 o_id
+	]b
+	[br 
+	]br
+	$LF
+	"An arbitrary number, different for every object, used to see if two objects are the same or not.
+	[br 
+	]br
+	$LF
+	[b 
+		"1D ox
+	]b
+	[br 
+	]br
+	$LF
+	[b 
+		"04 oy
+	]b
+	[br 
+	]br
+	$LF
+	"The location of the object, last time it mattered. (Probably when it was last on the floor.) Doesn't matter for objects in inventory, and thus glitch objects.
+	[br 
+	]br
+	$LF
+	[b 
+		"8A 00 otyp
+	]b
+	[br 
+	]br
+	$LF
+	"A code representing what sort of object the object is (0x008A = gauntlets of power).
+	[br 
+	]br
+	$LF
+	[b 
+		"1E 00 00 00 owt
+	]b
+	[br 
+	]br
+	$LF
+	"The weight of the object in game-internal units. Doesn't matter for any commands you can actually give on a glitch object.
+	[br 
+	]br
+	$LF
+	[b 
+		"01 00 00 00 quan
+	]b
+	[br 
+	]br
+	$LF
+	"The stack size of the object. Most objects, like gloves, don't stack.
+	[br 
+	]br
+	$LF
+	[b 
+		"00 spe
+	]b
+	[br 
+	]br
+	$LF
+	"The magical qualities of the object; this is what's set to 0 by cancellation. For a weapon or armour, this is the object's enchantment. (If trying to cause a buffer overflow, you'd want to set this to a 3-digit number like +100, to get a bit of extra length.)
+	[br 
+	]br
+	$LF
+	[b 
+		"03 oclass
+	]b
+	[br 
+	]br
+	$LF
+	"The general group of items that this item falls into (autopickup group, screen symbol); 03 is '[', armour. Note: the 3 or 4 bytes from here onwards are the best things to look for if trying to memory-search for a particular object; it's how I found the GoP in memory in the first place.
+	[br 
+	]br
+	$LF
+	[b 
+		"6F invlet
+	]b
+	[br 
+	]br
+	$LF
+	"The letter that this object has in inventory, or had last time it was there. 6F is ASCII for 'o', the letter which the GoP gained in inventory immediately after being picked up. The game also uses this as a flag to see if an item has ever been in inventory (relevant when training pets, etc., although not for a glitch object).
+	[br 
+	]br
+	$LF
+	[b 
+		"00 oartifact
+	]b
+	[br 
+	]br
+	$LF
+	"This object's artifact code. Used to distinguish Excalibur from a longsword that happens to be named Excalibur, etc. (It's a common urban myth in the NetHack community that this isn't tracked by the game, because it prevents you naming an item to clash with an artifact name anyway, part of a well-known realtime exploit for determining the true identity of an item; but it really is tracked separately.) 00 means it isn't an artifact.
+	[br 
+	]br
+	$LF
+	[b 
+		"03 where
+	]b
+	[br 
+	]br
+	$LF
+	"Where the game currently thinks the item is; 03 means inventory. Glitch objects tend to have 03 in this field (unless manipulated by the player), even though they aren't actually on the inventory chain.
+	[br 
+	]br
+	$LF
+	[b 
+		"00 timed
+	]b
+	[br 
+	]br
+	$LF
+	"The number of in-game timers on this object, used to track when it, say, hatches or burns out. (The timers themselves are stored elsewhere.) Will generally be 0 for most objects.
+	[br 
+	]br
+	$LF
+	[b 
+		"20 00 00 00 bitfield
+	]b
+	[br 
+	]br
+	$LF
+	"32 bits which have separate meanings of their own. In order: 
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bit
+			]th
+			[th 
+				"Bits
+			]th
+			[th 
+				"Meaning
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Is cursed?
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Is blessed?
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"On shop bill?
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"in a shop but not owned by it?
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Formally identified?
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Viewed while not blind?
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Blessing/curse known?
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Rustproofing level known?
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"rust/fire/dilution damage level (also used for "blecch!"ing food)
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"corrosion/rot damage level (also used for unreviving corpses)
+			]td
+		]tr
+		[tr 
+			[td 
+				"12
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Erodeproofing level
+			]td
+		]tr
+		[tr 
+			[td 
+				"13
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Locked?
+			]td
+		]tr
+		[tr 
+			[td 
+				"14
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Lock broken?
+			]td
+		]tr
+		[tr 
+			[td 
+				"15
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Trapped/poisoned?
+			]td
+		]tr
+		[tr 
+			[td 
+				"16
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"Recharge count
+			]td
+		]tr
+		[tr 
+			[td 
+				"19
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Lit (for lamps, etc.)?
+			]td
+		]tr
+		[tr 
+			[td 
+				"20
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Greased?
+			]td
+		]tr
+		[tr 
+			[td 
+				"21
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Object refers to a monster (for tracking dead pets, etc)
+			]td
+		]tr
+		[tr 
+			[td 
+				"23
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Currently being used by game internals?
+			]td
+		]tr
+		[tr 
+			[td 
+				"24
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Immune to spells (used temporarily to stop items being affected twice by the same spell)?
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"This is likely the most useful field for a TAS; in particular, "viewed while not blind" can be altered simply by pressing ) to view the object's name, changing a 00 in that location to a 20, as seen here. (Note that a side effect of applying a cream pie to trigger the glitch is to blind yourself, thus you will need to wait for the blindness to time out first.)
+	$LF
+]p
+[p 
+	"One potential plan is to use this to overwrite a trailing NUL at the end of a string to a space, although it might require several memory allocations to pull off. There are other potential uses too, such as setting as many of the user-visible flags as possible to create a really long object name.
+	[br 
+	]br
+	$LF
+	"ignored padding: 00 00
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 00 00 corpsenm
+	]b
+	[br 
+	]br
+	$LF
+	"An object-type-specific flag: the monster class number of the monster this item is a corpse of (if it's a corpse), the monster ID of the pet leashed to this item (if a leash), the number of times a spellbook has been read, or 1 for an unbottled potion coming from a sink rather than a bottle.
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 00 00 oeaten
+	]b
+	[br 
+	]br
+	$LF
+	"For partially eaten food, how much is left to eat.
+	[br 
+	]br
+	$LF
+	[b 
+		"01 00 00 00 age
+	]b
+	[br 
+	]br
+	$LF
+	"Gametime when this object was created. (This is responsible for the unfortunately unexploitable crash when you drop 0 gold pieces onto another stack of 0 gold pieces; averaging out the ages gives a division by zero.)
+	[br 
+	]br
+	$LF
+	[b 
+		"00 onamelth
+	]b
+	[br 
+	]br
+	$LF
+	"The length of the user-specific name for this item (used to reallocate the item if the name is made longer).
+	[br 
+	]br
+	$LF
+	[b 
+		"ignored padding: 00
+	]b
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 oxlth
+	]b
+	[br 
+	]br
+	$LF
+	"The offset from the end of the object to its name. Nearly always 0 in actual play (except in weird cases like named pet corpses, where the info is put in between the end of the object and its name); however, if this is changed via glitch, the object will take its name from an unexpected place in memory, which might help to gain unusually long names. (It's a signed 16-bit number, so you can even take names from earlier in memory than the object itself.)
+	[br 
+	]br
+	$LF
+	[b 
+		"00 00 00 00 wornmask
+	]b
+	[br 
+	]br
+	$LF
+	"The parts of the body on which this item is currently being worn; redundant to things like the uwep pointer. This ends up out of synch with reality when the glitch is performed, stating that an item that isn't even in inventory is held in the hands.
+	[br 
+	]br
+	$LF
+	[b 
+		"00... oextra
+	]b
+	[br 
+	]br
+	$LF
+	"Other things tacked onto the object, like its name or information on a monster that was converted into an item somehow. The number of bytes allocated here may vary; NetHack uses the "struct hack" famous among C programmers.
+	$LF
+]p
+[p 
+	"The memory allocation algorithm used by NetHack is DJGPP's standard algorithm: memory is looked for in this order:
+	$LF
+]p
+[ul 
+	[li 
+		" space left over in a block after it had to be split to allocate a small space from a large block (only one of these spaces is tracked at a time);
+		$LF
+	]li
+	[li 
+		" freed blocks whose size is large enough to fit the requested size, and less than 5/4 the requested size, and has the same number of bits in its size (the most recently freed block is checked first);
+		$LF
+	]li
+	[li 
+		" freed blocks which are large enough to fit the requested size (checked in order of number of bits in their size, and from most recently to least recently freed in order);
+		$LF
+	]li
+	[li 
+		" memory requested from the OS.
+		$LF
+	]li
+]ul
+[p 
+	"When a block is freed, it's merged with other adjacent freed blocks (two blocks are adjacent if the distance between them is equal to the size of the first plus 8) into a larger block; if a block is allocated but has more than 64 bytes spare, the spare area is put into the "space left over" variable, and the old value of that variable is just marked as free, as normal.
+	$LF
+]p
+[p 
+	"For memory watching purposes: while a block of memory is allocated, the 4 bytes preceding it hold its size, and the 4 bytes following it also hold its size (so that blocks can be traversed forwards or backwards), and that's the only tracked metadata. While a block is deallocated, the sizes are still there (but with their low bit set to 0 to mark it as free, it's normally set to 1); also, its first 4 bytes hold a pointer to the next block, its next 4 bytes cache the number of bits in its size (0 means 2 bits as in 2 or 3 bytes, 1 means 3 bits as in 4-7 bytes, 2 means 4 bits as in 8-15 bytes, and so on). (Allocated sizes are rounded up to a multiple of 8 so that the info in question fits.)
+	$LF
+]p
+[p 
+	"Note that one consequence of the memory allocation algorithm is that the space used for the glitch object tends to get filled by the game's record of past messages; after 20 messages, it's freed, but generally immediately filled by the 
+	[em 
+		"next
+	]em
+	" message. Ways to avoid this happening involve producing a message that's considerably longer than the message that was just removed (so the new message doesn't fit), and using the messages themselves as a source of information. (By using maximum-length naming and calling on an item, then naming the item at maximum length again, you can create a massively long message name; pointing a glitch item's name at it causes a buffer overflow upon pressing 
+	[tt 
+		")
+	]tt
+	", but unfortunately, in order to create a memory address for the overflow in the addressable range, you have to include the NUL at the end of the string and the full stop before it as part of the memory address, and full stop = 0x2e doesn't correspond to any useful memory address in the code.)
+	$LF
+]p
+[h3 
+	" Luck manipulation
+	$LF
+]h3
+[p 
+	"Although the vast majority of the time-consuming actions in the game consume random numbers for one reason or another, for luck manipulation purposes you ideally want to be able to change the RNG sequence in zero in-game time (likely, no matter what category you're aiming for, as simulating a turn takes time). (NetHack's RNG uses a very wide seed, and changes only when random numbers are actually requested.) Here are some zero-turn methods of luck manipulation:
+	$LF
+]p
+[h4 
+	" Walking into walls
+	$LF
+]h4
+[p 
+	"Under normal circumstances, walking into walls is the fastest and simplest method of luck manipulation. The game checks for engraving erosion before it checks to see if the move is possible, and erodes engravings on the square by a random amount — even if there isn't an engraving on the square, and even if you can't reach the floor and are thus unable to erode engravings (the random number is generated before the levitation check). This consumes 1 RNG seed, and has no real effects other than consuming the seed (no message is printed, speeding up things considerably, but existing messages may be cleared).
+	$LF
+]p
+[h4 
+	" Zero-turn wresting
+	$LF
+]h4
+[p 
+	"A commonly used glitch when not TASing is to attempt to engrave with a wand while levitating; if the wand is empty, the game checks to see if the wand is wrestable (a 1 in 121 chance) before it aborts due to the inability to reach the ground, and the glitch is that this does not cost a turn (thus the non-TAS run can keep repeating until it hits that 1 in 121 chance). In a TAS, you can hit the much easier 120 in 121 chance that nothing happens for luck-manipulation purposes, using up a random number without costing the turn.
+	$LF
+]p
+[h4 
+	" Artifact naming
+	$LF
+]h4
+[p 
+	"Attempting to name an item so that it would resemble an artifact in name and base type is disallowed, and the name changes at random (with the number of RNG seeds used not always the same). Naming an item takes zero time and can be done no matter what the situation, so this always allows luck manipulation in zero in-game time. It requires quite a lot of typing and screen updates, though, so is slow in realtime.
+	$LF
+]p
+[h4 
+	" Hallucination
+	$LF
+]h4
+[p 
+	"The status change "Hallu" can be set up in zero additional time by having a black light explode next to the player; as this happens on the monster's turn, it can be done "for free" at the same time as another action. Hallucination causes all monsters, items, and a lot of other in-game things to be randomized in appearance and name (as well as a lot of other things), using up random number seeds very quickly (and allowing zero-turn RNG manipulation via using control-R to redraw the screen, or with pretty much any other action no matter what it is). However, ending the status change is not so simple, requiring the use of a healing item or unicorn horn (costing a turn), or waiting for it to time out. It also makes it harder to follow what's going on (although the in-game messages become a lot more amusing).
+	$LF
+]p
+[h4 
+	" Pet attack-cancel
+	$LF
+]h4
+[p 
+	"Luck can also be manipulated by first attacking a pet (or any other creature that has confirmation prompt for an attack) and then answering no in the are you sure prompt.
+	$LF
+]p
+[p 
+	"This requires option safepet to be off and confirm to be on.
+	$LF
+]p
+[h3 
+	" Maximising movement speed
+	$LF
+]h3
+[p 
+	"The NetHack time system works on two different scales, "turns" and "actions". After using up a certain number of actions, the game goes to the next turn; and certain actions just go immediately to the next turn regardless of how man actions have been taken. The number of actions a character gets per turn depends on their speed intrinsic and extrinsic (the fastest is "very fast", obtained via speed boots or a potion or spell of speed), what form they're currently polymorphed into (air elementals are fastest, with unicorns being the most TAS-useful of the many monster forms that tie for second place), and a random factor (normally making a difference of at most one action per turn, and luck-manipulatable). A very fast air elemental with a good random roll gets 4 actions per turn; other forms can only manage 3 per turn at most. It's possible to get intrinsic polymorphitis and polymorph control (via eating rings), making it possible to luck-manipulate a form change whenever you want in zero time; this is likely the best option for a TAS, even though triggering the polymorphitis has low probability.
+	$LF
+]p
+[h4 
+	" Vertical movement
+	$LF
+]h4
+[p 
+	"The fastest form of vertical movement in the game is level teleport, obtained via a cursed scroll of teleport, using a scroll of teleport while confused, the Orb of Fate, or a level teleport trap. This can only move a limited distance downwards if uncontrolled, so luck-manipulating large downwards movements is not possible, but with a source of teleport control (available as an intrinsic, at random from tengu corpses, eating the ring, or level as certain classes), unlimited distances can be covered. (An exception: you cannot level-teleport from above the Valley of the Dead to below, so such movements take at least two actions, going via the valley.) As levelteleportitis does not exist, all forms of level teleport cost an action.
+	$LF
+]p
+[p 
+	"When level teleport is not available (in certain branches like the endgame, and while holding the Amulet of Yendor), it's possible to use wands of digging to move down one level in one turn, and cursed potions of gain level to move up one level one turn. The fastest known way to do the ascension run is to use cursed potions of gain level on most of the levels on the way up (luck-manipulating them to land you on the upstairs can reduce the number of potions needed, but would require a lot of manipulation and thus be slower in realtime, whilst equal in gametime).
+	$LF
+]p
+[h4 
+	" Horizontal movement
+	$LF
+]h4
+[p 
+	"As with vertical movement, teleportation is the fastest form of horizontal movement (via the scroll, wand, trap, or teleportitis); triggering teleportitis (obtained from nymph, leprechaun, or tengu corpses at random, or by eating the ring) deliberately costs an action, but if it happens by chance (and this is luck-manipulatable), it takes zero time. (Teleport control controls the location where it lands; although this can also be luck-manipulated in most cases, it's likely realtime-faster to enter the location "by hand".)
+	$LF
+]p
+[p 
+	"Things are much more interesting in the many levels where teleport is banned (which includes pretty much all the levels where you'd want to move horizontally rather than just luck-manipulating your location or skipping the level altogether via vertical movement). Walking takes one action to move one square, and works in most contexts. Jumping can move up to four squares horizontally or vertically (if a wizard with maxed-out jumping skill), but takes the remainder of the current turn, rather than one action; thus, mixing walking and jumping is faster than either jumping or walking alone. Punishment offers an even faster form of movement when mixed with the others; if you throw an iron ball that's currently chained to you, it drags you along behind it, moving up to four squares in a single action, although the next move must be a walk to pick the ball up again (autopickup makes it possible to move and pick up the ball within the same action). However, air elementals are immune to punishment, so the fastest form of movement like this is in punished unicorn form; the first of the three actions in the turn can be used to throw the ball, the second to pick it up, the third to jump, for a total of 9 spaces moved. Unfortunately, neither jumping nor punishment works on the plane of Air.
+	$LF
+]p
+[p 
+	"A faster form of movement still is hurtling; if you throw a sufficiently heavy object while levitating, you shoot in the opposite direction, up to 9 squares per action (!). However, the game follows this up with paralysis for a number of turns equal to the distance you moved, so this would not at first seem to be useful. In order for this form of movement to actually be fastest, you need to interrupt the paralysis somehow, most simply via the death of the character. Dying and being resurrected by an amulet of lifesaving costs the rest of the turn, much faster than the normal timeout for hurtling. In order to maintain a high actions/turn, unfortunately, you cannot die from natural form to do this (the only sort of death caused by hitpoint damage), as doing so causes you to respawn in natural form at the start of a turn, losing the actions you'd get from being in a faster form. The alternative is to use one of NetHack's many instadeaths, to die in whatever speed form you're using and retaining that form. For an air elemental, a loadstone is a sufficiently heavy object to throw to move the full distance; however, carrying a large number of loadstones (or any other object sufficiently heavy to move this way) will slow the character down due to burden limit, thus they may need to be produced on the spot (most likely via wishing, which costs an action).
+	$LF
+]p
+[h4 
+	" Other directions
+	$LF
+]h4
+[p 
+	"Remember that, with a randomized timeout, it's possible to use the Eye of the Aethiopica to move from one dungeon branch to another. If playing as a wizard in order to enable maximum jump distance, this cannot be obtained until after turn 2000, as it's past the Quest entrance; fortunately, however, it can be obtained on the same turn as the Bell of Opening, so no time is actually lost picking it up. It saves one action to use the Eye to leave the Quest, rather than using the Quest entrance portal.
+	$LF
+]p
+[h4 
+	" Landing on specific squares
+	$LF
+]h4
+[p 
+	"Vertical and horizontal movement can be combined by trying to land on a specific square after vertical movement; this saves an action teleporting to the square (and substantially more on no-teleport levels like the Sanctum). Each level has an arrival region that determines where you can arrive from above, and another from below; this puts limits on how useful this technique is. Additionally, the code only checks a limited number of times for a free square. One side effect of this is that filling in squares doesn't reduce the number of manipulations you're going to need to hit the square you're looking for (except in a few cases). Another is that if you leave only one square open, the game may not be able to place you on that square anyway. If the game finds no free squares to place the player, it defaults to the top-left corner, and as such, this is the best square to aim for if you absolutely need to hit a specific square without much scope for manipulation.
+	$LF
+]p
+[h4 
+	" Time system abuses
+	$LF
+]h4
+[p 
+	"The exact details of the time system work like this: the player and each monster in the game have a reservoir of "movement energy", refilled each turn. The game continuously alternates between "player actions", where the player can move at the cost of 12 energy, and "monster actions", where monsters can move at the cost of 12 energy. If you perform a zero-time command, like checking your inventory, that action is not spent and you immediately get a chance to use it again. Thus, there's no way to hold on to your movement energy until after the monsters move; you either have to wait with the 
+	[tt 
+		".
+	]tt
+	" command and throw the 12 energy away, or use it for some purpose.
+	$LF
+]p
+[p 
+	"The order in which the players and monsters move is slightly buggy. Normally, if the player and at least one monster each have at least 12 points of energy, the player will move once, then each energized monster will move once. If the player should happen to have 12 points exactly, though, then their action is delayed until the end of the turn (due to an off-by-one in the game's main loop). So for instance, a speed 24 player and a speed 24 monster will alternate actions if the player's movement energy is not exactly divisible by 12, but will take turns to perform two actions if the player's movement energy is exactly divisible by 12. Alternating is normally more useful, and thus it is generally helpful in a TAS to avoid allowing your movement energy to become divisible by 12.
+	$LF
+]p
+[p 
+	"When nobody on the level has 12 movement energy, the turn ends, and the movement energy reservoirs are refilled, adding a number equal to the natural speed of the polymorph form the player is (12 for natural form), or the natural speed of the monster, possibly with modifiers. The simplest modifiers are the "fast" and "very fast" properties; the first has a 2 in 3 chance of adding an extra 6 energy for players, with the second always adding 6, and having a 1 in 3 chance of adding an extra 6. For monsters, the relevant properties are instead "slow" (2/3 speed rounded up), and "fast" (4/3 speed rounded up); there is no "very fast". Movement energy not used in one turn is carried over to the next, although it is only possible to carry over up to 11 energy this way (as a 12th point would instead give an extra action on the previous turn). This works much the same way that subpixels do in other games. (It's also noticeable that movement energy is one of the things not saved in a save file, and always resets to 12 upon loading a saved game. This is generally bad for the character, as 
+	[em 
+		"any
+	]em
+	" action requires 12 energy to perform, even zero-time actions like saving; it's just that with zero-time actions, the energy is not lost and another action can generally be performed immediately afterwards.)
+	$LF
+]p
+[p 
+	"One of the most useful abuses based on this algorithm is changing polymorph form within a turn. Polymorphitis only triggers at the start of a turn, immediately after movement is calculated for the round; thus, if you were a fast form like an air elemental, and become a slow form like a rock piercer, you nonetheless get all the actions you would that round. As long as you turn back into an air elemental before the turn ends, you can still take 4 actions this turn. Thus, you can get 3 actions a turn in any polymorph form in the game, by polymorphitising into the form you want at the start of the turn, taking three actions, then using an extrinsic source of polymorph (like a potion, wand or spell) to turn back into an air elemental just before the turn ends. (The same rules apply to monsters, which can occasionally be helpful, although it can be very hard to manipulate the monster AI into abusing the glitch. Careful control of level generation to place polymorph traps in the right place is likely to be required. It should also be noticed that monsters can end a turn with more than 11 energy, if the player leaves the level towards the start of a turn, as energy enforcement only happens for monsters on the current level. On the flip side, monsters spawn with 0 energy and don't gain it until you arrive on their level, so if you want monsters to start moving as soon as you arrive on the level, you'd better visit it for a few turns earlier in the game so they can refill.)
+	$LF
+]p
+[p 
+	"In order to make the most efficient use of time during the ascension run, you want to accomplish as much as possible on monster turns (so you don't have to wait for the player). In order to give monsters as many actions as possible, you can "charge" them by leaving the level when they still have movement points left. Using fast monsters, or by polymorphing the monsters from air elementals, lets you give them a lot of points in the first place; then simply leave the level, and the monsters will be able to act when you get back.
+	$LF
+]p
+[p 
+	"There are also some bizarre exploits based on command repeat, which is apparently unrelated to the speed system. One rather noticeable one, which can be used to sacrifice an action (putting on an amulet of life saving) in order to gain an action later, is that if the character is currently repeating an action via command repeat and die on their own action (not a monster action), but get lifesaved, that action is retroactively set to take zero time and the movement energy refunded (to be precise, it's never deducted at all). This appears to be an accident in the code, especially as being lifesaved normally costs the remainder of the turn; however, it can be exploited to gain a fifth action in a turn after turn 2000 at the cost of an action before, which is obviously helpful, although generally only when suiciding would be useful for other reasons (generally, safe_teleds abuse). A more minor situation is when galloping; if you have moved during a turn, and are command-repeat moving at the start of the next turn, and are riding, and kicked your steed to spur it forwards recently, you get a boost of speed. This is probably intended to move long distances, but galloping into a wall works just as well if you get the timing right, and the speed boost on a speed-24 steed like a warhorse gains you the maximum possible movement energy refill, 53 movement energy regardless of polymorph form. With at least 7 movement energy carried over from the turn before, this gives 60 movement energy, enough for 5 actions, providing another mechanism to get a 5-action turn, although one that requires a relatively useless action (moving) on the turn before. (The most sensible use for this is to spend the end of turn 1999 galloping at a wall in order to get 5 actions on turn 2000.)
+	$LF
+]p
+[h3 
+	" Starting character attributes for a low in-game turn count run
+	$LF
+]h3
+[h4 
+	" Character, race, and alignment
+	$LF
+]h4
+[p 
+	"The Wizard is likely the best starting character, being the only character that can manage 4-square jumps.  Using a neutral character is required to be able to wish for the Eyes of the Overworld; this allows jumping to be done even in air elemental form (which normally cannot jump to visibility issues).  The other attributes such as race and gender are mostly irrelevant, but setting them to particular values or choosing them at random can help for luck-manipulation purposes.
+	$LF
+]p
+[h4 
+	" Level locations
+	$LF
+]h4
+[p 
+	"There are caps on various level locations that are generated at the start of the game.  These can be viewed with Ctrl+o while in wizard (debug) mode.  For a TAS it's helpful if fakewiz1 (the portal to the Wizard's tower) is as deep as possible and the Sanctum and the actual Wizard's Tower are as shallow as possible.  These map to fakewiz1: 43 (putting it deeper would force the Sanctum deeper), Sanctum: 45, and wizard1: 36 as viewed with Ctrl+o. (A shallow Sanctum reduces the distance that needs to be travelled on the ascension run, thus saving time; a large difference between wizard1-3 and fakewiz1 enables more time to be saved via sequence breaking.)
+	$LF
+]p
+[h4 
+	" Rings
+	$LF
+]h4
+[p 
+	"The majority of rings can provide their effects permanently when eaten in a monster form. For a TAS the ring of polymorph and the ring of polymorph control are both very helpful to eat.  Other potentially helpful rings include the ring of increase damage, the ring of searching, and the ring of conflict.  Rings of the following descriptions can be eaten by some available polymorph form: pearl, iron, twisted, steel, wire, engagement, shiny, bronze, brass, copper, silver, gold, wooden.  Because the correspondence between item appearance and item effect is set at the start of the game, before any actions happen, the useful rings must therefore be luck-manipulated to have edible appearances via the time at which the game is started and character selection.
+	$LF
+]p
+[h4 
+	" Potential seeds
+	$LF
+]h4
+[p 
+	"The seed 1447373582 with a Wizard / Gnome / Male character starts with the best levels and edible rings of polymorph and polymorph control.  It is a seed that starts 13 minutes after midnight on a new moon on Friday the 13th.  Other seeds likely exist that are closer to midnight but additional searching is needed; the above seed was found with the expect script whose latest version is online 
+	[a class=extlink href=http://gitorious.org/nethack-tas-tools/mainline/blobs/raw/master/scripts/wizscum.expect rel=nofollow 
+		"here
+	]a
+	".
+	$LF
+]p
+[h3 
+	" Sequence-breaking
+	$LF
+]h3
+[h4 
+	" safe_teleds sequence breaking
+	$LF
+]h4
+[p 
+	"On certain levels that ban teleportation, it's nonetheless possible to teleport via exploiting the game's recovery from certain emergency situations (the safe_teleds function), which effectively do an uncontrolled teleport to a random walkable square even on no-teleport levels (and of course, this randomness can be luck-manipulated). Some examples include being lifesaved from drowning in water or lava, and prayer from being trapped in a wall (likely only the first is useful in a TAS due to the huge time cost of prayer, but the first is a highly useful sequence break on the plane of Water). This is possible on most levels where it would be useful; unfortunately, though, it doesn't work on the plane of Air (the game limits safe_teleds to keep the player in the same third of the map, left, right, or centre), or in the Wizard of Yendor's tower (safe_teleds will not move between the inside and outside or vice versa), and it likely takes longer to set up than it saves on Earth, Fire, or Astral.
+	$LF
+]p
+[h4 
+	" Using the fake wizard's tower
+	$LF
+]h4
+[p 
+	"The only way to skip levels on the way up is to use the portal in the fake wizard's tower that goes into the real wizard's tower, which can skip several levels with an optimal dungeon layout (the fake tower as low as possible, the real tower as high as possible). However, it's impossible to leave the real tower except via level teleport, branchport via the Eye of the Aethiopica, or the portal; the first two are blocked by the Amulet of Yendor, so this would seem useless on the way up. It is, however, possible to use either a wand of teleport, or a convenient monster (the Wizard himself?), to carry the Amulet out of the tower for you, while you level-teleport twice to end up outside the tower. It's unclear whether doing this by itself saves time (it seems to save at most one action even under perfect circumstances); however, combining this with enexto() abuse saves time under a much wider range of timing of actions relative to the turn.
+	$LF
+]p
+[h4 
+	" enexto() abuse
+	$LF
+]h4
+[p 
+	"When the player and a monster occupy the same square at the same time, normally the game resolves the situation by moving the monster (e.g. when the player ceases to be engulfed). There are a few situations where it moves the player instead (e.g. 1 in 2 chance when going downstairs), but most of them have guards to prevent the player moving too far. There is, however, one situation without a guard for distance moved: when polymorphed into any 
+	[tt 
+		"p
+	]tt
+	" or 
+	[tt 
+		"t
+	]tt
+	" form and using #monster, a monster moving onto your square (which happens because the monster cannot see you, as you're hiding on the ceiling) causes you to fall off the ceiling and land on the nearest unoccupied square, other than the square you were on and the square the monster was on. ("nearest" in this case is measured using diagonal and orthogonal moves, meaning that a square 5 squares away diagonally, say, is nearer than a square 6 squares away orthogonally. If more than one square has the same distance under this measure, a random one is taken, and this can be luck-manipulated.) Notably, there's no restriction on things like walls or level regions, so it's possible to fall off the ceiling and land on the other side of an unphaseable wall. This is potentially useful by in two situations: in the Wizard of Yendor's tower, and on the Astral Plane. Combining it with instant enexto setup makes it useful in many more locations (all the Planes but Fire).
+	$LF
+]p
+[p 
+	"The tower is the more clear-cut place to do this, as the sequence-break can be set up in advance, before turn 2000. What is necessary is to fill most of the area around the portal or upstairs in the tower with slow-moving or, ideally, sessile monsters (such as blue jellies), with one fast-moving monster right next to the portal (a hasted leocrotta, or something like that; the exact monster chosen will depend on the timings on the way up). Unfortunately, all the forms that can pull off the glitch are very slow (with lurkers above and trappers tied for fastest at 3, one quarter the speed of a human). However, the player's speed only matters at the start of the turn; if you were an air elemental at the start of the turn, this gives enough time to polymorphitis into a lurker above, perform the glitch, and polymorph back into an air elemental just before the next turn comes around. (To pull this off, it's vital that the monster you use to perform the glitch can move multiple times in a turn, so that you don't end up doing it exactly as a turn ends. Note that you can't polymorphitis except just after the start of a turn, so you need to spend an action using an item to polymorph back.) With ideal timings, the glitch takes just two actions to pull off here.
+	$LF
+]p
+[p 
+	"On the Astral Plane, it is less clear whether it saves time without the use of instant enexto() setup; the fastest way to fill the area with monsters without advance setup is to use cursed scrolls of create monster while confused, luck-manipulating them to produce the maximum number of monsters (a 1 in 296 chance), which fills the area with acid blobs. (Confusion is possible on the monster's turn via umber hulk gazes; it may also be possible, although considerably more complex due to all the monsters around, to use the scrolls without previous confusion, which helps in that it can summon up to 17 swarms of monsters, rather than 17 individual monsters. Having enemies or Wizard curses summonstorm around you also helps.) It's unclear exactly how many actions are necessary to fill the area with enough monsters that you can glitch into the area around the central altar (the nearest one); it's definitely possible with five actions, but is likely possible faster. All the caveats for sequence-breaking out of the Tower also apply here. This is an obsolete trick nowadays, because instant enexto() setup can be used instead.
+	$LF
+]p
+[h4 
+	" Instant enexto() setup
+	$LF
+]h4
+[p 
+	"The major disadvantage of enexto() abuse is that it requires a large number of monsters on the level. This is no problem for main game levels, but an issue in the endgame. In order to perform the glitch quickly on levels you've never visited, you therefore need to create a large number of monsters at once. For smallish numbers of monsters (up to 10 or so), such as is needed on the Plane of Earth, you can make use of the "summon nasties" monster spell to create the monsters on a monster action (several high-level monsters can be manipulated into doing this; it's best to use non-boss monsters for this, because although the Wizard of Yendor can summon them just fine, his AI tends to mess up attempts to use the enexto() glitch afterwards). For larger numbers of monsters, the best approach is to use several stacks of eggs in your inventory, timed to hatch at the exact right moment; this is "slower" in that it only happens at the start of a turn, rather than the start of an action, but is still substantially faster than other methods of filling a level.
+	$LF
+]p
+[h4 
+	" Wizard of Yendor sequence breaking
+	$LF
+]h4
+[p 
+	"The Wizard's tower is exceptional branch in that it is embedded in the main branch instead of being outside it like all other branches. It is separated from main branch by walls that can't be passed through (even by monsters normally capable of passing through walls) and the levels are no-teleport.
+	$LF
+]p
+[p 
+	"However you can get close enough the Wizard of Yendor from the main branch so that Master Mind Flayer telepathic attack (#monster) can reach the Wizard. If you successfully attack the Wizard using that attack, he can wake up and subsequently teleport to you (he cheats by ignoring the no-teleport restriction). Note that this never happens on his first turn after waking up.
+	$LF
+]p
+[p 
+	"After this, you can fight him in the main branch (possibly after teleporting to another level).
+	$LF
+]p

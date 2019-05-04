@@ -1,0 +1,5856 @@
+7
+[h3 
+	" Nesvideos-piece
+	$LF
+	[a id=heading-234 
+	]a
+]h3
+[p 
+	"Nesvideos-piece is my toolset for creating AVI videos from any
+	$LF
+	"particular emulator with a simple interface.
+	$LF
+]p
+[p 
+	"This document is divided in three parts:
+	$LF
+]p
+[ul 
+	[li 
+		" Source code of the core nesvideos-piece
+		$LF
+	]li
+	[li 
+		" Documentation how to hook nesvideos-piece into an emulator
+		$LF
+	]li
+	[li 
+		" Documentation how to use so modified emulator to create AVIs
+		$LF
+	]li
+]ul
+[p 
+	"This core is identical for all emulators.
+	$LF
+]p
+[p 
+	"Linking requirements:
+	$LF
+]p
+[ul 
+	[li 
+		" libgd2 for linking (it does PNG file access). (
+		[tt 
+			"-lgd2
+		]tt
+		" in GCC)
+		$LF
+	]li
+	[li 
+		" pthread for linking (it contains thread safety features for cases when it is used with LD_PRELOAD technique). (
+		[tt 
+			"-pthread
+		]tt
+		" in GCC)
+		$LF
+	]li
+	[li 
+		" It is also recommended to enable MMX optimizations if your processor supports them. Use the 
+		[tt 
+			"-mmmx
+		]tt
+		" flag in GCC.
+		$LF
+	]li
+]ul
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-234 
+						" Nesvideos-piece
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-235 
+						" How to modify the emulator
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-236 
+						" Source code of the core feature set
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-237 
+								" 
+								[tt 
+									"nesvideos-piece.hh
+								]tt
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-238 
+								" 
+								[tt 
+									"nesvideos-piece.cc
+								]tt
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-239 
+								" 
+								[tt 
+									"quantize.hh
+								]tt
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-240 
+								" 
+								[tt 
+									"simd.hh
+								]tt
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-241 
+								" 
+								[tt 
+									"rgbtorgb.hh
+								]tt
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-242 
+								" 
+								[tt 
+									"rgbtorgb.cc
+								]tt
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-243 
+						" How to use the modified emulator:
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-244 
+								" Using a remote computer for running mencoder
+								$LF
+							]a
+						]li
+					]ul
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" How to modify the emulator
+	$LF
+	[a id=heading-235 
+	]a
+]h3
+[ol 
+	[li 
+		" Architectural setup:
+		$LF
+		[ol 
+			[li 
+				" Ensure that your emulator does not skip or duplicate frames. Disable all features that try to throttle the emulation speed to match the host system's speed.
+				$LF
+			]li
+			[li 
+				" Ensure that your emulator produces perfectly synchronized audio (synchronized to emulated system, 
+				[em 
+					"NOT to host system
+				]em
+				"). For example, if your emulated system (not host!) runs at 60 fps and you are outputting audio at 44100 Hz, the emulator 
+				[em 
+					"must
+				]em
+				" output exactly 735 (44100/60) samples per frame, regardless of the host system speed.
+				$LF
+			]li
+		]ol
+		" API setup:
+		$LF
+		[ol 
+			[li 
+				" Enable AVI logging: set 
+				[tt 
+					"LoggingEnabled=2;
+				]tt
+				" after the proper movie file has been loaded.
+				$LF
+			]li
+			[li 
+				" Specify the recording command: Use the function 
+				[tt 
+					"NESVideoSetVideoCmd()
+				]tt
+				". At simplest, a call such as 
+				[tt 
+					"NESVideoSetVideoCmd(getenv("VIDEOCMD")
+					[em 
+					]em
+					");
+				]tt
+				" will do fine. This delegates the specifying of the video encoding command to the user, who has to supply the 
+				[tt 
+					"VIDEOCMD
+				]tt
+				" environment variable as specified above.
+				$LF
+			]li
+		]ol
+		" Feed data:
+		$LF
+		[ol 
+			[li 
+				" Call 
+				[tt 
+					"NESVideoLoggingVideo()
+				]tt
+				" at each video frame.
+				$LF
+			]li
+			[li 
+				" Call 
+				[tt 
+					"NESVideoLoggingAudio()
+				]tt
+				" each time you have new audio data.
+				$LF
+			]li
+			[li 
+				" If the video or audio specifications (fps, resolution, sampling rate, etc.) change and you cannot resample them to a common rate, call NESVideoNextAVI() to start a new AVI. You can also call the function voluntarily whenever you want to split the movie into multiple AVIs.
+				$LF
+			]li
+		]ol
+	]li
+]ol
+[p 
+	"Notes:
+	$LF
+]p
+[ul 
+	[li 
+		" Nesvideos-piece buffers video and audio to ensure good synchronization. If your emulator produces audio sporadically (for example, 4 framefuls of audio at 4 frame intervals), it does not matter.
+		$LF
+	]li
+	[li 
+		" The 
+		[tt 
+			"fps_scaled
+		]tt
+		" parameter for 
+		[tt 
+			"NESVideoLoggingVideo()
+		]tt
+		" must be your emulated system's fps 
+		[em 
+			"times 16777216
+		]em
+		". For example, if your emulated system runs at 60.0988138974 fps, you must 
+		[tt 
+			"fps_scaled
+		]tt
+		" as 1008290782.
+		$LF
+	]li
+	[li 
+		" The supported values for 
+		[tt 
+			"bpp
+		]tt
+		" are:
+		$LF
+		[ul 
+			[li 
+				" 32 = BGR32
+				$LF
+			]li
+			[li 
+				" 24 = BGR24
+				$LF
+			]li
+			[li 
+				" 16 = RGB16 (5:6:5)
+				$LF
+			]li
+			[li 
+				" 15 = RGB15 (5:5:5)
+				$LF
+			]li
+			[li 
+				" 12 = I420 (planar 1:1 Y, 2:2 V, 2:2 U)
+				$LF
+			]li
+			[li 
+				" 14 = YUY2 (1:1 Y, 2:1 V, 1:1 Y, 2:1 U)
+				$LF
+			]li
+		]ul
+		" The 
+		[tt 
+			"nsamples
+		]tt
+		" parameter for 
+		[tt 
+			"NESVideoLoggingAudio()
+		]tt
+		" represents the number of samples your 
+		[tt 
+			"data
+		]tt
+		" contains. There are 
+		[tt 
+			"rate
+		]tt
+		" number of samples per a second, regardless of the number of channels or bitness.
+		$LF
+	]li
+	[li 
+		" Feed only complete audio samples: Do not feed partial samples (i.e. halves of 16-bit samples, or only the left channel in a stereo setup).
+		$LF
+	]li
+	[li 
+		" If your emulator produces video and audio at an uneven ratio (i.e. not perfectly synchronized), the buffering in nesvideos-piece will start consuming RAM in excess amounts, possibly making your system unstable!
+		$LF
+	]li
+	[li 
+		" nesvideos-piece supports automatically blending a logo animation into the beginning of the movie. The exact manner of how it is done is controlled by the following settings in 
+		[tt 
+			"nesvideos-piece.cc
+		]tt
+		":
+		$LF
+		[ul 
+			[li 
+				" The #define 
+				[tt 
+					"LOGO_LENGTH_HEADER
+				]tt
+				" (floating point constant) controls how many seconds of the animation is displayed before the movie actually begins.
+				$LF
+			]li
+			[li 
+				" The #define 
+				[tt 
+					"LOGO_LENGTH_OVERLAP
+				]tt
+				" (floating point constant) controls how many seconds of the animation is blended together with the movie after 
+				[tt 
+					"LOGO_LENGTH_HEADER
+				]tt
+				" has elapsed.
+				$LF
+			]li
+			[li 
+				" The 
+				[tt 
+					"avdir
+				]tt
+				" string constant in function 
+				[tt 
+					"GetLogoFileName()
+				]tt
+				" specifies the directory (aka. folder) in which the animator will look for animation frames.
+				$LF
+				[ul 
+					[li 
+						" The animation frames are supposed to be stored in files matching the following pattern: 
+						[tt 
+							"logo_X_Y_fN.png
+						]tt
+						" where 
+						[tt 
+							"X
+						]tt
+						" and 
+						[tt 
+							"Y
+						]tt
+						" specify the frame size (resolution) and 
+						[tt 
+							"N
+						]tt
+						" specifies the frame number. For example, 
+						[tt 
+							"logo_256_224_f10.png
+						]tt
+						" is the eleventh frame of the animation for frame size 256x224. (Frame numbers begin from 0.)
+						$LF
+					]li
+				]ul
+				" The animation frames are assumed to be png files with an alpha channel. However, they will work also without an alpha channel.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Source code of the core feature set
+	$LF
+	[a id=heading-236 
+	]a
+]h3
+[h4 
+	" 
+	[tt 
+		"nesvideos-piece.hh
+	]tt
+	$LF
+	[a id=heading-237 
+	]a
+]h4
+[p 
+	"This is the interface to nesvideos-piece. It includes functions
+	$LF
+	"and global variables that are to be accessed by the emulator.
+	$LF
+]p
+[pre 
+	[code class=language-c_white 
+		"#ifndef NESVPIECEhh
+		$LF
+		"#define NESVPIECEhh
+		$LF
+		$LF
+		"#define NESVIDEOS_LOGGING 1
+		$LF
+		$LF
+		"#ifdef __cplusplus
+		$LF
+		"extern "C" {
+		$LF
+		"#endif
+		$LF
+		$LF
+		"/* Is video logging enabled? 0=no, 1=yes, 2=active. Default value: 0 */ 
+		$LF
+		"extern int LoggingEnabled; 
+		$LF
+		$LF
+		"/* Get and set the video recording command (shell command) */ 
+		$LF
+		"extern const char* NESVideoGetVideoCmd(void); 
+		$LF
+		"extern void NESVideoSetVideoCmd(const char *cmd);
+		$LF
+		$LF
+		"/* Save 1 frame of video. (Assumed to be 16-bit RGB) */ 
+		$LF
+		"/* FPS is scaled by 24 bits (*0x1000000) */
+		$LF
+		"/* Does not do anything if LoggingEnabled<2. */ 
+		$LF
+		"extern void NESVideoLoggingVideo
+		$LF
+		"    (const void*data, unsigned width, unsigned height,
+		$LF
+		"     unsigned fps_scaled,
+		$LF
+		"     unsigned bpp); 
+		$LF
+		$LF
+		"/* Save N bytes of audio. bytes_per_second is required on the first call. */ 
+		$LF
+		"/* Does not do anything if LoggingEnabled<2. */ 
+		$LF
+		"/* The interval of calling this function is not important, as long as all the audio
+		$LF
+		" * data is eventually written without too big delay (5 seconds is too big)
+		$LF
+		" * This function may be called multiple times per video frame, or once per a few video
+		$LF
+		" * frames, or anything in between. Just that all audio data must be written exactly once,
+		$LF
+		" * and in order. */ 
+		$LF
+		"extern void NESVideoLoggingAudio
+		$LF
+		"    (const void*data,
+		$LF
+		"     unsigned rate, unsigned bits, unsigned chans,
+		$LF
+		"     unsigned nsamples);
+		$LF
+		"/* nsamples*chans*(bits/8) = bytes in *data. */
+		$LF
+		$LF
+		"/* Requests current AVI to be closed and new be started */
+		$LF
+		"/* Use when encoding parameters have changed */
+		$LF
+		"extern void NESVideoNextAVI();
+		$LF
+		$LF
+		"#ifdef __cplusplus
+		$LF
+		"}
+		$LF
+		"#endif
+		$LF
+		$LF
+		"#endif
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"nesvideos-piece.cc
+	]tt
+	$LF
+	[a id=heading-238 
+	]a
+]h4
+[p 
+	"This is the source code of the functionality behind nesvideos-piece.
+	$LF
+]p
+[pre 
+	[code class=language-c_white 
+		"#define THREAD_SAFETY
+		$LF
+		$LF
+		"#include <cmath>
+		$LF
+		"#include <string>
+		$LF
+		"#include <vector>
+		$LF
+		"#include <deque>
+		$LF
+		"#include <list>
+		$LF
+		"#include <map>
+		$LF
+		$LF
+		"#include <unistd.h>   // mknod, unlink, write
+		$LF
+		"#include <stdio.h>
+		$LF
+		"#include <sys/stat.h> // S_IFIFO
+		$LF
+		"#include <fcntl.h>    // fcntl
+		$LF
+		"#include <sys/poll.h> // poll
+		$LF
+		"#include <stdlib.h>   // setenv
+		$LF
+		"#include <string.h>   // strrchr
+		$LF
+		"#include <errno.h>
+		$LF
+		"#include <glob.h>
+		$LF
+		$LF
+		"#include <gd.h>
+		$LF
+		$LF
+		"#ifdef THREAD_SAFETY
+		$LF
+		"# include <pthread.h>
+		$LF
+		"#endif
+		$LF
+		$LF
+		"/* Note: This module assumes everyone uses BGR16 as display depth */
+		$LF
+		$LF
+		"//#define LOGO_LENGTH_HEADER  (1.2)
+		$LF
+		"//#define LOGO_LENGTH_OVERLAP (10.0-LOGO_LENGTH_HEADER)
+		$LF
+		"//#define LOGO_LENGTH_HEADER  (1.1)
+		$LF
+		"//#define LOGO_LENGTH_OVERLAP (6.3-LOGO_LENGTH_HEADER)
+		$LF
+		"//#define LOGO_LENGTH_HEADER  (1.4)
+		$LF
+		"#define LOGO_LENGTH_OVERLAP (0)
+		$LF
+		"#define LOGO_LENGTH_HEADER (0)
+		$LF
+		$LF
+		"static std::string VIDEO_CMD = "";
+		$LF
+		"/*
+		$LF
+		"-rawvideo on:fps=60:format=0x42475220:w=256:h=224:size=$[1024*224]
+		$LF
+		"-audiofile "+AUDIO_FN+"
+		$LF
+		"*/
+		$LF
+		"static std::string AUDIO_FN = "s.log";
+		$LF
+		$LF
+		"static bool Terminate=false;
+		$LF
+		"static unsigned videonumber = 0;
+		$LF
+		$LF
+		"#ifdef THREAD_SAFETY
+		$LF
+		"static pthread_mutex_t APIlock = PTHREAD_MUTEX_INITIALIZER;
+		$LF
+		"#endif
+		$LF
+		$LF
+		"static unsigned NonblockWrite(FILE* fp, const unsigned char*buf, unsigned length)
+		$LF
+		"{
+		$LF
+		"  Retry:
+		$LF
+		"    int result = write(fileno(fp), buf, length);
+		$LF
+		"    if(result == -1 && errno==EAGAIN)
+		$LF
+		"    {
+		$LF
+		"        return 0;
+		$LF
+		"    }
+		$LF
+		"    if(result == -1 && errno==EINTR) goto Retry;
+		$LF
+		"    if(result == -1)
+		$LF
+		"    {
+		$LF
+		"        perror("write");
+		$LF
+		"        Terminate=true;
+		$LF
+		"        return 0;
+		$LF
+		"    }
+		$LF
+		"    return result;
+		$LF
+		"}
+		$LF
+		"static int WaitUntilOneIsWritable(FILE*f1, FILE*f2)
+		$LF
+		"{
+		$LF
+		"    struct pollfd po[2] = { {fileno(f1),POLLOUT,0}, {fileno(f2),POLLOUT,0} };
+		$LF
+		"    poll(po, 2, -1);
+		$LF
+		"    return ((po[0].revents & POLLOUT) ? 1 : 0)
+		$LF
+		"         | ((po[1].revents & POLLOUT) ? 2 : 0);
+		$LF
+		"}
+		$LF
+		$LF
+		"#define BGR32 0x42475220  // BGR32 fourcc
+		$LF
+		"#define BGR24 0x42475218  // BGR24 fourcc
+		$LF
+		"#define BGR16 0x42475210  // BGR16 fourcc
+		$LF
+		"#define BGR15 0x4247520F  // BGR15 fourcc
+		$LF
+		"#define I420  0x30323449  // I420 fourcc
+		$LF
+		"#define YUY2  0x32595559  // YUY2 fourcc
+		$LF
+		$LF
+		"static unsigned USE_FOURCC = BGR16;
+		$LF
+		"static unsigned INPUT_BPP  = 16;
+		$LF
+		$LF
+		"#define u32(n) (n)&255,((n)>>8)&255,((n)>>16)&255,((n)>>24)&255
+		$LF
+		"#define u16(n) (n)&255,((n)>>8)&255
+		$LF
+		"#define s4(s) s[0],s[1],s[2],s[3]
+		$LF
+		$LF
+		"static const unsigned FPS_SCALE = 0x1000000;
+		$LF
+		$LF
+		"static struct Construct
+		$LF
+		"{
+		$LF
+		"    Construct()
+		$LF
+		"    {
+		$LF
+		"        char Buf[4096];
+		$LF
+		"        getcwd(Buf,sizeof(Buf));
+		$LF
+		"        Buf[sizeof(Buf)-1]=0;
+		$LF
+		"        AUDIO_FN = Buf + std::string("/") + AUDIO_FN;
+		$LF
+		"    }
+		$LF
+		"} Construct;
+		$LF
+		$LF
+		"class AVI
+		$LF
+		"{
+		$LF
+		"    FILE* vidfp;
+		$LF
+		"    FILE* audfp;
+		$LF
+		"    
+		$LF
+		"    bool KnowVideo;
+		$LF
+		"    unsigned vid_width;
+		$LF
+		"    unsigned vid_height;
+		$LF
+		"    unsigned vid_fps_scaled;
+		$LF
+		"    std::list<std::vector<unsigned char> > VideoBuffer;
+		$LF
+		"    unsigned VidBufSize;
+		$LF
+		"    
+		$LF
+		"    bool KnowAudio;
+		$LF
+		"    unsigned aud_rate;
+		$LF
+		"    unsigned aud_chans;
+		$LF
+		"    unsigned aud_bits;
+		$LF
+		"    std::list<std::vector<unsigned char> > AudioBuffer;
+		$LF
+		"    unsigned AudBufSize;
+		$LF
+		"    
+		$LF
+		"public:
+		$LF
+		"    AVI() :
+		$LF
+		"        vidfp(NULL),
+		$LF
+		"        audfp(NULL),
+		$LF
+		"        KnowVideo(false), VidBufSize(0),
+		$LF
+		"        KnowAudio(false), AudBufSize(0)
+		$LF
+		"    {
+		$LF
+		"    }
+		$LF
+		"    ~AVI()
+		$LF
+		"    {
+		$LF
+		"        while(VidBufSize && AudBufSize)
+		$LF
+		"        {
+		$LF
+		"            CheckFlushing();
+		$LF
+		"        }
+		$LF
+		"        if(audfp) fclose(audfp);
+		$LF
+		"        if(vidfp) pclose(vidfp);
+		$LF
+		"        unlink(AUDIO_FN.c_str());
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    void Audio(unsigned r,unsigned b,unsigned c,
+		$LF
+		"               const unsigned char*d, unsigned nsamples)
+		$LF
+		"    {
+		$LF
+		"        if(Terminate) return;
+		$LF
+		"        if(!KnowAudio)
+		$LF
+		"        {
+		$LF
+		"            aud_rate = r;
+		$LF
+		"            aud_chans = c;
+		$LF
+		"            aud_bits = b;
+		$LF
+		"            KnowAudio = true;
+		$LF
+		"        }
+		$LF
+		"        CheckFlushing();
+		$LF
+		"        
+		$LF
+		"        unsigned bytes = nsamples * aud_chans * (aud_bits / 8);
+		$LF
+		"        
+		$LF
+		"        unsigned wrote = 0;
+		$LF
+		"        if(KnowVideo && AudioBuffer.empty())
+		$LF
+		"        {
+		$LF
+		"            //fprintf(stderr, "Writing %u of %s from %p to %p\t", bytes, "aud", (void*)d, (void*)audfp);
+		$LF
+		"            wrote = NonblockWrite(audfp, d, bytes);
+		$LF
+		"            //fprintf(stderr, "Wrote %u\n", wrote);
+		$LF
+		"        }
+		$LF
+		"        if(wrote < bytes)
+		$LF
+		"        {
+		$LF
+		"            unsigned remain = bytes-wrote;
+		$LF
+		"            //fprintf(stderr, "Buffering %u of %s (%p..%p)\n", remain, "aud", d+wrote, d+bytes);
+		$LF
+		"            AudioBuffer.push_back(std::vector<unsigned char>(d+wrote, d+bytes));
+		$LF
+		"            AudBufSize += remain;
+		$LF
+		"        }
+		$LF
+		"        CheckFlushing();
+		$LF
+		"    }
+		$LF
+		"    void Video(unsigned w,unsigned h,unsigned f, const unsigned char*d)
+		$LF
+		"    {
+		$LF
+		"        if(Terminate) return;
+		$LF
+		"        if(!KnowVideo)
+		$LF
+		"        {
+		$LF
+		"            vid_width      = w;
+		$LF
+		"            vid_height     = h;
+		$LF
+		"            vid_fps_scaled = f;
+		$LF
+		"            KnowVideo = true;
+		$LF
+		"        }
+		$LF
+		"        CheckFlushing();
+		$LF
+		"        
+		$LF
+		"        unsigned bpp   = INPUT_BPP; if(bpp == 15 || bpp == 17) bpp = 16;
+		$LF
+		"        unsigned bytes = vid_width * vid_height * bpp / 8;
+		$LF
+		"        
+		$LF
+		"        //std::vector<unsigned char> tmp(bytes, 'k');
+		$LF
+		"        //d = &tmp[0];
+		$LF
+		"        
+		$LF
+		"        unsigned wrote = 0;
+		$LF
+		"        if(KnowAudio && VideoBuffer.empty())
+		$LF
+		"        {
+		$LF
+		"            CheckBegin();
+		$LF
+		"            //fprintf(stderr, "Writing %u of %s from %p to %p\t", bytes, "vid", (void*)d, (void*)vidfp);
+		$LF
+		"            wrote = NonblockWrite(vidfp, d, bytes);
+		$LF
+		"            //fprintf(stderr, "Wrote %u\n", wrote);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        if(wrote < bytes)
+		$LF
+		"        {
+		$LF
+		"            unsigned remain = bytes-wrote;
+		$LF
+		"            //fprintf(stderr, "Buffering %u of %s (%p..%p)\n", remain, "vid", d+wrote, d+bytes);
+		$LF
+		$LF
+		"            VideoBuffer.push_back(std::vector<unsigned char>(d+wrote, d+bytes));
+		$LF
+		"            VidBufSize += remain;
+		$LF
+		"        }
+		$LF
+		"        CheckFlushing();
+		$LF
+		"    }
+		$LF
+		$LF
+		"private:
+		$LF
+		"    /* fp is passed as a reference because it may be NULL
+		$LF
+		"     * prior to calling, and this function changes it. */
+		$LF
+		"    template<typename BufType>
+		$LF
+		"    void FlushBufferSome(BufType& List, unsigned& Size, FILE*& fp, const char* what)
+		$LF
+		"    {
+		$LF
+		"        what=what;
+		$LF
+		"        
+		$LF
+		"    Retry:
+		$LF
+		"        if(List.empty() || Terminate) return;
+		$LF
+		"        
+		$LF
+		"        typename BufType::iterator i = List.begin();
+		$LF
+		"        std::vector<unsigned char>& buf = *i;
+		$LF
+		"        
+		$LF
+		"        if(buf.empty())
+		$LF
+		"        {
+		$LF
+		"            List.erase(i);
+		$LF
+		"            goto Retry;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        unsigned bytes = buf.size();
+		$LF
+		"        
+		$LF
+		"        CheckBegin();
+		$LF
+		"        //fprintf(stderr, "Writing %u of %s from %p to %p\t", bytes, what, (void*)&buf[0], (void*)fp);
+		$LF
+		"        
+		$LF
+		"        unsigned ate = NonblockWrite(fp, &buf[0], bytes);
+		$LF
+		$LF
+		"        //fprintf(stderr, "Wrote %u\n", ate);
+		$LF
+		"        
+		$LF
+		"        buf.erase(buf.begin(), buf.begin()+ate);
+		$LF
+		"        
+		$LF
+		"        Size -= ate;
+		$LF
+		"        
+		$LF
+		"        if(buf.empty())
+		$LF
+		"        {
+		$LF
+		"            List.erase(i);
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		$LF
+		"    void CheckFlushing()
+		$LF
+		"    {
+		$LF
+		"        //AudioBuffer.clear();
+		$LF
+		"        //VideoBuffer.clear();
+		$LF
+		"        
+		$LF
+		"        if(KnowAudio && KnowVideo && !Terminate)
+		$LF
+		"        {
+		$LF
+		"            if(!AudioBuffer.empty() && !VideoBuffer.empty())
+		$LF
+		"            {
+		$LF
+		"                do {
+		$LF
+		"                    /* vidfp = &1, audfp = &2 */
+		$LF
+		"                    int attempt = WaitUntilOneIsWritable(vidfp, audfp);
+		$LF
+		"                    
+		$LF
+		"                    if(attempt <= 0) break; /* Some kind of error can cause this */
+		$LF
+		$LF
+		"                    // Flush Video
+		$LF
+		"                    if(attempt&1) FlushBufferSome(VideoBuffer, VidBufSize, vidfp, "vid");
+		$LF
+		"                    
+		$LF
+		"                    // Flush Audio
+		$LF
+		"                    if(attempt&2) FlushBufferSome(AudioBuffer, AudBufSize, audfp, "aud");
+		$LF
+		"                } while (!AudioBuffer.empty() && !VideoBuffer.empty());
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                FlushBufferSome(VideoBuffer, VidBufSize, vidfp, "vid");
+		$LF
+		"                FlushBufferSome(AudioBuffer, AudBufSize, audfp, "aud");
+		$LF
+		"            }
+		$LF
+		"            /*
+		$LF
+		"            fprintf(stderr, "Buffer Sizes: Audio %u(%u) video %u(%u)\n",
+		$LF
+		"                (unsigned)AudioBuffer.size(), AudBufSize,
+		$LF
+		"                (unsigned)VideoBuffer.size(), VidBufSize);
+		$LF
+		"            */
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    std::string GetMEncoderRawvideoParam() const
+		$LF
+		"    {
+		$LF
+		"        char Buf[512];
+		$LF
+		"        unsigned bpp   = INPUT_BPP; if(bpp == 15 || bpp == 17) bpp = 16;
+		$LF
+		"        sprintf(Buf, "fps=%g:format=0x%04X:w=%u:h=%u:size=%u",
+		$LF
+		"            vid_fps_scaled / (double)FPS_SCALE,
+		$LF
+		"            USE_FOURCC,
+		$LF
+		"            vid_width,
+		$LF
+		"            vid_height,
+		$LF
+		"            vid_width*vid_height * bpp/8);
+		$LF
+		"        return Buf;
+		$LF
+		"    }
+		$LF
+		"    std::string GetMEncoderRawaudioParam() const
+		$LF
+		"    {
+		$LF
+		"        char Buf[512];
+		$LF
+		"        sprintf(Buf, "channels=%u:rate=%u:samplesize=%u:bitrate=%u",
+		$LF
+		"            aud_chans,
+		$LF
+		"            aud_rate,
+		$LF
+		"            aud_bits/8,
+		$LF
+		"            aud_rate*aud_chans*(aud_bits/8) );
+		$LF
+		"        return Buf;
+		$LF
+		"    }
+		$LF
+		"    std::string GetMEncoderCommand() const
+		$LF
+		"    {
+		$LF
+		"        std::string mandatory = "-audiofile " + AUDIO_FN
+		$LF
+		"                              + " -audio-demuxer rawaudio"
+		$LF
+		"                              + " -demuxer rawvideo"
+		$LF
+		"                              + " -rawvideo " + GetMEncoderRawvideoParam()
+		$LF
+		"                              + " -rawaudio " + GetMEncoderRawaudioParam()
+		$LF
+		"                              ;
+		$LF
+		"        std::string cmd = VIDEO_CMD;
+		$LF
+		$LF
+		"        std::string::size_type p = cmd.find("NESV""SETTINGS");
+		$LF
+		"        if(p != cmd.npos)
+		$LF
+		"            cmd = cmd.replace(p, 4+8, mandatory);
+		$LF
+		"        else
+		$LF
+		"            fprintf(stderr, "Warning: NESVSETTINGS not found in videocmd\n");
+		$LF
+		"        
+		$LF
+		"        char videonumstr[64];
+		$LF
+		"        sprintf(videonumstr, "%u", videonumber);
+		$LF
+		"        
+		$LF
+		"        for(;;)
+		$LF
+		"        {
+		$LF
+		"            p = cmd.find("VIDEO""NUMBER");
+		$LF
+		"            if(p == cmd.npos) break;
+		$LF
+		"            cmd = cmd.replace(p, 5+6, videonumstr);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        fprintf(stderr, "Launch: %s\n", cmd.c_str()); fflush(stderr);
+		$LF
+		"        
+		$LF
+		"        return cmd;
+		$LF
+		"    }
+		$LF
+		$LF
+		"    void CheckBegin()
+		$LF
+		"    {
+		$LF
+		"        if(!audfp)
+		$LF
+		"        {
+		$LF
+		"            unlink(AUDIO_FN.c_str());
+		$LF
+		"            mknod(AUDIO_FN.c_str(), S_IFIFO|0666, 0);
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        if(!vidfp)
+		$LF
+		"        {
+		$LF
+		"            /* Note: popen does not accept b/t in mode param */
+		$LF
+		"            setenv("LD_PRELOAD", "", 1);
+		$LF
+		"            vidfp = popen(GetMEncoderCommand().c_str(), "w");
+		$LF
+		"            if(!vidfp)
+		$LF
+		"            {
+		$LF
+		"                perror("Launch failed");
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                fcntl(fileno(vidfp), F_SETFL, O_WRONLY | O_NONBLOCK);
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        if(!audfp)
+		$LF
+		"        {
+		$LF
+		"        Retry:
+		$LF
+		"            audfp = fopen(AUDIO_FN.c_str(), "wb");
+		$LF
+		"            
+		$LF
+		"            if(!audfp)
+		$LF
+		"            {
+		$LF
+		"                perror(AUDIO_FN.c_str());
+		$LF
+		"                if(errno == ESTALE) goto Retry;
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                fcntl(fileno(audfp), F_SETFL, O_WRONLY | O_NONBLOCK);
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"static AVI* AVI = 0;
+		$LF
+		$LF
+		"namespace LogoInfo
+		$LF
+		"{
+		$LF
+		"    unsigned width;
+		$LF
+		"    unsigned height;
+		$LF
+		"}
+		$LF
+		$LF
+		"#include "quantize.hh"
+		$LF
+		"#include "rgbtorgb.hh"
+		$LF
+		$LF
+		"extern "C"
+		$LF
+		"{
+		$LF
+		"    int LoggingEnabled = 0; /* 0=no, 1=yes, 2=recording! */
+		$LF
+		$LF
+		"    const char* NESVideoGetVideoCmd()
+		$LF
+		"    {
+		$LF
+		"        return VIDEO_CMD.c_str();
+		$LF
+		"    }
+		$LF
+		"    void NESVideoSetVideoCmd(const char *cmd)
+		$LF
+		"    {
+		$LF
+		"#ifdef THREAD_SAFETY
+		$LF
+		"        struct ScopedLock
+		$LF
+		"        { ScopedLock() { 
+		$LF
+		"                         pthread_mutex_lock(&APIlock);
+		$LF
+		"                         //fprintf(stderr, "audio start\n"); fflush(stderr);
+		$LF
+		"                       }
+		$LF
+		"          ~ScopedLock() {
+		$LF
+		"                         //fprintf(stderr, "audio end\n"); fflush(stderr);
+		$LF
+		"                         pthread_mutex_unlock(&APIlock); }
+		$LF
+		"        } ScopedLock;
+		$LF
+		"#endif
+		$LF
+		$LF
+		"        VIDEO_CMD = cmd;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static class AVI& GetAVIptr()
+		$LF
+		"    {
+		$LF
+		"        if(!AVI)
+		$LF
+		"        {
+		$LF
+		"            fprintf(stderr, "Starting new AVI (num %u)\n", videonumber);
+		$LF
+		"            AVI = new class AVI;
+		$LF
+		"        }
+		$LF
+		"        return *AVI;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    void NESVideoNextAVI()
+		$LF
+		"    {
+		$LF
+		"#ifdef THREAD_SAFETY
+		$LF
+		"        struct ScopedLock
+		$LF
+		"        { ScopedLock() { 
+		$LF
+		"                         pthread_mutex_lock(&APIlock);
+		$LF
+		"                         //fprintf(stderr, "audio start\n"); fflush(stderr);
+		$LF
+		"                       }
+		$LF
+		"          ~ScopedLock() {
+		$LF
+		"                         //fprintf(stderr, "audio end\n"); fflush(stderr);
+		$LF
+		"                         pthread_mutex_unlock(&APIlock); }
+		$LF
+		"        } ScopedLock;
+		$LF
+		"#endif
+		$LF
+		$LF
+		"        if(AVI)
+		$LF
+		"        {
+		$LF
+		"            fprintf(stderr, "Closing AVI (next will be started)\n");
+		$LF
+		"            delete AVI;
+		$LF
+		"            AVI = 0;
+		$LF
+		"            ++videonumber;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		$LF
+		"    static void Overlay32With32(unsigned char* target, const unsigned char* source, int alpha)
+		$LF
+		"    {
+		$LF
+		"        target[0] += ((int)(source[0] - target[0])) * alpha / 255;
+		$LF
+		"        target[1] += ((int)(source[1] - target[1])) * alpha / 255;
+		$LF
+		"        target[2] += ((int)(source[2] - target[2])) * alpha / 255;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static void OverlayLogoFrom(const char* fn, std::vector<unsigned char>& data)
+		$LF
+		"    {
+		$LF
+		"        FILE*fp = fopen(fn, "rb");
+		$LF
+		"        if(!fp) perror(fn);
+		$LF
+		"        if(!fp) return; /* Silently ignore missing frames */
+		$LF
+		"        
+		$LF
+		"        gdImagePtr im = gdImageCreateFromPng(fp);
+		$LF
+		"        if(!gdImageTrueColor(im))
+		$LF
+		"        {
+		$LF
+		"          fprintf(stderr, "'%s': Only true color images are supported\n", fn);
+		$LF
+		"          goto CloseIm;
+		$LF
+		"        }
+		$LF
+		"        {/*scope begin*/
+		$LF
+		"        
+		$LF
+		"        unsigned new_width = gdImageSX(im);
+		$LF
+		"        unsigned new_height= gdImageSY(im);
+		$LF
+		"        
+		$LF
+		"        if(new_width != LogoInfo::width
+		$LF
+		"        || new_height != LogoInfo::height)
+		$LF
+		"        {
+		$LF
+		"            if(new_height < LogoInfo::height || new_height > LogoInfo::height+20)
+		$LF
+		"            fprintf(stderr, "'%s': ERROR, expected %dx%d, got %dx%d\n", fn,
+		$LF
+		"                LogoInfo::width, LogoInfo::height,
+		$LF
+		"                new_width, new_height);
+		$LF
+		"        }
+		$LF
+		$LF
+		"        for(unsigned y=0; y<LogoInfo::height; ++y)
+		$LF
+		"        {
+		$LF
+		"            unsigned char pixbuf[4] = {0,0,0,0};
+		$LF
+		"            for(unsigned x = 0; x < LogoInfo::width; ++x)
+		$LF
+		"            {
+		$LF
+		"                int color = gdImageTrueColorPixel(im, x,y);
+		$LF
+		"                int alpha = 255-gdTrueColorGetAlpha(color)*256/128;
+		$LF
+		"                pixbuf[2] = gdTrueColorGetRed(color);
+		$LF
+		"                pixbuf[1] = gdTrueColorGetGreen(color);
+		$LF
+		"                pixbuf[0] = gdTrueColorGetBlue(color);
+		$LF
+		"                Overlay32With32(&data[(y*LogoInfo::width+x)*3], pixbuf, alpha);
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        }/* close scope */
+		$LF
+		"    CloseIm:
+		$LF
+		"        gdImageDestroy(im);
+		$LF
+		"        fclose(fp);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::string GetLogoFileName(unsigned frameno)
+		$LF
+		"    {
+		$LF
+		"        std::string avdir = "/home/bisqwit/povray/nesvlogov5/";
+		$LF
+		"        //std::string avdir = "/home/bisqwit/povray/nesvlogov6/cv2/";
+		$LF
+		"        //std::string avdir = "/home/bisqwit/povray/nesvlogov6/kuros/";
+		$LF
+		"        
+		$LF
+		"        char AvName[512];
+		$LF
+		"        sprintf(AvName, "logo_%d_%d_f%03u.png",
+		$LF
+		"            LogoInfo::width,
+		$LF
+		"            LogoInfo::height,
+		$LF
+		"            frameno);
+		$LF
+		"        
+		$LF
+		"        std::string want = avdir + AvName;
+		$LF
+		"        int ac = access(want.c_str(), R_OK);
+		$LF
+		"        if(ac != 0)
+		$LF
+		"        {
+		$LF
+		"            /* No correct avatar file? Check if there's an approximate match. */
+		$LF
+		"            static std::map<int, std::vector<std::string> > files;
+		$LF
+		"            if(files.empty()) /* Cache the list of logo files. */
+		$LF
+		"            {
+		$LF
+		"                static const char GlobPat[] = "logo_*_*_f*.png";
+		$LF
+		"                glob_t globdata;
+		$LF
+		"                globdata.gl_offs = 0;
+		$LF
+		"                fprintf(stderr, "Loading list of usable logo animation files in %s...\n", avdir.c_str());
+		$LF
+		"                int globres = glob( (avdir + GlobPat).c_str(), GLOB_NOSORT, NULL, &globdata);
+		$LF
+		"                if(globres == 0)
+		$LF
+		"                {
+		$LF
+		"                    for(size_t n=0; n<globdata.gl_pathc; ++n)
+		$LF
+		"                    {
+		$LF
+		"                        const char* fn = globdata.gl_pathv[n];
+		$LF
+		"                        const char* slash = strrchr(fn, '/');
+		$LF
+		"                        if(slash) fn = slash+1;
+		$LF
+		"                        
+		$LF
+		"                        int gotw=0, goth=0, gotf=0;
+		$LF
+		"                        sscanf(fn, "logo_%d_%d_f%d", &gotw,&goth,&gotf);
+		$LF
+		"                        files[gotf].push_back(fn);
+		$LF
+		"                    }
+		$LF
+		"                }
+		$LF
+		"                globfree(&globdata);
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            std::map<int, std::vector<std::string> >::const_iterator
+		$LF
+		"                i = files.find(frameno);
+		$LF
+		"            if(i != files.end())
+		$LF
+		"            {
+		$LF
+		"                std::string best;
+		$LF
+		"                int bestdist = -1;
+		$LF
+		"                
+		$LF
+		"                const std::vector<std::string>& fnames = i->second;
+		$LF
+		"                for(size_t b=fnames.size(), a=0; a<b; ++a)
+		$LF
+		"                {
+		$LF
+		"                    unsigned gotw=0, goth=0;
+		$LF
+		"                    sscanf(fnames[a].c_str(), "logo_%u_%u", &gotw,&goth);
+		$LF
+		"                    if(gotw < LogoInfo::width || goth < LogoInfo::height) continue;
+		$LF
+		"                    
+		$LF
+		"                    int dist = std::max(gotw - LogoInfo::width,
+		$LF
+		"                                        goth - LogoInfo::height);
+		$LF
+		"                    
+		$LF
+		"                    if(bestdist == -1 || dist < bestdist)
+		$LF
+		"                        { bestdist = dist; best = fnames[a]; }
+		$LF
+		"                }
+		$LF
+		"                
+		$LF
+		"                if(bestdist >= 0) want = avdir + best;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        return want;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert24To16Frame
+		$LF
+		"        (const std::vector<unsigned char>& logodata)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> result(LogoInfo::width * LogoInfo::height * 2);
+		$LF
+		"        Convert24To16Frame(&logodata[0], &result[0], LogoInfo::width * LogoInfo::height, LogoInfo::width);
+		$LF
+		"        return result;
+		$LF
+		"    }
+		$LF
+		"    static const std::vector<unsigned char> NVConvert24To15Frame
+		$LF
+		"        (const std::vector<unsigned char>& logodata)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> result(LogoInfo::width * LogoInfo::height * 2);
+		$LF
+		"        Convert24To15Frame(&logodata[0], &result[0], LogoInfo::width * LogoInfo::height, LogoInfo::width);
+		$LF
+		"        return result;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert24To_I420Frame
+		$LF
+		"        (const std::vector<unsigned char>& logodata)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> result(LogoInfo::width * LogoInfo::height * 3 / 2);
+		$LF
+		"        Convert24To_I420Frame(&logodata[0], &result[0], LogoInfo::width * LogoInfo::height, LogoInfo::width);
+		$LF
+		"        return result;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert24To_YUY2Frame
+		$LF
+		"        (const std::vector<unsigned char>& logodata)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> result(LogoInfo::width * LogoInfo::height * 3 / 2);
+		$LF
+		"        Convert24To_YUY2Frame(&logodata[0], &result[0], LogoInfo::width * LogoInfo::height, LogoInfo::width);
+		$LF
+		"        return result;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert16To24Frame
+		$LF
+		"        (const void* data, unsigned npixels)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> logodata(npixels*3); /* filled with black. */
+		$LF
+		"        Convert16To24Frame(data, &logodata[0], npixels);
+		$LF
+		"        return logodata;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert15To24Frame
+		$LF
+		"        (const void* data, unsigned npixels)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> logodata(npixels*3); /* filled with black. */
+		$LF
+		"        Convert15To24Frame(data, &logodata[0], npixels);
+		$LF
+		"        return logodata;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert_I420To24Frame
+		$LF
+		"        (const void* data, unsigned npixels)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> logodata(npixels*3); /* filled with black. */
+		$LF
+		"        Convert_I420To24Frame(data, &logodata[0], npixels, LogoInfo::width);
+		$LF
+		"        return logodata;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static const std::vector<unsigned char> NVConvert_YUY2To24Frame
+		$LF
+		"        (const void* data, unsigned npixels)
+		$LF
+		"    {
+		$LF
+		"        std::vector<unsigned char> logodata(npixels*3); /* filled with black. */
+		$LF
+		"        Convert_YUY2To24Frame(data, &logodata[0], npixels, LogoInfo::width);
+		$LF
+		"        return logodata;
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    static void SubstituteWithBlackIfNeeded(const void*& data)
+		$LF
+		"    {
+		$LF
+		"        /* If the first frames of the animation consist of a
+		$LF
+		"         * single color (such as gray for NES), replace them
+		$LF
+		"         * with black to avoid ugly backgrounds on logo animations
+		$LF
+		"         */
+		$LF
+		"    
+		$LF
+		"        static bool Deviate = false;
+		$LF
+		"        static short* Replacement = 0;
+		$LF
+		"        static unsigned wid=0, hei=0;
+		$LF
+		"        if(Deviate)
+		$LF
+		"        {
+		$LF
+		"            if(Replacement) { delete[] Replacement; Replacement=0; }
+		$LF
+		"            return;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        unsigned dim = LogoInfo::width * LogoInfo::height;
+		$LF
+		"        const short* p = (const short*)data;
+		$LF
+		"        for(unsigned a=0; a<dim; ++a)
+		$LF
+		"            if(p[a] != p[0])
+		$LF
+		"            {
+		$LF
+		"                Deviate = true;
+		$LF
+		"                return;
+		$LF
+		"            }
+		$LF
+		"        
+		$LF
+		"        if(Replacement && (wid != LogoInfo::width || hei != LogoInfo::height))
+		$LF
+		"        {
+		$LF
+		"            delete[] Replacement;
+		$LF
+		"            Replacement = 0;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        wid = LogoInfo::width;
+		$LF
+		"        hei = LogoInfo::height;
+		$LF
+		"        
+		$LF
+		"        if(!Replacement)
+		$LF
+		"        {
+		$LF
+		"            Replacement = new short[dim];
+		$LF
+		"            for(unsigned a=0; a<dim; ++a) Replacement[a]=0x0000;
+		$LF
+		"        }
+		$LF
+		"        data = (void*)Replacement;
+		$LF
+		"    }
+		$LF
+		$LF
+		"    void NESVideoLoggingVideo
+		$LF
+		"        (const void*data, unsigned width,unsigned height,
+		$LF
+		"         unsigned fps_scaled,
+		$LF
+		"         unsigned bpp
+		$LF
+		"        )
+		$LF
+		"    {
+		$LF
+		"        if(LoggingEnabled < 2) return;
+		$LF
+		"        
+		$LF
+		"#ifdef THREAD_SAFETY
+		$LF
+		"        struct ScopedLock
+		$LF
+		"        { ScopedLock() { 
+		$LF
+		"                         pthread_mutex_lock(&APIlock);
+		$LF
+		"                         //fprintf(stderr, "video start\n"); fflush(stderr);
+		$LF
+		"                       }
+		$LF
+		"          ~ScopedLock() {
+		$LF
+		"                         //fprintf(stderr, "video end\n"); fflush(stderr);
+		$LF
+		"                         pthread_mutex_unlock(&APIlock); }
+		$LF
+		"        } ScopedLock;
+		$LF
+		"#endif
+		$LF
+		$LF
+		"        if(bpp == 32) /* Convert 32 to 24 */
+		$LF
+		"        {
+		$LF
+		"            bpp = 24;
+		$LF
+		"            
+		$LF
+		"            static std::vector<unsigned char> VideoBuf;
+		$LF
+		"            VideoBuf.resize(width*height * 3);
+		$LF
+		"            
+		$LF
+		"            Convert32To24Frame(data, &VideoBuf[0], width*height);
+		$LF
+		"            data = (void*)&VideoBuf[0];
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        if(bpp) INPUT_BPP = bpp;
+		$LF
+		"        
+		$LF
+		"        switch(INPUT_BPP)
+		$LF
+		"        {
+		$LF
+		"            case 32: USE_FOURCC = BGR32; break;
+		$LF
+		"            case 24: USE_FOURCC = BGR24; break;
+		$LF
+		"            case 16: USE_FOURCC = BGR16; break;
+		$LF
+		"            case 15: USE_FOURCC = BGR15; break;
+		$LF
+		"            case 12: USE_FOURCC = I420; break;
+		$LF
+		"            case 17: USE_FOURCC = YUY2; break;
+		$LF
+		"        }
+		$LF
+		"        //USE_FOURCC = BGR24; // FIXME TEMPORARY
+		$LF
+		"        
+		$LF
+		"        const int LogoFramesHeader  = (int)( (LOGO_LENGTH_HEADER  * fps_scaled) / (1 << 24) );
+		$LF
+		"        const int LogoFramesOverlap = (int)( (LOGO_LENGTH_OVERLAP * fps_scaled) / (1 << 24) );
+		$LF
+		"        
+		$LF
+		"        LogoInfo::width  = width;
+		$LF
+		"        LogoInfo::height = height;
+		$LF
+		"        
+		$LF
+		"        if(INPUT_BPP == 16 || INPUT_BPP == 15)
+		$LF
+		"        {
+		$LF
+		"            SubstituteWithBlackIfNeeded(data);
+		$LF
+		"        }
+		$LF
+		"        else if(INPUT_BPP != 24 && INPUT_BPP != 12 && INPUT_BPP != 17)
+		$LF
+		"        {
+		$LF
+		"            fprintf(stderr, "NESVIDEOS_PIECE only supports 16 and 24 bpp, you gave %u bpp\n",
+		$LF
+		"                bpp);
+		$LF
+		"            return;
+		$LF
+		"        }
+		$LF
+		$LF
+		"        static bool LogoHeaderPartSent = false;
+		$LF
+		"        if(!LogoHeaderPartSent)
+		$LF
+		"        {
+		$LF
+		"            /* Send animation frames that do not involve source video? */
+		$LF
+		"            LogoHeaderPartSent=true;
+		$LF
+		$LF
+		"            if(LogoFramesHeader > 0)
+		$LF
+		"            {
+		$LF
+		"                for(int frame = 0; frame < LogoFramesHeader; ++frame)
+		$LF
+		"                {
+		$LF
+		"                    std::vector<unsigned char> logodata(width*height*3); /* filled with black. */
+		$LF
+		"                    
+		$LF
+		"                    std::string fn = GetLogoFileName(frame);
+		$LF
+		"                    /*fprintf(stderr, "wid=%d(%d), hei=%d(%d),fn=%s\n",
+		$LF
+		"                        width, LogoInfo::width,
+		$LF
+		"                        height, LogoInfo::height,
+		$LF
+		"                        fn.c_str());*/
+		$LF
+		"                    OverlayLogoFrom(fn.c_str(), logodata);
+		$LF
+		"                    
+		$LF
+		"                    //INPUT_BPP = 24; USE_FOURCC = BGR24; // FIXME TEMPORARY
+		$LF
+		"                    
+		$LF
+		"                    if(INPUT_BPP == 16)
+		$LF
+		"                    {
+		$LF
+		"                        std::vector<unsigned char> result = NVConvert24To16Frame(logodata);
+		$LF
+		"                        GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"                    }
+		$LF
+		"                    else if(INPUT_BPP == 15)
+		$LF
+		"                    {
+		$LF
+		"                        std::vector<unsigned char> result = NVConvert24To15Frame(logodata);
+		$LF
+		"                        GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"                    }
+		$LF
+		"                    else if(INPUT_BPP == 12)
+		$LF
+		"                    {
+		$LF
+		"                        std::vector<unsigned char> result = NVConvert24To_I420Frame(logodata);
+		$LF
+		"                        GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"                    }
+		$LF
+		"                    else if(INPUT_BPP == 17)
+		$LF
+		"                    {
+		$LF
+		"                        std::vector<unsigned char> result = NVConvert24To_YUY2Frame(logodata);
+		$LF
+		"                        GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"                    }
+		$LF
+		"                    else
+		$LF
+		"                    {
+		$LF
+		"                        GetAVIptr().Video(width,height,fps_scaled, &logodata[0]);
+		$LF
+		"                    }
+		$LF
+		"                }
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        static int LogoOverlapSent = 0;
+		$LF
+		"        if(LogoOverlapSent < LogoFramesOverlap)
+		$LF
+		"        {
+		$LF
+		"            /* Send animation frames that mix source and animation? */
+		$LF
+		$LF
+		"            std::string fn = GetLogoFileName(LogoOverlapSent + LogoFramesHeader);
+		$LF
+		"            /*
+		$LF
+		"            fprintf(stderr, "wid=%d(%d), hei=%d(%d),fn=%s\n",
+		$LF
+		"                width, LogoInfo::width,
+		$LF
+		"                height, LogoInfo::height,
+		$LF
+		"                fn.c_str());*/
+		$LF
+		$LF
+		"            std::vector<unsigned char> logodata;
+		$LF
+		"            if(INPUT_BPP == 16)
+		$LF
+		"            {
+		$LF
+		"                logodata = NVConvert16To24Frame(data, width*height);
+		$LF
+		"            }
+		$LF
+		"            else if(INPUT_BPP == 15)
+		$LF
+		"            {
+		$LF
+		"                logodata = NVConvert15To24Frame(data, width*height);
+		$LF
+		"            }
+		$LF
+		"            else if(INPUT_BPP == 17)
+		$LF
+		"            {
+		$LF
+		"                logodata = NVConvert_YUY2To24Frame(data, width*height);
+		$LF
+		"            }
+		$LF
+		"            else if(INPUT_BPP == 12)
+		$LF
+		"            {
+		$LF
+		"                logodata = NVConvert_I420To24Frame(data, width*height);
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                logodata.resize(width*height*3); /* filled with black. */
+		$LF
+		"                memcpy(&logodata[0], data, width*height*3);
+		$LF
+		"            }
+		$LF
+		$LF
+		"            OverlayLogoFrom(fn.c_str(), logodata);
+		$LF
+		"            
+		$LF
+		"//            INPUT_BPP = 24; USE_FOURCC = BGR24; // FIXME TEMPORARY
+		$LF
+		$LF
+		"            if(INPUT_BPP == 16)
+		$LF
+		"            {
+		$LF
+		"                std::vector<unsigned char> result = NVConvert24To16Frame(logodata);
+		$LF
+		"                GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"            }
+		$LF
+		"            else if(INPUT_BPP == 15)
+		$LF
+		"            {
+		$LF
+		"                std::vector<unsigned char> result = NVConvert24To15Frame(logodata);
+		$LF
+		"                GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"            }
+		$LF
+		"            else if(INPUT_BPP == 12)
+		$LF
+		"            {
+		$LF
+		"                std::vector<unsigned char> result = NVConvert24To_I420Frame(logodata);
+		$LF
+		"                GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"            }
+		$LF
+		"            else if(INPUT_BPP == 17)
+		$LF
+		"            {
+		$LF
+		"                std::vector<unsigned char> result = NVConvert24To_YUY2Frame(logodata);
+		$LF
+		"                GetAVIptr().Video(width,height,fps_scaled, &result[0]);
+		$LF
+		"            }
+		$LF
+		"            else
+		$LF
+		"            {
+		$LF
+		"                GetAVIptr().Video(width,height,fps_scaled, &logodata[0]);
+		$LF
+		"            }
+		$LF
+		$LF
+		"            ++LogoOverlapSent;
+		$LF
+		"            return;
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        GetAVIptr().Video(width,height,fps_scaled,  (const unsigned char*) data);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    void NESVideoLoggingAudio
+		$LF
+		"        (const void*data,
+		$LF
+		"         unsigned rate, unsigned bits, unsigned chans,
+		$LF
+		"         unsigned nsamples)
+		$LF
+		"    {
+		$LF
+		"        if(LoggingEnabled < 2) return;
+		$LF
+		"        
+		$LF
+		"#ifdef THREAD_SAFETY
+		$LF
+		"        struct ScopedLock
+		$LF
+		"        { ScopedLock() { 
+		$LF
+		"                         pthread_mutex_lock(&APIlock);
+		$LF
+		"                         //fprintf(stderr, "audio start\n"); fflush(stderr);
+		$LF
+		"                       }
+		$LF
+		"          ~ScopedLock() {
+		$LF
+		"                         //fprintf(stderr, "audio end\n"); fflush(stderr);
+		$LF
+		"                         pthread_mutex_unlock(&APIlock); }
+		$LF
+		"        } ScopedLock;
+		$LF
+		"#endif
+		$LF
+		$LF
+		"        static bool LogoHeaderPartSent = false;
+		$LF
+		"        if(!LogoHeaderPartSent && LOGO_LENGTH_HEADER > 0)
+		$LF
+		"        {
+		$LF
+		"            LogoHeaderPartSent=true;
+		$LF
+		"            
+		$LF
+		"            double HdrLength = LOGO_LENGTH_HEADER; // N64 workaround
+		$LF
+		"            
+		$LF
+		"            const long n = (long)(rate * HdrLength)/*
+		$LF
+		"                - (rate * 0.11)*/;
+		$LF
+		"            
+		$LF
+		"            if(n > 0) {
+		$LF
+		"            unsigned bytes = n*chans*(bits/8);
+		$LF
+		"            unsigned char* buf = (unsigned char*)malloc(bytes);
+		$LF
+		"            if(buf)
+		$LF
+		"            {
+		$LF
+		"                memset(buf,0,bytes);
+		$LF
+		"                GetAVIptr().Audio(rate,bits,chans, buf, n);
+		$LF
+		"                free(buf);
+		$LF
+		"            } }
+		$LF
+		"        }
+		$LF
+		"        
+		$LF
+		"        /*
+		$LF
+		"        fprintf(stderr, "Writing %u samples (%u bits, %u chans, %u rate)\n",
+		$LF
+		"            nsamples, bits, chans, rate);*/
+		$LF
+		"        
+		$LF
+		"        /*
+		$LF
+		"        static FILE*fp = fopen("audiodump.wav", "wb");
+		$LF
+		"        fwrite(data, 1, nsamples*(bits/8)*chans, fp);
+		$LF
+		"        fflush(fp);*/
+		$LF
+		"        
+		$LF
+		"        GetAVIptr().Audio(rate,bits,chans, (const unsigned char*) data, nsamples);
+		$LF
+		"    }
+		$LF
+		"} /* extern "C" */
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"quantize.hh
+	]tt
+	$LF
+	[a id=heading-239 
+	]a
+]h4
+[p 
+	"This include file provides functions for a single R/G/B value from some bit depth to a lesser bit depth, such as RGB32 to RGB15, with 
+	[a class=extlink href=http://en.wikipedia.org/wiki/OrderedDithering rel=nofollow 
+		"ordered dithering
+	]a
+	".
+	$LF
+]p
+[pre 
+	[code class=language-c_white 
+		"/*
+		$LF
+		" Ordered dithering methods provided for:
+		$LF
+		"   8x8 (Quantize8x8)
+		$LF
+		"   4x4 (Quantize4x4)
+		$LF
+		"   3x3 (Quantize3x3)
+		$LF
+		"   4x2 (Quantize4x2)
+		$LF
+		"   3x2 (Quantize3x2)
+		$LF
+		"   2x2 (Quantize2x2)
+		$LF
+		" The functions are:
+		$LF
+		" 
+		$LF
+		"   template<int m, int in_max>
+		$LF
+		"   int QuantizeFunc(size_t quant_pos, double value)
+		$LF
+		"   
+		$LF
+		"      - Quantizes value, assumed to be in range 0..in_max, to range 0..m
+		$LF
+		"      - quant_pos tells the coordinate into the dithering matrix
+		$LF
+		$LF
+		"   template<int m, int in_max>
+		$LF
+		"   int QuantizeFunc(size_t quant_pos, unsigned value)
+		$LF
+		$LF
+		"      - Quantizes value, assumed to be in range 0..in_max, to range 0..m
+		$LF
+		"      - quant_pos tells the coordinate into the dithering matrix
+		$LF
+		$LF
+		" Copyright (C) 1992,2008 Joel Yliluoma (http://iki.fi/bisqwit/)
+		$LF
+		"*/
+		$LF
+		$LF
+		"#define OrderedDitherDecl(n) \
+		$LF
+		"    static const double flts[n]; \
+		$LF
+		"    static const int ints[n]; \
+		$LF
+		"    enum { mul = n+1, \
+		$LF
+		"           maxin = in_max, \
+		$LF
+		"           even = !(maxin % mul), \
+		$LF
+		"           intmul = even ? 1 : mul };
+		$LF
+		$LF
+		"/* macroes for initializing dither tables */
+		$LF
+		"#define d(n) (n)/double(mul) - 0.5
+		$LF
+		"#define i(n) even ? (n*in_max/mul - (int)in_max/2) \
+		$LF
+		"                  : (n*in_max - (int)mul*in_max/2)
+		$LF
+		$LF
+		"template<int m, int in_max = 255>
+		$LF
+		"struct QuantizeNoDither
+		$LF
+		"{
+		$LF
+		"    int res;
+		$LF
+		"    template<typename IntType>
+		$LF
+		"    QuantizeNoDither(IntType v) : res(v * m / in_max) { }
+		$LF
+		"    operator int() const { return res; }
+		$LF
+		"};
+		$LF
+		$LF
+		"template<int m, typename Base>
+		$LF
+		"struct QuantizeFuncBase: private Base
+		$LF
+		"{
+		$LF
+		"    int res;
+		$LF
+		"    
+		$LF
+		"    QuantizeFuncBase(size_t quant_pos, double v) : res(0)
+		$LF
+		"    {
+		$LF
+		"        if(v > 0.0)
+		$LF
+		"        {
+		$LF
+		"            const double dither_threshold = Base::flts[quant_pos];
+		$LF
+		"            res = (int)(v * (m / double(Base::maxin)) + dither_threshold);
+		$LF
+		"            if(res > m) res = m;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		"    QuantizeFuncBase(size_t quant_pos, unsigned char v) : res(v)
+		$LF
+		"    {
+		$LF
+		"        if(m == Base::maxin) return;
+		$LF
+		"        if(m < Base::maxin)
+		$LF
+		"        {
+		$LF
+		"            // With dithering
+		$LF
+		"            const int dither_threshold = Base::ints[quant_pos];
+		$LF
+		"            const int intmul = Base::intmul;
+		$LF
+		"            res = (res * (m * intmul) + dither_threshold) / (Base::maxin * intmul);
+		$LF
+		"        }
+		$LF
+		"        else
+		$LF
+		"        {
+		$LF
+		"            // Without dithering
+		$LF
+		"            res = QuantizeNoDither<m, Base::maxin> (res);
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"#define QuantizeFuncDecl(name, base) \
+		$LF
+		"  template<int m, int in_max=255> \
+		$LF
+		"  struct name: private QuantizeFuncBase<m, base<in_max> > \
+		$LF
+		"  { \
+		$LF
+		"      typedef QuantizeFuncBase<m, base<in_max> > Base; \
+		$LF
+		"      template<typename A, typename B> name(A a, B b) : Base(a, b) { } \
+		$LF
+		"      operator int() const { return Base::res; } \
+		$LF
+		"  }
+		$LF
+		$LF
+		"/******* Quantizing with 8x8 ordered dithering ********/
+		$LF
+		"template<int in_max> struct OrderedDither_8x8 { OrderedDitherDecl(8*8) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const double OrderedDither_8x8<in_max>::flts[] /* A table for 8x8 ordered dithering */
+		$LF
+		"    = { d(1 ), d(49), d(13), d(61), d( 4), d(52), d(16), d(64),
+		$LF
+		"        d(33), d(17), d(45), d(29), d(36), d(20), d(48), d(32),
+		$LF
+		"        d(9 ), d(57), d( 5), d(53), d(12), d(60), d( 8), d(56),
+		$LF
+		"        d(41), d(25), d(37), d(21), d(44), d(28), d(40), d(24),
+		$LF
+		"        d(3 ), d(51), d(15), d(63), d( 2), d(50), d(14), d(62),
+		$LF
+		"        d(35), d(19), d(47), d(31), d(34), d(18), d(46), d(30),
+		$LF
+		"        d(11), d(59), d( 7), d(55), d(10), d(58), d( 6), d(54),
+		$LF
+		"        d(43), d(27), d(39), d(23), d(42), d(26), d(38), d(22) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const int OrderedDither_8x8<in_max>::ints[]
+		$LF
+		"    = { i(1 ), i(49), i(13), i(61), i( 4), i(52), i(16), i(64),
+		$LF
+		"        i(33), i(17), i(45), i(29), i(36), i(20), i(48), i(32),
+		$LF
+		"        i(9 ), i(57), i( 5), i(53), i(12), i(60), i( 8), i(56),
+		$LF
+		"        i(41), i(25), i(37), i(21), i(44), i(28), i(40), i(24),
+		$LF
+		"        i(3 ), i(51), i(15), i(63), i( 2), i(50), i(14), i(62),
+		$LF
+		"        i(35), i(19), i(47), i(31), i(34), i(18), i(46), i(30),
+		$LF
+		"        i(11), i(59), i( 7), i(55), i(10), i(58), i( 6), i(54),
+		$LF
+		"        i(43), i(27), i(39), i(23), i(42), i(26), i(38), i(22) };
+		$LF
+		"QuantizeFuncDecl(Quantize8x8, OrderedDither_8x8);
+		$LF
+		$LF
+		$LF
+		"/******* Quantizing with 4x4 ordered dithering ********/
+		$LF
+		"template<int in_max> struct OrderedDither_4x4 { OrderedDitherDecl(4*4) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const double OrderedDither_4x4<in_max>::flts[] /* A table for 4x4 ordered dithering */
+		$LF
+		"    = { d( 1), d( 9), d( 3), d(11),
+		$LF
+		"        d(13), d( 5), d(15), d( 7),
+		$LF
+		"        d( 4), d(12), d( 2), d(10),  
+		$LF
+		"        d(16), d( 8), d(14), d( 6) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const int OrderedDither_4x4<in_max>::ints[]
+		$LF
+		"    = { i( 1), i( 9), i( 3), i(11),
+		$LF
+		"        i(13), i( 5), i(15), i( 7),
+		$LF
+		"        i( 4), i(12), i( 2), i(10),
+		$LF
+		"        i(16), i( 8), i(14), i( 6) };
+		$LF
+		"QuantizeFuncDecl(Quantize4x4, OrderedDither_4x4);
+		$LF
+		$LF
+		"/******* Quantizing with 3x3 ordered dithering ********/
+		$LF
+		"template<int in_max> struct OrderedDither_3x3 { OrderedDitherDecl(3*3) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const double OrderedDither_3x3<in_max>::flts[] /* A table for 3x3 ordered dithering */
+		$LF
+		"    = { d(1), d(7), d(3),
+		$LF
+		"        d(6), d(4), d(9),
+		$LF
+		"        d(8), d(2), d(5) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const int OrderedDither_3x3<in_max>::ints[]
+		$LF
+		"    = { i(1), i(7), i(3),
+		$LF
+		"        i(6), i(4), i(9),  
+		$LF
+		"        i(8), i(2), i(5) };
+		$LF
+		"QuantizeFuncDecl(Quantize3x3, OrderedDither_3x3);
+		$LF
+		$LF
+		"/******* Quantizing with 4x2 ordered dithering ********/
+		$LF
+		"template<int in_max> struct OrderedDither_4x2 { OrderedDitherDecl(4*2) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const double OrderedDither_4x2<in_max>::flts[] /* A table for 4x2 ordered dithering */
+		$LF
+		"    = { d(1), d(5), d(2), d(6),
+		$LF
+		"        d(7), d(3), d(8), d(4) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const int OrderedDither_4x2<in_max>::ints[]
+		$LF
+		"    = { i(1), i(5), i(2), i(6),
+		$LF
+		"        i(7), i(3), i(8), i(4) };
+		$LF
+		"QuantizeFuncDecl(Quantize4x2, OrderedDither_4x2);
+		$LF
+		$LF
+		"/******* Quantizing with 3x2 ordered dithering ********/
+		$LF
+		"template<int in_max> struct OrderedDither_3x2 { OrderedDitherDecl(3*2) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const double OrderedDither_3x2<in_max>::flts[] /* A table for 3x2 ordered dithering */
+		$LF
+		"    = { d(1), d(5), d(3),
+		$LF
+		"        d(4), d(2), d(6) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const int OrderedDither_3x2<in_max>::ints[]
+		$LF
+		"    = { i(1), i(5), i(3),
+		$LF
+		"        i(4), i(2), i(6) };
+		$LF
+		"QuantizeFuncDecl(Quantize3x2, OrderedDither_3x2);
+		$LF
+		$LF
+		"/******* Quantizing with 2x2 ordered dithering ********/
+		$LF
+		"template<int in_max> struct OrderedDither_2x2 { OrderedDitherDecl(2*2) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const double OrderedDither_2x2<in_max>::flts[] /* A table for 2x2 ordered dithering */
+		$LF
+		"    = { d(1), d(4),
+		$LF
+		"        d(3), d(2) };
+		$LF
+		"    template<int in_max>
+		$LF
+		"    const int OrderedDither_2x2<in_max>::ints[]
+		$LF
+		"    = { i(1), i(4),
+		$LF
+		"        i(3), i(2) };
+		$LF
+		"QuantizeFuncDecl(Quantize2x2, OrderedDither_2x2);
+		$LF
+		$LF
+		$LF
+		"#undef OrderedDitherDecl
+		$LF
+		"#undef QuantizeFuncDecl
+		$LF
+		"#undef i
+		$LF
+		"#undef d
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"simd.hh
+	]tt
+	$LF
+	[a id=heading-240 
+	]a
+]h4
+[pre 
+	[code class=language-c_white 
+		"#if defined(__MMX__) && !defined(__x86_64)
+		$LF
+		"#define USE_MMX
+		$LF
+		"#endif
+		$LF
+		"#if defined(__SSE__)
+		$LF
+		"#define USE_SSE
+		$LF
+		"#endif
+		$LF
+		$LF
+		"/* SIMD interface (MMX) written by Bisqwit
+		$LF
+		" * Copyright (C) 1992,2008 Joel Yliluoma (http://iki.fi/bisqwit/)
+		$LF
+		" */
+		$LF
+		$LF
+		"#ifdef __3dNOW__
+		$LF
+		"# include <mm3dnow.h> /* Note: not available on ICC */ 
+		$LF
+		"#elif defined(__MMX__)
+		$LF
+		"# include <mmintrin.h>
+		$LF
+		"#endif
+		$LF
+		"#ifdef __SSE__
+		$LF
+		"#include <xmmintrin.h>
+		$LF
+		" #ifdef __ICC
+		$LF
+		" typedef __m128 __v4sf;
+		$LF
+		" #endif
+		$LF
+		"#endif
+		$LF
+		$LF
+		"struct c64_common
+		$LF
+		"{
+		$LF
+		"    static signed char clamp_s8(int_fast64_t v)
+		$LF
+		"        { return v<-128 ? -128 : (v > 127 ? 127 : v); }
+		$LF
+		"    static unsigned char clamp_u8(int_fast64_t v)
+		$LF
+		"        { return v<0 ? 0 : (v > 255 ? 255 : v); }
+		$LF
+		"    static short clamp_s16(int_fast64_t v)
+		$LF
+		"        { return v<-32768 ? -32768 : (v > 32767 ? 32767 : v); }
+		$LF
+		$LF
+		"    static inline uint_fast64_t expand32_8(uint_fast32_t a)
+		$LF
+		"    {
+		$LF
+		"        // 0000abcd -> 0a0b0c0d
+		$LF
+		"        typedef uint_fast64_t v;
+		$LF
+		"        return (a&0xFFU)
+		$LF
+		"            | ((a&0xFF00U)<<8)    // base: 8+8 = 16
+		$LF
+		"            | ((v)(a&0xFF0000U)<<16) // base: 16+16 = 32
+		$LF
+		"            | ((v)(a&0xFF000000UL)<<24); // base: 24+24 = 48
+		$LF
+		"    }
+		$LF
+		"    static inline uint_fast64_t expand32_16(uint_fast32_t a)
+		$LF
+		"    {
+		$LF
+		"        // 0000abcd -> 00ab00cd
+		$LF
+		"        typedef uint_fast64_t v;
+		$LF
+		"        return (a&0xFFFFU)
+		$LF
+		"         | ((v)(a&0xFFFF0000UL)<<16);   // base: 16+16 = 32
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"#ifdef __MMX__
+		$LF
+		"/* 64-bit integers that use MMX / 3Dnow operations where relevant */
+		$LF
+		"struct c64_MMX: public c64_common
+		$LF
+		"{
+		$LF
+		"    typedef c64_MMX c64;
+		$LF
+		$LF
+		"    __m64 value;
+		$LF
+		"    
+		$LF
+		"    inline c64_MMX() { }
+		$LF
+		"    inline c64_MMX(__m64 v) : value(v) { }
+		$LF
+		"    inline c64_MMX(const uint64_t& v) : value( *(const __m64*)& v) { }
+		$LF
+		$LF
+		"    inline c64 operator<< (int b) const { if(b < 0) return *this >> -b; return shl64(b); }
+		$LF
+		"    inline c64 operator>> (int b) const { if(b < 0) return *this << -b; return shr64(b); }
+		$LF
+		"    c64& operator<<= (int n) { return *this = shl64(n); }
+		$LF
+		"    c64& operator>>= (int n) { return *this = shr64(n); }
+		$LF
+		$LF
+		"    c64 conv_s16_u8() const { return conv_s16_u8(*this); }
+		$LF
+		"    c64 conv_s16_s8() const { return conv_s16_s8(*this); }
+		$LF
+		$LF
+		"    void Get(const unsigned char* p)      { value = *(const __m64*)p; }
+		$LF
+		"    void Put(      unsigned char* p)const { *(__m64*)p =  value; }
+		$LF
+		"    
+		$LF
+		"    void Init16(short a,short b,short c, short d)
+		$LF
+		"        { value = _mm_setr_pi16(a,b,c,d); }
+		$LF
+		"    void Init16(short a)
+		$LF
+		"        { value = _mm_set1_pi16(a); }
+		$LF
+		$LF
+		"    void GetD(const unsigned char* p)      { value = *(const __m64*)p; }
+		$LF
+		"    
+		$LF
+		"    template<int n>
+		$LF
+		"    short Extract16() const { return ((const short*)&value)[n]; }
+		$LF
+		"    template<int n>
+		$LF
+		"    int Extract32() const { return ((const int*)&value)[n]; }
+		$LF
+		"    
+		$LF
+		"    short Extract88_from_1616lo() const
+		$LF
+		"    {
+		$LF
+		"        const unsigned char* data = (const unsigned char*)&value;
+		$LF
+		"        // bytes:  76543210
+		$LF
+		"        // shorts: 33221100
+		$LF
+		"        // take:        H L
+		$LF
+		"        return data[0] | *(short*)(data+1);
+		$LF
+		"        //return data[0] | ((*(const unsigned int*)data) >> 8);
+		$LF
+		"    }
+		$LF
+		"    short Extract88_from_1616hi() const
+		$LF
+		"    {
+		$LF
+		"        const unsigned char* data = 4+(const unsigned char*)&value;
+		$LF
+		"        // bytes:  76543210
+		$LF
+		"        // shorts: 33221100
+		$LF
+		"        // take:    H L
+		$LF
+		"        return data[0] | *(short*)(data+1);
+		$LF
+		"        //return data[0] | ((*(const unsigned int*)data) >> 8);
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		$LF
+		"    c64& operator&= (const c64& b) { value=_mm_and_si64(value,b.value); return *this; }
+		$LF
+		"    c64& operator|= (const c64& b) { value=_mm_or_si64(value,b.value); return *this; }
+		$LF
+		"    c64& operator^= (const c64& b) { value=_mm_xor_si64(value,b.value); return *this; }
+		$LF
+		"    c64& operator+= (const c64& b) { return *this = *this + b; }
+		$LF
+		"    c64& operator-= (const c64& b) { return *this = *this - b; }
+		$LF
+		"    
+		$LF
+		"            /* psllqi: p = packed
+		$LF
+		"                       s = shift
+		$LF
+		"                       r = right, l = left
+		$LF
+		"                       l = shift in zero, a = shift in sign bit
+		$LF
+		"                       q = 64-bit, d = 32-bit, w = 16-bit
+		$LF
+		"                      [i = immed amount]
+		$LF
+		"             */
+		$LF
+		"    c64 operator& (const c64& b) const { return c64(_mm_and_si64(value,b.value)); }
+		$LF
+		"    c64 operator| (const c64& b) const { return c64(_mm_or_si64(value,b.value)); }
+		$LF
+		"    c64 operator^ (const c64& b) const { return c64(_mm_xor_si64(value,b.value)); }
+		$LF
+		"    
+		$LF
+		"    c64 operator- (const c64& b) const
+		$LF
+		"    {
+		$LF
+		"        #ifdef __SSE2__
+		$LF
+		"        return _mm_sub_si64(value, b.value);
+		$LF
+		"        #else
+		$LF
+		"        return (const uint64_t&)value - (const uint64_t&)b.value;
+		$LF
+		"        #endif
+		$LF
+		"    }
+		$LF
+		"    c64 operator+ (const c64& b) const
+		$LF
+		"    {
+		$LF
+		"        #ifdef __SSE2__
+		$LF
+		"        return _mm_add_si64(value, b.value);
+		$LF
+		"        #else
+		$LF
+		"        return (const uint64_t&)value + (const uint64_t&)b.value;
+		$LF
+		"        #endif
+		$LF
+		"    }
+		$LF
+		"    
+		$LF
+		$LF
+		"    c64 shl64(int b) const { return _mm_slli_si64(value, b); }
+		$LF
+		"    c64 shr64(int b) const { return _mm_srli_si64(value, b); }
+		$LF
+		"    c64 shl16(int b) const { return _mm_slli_pi16(value, b); }
+		$LF
+		"    c64 shr16(int b) const { return _mm_srli_pi16(value, b); }
+		$LF
+		"    c64 sar32(int b) const { return _mm_srai_pi32(value, b); }
+		$LF
+		"    c64 sar16(int b) const { return _mm_srai_pi16(value, b); }
+		$LF
+		"    c64 add32(const c64& b) const { return _mm_add_pi32(value, b.value); }
+		$LF
+		"    c64 add16(const c64& b) const { return _mm_add_pi16(value, b.value); }
+		$LF
+		"    c64 sub32(const c64& b) const { return _mm_sub_pi32(value, b.value); }
+		$LF
+		"    c64 sub16(const c64& b) const { return _mm_sub_pi16(value, b.value); }
+		$LF
+		"    c64 mul16(const c64& b) const   { return _mm_mullo_pi16(value, b.value); }
+		$LF
+		"    c64 mul16hi(const c64& b) const { return _mm_mulhi_pi16(value, b.value); }
+		$LF
+		"    //c64 mul32(const c64& b) const { return _mm_mullo_pi32(value, b.value); }
+		$LF
+		"    c64 add8(const c64& b) const { return _mm_add_pi8(value, b.value); }
+		$LF
+		"    c64 sub8(const c64& b) const { return _mm_sub_pi8(value, b.value); }
+		$LF
+		"    
+		$LF
+		"    c64 unpacklbw(const c64& b) const { return _mm_unpacklo_pi8(b.value,value); }
+		$LF
+		"    c64 unpacklwd(const c64& b) const { return _mm_unpacklo_pi16(b.value,value); }
+		$LF
+		"    c64 unpackhbw(const c64& b) const { return _mm_unpackhi_pi8(b.value,value); }
+		$LF
+		"    c64 unpackhwd(const c64& b) const { return _mm_unpackhi_pi16(b.value,value); }
+		$LF
+		"    c64 unpackldq(const c64& b) const { return _mm_unpacklo_pi32(b.value,value); }
+		$LF
+		"    c64 unpackldq() const { return _mm_unpacklo_pi32(value,value); }
+		$LF
+		$LF
+		"    c64 operator& (const uint64_t& v) { return c64(_mm_and_si64(value, *(const __m64*)& v)); }
+		$LF
+		"    
+		$LF
+		"    c64 conv_s32_s16(const c64& b) const { return _mm_packs_pi32(value, b.value); }
+		$LF
+		"    c64 conv_s16_u8(const c64& b) const { return _mm_packs_pu16(value, b.value); }
+		$LF
+		"    c64 conv_s16_s8(const c64& b) const { return _mm_packs_pi16(value, b.value); }
+		$LF
+		"};
+		$LF
+		"#endif
+		$LF
+		$LF
+		"struct c64_nonMMX: public c64_common
+		$LF
+		"{
+		$LF
+		"    typedef c64_nonMMX c64;
+		$LF
+		"    
+		$LF
+		"    uint_least64_t value;
+		$LF
+		"    
+		$LF
+		"    inline c64_nonMMX() { }
+		$LF
+		"    inline c64_nonMMX(uint64_t v) : value(v) { }
+		$LF
+		$LF
+		"    c64 operator<< (int b) const { if(b < 0) return *this >> -b; return shl64(b); }
+		$LF
+		"    c64 operator>> (int b) const { if(b < 0) return *this << -b; return shr64(b); }
+		$LF
+		"    c64& operator<<= (int n) { return *this = shl64(n); }
+		$LF
+		"    c64& operator>>= (int n) { return *this = shr64(n); }
+		$LF
+		$LF
+		"    c64 conv_s16_u8() const { return conv_s16_u8(*this); }
+		$LF
+		"    c64 conv_s16_s8() const { return conv_s16_s8(*this); }
+		$LF
+		$LF
+		"    void Init16(short a,short b,short c, short d)
+		$LF
+		"        { uint_fast64_t aa = (unsigned short)a,
+		$LF
+		"                        bb = (unsigned short)b,
+		$LF
+		"                        cc = (unsigned short)c,
+		$LF
+		"                        dd = (unsigned short)d;
+		$LF
+		"          value = aa | (bb << 16) | (cc << 32) | (dd << 48); }
+		$LF
+		"    void Init16(short a)
+		$LF
+		"        { Init16(a,a,a,a); }
+		$LF
+		"    void Init8(unsigned char a,unsigned char b,unsigned char c,unsigned char d,
+		$LF
+		"               unsigned char e,unsigned char f,unsigned char g,unsigned char h)
+		$LF
+		"    {
+		$LF
+		"        value = ((uint_fast64_t)(a | (b << 8) | (c << 16) | (d << 24)))
+		$LF
+		"              | (((uint_fast64_t)e) << 32)
+		$LF
+		"              | (((uint_fast64_t)f) << 40)
+		$LF
+		"              | (((uint_fast64_t)g) << 48)
+		$LF
+		"              | (((uint_fast64_t)h) << 56);
+		$LF
+		"    }
+		$LF
+		$LF
+		"    void Get(const unsigned char* p)      { value = *(const uint_least64_t*)p; }
+		$LF
+		"    void Put(      unsigned char* p)const { *(uint_least64_t*)p =  value; }
+		$LF
+		"    
+		$LF
+		"    c64& operator&= (const c64& b) { value&=b.value; return *this; }
+		$LF
+		"    c64& operator|= (const c64& b) { value|=b.value; return *this; }
+		$LF
+		"    c64& operator^= (const c64& b) { value^=b.value; return *this; }
+		$LF
+		"    c64& operator+= (const c64& b) { value+=b.value; return *this; }
+		$LF
+		"    c64& operator-= (const c64& b) { value-=b.value; return *this; }
+		$LF
+		"    c64 operator& (const c64& b) const { return value & b.value; }
+		$LF
+		"    c64 operator| (const c64& b) const { return value | b.value; }
+		$LF
+		"    c64 operator^ (const c64& b) const { return value ^ b.value; }
+		$LF
+		"    c64 operator- (const c64& b) const { return value - b.value; }
+		$LF
+		"    c64 operator+ (const c64& b) const { return value + b.value; }
+		$LF
+		$LF
+		"    c64 operator& (uint_fast64_t b) const { return value & b; }
+		$LF
+		"    
+		$LF
+		"    #define usimdsim(type, count, op) \
+		$LF
+		"        type* p = (type*)&res.value; \
+		$LF
+		"        for(int n=0; n<count; ++n) p[n] = (p[n] op b)
+		$LF
+		$LF
+		"    #define simdsim(type, count, op) \
+		$LF
+		"        type* p = (type*)&res.value; \
+		$LF
+		"        const type* o = (const type*)&b.value; \
+		$LF
+		"        for(int n=0; n<count; ++n) p[n] = (p[n] op o[n])
+		$LF
+		"    
+		$LF
+		"    c64 shl64(int b) const { return value << b; }
+		$LF
+		"    c64 shr64(int b) const { return value >> b; }
+		$LF
+		"    c64 shl16(int b) const { c64 res = *this; usimdsim(short, 2, <<); return res; }
+		$LF
+		"    c64 shr16(int b) const { c64 res = *this; usimdsim(unsigned short, 2, >>); return res; }
+		$LF
+		"    c64 sar32(int b) const { c64 res = *this; usimdsim(int, 2, >>); return res; }
+		$LF
+		"    c64 sar16(int b) const { c64 res = *this; usimdsim(short, 2, >>); return res; }
+		$LF
+		$LF
+		"    c64 add16(const c64& b) const { c64 res = *this; simdsim(short, 4, +); return res; }
+		$LF
+		"    c64 sub16(const c64& b) const { c64 res = *this; simdsim(short, 4, -); return res; }
+		$LF
+		"    c64 add32(const c64& b) const { c64 res = *this; simdsim(int,   2, +); return res; }
+		$LF
+		"    c64 sub32(const c64& b) const { c64 res = *this; simdsim(int,   2, -); return res; }
+		$LF
+		"    c64 mul16(const c64& b) const { c64 res = *this; simdsim(short, 4, *); return res; }
+		$LF
+		"    c64 mul16hi(const c64& b) const { c64 res = *this; simdsim(short, 4, *) >> 16; return res; }
+		$LF
+		"    c64 add8(const c64& b) const { c64 res = *this; simdsim(unsigned char, 8, +); return res; }
+		$LF
+		"    c64 sub8(const c64& b) const { c64 res = *this; simdsim(unsigned char, 8, -); return res; }
+		$LF
+		"    
+		$LF
+		"    #undef simdsim
+		$LF
+		"    #undef usimdsim
+		$LF
+		"    
+		$LF
+		"    c64 conv_s32_s16(const c64& b) const
+		$LF
+		"    {
+		$LF
+		"        c64 res; res.
+		$LF
+		"        Init16(clamp_s16(value & 0xFFFFFFFFU),
+		$LF
+		"               clamp_s16(value >> 32),
+		$LF
+		"               clamp_s16(b.value & 0xFFFFFFFFU),
+		$LF
+		"               clamp_s16(b.value >> 32));
+		$LF
+		"        return res;
+		$LF
+		"    }
+		$LF
+		"    c64 conv_s16_u8(const c64& b) const
+		$LF
+		"    {
+		$LF
+		"        c64 res; res.
+		$LF
+		"        Init8(clamp_u8(value & 0xFFFF),
+		$LF
+		"              clamp_u8((value >> 16) & 0xFFFF),
+		$LF
+		"              clamp_u8((value >> 32) & 0xFFFF),
+		$LF
+		"              clamp_u8((value >> 48) & 0xFFFF),
+		$LF
+		"              clamp_u8(b.value & 0xFFFF),
+		$LF
+		"              clamp_u8((b.value >> 16) & 0xFFFF),
+		$LF
+		"              clamp_u8((b.value >> 32) & 0xFFFF),
+		$LF
+		"              clamp_u8((b.value >> 48) & 0xFFFF));
+		$LF
+		"        return res;
+		$LF
+		"    }
+		$LF
+		"    c64 conv_s16_s8(const c64& b) const
+		$LF
+		"    {
+		$LF
+		"        c64 res; res.
+		$LF
+		"        Init8(clamp_s8(value & 0xFFFF),
+		$LF
+		"              clamp_s8((value >> 16) & 0xFFFF),
+		$LF
+		"              clamp_s8((value >> 32) & 0xFFFF),
+		$LF
+		"              clamp_s8((value >> 48) & 0xFFFF),
+		$LF
+		"              clamp_s8(b.value & 0xFFFF),
+		$LF
+		"              clamp_s8((b.value >> 16) & 0xFFFF),
+		$LF
+		"              clamp_s8((b.value >> 32) & 0xFFFF),
+		$LF
+		"              clamp_s8((b.value >> 48) & 0xFFFF));
+		$LF
+		"        return res;
+		$LF
+		"    }
+		$LF
+		$LF
+		"    /* TODO: Verify that these are correct (though they should never be used anyway) */
+		$LF
+		"    c64 unpacklbw(const c64& p) const
+		$LF
+		"    {
+		$LF
+		"    #if defined(__MMX__) && !defined(__ICC)
+		$LF
+		"        /* ICC says [error: type of cast must be integral or enum]
+		$LF
+		"         * on the return value cast,
+		$LF
+		"         * so we cannot use this code on ICC. Fine for GCC. */
+		$LF
+		"        return (uint_least64_t)_m_punpcklbw(*(__m64*)&p.value, *(__m64*)&value);
+		$LF
+		"    #else
+		$LF
+		"        uint_fast64_t a=value, b=p.value;
+		$LF
+		"        return expand32_8(a) | (expand32_8(b) << 8);
+		$LF
+		"    #endif
+		$LF
+		"    }
+		$LF
+		"    c64 unpackhbw(const c64& p) const
+		$LF
+		"    {
+		$LF
+		"    #if defined(__MMX__) && !defined(__ICC)
+		$LF
+		"        return (uint_least64_t)_m_punpckhbw(*(__m64*)&p.value, *(__m64*)&value);
+		$LF
+		"    #else
+		$LF
+		"        uint_fast64_t a=value, b=p.value;
+		$LF
+		"        return expand32_8(a>>32) | (expand32_8(b>>32) << 8);
+		$LF
+		"    #endif
+		$LF
+		"    }
+		$LF
+		"    c64 unpacklwd(const c64& p) const
+		$LF
+		"    {
+		$LF
+		"    #if defined(__MMX__) && !defined(__ICC)
+		$LF
+		"        return (uint_least64_t)_m_punpcklwd(*(__m64*)&p.value, *(__m64*)&value);
+		$LF
+		"    #else
+		$LF
+		"        uint_fast64_t a=value, b=p.value;
+		$LF
+		"        return expand32_16(a) | (expand32_16(b) << 16);
+		$LF
+		"    #endif
+		$LF
+		"    }
+		$LF
+		"    c64 unpackhwd(const c64& p) const
+		$LF
+		"    {
+		$LF
+		"    #if defined(__MMX__) && !defined(__ICC)
+		$LF
+		"        return (uint_least64_t)_m_punpckhwd(*(__m64*)&p.value, *(__m64*)&value);
+		$LF
+		"    #else
+		$LF
+		"        uint_fast64_t a=value, b=p.value;
+		$LF
+		"        return expand32_16(a>>32) | (expand32_16(b>>32) << 16);
+		$LF
+		"    #endif
+		$LF
+		"    }
+		$LF
+		"    c64 unpackldq() const { return unpackldq(*this); }
+		$LF
+		"    c64 unpackldq(const c64& p) const
+		$LF
+		"    {
+		$LF
+		"    #if defined(__MMX__) && !defined(__ICC)
+		$LF
+		"        return (uint_least64_t)_m_punpckldq(*(__m64*)&p.value, *(__m64*)&value);
+		$LF
+		"    #else
+		$LF
+		"        return value | (p.value << 32);
+		$LF
+		"    #endif
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"#ifdef USE_MMX
+		$LF
+		"typedef c64_MMX c64;
+		$LF
+		"#else
+		$LF
+		"typedef c64_nonMMX c64;
+		$LF
+		"#endif
+		$LF
+		$LF
+		"static inline void MMX_clear()
+		$LF
+		"{
+		$LF
+		"    #ifdef __3dNOW__
+		$LF
+		"    _m_femms(); /* Note: not available on ICC */
+		$LF
+		"    #elif defined(__MMX__)
+		$LF
+		"    _mm_empty();
+		$LF
+		"    #endif
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"rgbtorgb.hh
+	]tt
+	$LF
+	[a id=heading-241 
+	]a
+]h4
+[p 
+	"This include file provides functions for converting images of a certain bit depth to another bit depth. The functions use MMX optimizations where possible.
+	$LF
+	"Note: If your compiler does not support 
+	[tt 
+		[b 
+			"attribute
+		]b
+		"(
+		[em 
+		]em
+		"(noinline)
+		[em 
+		]em
+		")
+	]tt
+	", you can remove that expression with no ill effects. It is there simply for my debugging.
+	$LF
+]p
+[pre 
+	[code class=language-c_white 
+		"#ifdef __cplusplus
+		$LF
+		"extern "C" {
+		$LF
+		"  #define defaulttrue =true
+		$LF
+		"#else
+		$LF
+		"  #define defaulttrue
+		$LF
+		"  #define bool       int
+		$LF
+		"#endif
+		$LF
+		$LF
+		"/* RGB to RGB and RGB from/to YCbRr (YUV) conversions written by Bisqwit
+		$LF
+		" * Copyright (C) 1992,2008 Joel Yliluoma (http://iki.fi/bisqwit/)
+		$LF
+		" *
+		$LF
+		" * Concepts:
+		$LF
+		" *   15 = RGB15 or BGR15
+		$LF
+		" *   16 = RGB16 or BGR16
+		$LF
+		" *   24 = RGB24 or BGR24
+		$LF
+		" *   32 = RGB32 or BGR32
+		$LF
+		" * I420 = YCbCr where Y is issued for each pixel,
+		$LF
+		" *                    followed by Cr for 2x2 pixels,
+		$LF
+		" *                    followed by Cb for 2x2 pixels
+		$LF
+		" * YUY2 = YCbCr where for each pixel, Y is issued,
+		$LF
+		" *                    followed by Cr for 2x1 pixels (if even pixel)
+		$LF
+		" *                             or Cb for 2x1 pixels (if odd pixel)
+		$LF
+		" *
+		$LF
+		" * Note: Not all functions honor the swap_red_blue setting.
+		$LF
+		" */
+		$LF
+		$LF
+		"void Convert32To24Frame(const void* data, unsigned char* dest, unsigned npixels)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert15To24Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue defaulttrue)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert16To24Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue defaulttrue)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert15To32Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue defaulttrue)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert16To32Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue defaulttrue)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert24To16Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		$LF
+		"void Convert24To15Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		$LF
+		"void Convert_I420To24Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width, bool swap_red_blue defaulttrue)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert15To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		"void Convert16To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		"void Convert24To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		"void Convert32To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		$LF
+		"void Convert_YUY2To24Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width, bool swap_red_blue defaulttrue)
+		$LF
+		"    __attribute__((noinline));
+		$LF
+		$LF
+		"void Convert15To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		"void Convert16To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		"void Convert24To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		"void Convert32To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width);
+		$LF
+		$LF
+		"#ifdef __cplusplus
+		$LF
+		"}
+		$LF
+		"  #undef defaulttrue
+		$LF
+		"#else
+		$LF
+		"  #undef defaulttrue
+		$LF
+		"  #undef bool
+		$LF
+		"#endif
+		$LF
+	]code
+]pre
+[h4 
+	" 
+	[tt 
+		"rgbtorgb.cc
+	]tt
+	$LF
+	[a id=heading-242 
+	]a
+]h4
+[p 
+	"This is the source code of the functionality behind rgbtorgb.hh.
+	$LF
+]p
+[pre 
+	[code class=language-c_white 
+		"#include <stdint.h>
+		$LF
+		"#include <stdlib.h> // for size_t
+		$LF
+		"#include <vector>
+		$LF
+		"#include <cmath>
+		$LF
+		$LF
+		"/* RGB to RGB and RGB from/to I420 conversions written by Bisqwit
+		$LF
+		" * Copyright (C) 1992,2008 Joel Yliluoma (http://iki.fi/bisqwit/)
+		$LF
+		" */
+		$LF
+		$LF
+		"typedef uint_least64_t uint64_t;
+		$LF
+		$LF
+		"#include "quantize.hh"
+		$LF
+		"#include "rgbtorgb.hh"
+		$LF
+		"#include "simd.hh"
+		$LF
+		$LF
+		"/* For BPP conversions */
+		$LF
+		$LF
+		"static const uint64_t zero64         __attribute__((aligned(8))) = 0ULL;
+		$LF
+		"static const uint64_t mask24l        __attribute__((aligned(8))) = 0x0000000000FFFFFFULL;
+		$LF
+		"static const uint64_t mask24h        __attribute__((aligned(8))) = 0x0000FFFFFF000000ULL;
+		$LF
+		"static const uint64_t mask24hh       __attribute__((aligned(8))) = 0xffff000000000000ULL;
+		$LF
+		"static const uint64_t mask24hhh      __attribute__((aligned(8))) = 0xffffffff00000000ULL;
+		$LF
+		"static const uint64_t mask24hhhh     __attribute__((aligned(8))) = 0xffffffffffff0000ULL;
+		$LF
+		$LF
+		"static const uint64_t mask64h        __attribute__((aligned(8))) = 0xFF00FF00FF00FF00ULL;
+		$LF
+		"static const uint64_t mask64l        __attribute__((aligned(8))) = 0x00FF00FF00FF00FFULL;
+		$LF
+		"static const uint64_t mask64hw       __attribute__((aligned(8))) = 0xFFFF0000FFFF0000ULL;
+		$LF
+		"static const uint64_t mask64lw       __attribute__((aligned(8))) = 0x0000FFFF0000FFFFULL;
+		$LF
+		"static const uint64_t mask64hd       __attribute__((aligned(8))) = 0xFFFFFFFF00000000ULL;
+		$LF
+		"static const uint64_t mask64ld       __attribute__((aligned(8))) = 0x00000000FFFFFFFFULL;
+		$LF
+		$LF
+		"/* For RGB2YUV: */
+		$LF
+		$LF
+		"static const int RGB2YUV_SHIFT = 15; /* highest value where [RGB][YUV] fit in signed short */
+		$LF
+		$LF
+		"static const int RY = 8414;  //  ((int)(( 65.738/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		"static const int RV = 14392; //  ((int)((112.439/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		"static const int RU = -4856; //  ((int)((-37.945/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		$LF
+		"static const int GY = 16519; //  ((int)((129.057/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		"static const int GV = -12051;//  ((int)((-94.154/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		"static const int GU = -9534; //  ((int)((-74.494/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		$LF
+		"static const int BY = 3208;  //  ((int)(( 25.064/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		"static const int BV = -2339; //  ((int)((-18.285/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		"static const int BU = 14392; //  ((int)((112.439/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+		$LF
+		$LF
+		"static const int Y_ADD = 16;
+		$LF
+		"static const int U_ADD = 128;
+		$LF
+		"static const int V_ADD = 128;
+		$LF
+		$LF
+		"/* For YUV2RGB: */
+		$LF
+		$LF
+		"static const int YUV2RGB_SHIFT = 13; /* highest value where UB still fits in signed short */
+		$LF
+		$LF
+		"static const int Y_REV = 9539; // ((int)( (  255 / 219.0 )     * (1<<YUV2RGB_SHIFT)+0.5));
+		$LF
+		"static const int VR = 14688;   // ((int)( ( 117504 / 65536.0 ) * (1<<YUV2RGB_SHIFT)+0.5));
+		$LF
+		"static const int VG = -6659;   // ((int)( ( -53279 / 65536.0 ) * (1<<YUV2RGB_SHIFT)+0.5));
+		$LF
+		"static const int UG = -3208;   // ((int)( ( -25675 / 65536.0 ) * (1<<YUV2RGB_SHIFT)+0.5));
+		$LF
+		"static const int UB = 16525;   // ((int)( ( 132201 / 65536.0 ) * (1<<YUV2RGB_SHIFT)+0.5));
+		$LF
+		$LF
+		"/****************/
+		$LF
+		$LF
+		"template<typename c64>
+		$LF
+		"static inline void Convert32To24_32bytes(c64 w0, c64 w1, c64 w2, c64 w3, unsigned char* dest)
+		$LF
+		"{
+		$LF
+		"    c64 r0 = (w0 & mask24l) | ((w0 >> 8) & mask24h); /* bbbaaa */
+		$LF
+		"    c64 r1 = (w1 & mask24l) | ((w1 >> 8) & mask24h); /* dddccc */
+		$LF
+		"    c64 r2 = (w2 & mask24l) | ((w2 >> 8) & mask24h); /* fffeee */
+		$LF
+		"    c64 r3 = (w3 & mask24l) | ((w3 >> 8) & mask24h); /* hhhggg */
+		$LF
+		"    
+		$LF
+		"    /* ccbbbaaa */
+		$LF
+		"    ((r0      )  | ((r1 << 48) & mask24hh)).Put(dest+0);
+		$LF
+		"    /* feeedddc */
+		$LF
+		"    ((r1 >> 16)  | ((r2 << 32) & mask24hhh)).Put(dest+8);
+		$LF
+		"    /* hhhgggff */
+		$LF
+		"    ((r2 >> 32)  | ((r3 << 16) & mask24hhhh)).Put(dest+16);
+		$LF
+		"}
+		$LF
+		$LF
+		"#if defined(__x86_64) || defined(USE_MMX)
+		$LF
+		"static void Convert32To24_32bytes(const unsigned char* src,
+		$LF
+		"                                  unsigned char* dest)
+		$LF
+		"{
+		$LF
+		"    c64 w0; w0.Get(src+0);
+		$LF
+		"    c64 w1; w1.Get(src+8);
+		$LF
+		"    c64 w2; w2.Get(src+16);
+		$LF
+		"    c64 w3; w3.Get(src+24);
+		$LF
+		"    Convert32To24_32bytes(w0,w1,w2,w3, dest);
+		$LF
+		"}
+		$LF
+		"#endif
+		$LF
+		$LF
+		"void Convert32To24Frame(const void* data, unsigned char* dest, unsigned npixels)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*)data;
+		$LF
+		"    
+		$LF
+		"    #if defined(__x86_64) || defined(USE_MMX)
+		$LF
+		"    while(npixels >= 8)
+		$LF
+		"    {
+		$LF
+		"        Convert32To24_32bytes(src, dest);
+		$LF
+		"        src  += 4*8;
+		$LF
+		"        dest += 3*8;
+		$LF
+		"        npixels -= 8;
+		$LF
+		"    }
+		$LF
+		"     #ifdef USE_MMX
+		$LF
+		"     MMX_clear();
+		$LF
+		"     #endif
+		$LF
+		"    #endif
+		$LF
+		"    
+		$LF
+		"    for(unsigned pos=0; pos<npixels; ++pos)
+		$LF
+		"    {
+		$LF
+		"        dest[3*pos+0] = src[4*pos+0];
+		$LF
+		"        dest[3*pos+1] = src[4*pos+1];
+		$LF
+		"        dest[3*pos+2] = src[4*pos+2];
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"static void Unbuild16(unsigned char* target, unsigned rgb16)
+		$LF
+		"{
+		$LF
+		"    unsigned B = (rgb16%32)*256/32;
+		$LF
+		"    unsigned G = ((rgb16/32)%64)*256/64;
+		$LF
+		"    unsigned R = ((rgb16/(32*64))%32)*256/32;
+		$LF
+		"    target[0] = R;
+		$LF
+		"    target[1] = G;
+		$LF
+		"    target[2] = B;
+		$LF
+		"}
+		$LF
+		$LF
+		"static void Unbuild15(unsigned char* target, unsigned rgb16)
+		$LF
+		"{
+		$LF
+		"    unsigned B = (rgb16%32)*256/32;
+		$LF
+		"    unsigned G = ((rgb16/32)%32)*256/32;
+		$LF
+		"    unsigned R = ((rgb16/(32*32))%32)*256/32;
+		$LF
+		"    target[0] = R;
+		$LF
+		"    target[1] = G;
+		$LF
+		"    target[2] = B;
+		$LF
+		"}
+		$LF
+		$LF
+		"template<int basevalue_lo, int basevalue_hi>
+		$LF
+		"struct Bits16const
+		$LF
+		"{
+		$LF
+		"    static const uint64_t value;
+		$LF
+		"};
+		$LF
+		"template<int basevalue_lo, int basevalue_hi>
+		$LF
+		"const uint64_t Bits16const<basevalue_lo, basevalue_hi>::value =
+		$LF
+		"       (( ((uint64_t)(unsigned short) basevalue_lo) << 0)
+		$LF
+		"      | ( ((uint64_t)(unsigned short) basevalue_hi) << 16)
+		$LF
+		"      | ( ((uint64_t)(unsigned short) basevalue_lo) << 32)
+		$LF
+		"      | ( ((uint64_t)(unsigned short) basevalue_hi) << 48));
+		$LF
+		$LF
+		"template<int basevalue_lo, int basevalue_hi>
+		$LF
+		"struct Bits32const
+		$LF
+		"{
+		$LF
+		"    static const uint64_t value;
+		$LF
+		"};
+		$LF
+		"template<int basevalue_lo, int basevalue_hi>
+		$LF
+		"const uint64_t Bits32const<basevalue_lo, basevalue_hi>::value =
+		$LF
+		"       (( ((uint64_t)(unsigned int) basevalue_lo) << 0)
+		$LF
+		"      | ( ((uint64_t)(unsigned int) basevalue_hi) << 32));
+		$LF
+		$LF
+		"template<uint64_t basevalue_lo, uint64_t basevalue_hi>
+		$LF
+		"struct Bits8const
+		$LF
+		"{
+		$LF
+		"    static const uint64_t value =
+		$LF
+		"       ((basevalue_lo << 0)
+		$LF
+		"      | (basevalue_hi << 8)
+		$LF
+		"      | (basevalue_lo << 16)
+		$LF
+		"      | (basevalue_hi << 24)
+		$LF
+		"      | (basevalue_lo << 32)
+		$LF
+		"      | (basevalue_hi << 40)
+		$LF
+		"      | (basevalue_lo << 48)
+		$LF
+		"      | (basevalue_hi << 56));
+		$LF
+		"};
+		$LF
+		$LF
+		$LF
+		"template<int lowbitcount, int highbitcount, int leftshift>
+		$LF
+		"struct MaskBconst
+		$LF
+		"{
+		$LF
+		"    static const uint64_t basevalue_lo = (1 <<  lowbitcount) - 1;
+		$LF
+		"    static const uint64_t basevalue_hi = (1 << highbitcount) - 1;
+		$LF
+		"    static const uint64_t value = Bits8const<basevalue_lo,basevalue_hi>::value << leftshift;
+		$LF
+		"};
+		$LF
+		$LF
+		"template<int bits>
+		$LF
+		"struct Convert_2byte_consts
+		$LF
+		"{
+		$LF
+		"    static const uint64_t mask_lo;//   = MaskBconst<bits,0, 0>::value;
+		$LF
+		"    static const uint64_t mask_hi;//   = MaskBconst<bits,0, 8>::value;
+		$LF
+		"    static const uint64_t mask_frac;// = MaskBconst<8-bits,8-bits, 0>::value;
+		$LF
+		"};
+		$LF
+		"template<int bits>
+		$LF
+		"const uint64_t Convert_2byte_consts<bits>::mask_lo   = MaskBconst<bits, 0, 0>::value;
+		$LF
+		"template<int bits>
+		$LF
+		"const uint64_t Convert_2byte_consts<bits>::mask_hi   = MaskBconst<bits, 0, 8>::value;
+		$LF
+		"template<int bits>
+		$LF
+		"const uint64_t Convert_2byte_consts<bits>::mask_frac = MaskBconst<8-bits, 8-bits, 0>::value;
+		$LF
+		$LF
+		"template<int offs, int bits>
+		$LF
+		"struct Convert_2byte_helper
+		$LF
+		"{
+		$LF
+		"    c64 lo, hi;
+		$LF
+		"    
+		$LF
+		"    Convert_2byte_helper(c64 p4a, c64 p4b)
+		$LF
+		"    {
+		$LF
+		"        const uint64_t& mask_lo   = Convert_2byte_consts<bits>::mask_lo;
+		$LF
+		"        const uint64_t& mask_hi   = Convert_2byte_consts<bits>::mask_hi;
+		$LF
+		"        const uint64_t& mask_frac = Convert_2byte_consts<bits>::mask_frac;
+		$LF
+		"        
+		$LF
+		"        /* STEP 1: SEPARATE THE PIXELS INTO RED, GREEN AND BLUE COMPONENTS */
+		$LF
+		$LF
+		"        /* 000BBBBB 000bbbbb  000BBBBB 000bbbbb  000BBBBB 000bbbbb  000BBBBB 000bbbbb */
+		$LF
+		"        c64 s5 = ((p4a >> offs) & mask_lo) | ((p4b << (8-offs)) & mask_hi);
+		$LF
+		$LF
+		"        /* STEP 2: SCALE THE COLOR COMPONENTS TO 256 RANGE */
+		$LF
+		"        
+		$LF
+		"        /* BBBBB000 bbbbb000  BBBBB000 bbbbb000  BBBBB000 bbbbb000  BBBBB000 bbbbb000 */
+		$LF
+		"        /* 00000BBB 00000bbb  00000BBB 00000bbb  00000BBB 00000bbb  00000BBB 00000bbb */
+		$LF
+		"        c64 v8 = (s5 << (8-bits)) | ((s5 >> (bits-(8-bits))) & mask_frac);
+		$LF
+		"        /* v8:
+		$LF
+		"         *
+		$LF
+		"         * BBBBBBBB bbbbbbbb  BBBBBBBB bbbbbbbb  BBBBBBBB bbbbbbbb  BBBBBBBB bbbbbbbb *
+		$LF
+		"         */
+		$LF
+		"        
+		$LF
+		"        /* STEP 3: DEINTERLACE THE PIXELS */
+		$LF
+		"        lo = (v8     ) & mask64l;
+		$LF
+		"        hi = (v8 >> 8) & mask64l;
+		$LF
+		"    }
+		$LF
+		"};
+		$LF
+		$LF
+		"/*
+		$LF
+		"template<int roffs,int rbits, int goffs,int gbits, int boffs,int bbits>
+		$LF
+		"static void Convert_2byte_to_24Common(const unsigned char* src, unsigned char* dest)
+		$LF
+		"    __attribute((noinline));
+		$LF
+		"*/
+		$LF
+		"template<int roffs,int rbits, int goffs,int gbits, int boffs,int bbits, bool rgb24>
+		$LF
+		"static void Convert_2byte_to_24or32Common(const unsigned char* src, unsigned char* dest)
+		$LF
+		"{
+		$LF
+		"    c64 p4a; p4a.Get(src+0); // four pixels
+		$LF
+		"    c64 p4b; p4b.Get(src+8); // another four pixels
+		$LF
+		"    
+		$LF
+		"    /* in: In both registers: */
+		$LF
+		"    
+		$LF
+		"    Convert_2byte_helper<roffs,rbits> r(p4a,p4b);
+		$LF
+		"    Convert_2byte_helper<boffs,bbits> b(p4a,p4b);
+		$LF
+		"    Convert_2byte_helper<goffs,gbits> g(p4a,p4b);
+		$LF
+		$LF
+		"    /* STEP 4: CONVERT PIXELS INTO RGB32 */
+		$LF
+		"    
+		$LF
+		"    /* Now we have:
+		$LF
+		"     *               b.lo =  0j0g0d0a
+		$LF
+		"     *               g.lo =  0k0h0e0b
+		$LF
+		"     *               r.lo =  0l0i0f0c
+		$LF
+		"     *               b.hi =  0J0G0D0A
+		$LF
+		"     *               g.hi =  0K0H0E0B
+		$LF
+		"     *               r.hi =  0L0I0F0C
+		$LF
+		"     * We want:
+		$LF
+		"     *                 w1 =  0fed0cba
+		$LF
+		"     *                 w2 =  0lkj0ihg
+		$LF
+		"     *                 w3 =  0FED0CBA
+		$LF
+		"     *                 w4 =  0LKJ0IHG
+		$LF
+		"     */
+		$LF
+		"   
+		$LF
+		"#if 0 && defined(__MMX__) /* FIXME why is this 0&&? */
+		$LF
+		"    // punpcklbw  0k0h0e0b, 0j0g0d0a -> 00ed00ba
+		$LF
+		"    // punpcklwd  0l0i0f0c, ________ -> 0f__0c__
+		$LF
+		"    c64 w1 = r.lo.unpacklwd(zero64) | g.lo.unpacklbw(b.lo); // pix 0,1
+		$LF
+		"    // punpckhbw  0k0h0e0b, 0j0g0d0a -> 00kj00hg
+		$LF
+		"    // punpckhwd  0l0i0f0c, ________ -> 0l__0i__
+		$LF
+		"    c64 w2 = r.lo.unpackhwd(zero64) | g.lo.unpackhbw(b.lo); // pix 2,3
+		$LF
+		"    
+		$LF
+		"    c64 w3 = r.hi.unpacklwd(zero64) | g.hi.unpacklbw(b.hi); // pix 4,5
+		$LF
+		"    c64 w4 = r.hi.unpackhwd(zero64) | g.hi.unpackhbw(b.hi); // pix 6,7
+		$LF
+		"    #ifndef USE_MMX
+		$LF
+		"     MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"#else
+		$LF
+		"    /* With 64-bit registers, this code is greatly simpler than
+		$LF
+		"     * the emulation of unpack opcodes. However, when the
+		$LF
+		"     * unpack opcodes is available, using them is shorter.
+		$LF
+		"     * Which way is faster? FIXME: Find out
+		$LF
+		"     */
+		$LF
+		$LF
+		"    //        mask64lw:  00**00**
+		$LF
+		"    //        mask64hw:  **00**00
+		$LF
+		"    // b.lo & mask64lw:  000g000a
+		$LF
+		"    // g.lo & mask64lw:  000h000b
+		$LF
+		"    // r.lo & mask64lw:  000i000c
+		$LF
+		"    // b.lo & mask64hw:  0j000d00
+		$LF
+		"    // g.lo & mask64hw:  0k000e00
+		$LF
+		"    // r.lo & mask64hw:  0l000f00
+		$LF
+		"    
+		$LF
+		"    c64 tlo1 = ((b.lo & mask64lw)     ) | ((g.lo & mask64lw) << 8) | ((r.lo & mask64lw) << 16);
+		$LF
+		"    c64 tlo2 = ((b.lo & mask64hw) >>16) | ((g.lo & mask64hw) >> 8) | ((r.lo & mask64hw)      );
+		$LF
+		$LF
+		"    c64 thi1 = ((b.hi & mask64lw)     ) | ((g.hi & mask64lw) << 8) | ((r.hi & mask64lw) << 16);
+		$LF
+		"    c64 thi2 = ((b.hi & mask64hw) >>16) | ((g.hi & mask64hw) >> 8) | ((r.hi & mask64hw)      );
+		$LF
+		"    /*
+		$LF
+		"     *                tlo1 =  0ihg0cba
+		$LF
+		"     *                tlo2 =  0lkj0fed
+		$LF
+		"     *                thi1 =  0IHG0CBA
+		$LF
+		"     *                thi2 =  0LKJ0FED
+		$LF
+		"     *            mask64ld =  0000****
+		$LF
+		"     *            mask64hd =  ****0000
+		$LF
+		"     */
+		$LF
+		"     
+		$LF
+		"    c64 w1 = (tlo1 & mask64ld) | ((tlo2 & mask64ld) << 32); // 00000cba | 00000fed = 0fed0bca
+		$LF
+		"    c64 w2 = (tlo2 & mask64hd) | ((tlo1 & mask64hd) >> 32); // 0lkj0000 | 0ihg0000 = 0lkj0ihg
+		$LF
+		$LF
+		"    c64 w3 = (thi1 & mask64ld) | ((thi2 & mask64ld) << 32);
+		$LF
+		"    c64 w4 = (thi2 & mask64hd) | ((thi1 & mask64hd) >> 32);
+		$LF
+		"#endif
+		$LF
+		"    
+		$LF
+		"    if(rgb24)
+		$LF
+		"    {
+		$LF
+		"        /* STEP 5A: CONVERT PIXELS INTO RGB24 */
+		$LF
+		"        Convert32To24_32bytes(w1,w2,w3,w4, dest);
+		$LF
+		"    }
+		$LF
+		"    else
+		$LF
+		"    {
+		$LF
+		"        /* STEP 5B: STORE RGB32 */
+		$LF
+		"        w1.Put(dest+0);
+		$LF
+		"        w2.Put(dest+8);
+		$LF
+		"        w3.Put(dest+16);
+		$LF
+		"        w4.Put(dest+24);
+		$LF
+		"    }
+		$LF
+		"     
+		$LF
+		"    /*
+		$LF
+		"     punpcklbw    ____ABCD, ____abcd = AaBbCcDd
+		$LF
+		"     punpcklwd    ____ABCD, ____abcd = ABabCDcd
+		$LF
+		"     punpckldq    ____ABCD, ____abcd = ABCDabcd
+		$LF
+		"     
+		$LF
+		"     punpckhbw    ABCD____, abcd____ = AaBbCcDd
+		$LF
+		"     punpckhwd    ABCD____, abcd____ = ABabCDcd
+		$LF
+		"     punpckhdq    ABCD____, abcd____ = ABCDabcd
+		$LF
+		"    */
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert15To24Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*)data;
+		$LF
+		"    
+		$LF
+		"    if(swap_red_blue)
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*3, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<0,5, 5,5, 10,5, true> (src, dest);
+		$LF
+		"    else
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*3, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<10,5, 5,5, 0,5, true> (src, dest);
+		$LF
+		$LF
+		"    #ifdef USE_MMX
+		$LF
+		"     MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"    for(unsigned a=0; a<npixels; ++a)
+		$LF
+		"    {
+		$LF
+		"        unsigned short v = ((const unsigned short*)src)[a];
+		$LF
+		"        Unbuild15(&dest[a*3], v);
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert16To24Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*)data;
+		$LF
+		"    
+		$LF
+		"    if(swap_red_blue)
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*3, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<0,5, 5,6, 11,5, true> (src, dest);
+		$LF
+		"    else
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*3, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<11,5, 5,6, 0,5, true> (src, dest);
+		$LF
+		$LF
+		"    #ifdef USE_MMX
+		$LF
+		"     MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"    for(unsigned a=0; a<npixels; ++a)
+		$LF
+		"    {
+		$LF
+		"        unsigned short v = ((const unsigned short*)src)[a];
+		$LF
+		"        Unbuild16(&dest[a*3], v);
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert15To32Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*)data;
+		$LF
+		"    
+		$LF
+		"    if(swap_red_blue)
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*4, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<0,5, 5,5, 10,5, false> (src, dest);
+		$LF
+		"    else
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*4, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<10,5, 5,5, 0,5, false> (src, dest);
+		$LF
+		$LF
+		"    #ifdef USE_MMX
+		$LF
+		"     MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"    for(unsigned a=0; a<npixels; ++a)
+		$LF
+		"    {
+		$LF
+		"        unsigned short v = ((const unsigned short*)src)[a];
+		$LF
+		"        Unbuild15(&dest[a*4], v);
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert16To32Frame(const void* data, unsigned char* dest, unsigned npixels, bool swap_red_blue)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*)data;
+		$LF
+		"    
+		$LF
+		"    if(swap_red_blue)
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*4, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<0,5, 5,6, 11,5, false> (src, dest);
+		$LF
+		"    else
+		$LF
+		"        for(; npixels >= 8; src += 8*2, dest += 8*4, npixels -= 8)
+		$LF
+		"            Convert_2byte_to_24or32Common<11,5, 5,6, 0,5, false> (src, dest);
+		$LF
+		$LF
+		"    #ifdef USE_MMX
+		$LF
+		"     MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"    for(unsigned a=0; a<npixels; ++a)
+		$LF
+		"    {
+		$LF
+		"        unsigned short v = ((const unsigned short*)src)[a];
+		$LF
+		"        Unbuild16(&dest[a*4], v);
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"static inline unsigned Build16(unsigned x,unsigned y, const unsigned char* rgbdata)
+		$LF
+		"{
+		$LF
+		"    unsigned o16 = (x + 4*y) % 16;
+		$LF
+		"    return (Quantize4x4<31>(o16, rgbdata[2]) << 0)
+		$LF
+		"         | (Quantize4x4<63>(o16, rgbdata[1]) << 5)
+		$LF
+		"         | (Quantize4x4<31>(o16, rgbdata[0]) << 11);
+		$LF
+		"}
+		$LF
+		"static inline unsigned Build15(unsigned x,unsigned y, const unsigned char* rgbdata)
+		$LF
+		"{
+		$LF
+		"    unsigned o16 = (x + 4*y) % 16;
+		$LF
+		"    return (Quantize4x4<31>(o16, rgbdata[2]) << 0)
+		$LF
+		"         | (Quantize4x4<31>(o16, rgbdata[1]) << 5)
+		$LF
+		"         | (Quantize4x4<31>(o16, rgbdata[0]) << 10);
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert24To16Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* logodata = (const unsigned char*) data;
+		$LF
+		"    unsigned short* result = (unsigned short*) dest;
+		$LF
+		"    unsigned x=0,y=0;
+		$LF
+		"    for(unsigned pos=0; pos<npixels; ++pos)
+		$LF
+		"    {
+		$LF
+		"        result[pos] = Build16(x,y, &logodata[pos*3]);
+		$LF
+		"        if(++x >= width) { x=0; ++y; }
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert24To15Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* logodata = (const unsigned char*) data;
+		$LF
+		"    unsigned short* result = (unsigned short*) dest;
+		$LF
+		"    unsigned x=0,y=0;
+		$LF
+		"    for(unsigned pos=0; pos<npixels; ++pos)
+		$LF
+		"    {
+		$LF
+		"        result[pos] = Build15(x,y, &logodata[pos*3]);
+		$LF
+		"        if(++x >= width) { x=0; ++y; }
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"#ifdef __MMX__
+		$LF
+		"static inline void Convert_I420_MMX_Common
+		$LF
+		"    (c64_MMX p0_1, c64_MMX p2_3,
+		$LF
+		"     unsigned char* dest_y0,
+		$LF
+		"     unsigned char* dest_y1,
+		$LF
+		"     unsigned char* dest_u,
+		$LF
+		"     unsigned char* dest_v)
+		$LF
+		"{
+		$LF
+		"    c64_MMX p0 = c64_MMX(zero64).unpacklbw(p0_1); // expand to 64-bit (4*16)
+		$LF
+		"    c64_MMX p1 = c64_MMX(zero64).unpackhbw(p0_1);
+		$LF
+		"    c64_MMX p2 = c64_MMX(zero64).unpacklbw(p2_3);
+		$LF
+		"    c64_MMX p3 = c64_MMX(zero64).unpackhbw(p2_3);
+		$LF
+		"    
+		$LF
+		"    c64_MMX ry_gy_by; ry_gy_by.Init16(RY,GY,BY, 0);
+		$LF
+		"    c64_MMX rgb_u;    rgb_u.Init16(RU,GU,BU, 0);
+		$LF
+		"    c64_MMX rgb_v;    rgb_v.Init16(RV,GV,BV, 0);
+		$LF
+		$LF
+		"    c64_MMX ctotal = p0.add16(
+		$LF
+		"                     p2.add16(
+		$LF
+		"                     p1.add16(
+		$LF
+		"                     p3)));
+		$LF
+		"  
+		$LF
+		"    p0 = _mm_madd_pi16(ry_gy_by.value, p0.value);
+		$LF
+		"    p1 = _mm_madd_pi16(ry_gy_by.value, p1.value);
+		$LF
+		"    p2 = _mm_madd_pi16(ry_gy_by.value, p2.value);
+		$LF
+		"    p3 = _mm_madd_pi16(ry_gy_by.value, p3.value);
+		$LF
+		"    
+		$LF
+		"    c64_MMX yy;
+		$LF
+		"    yy.Init16( ((p0.Extract32<0>() + p0.Extract32<1>()) >> (RGB2YUV_SHIFT)),
+		$LF
+		"               ((p1.Extract32<0>() + p1.Extract32<1>()) >> (RGB2YUV_SHIFT)),
+		$LF
+		"               ((p2.Extract32<0>() + p2.Extract32<1>()) >> (RGB2YUV_SHIFT)),
+		$LF
+		"               ((p3.Extract32<0>() + p3.Extract32<1>()) >> (RGB2YUV_SHIFT)) );
+		$LF
+		"    yy = yy.add16( Bits16const<Y_ADD,Y_ADD>::value );
+		$LF
+		"    
+		$LF
+		"    // Because we're writing to adjacent pixels, we optimize this by
+		$LF
+		"    // writing two 8-bit values at once in both cases.
+		$LF
+		"    *(short*)dest_y0 = yy.Extract88_from_1616lo();
+		$LF
+		"    *(short*)dest_y1 = yy.Extract88_from_1616hi();
+		$LF
+		"    
+		$LF
+		"    c64_MMX u_total32 = _mm_madd_pi16(rgb_u.value, ctotal.value);
+		$LF
+		"    c64_MMX v_total32 = _mm_madd_pi16(rgb_v.value, ctotal.value);
+		$LF
+		"    
+		$LF
+		"    *dest_u = U_ADD + ((u_total32.Extract32<0>() + u_total32.Extract32<1>()) >> (RGB2YUV_SHIFT+2));
+		$LF
+		"    *dest_v = V_ADD + ((v_total32.Extract32<0>() + v_total32.Extract32<1>()) >> (RGB2YUV_SHIFT+2));
+		$LF
+		"}
+		$LF
+		$LF
+		"static inline void Convert_YUY2_MMX_Common
+		$LF
+		"    (c64_MMX p0_1, c64_MMX p2_3,
+		$LF
+		"     unsigned char* dest_yvyu)
+		$LF
+		"{
+		$LF
+		"    c64_MMX p0 = c64_MMX(zero64).unpacklbw(p0_1); // expand to 64-bit (4*16)
+		$LF
+		"    c64_MMX p1 = c64_MMX(zero64).unpackhbw(p0_1);
+		$LF
+		"    c64_MMX p2 = c64_MMX(zero64).unpacklbw(p2_3); // expand to 64-bit (4*16)
+		$LF
+		"    c64_MMX p3 = c64_MMX(zero64).unpackhbw(p2_3);
+		$LF
+		"    
+		$LF
+		"    c64_MMX ry_gy_by; ry_gy_by.Init16(RY,GY,BY, 0);
+		$LF
+		"    c64_MMX rgb_u;    rgb_u.Init16(RU,GU,BU, 0);
+		$LF
+		"    c64_MMX rgb_v;    rgb_v.Init16(RV,GV,BV, 0);
+		$LF
+		$LF
+		"    c64_MMX ctotal0 = p0.add16(p1);
+		$LF
+		"    c64_MMX ctotal2 = p2.add16(p3);
+		$LF
+		"  
+		$LF
+		"    p0 = _mm_madd_pi16(ry_gy_by.value, p0.value);
+		$LF
+		"    p1 = _mm_madd_pi16(ry_gy_by.value, p1.value);
+		$LF
+		"    p2 = _mm_madd_pi16(ry_gy_by.value, p2.value);
+		$LF
+		"    p3 = _mm_madd_pi16(ry_gy_by.value, p3.value);
+		$LF
+		"    
+		$LF
+		"    c64_MMX yy;
+		$LF
+		"    yy.Init16( ((p0.Extract32<0>() + p0.Extract32<1>()) >> (RGB2YUV_SHIFT)),
+		$LF
+		"               ((p1.Extract32<0>() + p1.Extract32<1>()) >> (RGB2YUV_SHIFT)),
+		$LF
+		"               ((p2.Extract32<0>() + p2.Extract32<1>()) >> (RGB2YUV_SHIFT)),
+		$LF
+		"               ((p3.Extract32<0>() + p3.Extract32<1>()) >> (RGB2YUV_SHIFT)) );
+		$LF
+		$LF
+		"    yy = yy.add16( Bits16const<Y_ADD,Y_ADD>::value );
+		$LF
+		"    
+		$LF
+		"    c64_MMX u_total32_0 = _mm_madd_pi16(rgb_u.value, ctotal0.value);
+		$LF
+		"    c64_MMX v_total32_0 = _mm_madd_pi16(rgb_v.value, ctotal0.value);
+		$LF
+		"    c64_MMX u_total32_2 = _mm_madd_pi16(rgb_u.value, ctotal2.value);
+		$LF
+		"    c64_MMX v_total32_2 = _mm_madd_pi16(rgb_v.value, ctotal2.value);
+		$LF
+		"    
+		$LF
+		"    c64_MMX quadword = yy; // four y values: at 0, 2, 4 and 6
+		$LF
+		"    
+		$LF
+		"    c64_MMX uv; uv.Init16(
+		$LF
+		"        ((v_total32_0.Extract32<0>() + v_total32_0.Extract32<1>()) >> (RGB2YUV_SHIFT+1)),
+		$LF
+		"        ((u_total32_0.Extract32<0>() + u_total32_0.Extract32<1>()) >> (RGB2YUV_SHIFT+1)),
+		$LF
+		"        ((v_total32_2.Extract32<0>() + v_total32_2.Extract32<1>()) >> (RGB2YUV_SHIFT+1)),
+		$LF
+		"        ((u_total32_2.Extract32<0>() + u_total32_2.Extract32<1>()) >> (RGB2YUV_SHIFT+1)) );
+		$LF
+		"    c64_MMX uv_adds; uv_adds.Init16(V_ADD, U_ADD, V_ADD, U_ADD);
+		$LF
+		"    uv = uv.add16(uv_adds);
+		$LF
+		"    
+		$LF
+		"    quadword |= uv << 8;     // two u and v values: at 1, 3, 5 and 7.
+		$LF
+		"    quadword.Put(dest_yvyu); // write four y values: at 0, 2, 4 and 6
+		$LF
+		"}
+		$LF
+		"#endif
+		$LF
+		$LF
+		"/*template<int PixStride>
+		$LF
+		"void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"    __attribute__((noinline));*/
+		$LF
+		$LF
+		"template<int PixStride>
+		$LF
+		"void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*) data;
+		$LF
+		"    unsigned height = npixels / width;
+		$LF
+		"    unsigned pos = 0;
+		$LF
+		"    unsigned ypos = 0;
+		$LF
+		"    unsigned vpos = npixels;
+		$LF
+		"    unsigned upos = vpos + npixels / 4;
+		$LF
+		"    unsigned stride = width*PixStride;
+		$LF
+		$LF
+		"    /* This function is based on code from x264 svn version 711 */
+		$LF
+		"    /* TODO: Apply MMX optimization for 24-bit pixels */
+		$LF
+		"    
+		$LF
+		"    for(unsigned y=0; y<height; y += 2)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned x=0; x<width; x += 2)
+		$LF
+		"        {
+		$LF
+		"        #ifdef __MMX__
+		$LF
+		"          if(PixStride == 4)
+		$LF
+		"          {
+		$LF
+		"            c64_MMX p0_1; p0_1.Get(&src[pos]);        // two 32-bit pixels (4*8)
+		$LF
+		"            c64_MMX p2_3; p2_3.Get(&src[pos+stride]); // two 32-bit pixels
+		$LF
+		$LF
+		"            pos += PixStride*2;
+		$LF
+		"            
+		$LF
+		"            Convert_I420_MMX_Common(p0_1, p2_3,
+		$LF
+		"                dest+ypos,
+		$LF
+		"                dest+ypos+width,
+		$LF
+		"                dest+upos++,
+		$LF
+		"                dest+vpos++);
+		$LF
+		"          }
+		$LF
+		"          else
+		$LF
+		"        #endif
+		$LF
+		"          {
+		$LF
+		"            int c[3], rgb[3][4];
+		$LF
+		"            
+		$LF
+		"            /* luma */
+		$LF
+		"            for(int n=0; n<3; ++n) c[n]  = rgb[n][0] = src[pos + n];
+		$LF
+		"            for(int n=0; n<3; ++n) c[n] += rgb[n][1] = src[pos + n + stride];
+		$LF
+		"            pos += PixStride;
+		$LF
+		"            
+		$LF
+		"            for(int n=0; n<3; ++n) c[n] += rgb[n][2] = src[pos + n];
+		$LF
+		"            for(int n=0; n<3; ++n) c[n] += rgb[n][3] = src[pos + n + stride];
+		$LF
+		"            pos += PixStride;
+		$LF
+		$LF
+		"            unsigned destpos[4] = { ypos, ypos+width, ypos+1, ypos+width+1 };
+		$LF
+		"            for(int n=0; n<4; ++n)
+		$LF
+		"            {
+		$LF
+		"                dest[destpos[n]]
+		$LF
+		"                    = Y_ADD + ((RY * rgb[0][n]
+		$LF
+		"                              + GY * rgb[1][n]
+		$LF
+		"                              + BY * rgb[2][n]
+		$LF
+		"                               ) >> RGB2YUV_SHIFT);  // y
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            dest[upos++] = (U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+2)) );
+		$LF
+		"            dest[vpos++] = (V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+2)) ); 
+		$LF
+		"          }
+		$LF
+		"            
+		$LF
+		"            ypos += 2;
+		$LF
+		"        }
+		$LF
+		"        pos += stride;
+		$LF
+		"        ypos += width;
+		$LF
+		"    }
+		$LF
+		"    #ifdef __MMX__
+		$LF
+		"     MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"}
+		$LF
+		$LF
+		"template<int PixStride>
+		$LF
+		"void Convert_4byte_To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*) data;
+		$LF
+		"    unsigned height = npixels / width;
+		$LF
+		"    unsigned pos = 0;
+		$LF
+		"    unsigned ypos = 0;
+		$LF
+		"    unsigned stride = width*PixStride;
+		$LF
+		$LF
+		"    /* This function is based on code from x264 svn version 711 */
+		$LF
+		"    /* TODO: Apply MMX optimization for 24-bit pixels */
+		$LF
+		"    
+		$LF
+		"    for(unsigned y=0; y<height; ++y)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned x=0; x<width; x += 2)
+		$LF
+		"        {
+		$LF
+		"        #ifdef __MMX__
+		$LF
+		"          if(PixStride == 4)
+		$LF
+		"          {
+		$LF
+		"            c64_MMX p0_1; p0_1.Get(&src[pos]);        // two 32-bit pixels (4*8)
+		$LF
+		"            pos += PixStride*2;
+		$LF
+		"            
+		$LF
+		"            c64_MMX p2_3; p2_3.Get(&src[pos]);        // two 32-bit pixels (4*8)
+		$LF
+		"            pos += PixStride*2;
+		$LF
+		"            x += 2;
+		$LF
+		"            
+		$LF
+		"            Convert_YUY2_MMX_Common(p0_1, p2_3,
+		$LF
+		"                dest+ypos);
+		$LF
+		"          
+		$LF
+		"            ypos += 4;
+		$LF
+		"          }
+		$LF
+		"          else
+		$LF
+		"        #endif
+		$LF
+		"          {
+		$LF
+		"            int c[3], rgb[3][2];
+		$LF
+		"            
+		$LF
+		"            /* luma */
+		$LF
+		"            for(int n=0; n<3; ++n) c[n]  = rgb[n][0] = src[pos + n];
+		$LF
+		"            pos += PixStride;
+		$LF
+		"            
+		$LF
+		"            for(int n=0; n<3; ++n) c[n] += rgb[n][1] = src[pos + n];
+		$LF
+		"            pos += PixStride;
+		$LF
+		$LF
+		"            for(int n=0; n<2; ++n)
+		$LF
+		"            {
+		$LF
+		"                dest[ypos + n*2]
+		$LF
+		"                    = Y_ADD + ((RY * rgb[0][n]
+		$LF
+		"                              + GY * rgb[1][n]
+		$LF
+		"                              + BY * rgb[2][n]
+		$LF
+		"                               ) >> RGB2YUV_SHIFT);  // y
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            dest[ypos+3] = (U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+1)) );
+		$LF
+		"            dest[ypos+1] = (V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+1)) ); 
+		$LF
+		"          }
+		$LF
+		"            ypos += 4;
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"    #ifdef __MMX__
+		$LF
+		"    MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"}
+		$LF
+		$LF
+		"/*template<int roffs,int rbits, int goffs,int gbits, int boffs,int bbits>
+		$LF
+		"void Convert_2byte_To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"    __attribute__((noinline));*/
+		$LF
+		"    
+		$LF
+		"template<int roffs,int rbits, int goffs,int gbits, int boffs,int bbits>
+		$LF
+		"void Convert_2byte_To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    const unsigned PixStride = 2;
+		$LF
+		"    const unsigned char* src = (const unsigned char*) data;
+		$LF
+		"    unsigned height = npixels / width;
+		$LF
+		"    unsigned pos = 0;
+		$LF
+		"    unsigned ypos = 0;
+		$LF
+		"    unsigned vpos = npixels;
+		$LF
+		"    unsigned upos = vpos + npixels / 4;
+		$LF
+		"    unsigned stride = width*PixStride;
+		$LF
+		$LF
+		"    /* This function is based on code from x264 svn version 711 */
+		$LF
+		"    
+		$LF
+		"    for(unsigned y=0; y<height; y += 2)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned x=0; x<width; x += 8)
+		$LF
+		"        {
+		$LF
+		"            unsigned char Rgb2byteBuf[2][8][4];
+		$LF
+		"            
+		$LF
+		"            /* Convert 8 pixels from two scanlines (16 in total)
+		$LF
+		"             * from RGB15 / RGB16 to RGB32
+		$LF
+		"             * (Not RGB32, because RGB32 conversion is faster)
+		$LF
+		"             */
+		$LF
+		"            Convert_2byte_to_24or32Common
+		$LF
+		"                <roffs,rbits, goffs,gbits, boffs,bbits, false>
+		$LF
+		"                (src+pos,        Rgb2byteBuf[0][0]);
+		$LF
+		$LF
+		"            Convert_2byte_to_24or32Common
+		$LF
+		"                <roffs,rbits, goffs,gbits, boffs,bbits, false>
+		$LF
+		"                (src+pos+stride, Rgb2byteBuf[1][0]);
+		$LF
+		$LF
+		"            pos += 16;
+		$LF
+		"            
+		$LF
+		"            for(int x8 = 0; x8 < 8; x8 += 2)
+		$LF
+		"            {
+		$LF
+		"              #ifdef __MMX__
+		$LF
+		"                c64_MMX p0_1; p0_1.Get(&Rgb2byteBuf[0][x8][0]); // two 32-bit pixels (4*8)
+		$LF
+		"                c64_MMX p2_3; p2_3.Get(&Rgb2byteBuf[1][x8][0]); // two 32-bit pixels
+		$LF
+		$LF
+		"                Convert_I420_MMX_Common(p0_1, p2_3,
+		$LF
+		"                    dest+ypos,
+		$LF
+		"                    dest+ypos+width,
+		$LF
+		"                    dest+upos++,
+		$LF
+		"                    dest+vpos++);
+		$LF
+		"              #else
+		$LF
+		"                int c[3];
+		$LF
+		"                /* TODO: Some faster means than using pointers */
+		$LF
+		"                unsigned char* rgb[4] =
+		$LF
+		"                {
+		$LF
+		"                    Rgb2byteBuf[0][x8+0],
+		$LF
+		"                    Rgb2byteBuf[0][x8+1],
+		$LF
+		"                    Rgb2byteBuf[1][x8+0],
+		$LF
+		"                    Rgb2byteBuf[1][x8+1]
+		$LF
+		"                };
+		$LF
+		"                
+		$LF
+		"                for(int m=0; m<3; ++m) c[m] = 0;
+		$LF
+		"                for(int n=0; n<4; ++n)
+		$LF
+		"                    for(int m=0; m<3; ++m)
+		$LF
+		"                        c[m] += rgb[n][m];
+		$LF
+		"                
+		$LF
+		"                unsigned destpos[4] = { ypos, ypos+1, ypos+width, ypos+width+1 };
+		$LF
+		"                for(int n=0; n<4; ++n)
+		$LF
+		"                {
+		$LF
+		"                    dest[destpos[n]]
+		$LF
+		"                        = Y_ADD + ((RY * rgb[n][0]
+		$LF
+		"                                  + GY * rgb[n][1]
+		$LF
+		"                                  + BY * rgb[n][2]
+		$LF
+		"                                   ) >> RGB2YUV_SHIFT);  // y
+		$LF
+		"                }
+		$LF
+		"                
+		$LF
+		"                /*c[0] /= 4; c[1] /= 4; c[2] /= 4;*/
+		$LF
+		"                // Note: +2 is because c[] contains 4 values
+		$LF
+		"                dest[upos++] = U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+2));
+		$LF
+		"                dest[vpos++] = V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+2)); 
+		$LF
+		"              #endif
+		$LF
+		"                ypos += 2;
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"        pos += stride;
+		$LF
+		"        ypos += width;
+		$LF
+		"    }
+		$LF
+		$LF
+		"    #ifdef __MMX__
+		$LF
+		"    MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"}
+		$LF
+		$LF
+		"template<int roffs,int rbits, int goffs,int gbits, int boffs,int bbits>
+		$LF
+		"void Convert_2byte_To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    const unsigned PixStride = 2;
+		$LF
+		"    const unsigned char* src = (const unsigned char*) data;
+		$LF
+		"    unsigned height = npixels / width;
+		$LF
+		"    unsigned pos = 0;
+		$LF
+		"    unsigned ypos = 0;
+		$LF
+		"    unsigned stride = width*PixStride;
+		$LF
+		$LF
+		"    for(unsigned y=0; y<height; ++y)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned x=0; x<width; x += 8)
+		$LF
+		"        {
+		$LF
+		"            unsigned char Rgb2byteBuf[8][4];
+		$LF
+		"            
+		$LF
+		"            /* Convert 8 pixels from a scanline
+		$LF
+		"             * from RGB15 / RGB16 to RGB32
+		$LF
+		"             * (Not RGB32, because RGB32 conversion is faster)
+		$LF
+		"             */
+		$LF
+		"            Convert_2byte_to_24or32Common
+		$LF
+		"                <roffs,rbits, goffs,gbits, boffs,bbits, false>
+		$LF
+		"                (src+pos, Rgb2byteBuf[0]);
+		$LF
+		$LF
+		"            pos += 16;
+		$LF
+		"            
+		$LF
+		"            for(int x8 = 0; x8 < 8; )
+		$LF
+		"            {
+		$LF
+		"              #ifdef __MMX__
+		$LF
+		"                c64_MMX p0_1; p0_1.Get(&Rgb2byteBuf[x8  ][0]); // two 32-bit pixels (4*8)
+		$LF
+		"                c64_MMX p2_3; p2_3.Get(&Rgb2byteBuf[x8+2][0]); // two 32-bit pixels (4*8)
+		$LF
+		"                Convert_YUY2_MMX_Common(p0_1, p2_3, dest+ypos);
+		$LF
+		"                x8   += 4;
+		$LF
+		"                ypos += 8;
+		$LF
+		"              #else
+		$LF
+		"                int c[3];
+		$LF
+		"                /* TODO: Some faster means than using pointers */
+		$LF
+		"                unsigned char* rgb[2] =
+		$LF
+		"                {
+		$LF
+		"                    Rgb2byteBuf[x8+0],
+		$LF
+		"                    Rgb2byteBuf[x8+1],
+		$LF
+		"                };
+		$LF
+		"                
+		$LF
+		"                for(int m=0; m<3; ++m) c[m] = 0;
+		$LF
+		"                for(int n=0; n<2; ++n)
+		$LF
+		"                    for(int m=0; m<3; ++m)
+		$LF
+		"                        c[m] += rgb[n][m];
+		$LF
+		"                
+		$LF
+		"                for(int n=0; n<2; ++n)
+		$LF
+		"                {
+		$LF
+		"                    dest[ypos + n*2]
+		$LF
+		"                        = Y_ADD + ((RY * rgb[n][0]
+		$LF
+		"                                  + GY * rgb[n][1]
+		$LF
+		"                                  + BY * rgb[n][2]
+		$LF
+		"                                   ) >> RGB2YUV_SHIFT);  // y
+		$LF
+		"                }
+		$LF
+		"                
+		$LF
+		"                /*c[0] /= 4; c[1] /= 4; c[2] /= 4;*/
+		$LF
+		"                // Note: +2 is because c[] contains 4 values
+		$LF
+		"                dest[ypos+3] = U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+1));
+		$LF
+		"                dest[ypos+1] = V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+1)); 
+		$LF
+		"                x8   += 2;
+		$LF
+		"                ypos += 4;
+		$LF
+		"              #endif
+		$LF
+		"            }
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		$LF
+		"    #ifdef __MMX__
+		$LF
+		"    MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"}
+		$LF
+		$LF
+		$LF
+		"/***/
+		$LF
+		$LF
+		"void Convert_I420To24Frame(const void* data, unsigned char* dest,
+		$LF
+		"                           unsigned npixels, unsigned width, bool swap_red_blue)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*) data;
+		$LF
+		"    unsigned height = npixels / width;
+		$LF
+		"    unsigned pos = 0;
+		$LF
+		"    unsigned ypos = 0;
+		$LF
+		"    unsigned vpos = npixels;
+		$LF
+		"    unsigned upos = vpos + npixels / 4;
+		$LF
+		"    
+		$LF
+		"    #ifdef __MMX__
+		$LF
+		"    c64_MMX rgb[4], yy[4];
+		$LF
+		"    #endif
+		$LF
+		"    
+		$LF
+		"    /*
+		$LF
+		"        Y input: 16..235
+		$LF
+		"        U input: 16..240
+		$LF
+		"        V input: 16..240
+		$LF
+		"        
+		$LF
+		"    */
+		$LF
+		"    
+		$LF
+		"  #pragma omp parallel for
+		$LF
+		"    for(unsigned y=0; y<height; y += 2)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned x=0; x<width; )
+		$LF
+		"        {
+		$LF
+		"        #ifdef __MMX__
+		$LF
+		"            /* Load 4 U and V values and subtract U_ADD and V_ADD from them. */
+		$LF
+		"            uint64_t tmp_u = *(uint32_t*)&src[upos];
+		$LF
+		"            uint64_t tmp_v = *(uint32_t*)&src[vpos];
+		$LF
+		"            c64_MMX uuq = c64_MMX(zero64)
+		$LF
+		"                     .unpacklbw(tmp_u) // 8-bit to 16-bit
+		$LF
+		"                     .sub16(Bits16const<U_ADD,U_ADD>::value)
+		$LF
+		"                     .shl16(16 - YUV2RGB_SHIFT); // shift them so that *13bitconst results in upper 16 bits having the actual value
+		$LF
+		"            c64_MMX vvq = c64_MMX(zero64)
+		$LF
+		"                     .unpacklbw(tmp_v)
+		$LF
+		"                     .sub16(Bits16const<V_ADD,V_ADD>::value)
+		$LF
+		"                     .shl16(16 - YUV2RGB_SHIFT); // shift them so that *13bitconst results in upper 16 bits having the actual value
+		$LF
+		"            
+		$LF
+		"            const short* uu = (const short*)&uuq;
+		$LF
+		"            const short* vv = (const short*)&vvq;
+		$LF
+		"          #if 1
+		$LF
+		"            c64_MMX vmul; vmul.Init16(VR, VG, 0, 0);  // R,G,B,0 * vmul = V
+		$LF
+		"            c64_MMX umul; umul.Init16(0, UG, UB, 0);  // R,G,B,0 * umul = U
+		$LF
+		"          #else
+		$LF
+		"            // pmaddw does: A,B,C,D and E,F,G,H,    A*E + B*F,  C*G + D*H
+		$LF
+		"            
+		$LF
+		"            // we do:                           R=   VR*v +  0*u, G= VG*v + UG*u
+		$LF
+		"            //                                  B=    0*v + UB*u,     0*0 + 0*0
+		$LF
+		"            c64_MMX vumul1; vumul1.Init16(VR, 0, VG, UG);
+		$LF
+		"            c64_MMX vumul2; vumul2.Init16(0, UB,  0,  0);
+		$LF
+		"          #endif
+		$LF
+		"            
+		$LF
+		"            /* c64_MMX rgb[4]; // four sets of 4*int16, each representing 1 rgb value */
+		$LF
+		"            for(int n=0; n<4; ++n)
+		$LF
+		"            {
+		$LF
+		"              #if 1
+		$LF
+		"                /* vv is shifted by 3 bits, vmul is shifted by 13 bits
+		$LF
+		"                 * 16 bits in total, so mul16hi gets the 16-bit downscaled part */
+		$LF
+		"                c64_MMX v; v.Init16(vv[n]);
+		$LF
+		"                c64_MMX u; u.Init16(uu[n]);
+		$LF
+		"                rgb[n] = v.mul16hi(vmul).add16(
+		$LF
+		"                         u.mul16hi(umul)      );
+		$LF
+		"              #else
+		$LF
+		"                c64_MMX vuvu; vuvu.Init16(vv[n], uu[n], vv[n], uu[n]);
+		$LF
+		"                c64_MMX madd1 = _mm_madd_pi16(vumul1.value, vuvu.value);
+		$LF
+		"                c64_MMX madd2 = _mm_madd_pi16(vumul2.value, vuvu.value);
+		$LF
+		"                rgb[n] = madd1.sar32(YUV2RGB_SHIFT)
+		$LF
+		"                              .conv_s32_s16(
+		$LF
+		"                         madd2.sar32(YUV2RGB_SHIFT));
+		$LF
+		"              #endif
+		$LF
+		"            }
+		$LF
+		"            
+		$LF
+		"            /* rgb[0] : U,V increment of RGB32 for x0,y0 - x1,y1
+		$LF
+		"             * rgb[1] : U,V increment of RGB32 for x2,y0 - x3,y1
+		$LF
+		"             * rgb[2] : U,V increment of RGB32 for x4,y0 - x5,y1
+		$LF
+		"             * rgb[3] : U,V increment of RGB32 for x6,y0 - x7,y1
+		$LF
+		"             */
+		$LF
+		"            
+		$LF
+		"            unsigned yyoffs[4] = { ypos, ypos+1, ypos+width, ypos+width+1 };
+		$LF
+		"            /* c64_MMX yy[4]; // four sets of 4*int16, each representing four Y values */
+		$LF
+		"            for(int n=0; n<4; ++n)
+		$LF
+		"            {
+		$LF
+		"                c64_MMX luma; luma.Init16(
+		$LF
+		"                    src[yyoffs[0]+n*2],
+		$LF
+		"                    src[yyoffs[1]+n*2],
+		$LF
+		"                    src[yyoffs[2]+n*2],
+		$LF
+		"                    src[yyoffs[3]+n*2]
+		$LF
+		"                );
+		$LF
+		"                luma = luma.sub16(Bits16const<Y_ADD,Y_ADD>::value);
+		$LF
+		"                luma = luma.shl16(16 - YUV2RGB_SHIFT);
+		$LF
+		"                yy[n] = luma.mul16hi(Bits16const<Y_REV,Y_REV>::value);
+		$LF
+		"            }
+		$LF
+		"            const short* const yyval = (const short*) &yy[0].value;
+		$LF
+		"            /*
+		$LF
+		"                values in order:
+		$LF
+		"                   x0y0 x1y0 x0y1 x1y1
+		$LF
+		"                   x2y0 x3y0 x2y1 x3y1
+		$LF
+		"                   x4y0 x5y0 x4y1 x5y1
+		$LF
+		"                   x6y0 x7y0 x6y1 x7y1
+		$LF
+		"            */
+		$LF
+		"            int tmppos = pos;
+		$LF
+		"            for(int ny = 0; ny < 4; ny += 2)
+		$LF
+		"            {
+		$LF
+		"                /* Note: We must use 16-bit pixels here instead of 8-bit,
+		$LF
+		"                 * because the rgb+Y addition can overflow. conv_s16_u8()
+		$LF
+		"                 * does the necessary clamping, which would not be done
+		$LF
+		"                 * if the values were 8-bit.
+		$LF
+		"                 */
+		$LF
+		"                // 8 pixels for one scanline, repeated twice
+		$LF
+		"                /* Note: C++ has no named constructors, so we
+		$LF
+		"                 * use statement blocks here as substitutes.
+		$LF
+		"                 */
+		$LF
+		"                c64_MMX r0
+		$LF
+		"                    = rgb[0].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+0]); tmp; }) )
+		$LF
+		"                           .conv_s16_u8(
+		$LF
+		"                      rgb[0].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+1]); tmp; }) ));
+		$LF
+		"                c64_MMX r1
+		$LF
+		"                    = rgb[1].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+4]); tmp; }) )
+		$LF
+		"                           .conv_s16_u8(
+		$LF
+		"                      rgb[1].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+5]); tmp; }) ));
+		$LF
+		"                c64_MMX r2
+		$LF
+		"                    = rgb[2].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+8]); tmp; }) )
+		$LF
+		"                           .conv_s16_u8(
+		$LF
+		"                      rgb[2].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+9]); tmp; }) ));
+		$LF
+		"                c64_MMX r3
+		$LF
+		"                    = rgb[3].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+12]); tmp; }) )
+		$LF
+		"                           .conv_s16_u8(
+		$LF
+		"                      rgb[3].add16( ({ c64_MMX tmp; tmp.Init16(yyval[ny+13]); tmp; }) ));
+		$LF
+		$LF
+		"                Convert32To24_32bytes(r0,r1,r2,r3, &dest[tmppos]);
+		$LF
+		"                tmppos += width*3; // next line
+		$LF
+		"            }
+		$LF
+		"            upos += 4;
+		$LF
+		"            vpos += 4;
+		$LF
+		"            ypos += 8; // eight bytes for this line (and eight from next too)
+		$LF
+		"            pos  += 8*3; // eight triplets generated on this line
+		$LF
+		"            x    += 8; // eight yy values used on this line
+		$LF
+		"        #else /* non-MMX */
+		$LF
+		"            int u = src[upos] - U_ADD;
+		$LF
+		"            int v = src[vpos] - V_ADD;
+		$LF
+		$LF
+		"            int rgb[3] =
+		$LF
+		"                {
+		$LF
+		"                   (VR * v         ) >> (YUV2RGB_SHIFT),
+		$LF
+		"                   (VG * v + UG * u) >> (YUV2RGB_SHIFT),
+		$LF
+		"                   (       + UB * u) >> (YUV2RGB_SHIFT)
+		$LF
+		"                };
+		$LF
+		"            
+		$LF
+		"            unsigned incr[4] = {0,1,width,width+1};
+		$LF
+		$LF
+		"            for(unsigned r=0; r<4; ++r)
+		$LF
+		"                for(unsigned doffs=pos + incr[r]*3, yoffs=ypos + incr[r],
+		$LF
+		"                        yy = (Y_REV * (src[yoffs] - Y_ADD)) >> YUV2RGB_SHIFT,
+		$LF
+		"                        n=0; n<3; ++n)
+		$LF
+		"                    dest[doffs+n] = c64::clamp_u8(rgb[n] + (int)yy);
+		$LF
+		$LF
+		"            upos += 1;
+		$LF
+		"            vpos += 1;
+		$LF
+		"            ypos += 2; // two bytes for this line (two from next line)
+		$LF
+		"            pos  += 2*3; // two triplets generated on this line
+		$LF
+		"            x    += 2; // two yy values used on this line
+		$LF
+		"        #endif
+		$LF
+		"        }
+		$LF
+		"        ypos += width;
+		$LF
+		"        pos += 3*width;
+		$LF
+		"    }
+		$LF
+		"    #ifdef __MMX__
+		$LF
+		"    MMX_clear();
+		$LF
+		"    #endif
+		$LF
+		"}
+		$LF
+		$LF
+		"void Convert_YUY2To24Frame(const void* data, unsigned char* dest,
+		$LF
+		"                           unsigned npixels, unsigned width, bool swap_red_blue)
+		$LF
+		"{
+		$LF
+		"    const unsigned char* src = (const unsigned char*) data;
+		$LF
+		"    unsigned height = npixels / width;
+		$LF
+		"    unsigned pos = 0;
+		$LF
+		"    unsigned ypos = 0;
+		$LF
+		"    
+		$LF
+		"    /* TODO: MMX optimization */
+		$LF
+		"    
+		$LF
+		"    /*
+		$LF
+		"        Y input: 16..235
+		$LF
+		"        U input: 16..240
+		$LF
+		"        V input: 16..240
+		$LF
+		"        
+		$LF
+		"    */
+		$LF
+		"  #pragma omp parallel for
+		$LF
+		"    for(unsigned y=0; y<height; ++y)
+		$LF
+		"    {
+		$LF
+		"        for(unsigned x=0; x<width; x += 2)
+		$LF
+		"        {
+		$LF
+		"            /* non-MMX */
+		$LF
+		"            int u = src[ypos+1] - U_ADD;
+		$LF
+		"            int v = src[ypos+3] - V_ADD;
+		$LF
+		$LF
+		"            int rgb[3] =
+		$LF
+		"                {
+		$LF
+		"                   (VR * v         ) >> (YUV2RGB_SHIFT),
+		$LF
+		"                   (VG * v + UG * u) >> (YUV2RGB_SHIFT),
+		$LF
+		"                   (       + UB * u) >> (YUV2RGB_SHIFT)
+		$LF
+		"                };
+		$LF
+		"            
+		$LF
+		"            for(unsigned r=0; r<2; ++r)
+		$LF
+		"                for(unsigned doffs=pos + r*3, yoffs=ypos+r*2,
+		$LF
+		"                        yy = (Y_REV * (src[yoffs] - Y_ADD)) >> YUV2RGB_SHIFT,
+		$LF
+		"                        n=0; n<3; ++n)
+		$LF
+		"                    dest[doffs+n] = c64::clamp_u8(rgb[n] + (int)yy);
+		$LF
+		$LF
+		"            ypos += 4; // four bytes for this line (y,u,y,v)
+		$LF
+		"            pos  += 2*3; // two triplets generated on this line
+		$LF
+		"            x    += 2; // two yy values used on this line
+		$LF
+		"        }
+		$LF
+		"    }
+		$LF
+		"}
+		$LF
+		$LF
+		"/***/
+		$LF
+		"void Convert24To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_4byte_To_I420Frame<3>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"void Convert32To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_4byte_To_I420Frame<4>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"void Convert15To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_2byte_To_I420Frame<10,5, 5,5, 0,5>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"void Convert16To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_2byte_To_I420Frame<11,5, 5,6, 0,5>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"/***/
+		$LF
+		"void Convert24To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_4byte_To_YUY2Frame<3>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"void Convert32To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_4byte_To_YUY2Frame<4>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"void Convert15To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_2byte_To_YUY2Frame<10,5, 5,5, 0,5>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+		"void Convert16To_YUY2Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+		$LF
+		"{
+		$LF
+		"    Convert_2byte_To_YUY2Frame<11,5, 5,6, 0,5>(data,dest,npixels,width);
+		$LF
+		"}
+		$LF
+	]code
+]pre
+[h3 
+	" How to use the modified emulator:
+	$LF
+	[a id=heading-243 
+	]a
+]h3
+[p 
+	"An example of a working value for 
+	[tt 
+		"NESVideoSetVideoCmd()
+	]tt
+	":
+	$LF
+]p
+[pre 
+	"mencoder - -o testVIDEONUMBER.avi -mc 0 \
+	$LF
+	"  -ovc x264 -x264encopts crf=0:me=dia:turbo=2:frameref=4 \
+	$LF
+	"  -oac mp3lame -lameopts mode=3:preset=60:aq=1 \
+	$LF
+	"  -vf decimate=10:0:0:1 -nocache \
+	$LF
+	"  NESVSETTINGS &> mencoder.log
+	$LF
+]pre
+[p 
+	"nesvideos-piece will replace NESVSETTINGS with the relevant settings
+	$LF
+	"required to interpret the raw video and audio data properly. It will
+	$LF
+	"also replace VIDEONUMBER with a successive number starting from 0
+	$LF
+	"each time a new AVI is started.
+	$LF
+]p
+[p 
+	"If your emulator reads the encoding command from the VIDEOLOG environment
+	$LF
+	"variable, you can start the emulator like this, for example:
+	$LF
+]p
+[pre 
+	" 
+	$LF
+	"RESULTFILE="`pwd`/testVIDEONUMBER.avi"
+	$LF
+	"VIDEO="-ovc x264 -x264encopts crf=0:me=dia:turbo=2:frameref=4"
+	$LF
+	"AUDIO="-oac mp3lame -lameopts mode=3:preset=60:aq=1"
+	$LF
+	"OPT="-vf decimate=10:0:0:1 -nocache -mc 0"
+	$LF
+	"VIDEOCMD="mencoder - -o $RESULTFILE $OPT $VIDEO $AUDIO NESVSETTINGS"
+	$LF
+	"VIDEOLOG="$VIDEOCMD" ./emulator --autodemo moviefile.mmv romfile.sms
+	$LF
+]pre
+[h4 
+	" Using a remote computer for running mencoder
+	$LF
+	[a id=heading-244 
+	]a
+]h4
+[p 
+	"In my setups, I always use a remote computer for encoding the AVI,
+	$LF
+	"different from the computer where I run the emulator. This has double
+	$LF
+	"benefits:
+	$LF
+]p
+[ul 
+	[li 
+		" The desktop computer that runs the emulator, can use 100% CPU power for running the emulator, making the encoding faster
+		$LF
+	]li
+	[li 
+		" The server computer that creates the actual AVI, potentially has more CPU power than the desktop, and can encode faster than the desktop would.
+		$LF
+	]li
+]ul
+[p 
+	"To accomplish this, I modify the encoding script as follows:
+	$LF
+]p
+[pre 
+	$LF
+	"REXEC="rexec -pPASSWORD HOSTNAME"
+	$LF
+	"FLAGFILE="`pwd`/s.status"
+	$LF
+	"# These commands are common for both local and remote cases:
+	$LF
+	"RESULTFILE="`pwd`/testVIDEONUMBER.avi"
+	$LF
+	"VIDEO="-ovc x264 -x264encopts crf=0:me=dia:turbo=2:frameref=4"
+	$LF
+	"AUDIO="-oac mp3lame -lameopts mode=3:preset=60:aq=1"
+	$LF
+	"OPT="-vf decimate=10:0:0:1 -nocache -mc 0"
+	$LF
+	"VIDEOCMD="mencoder - -o $RESULTFILE $OPT $VIDEO $AUDIO NESVSETTINGS"
+	$LF
+	"# This is again for the remote case:
+	$LF
+	"COM="lzop -F4"
+	$LF
+	"DECOM="lzop -Fd"
+	$LF
+	"rm -f "$FLAGFILE" s.log
+	$LF
+	"VIDEOCMD="touch '$FLAGFILE';$COM | $REXEC $DECOM \| $VIDEOCMD"
+	$LF
+	"(while 
+	"[ ! -f "$FLAGFILE" ]
+	";do sleep 0.25;done
+	$LF
+	" $REXEC "cat > `pwd`/s.log" < s.log) &
+	$LF
+	"# This is again common for both local and remote cases: 
+	$LF
+	"VIDEOLOG="$VIDEOCMD" ./emulator --autodemo moviefile.mmv romfile.sms
+	$LF
+	"# lastly, cleanup (remote only)
+	$LF
+	"rm -f "$FLAGFILE" s.log
+	$LF
+]pre
+[p 
+	"The 
+	[tt 
+		"s.log
+	]tt
+	" file is a FIFO through which nesvideos-piece.cc passes the audio to mencoder. Making a FIFO work through a remote connection requires some extra work:
+	$LF
+]p
+[ul 
+	[li 
+		" The local and remote computer must share access to the same working directory, and it has to have the same path name. 
+		[em 
+			"This is important.
+		]em
+		" (A future version may alleviate the problem.)
+		$LF
+	]li
+	[li 
+		" Because a FIFO is not shared through the network, some extra work is required to transfer the data from the local FIFO to the remote FIFO. This is done by the backgrounded 
+		[tt 
+			"cat
+		]tt
+		" command in the script. But the command must not start before the encoder is to be launched, hence the flag file and the 
+		[tt 
+			"while
+		]tt
+		" loop.
+		$LF
+	]li
+]ul
+[p 
+	"Optimizations:
+	$LF
+]p
+[ul 
+	[li 
+		" Note that 
+		[a class=extlink href=http://www.lzop.org/ rel=nofollow 
+			"lzop
+		]a
+		" is used to lessen the network bottleneck by exchanging it for CPU usage. lzop is a very lightweight compressor, much better for its purpose here than gzip, bzip2 or lzma would be.
+		$LF
+	]li
+	[li 
+		" If you are encoding to H.264, your emulator would ideally output I420 video. H.264 internally uses I420 video, and it has the smallest network usage of all the choices. You can use the 
+		[tt 
+			"Convert##To_I420()
+		]tt
+		" functions in 
+		[tt 
+			"rgbtorgb.hh
+		]tt
+		" to convert frames to I420. (Substitute ## with your BPP.) The conversion to I420 consumes less CPU time than the reduction in frame sizes saves, making encoding faster.
+		$LF
+	]li
+]ul

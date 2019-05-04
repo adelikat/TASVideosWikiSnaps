@@ -1,0 +1,156 @@
+8
+[p 
+	"frs is the current movie capture format used by 
+	(__wikiLink|EmulatorResources/Fbash|Final Burn Alpha Shuffle)
+	". It is a modified version of the 
+	(__wikiLink|EmulatorResources/Fbarr/fbm|fbm file format.)
+	$LF
+]p
+[p 
+	"Note: fba-rr has a bug where it will repeat the metadata chunk each time the emulator is closed/reloaded (for example, reloading a movie.) Example below. This is NOT fixed in fbash.
+	$LF
+]p
+[p 
+	[img class=embed src=http://imgur.com/gCppnov.png 
+	]img
+	$LF
+]p
+[p 
+	"From the official documentation:
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"frs is the movie capture format used by FBA shuffle.
+	$LF
+]p
+[p 
+	"It is almost identical to the earlier fr format used by blip's rerecording build.
+	$LF
+	"FRS file format description FRS file consists of a header, followed by an optional save state chunk,
+	$LF
+	"followed by a frame data chunk, then a metadata chunk.
+	$LF
+]p
+[p 
+	"File Header format:
+	$LF
+	[br 
+	]br
+	" 000 4-byte signature: 46 42 31 20 "FB1 "
+	$LF
+	[br 
+	]br
+	" 004 1-byte int: movie flag (1 = record from start)
+	$LF
+	[br 
+	]br
+	" 005 4-byte little-endian unsigned int: major revision of libburn
+	$LF
+	[br 
+	]br
+	" 00D 4-byte little-endian unsigned int: minor revision of libburn
+	$LF
+]p
+[p 
+	"Save State Chunk format:
+	$LF
+	[br 
+	]br
+	" 000 4-byte chunk identifier: 46 53 31 20 "FS1 "
+	$LF
+	[br 
+	]br
+	" 004 4-byte little-endian unsigned int: size of this save state chunk in bytes, not including the chunk identifier
+	$LF
+	[br 
+	]br
+	" 008 4-byte little-endian unsigned int: version of FB this was saved from
+	$LF
+	[br 
+	]br
+	" 00C 4-byte little-endian unsigned int: minimum FBA version required to load NV data
+	$LF
+	[br 
+	]br
+	" 010 4-byte little-endian unsigned int: minimum FBA version required to load All data
+	$LF
+	[br 
+	]br
+	" 014 4-byte little-endian unsigned int: size of the compressed saved data (not including header size or padding)
+	$LF
+	[br 
+	]br
+	" 018 32-byte possibly-unterminated ASCII string: Name of the game
+	$LF
+	[br 
+	]br
+	" 038 4-byte little-endian unsigned int: number of frames that have already been emulated before recording started
+	$LF
+	[br 
+	]br
+	" 03C 12 bytes: reserved, set to 0
+	$LF
+	[br 
+	]br
+	" 048: the compressed save data
+	$LF
+]p
+[p 
+	"Frame Data Chunk format:
+	$LF
+	[br 
+	]br
+	" 000 4-byte chunk identifier: 46 52 31 20 "FR1 "
+	$LF
+	[br 
+	]br
+	" 004 32-byte possibly-unterminated ASCII string: Name of the game
+	$LF
+	[br 
+	]br
+	" 004 32-byte null-terminated ASCII string: Application version
+	$LF
+	[br 
+	]br
+	" 024 4-byte little-endian unsigned int: size of this frame data chunk in bytes, not including the chunk identifier
+	$LF
+	[br 
+	]br
+	" 028 4-byte little-endian unsigned int: number of recorded frames
+	$LF
+	[br 
+	]br
+	" 02A 4-byte little-endian unsigned int: rerecord count
+	$LF
+	[br 
+	]br
+	" 02E 8 bytes: reserved, set to 0
+	$LF
+	[br 
+	]br
+	" 036: frame input data. The format varies depending on which inputs the game supports and may be compressed (unknown).
+	$LF
+	"Reset is always a possible input, although the value that means Reset will be different depending on the game.
+	$LF
+]p
+[p 
+	"Meta Data Chunk format:
+	$LF
+	[br 
+	]br
+	" 000 4-byte chunk identifier: 46 52 31 20 "FRM1"
+	$LF
+	[br 
+	]br
+	" 004 4-byte little-endian unsigned int: size of the metadata in bytes, not including the chunk identifier or this integer
+	$LF
+	[br 
+	]br
+	" 008 string of little-endian 2-byte wide characters of locale-dependant encoding: author information
+	$LF
+]p
+[p 
+	"Notes The format does not indicate a framerate, but it is assumed to always be 60 frames per second.
+]p

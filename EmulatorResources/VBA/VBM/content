@@ -1,0 +1,581 @@
+4
+[p 
+	"VBM is the movie capture format of 
+	(__wikiLink|EmulatorResources/VBA|Visual Boy Advance)
+	$LF
+]p
+[h3 
+	" VBM file format description
+	$LF
+]h3
+[h4 
+	" Header format:
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"000
+			]th
+			[td 
+				" 4-byte                  signature
+			]td
+			[td 
+				" 56 42 4D 1A "VBM\x1A"
+			]td
+		]tr
+		[tr 
+			[th 
+				"004
+			]th
+			[td 
+				" 4-byte little-endian unsigned int
+			]td
+			[td 
+				" major version number, must be "1"
+			]td
+		]tr
+		[tr 
+			[th 
+				"008
+			]th
+			[td 
+				" 4-byte little-endian      integer
+			]td
+			[td 
+				" movie "uid" - identifies the movie-savestate relationship, also used as the recording time in Unix epoch format
+			]td
+		]tr
+		[tr 
+			[th 
+				"00C
+			]th
+			[td 
+				" 4-byte little-endian unsigned int
+			]td
+			[td 
+				" number of frames
+			]td
+		]tr
+		[tr 
+			[th 
+				"010
+			]th
+			[td 
+				" 4-byte little-endian unsigned int
+			]td
+			[td 
+				" rerecord count
+			]td
+		]tr
+		[tr 
+			[th 
+				"014
+			]th
+			[td 
+				" 1-byte                      flags
+			]td
+			[td 
+				" (movie start flags)
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 0
+			]td
+			[td 
+				" if "1", movie starts from an embedded "quicksave" snapshot
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 1
+			]td
+			[td 
+				" if "1", movie starts from reset with an embedded SRAM
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"If both bits 0 and 1 are "1", the movie file is invalid
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"other
+			]td
+			[td 
+				" reserved, set to 0
+			]td
+		]tr
+		[tr 
+			[th 
+				"015
+			]th
+			[td 
+				" 1-byte flags
+			]td
+			[td 
+				" controller flags
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 0
+			]td
+			[td 
+				" controller 1 in use
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 1
+			]td
+			[td 
+				" controller 2 in use (SGB games can be 2-player multiplayer)
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 2
+			]td
+			[td 
+				" controller 3 in use (SGB games can be 3- or 4-player multiplayer with multitap)
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 3
+			]td
+			[td 
+				" controller 4 in use (SGB games can be 3- or 4-player multiplayer with multitap)
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"other
+			]td
+			[td 
+				" reserved
+			]td
+		]tr
+		[tr 
+			[th 
+				"016
+			]th
+			[td 
+				" 1-byte flags
+			]td
+			[td 
+				" system flags (game always runs at 60 frames/sec)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 0
+			]td
+			[td 
+				" if "1", movie is for the GBA system
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 1
+			]td
+			[td 
+				" if "1", movie is for the GBC system
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 2
+			]td
+			[td 
+				" if "1", movie is for the SGB system
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"If all 3 of these bits are "0", it is for regular GB.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"At most one of bits 0, 1, 2 can be "1"
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"other
+			]td
+			[td 
+				" reserved, set to 0
+			]td
+		]tr
+		[tr 
+			[th 
+				"017
+			]th
+			[td 
+				" 1-byte flags
+			]td
+			[td 
+				" (values of some boolean emulator options)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 0: useBiosFile  
+			]td
+			[td 
+				"if "1" and the movie is of a GBA game, the movie was made using a GBA BIOS file.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 1: skipBiosFile 
+			]td
+			[td 
+				"if "0" and the movie was made with a GBA BIOS file, the BIOS intro is included in the movie.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 2: rtcEnable    
+			]td
+			[td 
+				"if "1", the emulator "real time clock" feature was enabled.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 3: gbInputHack  
+			]td
+			[td 
+				"if "1" and the movie is of a GB, GBC, or SGB game, the movie was made with the Null Input Kludge on, otherwise it was not.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 4: lagReduction 
+			]td
+			[td 
+				"if "0" and the movie is of a GBA game, the movie was made using the old excessively laggy GBA timing.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 5: gbcHdma5Fix  
+			]td
+			[td 
+				"if "0" and the movie is of a GBC game, the movie was made using the old buggy HDMA5 timing.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 6: echoRAMFix   
+			]td
+			[td 
+				"if "1" and the movie is of a GB, GBC, or SGB game, the movie was made with Echo RAM Fix on, otherwise it was made with Echo RAM Fix off.
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				"bit 7: sramInitFix  
+			]td
+			[td 
+				"if "1" and the movie is of a GBA game, the movie was made with SRAM Init Fix on, otherwise it was not.
+			]td
+		]tr
+		[tr 
+			[th 
+				"018
+			]th
+			[td 
+				" 4-byte little-endian unsigned   int
+			]td
+			[td 
+				" theApp.winSaveType (value of that emulator option)
+			]td
+		]tr
+		[tr 
+			[th 
+				"01C
+			]th
+			[td 
+				" 4-byte little-endian unsigned   int
+			]td
+			[td 
+				" theApp.winFlashSize (value of that emulator option)
+			]td
+		]tr
+		[tr 
+			[th 
+				"020
+			]th
+			[td 
+				" 4-byte little-endian unsigned   int
+			]td
+			[td 
+				" gbEmulatorType (value of that emulator option)
+			]td
+		]tr
+		[tr 
+			[th 
+				"024
+			]th
+			[td 
+				" 12-byte             character array
+			]td
+			[td 
+				" the internal game title of the ROM used while recording, not necessarily null-terminated (ASCII?)
+			]td
+		]tr
+		[tr 
+			[th 
+				"030
+			]th
+			[td 
+				" 1-byte                unsigned char
+			]td
+			[td 
+				" minor version/revision number of current VBM version, the latest is "1"
+			]td
+		]tr
+		[tr 
+			[th 
+				"031
+			]th
+			[td 
+				" 1-byte               unsigned  char
+			]td
+			[td 
+				" the internal CRC of the ROM used while recording
+			]td
+		]tr
+		[tr 
+			[th 
+				"032
+			]th
+			[td 
+				" 2-byte little-endian unsigned short
+			]td
+			[td 
+				" the internal Checksum of the ROM used while recording, or a calculated CRC16 of the BIOS if GBA
+			]td
+		]tr
+		[tr 
+			[th 
+				"034
+			]th
+			[td 
+				" 4-byte little-endian unsigned   int
+			]td
+			[td 
+				" the Game Code of the ROM used while recording, or the Unit Code if not GBA
+			]td
+		]tr
+		[tr 
+			[th 
+				"038
+			]th
+			[td 
+				" 4-byte little-endian unsigned   int
+			]td
+			[td 
+				" offset to the savestate or SRAM inside file, set to 0 if unused
+			]td
+		]tr
+		[tr 
+			[th 
+				"03C
+			]th
+			[td 
+				" 4-byte little-endian unsigned   int
+			]td
+			[td 
+				" offset to the controller data inside file
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Info (192 bytes)
+	$LF
+]h4
+[p 
+	"After the header is 192 bytes of text.
+	$LF
+	"The first 64 of these 192 bytes are for the author's name (or names).
+	$LF
+	"The following 128 bytes are for a description of the movie.
+	$LF
+	"Both parts must be null-terminated.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Bisqwit)
+	": Due to particularly bad design of the file format, the character encoding used in these strings is locale-dependent. That is, it might be Windows-1252 if the player was central-European, Windows-1251 if the player was Russian, Shift_JIS if the player was Japanese, or anything else. Which makes it impossible to reliably read what text is stored there. If the person replaying the movie has different locale than the person who made the movie, the non-English letters of the text most certainly appear as garbage. 
+	$LF
+]p
+[h4 
+	" Start Data
+	$LF
+]h4
+[p 
+	"Located somewhere after the Info, as determined by the 4-byte save offset value at 0x038 in the Header.
+	$LF
+]p
+[p 
+	"It must be *before* the controller data, however, and obviously must not overlap the controller data.
+	$LF
+]p
+[p 
+	"Can be either a save-state snapshot or SRAM, as determined by the flags at byte 0x014 in the header.
+	$LF
+]p
+[p 
+	"Also has the possibility of not existing at all, which is the same as containing all-cleared SRAM (except it's not stored in the movie). 
+	$LF
+]p
+[h4 
+	" Controller Data
+	$LF
+]h4
+[p 
+	"Located somewhere after the Info, as determined by the 4-byte controller offset value at 0x03C in the Header.
+	$LF
+]p
+[p 
+	"(If there is no "Start Data", this will probably begin at byte 0x100 in the file, but this is not guaranteed.)
+	$LF
+]p
+[p 
+	"A stream of 2-byte bitvectors which indicate which buttons are pressed at each point in time.
+	$LF
+]p
+[p 
+	"They will come in groups of however many controllers are active, in increasing order. Each value is determined by OR-ing together values for whichever of the following are pressed:
+	$LF
+	[tt 
+		$LF
+	]tt
+]p
+[pre 
+	" 01 00 A
+	$LF
+	" 02 00 B
+	$LF
+	" 04 00 Select
+	$LF
+	" 08 00 Start
+	$LF
+	" 10 00 Right
+	$LF
+	" 20 00 Left
+	$LF
+	" 40 00 Up
+	$LF
+	" 80 00 Down
+	$LF
+	" 00 01 R
+	$LF
+	" 00 02 L
+	$LF
+	" 00 04 Reset (old timing, only for backward-compatibility purpose)
+	$LF
+	" 00 08 Reset (new timing since version 1.1)
+	$LF
+	" 00 10 Left motion sensor (deprecated as never implemented)
+	$LF
+	" 00 20 Right motion sensor (deprecated as never implemented)
+	$LF
+	" 00 40 Down motion sensor (deprecated as never implemented)
+	$LF
+	" 00 80 Up motion sensor (deprecated as never implemented)
+	$LF
+]pre
+[p 
+	"}}
+]p

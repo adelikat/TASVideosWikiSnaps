@@ -1,0 +1,1367 @@
+49
+[p 
+	"This is a proposal for a new movie format for recording movies 
+	$LF
+	"with the Gens Sega Genesis emulator.  There is no code that implements 
+	$LF
+	"this proposal, and the implemented version may be different.  This 
+	$LF
+	"proposal is provided as a set of guidelines to let the eventual 
+	$LF
+	"implementer know which issues need to be addressed.
+	$LF
+]p
+[p 
+	"There is an 
+	[a href=/forum/t/3995 
+		"ongoing discussion
+	]a
+	" about this proposition on the forum.
+	$LF
+]p
+[p 
+	"The source code of 
+	[a class=extlink href=http://ucon64.sourceforge.net/ rel=nofollow 
+		"ucon64
+	]a
+	" may prove helpful
+	$LF
+	"for extracting information directly from ROMs.
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-58 
+				" Issues to be Addressed
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-59 
+						" Extensibility
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-60 
+						" Configuration Options
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-61 
+						" Game Information
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-62 
+						" Hexedit-friendly
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-63 
+						" Compression
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-64 
+						" Number of Players
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-65 
+						" Integrity
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-66 
+				" Current Proposal
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-67 
+						" Header
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-68 
+						" General Chunk Format
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-69 
+						" Required Chunks
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-70 
+								" Start Information
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-71 
+								" Recording information
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-72 
+								" Game Requirements
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-73 
+								" Frame Data
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-74 
+						" Optional Chunks
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-75 
+								" Console Events 
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-76 
+								" Saved States
+								[del 
+								]del
+								[del 
+								]del
+								"-
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-77 
+								" Subtitles
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-78 
+						" Text-only Format
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-79 
+								" Header
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-80 
+								" Generic Text-only Chunk
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-81 
+								" Text-only Frame Chunk
+								$LF
+							]a
+						]li
+					]ul
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h2 
+	" Issues to be Addressed
+	$LF
+	[a id=heading-58 
+	]a
+]h2
+[h3 
+	" Extensibility
+	$LF
+	[a id=heading-59 
+	]a
+]h3
+[p 
+	"The GMV format can not easily be modified or improved.  The GM2 format 
+	$LF
+	"should allow additional information to be inserted in a 
+	[a class=extlink href=http://en.wikipedia.org/wiki/Forward_compatibility rel=nofollow 
+		"forwards-compatible
+	]a
+	" manner.  
+	$LF
+	"GM2 does not need to be backwards-compatible with GMV.
+	$LF
+]p
+[h3 
+	" Configuration Options
+	$LF
+	[a id=heading-60 
+	]a
+]h3
+[p 
+	"The GMV format does not store certain configuration options which can 
+	$LF
+	"effect synchronization.  These include the following.
+	$LF
+]p
+[ul 
+	[li 
+		" sound rate 
+		[a id=r1 
+		]a
+		[sup 
+			"[
+			[a href=#1 
+				"1
+			]a
+			"]
+		]sup
+		$LF
+	]li
+	[li 
+		" SRM information (important for SegaCD recording, when stable)
+		$LF
+	]li
+	[li 
+		" perfect synchro (important for SegaCD recording, when stable)
+		$LF
+	]li
+	[li 
+		" country
+		$LF
+	]li
+	[li 
+		" up/down left/right (important for recording)
+		$LF
+	]li
+	[li 
+		" 
+		[del 
+			"Video resolution.
+		]del
+		" 
+		[a id=r7 
+		]a
+		[sup 
+			"[
+			[a href=#7 
+				"7
+			]a
+			"]
+		]sup
+		$LF
+	]li
+]ul
+[h3 
+	" Game Information
+	$LF
+	[a id=heading-61 
+	]a
+]h3
+[p 
+	"GMV does not contain any information on which ROM was used to record a movie.  
+	$LF
+	"The GM2 format should contain both the internal ROM name and a checksum of the ROM.
+	$LF
+]p
+[h3 
+	" Hexedit-friendly
+	$LF
+	[a id=heading-62 
+	]a
+]h3
+[p 
+	"The GMV format is relatively hexedit-friendly.  However, the format 
+	$LF
+	"may be considered hedexit-friendly as long as there is a portable editor
+	$LF
+	"or GM2<->text convertor available.
+	$LF
+	"The ability to directly load and save an ASCII verion of 
+	$LF
+	"GM2 fulfills this requirement.
+	$LF
+]p
+[h3 
+	" Compression
+	$LF
+	[a id=heading-63 
+	]a
+]h3
+[p 
+	"Button-press recordings compress very well, but GMV does not allow for 
+	$LF
+	"internal compression.  GM2 should allow movies to be optionally compressed as zip
+	$LF
+	"files for publication.  This prevents the need for separate 
+	$LF
+	"compression/decompression steps when submitting movies or viewing submitted movies.
+	$LF
+]p
+[p 
+	"In other words, a zip archive containing a valid GM2 file is also a valid GM2 file. (Not recursively, that would be silly.)
+	$LF
+]p
+[h3 
+	" Number of Players
+	$LF
+	[a id=heading-64 
+	]a
+]h3
+[p 
+	"GMV is hard-coded to allow 2 players with 6-button controllers.  Version 9D 
+	$LF
+	"contained a hack to allow 3 players with 3-button controllers, but this is 
+	$LF
+	"not an ideal solution.  GM2 should allow at least 3 players with 6-button controllers.  Ideally, the number and configuration of controllers would be 
+	$LF
+	"variable so that an arbitrary configuration could be stored with no wasted space.
+	$LF
+]p
+[h3 
+	" Integrity
+	$LF
+	[a id=heading-65 
+	]a
+]h3
+[p 
+	"A GM2 file should contain an internal checksum to ensure file integrity.  
+	$LF
+	"This checksum need only alert a user of errors resulting from corruption 
+	$LF
+	"in storage and transit.
+	$LF
+]p
+[h2 
+	" Current Proposal
+	$LF
+	[a id=heading-66 
+	]a
+]h2
+[p 
+	"The current proposal is a chunk-based format, superficially similar to 
+	$LF
+	[a class=extlink href=http://www.libpng.org/pub/png/pngintro.html rel=nofollow 
+		"PNG
+	]a
+	".  This format is a 
+	$LF
+	"stripped-down version of Jyzero's proposal.
+	$LF
+	"All integers are unsigned 4-byte little endian.  All strings are UTF-8 encoded and 
+	$LF
+	"null-terminated unless otherwise specified.  Lengths given include terminal nulls.
+	$LF
+]p
+[h3 
+	" Header
+	$LF
+	[a id=heading-67 
+	]a
+]h3
+[pre 
+	"0x000 - 4-byte magic number 'GM2\0'
+	$LF
+	"0x004 - 4-byte CRC of file (not including the first 8 bytes), or 0
+	$LF
+	"0x008 - 1-byte number of chunks in file. *
+	$LF
+	"0x009 - 3-byte 0 padding. +
+	$LF
+	"0x00C - 4-byte movie "uid" - recording time in epoch seconds, useful for
+	$LF
+	"                             identifying movies and states with each other
+	$LF
+	"0x010 - start of chunk data
+	$LF
+]pre
+[h3 
+	" General Chunk Format
+	$LF
+	[a id=heading-68 
+	]a
+]h3
+[p 
+	"Values are offsets from the beginning of a chunk.  No chunk may appear more
+	$LF
+	"than once.  Required chunks must appear exactly once.
+	$LF
+]p
+[pre 
+	"0x000 - 8-byte chunk ID (ASCII encoded, fixed 8-byte size, not null-terminated) 
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	$LF
+	"0x008 - 4-byte chunk data length
+	$LF
+	"0x00C - chunk data
+	$LF
+]pre
+[h3 
+	" Required Chunks
+	$LF
+	[a id=heading-69 
+	]a
+]h3
+[p 
+	"These chunks must always be present in a GM2 file.
+	$LF
+]p
+[h4 
+	" Start Information
+	$LF
+	[a id=heading-70 
+	]a
+]h4
+[pre 
+	"ID: 'start   '
+	$LF
+]pre
+[p 
+	"This chunk tells Gens whether the movie begins from a saved state, SRAM, or power on.
+	$LF
+]p
+[p 
+	"Note: If a movie starts from a saved state, the frame data is interpreted
+	$LF
+	"as starting from that state.  Frame data from before that state will not
+	$LF
+	"be stored.
+	$LF
+]p
+[pre 
+	"1-byte flag (0 = power on, 1 = SRAM, 2 = state)
+	$LF
+]pre
+[p 
+	"if starting from SRAM:
+	$LF
+]p
+[pre 
+	"4-byte length of embedded SRAM image
+	$LF
+	"SRAM data (uncompressed)
+	$LF
+]pre
+[p 
+	"if starting from a state:
+	$LF
+]p
+[pre 
+	"4-byte number of first frame
+	$LF
+	"4-byte length of embedded state
+	$LF
+	"state data (uncompressed)
+	$LF
+]pre
+[p 
+	"Note: The state contains the SRAM data, so loading both is redundant.
+	$LF
+]p
+[p 
+	"This chunk must occur before the frame chunk. 
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	$LF
+]p
+[h4 
+	" Recording information
+	$LF
+	[a id=heading-71 
+	]a
+]h4
+[pre 
+	"ID: 'record  '
+	$LF
+]pre
+[p 
+	"data:
+	$LF
+]p
+[pre 
+	"4-byte Gens version string length
+	$LF
+	"Gens version string
+	$LF
+	"4-byte author name length
+	$LF
+	"author name
+	$LF
+	"4-byte author comment length
+	$LF
+	"author comment
+	$LF
+	"4-byte re-record count 
+	$LF
+	"4-byte number of recorded frames (including all recorded-over frames)
+	$LF
+]pre
+[h4 
+	" Game Requirements
+	$LF
+	[a id=heading-72 
+	]a
+]h4
+[pre 
+	"ID: 'gamereqs'
+	$LF
+]pre
+[p 
+	"data:
+	$LF
+]p
+[pre 
+	"1-byte country identifier
+	$LF
+	"  0x00 = Japan (NTSC)
+	$LF
+	"  0x01 = USA   (NTSC)
+	$LF
+	"  0x02 = Europe(PAL)
+	$LF
+	"  0x03 = Japan (PAL)
+	$LF
+	"1-byte system identifier:
+	[a id=r6 
+	]a
+	[sup 
+		"[
+		[a href=#6 
+			"6
+		]a
+		"]
+	]sup
+	$LF
+	"  0x01 - Genesis game
+	$LF
+	"  0x02 - 32x game 
+	$LF
+	"  0x04 - SegaCD game 
+	$LF
+	"  0x06 - SegaCD + 32x game 
+	$LF
+	"  0x08 - Master System game (for Meka, if applicable)
+	$LF
+	"4-byte config flags:
+	$LF
+	" 0x00000001 - Z80 enabled 
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	$LF
+	" 0x00000002 - YM2612 enabled
+	$LF
+	" 0x00000004 - PSG enabled
+	$LF
+	" 0x00000008 - DAC enabled
+	$LF
+	" 0x00000010 - PCM enabled
+	$LF
+	" 0x00000020 - PWM enabled
+	$LF
+	" 0x00000040 - CDDA enabled
+	$LF
+	" 0x00000080 - YM2612 improvement enabled
+	$LF
+	" 0x00000100 - DAC improvement enabled
+	$LF
+	" 0x00000200 - PSG improvement enabled
+	$LF
+	" 0x00000400 - Sample-rate multiplier, low bit (rate is 11025 hz times two raised to this number) +
+	$LF
+	" 0x00000800 - Sample-rate multiplier, high bit (rate is 11025 hz times two raised to this number) +
+	$LF
+	" 0x0000?000 - reserved for future chipset options *
+	$LF
+	" 0x00010000 - enable up/down and left/right while recording
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	$LF
+	"4-byte calculated ROM CRC
+	$LF
+	"4-byte internal ROM name length
+	$LF
+	"internal ROM name (initially 48 bytes, converted to null-terminated UTF-8)
+	$LF
+	"4-byte calculated Genesis BIOS CRC, or 0 --
+	$LF
+]pre
+[p 
+	"if system is 32x: --
+	$LF
+]p
+[pre 
+	"4-byte 68K BIOS calculated CRC, or 0
+	$LF
+	"4-byte Master SH2 BIOS calculated CRC, or 0 --
+	$LF
+	"4-byte Slave SH2 BIOS calculated CRC, or 0 --
+	$LF
+]pre
+[p 
+	"if system is SegaCD: --
+	$LF
+]p
+[pre 
+	"4-byte SegaCD BIOS calculated CRC, or 0
+	$LF
+]pre
+[p 
+	"--
+	$LF
+]p
+[h4 
+	" Frame Data
+	$LF
+	[a id=heading-73 
+	]a
+]h4
+[pre 
+	"ID: 'frames  '
+	$LF
+]pre
+[p 
+	"data:
+	$LF
+]p
+[pre 
+	"4-byte frame count (number of frames in the movie, not the number of the last frame)
+	$LF
+	"1-byte controller recorded flags: *
+	$LF
+	" 0x01 - Controller 1 recorded *
+	$LF
+	" 0x02 - Controller 2 recorded *
+	$LF
+	" 0x04 - Controller 1B recorded +
+	$LF
+	" 0x08 - Controller 1C recorded +
+	$LF
+	" 0x10 - Controller 1D recorded +
+	$LF
+	" 0x20 - Controller 2B recorded +
+	$LF
+	" 0x40 - Controller 2C recorded +
+	$LF
+	" 0x80 - Controller 2D recorded +
+	$LF
+	"1-byte controller 1 type (ignored when 1 recorded flag is 0) *
+	$LF
+	"1-byte controller 2 type (ignored when 2 recorded flag is 0) *
+	$LF
+	"1-byte controller 1B type (ignored when 1B recorded flag is 0) *
+	$LF
+	"1-byte controller 1C type (ignored when 1C recorded flag is 0) *
+	$LF
+	"1-byte controller 1D type (ignored when 1D recorded flag is 0) *
+	$LF
+	"1-byte controller 2B type (ignored when 2B recorded flag is 0) *
+	$LF
+	"1-byte controller 2C type (ignored when 2C recorded flag is 0) *
+	$LF
+	"1-byte controller 2D type (ignored when 2D recorded flag is 0) *
+	$LF
+	"  where
+	$LF
+	"  0x00 = 3-button -*
+	$LF
+	"  0x01 = 6-button *
+	$LF
+	"  0x02 = Mega Mouse *
+	$LF
+	"  0x03 = Sega Menacer *
+	$LF
+	"  0x04 = TeeVGolf *
+	$LF
+	"  0x05 = Batter Up! *
+	$LF
+	"  0x06 = Sega Master System controller *
+	$LF
+]pre
+[p 
+	"Frame segment order: +
+	$LF
+]p
+[pre 
+	"console buttons+
+	$LF
+	"Player 1 (if recorded)+
+	$LF
+	"Player 2 (if recorded)+
+	$LF
+	"Player 1B (if recorded)+
+	$LF
+	"Player 1C (if recorded)+
+	$LF
+	"Player 1D (if recorded)+
+	$LF
+	"Player 2B (if recorded)+
+	$LF
+	"Player 2C (if recorded)+
+	$LF
+	"Player 2D (if recorded)+
+	$LF
+]pre
+[p 
+	"frame data:
+	$LF
+]p
+[pre 
+	"1 means a button is 
+	[b 
+		"not pressed
+	]b
+	" 
+	$LF
+	"0 means a button 
+	[b 
+		"is pressed
+	]b
+	$LF
+]pre
+[p 
+	"Console data: +
+	$LF
+]p
+[pre 
+	"1 byte: power cycle, reset button, SMS Pause button
+	$LF
+]pre
+[p 
+	"3-button data:
+	$LF
+]p
+[pre 
+	"1 byte: a,b,c,start,up,down,left,right
+	$LF
+]pre
+[p 
+	"6-button data:
+	$LF
+]p
+[pre 
+	"1 byte: a,b,c,start,up,down,left,right
+	$LF
+	"1 byte: x,y,z,mode
+	$LF
+]pre
+[p 
+	"Sega Master System controller data: +
+	$LF
+]p
+[pre 
+	"1 byte: 1,2,up,down,left,right+
+	$LF
+]pre
+[p 
+	"Format and number of bytes for other peripherals to be decided at a later date. See http://www.vidgame.net/SEGA/peripherals.htm for a list of peripherals.
+	$LF
+]p
+[p 
+	"Note: Only bytes for active controllers are stored.  If a movie has two 6-button
+	$LF
+	"controllers (2 bytes each) and one 3-button controller (1 byte each), each frame will occupy 5 bytes.
+	$LF
+]p
+[h3 
+	" Optional Chunks
+	$LF
+	[a id=heading-74 
+	]a
+]h3
+[p 
+	"These chunks are optional for a GM2 file.
+	$LF
+]p
+[h4 
+	" Console Events 
+	$LF
+	[a id=heading-75 
+	]a
+]h4
+[pre 
+	"ID: 'consevnt' 
+	$LF
+]pre
+[p 
+	"It makes more sense for these to go in frame data. An extra 1 byte per frame is not a big deal, especially if these are being compressed. +
+	$LF
+]p
+[h4 
+	" Saved States
+	[del 
+	]del
+	[del 
+	]del
+	"-
+	$LF
+	[a id=heading-76 
+	]a
+]h4
+[pre 
+	"ID: 'states  '
+	$LF
+]pre
+[p 
+	"This chunk contains one or more unordered saved states.  
+	$LF
+	"This allows viewers to skip to another level or to watch a level 
+	$LF
+	"over again with minimal effort. *
+	[br 
+	]br
+	$LF
+	"Chunk format: +
+	$LF
+]p
+[pre 
+	"4-byte number of states+
+	$LF
+]pre
+[p 
+	"State format:
+	$LF
+]p
+[pre 
+	"4-byte state name length
+	$LF
+	"state name (decided by recorder)
+	$LF
+	"4-byte state length
+	$LF
+	"state data (uncompressed)
+	$LF
+]pre
+[h4 
+	" Subtitles
+	$LF
+	[a id=heading-77 
+	]a
+]h4
+[pre 
+	"ID: 'subtitle'
+	$LF
+]pre
+[p 
+	"This chunk contains one or more strings and associated data to be displayed
+	$LF
+	"during the movie.  These do not need to be sorted.  Each string is stored 
+	$LF
+	"as follows:
+	$LF
+]p
+[pre 
+	"4-byte size of string (in bytes)
+	$LF
+	"string data
+	$LF
+	"2-byte x-coordinate (upper left corner of first letter)
+	$LF
+	"2-byte y-coordinate
+	$LF
+	"4-byte text color (red,green,blue,transparency, stored as 0xRRGGBBTT)
+	$LF
+	"4-byte border color (rgbt)
+	$LF
+	"4-byte first frame to display text
+	$LF
+	"4-byte last frame to display text
+	$LF
+]pre
+[h3 
+	" Text-only Format
+	$LF
+	[a id=heading-78 
+	]a
+]h3
+[p 
+	"This format exists to simplify hexediting, since manually hexediting the binary
+	$LF
+	"GM2 format is non-trivial.  This format will consist of only ASCII characters
+	$LF
+	"and will be very easy to edit with any text-manipulation tool.  Gens will
+	$LF
+	"be able to read from and write to this format natively.
+	$LF
+	"Because it is intended for editing, this format will not contain any
+	$LF
+	"corruption detection measures such as a CRC checksum.
+	$LF
+	"Line separators may be either unix-style ('\n') or DOS-style ('\r\n').
+	$LF
+]p
+[h4 
+	" Header
+	$LF
+	[a id=heading-79 
+	]a
+]h4
+[p 
+	"The header will consist of the following 7 characters in the first line, 
+	$LF
+]p
+[pre 
+	"GM2TEXT
+	$LF
+]pre
+[h4 
+	" Generic Text-only Chunk
+	$LF
+	[a id=heading-80 
+	]a
+]h4
+[p 
+	"Each chunk will occupy one line and will consist of the following fields, with no separation:
+	$LF
+]p
+[pre 
+	"8-character chunk name
+	$LF
+	"base-64 encoded chunk data, not including chunk header
+	$LF
+	"1-character ASCII exclamation mark ('!')
+	$LF
+]pre
+[h4 
+	" Text-only Frame Chunk
+	$LF
+	[a id=heading-81 
+	]a
+]h4
+[p 
+	"Because this chunk is intended for editing, all data will be encoded into
+	$LF
+	"human-editable text.  The format will appear as follows, one line for each
+	$LF
+	"field:
+	$LF
+]p
+[pre 
+	"8-character chunk name ('frames   ')
+	$LF
+	"recorded controlers ('controllers_recorded:1,1,1,0,0,0,0,0') *
+	$LF
+	"controller types ('controller_types:2,1,2,0,0,0,0,0')
+	$LF
+]pre
+[p 
+	"Note: Because editing is likely to change the number of frames, the frame
+	$LF
+	"count is explicitly excluded from this data.  It must be derived
+	$LF
+	"from the number of frames.
+	$LF
+	"Note: The values on the 'controller_types' line represent the following
+	$LF
+	"controllers: 1, 2, 1b, 1c, 1d, 2b, 2c, 2d.
+	$LF
+]p
+[p 
+	"After this, the chunk will contain frame data conforming to the following 
+	[a class=extlink href=http://en.wikipedia.org/wiki/Backus-Naur_form rel=nofollow 
+		"BNF
+	]a
+	" description:
+	$LF
+]p
+[pre 
+	"lines             := lines line |
+	$LF
+	"                     line |
+	$LF
+	"                     "!" "\n"
+	$LF
+	"line              := frame-comment ":" button-lists "\n"
+	$LF
+	"frame-comment      := non-colon-char frame-comment |
+	$LF
+	"                     "" 
+	$LF
+	"non-colon-char    := a-zA-Z0-9,./<>?;'"{}
+	"[]
+	"\|~!@#$%^&*()_+=-
+	$LF
+	"button-lists      := button-lists "," button-list |
+	$LF
+	"                     button-list |
+	$LF
+	"                     ""
+	$LF
+	"button-list       := controller-number button-chars
+	$LF
+	"controller-number := 1-8
+	$LF
+	"button-chars      := button-chars button-char |
+	$LF
+	"                     ""
+	$LF
+	"button-char       := UuDdLlRrAaBbCcSsXxYyZzMm
+	$LF
+]pre
+[p 
+	"It is recommended that Gens store the number of each frame before the colon
+	$LF
+	"to make editing simpler, however Gens must ignore this information when reading
+	$LF
+	"the file 
+	$LF
+	"because editing may cause it to become inconsistent.
+	$LF
+]p
+[p 
+	"The end of this chunk will consist of an ASCII exclamation mark at the end of a line.
+	$LF
+]p
+[p 
+	"Button presses are stored in comma separated strings consisting of 1 character for controller number and 1 or more characters for buttons pressed.  Controller number must be 
+	$LF
+	"an ASCII character 1-8. Valid characters for button are u,d,l,r,a,c,b,s,x,y,z,m (case insensitive). In the event of a frame showing the same controller number in multiple segments, only the 
+	[b 
+		"last
+	]b
+	" segment for each controller will be used.
+	$LF
+	"All of the following are valid frames:
+	$LF
+]p
+[pre 
+	"45:1abud
+	$LF
+	"painintheassframe:1ab,2d,1alb,1alaU
+	$LF
+	"foobar:1u
+	$LF
+	":
+	$LF
+	"?!?!;:1a,2cu,3l,6r
+	$LF
+	"xyz:
+	$LF
+	"foo:1bar,2cab
+	$LF
+	"this_is_the_last_frame:1ab!
+	$LF
+]pre
+[hr 
+]hr
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	": Sound rate should not affect synchronization. --
+	(__wikiLink|user:Bisqwit)
+	$LF
+]p
+[ul 
+	[li 
+		[ul 
+			[li 
+				" In an utopian world maybe, but should not and does not aren't the same thing. Both Gens and Snes9x have troublems where sound output affects emulation, but shouldn't. 44100 should always be the preselected in Gens, but that is an emulator implementation and not a format dito. -- 
+				(__wikiLink|user:Truncated)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		[ul 
+			[li 
+				" In my opinion, sound output should NEVER affect emulation. Instead of adding that header, fix the "sound ouput that affects emulation" problem. Hax like that won't resolve the problem. -- 
+				(__wikiLink|user:Phil)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	": I think the chunk ID should be restricted into ASCII bytes. This avoids inconvenient byte/character length confusions that may apply in fixed-width fields.
+	$LF
+	"Also you should specify the padding used (spaces?). And direction of padding? --
+	(__wikiLink|user:Bisqwit)
+	$LF
+]p
+[ul 
+	[li 
+		[ul 
+			[li 
+				" Changed chunk ID to ASCII (I think it was that previously). Padding is specified as seen in every chunk (spaces at the end). -- 
+				(__wikiLink|user:Truncated)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	": Why must it occur before the input stream? Even though Gens will probably always save the chunks in the same order, why must this be a requirement? I thought the idea of chunks was that new ones could be added, left out, or ignored, regardless of order. --
+	(__wikiLink|user:Truncated)
+	$LF
+]p
+[ul 
+	[li 
+		[ul 
+			[li 
+				" Maybe not necessarily. It would just perhaps make the playback / other analysis based on the movie easier. At least it wouldn't need backtracking in the file. --
+				(__wikiLink|user:Bisqwit)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		[ul 
+			[li 
+				" It's a very small change in the Gens code that would make external processing significantly simpler.  I think it's a good trade-off.  --
+				(__wikiLink|user:ideamagnate)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		[ul 
+			[li 
+				" Because the input stream is constantly changing size, it should always be the last chunk. Otherwise, all data after it will also have to be rewritten constantly, which increases the chance of corruption, as well as general wear on the disk. --
+				(__wikiLink|user:upthorn)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	": 
+	(__wikiLink|user:nitsuja)
+	": Can these "x improvement" options possibly cause desync?
+	$LF
+	"If not, they are a nuisance to store because viewers who prefer a certain option
+	$LF
+	"will want to change it whenever the recorder didn't happen to use it.
+	$LF
+]p
+[ul 
+	[li 
+		[ul 
+			[li 
+				" This should be looked into.  I've included all options to be safe.  The problem is  that it's easy to show that an option can cause a desync for a certain movie, but hard to show that it never will. --
+				(__wikiLink|user:ideamagnate)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	": 
+	(__wikiLink|user:Bisqwit)
+	": I think, for clarity, the up/down option should be moved to 00010000 or something, so that if more chipset-related options are added later, they will still be in a contiguous block.
+	$LF
+]p
+[ul 
+	[li 
+		[ul 
+			[li 
+				" I'm not sure if it will prove necessary, but there are plenty of bits to spare. --
+				(__wikiLink|user:ideamagnate)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		[ul 
+			[li 
+				[ul 
+					[li 
+						" It's not a question of bits to spare. It's a question of readability of the format description. Don't you agree that a list grouped by purpose is easier to read than a randomly shuffled list? --
+						(__wikiLink|user:Bisqwit)
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	": 
+	(__wikiLink|user:upthorn)
+	": Why are these bitwise? There will never be a situation where master system is combined with anything else, and if we give each system it's own number, there's more space for future expansion, even if it means that the genesis and its addons get 4, that's 4 out of 256, rather than 4 out of 8.
+	$LF
+]p
+[p 
+	"[
+	[a id=7 
+	]a
+	[a href=#r7 
+		"7
+	]a
+	"]
+	": 
+	(__wikiLink|user:Phil)
+	": It's not that it affects emulation but some games, such as Battletoads, use special resolution. Unfortunately, Gens doesn't auto-detect those games to use the correct resolution. So, either we put something in the header or make Gens to detect those games to use the correct resolution.
+	$LF
+	"What I think is that when you start recording you have the option to use other resolution, so when people play the movie, Gens auto-resize to desired resolution. Default is 320*240. 
+	[br 
+	]br
+	" 
+	$LF
+	[b 
+		"P.S.
+	]b
+	" AVI dumping doesn't let Windows users to use other resolution than 320*240.
+	$LF
+]p
+[ul 
+	[li 
+		" This seems to be a poor solution to a larger problem. But more importantly, it isn't something which can affect movie sync, so the movie file isn't a good place to change how it's handled. --
+		(__wikiLink|user:upthorn)
+		$LF
+	]li
+]ul
+[p 
+	(__wikiLink|user:upthorn)
+	": I'm starting to implement this format, and I'm going to change some parts of the specification that don't make sense to me, or I see a better way to do.
+	$LF
+	"Summary of changes: 
+	$LF
+]p
+[ul 
+	[li 
+		" Got rid of stored filenames -- CRC is far more meaningful than filename.
+		$LF
+		[ul 
+			[li 
+				" The CRC is more useful unless you're a human trying to figure out which ROM the GM2 goes with.  I'd keep both of pieces of information.  --
+				(__wikiLink|user:Ideamagnate)
+				" 
+				$LF
+				[ul 
+					[li 
+						" Well, the game's internal ROM name is still stored, which should be enough for most humans to work with, and the filenames for various bios files are probably unnecessary anyway -- there are only 2 versions of each country's SegaCD bios, two of the 32X bios images don't even seem to be used (not that there are multiple versions, anyway), and I think there was only one or two versions of the Genesis BIOS. Unless someone records a movie using a homebrew version of one of those, it's not likely to be a problem. --
+						(__wikiLink|user:upthorn)
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+		" Replaced stored filesize in header with a stored number of chunks. 
+		$LF
+	]li
+	[li 
+		" Added sound rate storage to the config flags.
+		$LF
+	]li
+	[li 
+		" Modified frame chunk format slightly -- multitap is now derived from which controllers are recorded, and there is no need to reserve a controller type for "inactive".
+		$LF
+	]li
+	[li 
+		" Added a spec for SMS controller data format.
+		$LF
+	]li
+	[li 
+		" Merged console events chunk into framedata -- slightly less efficient file-size wise, but seems much simpler to handle this way.
+	]li
+]ul

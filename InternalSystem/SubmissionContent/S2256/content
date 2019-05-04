@@ -1,0 +1,537 @@
+7
+[p 
+	(__wikiLink|user:FractalFusion)
+	"'s Azure Dreams in 10:32. My quest to TAS a random dungeon RPG led me here.
+	$LF
+]p
+[p 
+	"Thanks to 
+	(__wikiLink|user:Aktan)
+	" for an encode using Eternal SPU. It took him a while to resync due to the game itself. You can download 
+	[a class=extlink href=http://www.archive.org/download/FractalfusionsPsxAzureDreamsIn1031.73/azuredreams-tas-fractalfusion.mp4 rel=nofollow 
+		"MP4
+	]a
+	" or 
+	[a class=extlink href=http://www.archive.org/download/FractalfusionsPsxAzureDreamsIn1031.73/azuredreams-tas-fractalfusion.mkv rel=nofollow 
+		"MKV
+	]a
+	", or watch 
+	[a class=extlink href=http://www.zexsoft.com/aktan/?FractalfusionsPsxAzureDreamsIn1031.73/azuredreams-tas-fractalfusion_512kb rel=nofollow 
+		"online
+	]a
+	".
+	$LF
+]p
+[p 
+	"The TAS was made in PCSX rerecording v0.0.7, but will work in v0.0.9 . For sound plugin, 
+	[a class=extlink href=http://www.pbernert.com/spupetemidas107.zip rel=nofollow 
+		"Pete's MIDAS Audio Driver 1.7
+	]a
+	" is the best known one that syncs, as TAS Sound Plugin doesn't work well (although it syncs). It is also recommended to play it right away, without opening a ROM beforehand, though I haven't run into desyncs lately.
+	$LF
+]p
+[p 
+	"Also note that fast-forwarding may cause the names of the characters to be messed up, and other graphical glitches.
+	$LF
+]p
+[h4 
+	" Aims
+	$LF
+]h4
+[ul 
+	[li 
+		" Best ending
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Abuses programming errors in the game
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[h4 
+	" Programming errors abused
+	$LF
+]h4
+[p 
+	"Only one. On floor 31, rarely but possibly Beldo doesn't show up (and there are no enemies on that floor).
+	$LF
+]p
+[h4 
+	" About the game and the run
+	$LF
+]h4
+[p 
+	"Azure Dreams is a random dungeon RPG (roguelike) where the floors are randomly generated. You control the main character, Koh, who trains monsters while obtaining riches while in the Monster Tower, and builds buildings and gets girlfriends while in the town of Monsbaiya. The ultimate goal though is to reach the top of Monster Tower, the 40th floor.
+	$LF
+]p
+[p 
+	"Due to the way the game works, it is extremely difficult (without cheating) to reach the top of Monster Tower on the first try unassisted. Extreme luck would be required, as monsters on the high floors kill an underleveled adventurer (and his trained but underleveled monsters) in one hit. Note that it's never game over when killed, you just lose all items you brought in the tower and have to start over from the first floor, if you want to try again.
+	$LF
+]p
+[p 
+	"Of course, with TAS, anything goes. Not only does this adventurer not pick up any items (except at the plot-driven ending), he sends his starter monster (Kewne) home right on the first floor, then scales the tower to the 40th floor armed with nothing but a Pita Fruit. Oh, and there is a way to get around the "final boss". It's required, actually.
+	$LF
+]p
+[p 
+	"So, how does such an adventurer survive, when all enemies on floors 15 and above not named "Pulunpa" kill him in one hit? In a TAS, apparently by manipulating the location of the elevator to the next floor so it is close by. But that is not all.
+	$LF
+]p
+[p 
+	"Every stage has trap tiles, whether it is relatively harmless like Upheaval or Reversal, or ridiculously deadly like Monster Den (this is very rare, fortunately). The traps are randomly scattered and only occur in rooms rather than passageways, although occasionally a trap room is designated which contains about a dozen traps.
+	$LF
+]p
+[p 
+	"One type of trap, Go Up, sends Koh or any enemy to the floor above; this is a useful substitute for the elevator, and is faster by about 100 frames. Koh can also run very fast (except when a non-sleeping enemy is nearby), so even if the Go Up trap is not close, he can run to it, and it may be faster than manipulating the elevator. Of course, you don't see traps before you run into them, so how do you know where they are?
+	$LF
+]p
+[p 
+	"Using memory watch, of course. I found character coordinates, elevator coordinates, trap coordinates, and trap IDs (traps are dynamically allocated but are always seeded into one of about twelve slots, maybe more, all at increments of 24). Go Up, the important one, has a trap ID of 184.
+	$LF
+]p
+[p 
+	"So to manipulate, I use waiting frames, and check if it places a Go Up trap (preferred) nearby, or the elevator nearby. Since there are many addresses involved, I only check the trap IDs, and see if any of them are 184 before checking trap coordinates. Note that if the current level has Go Up traps, the trap ID of 184 may remain; I can weed these out by seeing that the trap coordinates don't change. This of course assuming that the game is not evil enough to place Go Up traps in the same spot on two consecutive floors.
+	$LF
+]p
+[p 
+	"Of course manipulating the elevator or Go Up trap close by is of no use if there happens to be a non-sleeping enemy in the way.
+	$LF
+]p
+[h4 
+	" Trap tile IDs
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Trap tile ID
+			]th
+			[th 
+				"Trap tile
+			]th
+			[th 
+				"What it does
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"Monster Den
+			]td
+			[td 
+				[a class=extlink href=http://www.youtube.com/watch?v=pGfAGBW_Jeo rel=nofollow 
+					"Huge monster ambush
+				]a
+				", cannot be detected
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"Crack
+			]td
+			[td 
+				"Lowers the floor around the target
+			]td
+		]tr
+		[tr 
+			[td 
+				"16
+			]td
+			[td 
+				"Rust
+			]td
+			[td 
+				"Permanently lowers equipment stats by 1, except if already at 1, or rust-proof
+			]td
+		]tr
+		[tr 
+			[td 
+				"36
+			]td
+			[td 
+				"Bump
+			]td
+			[td 
+				"Wakes up sleeping enemies in the room
+			]td
+		]tr
+		[tr 
+			[td 
+				"44
+			]td
+			[td 
+				"Upheaval
+			]td
+			[td 
+				"Raises the floor around the target
+			]td
+		]tr
+		[tr 
+			[td 
+				"48
+			]td
+			[td 
+				"Warp
+			]td
+			[td 
+				"Warps target to a different spot on the same floor
+			]td
+		]tr
+		[tr 
+			[td 
+				"60
+			]td
+			[td 
+				"Frog
+			]td
+			[td 
+				"Turns target into a frog with no offensive capabilities
+			]td
+		]tr
+		[tr 
+			[td 
+				"84
+			]td
+			[td 
+				"Prison
+			]td
+			[td 
+				"Causes paralysis
+			]td
+		]tr
+		[tr 
+			[td 
+				"144
+			]td
+			[td 
+				"Seal
+			]td
+			[td 
+				"Prevents use of magic
+			]td
+		]tr
+		[tr 
+			[td 
+				"152
+			]td
+			[td 
+				"Poison
+			]td
+			[td 
+				"Causes poison
+			]td
+		]tr
+		[tr 
+			[td 
+				"156
+			]td
+			[td 
+				"Bomb
+			]td
+			[td 
+				"Does damage in a cross-shaped region and destroys any items on it
+			]td
+		]tr
+		[tr 
+			[td 
+				"160
+			]td
+			[td 
+				"Reversal
+			]td
+			[td 
+				"Turns the screen upside down
+			]td
+		]tr
+		[tr 
+			[td 
+				"176
+			]td
+			[td 
+				"Blinder
+			]td
+			[td 
+				"Causes blindness
+			]td
+		]tr
+		[tr 
+			[td 
+				"184
+			]td
+			[td 
+				"Go Up
+			]td
+			[td 
+				"Sends target to the floor above
+			]td
+		]tr
+		[tr 
+			[td 
+				"192
+			]td
+			[td 
+				"Slam
+			]td
+			[td 
+				"Does damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"200
+			]td
+			[td 
+				"Sleep
+			]td
+			[td 
+				"Causes sleep
+			]td
+		]tr
+		[tr 
+			[td 
+				"224
+			]td
+			[td 
+				"Chaos
+			]td
+			[td 
+				"Causes confusion, messes up controls
+			]td
+		]tr
+		[tr 
+			[td 
+				"248
+			]td
+			[td 
+				"Slow
+			]td
+			[td 
+				"Causes target to move at half speed
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Important memory addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"What it represents
+			]th
+		]tr
+		[tr 
+			[td 
+				"82EA4
+			]td
+			[td 
+				"Player X
+			]td
+		]tr
+		[tr 
+			[td 
+				"82EA5
+			]td
+			[td 
+				"Player Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"E3CDA
+			]td
+			[td 
+				"Elevator X
+			]td
+		]tr
+		[tr 
+			[td 
+				"E3CDC
+			]td
+			[td 
+				"Elevator Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"E39CE+0x18*n
+			]td
+			[td 
+				"Trap n X
+			]td
+		]tr
+		[tr 
+			[td 
+				"E39CF+0x18*n
+			]td
+			[td 
+				"Trap n Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"E39D0+0x18*n
+			]td
+			[td 
+				"Trap n ID
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Run progress
+	$LF
+]h4
+[ul 
+	[li 
+		" Thursday, May 14, 2009 - Verified that Azure Dreams can be beaten on the first trip. Also discovered that Go Up trap is useful.
+		$LF
+	]li
+	[li 
+		" May 15 - Found important memory addresses, including trap ID and location.
+		$LF
+	]li
+	[li 
+		" May 16 - started run; into first few dialogs
+		$LF
+	]li
+	[li 
+		" May 17 - Entered tower and reached floor 10
+		$LF
+	]li
+	[li 
+		" May 18 - Reached floor 20
+		$LF
+	]li
+	[li 
+		" May 19 - Reached floor 26
+		$LF
+	]li
+	[li 
+		" May 20 - Reached floor 35
+		$LF
+	]li
+	[li 
+		" May 21 - Completed game (almost)
+		$LF
+	]li
+	[li 
+		" May 22 - Fixed desync and completed game
+		$LF
+	]li
+]ul
+[h3 
+	" Run notes
+	$LF
+]h3
+[p 
+	"Any waiting is due to luck manipulation. Koh cannot run when nearby a non-sleeping enemy. Koh has to take extra or walking steps sometimes to trigger the Go Up trap, since traps do not always work.
+	$LF
+]p
+[ul 
+	[li 
+		" After leaving the house, I use the view rotation to put Koh on a straight line to the destination.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 1: First trip only, this is a tutorial floor. I send Kewne home. There are two reasons for this. One is that otherwise he frequently stops you to talk during this floor. The other is that on later floors it makes it easier for enemies to attack him, thus slowing you down. The weird path I take is to manipulate the Pulunpa as far away as possible as to avoid being unable to run due to a nearby enemy.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 7: The slight pause is due to the enemy waking up. I run over a Seal trap near the Go Up trap.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 13: I run over a Rust trap on the way to the Go Up trap.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 20: The route was to let some monsters go by first. I was quite unlucky manipulating this floor.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 22: An enemy, who would otherwise kill Koh, falls into a Blinder trap. :D
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 23: Another close call here.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 28: There was actually another Go Up trap nearby. That makes two Go Up traps and the elevator near the starting point, something very rare.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 31: Very rarely Beldo doesn't show up and there are no enemies on the floor. This is one of those times; the next one didn't show up for about 90 frames.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 32: Who needs elevator when you have Go Up trap?
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 38: As a puzzle, find the hidden elevator.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Floor 40: The ending makes no sense, but whatever. I chose the "good" ending here (Kewne stays with you, and appears in the credits) even though it is about 2 seconds slower.
+		$LF
+	]li
+]ul
+[h4 
+	" Thanks
+	$LF
+]h4
+[p 
+	"Thanks to 
+	(__wikiLink|user:mz)
+	" for giving us rerecording for PSX. Thanks also to a Pokémon Mystery Dungeon Red review (!) for introducing me to this game.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Accepting due to positive viewer response.  I'll handle the publication.
+	$LF
+]p

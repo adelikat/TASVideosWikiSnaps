@@ -1,0 +1,360 @@
+8
+[h3 
+	"work in progress
+	$LF
+]h3
+[hr 
+]hr
+[p 
+	"First we will define some variables and provide the memory location the game uses to reference them.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"variable name
+			]th
+			[th 
+				"memory location
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"x speed
+			]td
+			[td 
+				"7e0408,2s
+			]td
+			[td 
+				"positive is moving to the right
+			]td
+		]tr
+		[tr 
+			[td 
+				"y speed
+			]td
+			[td 
+				"7e040a,2s
+			]td
+			[td 
+				"positive is falling
+			]td
+		]tr
+		[tr 
+			[td 
+				"x pos
+			]td
+			[td 
+				"7e0404,2u
+			]td
+			[td 
+				"the farther to the right the higher
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"y pos
+			]td
+			[td 
+				"7e0406,2u
+			]td
+			[td 
+				"the lower the higher
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"str len
+			]td
+			[td 
+				"7e0604,1s
+			]td
+			[td 
+				"the amount of line out, possible to make negative somehow
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"str stretch
+			]td
+			[td 
+				"7e0602,1u
+			]td
+			[td 
+				"the length of the line stretched
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"x hook
+			]td
+			[td 
+				"7e0500,2u
+			]td
+			[td 
+				"x location of tip of hook (in pixels)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"y hook
+			]td
+			[td 
+				"7e0502,2u
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"x dim(pixels)
+			]td
+			[td 
+				"7e040c,2u
+			]td
+			[td 
+				"x dim / 64
+			]td
+		]tr
+		[tr 
+			[td 
+				"y dim(pixels)
+			]td
+			[td 
+				"7e040e,2u
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Note this is not the actual order things are evaluated in
+	$LF
+]p
+[h3 
+	"Movement
+	$LF
+]h3
+[p 
+	"Every frame:
+	$LF
+]p
+[ul 
+	[li 
+		"x dim = x dim + x speed
+		$LF
+	]li
+	[li 
+		"y dim = y dim + y speed
+		$LF
+	]li
+	[li 
+		"if hit wall x speed = 0
+		$LF
+	]li
+	[li 
+		"if hit floor/ceiling y speed = 0
+		$LF
+	]li
+]ul
+[h3 
+	"Gravity
+	$LF
+]h3
+[ul 
+	[li 
+		"y speed = y speed + 18
+		$LF
+	]li
+]ul
+[h3 
+	"Speed limits
+	$LF
+]h3
+[ul 
+	[li 
+		"if any dimensions speed > 384 then that dimensions speed = 384
+		$LF
+	]li
+]ul
+[h3 
+	"Horizontal Control
+	$LF
+]h3
+[ul 
+	[li 
+		"note horizontal control will not exceed a speed of 96
+		$LF
+	]li
+	[li 
+		"if on ground and pressing left/right then 
+		$LF
+		[ul 
+			[li 
+				"if moving x speed += 8
+				$LF
+			]li
+			[li 
+				" else x speed += 16
+				$LF
+			]li
+		]ul
+		"if in air and pressing left/right then speed += 4
+		$LF
+	]li
+]ul
+[h3 
+	"Vertical Control
+	$LF
+]h3
+[ul 
+	[li 
+		"if just jumped y speed = -256
+		$LF
+	]li
+	[li 
+		"if just walked off a cliff y speed = 80
+		$LF
+	]li
+]ul
+[h3 
+	"Friction
+	$LF
+]h3
+[ul 
+	[li 
+		"if in air x speed -= 1 (once every 4 frames)
+		$LF
+	]li
+	[li 
+		"if on ground x speed -= 8 (unless walking under 96)
+		$LF
+	]li
+	[li 
+		"if on ground and crouching x speed -= 16 (instead of 8)
+		$LF
+	]li
+]ul
+[h3 
+	"Rope
+	$LF
+]h3
+[ul 
+	[li 
+		"rope travels at 4 pixels per second
+		$LF
+	]li
+	[li 
+		"returns at 8 pixels per second
+		$LF
+	]li
+	[li 
+		"max rope length = ~104, at this length it will begin to return
+		$LF
+	]li
+	[li 
+		"min rope length = unknown (possible to get negative using sea horse in f36)
+		$LF
+	]li
+	[li 
+		"breaks when a certain force or length is reached
+		$LF
+	]li
+]ul
+[h3 
+	"Rope control
+	$LF
+]h3
+[ul 
+	[li 
+		"After holding down (and not left/right) for about 10 frames rope will suck in at 2 per second
+		$LF
+	]li
+	[li 
+		"After holding up (and not left/right) for about 10 frames rope will release at 2 per second 
+		[em 
+			(__wikiLink|TODO)
+			": Double check)
+		]em
+		$LF
+	]li
+	[li 
+		"Cannot pull in rope if force is too strong (unknown exact value / formula)
+		$LF
+	]li
+]ul
+[h3 
+	"Rope forces
+	$LF
+]h3
+[ul 
+	[li 
+		"if str stretch > str len then do nothing
+		$LF
+	]li
+	[li 
+		"else a realistic forumla is used, exact formula not known but it is something like this:
+		$LF
+	]li
+	[li 
+		"xspeed += sin(angle) * (str stretch - str len) * 2
+		$LF
+	]li
+	[li 
+		"yspeed += cos(angle) * (str stretch - str len) * 2
+		$LF
+	]li
+	[li 
+		"max acceleration (due to rope) = 60
+		$LF
+	]li
+	[li 
+		[em 
+			(__wikiLink|TODO)
+			": Be more accurate, I forget what the number 72 has to do with this
+		]em
+		$LF
+	]li
+]ul
+[h3 
+	"Miscellaneous
+	$LF
+]h3
+[ul 
+	[li 
+		"if near ladder / exit door and press up/down then x speed = 56 in that direction
+		$LF
+	]li
+	[li 
+		"if get off ladder then x speed = 64
+		$LF
+	]li
+	[li 
+		"the fish hook is a solid object and has length, it is what causes you to move away from the wall when bouncing up and down
+		$LF
+	]li
+]ul
+[h3 
+	(__wikiLink|TODO)
+	$LF
+]h3
+[p 
+	"down,
+	$LF
+	"clip,
+	$LF
+	"lag
+	$LF
+]p

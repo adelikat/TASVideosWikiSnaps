@@ -1,0 +1,1006 @@
+28
+[p 
+	(youtube|v=OgVVcnGm0eM)
+	$LF
+]p
+[h2 
+	"Chrono Trigger any% TAS by inichi
+	$LF
+]h2
+[p 
+	"Finally, I made it. I'm sorry for keeping the entire movie-making process secret and not posting any WIP on the forum. The expected improvement was so gigantic that I couldn't resist an inpulse to make the run surprising. Also, the submission text is still incomplete. I think this is a bad thing. However, considering these facts: 
+	$LF
+]p
+[ul 
+	[li 
+		"Most part of the run is totally new stuff. So it would take a long time to cover them all, even in Japanese, my native language.
+		$LF
+	]li
+	[li 
+		"This is a long-term project; I started making the run in August 2007. 
+		$LF
+	]li
+	[li 
+		"Chrono Trigger is a very popular RPG, and not a few people have been interested in how the run is going. 
+		$LF
+	]li
+]ul
+[p 
+	"I thought it would be better to submit the run as fast as I could than to write up full texts and submit it. I will upload the rest of the submission texts little by little.
+	$LF
+]p
+[h3 
+	"Emulator Details
+	$LF
+]h3
+[ul 
+	[li 
+		"Recorded on
+		[a class=extlink href=http://code.google.com/p/snes9x151-rerecording/updates/list rel=nofollow 
+			"snes9x-1.51-rerecording-svn-r51
+		]a
+		$LF
+	]li
+	[li 
+		"Left+Right/Up+Down - off
+		$LF
+	]li
+	[li 
+		"Volume Envelope Height Reading - off
+		$LF
+	]li
+	[li 
+		"Fake Mute desync workaround - on
+		$LF
+	]li
+	[li 
+		"Sync samples with sound CPU - off 
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Note
+	]b
+	": To play the movie correctly, you must use Snes9x1.51 v5 or newer version; otherwise the movie will desync in about 1.5 minutes. You can get the latest Snes9x 1.51 
+	[a class=extlink href=http://code.google.com/p/snes9x151-rerecording/ rel=nofollow 
+		"here
+	]a
+	". 
+	[a class=extlink href=http://www.youtube.com/watch?v=vU4vlzEdBpI rel=nofollow 
+		"YouTube link
+	]a
+	" is also available. Thanks to FODA!
+	$LF
+]p
+[h3 
+	"Run Attributes
+	$LF
+]h3
+[ul 
+	[li 
+		"Abuses glitches
+		$LF
+	]li
+	[li 
+		"Abuses programming errors 
+		$LF
+	]li
+	[li 
+		"Aims for fastest possible time
+		$LF
+	]li
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Manipulates luck
+		$LF
+	]li
+	[li 
+		"Genre: RPG 
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Note
+	]b
+	": I'd highly recommend you skip 1:45-3:45 because that part is very repetitive for abusing the item duplication glitch.
+	$LF
+]p
+[h3 
+	" About the game
+	$LF
+]h3
+[p 
+	"Chrono Trigger is a memorable role-playing game developed and published by Square in 1995. The story is about a boy named Crono who travels through time with his friends to save the world from an alien parasite, Lavos. The game is also recognized as one of the best RPG, attracting a lot of new fans even today.
+	$LF
+]p
+[h3 
+	" About the movie
+	$LF
+]h3
+[p 
+	"This is a 3 hour 59 minute 48 second improvement over 
+	(__wikiLink|923S|Hero of the Day's current published run.)
+	$LF
+	"The improvement mostly came from massive new tricks and glitches. See the below "Tricks and Glitches" section for details.
+	$LF
+]p
+[h3 
+	" Tricks and Glitches
+	$LF
+]h3
+[p 
+	"In this section, I will give a full explanation of all glitches and tricks I used in the run.  
+	$LF
+]p
+[h4 
+	" Item duplication
+	$LF
+]h4
+[p 
+	"This is a glitch to duplicate items by loading a corrupted save file.
+	$LF
+]p
+[p 
+	[b 
+		"Mechanics:
+	]b
+	" It takes 2 frames to save the game in Chrono Trigger. some values between 7E2400 and 7E264F are overwritten in SRAM in order in the first frame; the rest of them and values in addresses after 7E264F are overwritten in order in the second frame. That means you can get a half-saved save file if you reset the game in the first frame of saving. Off course, this is an invalid procedure for the game, so the target data is deleted. In Chrono Trigger, however, you can load the corrupted data by pressing A and up/down key at the same time in the load screen.
+	$LF
+]p
+[p 
+	"Also, for the reason mentioned above, you can only affects on 7E2400-264F by resetting in saving. What are in those memory addresses are like this:
+	$LF
+]p
+[ul 
+	[li 
+		"7E2400-FF: Item ID (last 14 bytes are unused).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"7E2500-FF: Item number (last 14 bytes are unused).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"7E2600-4F: Crono's status
+		$LF
+	]li
+]ul
+[p 
+	"How many addresses between 7E2400-264F are overwritten in the first frame are slightly influenced on the previous key presses and cursor movements. Basically, you can manipulate it to some extent by changing them or costing a few frames. To make things easier, I used a lua script.
+	$LF
+]p
+[p 
+	[b 
+		"How to duplicate an item?
+	]b
+	" Item duplications are basically classified into three methods. I'll explain for each method.
+	$LF
+]p
+[p 
+	[b 
+		"Explanation of the chart:
+	]b
+	" Using data is a data that you use to save. Object data is a data that are saved in the glitch-use. Result data is a data you get after the glitch-use. Bronze means Bronze Helm; Hide means Hide Cap. Null means there are no items in the slot. Numbers next to them means item number.
+	$LF
+]p
+[p 
+	[b 
+		"Method 1:
+	]b
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Using data
+			]th
+			[th 
+				"Object data
+			]th
+			[th 
+				"Result data
+			]th
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Bronze 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Hide 2
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"This method is kind of switching. Only item ID is overwritten, and you can get two items with different ID. This is done in one reset. 
+	$LF
+]p
+[p 
+	[b 
+		"Method 2:
+	]b
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Using data
+			]th
+			[th 
+				"Object data
+			]th
+			[th 
+				"Result data
+			]th
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Null 0
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Bronze 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Bronze 2
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"This method is basically the same with the first one except that the below item ID isn't overwritten. As a result, you can get the same items that have different numbers. This requires extreme precision, unless you insert some null slots around the border, which is slower. This is also done in one reset. 
+	$LF
+]p
+[p 
+	[b 
+		"Method 3:
+	]b
+	$LF
+]p
+[p 
+	[b 
+		"Phase 1:
+	]b
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Using data
+			]th
+			[th 
+				"Object data
+			]th
+			[th 
+				"Result data
+			]th
+		]tr
+		[tr 
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Hide 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Bronze 2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Null 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Null 2
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	[b 
+		"Phase2:
+	]b
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Using data
+			]th
+			[th 
+				"Object data
+			]th
+			[th 
+				"Result data
+			]th
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Null 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Null 2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Null 1
+			]td
+			[td 
+				"Hide 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Null 2
+			]td
+			[td 
+				"Bronze 2
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	[b 
+		"Phase3:
+	]b
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Using data
+			]th
+			[th 
+				"Object data
+			]th
+			[th 
+				"Result data
+			]th
+		]tr
+		[tr 
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Null 1
+			]td
+			[td 
+				"Hide 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Null 2
+			]td
+			[td 
+				"Bronze 2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Hide 1
+			]td
+			[td 
+				"Hide 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Null 0
+			]td
+			[td 
+				"Bronze 2
+			]td
+			[td 
+				"Bronze 2
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"This method is the most complicated, but most powerful one of all. With this method, you can extend items over the above null slots. This actually can be done with Method 2. However, it is much slower because it requires you to buy other items for replacement in each use, which takes much time. This method also requires extraordinary precision, unless you insert some null slots around the border, which is slower. You need to reset three times for this method. 
+	$LF
+]p
+[p 
+	[b 
+		"How they were used in the run?
+	]b
+	" Duplicating Hide Caps and Bronze Helms and having them in 98 slots with three methods. This is what I did in the first 3.5 minutes in the run. I'll write it down step by step:
+	$LF
+]p
+[p 
+	"First, I bought 1 revive and 20 Tonics from the merchant at the fair for 400G, Crono's pocket money. With Method 1, Two items ID were switched, resulting in 20 Revives and 1 Tonic, both of which were immediately sold. With that money, I bought a Bronze Helm and 5 other items from two merchants. Second, with Method 2, I changed 5 items into Bronze Helms and Hide Caps. Now I had Bronze Helms and Hide Caps in 7 slots. Finally, with Method 3, I extended them over the above null slots. The actual pace is like this: 7-13-25-49-98. Thus, I got Hide Caps and Bronze Helms in 98 slots.
+	$LF
+]p
+[p 
+	"Having the same type of equipment in 98 slots allows you to access various memory addresses via the equipment screen in Chrono trigger. This is actually the only purpose of all item duplications I did in the first 3.5 minutes. I'll explain the detail in the below section.
+	$LF
+]p
+[h4 
+	" Accessing various memory addresses.
+	$LF
+]h4
+[p 
+	"As stated above, Having same type of equipment in 98 slots allows you to access various memory addresses that you normally can't.
+	$LF
+]p
+[p 
+	[b 
+		"Mechanics:
+	]b
+	" When you call on the individual equipment screen, item ID that corresponds the equipment type that the cursor currently points out is stored in 7E0F00-60; item number in 7E0F61-C2 as well. All they appear in the equipment selection screen. Yes, as you can see, each has only 96 bytes for their purpose. So if you have the same type of equipment in more than 96 slots, item numbers will flow into 7E0FC3 or later addresses. It is required to flow them into 7E0FC4-6 to access various memory addresses. This is why you need to have them in 98 slots at least. I write down the function of those addresses:
+	$LF
+]p
+[p 
+	[b 
+		"7E0FC4:
+	]b
+	" Decides how many the cursor can move in the character selection screen. 
+	$LF
+]p
+[p 
+	[b 
+		"7E0FC5:
+	]b
+	" Decides where the cursor is in the equipment screen. It also works as an offset when you equip, which is stored in C2A4AB-A5AA, and it works like this: 7E2600+xx (in Crono's case)
+	$LF
+]p
+[p 
+	[b 
+		"7E0FC6:
+	]b
+	" Decides how many the cursor can move in the equipment selection screen.
+	$LF
+]p
+[p 
+	"In my run, I accessed and overwrote these three addresses: 7E2985, 7E2980 and 7E2990.
+	$LF
+]p
+[p 
+	[b 
+		"7E2985:
+	]b
+	" An address for a third reserve character. You cannot access 7E2983-84 because any appropriate address doesn't have 13-15, 63-65, B3-B5. I stored 0A in 7E2985, which saved a lot of time when accessing 7E2980. Also, although the address is for a third character, it is treated as it is just under the main three characters when no one is in the first or second reserve. 
+	$LF
+]p
+[p 
+	[b 
+		"7E2980:
+	]b
+	" An address for the first party character. You can't access 7E2981-82 since any appropriate address doesn't have 11,12,61,62 B1, and B2. This was rather inconvenient, but not much. This address was heavily accessed and overwritten throughout the run to call out a character who must be in a cutscene or to use "Character warping" trick that will be picked up later.
+	$LF
+]p
+[p 
+	[b 
+		"7E2990:
+	]b
+	" An address for the configuration setting. By modifying the configuration setting, you can store any value out of 256 in the address. Because you are accessing it via the equipment screen, if you equip something with it, the value in the address appears as an item in the item inventory. The thing is, you can retrieve any item from this address.
+	$LF
+]p
+[p 
+	"The alternative way to retrieve an item is to use an address of one character of name strings. The problem with that plan is, once you retrieve an item from it, you can't use the character for that purpose again. I needed three different items in the run, Bike Key, Elixir and Green Dream. That means I have to change the item order twice to withdraw an item from another character, which would consume time.
+	$LF
+]p
+[h4 
+	" Character warping
+	$LF
+]h4
+[p 
+	"Every time you open the pause menu, all your three character X-Y coordinates are stored in proper addresses. However, if a missing number is in your party and he is not in the first, the appropriate address is not updated. And then, if you replace the missing number with a normal character, the character appears on the coordinates which was stored in when you previously opened the menu. Now a second or third character warping happens. After you use the warping trick at least once in an area, coordinates stored in the addresses always take the same value with a normal character one even if a missing number is in your party. Therefore, you can make even the first character warp by keeping the missing number in the party in the first warp, and just replacing him with a normal character. 
+	$LF
+]p
+[p 
+	"Very unfortunately, this isn't applied to overworld coordinates. If it was feasible, the run would shrink by another 10 minutes.
+	$LF
+]p
+[h4 
+	" Character sliding
+	$LF
+]h4
+[p 
+	"Normally, a second and third character mimic the first character's movement. However, if he is a missing number, he can't mimic the first. Instead, the movement he should have mimicked stacks up in proper addresses until a counter reachs 128 and erases them all. With enough such stacks, if you replace a normal character with the missing number, the character starts sliding, mimicking the movement that has stacked up. While sliding, the character can go through any obstacles.
+	$LF
+]p
+[p 
+	"To make the most of this, you need to use the character warping once or change a character order beforehand so that missing number's next X-Y coordinates could be subject to the normal character's one. Otherwise, a character called out will warp far away and start sliding there, which is unfavorable.
+	$LF
+]p
+[h4 
+	" Marle join skip
+	$LF
+]h4
+[p 
+	"If you talk to either one of the two merchants with Marle in the party, he sets a flag to remove the men who block the way to Telepod area. Thus, you can entirely skip the marle joining cutscene and enter Telepod area. 
+	$LF
+]p
+[p 
+	"Alternatively, you can go through those men in the same way as used in the Factory, which will be mentioned in the below section. When you go back from Telepod area, however, they block your path, and you have to go through them again. So it's a waste of time, though it might be useful for a new game+ run.
+	$LF
+]p
+[h4 
+	" Pause menu abuse
+	$LF
+]h4
+[p 
+	"By opening the pause menu and leaving it when the screen starts to fade out, you can have a few frames to move in another direct. If you repeat this again and again, you can get to a point that would trigger a certain event, keeping the fade-out status. If you set a flag that determines if the event completed and let the fade-out be done, you are brought to the previous room and it is considered the event already finished.
+	$LF
+]p
+[p 
+	"This trick could have been featured as a main timesaver to skip some boss battles. However, due to the discovery of the more sequence-break glitch, the trick was used in only one place moderately: Telepod area, to skip Lucca’s dialogue.
+	$LF
+]p
+[h4 
+	" Playing around at the Telepod area
+	$LF
+]h4
+[p 
+	"Unless Crono picks up the pendant, you never lose control, which provides a first huge play-around time. This is useful not only to mess around, but also to make a moving counter of Taban and Lucca faster. Normally, the moving counter of them are incremented by 1 per 4 frames. However, if you keep touching him/her, it is incremented by 1 per 1 frame. Also this is a necessary step to completely skip Middle Ages. See the below section for details.
+	$LF
+]p
+[h4 
+	" Middle Ages skip
+	$LF
+]h4
+[p 
+	"In every gate transition, a flag that determines if you are in warping is set a few frames before the fade-out completes. That is, you can escape the area with the flag is on if you interrupt another fade-out, which was the entrance of Telepod area in my run's case. If you enter the gate area with the flag is on, the game considers you just got through the gate, and consequently open the gate with your character. In Telepod area's case, the game also considers you just returned from Middle Ages, and increments the storyline counter enough to trigger the trial events. A big timesaver, certainly. Also, Marle must be in the party when you enter the castle; otherwise the game freezes right after entering the castle.
+	$LF
+]p
+[p 
+	"Alternatively, I tested to go to Guardia Forest gate area instead of entering the Telepod area right soon, hoping to entirely skip the trial cutscene. As expected, Magus appeared from the gate; however, the gate disappeared soon and I wasn't able to go into it, proving it not useful for the run.
+	$LF
+]p
+[h4 
+	" Candy skip
+	$LF
+]h4
+[p 
+	"A flag that triggers the candy cutscene is set when Marle joins in Crono. Since Crono and Marle never met in a intended way in the run, the candy cutscene also never happened.  
+	$LF
+]p
+[h4 
+	" Getting out of the trial
+	$LF
+]h4
+[p 
+	"In the flashback scene of the trial, the game makes the first character appear there. And if the first character isn't Crono, you can move him at free. If he is a missing number, nobody shows up there, but you can still open the menu. And then, if you call out a normal character, it meets the condition of "Character warping trick" and he appears in the same position with where you previously opened the menu.　In my run, it is the south entrance of Leene’s Bell area. At this point, the storyline counter is enough to trigger the Marle runaway cutscene. Thus, you can skip the latter half of the trial and all the events in the jail. A huge time-saver, off course.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	"Also, Lucca must be in the party when you enter the castle; otherwise the game freezes after Marle runs out of the castle.
+	$LF
+]p
+[h4 
+	" Arris Dome skip
+	$LF
+]h4
+[p 
+	"Johnny appears at Lab 32 if you enter there with a Bike Key. That means you can completely skip Arris Dome, where you can get a Bike key from Doan after you finish all the events there. This may be not intense, but definitely a solid timesaver.
+	$LF
+]p
+[h4 
+	" Bike Race skip
+	$LF
+]h4
+[p 
+	"This is very similar to Middle Ages skip. A flag that determines if the race was over is set a few frames before a fade-out to the race track completes. Also, the fade-out is slower than the usual screen transition one. The thing is, if you start a fade-out to overworld just after you turn the key, you can escape to the overworld with the flag is set. "Character warping trick" only makes it possible, so you need a set up beforehand. I used a north edge of Lab 16 east for that purpose because it has the same Y coordinate with the south entrance of Lab 32. You may notice I did a strange behavior in Lab 16 east. That is exactly the set up for Bike Race skip. 
+	$LF
+]p
+[p 
+	"Alternatively, you can directly get the needed Y coordinate at the south entrance of Lab 32. However, it requires to go out and in Lab 32 to avoid the freeze that results from the lack of characters. After all, it will be slower.
+	$LF
+]p
+[h4 
+	" Warping to the main area of Lab 32
+	$LF
+]h4
+[p 
+	"Once that flag is set, the entrance to the Lab 32 main area is activated. In Chrono trigger, most entrance never causes the fading out unless you move in there. That entrance, however, doesn't require such movement, and lets you go into the next area by just standing there. If you enter any location followed by a missing number, the game considers you are at (255,0), the right above place, which is in the entrance of Lab 32 main area. So the game immediately sends you into the main area.
+	$LF
+]p
+[p 
+	"There is another reason I had to use this trick: If you enter there followed by a normal character, Johnny tries to speak, but since he is outside the screen, he can't do it and the game freezes. Using this trick is the only way to avoid the freeze and advance the game. 
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h4 
+	" Going through the barrier sprite
+	$LF
+]h4
+[p 
+	"You can vertically go through the barrier sprite if it is outside the screen. To achieve this, you have to enter the room with a missing number in the first character. By this, the game considers you at (255,0) and then focus the camera on that point, which allows you to go through the barrier. 
+	$LF
+]p
+[p 
+	"Alternatively, you can go through the barrier by using "Character sliding" trick instead. However, it requires one extra menu-opening, so I didn't use it, though I had no choice to use it when trapped out. Because this time it was required to move horizontally to go through the barrier.
+	$LF
+]p
+[h4 
+	" Playing around with R-series
+	$LF
+]h4
+[p 
+	"R-series bounce off only Crono. That means you can move around during the cutscene by fitting other character in the first, providing a second huge play-around time. It should be noted that Marle and Lucca won't do because they will take their regular position and just stand still. Like the Telepod area, this free-time is useful for shaving off frames. I did these two things for that purpose: 1) Erase the dialogue screen of R-series or Robo before they pop up by getting them out of the screen at the right timing. 2) Increments the moving counter of R-series by touching one of them at certain timing.
+	$LF
+]p
+[p 
+	"Normally, after Robo is knocked down, you become unable to move a character anymore. However, if you interrupt a fight with Alkalines just before losing control, R-series are also caught in the battle. This was supposed to be the fight with only Alkalines, so you can escape from them. Thus, you can gain control again. When the real R-series battle is about to start is the best timing you interrupt another Alkalines battle. With this, you can not only escape from them again, but also increments the storyline counter enough to open the door in Proto Dome.
+	$LF
+]p
+[h4 
+	" Smoothly escaping
+	$LF
+]h4
+[p 
+	"An escape counter builds up even when you open the technique or item menu in battle. The thing is, you can escape from a battle without being attacked by setting the battle mode "Wait", opening the either menu and holding the L+R buttons. This trick was featured in all the three battles in the Factory. 
+	$LF
+]p
+[h4 
+	" Robo repair skip
+	$LF
+]h4
+[p 
+	"If you enter Proto Dome from overworld after the R-series fight, the game considers you just dragged Robo into, and make characters appear in front of the door for repair. That area is actually in warning area of the below enmies, so the characters start running down for fighting, though a fight starts halfway. When the fight finishes, you gain control and the repair cutscene never starts. At this point, the door to the gate room already opens; consequently, you can completely skip the Robo repair cutscene.
+	$LF
+]p
+[pre 
+	" 
+	$LF
+]pre
+[p 
+	"Also, when you enter Proto Dome, the first character must be Crono for these two reasons: 1) If you enter the gate room without Crono, the game freezes. 2) If a character is other than Crono, Marle, Lucca and Robo, he/she appears near the entrance, which doesn't awake the enmies and the game freezes.
+	$LF
+]p
+[h4 
+	" Playing around at the End of Time
+	$LF
+]h4
+[p 
+	"When you speak to snoaring Gasper, you are given a few frames to move around until he starts talking. And if you take the opportunity of talking to Robo twice, you can avoid losing control. This is actually temporary, and you will lose control as usual after you skip the dialogue. However, if you check the healing bucket right after skipping the dialogue, three party characters get together and you can gain control again, providing a third huge play-around time. In the non-glitched run, the trick saves little time, only allowing you to get slightly faster to the point that Gasper shouts "Hey!" to Crono. In the glitched run, however, the trick serves as the set up to perform "Lavos Shell skip" more smoothly and dramatically. I'll pick it up later.
+	$LF
+]p
+[h4 
+	" Confusing Spekkio
+	$LF
+]h4
+[p 
+	"If you talk to Spekkio while you are still running around the room, he claims to do it over. However, if you continue and complete it keeping the dialogue screen open, he thinks it as succeeded. This doesn't save any frames, but I added it to the run because I felt it would slightly enhance the entertainment value. 
+	$LF
+]p
+[h4 
+	" Lavos Shell skip
+	$LF
+]h4
+[p 
+	"This trick makes full use of the characteristics of gate transition as well as Middle Ages skip does. This is definitely the most difficult trick to pull off. Here are some important facts:
+	$LF
+]p
+[ol 
+	[li 
+		" In every gate transition, your starting X-Y coordinates in the next location is set a few frames before a fade-out completes. 
+		$LF
+	]li
+	[li 
+		" If you open the menu in that tiny window, you can overwrite them with the current X-Y coordinates.
+		$LF
+	]li
+	[li 
+		" If your characters appear at (7-8, 0-8), the entrance into Lavos's body, in the day of Lavos, they immediately jump into Lavos's body. The reason is that the entrance has the same features as the Lab 32 one: Fade-out occurs by just being at the appropriate position.
+		$LF
+	]li
+]ol
+[p 
+	"The thing is, if you manage to open the menu at (7-8, 0-8) at the End of Time just before the fade-out to the day of Lavos completes, you can completely skip Shell Lavos. Normally, this is out of the question. In the first place, (7-8, 0-8) is outside the moveable area. Second, you lose control right after checking the bucket to the day of Lavos, which means you can neither move nor open the menu anymore. To solve this problem, I used the following glitches:
+	$LF
+]p
+[ol 
+	[li 
+		" If you run around the End of Time autofiring the A button with a dialogue screen opened, the second and third character eventually fall behind the first. 
+		$LF
+	]li
+	[li 
+		" If the two are too far behind the first, they stop catching up with the first and newly start it with reference to the position they stopped. Note: You need to use the trick "Playing around at the End of Time" to reproduce these two glitches in a timely manner.
+		$LF
+	]li
+	[li 
+		" Hold two gate messages, choose yes for each. Then if the second message screen closes just before the rest characters, who run at the first to fly for the first gate waping, joins in him, you can restore the function to open the menu even while flying.
+		$LF
+	]li
+	[li 
+		" Under these conditions, if you change the order of characters twice, you can get out of flying and freely move.
+		$LF
+	]li
+]ol
+[p 
+	"To pull off these four glitches are required to skip Shell Lavos. Here is what I did in the run:
+	$LF
+]p
+[p 
+	"First, use the "Playing around" trick and get the other characters out of the screen with the first and second glitch while Gasper gives the long speech. Second, replace the three characters with Ayla, Magus and $17 when Gasper finishes the speech. The reason I call out Magus and Ayla is they don't take any action when Spekkio tries to give Magic, which saves a few hundred frames. Although it's not visible, Lucca, the third character, is at (8,0) at this point. These coordinates values are stored in the proper addresses, which will be really helpful later. Third, enter Spekkio's room and acquire Magic from Spekkio, no one actually gets it though. Now the bucket to the day of Lavos is activated. Fourth, check the bucket so that the Gasper's warning message doesn't hinder the third and fourth glitches.
+	$LF
+]p
+[p 
+	"Fifth, talk to Gasper because it is needed to show his dialogue to hold more than one gate message. Sixth, hold the Proto gate message, which is the shortest one of the three, and check the bucket. Seventh, use the third and fourth glitches and get right to the save point. Since the Lavos gate message was the first, warping to the day of Lavos is going to occur at this point. It should be noted that (8,0) is still stored in the addresses because only the first and second character were swithced. Eighth, right after the starting X-Y coordinates in the day of Lavos is loaded, use the character warp trick, send the first character into (8,0) and save the game. The save point effect lasts for a few frames after you leave there, so that's no problem to save on that position. Now the save file includes the day of Lavos as the current location, and (8,0) as the current position. Finally, reset the game and load the save file. Magus appears at (8,0) in the day of Lavos. As I stated above, that position is in the entrance to Lavos's body. Therefore, the game sends him into the inner body in a blink. 
+	$LF
+]p
+[p 
+	"Now we've done Lavos Shell skip!
+	$LF
+]p
+[p 
+	"It is extremely difficult to pull off, but the result is priceless. For the record, this is my favorite trick of all I have discovered.
+	$LF
+]p
+[h4 
+	" Instant kill
+	$LF
+]h4
+[p 
+	"Normally, when a character with the Green Dream is defeated, he automatically revives. However, when two RNG conditions are satisfied, the game temporarily considers him as dead. and if the other two characters are really dead at that point, he becomes unable to use an item on enemies instead of himself. If you use an Elixir on an enemy and the sum of its current HP and the HP heal is more than 32768(0x8000), that causes overflow and does instant kill. Inner Lavos has 20000 HP; Lavos Core has 30000 HP. Therefore, you can immediately finish those battles with the glitch. This is why I had to get a Green Dream and an Elixer from the configuration setting address. 
+	$LF
+]p
+[p 
+	"Also, for some reason, the glitch never occurs if the character has any status effect such as protect or chaos on him/her. I guess this is why the trick had not discovered for a long time.
+	$LF
+]p
+[h4 
+	" Useful key combinations
+	$LF
+]h4
+[p 
+	"There are three useful key combinations to be mentioned: 
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[p 
+	[b 
+		"X:
+	]b
+	" If you press the X button in battle, you can point at an enemy as an attack target wherever the cursor is. This was helpful for targeting Lavos in using the instant kill glitch.
+	$LF
+]p
+[p 
+	[b 
+		"Start and Up/Down/L/R:
+	]b
+	" Normally, you need 2 frames to move the cursor, as you have to insert null frame in each key press. However, if you press either the Up or Down key holding the start key, the cursor moves per one frame, which makes it possible very rapid cursor movements. The same goes for the L/R buttons. It normally requires 5 frames to scroll three pages; however, holding the start key reduces it to 4 frames. It should be noted, however, that it can be applied in only three places: the item inventory, the equipment selection screen, and the shopping window. In battle, for example, holding the start button will do nothing. This really comes in handy in a save-corruption run because you have to move up and down in the item inventory multiple times to perform the item duplication glitch properly.
+	$LF
+]p
+[p 
+	[b 
+		"B and Start:
+	]b
+	" Once these two buttons are pressed in the pause menu or the character change menu, every frame is treated as the B button pressed until you leave the menu. Thus, you can immediately get out of the menu no matter where you are. Note that this is slightly faster than the normal method because it requires null frame in each B button presses.  
+	$LF
+]p
+[h3 
+	"Thanks
+	$LF
+]h3
+[p 
+	"(in no particuarly order)
+	$LF
+]p
+[ul 
+	[li 
+		"Bisqwit  - For running the whole TAS Videos community. He is also one of them who tried to make a CT TAS.
+		$LF
+	]li
+	[li 
+		"Geiger - Using his Snes9x debugger, I could develop the item duplication glitch into the setup for a game-breaking glitch. Also his various texts on his CT hacking results were very informative and helpful.
+		$LF
+	]li
+	[li 
+		"Gocha - I learned how to make a TAS from his 
+		[a class=extlink href=http://d.hatena.ne.jp/GOCHA/ rel=nofollow 
+			"weblog
+		]a
+		". He also has fixed various bugs and implemented some good features on Snes9x 1.51. 
+		$LF
+	]li
+	[li 
+		"Hero of the Day - Watching his TAS, I decided to make a CT speedrun. He developed lots of good boss strategies, all of which are just plain awesome. I used most of them in my speedrun, some in my test TAS.
+		$LF
+	]li
+	[li 
+		"Mashmallow - I referred his movie on SDA several times when I tried to break his record.  
+		$LF
+	]li
+	[li 
+		"Molotov - He introduced my first CT speedrun to SDA and TAS videos, which broadened my perspective and has finally brought me here.
+		$LF
+	]li
+	[li 
+		"Nanashi(七誌) - He implied there were more tricks that I had not known then,　which motivated me to discover new tricks more and more.
+		$LF
+	]li
+	[li 
+		"Okuto(オクト) - A Japanese CT speedrunner. It was his reports on his run that I first knew about CT speedrun.
+		$LF
+	]li
+	[li 
+		"Reudy(ロイディ) - A very skillful Japanese CT speedrunner. he made a 100% CT run on console and even found some useful tricks for TAS.
+		$LF
+	]li
+	[li 
+		"Ryuuou Leo(竜王レオ) - A website manager of Japanese 
+		[a class=extlink href=http://www.geocities.jp/etr_dr_lor/top.html rel=nofollow 
+			"CT site
+		]a
+		", providing a community to discuss CT speedrun. He is also a good CT player.
+		$LF
+	]li
+	[li 
+		"Saturn - I learned how to make an optimized CT TAS by analyzing his new game+ TAS. 
+		$LF
+	]li
+	[li 
+		"Tilus -  At the beginning of making a CT speedrun, I followed his posts one by one, which were really suggestive and helpful.
+		$LF
+	]li
+]ul
+[p 
+	"And finally, I would really thank to all the people on TASvideos. If you had not been, I would never be able to make this run. I'd really appreciate it.
+	$LF
+]p
+[p 
+	"I hope you will enjoy the run! 
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Accepting for publication as a "glitched any%" category.
+	$LF
+]p
+[p 
+	"ShinyDoofy: Might as well get some use of the effort I put into Snes9x 1.51 on Linux... Claiming for encoding.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Some good points in the discussion in the forum topic has caused me to change my mind.  This will obsolete the current movie.  Mainly this keeps our options open the most.  The published movie is very outdated.  This gives the option of re-deciding if we want a non-glitch any%, or a 100%, or a "all aspects" run, or whatever category might be most appropriate.
+]p

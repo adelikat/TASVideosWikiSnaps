@@ -1,0 +1,680 @@
+5
+[h2 
+	"Werewolf TAS by andrewg & AnS
+	$LF
+	[a id=heading-170 
+	]a
+]h2
+[p 
+	"Recorded with FCEUX 2.0.4-interim
+	[br 
+	]br
+	$LF
+	"Completed in 9:00 (32428 frames)
+	$LF
+]p
+[p 
+	"- Aims for fastest time
+	[br 
+	]br
+	$LF
+	"- Takes damage to save time
+	[br 
+	]br
+	$LF
+	"- Abuses programming errors in the game
+	[br 
+	]br
+	$LF
+	"- Manipulates luck
+	[br 
+	]br
+	$LF
+	"- Genre: Platform
+	[br 
+	]br
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-170 
+				"Werewolf TAS by andrewg & AnS
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-171 
+						"About the game
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-172 
+						"Authors comments
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-173 
+						"Optimizing the run
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-174 
+						"Tricks&Glitches
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-175 
+						"Memory addresses
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-176 
+						"Using Lua
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-177 
+						"Level by level notes
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[hr 
+]hr
+[h3 
+	"About the game
+	$LF
+	[a id=heading-171 
+	]a
+]h3
+[p 
+	"Werewolf - The Last Warrior is an old NES platformer with good visuals and bad programming.
+	$LF
+]p
+[p 
+	"The game's slow-paced and actually quite repetitive. On some levels (as 2-2) there isn't a single enemy! Fortunately, glitches made it TAS-worthy, and we've tried our best to make the game look more amusing.
+	$LF
+]p
+[p 
+	"The main character of the game has 3 forms: weak Man, average Werewolf and strong Super Werewolf. These forms have different jumping heights and attack powers.
+	$LF
+]p
+[p 
+	"It's pretty easy to turn into Werewolf, you just need to collect a red W (and it's even easier to lose the status and turn back to Man), but for Super Werewolf form you have to search for hidden "anger" powerups, and after collecting 5 of them, you have a limited amount of time to use the Super form.
+	$LF
+]p
+[p 
+	"The currently published TAS of the game didn't use the Super form at all, thus it was clearly improvable from the very beginning. Just by using Super Werewolf you could shave about 20 seconds. But there appeared to be so much more...
+	$LF
+]p
+[h3 
+	"Authors comments
+	$LF
+	[a id=heading-172 
+	]a
+]h3
+[p 
+	[b 
+		"andrewg:
+	]b
+	$LF
+	"This is my first TAS and it turns out that I really enjoy TASing. I never knew about how awesome Werewolf was until pretty recently. In early 2008, "Frezy_man" over at Speeddemosarchive posted a cash bounty for 100 dollars for a speedrun of Werewolf. Of course, I decided to check the game out as I had never heard of it before. At first I didn't know what to think of the game, but after playing it a bit, I really enjoyed it and decided to speedrun it. The game was pretty tough, but I enjoy a tough NES game. After I finished the speedrun and won the bounty I decided to watch the TAS (I didn't know one existed until after I finished). The TAS didn't do one very minor glitch that I found while speedrunning the game. So I knew the TAS was improvable from the start. So I decided that I should try my hand at TASing Werewolf. After a few weeks of TASing AnS joined my project.
+	$LF
+]p
+[p 
+	[b 
+		"AnS:
+	]b
+	$LF
+	"I liked this game from the moment I got it on pirate multicartridge, even though it was one of hardest titles on NES.
+	$LF
+	"Once in 2006 I already tried improving upon currently published run, but the initiative got buried under huge amount of small optimizations needed to perfect the run. Yeah, the game appears to be even harder to TAS than to play.
+	$LF
+	"The one task that made me quit TASing the game was: planning Anger powerups. There was several different 'routes' of collecting them, and no way to choose fastest one without thorough and tedious tasing.
+	$LF
+	"Who could predict that these powerups would become unnecessary?
+	$LF
+	"When andrewg started the project, I remembered everything from 2 years ago and tried to help out just a little bit. But soon we found a lot of great glitches which brought the game to completely another level of TASing. I mean, hey, it was supposed that old run is improvable by 20-25 seconds at most, and now we have about 2.5 minutes!
+	$LF
+]p
+[h3 
+	"Optimizing the run
+	$LF
+	[a id=heading-173 
+	]a
+]h3
+[p 
+	"The game is sure evil. It has tons of little quirks that slow you down almost unnoticeably. Even in Frame Advance sometimes it's hard to notice you've lost a frame or two.
+	$LF
+]p
+[p 
+	"Some examples:
+	$LF
+]p
+[p 
+	"Falling from ledges costs 1 frame, landing costs 2 frames. Preparing high-jump costs 2 frames if you're walking and 1 frame if you're standing or just landed.
+	$LF
+]p
+[p 
+	"Ducking and standing costs 1 frame each.
+	$LF
+]p
+[p 
+	"Backflips cost 8-10 frames.
+	$LF
+]p
+[p 
+	"Attacking while jumping costs 1 frame, but it can be avoided if you manage to land before attack animation ends. Also you can press A+B to make invisible attack without animation at all, but it doesn't work with arrows.
+	$LF
+]p
+[p 
+	"Taking damage costs 5 frames at the very least.
+	$LF
+]p
+[p 
+	"There's some more I forgot about.
+	$LF
+]p
+[p 
+	"Surprisingly, there's no lag in the game.
+	$LF
+]p
+[p 
+	[b 
+		"Attacks table:
+	]b
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Man punch
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Man scream
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Man scream+punch (attack in same frame)
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"Werewolf slash
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Werewolf howl
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"Werewolf shooting
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"Super Werewolf slash
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"Super Werewolf howl
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"Super Werewolf shooting
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"Super Werewolf shooting+slash
+			]td
+			[td 
+				"7
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	"Tricks&Glitches
+	$LF
+	[a id=heading-174 
+	]a
+]h3
+[p 
+	[b 
+		"Saving charge
+	]b
+	$LF
+]p
+[p 
+	"To perform a Howl or Scream attack you have to charge up by standing still and holding A. If you start walking or doing something, charge meter will freeze. If you then stop without having A pressed, charge meter will be nullified.
+	$LF
+	"So in order to bring some amount of charge from one boss to another you need to have some button being pressed at all times. This way you can charge in little portions, saving time for the next battle.
+	$LF
+]p
+[p 
+	[b 
+		"Pause glitch
+	]b
+	$LF
+]p
+[p 
+	"Pause cancels screen flashing or fading animation. This way you can save time needed for transformations and even break level transition procedure.
+	$LF
+	"It's also possible to cancel the effect of Howl. Press Start just the frame after releasing A with full charge meter.
+	$LF
+	"Also pressing Start on the frame you're taking red/blue W to change form will eliminate the time-wasting flashing effect.
+	$LF
+	"As for level transitions, the matter is even more interesting. If you press Start on the frame Werewolf exits a level, the game assumes you're already on the next level, so it doesn't load new graphics, doesn't change current music and doesn't clean important memory variables. E.g. you can bring enemies (which are nothing but data objects) with you from one level to another.
+	$LF
+	"There are places where pause glitch doesn't work though.
+	$LF
+]p
+[p 
+	[b 
+		"Penetrating walls
+	]b
+	$LF
+]p
+[p 
+	"This glitch was known as the LDR-walk. By ducking and holding Left+Down+Right you can walk inside any wall. Obviously, you cannot do it while jumping.
+	$LF
+	"Now, to sink into a wall while in midair you have to alternate the Left-Right buttons each frame. Timing is critical.
+	$LF
+]p
+[p 
+	[b 
+		"Wallzipping
+	]b
+	$LF
+]p
+[p 
+	"After getting stuck inside a wall most of time your only option is to press jump and fall down.
+	$LF
+	"But with some blocks it's possible to climb the wall from inside, thus gaining the ability to jump once more - deeper into the wall.
+	$LF
+	"With constant jumping and grabbing adjacent blocks it's possible to move Werewolf inside a wall with the speed of 8 pixels per frame!
+	$LF
+]p
+[p 
+	[b 
+		"Manipulating bosses
+	]b
+	$LF
+]p
+[p 
+	"Bosses AI is very simple. Most of attacks are defined by amount of boss HP. For example, most of bosses will jump away after being hit if their HP is dividable by 4. So it's necessary to ensure every attack leaves boss with an odd amount of HP. This way we eliminated nearly every bosses' jumping.
+	$LF
+]p
+[p 
+	[b 
+		"Item duplication glitch
+	]b
+	$LF
+]p
+[p 
+	"Some of BG tiles contain valuable items and powerups. To retrieve an item you have to punch the object containing it, even if it says "DON'T KNOCK".
+	$LF
+	"The game memorizes where you've knocked, so normally you can't take more than one item from one holder.
+	$LF
+	"Hovewer, there's very limited amount of memory, so each time you cross invisible border between screens (1 screen = 256 pixels of width) the game forgets everything you did in the previous screen.
+	$LF
+	"When scrolling works as intended (Werewolf is always in the middle of screen) there shouldn't be any contradiction - you can't return back too far.
+	$LF
+	"But by using LDR or backflips it's possible to make Werewolf walk near right edge of screen, so he can retrieve an item before screen scrolls closer to the object holding it. Then after BG offset = 00 (border between two screens) the game forgets you've already knocked there, so you can take second item right away.
+	$LF
+	"At first we planned to use item duplication to get more Anger powerups, so we could transform into Super Werewolf more often. But then andrewg just duplicated red W powerup and it appeared to give player INFINITE Super Werewolf power. This meant there was no more need to optimize powerup picking routes! It's impossible to express how much time and nerve this finding has saved.
+	$LF
+]p
+[p 
+	[b 
+		"Ladder shift
+	]b
+	$LF
+]p
+[p 
+	"By approaching any ladder via LDR you can grab it 12 frames earlier. Even if you don't want to climb up, you can save 8 frames by grabbing and immediately releasing the ladder.
+	$LF
+	"If you're facing right while climbing a ladder, the screen will scroll forward. To avoid this, simply turn left before grabbing a ladder.
+	$LF
+]p
+[p 
+	[b 
+		"Skipping Giantheads
+	]b
+	$LF
+]p
+[p 
+	"These minibosses are in fact usual enemies, and most of time there's a way to prevent them from appearing.
+	$LF
+	"With Super Werewolf high-jump it's possible to jump over boss' spawn range, but in some levels this requires certain allocation of other enemies on screen.
+	$LF
+	"At first, each Gianthead battle seemed impossible to skip, but at the end we pulled it off somehow. Only the first and second Giantheads aren't skipped, because we didn't have Super Werewolf there yet.
+	$LF
+]p
+[h3 
+	"Memory addresses
+	$LF
+	[a id=heading-175 
+	]a
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Meaning
+			]th
+		]tr
+		[tr 
+			[td 
+				"6F
+			]td
+			[td 
+				"scrolling offset
+			]td
+		]tr
+		[tr 
+			[td 
+				"70
+			]td
+			[td 
+				"screen number
+			]td
+		]tr
+		[tr 
+			[td 
+				"!006F
+			]td
+			[td 
+				"bg X
+			]td
+		]tr
+		[tr 
+			[td 
+				"422
+			]td
+			[td 
+				"player X
+			]td
+		]tr
+		[tr 
+			[td 
+				"425
+			]td
+			[td 
+				"player Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"424
+			]td
+			[td 
+				"Y subpixel Very important for some jumps
+			]td
+		]tr
+		[tr 
+			[td 
+				"46F
+			]td
+			[td 
+				"Boss damage
+			]td
+		]tr
+		[tr 
+			[td 
+				"466
+			]td
+			[td 
+				"Boss timer Timing attacks and actions
+			]td
+		]tr
+		[tr 
+			[td 
+				"481
+			]td
+			[td 
+				"Boss invincibility timer
+			]td
+		]tr
+		[tr 
+			[td 
+				"450
+			]td
+			[td 
+				"Charge
+			]td
+		]tr
+		[tr 
+			[td 
+				"508
+			]td
+			[td 
+				"lightning id important for luck manipulation
+			]td
+		]tr
+		[tr 
+			[td 
+				"44e
+			]td
+			[td 
+				"form (Man/Werewolf/Super Werewolf)
+			]td
+		]tr
+		[tr 
+			[td 
+				"44d
+			]td
+			[td 
+				"arrows
+			]td
+		]tr
+		[tr 
+			[td 
+				"44f
+			]td
+			[td 
+				"attack type (slash/shoot)
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	"Using Lua
+	$LF
+	[a id=heading-176 
+	]a
+]h3
+[p 
+	"The one real downside of using the Pause glitch is that after using it on level transition the game screws up graphics, so you can't see sprites, also background is unreadable.
+	$LF
+	"At first it didn't look as a major problem, but when it came to optimizing wallzipping in 3-2 this became a real pain.
+	$LF
+	"Of course there is Memory Watcher, so it's not particularly hard to play invisibly, it's just hard to play precisely.
+	$LF
+	"So after getting frustrated by uncertainty, I learned basics of Lua scripting and wrote an awesome visualization script. It shows Werewolf's checkbox even when there's no Werewolf sprite on screen. Also it draws enemies and powerups, so the whole game now can be played without sprites at all.
+	$LF
+	"As for background, the script uses two main variables to inform the TASer about current collisions with BG.
+	$LF
+]p
+[p 
+	"The full script can be found here:
+	$LF
+	"http://shedevr.org.ru/temp/werewolf.lua
+	$LF
+]p
+[p 
+	"Even later, in levels with visible graphics this script helped a lot. I'm so glad I paid attention to Lua.
+	$LF
+]p
+[h3 
+	"Level by level notes
+	$LF
+	[a id=heading-177 
+	]a
+]h3
+[p 
+	[b 
+		"1-1
+	]b
+	$LF
+	"There's useful technique for Man form of Werewolf: if you shoot projectile and punch an enemy on the frame the projectile touches it, then both hits will be counted.
+	$LF
+	"First Gianthead battle was significantly improved by using this tech to avoid jumping. Attacks go like this: +3, +3, +3, +2, +3, +3, +3, so the boss doesn't have a chance to jump (as his HP is never dividable by 4).
+	$LF
+]p
+[p 
+	[b 
+		"1-2
+	]b
+	$LF
+	"It's not visible, but there are some important preparations needed to finish the boss quicker.
+	$LF
+]p
+[p 
+	[b 
+		"2-1
+	]b
+	$LF
+	"There is a lot of hidden items in this level, and many of them can be duplicated, so it's time to turn to Super Werewolf. Only Man can retrieve red Ws, so first we need to lose Werewolf status by taking blue W.
+	$LF
+	"Although Super Werewolf moves with the same speed as Man, somehow the pace of the game becomes more energetic. Even Gianthead of this level now can be skipped without slowing down or going underground.
+	$LF
+]p
+[p 
+	[b 
+		"2-2
+	]b
+	$LF
+	"Some lightnings tend to strike very close to Werewolf, but they can be manipulated away by tactical jumping.
+	$LF
+]p
+[p 
+	[b 
+		"3-1
+	]b
+	$LF
+	"Some of the underground tiles can be used to zip through. Unfortunately, camera only scrolls by 1 pixel per frame, so if you zip too fast you can wrap back to left side of screen.
+	$LF
+]p
+[p 
+	[b 
+		"3-2
+	]b
+	$LF
+	"A lot of things are done invisibly - zipping through set of walls, using every ladder to boost, crossing walls in midair and obtaining invisible arrow for boss.
+	$LF
+	"In Fireman battle I had to take damage, because I need more time for charging. You can't charge while jumping, so at the end of the battle Werewolf has only 2 HP left. In fact, he dies on the frame the game stops for playing fanfares!
+	$LF
+]p
+[p 
+	[b 
+		"4-1
+	]b
+	$LF
+	"Yes, the level is as difficult to play as it seems.
+	$LF
+	"At the end there's another Gianthead miniboss, and we decided not to skip him, but take along with werewolf to next level.
+	$LF
+]p
+[p 
+	[b 
+		"4-2
+	]b
+	$LF
+	"Watch this movie with Lua script running, so that you can see what's going on.
+	$LF
+	"Basically, invisible Werewolf is followed by invisible Gianthead down to invisible boss. I'm not making this up! They are there. Trust me. The boss name is "Monster", if that makes more sense... Anyway, invisible Werewolf shoots two invisible arrows and uses two Howls, then player can finally see everyone. Everyone except Gianhead, because Gianthead dies after second Howl. Too bad for him, because the most interesting part just begins.
+	$LF
+	"When the game notices miniboss death, it switches boss mode off, thus allowing screen to scroll up. But Monster wasn't programmed to operate in such environment, so he gets murdered in a blink of eye. What's more important, there's supposed to be long death animation of Monster falling down, but we managed to scroll screen in such a way that this animation doesn't even start. Werewolf just wins and goes to next level.
+	$LF
+]p
+[p 
+	[b 
+		"5-1
+	]b
+	$LF
+	"The way of Kinju miniboss handling actually defines the luck for whole level. Maybe it was possible to have better luck with less enemies (thus less jumps would be needed, as each jump costs 2 frames), but I like how it looks now.
+	$LF
+]p
+[p 
+	[b 
+		"5-2
+	]b
+	$LF
+	"Another invisible section with enemiy manipulation, Gianhead skipping and arrow taking. For Faryan battle 1 arrow appeared to be faster than 2 arrows, and two last battles were nothing special.
+	$LF
+	"It's so itchy that time record is that close to 9:00, but I doubt it's possible to shave 28 frames even by redoing whole movie.
+	$LF
+]p
+[p 
+	[b 
+		"Suggested screenshot - frame 21609
+	]b
+	$LF
+]p
+[p 
+	[img class=embed src=http://shedevr.org.ru/temp/sound/ho.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Accepting as an improvement to the published movie.
+	$LF
+]p
+[p 
+	"ShinyDoofy: Will process...
+]p

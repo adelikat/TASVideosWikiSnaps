@@ -1,0 +1,493 @@
+7
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-5690 
+						" Movie mode and Emulator read-only/read+write states:
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-5691 
+						" Read-only vs read+write
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-5692 
+						" Savestate interaction with movies
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-5693 
+						" Loadstate interaction with movies
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-5694 
+								" Mode Inactive
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-5695 
+								" Playback or Recording + Read-only
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-5696 
+								" Playback, Recording + Read+write
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-5697 
+								" Post-movie savestate event
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-5698 
+						" Further study
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[p 
+	"The core of rerecording is the use of savestates along with movie recording.  These 2 events can create a complex logic that must be carefully implemented.
+	$LF
+]p
+[p 
+	[b 
+		"Terminology used in this section:
+	]b
+	[br 
+	]br
+	$LF
+]p
+[ul 
+	[li 
+		"movie - the movie currently loaded in memory; what the user is "TASing"
+		$LF
+	]li
+	[li 
+		"savestate-movie - the movie data stored in a savestate file
+		$LF
+	]li
+	[li 
+		"current framecount - the current frame count as displayed by the emulator, this is what the user sees and interacts with. In essence, "now".
+		$LF
+	]li
+	[li 
+		"timeline - a series of input (events) in a specified stream.  For example, in a movie that is 1000 frames long and a savestate that has 500 frames in put data: the savestate is in the same timeline if the savestate input matches the first 500 frames of the movie 
+		$LF
+	]li
+	[li 
+		"movie-length- the number of input log frames in the current movie
+		$LF
+	]li
+	[li 
+		"loadstate - the act of of retrieving a savestate and loading it in the emulator
+		$LF
+	]li
+	[li 
+		"savestate - the act of creating a savestate file.
+		$LF
+	]li
+]ul
+[h3 
+	" Movie mode and Emulator read-only/read+write states:
+	$LF
+	[a id=heading-5690 
+	]a
+]h3
+[p 
+	"The interaction of user input, savestates, and other tools depend on various modes that a movie could be in.  There are 4 possible movie modes.
+	$LF
+]p
+[ul 
+	[li 
+		[b 
+			"Inactive
+		]b
+		$LF
+		[ul 
+			[li 
+				"No movie loaded into memory, operations are the usual emulator affairs
+				$LF
+			]li
+		]ul
+		[b 
+			"Playback
+		]b
+		$LF
+		[ul 
+			[li 
+				"Movie is in a "read-only" mode.  The user input has no affect on the playback, and savestates & loadstates can not alter the movie in any way.
+				$LF
+			]li
+		]ul
+		[b 
+			"Recording
+		]b
+		$LF
+		[ul 
+			[li 
+				"Movie is in a "read+write" mode.  User input is dumped into the movie file and savestates affect movie data.
+				$LF
+			]li
+		]ul
+		[b 
+			"Finished
+		]b
+		$LF
+		[ul 
+			[li 
+				"The movie was in playback mode and now has played the entire input stream.  In this special mode the movie is still in memory, but the user has control of input, but it has no effect on the movie.  Savestates made in movie finished mode will contain a copy of the entire movie.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"implementation of movie mode is typically an Enum value.
+	$LF
+]p
+[h3 
+	" Read-only vs read+write
+	$LF
+	[a id=heading-5691 
+	]a
+]h3
+[p 
+	"The emulator will keep track of read-only and read+write states.  These don't immediately affect a movie.  The affect happens on a loadstate event.  At that point, the emulator read-only status will determine the behavior of the loadstate.
+	$LF
+]p
+[ul 
+	[li 
+		[b 
+			"read-only
+		]b
+		$LF
+		[ul 
+			[li 
+				"movie is in a read-only state, no user input or savestates can affect the movie file
+				$LF
+			]li
+		]ul
+		[b 
+			"read+write
+		]b
+		$LF
+		[ul 
+			[li 
+				"movie will be written to based on input or savestates
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"implementation is typically a simple boolean value
+	$LF
+]p
+[hr 
+]hr
+[h3 
+	" Savestate interaction with movies
+	$LF
+	[a id=heading-5692 
+	]a
+]h3
+[p 
+	"A movie savestate differs from a non-movie savestate in that it has movie data embedded into it.  This data is embedded upon the savestate event.  The entire movie contents are always stored in any movie mode other than inactive.  In addition, the current frame count must be stored.  This is critical information since the savestate movie-length can not be a reliable means of determining it.  The relationship between savestate movie-length and the savestate framecount will play a vital role in various savestate logic decisions.
+	$LF
+]p
+[ul 
+	[li 
+		[b 
+			"Inactive
+		]b
+		$LF
+		[ul 
+			[li 
+				" No movie data is stored
+				$LF
+			]li
+		]ul
+		[b 
+			"Playback
+		]b
+		$LF
+		[ul 
+			[li 
+				"The entire contents of the movie are stored not just up to the current framecount
+				$LF
+			]li
+		]ul
+		[b 
+			"Recording
+		]b
+		$LF
+		[ul 
+			[li 
+				"The entire contents of the movie are stored which will always be up to the current framecount
+				$LF
+			]li
+		]ul
+		[b 
+			"Movie finished
+		]b
+		$LF
+		[ul 
+			[li 
+				"The entire contents of the movie are stored which will always be up to a previous frame than current framecount
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[hr 
+]hr
+[h3 
+	" Loadstate interaction with movies
+	$LF
+	[a id=heading-5693 
+	]a
+]h3
+[p 
+	"When a movie is loaded, savestates should store movie data.  This is the hallmark of solid input recording and has been termed "Bulletproof Rerecording".  The implementation of this logic can be rather complex due to the interaction of the four movie modes and the 2 read-only states.  Here is a breakdown per mode of what should happen:
+	$LF
+]p
+[p 
+	"(note: in all logic chains, the act of "resuming" after loadstate error may require that a backup state was made before loadstate attempt)
+	$LF
+]p
+[h4 
+	" Mode Inactive
+	$LF
+	[a id=heading-5694 
+	]a
+]h4
+[ul 
+	[li 
+		" No movie data should be saved or loaded
+		$LF
+	]li
+]ul
+[h4 
+	" Playback or Recording + Read-only
+	$LF
+	[a id=heading-5695 
+	]a
+]h4
+[ul 
+	[li 
+		"Check that GUID of movie and savestate-movie must match or else error
+		$LF
+		[ul 
+			[li 
+				"on error: a message informing that the savestate doesn't belong to this movie.  This is a 
+				[em 
+					"GUID mismatch
+				]em
+				" error.  Give user a choice to load it anyway.
+				$LF
+				[ul 
+					[li 
+						"failstate: if use declines, loadstate attempt canceled, movie can resume as if not attempted (stop movie if resume fails)
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+		"Check that movie and savestate-movie are in same timeline.  If not then this is a 
+		[em 
+			"wrong timeline
+		]em
+		" error.
+		$LF
+		[ul 
+			[li 
+				"on error: a message informing that the savestate doesn't belong to this movie
+				$LF
+				[ul 
+					[li 
+						"failstate: loadstate attempt canceled, movie can resume as if not attempted
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+		"Check that savestate-movie is not greater than movie.  If not then this is a 
+		[em 
+			"future event
+		]em
+		" error and is not allowed in read-only
+		$LF
+		[ul 
+			[li 
+				"on error: message informing that the savestate is from a frame after the last frame of the movie
+				$LF
+				[ul 
+					[li 
+						"failstate - loadstate attempt cancelled, movie can resume (stop movie if resume fails)
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+		"Check that savestate framcount <= savestate movie length.  If not this is a 
+		[em 
+			"post-movie savestate
+		]em
+		$LF
+		[ul 
+			[li 
+				"on post-movie: See post-movie event section.
+				$LF
+			]li
+		]ul
+		"All error checks have passed, state will be loaded
+		$LF
+	]li
+	[li 
+		"Movie contained in the savestate will be discarded
+		$LF
+	]li
+	[li 
+		"Movie is now in Playback mode
+		$LF
+	]li
+]ul
+[h4 
+	" Playback, Recording + Read+write
+	$LF
+	[a id=heading-5696 
+	]a
+]h4
+[ul 
+	[li 
+		"Check that GUID of movie and savestate-movie must match or else error
+		$LF
+		[ul 
+			[li 
+				"on error: a message informing that the savestate doesn't belong to this movie.  This is a 
+				[em 
+					"GUID mismatch
+				]em
+				" error.  Give user a choice to load it anyway.
+				$LF
+				[ul 
+					[li 
+						"failstate: if use declines, loadstate attempt canceled, movie can resume as if not attempted (stop movie if resume fails)canceled, movie can resume (or stopmovie event)
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+		"Check that savestate framcount <= savestate movie length.  If not this is a 
+		[em 
+			"post-movie savestate
+		]em
+		$LF
+		[ul 
+			[li 
+				"on post-movie: See post-movie event section.
+				$LF
+			]li
+		]ul
+		"savestate passed all error checks and will now be loaded in its entirety and replace movie (note: there will be no truncation yet)
+		$LF
+	]li
+	[li 
+		"current framecount will be set to savestate framecount
+		$LF
+	]li
+	[li 
+		"on the next frame of input, movie will be truncated to framecount
+		$LF
+		[ul 
+			[li 
+				"(note: savestate-movie can be a future event of the movie timeline, or a completely new timeline and it is still allowed)
+				$LF
+			]li
+		]ul
+		"Rerecord count of movie will be incremented
+		$LF
+	]li
+	[li 
+		"Movie is now in record mode
+		$LF
+	]li
+]ul
+[h4 
+	" Post-movie savestate event
+	$LF
+	[a id=heading-5697 
+	]a
+]h4
+[ul 
+	[li 
+		"Whan a savestate is loaded and is determined that the savestate-movie length is less than the savestate framecount then it is a 
+		[em 
+			"post-movie savestate
+		]em
+		".  These occur when a savestate was made during 
+		[em 
+			"Movie Finished
+		]em
+		" mode.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"If read+write, the entire savestate movie will be loaded and replace current movie.
+		$LF
+	]li
+	[li 
+		"If read-only, the savestate movie will be discarded
+		$LF
+	]li
+	[li 
+		"Mode will be switched to Move Finished
+		$LF
+	]li
+	[li 
+		"Savestate will be loaded
+		$LF
+	]li
+	[li 
+		"Current framecount changes to savestate framecount
+		$LF
+	]li
+	[li 
+		"User will have control of input as if Movie inactive mode
+		$LF
+	]li
+]ul
+[h3 
+	" Further study
+	$LF
+	[a id=heading-5698 
+	]a
+]h3
+[p 
+	[a class=extlink href=http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/src/movie.cpp?view=log rel=nofollow 
+		"FCEUX movie.cpp
+	]a
+	" implements 100% of the documented material on this page.
+]p

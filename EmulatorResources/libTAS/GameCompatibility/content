@@ -1,0 +1,805 @@
+5
+[h3 
+	" General
+	$LF
+]h3
+[p 
+	"libTAS has been initially developed to support games that are using 
+	[a class=extlink href=https://www.libsdl.org rel=nofollow 
+		"Simple DirectMedia Layer
+	]a
+	" (SDL) for rendering (both software and OpenGL rendering). SDL is a cross-platform library for developing games. It is used in many commercial Linux games, either directly, or by using a high level framework that uses SDL as an intermediate layer. This includes 
+	[a class=extlink href=https://fna-xna.github.io rel=nofollow 
+		"FNA
+	]a
+	", a reimplementation of Microsoft XNA, or 
+	[a class=extlink href=http://mp2.dk/chowdren rel=nofollow 
+		"Chowdren
+	]a
+	", a cross-platform runtime for Clickteam Fusion games.
+	$LF
+]p
+[p 
+	"There has been some development to handle low-level rendering/inputs to support more games, including GameMaker Studio or Unity games.
+	$LF
+]p
+[p 
+	"Also, Steam games are partially supported right now. We can't let the game connect to Steam because Steam is messing with our code injection by spawning multiple processes and injecting code itself (such as game overlay). To fix that, a dummy Steam library is implemented, but it is still under development and games have many ways to connect to Steam so this does not work for all games yet. On the game compatibility below, it is noted if the Steam version of the game is supported. If not, you must use a drm-free version, except if the Steam game is or can be made 
+	[a class=extlink href=http://steam.wikia.com/wiki/List_of_DRM-free_games rel=nofollow 
+		"drm-free
+	]a
+	".
+	$LF
+]p
+[h4 
+	" Rendering
+	$LF
+]h4
+[p 
+	"LibTAS supports SDL1 software rendering, SDL2 software and OpenGL rendering, and low-level GLX (OpenGL) rendering.
+	$LF
+]p
+[h4 
+	" Inputs
+	$LF
+]h4
+[p 
+	"Supported inputs are:
+	$LF
+]p
+[ul 
+	[li 
+		" Keyboard: SDL1, SDL2 and Xlib
+		$LF
+	]li
+	[li 
+		" Mouse: SDL1, SDL2 and Xlib
+		$LF
+	]li
+	[li 
+		" Joystick: SDL1, SDL2, jsdev module (reading /dev/input/jsX) and evdev module (reading /dev/input/eventX)
+		$LF
+	]li
+]ul
+[h4 
+	" Audio
+	$LF
+]h4
+[p 
+	"Audio playback needs to be controlled for a correct playback when game is paused, and for audio dumping. Audio sources are intercepted from the audio library calls made by the game, and are mixed together by libTAS and played back at frame boundaries. The currently supported high-level audio libraries are SDL1 Audio, SDL2 Audio and OpenAL. Also, low-level ALSA API is supported, so that other high-level libraries (like FMOD) are still working.
+	$LF
+]p
+[h3 
+	" Compatibility
+	$LF
+]h3
+[h4 
+	" Engine Compatibility
+	$LF
+]h4
+[p 
+	"This is a list of game engines/frameworks that libTAS should be able to run, with their specific settings. Most games of the indicated engines should run fine with the required settings. Some games may be noted as not compatible in the next section.
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[a class=extlink href=https://love2d.org/ rel=nofollow 
+			"LÖVE
+		]a
+		" framework (only >11.1 was tested): no specific settings are required. Some games using this framework are indicated on the website.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.yoyogames.com/gamemaker rel=nofollow 
+			"GameMaker Studio
+		]a
+		" games need 
+		[tt 
+			"Runtime > Time tracking > Main thread > clock_gettime()
+		]tt
+		" to prevent softlocks. If the Steam version is running, you may need to take several libraries from Steam runtime ("~/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu/") to the game library folder (such as "libcrypto.so.1.0.0" and "libssl.so.1.0.0"). Here are 
+		[a class=extlink href=https://www.yoyogames.com/showcase rel=nofollow 
+			"two
+		]a
+		" 
+		[a class=extlink href=https://en.wikipedia.org/wiki/List_of_GameMaker_Studio_games rel=nofollow 
+			"lists
+		]a
+		" of games using this engine.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://fna-xna.github.io rel=nofollow 
+			"FNA
+		]a
+		" / 
+		[a class=extlink href=http://www.monogame.net/ rel=nofollow 
+			"MonoGame
+		]a
+		" games may need 
+		[tt 
+			"Runtime > Time tracking > Main thread > clock_gettime()
+		]tt
+		" to prevent softlocks. Also, some versions of mono need 
+		[tt 
+			"Runtime > Recycle threads
+		]tt
+		" unchecked to prevent crashes when threads exit. Here are 
+		[a class=extlink href=http://www.flibitijibibo.com/index.php?page=Portfolio/Tools#01_FNA.txt rel=nofollow 
+			"two
+		]a
+		" 
+		[a class=extlink href=http://www.monogame.net/showcase/ rel=nofollow 
+			"lists
+		]a
+		" of games using this engine.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://unity3d.com rel=nofollow 
+			"Unity
+		]a
+		": not much tested compared to the other engines. Because it is using mono, it requires the same settings as FNA/MonoGame. In libTAS v1.3.2 and below, Audio library may choose PulseAudio driver instead of ALSA, making the audio not hooked. Uninstalling pulseaudio solves the issue. Here is a 
+		[a class=extlink href=https://en.wikipedia.org/wiki/List_of_Unity_games rel=nofollow 
+			"list
+		]a
+		" of Unity games, and a 
+		[a class=extlink href=https://www.gamingonlinux.com/wiki/Unity_Games_Working_On_Linux_(User_Ported) rel=nofollow 
+			"guide to port Windows games on Linux
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=http://mp2.dk/chowdren rel=nofollow 
+			"Chowdren
+		]a
+		" is a runtime for Fusion and Construct games. No specific settings are required. A list of games is indicated on the main page.
+		$LF
+	]li
+]ul
+[h4 
+	" Recreated Engine Compatibility
+	$LF
+]h4
+[p 
+	"Taken from 
+	[a href=/forum/t/20538 
+		"this post
+	]a
+	", thanks to Slamo for gathering all this data.
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[a class=extlink href=https://www.scummvm.org rel=nofollow 
+			"ScummVM
+		]a
+		" does not require specific settings. See the 
+		[a class=extlink href=https://www.scummvm.org/compatibility/ rel=nofollow 
+			"list of supported games
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=http://abuse.zoy.org/ rel=nofollow 
+			"Abuse
+		]a
+		" (Abuse) and a 
+		[a class=extlink href=https://github.com/antrad/Abuse_1996 rel=nofollow 
+			"recent SDL2 fork
+		]a
+		". Go into the ".abuse" folder and open 
+		[tt 
+			"abuserc
+		]tt
+		", then set fullscreen to be 0.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.dxx-rebirth.com rel=nofollow 
+			"DXX-Rebirth
+		]a
+		" (Descent, Descent 2): open d1x-rebirth/d2x-rebirth by itself first and turn fullscreen off. Needs 
+		[tt 
+			"Runtime -> Time tracking -> Main thread -> SDL_GetTicks()
+		]tt
+		" to be checked.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://sourceforge.net/projects/prboom-plus/ rel=nofollow 
+			"PrBoom+
+		]a
+		" (Doom). Needs 
+		[tt 
+			"Runtime -> Time tracking -> Main thread -> SDL_GetTicks()
+		]tt
+		" to be checked.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.chocolate-doom.org rel=nofollow 
+			"Chocolate Doom
+		]a
+		" (Doom, Heretic, Hexen, Strife). Softlocks at OPL init, run 
+		[tt 
+			"chocolate-xxx-setup
+		]tt
+		" and disable music.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://github.com/svkaiser/strife-ve rel=nofollow 
+			"Strife: Veteran Edition
+		]a
+		" (Strife: Veteran Edition). Needs 
+		[tt 
+			"Runtime -> Time tracking -> Main thread -> SDL_GetTicks()
+		]tt
+		" to be checked.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.eduke32.com rel=nofollow 
+			"EDuke32
+		]a
+		" (Duke Nukem 3D). A couple things to set up: First, run eduke32 and uncheck "Always show this window at startup". In the game, go to Options -> Display Setup -> Video Mode, then set Renderer to Classic (or else it will look like clown vomit in libTAS). Set windowed mode as well, as it defaults to fullscreen. In libTAS, needs 
+		[tt 
+			"Runtime -> Time tracking -> Main thread -> SDL_GetTicks()
+		]tt
+		" to be checked. 
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=http://quakespasm.sourceforge.net rel=nofollow 
+			"QuakeSpasm
+		]a
+		" (Quake) does not require specific settings.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://openmw.org/fr rel=nofollow 
+			"OpenMW
+		]a
+		" (Morrowind). Loading a savestate often softlocks the game
+		$LF
+	]li
+]ul
+[h4 
+	" Emulator Compatibility
+	$LF
+]h4
+[p 
+	"Having an emulator compatible with libTAS does 
+	[b 
+		"not
+	]b
+	" mean that submissions of games running inside this emulator are accepted. I suggest you contact one of the TASVideos staff member if you are interested in such submission, or wait for an official statement.
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[a class=extlink href=https://www.dosbox.com rel=nofollow 
+			"DOSBox
+		]a
+		" (DOS). Needs to set fixed cycles in dosbox.conf, otherwise it will run extremely slowly. Needs Runtime -> Time tracking -> Main thread -> SDL_GetTicks() to be checked. 
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=http://dosbox-x.com rel=nofollow 
+			"DOSBox-X
+		]a
+		" (DOS). Write a config file with "config.com -all -wc" and set the cycles to a fixed amount, otherwise it will run extremely slowly. Needs 
+		[tt 
+			"Runtime -> Time tracking -> Main thread -> SDL_GetTicks()
+		]tt
+		" to be checked.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.mamedev.org rel=nofollow 
+			"MAME
+		]a
+		" (arcade/consoles). See the 
+		[a href=/forum/t/20554 
+			"specific topic
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.ppsspp.org/ rel=nofollow 
+			"PPSSPP
+		]a
+		" (PSP). The hotkey "Speed toggle" must be set (In System > Controls > Control mapping) and pressed at the beginning of the run to unthrottle the emulation. Option 
+		[tt 
+			"Runtime > Backup savefiles in memory
+		]tt
+		" must be disabled. See the 
+		[a href=/forum/t/20542 
+			"specific topic
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://citra-emu.org/ rel=nofollow 
+			"Citra
+		]a
+		" (3DS). The SDL frontend (
+		[tt 
+			"citra
+		]tt
+		") must be used. Edit the config file in "~/.config/citra-emu/sdl2-config.ini", go to the "Audio" section and set "output_engine = sdl2" to force using sdl2 audio. See the 
+		[a href=/forum/t/20614 
+			"specific topic
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.gnu.org/software/gnash rel=nofollow 
+			"Gnash
+		]a
+		" (Flash). See the 
+		[a href=/forum/t/20547 
+			"specific topic
+		]a
+		".
+		$LF
+	]li
+]ul
+[h4 
+	" Game Compatibility
+	$LF
+]h4
+[p 
+	"This list contains games that don't use the above engines, or require specific settings.
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-1066 
+				"Working games
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-1067 
+				"Unsupported games
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-1066 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							" Game               
+						]th
+						[th 
+							" Framework    
+						]th
+						[th 
+							" Steam 
+						]th
+						[th 
+							" Comments 
+						]th
+					]tr
+					[tr 
+						[td 
+							" Braid               
+						]td
+						[td 
+							" SDL1 or SDL2  
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Offset between system and game cursor 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Dead Cells          
+						]td
+						[td 
+							" Heaps/SDL2    
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Needs 
+							[tt 
+								"Time tracking > Main thread > gettimeofday()
+							]tt
+							" to prevent softlocks, randomness not controlled, audio effects not supported 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Dustforce           
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Limbo               
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Needs 
+							[tt 
+								"Time tracking > Main thread > SDL_GetPerformanceCounter()
+							]tt
+							" to prevent a softlock at startup 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Metal Slug          
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Osmos               
+						]td
+						[td 
+							" ???           
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Needs 
+							[tt 
+								"Time tracking > Main thread > gettimeofday()
+							]tt
+							" to prevent softlocks 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Shovel Knight       
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" Yes 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							" SteamWorld Dig      
+						]td
+						[td 
+							" None          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Needs 
+							[tt 
+								"Time tracking > Main thread > clock_gettime()
+							]tt
+							" to prevent a softlock at startup 
+						]td
+					]tr
+					[tr 
+						[td 
+							" SteamWorld Dig 2    
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Needs 
+							[tt 
+								"Time tracking > Main thread > SDL_GetPerformanceCounter()
+							]tt
+							" to prevent a softlock at startup, variable loading times 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Spacechem           
+						]td
+						[td 
+							" Tao/SDL2      
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Super Hexagon       
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Super Meat Boy      
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" Yes 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							" The End Is Nigh     
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" Yes 
+						]td
+						[td 
+							" Variable splash screen time 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Volgarr             
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Needs 
+							[tt 
+								"-vsync=2
+							]tt
+							" to get consistant startup. Variable loading time between levels, removed by a game setting 
+						]td
+					]tr
+					[tr 
+						[td 
+							" VVVVVV              
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" fps is 1000/34, letterbox mode forces 320x240 because logical size is not supported 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Wonder Boy: The Dragon's Trap 
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" Yes 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=y-1067 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							" Game 
+						]th
+						[th 
+							" Framework 
+						]th
+						[th 
+							" Steam 
+						]th
+						[th 
+							" Comments 
+						]th
+					]tr
+					[tr 
+						[td 
+							" 1001 Spikes         
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" No 
+						]td
+						[td 
+							" Connects to Steam somehow, then libTAS is not preloaded. No DRM-free version 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Antichamber         
+						]td
+						[td 
+							" Unreal Engine 
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Crash at startup 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Enter the Gungeon   
+						]td
+						[td 
+							" Unity         
+						]td
+						[td 
+							" Yes 
+						]td
+						[td 
+							" Prompts the game window then crash. Spawns more than 30 threads! 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Guacamelee          
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Softlock at splashscreen 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Hotline Miami       
+						]td
+						[td 
+							" Qt5           
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Instable. Common freezes, relies entirely on time hack, rendering thread is not main thread (thanks Qt...)! 
+						]td
+					]tr
+					[tr 
+						[td 
+							" La-Mulana Remake    
+						]td
+						[td 
+							" SDL2          
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Only run with 
+							[tt 
+								"Uncontrolled time
+							]tt
+							" and 
+							[tt 
+								"Native events
+							]tt
+							". At least three different threads render on screen (wtf) 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Papers Please       
+						]td
+						[td 
+							" OpenFL        
+						]td
+						[td 
+							" ??? 
+						]td
+						[td 
+							" Softlocks at startup. Uses SDL Timer which is not supported 
+						]td
+					]tr
+					[tr 
+						[td 
+							" Steredenn           
+						]td
+						[td 
+							" Unity         
+						]td
+						[td 
+							" Yes 
+						]td
+						[td 
+							" Prompts the game window then crash. Spawns more than 30 threads! 
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+	]div
+]div

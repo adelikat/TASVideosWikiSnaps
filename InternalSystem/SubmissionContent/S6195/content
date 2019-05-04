@@ -1,0 +1,181 @@
+12
+[p 
+	"-Heavy RNG manipulation
+	$LF
+]p
+[p 
+	"-Takes damage to save time
+	$LF
+]p
+[p 
+	"This is an improvement of 225 frames (3.75 seconds) over the current TAS.
+	$LF
+]p
+[p 
+	"I first started improving this TAS when I noticed some obvious improvements used in the RTA boss fights but not the TAS. I became slightly obsessed with shaving frames, and in doing so taught myself to script in Lua.
+	$LF
+]p
+[p 
+	"The two scripts I wrote are:
+	$LF
+]p
+[p 
+	"1) A hitbox script for all objects, which includes not only objects but the stage borders themselves (solid graphic tiles), with multiple other on-screen data.
+	$LF
+]p
+[p 
+	"2) A script that simulates the game's random number generator and how it is manipulated in order to find a way to manipulate some of the boss fights I wanted with the smallest frame investments - namely, the eel and seahorse fights.
+	$LF
+]p
+[p 
+	"STAGE 1
+	$LF
+]p
+[p 
+	"In this stage (and every other stage) I managed to shave off frames using careful subpixel analysis to cut corners as closely as possible. I also worked on reducing lag frames. For example, the octopus rooms often cause multiple lag frames which can be reduced with subtle changes in movement. Also, I found that it's possible to very carefully squeeze past the final fish, removing the need to slow down to bubble it.
+	$LF
+]p
+[p 
+	"STAGE 1 - Boss
+	$LF
+]p
+[p 
+	"I saved time here by waiting to throw the third fish at the Shark as so not to delay the spawning of the 4th and final fish.
+	$LF
+]p
+[p 
+	"Even though it didn't save me any time right away, I performed some very subtle RNG manipulation in Stage 1. More details in the Stage 2 Boss section below.
+	$LF
+]p
+[p 
+	"I also discovered that subpixel values carry over from the end of a boss fight to the next stage, so I maximized them accordingly. Specifically, setting the x subpixel to 0xFF and the y subpixel to 0x7F results in "maximized" (bottom-right) values of 0xFF for both at the first actionable frame of the next stage.
+	$LF
+]p
+[p 
+	"STAGE 2
+	$LF
+]p
+[p 
+	"My movement through the first octopus room looks unoptimized (I ram into a barrel I could have avoided), but by doing so I managed to prevent one of the octopus' rocks from spawning, which allows me to cut the next corner more closely and save time overall.
+	$LF
+]p
+[p 
+	"STAGE 2 - Boss
+	$LF
+]p
+[p 
+	"This was the most complex setup of the TAS. First of all, I discovered an interesting glitch regarding the crabs spawned during this fight. Normally, the crabs' timer (for how long they stay ducking before they start walking and can be bubbled) is randomly either 64 or 128 frames, though this can be toggled by moving to the other side of the crab as it hits the ground. However, the row of object values used for this timer is the same row used by the timer for bubbled enemies, to determine how long they stay bobbing before they begin floating upwards. Normally, when an object spawns in a previously occupied object slot, all relevant values are wiped; however, when the crab spawner object in this room spawns a new crab, it does not overwrite the timer value. This means that, if this value already contains a nonzero value, the crab will adopt this value as its initial timer value rather than the randomly selected value. Thus, by letting the bubble timers for the first two crabs run as close to zero as possible before grabbing them, I set these values very low, so that when the crabs in the 3rd cycle finally spawn they are able to be bubbled right away.
+	$LF
+]p
+[p 
+	"Incorporating this glitch, I happened to find a setup for a fast fight. However, this had multiple RNG requirements. In order to set up this specific fight, I wrote an LUA script that looks at every possible place from the beginning of the game to the eel fight that frames can be "invested" in order to alter the RNG from that point onward, then ran it in order to find every possible configuration that would result in the crab patterns I wanted. Then I investigated each of those viable results to find one from which an optimal eel pattern could be derived (specifically, I wanted an eel to appear in the bottom-middle spot, since my fight strategy involves ramming a crab directly into it here). I finally found one, which is the one I use here.
+	$LF
+]p
+[p 
+	"The places that frames can be "invested" to alter RNG are: 1) delaying frames before the starfish spawner, 2) delaying frames before the shark fight, 3) making use of optional RNG routines during the shark fight*, 4) delaying frames before the eel fight, and 5) delaying frames before crab cycle 2 (by waiting to bubble the 2nd crab of cycle 1)
+	$LF
+]p
+[ul 
+	[li 
+		" there is a section of code that runs if Ariel comes within 32 vertical pixels of the shark as it's counting down to spawn fish. When this happens, it does an RNG check. There is a 50% chance that the timer will stop and no fish will be spawned that cycle, and a 50% chance that the timer will reset but fish will still spawn. Regardless of the result, doing so alters the RNG seed. Since you can delay which frame this happens on, this also becomes a possible place to invest frames. And since there are two fish-spawn cycles in the shark fight, you can do it up to two times.
+		$LF
+	]li
+]ul
+[p 
+	"Also, I found out by complete accident that if you kill both Eels at once, it spawns two level-end objects. This doesn't result in anything special happening (grabbing the 2nd one simply replays the jingle and resets the level end timer) but it's funny.
+	$LF
+]p
+[p 
+	"Stage 3 - Boss
+	$LF
+]p
+[p 
+	"Again, saved time here using RTA techniques of waiting to throw the shell as not to delay item spawns.
+	$LF
+]p
+[p 
+	"Stage 4 - Boss
+	$LF
+]p
+[p 
+	"I used a similar script to the one before to help me get the seahorse fight I wanted. The random elements in the seahorse fight are not only the enemy spawns but also the seahorse's timer (the time between shots is either 32, 64 or 96 frames). It was nowhere near as complex as my eel script though.
+	$LF
+]p
+[p 
+	"Stage 5 - Boss
+	$LF
+]p
+[p 
+	"I didn't really have any big plan for how to manipulate Ursula, I just did trial and error and found a fight faster than the current TAS, and without having to invest any frames prior to the fight.
+	$LF
+]p
+[p 
+	"URSULA 2
+	$LF
+]p
+[p 
+	"I invested 4 frames before grabbing the urn in the previous level to get a better fight & somehow shaved time off here from the published TAS as well.
+	$LF
+]p
+[p 
+	"POSSIBLE IMPROVEMENTS
+	$LF
+]p
+[p 
+	"- More thorough RNG analysis. It's possible I could use the same methodology to write a script that looks at all of the RNG for the entire game & finds a way to manipulate better fights in even fewer frames. But the script I wrote began crashing within a 12 frame max analysis.
+	$LF
+]p
+[p 
+	"- For the eel fight, I actually found a way to manipulate one of the crabs in cycle 2 to have a timer of 1 with a very convoluted setup in the room prior involving the creation of dust clouds (which also use the same row for their timers). However the setup took so long that I doubt it would have saved any time. If I find a different way to set it up it could result in a complete reworking of the eel fight (though a very tiny time save even if successful).
+	$LF
+]p
+[p 
+	"- Probably still possible to shave a frame here and there with even more careful subpixel & frame management.
+	$LF
+]p
+[p 
+	"Anyway, I learned a lot about analyzing NES assembly code while writing my Lua scripts & I'd like to see if I can improve any of the other NES Capcom TASes that I know use shared code from this one.
+	$LF
+]p
+[p 
+	"Another glitch I found: there is a screen-wrapping glitch (found it in Ursula 2, possibly elsewhere) where if you shoot a bubble off the very left side of the screen, it can bubble an enemy just as they spawn on the right side of the screen. (& possibly vice versa?) No known application of this yet.
+	$LF
+]p
+[p 
+	"TEMPORARY ENCODE:
+	$LF
+]p
+[p 
+	(youtube|v=p3MN2vbWY60)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Memory)
+	": Judging
+	$LF
+]p
+[p 
+	(__wikiLink|user:Memory)
+	": Optimization looks good as an improvement to the published movie.
+	$LF
+]p
+[p 
+	"Entertainment on the other hand is about on par with the current movie. The movie moves at a decent pace but it doesn't feel like anything particularly special happens in it. The current publication is in the Vault with a borderline entertainment rating of 
+	[a href=/rating.exe/3298/details 
+		"6.2
+	]a
+	". Audience feedback was fairly mixed as well. In this case I will simply have this movie inherit its predecessor's tier.
+	$LF
+]p
+[p 
+	"Accepting to Vault as an improvement to 
+	(__wikiLink|3298M)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub.
+]p

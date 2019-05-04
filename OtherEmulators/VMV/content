@@ -1,0 +1,164 @@
+20
+[p 
+	[tt 
+		"vmv
+	]tt
+	" is the movie capture format of 
+	(__wikiLink|OtherEmulators|VirtuaNES)
+	", a NES emulator.
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	$LF
+]p
+[p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" The original VisualBoyAdvance, a GBA emulator, also had its movie capture format named 
+	[tt 
+		"vmv
+	]tt
+	", but it required a supporting 
+	[tt 
+		"vm0
+	]tt
+	" file to cooperate. Since it did not meet the requirements at this site, it was not supported.
+	$LF
+]p
+[blockquote 
+	"All descriptions below refer only to the movie capture format of VirtuaNES.
+	$LF
+]blockquote
+[h3 
+	" VMV file format description
+	$LF
+]h3
+[p 
+	"Some comments have been translated from Japanese.
+	$LF
+]p
+[p 
+	"This is the header of VMV files of VirtuaNES versions 0.93.
+	[br 
+	]br
+	$LF
+	"(0.60 … 0.92 are mostly the same though.)
+	$LF
+]p
+[pre 
+	"000 12-byte signature: "VirtuaNES MV"
+	$LF
+	"00C 2-byte little-endian integer: movie version 0x0400
+	$LF
+	"00E 2-byte little-endian integer: record version
+	$LF
+	"010 4-byte flags (control byte):
+	$LF
+	"  bit 7: disable rerecording
+	$LF
+	"  bit 6: 1=reset-based, 0=savestate-based (movie version <= 0x300 is always savestate-based)
+	$LF
+	"  bit 3: controller 4 in use
+	$LF
+	"  bit 2: controller 3 in use
+	$LF
+	"  bit 1: controller 2 in use
+	$LF
+	"  bit 0: controller 1 in use
+	$LF
+	"  For the other control bytes, if a key from 1P to 4P (whichever one) is entirely ON, the following 4 bytes becomes the controller data.
+	$LF
+	"  Other bits: reserved, set to 0
+	$LF
+	"014 DWORD   Ext0;                   // ROM:program CRC  FDS:program ID
+	$LF
+	"018 WORD    Ext1;                   // ROM:unused,0     FDS:maker ID
+	$LF
+	"01A WORD    Ext2;                   // ROM:unused,0     FDS:disk no.
+	$LF
+	"01C 4-byte little-endian integer: rerecord count
+	$LF
+	"020 BYTE    RenderMethod
+	$LF
+	"   0=POST_ALL,1=PRE_ALL
+	$LF
+	"   2=POST_RENDER,3=PRE_RENDER
+	$LF
+	"   4=TILE_RENDER
+	$LF
+	"021 BYTE    IRQtype                 // IRQ type
+	$LF
+	"022 BYTE    FrameIRQ                // FrameIRQ not allowed
+	$LF
+	"023 1-byte flag: 0=NTSC (60 Hz), 1=PAL (50 Hz)
+	$LF
+	"024 8-bytes: reserved, set to 0
+	$LF
+	"02C 4-byte little-endian integer: save state start offset
+	$LF
+	"030 4-byte little-endian integer: save state end offset
+	$LF
+	"034 4-byte little-endian integer: movie data offset
+	$LF
+	"038 4-byte little-endian integer: movie frame count
+	$LF
+	"03C 4-byte little-endian integer: CRC (CRC excluding this data(to prevent cheating) )
+	$LF
+]pre
+[p 
+	"Header size: 64 bytes.
+	$LF
+]p
+[p 
+	"If the movie version is < 0x400, or the "from-reset" flag is not
+	$LF
+	"set, a savestate is loaded from the movie.
+	$LF
+	"Otherwise, the savestate is ignored.
+	$LF
+]p
+[p 
+	"Each frame consists of 1 or more bytes. Controller 1 takes 1 byte, controller 2 takes 1 byte, controller 3 takes 1 byte, and controller 4 takes 1 byte. If all four exist, the frame is 4 bytes. For example, if the movie only has controller 1 data, a frame is 1 byte.
+	$LF
+]p
+[p 
+	"The bit values in hex for the buttons are as follows.
+	$LF
+]p
+[pre 
+	"01 A
+	$LF
+	"02 B
+	$LF
+	"04 Select
+	$LF
+	"08 Start
+	$LF
+	"10 Up
+	$LF
+	"20 Down
+	$LF
+	"40 Left
+	$LF
+	"80 Right
+	$LF
+]pre
+[hr 
+]hr
+[p 
+	"See also: 
+	(__wikiLink|EmulatorResources)
+	", 
+	(__wikiLink|FAQ|frequently asked questions)
+]p

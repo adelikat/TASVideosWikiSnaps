@@ -1,0 +1,207 @@
+2
+[p 
+	"Specification for the .mcm movie file format
+	$LF
+]p
+[h3 
+	"MCM
+	$LF
+]h3
+[p 
+	"mcm is the movie capture format of Mednafen, a TurboGrafx 16 (PC Engine), PC-FX, Neo Geo Pocket (Color), WonderSwan (Color),and Atari Lynx emulator.  In addition it also supports NES,SMS,GG,GB,GBA.
+	$LF
+]p
+[p 
+	"The following are only available on the Linux version:
+	[br 
+	]br
+	$LF
+	"PC-FX, GB, GBA, Sega MS, Game Gear
+	$LF
+]p
+[h4 
+	" Savestate/Movie Info
+	$LF
+]h4
+[p 
+	"Re-recording is bulletproof since the movie data is loaded from the appropriate file when a state is loaded. This prevents ruining a movie by loading states out of order while recording.
+	$LF
+]p
+[p 
+	"Savestates made from movies are seperate and do not contain the movies within them. For example, the savestate "filename.nc0" made from the movie file "filename.10.mcm" is seperate from "filename.10.mcm" and don't contain the input data from "filename.10.mcm".
+	$LF
+]p
+[p 
+	"Movie files have their associated savestates separate from "non-movie" savestates, so those savestates cannot be accidentally overwritten while no movie is being replayed.
+	$LF
+]p
+[p 
+	"TODO: More details
+	$LF
+]p
+[h4 
+	" Movie File Format
+	$LF
+]h4
+[pre 
+	"000 8-byte    "MDFNMOVI" signature
+	$LF
+	"008 uint32     Mednafen Version (Current is 0A 08)
+	$LF
+	"00C uint32     Movie Format Version (Current is 01)
+	$LF
+	"010 32-byte    MD5 of the ROM used
+	$LF
+	"030 64-byte    Filename of the ROM used (with extension)
+	$LF
+	"070 uint32     Re-record Count
+	$LF
+	"074 5-byte     Console indicator (pce, ngp, pcfx, wswan)
+	$LF
+	"079 32-byte    Author name
+	$LF
+	"099 103-byte   Padding 0s
+	$LF
+	"100 variable   Input data
+	$LF
+]pre
+[p 
+	"TODO: Verify if NTSC/PAL mode used for the movie can be detected or not.
+	$LF
+]p
+[h4 
+	" Input Data Formats
+	$LF
+]h4
+[p 
+	"The input stream consists of 1 byte for power-on and reset, and then X bytes per each input port per frame.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Console Type
+			]th
+			[th 
+				"Input Ports
+			]th
+			[th 
+				"Bytes per Port
+			]th
+			[th 
+				"Frame Size (with Control Byte)
+			]th
+			[th 
+				"Buttons (Ordered)
+			]th
+		]tr
+		[tr 
+			[td 
+				"Lynx      
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"3 
+			]td
+		]tr
+		[tr 
+			[td 
+				"WonderSwan
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"3 
+			]td
+		]tr
+		[tr 
+			[td 
+				"NG Pocket 
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"2 
+			]td
+		]tr
+		[tr 
+			[td 
+				"PC Engine 
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"1, 2, Select, Run, Up, Right, Down, Left
+			]td
+		]tr
+		[tr 
+			[td 
+				"PC-FX     
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"5 
+			]td
+		]tr
+		[tr 
+			[td 
+				"SMS       
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"3 
+			]td
+		]tr
+		[tr 
+			[td 
+				"NES       
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"? 
+			]td
+			[td 
+				"A, B, Select, Start, Up, "Down, Left, Right
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Normally, NES receives from 5 input ports, where the first 4 have a length of 1 byte, and the last has a length of 0. For the sake of simplicity, it is interpreted as 4 ports of 1 byte length for re-recording. 
+]p

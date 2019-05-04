@@ -1,0 +1,457 @@
+9
+[p 
+	"This is a completely new type of a Super Mario World run. It beats the game by getting the "
+	[a class=extlink href=http://i42.tinypic.com/wldlps.png/ rel=nofollow 
+		"THE END
+	]a
+	"" screen in the 2nd level (Yoshi's Island 3).
+	$LF
+]p
+[p 
+	"After the discovery of a new glitch by あんた (anta), our Skype TASing community was trying to understand what happened in the .smv. Since he only uploaded the .smv and a japanese documentation, we had to find it out by ourselves.
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Snes9x 1.43 v17
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses game-breaking glitches
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Achieves credits early
+		$LF
+	]li
+]ul
+[h3 
+	" The "credits glitch"
+	$LF
+]h3
+[p 
+	"Quote from 
+	[a class=extlink href=http://99.10.161.154/glitch.asm rel=nofollow 
+		"p4plus2's documentation
+	]a
+	":
+	$LF
+]p
+[p 
+	[em 
+		""spit sprite position = yoshi X position + offset to spit object(index by Y which is the direction)
+		$LF
+		"normally, this would store to the sprites X position, however, because the sprite index is #$FF
+		$LF
+		"It writes to #$E4 + #$FF which is #$01E3.  This is the stack address that is corrupted.  If yoshi 
+		$LF
+		"is facing left he must be at the position #$86, and if he is facing right it should be #$66."
+	]em
+	$LF
+]p
+[p 
+	[a class=extlink href=http://99.10.161.154/glitch.asm rel=nofollow 
+		"p4plus2's documentation of the "credits glitch"
+	]a
+	$LF
+]p
+[p 
+	[a href=/forum/p/294959#294959 
+		"bahamete's post about the "credits glitch"
+	]a
+	$LF
+]p
+[p 
+	[a href=/forum/p/250970#250970 
+		"Mister's post about the "yoshi eats a null sprite" glitch
+	]a
+	$LF
+]p
+[h3 
+	" Addresses which have to be manipulated
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"RAM Address
+			]th
+			[th 
+				"needed Value
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$7E:148C
+			]td
+			[td 
+				"#$7C
+			]td
+			[td 
+				"RNG 1 
+				"|
+				" See explanation below
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7E:148D
+			]td
+			[td 
+				"#$92
+			]td
+			[td 
+				"RNG 2
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7E:148E
+			]td
+			[td 
+				"#$F7
+			]td
+			[td 
+				"RNG 3
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7E:00E8
+			]td
+			[td 
+				"#$86
+			]td
+			[td 
+				"X position of sprite #04 (it's Yoshi in this case) (freezes when the sprite disappears, though you shouldn't have him disappear)
+			]td
+		]tr
+		[tr 
+			[th 
+				"OAM Address
+			]th
+			[th 
+				"needed Value
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$01:02D4
+			]td
+			[td 
+				"#$26
+			]td
+			[td 
+				"X position of some score numbers onscreen (freezes when it disappears)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:02FC
+			]td
+			[td 
+				"#$A3
+			]td
+			[td 
+				"X position of the "smoke" effect (like when a fireball goes into a wall) (freezes when it disappears)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:02FD
+			]td
+			[td 
+				"#$F0
+			]td
+			[td 
+				"Y position of the "smoke" effect (same as above) (sets to #$F0 when it disappears)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0304
+			]td
+			[td 
+				"#$81
+			]td
+			[td 
+				"X position of a Mario tile that appears when Mario is on Yoshi and he is in the turning animation (freezes when it disappears)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0305
+			]td
+			[td 
+				"#$39
+			]td
+			[td 
+				"Y position of the same Mario tile as above (freezes when it disappears)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0308
+			]td
+			[td 
+				"#$B0
+			]td
+			[td 
+				"X position of a cape tile (freezes when it disappears)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0309
+			]td
+			[td 
+				"#$F0
+			]td
+			[td 
+				"Y position of a cape tile (sets to #$F0 when it disappears)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:030C
+			]td
+			[td 
+				"#$60
+			]td
+			[td 
+				"X position of a cape tile that appears when mario is flying (freezes when it disappears)
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Those addresses starting with "01" are just OAM Addresses. 
+	[em 
+		"OAM is a chunk of memory that stores the data about the sprite tiles to draw onto screen.
+	]em
+	$LF
+]p
+[p 
+	"RNG:
+	$LF
+]p
+[p 
+	"The Random Number Generators (RNGs) change with certain events. We have to change the RNG 1197 times for it to work in our favor. When a koopa spawns, it's called once (when the RNG is "called", it changes). Before going into the pipe in YI3, three koopas appear; this leaves the RNG to be called a remaining 1194 times. This is where the fish come in. When a flopping fish bounces on the floor, it calls the RNG three times. So, that means the fish need to bounce 396 times (to call the RNG 1188 more times). After the fish manipulation, there are exactly six koopas that spawn. After they spawn, the RNGs are set perfectly in order for me to activate the credits.
+	$LF
+]p
+[p 
+	"There are also some OAM addresses that have more than one possible values, they have to have the same bytes of opcode and they also have to not affect the A register.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"OAM Address
+			]th
+			[th 
+				"Bytes of Opcode
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$01:02FA
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Will be the right value when you shoot a fireball with X
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:02FE
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Will be the right value when you shoot a fireball with Y
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0300
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"X position of a koopa shell tile
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0302
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"Will be the right value when you pick up a shell
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:0306
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Nearly always right
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$01:030A
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Nearly always right
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	[small 
+		"(actually you can change the bytes of the opcode, only the number of bytes between two required values is important
+	]small
+	")
+	$LF
+]p
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 
+	" Yoshi's Island 2
+	$LF
+]h4
+[p 
+	"We can't manipulate the addresses here since they would reset in the overworld.
+	$LF
+]p
+[h4 
+	" Yoshi's Island 3
+	$LF
+]h4
+[p 
+	"If you jump on a p-switch and then get the "pressed" p-switch in Yoshi's mouth on the right time, you will spawn a fish if you spit out the p-switch fast enough. Also, there can only be eight fishes in the room. After this room, I went back to the Yoshi block. I spawned two Yoshi's by hitting the block with Mario and the p-switch at the same time. I jumped on one Yoshi, got the p-switch in his mouth and let him die, so the second - invisible - Yoshi becomes visible and have a null sprite in his mouth. Then I go right to perform a PI (Powerup Incrementation) so i get a cape, to manipulate some values.
+	$LF
+]p
+[h3 
+	" Other comments
+	$LF
+]h3
+[h4 
+	" Potential Improvements
+	$LF
+]h4
+[p 
+	"Maybe the part with the fishes can be improved, since its heavy luck manipulation.
+	$LF
+	"Also, maybe there is a faster strategy to get all the right values.
+	$LF
+]p
+[h4 
+	" Suggested Screenshots
+	$LF
+]h4
+[p 
+	[a class=extlink href=http://i42.tinypic.com/2i9584n.png/ rel=nofollow 
+		"6666
+	]a
+	", 
+	[a class=extlink href=http://i42.tinypic.com/kb9aag.jpg/ rel=nofollow 
+		"8028
+	]a
+	$LF
+]p
+[h4 
+	" Thanks to
+	$LF
+]h4
+[ul 
+	[li 
+		"Our Skype TASing community, for being able to help each other. 
+		$LF
+	]li
+	[li 
+		"あんた (anta), for the discovery of this awesome glitch.
+		$LF
+	]li
+	[li 
+		"p4plus2 and smallhacker, for their awesome work exploring the glitch.
+		$LF
+	]li
+	[li 
+		"DarkMoon and Kaizoman666, for helping me writing this submission text.
+		$LF
+	]li
+	[li 
+		"bahamete, for creating some helpful lua scripts.
+		$LF
+	]li
+	[li 
+		"Mister, for helping me with YI2 :P.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	": Judging
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"Accepting this movie as a new 'ram corruption' category.  See this 
+	[a href=/forum/p/298133#298133 
+		"post
+	]a
+	" for details.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Dacicus)
+	": Publication underway
+]p

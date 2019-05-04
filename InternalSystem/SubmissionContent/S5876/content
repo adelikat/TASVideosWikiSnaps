@@ -1,0 +1,1111 @@
+6
+[p 
+	(youtube|v=hXvY-zt9ULQ)
+	$LF
+]p
+[h4 
+	" Objectives (in decreasing priority)
+	$LF
+]h4
+[ul 
+	[li 
+		" Does not early start or blow up (disqualifications)
+		$LF
+	]li
+	[li 
+		" Aims for the fastest in-game time
+		$LF
+		[ul 
+			[li 
+				" Secondary goal: Aims for maximum distance
+				$LF
+			]li
+		]ul
+		" Aims for track completion with fewest input frames
+		$LF
+		[ul 
+			[li 
+				" Secondary goal: Aims for fastest in-game time
+				$LF
+			]li
+			[li 
+				" Tertiary goal: Aims for maximum distance
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"I was very impressed by Omnigamer's excellent 
+	(__wikiLink|5517S|investigation)
+	" into the mechanics of Dragster, suggesting that the fastest achievable time in the game is 5.57, in contradiction to Todd Rogers' claim of achieving a 5.51.
+	$LF
+	"It was well researched and even included a 
+	[a class=extlink href=https://docs.google.com/spreadsheets/d/1HhaBah7e48lBRA18v8Mgr-fRVZS5DUJb_pnOsBTC34c/edit?usp=sharing rel=nofollow 
+		"spreadsheet
+	]a
+	" simulating the game making it easy to try it for yourself.
+	$LF
+	"However, the missing piece in the chain of evidence for me was that it was not clear that spreadsheet modeled the game correctly.
+	$LF
+	"Maybe you could perform actions outside what the spreadsheet allowed for a faster time?
+	$LF
+	"It started nagging at me, I had no choice: I needed investigate the game for myself.
+	$LF
+	"If nothing else, it is good science to replicate the findings to add more confidence to the results.
+	$LF
+]p
+[p 
+	"In some ways, I feel bad submitting this and potentially obsoleting Omnigamer's submission, with all the original research they did on this.
+	$LF
+	"On the other hand, this maybe more than any other category shows that no run is unbeatable, even when you think it's at its limit already.
+	$LF
+]p
+[p 
+	"This run ends up saving 1 frame compared to Omnigamer's run for both primary objectives, and completes the fewest input frames objective with a faster finishing time and greater distance.
+	$LF
+]p
+[h4 
+	" Note on emulation differences
+	$LF
+]h4
+[p 
+	"This submission uses BizHawk 2.2.2, which emulates slightly differently than BizHawk 1.12.1 used in Omnigamer's run.
+	$LF
+	"Specifically, this run is 5 frames shorter due to emulation differences.
+	$LF
+	"All 5 frames are in the initial startup phase, and you can add/remove them at the start of the input file and the rest of the input will sync fine.
+	$LF
+]p
+[h3 
+	" Investigation
+	$LF
+]h3
+[p 
+	"So I 
+	[a class=extlink href=https://github.com/MrWint/dragster/blob/master/Dragster.asm rel=nofollow 
+		"disassembled
+	]a
+	" the game for myself. It only consists of about 800 instructions total, so it was fairly easy to do.
+	$LF
+	"Next step, figuring out what the memory addresses are used for. Omnigamer provided a very helpful list in their submission to get started.
+	$LF
+]p
+[p 
+	"The first thing that became obvious is that it's not at all about emulation accuracy.
+	$LF
+	"The game has a main loop which is executed once per frame, and within that loop it increases the in-game time and advances the dragsters.
+	$LF
+	"Since we use the game's in-game timer for timing, any emulation timing inaccuracies are irrelevant.
+	$LF
+	"As long as the emulator executes the loop instructions in order (and it does, there are no hardware interrupts), it doesn't matter when it does it, the result will be the same.
+	$LF
+	"We're trying to minimize the number of iterations of that main loop here, not the number of frames.
+	$LF
+]p
+[p 
+	"The overall control flow starts the game up into a disabled state (the same state is also entered when switching game modes), and from there starting a new game clears most of the RAM to reset the dragsters and starts the countdown.
+	$LF
+	"During the game, each player is processed on alternating frames, running through exactly the same code paths.
+	$LF
+	"Each player has their own set of variables, including their own in-game timer, the game basically runs two isolated instances in parallel, which can't affect each other.
+	$LF
+]p
+[p 
+	"The game mechanics themselves work exactly as described by Omnigamer.
+	$LF
+	"As far as I can tell, the spreadsheet they created is an accurate representation of what happens during a game of Dragster when only looking at one of the players.
+	$LF
+]p
+[h3 
+	" Findings
+	$LF
+]h3
+[p 
+	"So that's all good and well, we now have a disassembly of the game, and some more confidence.
+	$LF
+	"But there were actually discrepancies and improvements compared to Omnigamer's original investigation and movie.
+	$LF
+]p
+[p 
+	"The first is an oversight in Omnigamer's model. It's not in the calculations, but in the initial conditions.
+	$LF
+	"As it turns out, when you start a new game, only most of the RAM is wiped, but not all of it.
+	$LF
+	"Most interestingly, the Tachometer is not set to zero when starting a new game, you can actually carry over your tachometer value from one game to the next.
+	$LF
+	"That means, instead of only being able to start off with a tachometer value that is divisible by 3, you can start out with any tachometer number you want, providing more possibilities to find an even faster starting configuration.
+	$LF
+	"Sadly though, as it turns out, starting at other tachometer values doesn't seem to end up allowing for any faster times or more distance than starting from values divisible by 3, at least as far as I could find.
+	$LF
+	"Feel free to try it out in Omnigamer's spreadsheet though, just ignore the "Must be multiple of 3" part, the maximum valid value is 31.
+	$LF
+	"Maybe this has interesting applications for non-TAS speedruns as well, allowing for an easier-to-perform setup (I did not investigate this; I think it's unlikely though, considering you'd need to do the tachometer setup before every attempt).
+	$LF
+]p
+[p 
+	"The other findings are improvements to Omnigamer's published run.
+	$LF
+	"The fastest in-game time of 5.57 and the largest distance with 0x62 subdistance spare are optimal from my calculations.
+	$LF
+	"However, the second primary goal of using the fewest input frames is not.
+	$LF
+	"To achieve the primary goal of the fastest in-game time and largest distance, the frame counter offset needs to be exactly 12 or 13.
+	$LF
+	"Due to an unintuitive quirk in how the frame counter is updated though (the active player is determined before the counter is incremented, but the frame rule is only evaluated after the counter is incremented), the bottom player actually is the first player in terms of where in its cycle the frame counter is, so it gets to the necessary offset of 12 first.
+	$LF
+	"In other words, it's player 2's turn at frame offset 12 and player 1's turn at 13, not the other way around as 
+	[a href=/forum/p/453772#453772 
+		"previously thought
+	]a
+	".
+	$LF
+]p
+[p 
+	"Thus, by having the fastest in-game time goal achieved by the bottom player, both players can start a frame earlier (with the top player starting first and using the earlier frame rule).
+	$LF
+	"This saves a frame compared to the current movie, with the last input on frame 337, and also makes the input file overall a frame shorter, without sacrificing any distance for the other player.
+	$LF
+]p
+[p 
+	"Additionally, the player using the least inputs finishes the race 20 frames (0.33 seconds) earlier than in the current movie, shortening the overall run time.
+	$LF
+	"Note that this was not an objective officially listed in Omnigamer's run, but it's likely they optimized for it considering they ended up with the optimal values for the chosen frame offset.
+	$LF
+	"Also, it feels like it fits this category well, so I added it as secondary and tertiary goals to this submission.
+	$LF
+]p
+[h3 
+	" Data
+	$LF
+]h3
+[p 
+	"All data was generated using a 
+	[a class=extlink href=https://github.com/MrWint/dragster/blob/master/Dragster.rs rel=nofollow 
+		"program
+	]a
+	" searching for optimal solutions based on a model of the game I extracted from the disassembly (which matches Omnigamer's model as far as I can tell).
+	$LF
+]p
+[p 
+	"Here's a table of the best achievable times and (sub)distances for each tachometer and frame counter offset value.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" tach\offset 
+			]th
+			[th 
+				"  0-1   
+			]th
+			[th 
+				"  2-3   
+			]th
+			[th 
+				"  4-5   
+			]th
+			[th 
+				"  6-7   
+			]th
+			[th 
+				"  8-9   
+			]th
+			[th 
+				" 10-11  
+			]th
+			[th 
+				" 12-13  
+			]th
+			[th 
+				" 14-15  
+			]th
+		]tr
+		[tr 
+			[td 
+				"       0      
+			]td
+			[td 
+				" 5.64/96 
+			]td
+			[td 
+				" 5.64/ef 
+			]td
+			[td 
+				" 5.64/62 
+			]td
+			[td 
+				" 5.64/7b 
+			]td
+			[td 
+				" 5.64/da 
+			]td
+			[td 
+				" 5.64/d9 
+			]td
+			[td 
+				" 5.64/5a 
+			]td
+			[td 
+				" 5.64/bb 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       1      
+			]td
+			[td 
+				" 5.64/d4 
+			]td
+			[td 
+				" 5.61/46 
+			]td
+			[td 
+				" 5.64/fc 
+			]td
+			[td 
+				" 5.64/c1 
+			]td
+			[td 
+				" 5.64/e8 
+			]td
+			[td 
+				" 5.61/34 
+			]td
+			[td 
+				" 5.64/a6 
+			]td
+			[td 
+				" 5.64/c1 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       2      
+			]td
+			[td 
+				" 5.61/67 
+			]td
+			[td 
+				" 5.61/7e 
+			]td
+			[td 
+				" 5.61/13 
+			]td
+			[td 
+				" 5.61/2a 
+			]td
+			[td 
+				" 5.61/2f 
+			]td
+			[td 
+				" 5.61/9a 
+			]td
+			[td 
+				" 5.61/8d 
+			]td
+			[td 
+				" 5.61/58 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       3      
+			]td
+			[td 
+				" 5.61/6d 
+			]td
+			[td 
+				" 5.61/80 
+			]td
+			[td 
+				" 5.61/ef 
+			]td
+			[td 
+				" 5.61/2c 
+			]td
+			[td 
+				" 5.61/4f 
+			]td
+			[td 
+				" 5.61/9c 
+			]td
+			[td 
+				" 5.61/9b 
+			]td
+			[td 
+				" 5.61/5a 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       4      
+			]td
+			[td 
+				" 5.61/7b 
+			]td
+			[td 
+				" 5.61/86 
+			]td
+			[td 
+				" 5.57/10 
+			]td
+			[td 
+				" 5.61/b6 
+			]td
+			[td 
+				" 5.61/c1 
+			]td
+			[td 
+				" 5.61/a2 
+			]td
+			[td 
+				" 5.57/34 
+			]td
+			[td 
+				" 5.61/68 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       5      
+			]td
+			[td 
+				" 5.61/f5 
+			]td
+			[td 
+				" 5.57/03 
+			]td
+			[td 
+				" 5.57/16 
+			]td
+			[td 
+				" 5.61/bc 
+			]td
+			[td 
+				" 5.61/cf 
+			]td
+			[td 
+				" 5.61/d0 
+			]td
+			[td 
+				" 5.57/3a 
+			]td
+			[td 
+				" 5.61/6e 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       6      
+			]td
+			[td 
+				" 5.61/f7 
+			]td
+			[td 
+				" 5.57/11 
+			]td
+			[td 
+				" 5.57/18 
+			]td
+			[td 
+				" 5.61/ca 
+			]td
+			[td 
+				" 5.61/d1 
+			]td
+			[td 
+				" 5.57/4f 
+			]td
+			[td 
+				" 5.57/3c 
+			]td
+			[td 
+				" 5.57/3f 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       7      
+			]td
+			[td 
+				" 5.61/fb 
+			]td
+			[td 
+				" 5.57/13 
+			]td
+			[td 
+				" 5.57/24 
+			]td
+			[td 
+				" 5.61/d0 
+			]td
+			[td 
+				" 5.61/d5 
+			]td
+			[td 
+				" 5.57/51 
+			]td
+			[td 
+				" 5.57/58 
+			]td
+			[td 
+				" 5.57/45 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       8      
+			]td
+			[td 
+				" 5.57/06 
+			]td
+			[td 
+				" 5.57/15 
+			]td
+			[td 
+				" 5.57/26 
+			]td
+			[td 
+				" 5.61/d4 
+			]td
+			[td 
+				" 5.61/dd 
+			]td
+			[td 
+				" 5.57/53 
+			]td
+			[td 
+				" 5.57/5a 
+			]td
+			[td 
+				" 5.57/49 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       9      
+			]td
+			[td 
+				" 5.57/08 
+			]td
+			[td 
+				" 5.57/17 
+			]td
+			[td 
+				" 5.57/28 
+			]td
+			[td 
+				" 5.61/d6 
+			]td
+			[td 
+				" 5.61/df 
+			]td
+			[td 
+				" 5.57/55 
+			]td
+			[td 
+				" 5.57/5c 
+			]td
+			[td 
+				" 5.57/4b 
+			]td
+		]tr
+		[tr 
+			[td 
+				"      10      
+			]td
+			[td 
+				" 5.57/0a 
+			]td
+			[td 
+				" 5.57/19 
+			]td
+			[td 
+				" 5.57/2a 
+			]td
+			[td 
+				" 5.61/d8 
+			]td
+			[td 
+				" 5.61/e1 
+			]td
+			[td 
+				" 5.57/57 
+			]td
+			[td 
+				" 5.57/5e 
+			]td
+			[td 
+				" 5.57/4d 
+			]td
+		]tr
+		[tr 
+			[td 
+				"      11      
+			]td
+			[td 
+				" 5.57/0c 
+			]td
+			[td 
+				" 5.57/1b 
+			]td
+			[td 
+				" 5.57/2c 
+			]td
+			[td 
+				" 5.61/da 
+			]td
+			[td 
+				" 5.61/e3 
+			]td
+			[td 
+				" 5.57/59 
+			]td
+			[td 
+				" 5.57/60 
+			]td
+			[td 
+				" 5.57/4f 
+			]td
+		]tr
+		[tr 
+			[td 
+				"      12      
+			]td
+			[td 
+				" 5.57/0c 
+			]td
+			[td 
+				" 5.57/1b 
+			]td
+			[td 
+				" 5.57/2c 
+			]td
+			[td 
+				" 5.61/da 
+			]td
+			[td 
+				" 5.61/e3 
+			]td
+			[td 
+				" 5.57/59 
+			]td
+			[td 
+				" 5.57/60 
+			]td
+			[td 
+				" 5.57/4f 
+			]td
+		]tr
+		[tr 
+			[td 
+				"     13-31    
+			]td
+			[td 
+				" 5.57/0e 
+			]td
+			[td 
+				" 5.57/1d 
+			]td
+			[td 
+				" 5.57/2e 
+			]td
+			[td 
+				" 5.61/dc 
+			]td
+			[td 
+				" 5.61/e5 
+			]td
+			[td 
+				" 5.57/5b 
+			]td
+			[td 
+				" 
+				[b 
+					"5.57/62
+				]b
+				" 
+			]td
+			[td 
+				" 5.57/51 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"And a table for the earliest (in-game time) you can end the input, and their corresponding best finishing times and (sub)distances.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" tach\offset 
+			]th
+			[th 
+				"     0-1     
+			]th
+			[th 
+				"     2-3     
+			]th
+			[th 
+				"     4-5     
+			]th
+			[th 
+				"     6-7     
+			]th
+			[th 
+				"     8-9     
+			]th
+			[th 
+				"    10-11    
+			]th
+			[th 
+				"    12-13    
+			]th
+			[th 
+				"    14-15    
+			]th
+		]tr
+		[tr 
+			[td 
+				"       0      
+			]td
+			[td 
+				" 2.93/8.08/27 
+			]td
+			[td 
+				" 2.90/8.18/13 
+			]td
+			[td 
+				" 2.87/8.35/1c 
+			]td
+			[td 
+				" 2.83/8.65/15 
+			]td
+			[td 
+				" 2.87/8.75/03 
+			]td
+			[td 
+				" 2.90/9.05/00 
+			]td
+			[td 
+				" 3.00/7.88/10 
+			]td
+			[td 
+				" 2.97/7.91/1a 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       1      
+			]td
+			[td 
+				" 2.93/8.01/24 
+			]td
+			[td 
+				" 2.90/8.11/1a 
+			]td
+			[td 
+				" 2.87/8.24/1b 
+			]td
+			[td 
+				" 2.83/8.48/0f 
+			]td
+			[td 
+				" 2.83/8.98/06 
+			]td
+			[td 
+				" 2.87/9.01/03 
+			]td
+			[td 
+				" 3.00/7.84/29 
+			]td
+			[td 
+				" 2.97/7.91/20 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       2      
+			]td
+			[td 
+				" 2.93/7.94/25 
+			]td
+			[td 
+				" 2.90/8.04/25 
+			]td
+			[td 
+				" 2.87/8.21/0c 
+			]td
+			[td 
+				" 2.83/8.35/03 
+			]td
+			[td 
+				" 2.83/8.58/14 
+			]td
+			[td 
+				" 2.83/8.85/01 
+			]td
+			[td 
+				" 2.97/9.21/00 
+			]td
+			[td 
+				" 2.97/7.84/0e 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       3      
+			]td
+			[td 
+				" 2.93/7.94/2b 
+			]td
+			[td 
+				" 2.90/8.04/27 
+			]td
+			[td 
+				" 2.87/8.14/13 
+			]td
+			[td 
+				" 2.83/8.35/05 
+			]td
+			[td 
+				" 2.80/8.61/15 
+			]td
+			[td 
+				" 2.83/8.85/03 
+			]td
+			[td 
+				" 2.93/9.11/01 
+			]td
+			[td 
+				" 2.97/7.84/10 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       4      
+			]td
+			[td 
+				" 2.93/7.91/0a 
+			]td
+			[td 
+				" 2.90/8.01/02 
+			]td
+			[td 
+				" 2.87/8.08/0c 
+			]td
+			[td 
+				" 2.83/8.28/18 
+			]td
+			[td 
+				" 2.80/8.45/0f 
+			]td
+			[td 
+				" 2.80/8.95/06 
+			]td
+			[td 
+				" 2.83/8.98/03 
+			]td
+			[td 
+				" 2.97/7.84/1e 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       5      
+			]td
+			[td 
+				" 2.93/7.88/11 
+			]td
+			[td 
+				" 2.90/7.98/1c 
+			]td
+			[td 
+				" 2.87/8.08/12 
+			]td
+			[td 
+				" 2.83/8.24/08 
+			]td
+			[td 
+				" 2.80/8.41/02 
+			]td
+			[td 
+				" 2.80/8.68/0a 
+			]td
+			[td 
+				" 2.83/8.95/00 
+			]td
+			[td 
+				" 2.97/7.84/24 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       6      
+			]td
+			[td 
+				" 2.93/7.88/13 
+			]td
+			[td 
+				" 2.90/7.98/2a 
+			]td
+			[td 
+				" 2.87/8.08/14 
+			]td
+			[td 
+				" 2.83/8.24/12 
+			]td
+			[td 
+				" 2.80/8.41/04 
+			]td
+			[td 
+				" 2.77/8.58/15 
+			]td
+			[td 
+				" 2.83/8.95/02 
+			]td
+			[td 
+				" 2.97/7.28/33 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       7      
+			]td
+			[td 
+				" 2.93/7.88/17 
+			]td
+			[td 
+				" 2.90/7.98/2c 
+			]td
+			[td 
+				" 2.87/8.08/20 
+			]td
+			[td 
+				" 2.83/8.24/20 
+			]td
+			[td 
+				" 2.80/8.41/08 
+			]td
+			[td 
+				" 2.77/8.55/01 
+			]td
+			[td 
+				" 2.77/8.91/06 
+			]td
+			[td 
+				" 2.97/7.28/39 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       8      
+			]td
+			[td 
+				" 2.93/7.88/1f 
+			]td
+			[td 
+				" 2.90/7.94/01 
+			]td
+			[td 
+				" 2.87/8.08/22 
+			]td
+			[td 
+				" 2.83/8.21/02 
+			]td
+			[td 
+				" 2.80/8.41/10 
+			]td
+			[td 
+				" 2.77/8.55/03 
+			]td
+			[td 
+				" 2.77/8.91/08 
+			]td
+			[td 
+				" 2.97/7.28/3d 
+			]td
+		]tr
+		[tr 
+			[td 
+				"       9      
+			]td
+			[td 
+				" 2.93/7.88/21 
+			]td
+			[td 
+				" 2.90/7.94/03 
+			]td
+			[td 
+				" 2.87/8.08/24 
+			]td
+			[td 
+				" 2.83/8.21/04 
+			]td
+			[td 
+				" 2.80/8.41/12 
+			]td
+			[td 
+				" 2.77/8.55/05 
+			]td
+			[td 
+				" 2.77/8.91/0a 
+			]td
+			[td 
+				" 2.97/7.28/3f 
+			]td
+		]tr
+		[tr 
+			[td 
+				"      10      
+			]td
+			[td 
+				" 2.93/7.88/23 
+			]td
+			[td 
+				" 2.90/7.94/05 
+			]td
+			[td 
+				" 2.87/8.08/26 
+			]td
+			[td 
+				" 2.83/8.21/06 
+			]td
+			[td 
+				" 2.80/8.41/14 
+			]td
+			[td 
+				" 2.77/8.55/07 
+			]td
+			[td 
+				" 2.77/8.88/01 
+			]td
+			[td 
+				" 2.97/7.28/41 
+			]td
+		]tr
+		[tr 
+			[td 
+				"      11      
+			]td
+			[td 
+				" 2.93/7.88/25 
+			]td
+			[td 
+				" 2.90/7.94/07 
+			]td
+			[td 
+				" 2.87/8.08/28 
+			]td
+			[td 
+				" 2.83/8.21/08 
+			]td
+			[td 
+				" 2.80/8.41/16 
+			]td
+			[td 
+				" 2.77/8.55/09 
+			]td
+			[td 
+				" 2.77/8.88/03 
+			]td
+			[td 
+				" 2.97/7.28/43 
+			]td
+		]tr
+		[tr 
+			[td 
+				"      12      
+			]td
+			[td 
+				" 2.93/7.88/25 
+			]td
+			[td 
+				" 2.90/7.94/07 
+			]td
+			[td 
+				" 2.87/8.08/28 
+			]td
+			[td 
+				" 2.83/8.21/08 
+			]td
+			[td 
+				" 2.80/8.41/16 
+			]td
+			[td 
+				" 2.77/8.55/09 
+			]td
+			[td 
+				" 2.77/8.88/03 
+			]td
+			[td 
+				" 2.97/7.28/43 
+			]td
+		]tr
+		[tr 
+			[td 
+				"     13-31    
+			]td
+			[td 
+				" 2.93/7.88/27 
+			]td
+			[td 
+				" 2.90/7.94/09 
+			]td
+			[td 
+				" 2.87/8.04/01 
+			]td
+			[td 
+				" 2.83/8.21/0a 
+			]td
+			[td 
+				" 2.80/8.41/18 
+			]td
+			[td 
+				" 
+				[b 
+					"2.77/8.55/0b
+				]b
+				" 
+			]td
+			[td 
+				" 2.77/8.88/05 
+			]td
+			[td 
+				" 2.97/7.28/45 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"It is quite a nice coincidence that the best possible configurations for these two sets of objectives align in a way that allows showing them off in the same run.
+	$LF
+	"Note that the absolute fastest frame you could end the input and still finish (ignoring any other objective) is a single frame faster than shown in this run, and can be achieved by using the bottom player instead of the top player, with the exact same inputs.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": It's interesting to see how even one of the most thoroughly researched, dissected, and optimized games still has a small optimization (be it not in-game time) left in it. For the Vault, this technically counts as an improvement - as such, accepting as an improvement to the 
+	(__wikiLink|3430M|published movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Pub.
+]p

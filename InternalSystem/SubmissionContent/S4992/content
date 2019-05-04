@@ -1,0 +1,785 @@
+9
+[h3 
+	" General information
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.2.2 (NewPPU)
+		$LF
+		[ul 
+			[li 
+				" Note that FCEUX 2.2.2's NewPPU does not implement grayscale, which is used by Dragon Warrior III in the battle start animation.  See http://pastebin.com/7YFh3v54 for a fix, which is cosmetic only and does not affect synchronization.
+				$LF
+			]li
+		]ul
+		" Uses death and damage to save time
+		$LF
+	]li
+	[li 
+		" Heavily manipulates luck
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+]ul
+[h3 
+	" Overview
+	$LF
+]h3
+[p 
+	"This run is about 7 minutes faster than the previous published run by
+	$LF
+	"dave_dfwm due to careful analysis of the game's code, including the
+	$LF
+	"behavior of the random number generator (RNG) and details of how the
+	$LF
+	"item glitch works.  In particular, this run takes advantage of a design
+	$LF
+	"flaw in the RNG to cause it to output sequential values, making
+	$LF
+	"encounters much less frequent and more predictable (though also
+	$LF
+	"requiring extra walking and healing in a few places).  Highlights
+	$LF
+	"include encounterless Najima, a double Metal Babble kill at level 1,
+	$LF
+	"and 2-turn Ortega and Zoma battles.
+	$LF
+]p
+[h3 
+	" Part 1: Party setup
+	$LF
+]h3
+[p 
+	"Before breaking the RNG, we buy a couple of Wings at the item shop, and
+	$LF
+	"we create a pilgrim and a wizard at Luisa's Place.  We next step outside
+	$LF
+	"Aliahan, get into a battle with a Slime, and kill off two party members
+	$LF
+	"who will be used later in the item glitch.  Then we go back to Luisa,
+	$LF
+	"swap out the dead party members for the two remaining ones, and reset to
+	$LF
+	"start RNG manipulation.
+	$LF
+]p
+[p 
+	"The names of the hero and the two characters added at Luisa's Place were
+	$LF
+	"selected to ensure that the pregenerated pilgrim starts with 9 MP
+	$LF
+	"(allowing us to cast Heal 3 times, so we need one less herb), to avoid
+	$LF
+	"the woman near the entrance of Aliahan getting in the way when we try to
+	$LF
+	"leave the town, and to force an encounter with a single Slime on the
+	$LF
+	"first step in the overworld.
+	$LF
+]p
+[p 
+	"The Slime battle has a second purpose beyond getting dead party members:
+	$LF
+	"setting the battle RNG seed to a useful value.  DW3 has a separate RNG
+	$LF
+	"seed used mainly by battle routines which serves as a counter to discard
+	$LF
+	"some numbers from the RNG output stream; the seed is stored in backup
+	$LF
+	"RAM, and it only changes at the beginning of a turn in battle, and only
+	$LF
+	"when you don't attempt to run.  Among other things, this seed is used in
+	$LF
+	"the healing effects for herbs and the Heal spell even outside of battle,
+	$LF
+	"so by setting it to a large enough value, we can skip over encounters
+	$LF
+	"with a single Heal spell or herb.  However, we also need it set to a
+	$LF
+	"value that will give us a numb character in the next battle, so we end
+	$LF
+	"up with one spot later where we have to heal twice to get past an
+	$LF
+	"encounter.
+	$LF
+]p
+[h3 
+	" Part 2: Aliahan -> Kanave
+	$LF
+]h3
+[p 
+	"For this segment of the run, we create a file with a specific name, sex,
+	$LF
+	"and message speed to put the RNG into a "hole", in which the random part
+	$LF
+	"of the generator is stuck on a single value and the output is just the
+	$LF
+	"sum of that value and a counter which increases by 1 each time the
+	$LF
+	"random routine is called.  Since encounter checks, like most random
+	$LF
+	"checks in the game, look at whether a random number is less than a
+	$LF
+	"threshold value, we just need to get the RNG past that threshold and we
+	$LF
+	"can walk around without fear of encounters, at least until the counter
+	$LF
+	"rolls over.
+	$LF
+]p
+[p 
+	"One danger of using this method is that, due to a design flaw in the
+	$LF
+	"logic to generate battle groups, the game can freeze when starting an
+	$LF
+	"encounter, so we have to ensure that we have a way (such as Heal spells
+	$LF
+	"or herbs, or waiting in a town or the overworld) to push the counter
+	$LF
+	"past the threshold again without moving.
+	$LF
+]p
+[p 
+	"The route starts off by adjusting party order in preparation for the
+	$LF
+	"Killer Bee battle later, then Winging outside Aliahan.  Not only is the
+	$LF
+	"Wing faster than walking, it also preserves the low RNG counter value we
+	$LF
+	"start out with, while walking through town would increase the counter as
+	$LF
+	"NPCs used random numbers to change direction.  The party order switch
+	$LF
+	"serves the additional purpose of delaying the game's movement frame
+	$LF
+	"counter by 16 frames (the delay before opening the menu); on the
+	$LF
+	"overworld, 2-3 random numbers are consumed every 64th frame, and waiting
+	$LF
+	"16 frames here shifts the frame counter so that we can skip one of those
+	$LF
+	"cycles.  (If we Winged out immediately, the RNG counter would end up 1
+	$LF
+	"higher on entering the Najima tunnel, and we'd have to do an encounter
+	$LF
+	"skip in the tower.)
+	$LF
+]p
+[p 
+	"We go straight for the hidden entrance to the Najima tunnel, since it's
+	$LF
+	"slightly faster to walk from Aliahan a second time than to enter and
+	$LF
+	"exit Reeve to get the Return point.  Along the way, we stop for a short
+	$LF
+	"time on the bridge to get past an encounter; this is about 1 second
+	$LF
+	"slower than using Heal to skip the encounter, but if we used Heal, the
+	$LF
+	"RNG counter would get pushed too far forward and we'd have to skip
+	$LF
+	"another encounter in the tower.  (As it is, we exit the tower on the
+	$LF
+	"last possible step before getting an encounter on the overworld.)
+	$LF
+	"Waiting also allows us to save a Heal for later, meaning one less herb
+	$LF
+	"we have to buy in Reeve.
+	$LF
+]p
+[p 
+	"After getting the key, we walk from Aliahan to Reeve, and buy herbs for
+	$LF
+	"encounter skips and item glitching and another Wing for the Killer Bee
+	$LF
+	"battle near Kanave.  Then we walk all the way from Reeve to Kanave; the
+	$LF
+	"linear RNG output means we only need to skip two encounters along the
+	$LF
+	"way, though for the second one, we need a double heal, a bit of waiting,
+	$LF
+	"and a couple of extra steps to push the RNG counter far enough forward
+	$LF
+	"that we don't get an encounter when we step on a hill tile.
+	$LF
+]p
+[p 
+	"In Kanave, we grab the Poison Needle, then leave town and wander around
+	$LF
+	"until we get an encounter.
+	[small 
+		" (*) 
+	]small
+	"  We arrange for the encounter to contain a
+	$LF
+	"Killer Bee and to have it numb the soldier; then we kill off the hero
+	$LF
+	"and wizard to set up for the item glitch, wing back to Aliahan, and make
+	$LF
+	"our way to Luisa's Place, being careful not to move on frames which
+	$LF
+	"would cure the soldier's numbness.
+	$LF
+]p
+[p 
+	[small 
+		"(*) This is the flip side of the RNG glitch: Once past an encounter, the
+		$LF
+		"RNG counter has to advance by nearly 256 before it returns to the
+		$LF
+		"range in which an encounter can occur.  Since the counter advances
+		$LF
+		"an average of 1.625 per step when in the overworld and it takes
+		$LF
+		"around 2.3 seconds = 9 steps to open the menu and heal, which only
+		$LF
+		"advances the counter by 11 with the battle RNG seed we need for
+		$LF
+		"Killer Bee manipulation, it turns out to be faster to simply walk
+		$LF
+		"around on the world map to advance the RNG counter.  Here, we need
+		$LF
+		"to take 127 steps and wait twice, costing about 34 seconds.  Even
+		$LF
+		"with this delay, though, this route is still about 25 seconds faster
+		$LF
+		"through the beginning of the Killer Bee battle than the previous
+		$LF
+		"route, largely because we almost never have to skip encounters.
+	]small
+	$LF
+]p
+[p 
+	"An interesting discovery made while routing this battle is that enemies
+	$LF
+	"with the Increase spell who use "smart" AI (which, as it happens, is all
+	$LF
+	"enemies with Increase) only allow targets for the spell whose defense is
+	$LF
+	[em 
+		"at least
+	]em
+	" 768.  This appears to be a bug; the relevant code (at $BC90
+	$LF
+	"in bank 4) is:
+	$LF
+]p
+[pre 
+	"   lda $0521,y  ;Load high byte of defense
+	$LF
+	"   cmp #3       ;Compare against 3 (i.e., compare defense against 768)
+	$LF
+	"   bcc $BC3F    ;If less than 3, add to enemy selection bitmask
+	$LF
+	"   bcs $BC42    ;Otherwise, don't add to enemy selection bitmask
+	$LF
+]pre
+[p 
+	"I suspect this is the result of programmer confusion caused by the
+	$LF
+	"fairly convoluted method used to select random targets -- in particular,
+	$LF
+	"the selection routines require a bitmask of characters to 
+	[em 
+		"exclude
+	]em
+	" from
+	$LF
+	"selection, rather than the more natural method of passing a bitmask of
+	$LF
+	"characters to 
+	[em 
+		"include
+	]em
+	".  So by adding enemies with defense less than
+	$LF
+	"768 to the bitmask, the code is actually excluding them as possible
+	$LF
+	"targets, and since that leaves no valid targets, the enemy that tried to
+	$LF
+	"use Increase will reroll its action.  The upshot of all this is that the
+	$LF
+	"Caterpillar which appears in the Killer Bee battle will sometimes
+	$LF
+	"consume several random numbers before successfully choosing an action.
+	$LF
+]p
+[h3 
+	" Part 3: Item glitch (a.k.a. Dream Ruby glitch, numbness glitch)
+	$LF
+]h3
+[p 
+	"As with the route used by dave_dfwm's earlier TAS, party state glitching
+	$LF
+	"is accomplished with 1 numb character and 3 dead characters, taking
+	$LF
+	"advantage of a bug in the Luisa character removal logic that lets you
+	$LF
+	"remove a numb character even if it leaves only dead characters in the
+	$LF
+	"party.  We remove first the (non-numb) wizard and then the (numb)
+	$LF
+	"soldier, then add back the two characters we created and killed off
+	$LF
+	"earlier.  This gives us a party of 4 dead characters, which activates
+	$LF
+	"the glitch.
+	$LF
+]p
+[p 
+	"Once the glitch has been activated, we exit to the overworld and take
+	$LF
+	"steps at specific times to modify the current party status.  We take
+	$LF
+	"advantage of the dead time between steps to move items around to where
+	$LF
+	"they can be glitched; opening the menu also allows us to time our steps
+	$LF
+	"to specific frames, avoiding the 16-frame granularity that applies when
+	$LF
+	"moving around.
+	$LF
+]p
+[p 
+	"Without getting too deep into technical details (see the links below for
+	$LF
+	"more details than you ever wanted), the glitch occurs because the game
+	$LF
+	"gets confused at having no live characters in the party, so it tries to
+	$LF
+	"check 256 bytes of memory for damage tiles (swamp or barrier), rather
+	$LF
+	"than just the 1-4 bytes containing the tiles the party is standing on.
+	$LF
+	"If any of those bytes indicates a "swamp" tile, the game tries to
+	$LF
+	"subtract 2 from the corresponding HP value, but since it's checking past
+	$LF
+	"the end of the party list, the minus-2 is instead applied to data like
+	$LF
+	"Return location flags or item numbers.
+	$LF
+]p
+[p 
+	"It's also possible to trigger the glitch on the second floor of Luisa's
+	$LF
+	"Place, but the advantage of using the overworld is that we can time our
+	$LF
+	"steps to when just one or two bytes out of the 256 indicate swamp
+	$LF
+	"damage, so we can modify exactly the parts of memory we want.  In town,
+	$LF
+	"there are a lot more bytes in memory which have the "swamp" value, and
+	$LF
+	"many of those point to parts of memory the game reads as 0 HP, so it
+	$LF
+	"shows a "<name> is dead" message (wasting several seconds) for each one.
+	$LF
+]p
+[p 
+	"Over the course of several trips out of and back into Aliahan, we
+	$LF
+	"accomplish the following:
+	$LF
+]p
+[ul 
+	[li 
+		" Change a Cypress Stick into 2 copies of a glitched " Black Raven" item which we can sell for 58500 gold.
+		$LF
+	]li
+	[li 
+		" Change one of the " Black Raven" items into a Sphere of Light.
+		$LF
+	]li
+	[li 
+		" Change a Copper Sword into a Rainbow Drop.
+		$LF
+	]li
+	[li 
+		" Change a Leather Armor into a Sword of Kings.
+		$LF
+	]li
+	[li 
+		" Change a Leather Helmet into a Shield of Heroes.
+		$LF
+	]li
+	[li 
+		" Change a Wayfarer's Clothes into an Armor of Radiance.
+		$LF
+	]li
+	[li 
+		" Change another Wayfarer's Clothes into a Water Flying Cloth.
+		$LF
+	]li
+	[li 
+		" Change a Medical Herb into a Final Key.
+		$LF
+	]li
+	[li 
+		" Change the Thief's Key into a Wizard's Ring.
+		$LF
+	]li
+	[li 
+		" Give one of the pilgrims the Return flag for Rimuldar.
+		$LF
+	]li
+	[li 
+		" Give the pilgrims 7 of their most powerful battle spells.
+		$LF
+	]li
+]ul
+[p 
+	"(We can't give the wizard his most powerful spells since he doesn't
+	$LF
+	"start out with any field spells, so the damage check would see the spell
+	$LF
+	"bits as 0 HP and not underflow.  But we'll get him some levels shortly
+	$LF
+	"so he can deal decent damage.)  A couple of the glitch steps cost the
+	$LF
+	"hero some max MP, but that's a small price to pay for what the glitch
+	$LF
+	"gives us, and the hero won't need to use much magic anyway.
+	$LF
+]p
+[p 
+	"The Wizard's Ring deserves an extra note: While it's certainly useful
+	$LF
+	"to give the pilgrims enough MP to get through the final boss rush and to
+	$LF
+	"recover the hero's MP so we can Heal to adjust the RNG counter, it has
+	$LF
+	"another important purpose, namely to shift the "parity" or position of
+	$LF
+	"the counter relative to the battle RNG seed.  Once the boss rush starts,
+	$LF
+	"almost every action we can take -- either in battle or on the map --
+	$LF
+	"increments the RNG counter based on the battle seed, so if the distance
+	$LF
+	"to our target value at some point in time is not a multiple of the
+	$LF
+	"battle seed, we can get stuck.  The Wizard's Ring, however, lets us
+	$LF
+	"increment the RNG counter by 1 more than the battle seed, so we can
+	$LF
+	"shift into a new sequence that does allow us to reach the target.
+	$LF
+]p
+[p 
+	"Once all that is done, we go back into town, sell the second glitched
+	$LF
+	"item, buy a Wing to get to Rimuldar and some Herbs as a present to Zoma,
+	$LF
+	"revive our characters, and save, using Luisa since that's faster than
+	$LF
+	"going to talk to the king.  Then we reset and create a third save file
+	$LF
+	"which gives us a specific random seed ($2DDE) that will bring up a good
+	$LF
+	"Metal Babble fight.  After reloading our original game with the new
+	$LF
+	"seed, we equip the second pilgrim and the wizard for the upcoming Metal
+	$LF
+	"Babbles, then warp to Rimuldar, skipping most of the game.  (Apparently
+	$LF
+	"there was this Baramos guy we were supposed to stop from destroying the
+	$LF
+	"world?  Oh well, it was a stupid world anyway.)
+	$LF
+]p
+[h3 
+	" Part 4: Rimuldar -> Charlock
+	$LF
+]h3
+[p 
+	"Our first task at Rimuldar is to get our characters some levels so they
+	$LF
+	"can survive the final boss rush.  Fortunately, there are Metal Babbles
+	$LF
+	"living in the environs of Rimuldar, and with the random seed we picked
+	$LF
+	"above, we can nab a couple before they get away.  Note that the second
+	$LF
+	"pilgrim still has his Club, which we kept around while glitching items;
+	$LF
+	"this is needed in order for a critical hit to kill the Metal Babble,
+	$LF
+	"since otherwise a level-1 pilgrim's attack power is too low.  (Though
+	$LF
+	"watching a character fail to kill a metal enemy with a critical hit can
+	$LF
+	"be amusing in and of itself...)  We attempt to run in the second round
+	$LF
+	"since that gives a better RNG state than entering commands and changing
+	$LF
+	"the battle RNG seed.
+	$LF
+]p
+[p 
+	"Once we finish paging through over 8 minutes(!) of level spam, we enter
+	$LF
+	"Rimuldar and use the inn to fill up all the new HP and MP we have.  Then
+	$LF
+	"we make a quick trip back to Aliahan in order to save, so we can reset
+	$LF
+	"and re-enable the RNG glitch.  The equipment shop here sells Magic Armor
+	$LF
+	"which the pilgrims could use to reduce magic damage in the final boss
+	$LF
+	"rush, but they end up having just enough HP to survive without.
+	$LF
+]p
+[p 
+	"After resetting, we shuffle a few last items around and equip the hero
+	$LF
+	"(done here rather than before resetting since NPC movements will consume
+	$LF
+	"a few extra RNG outputs, so we don't have to take as many extra steps in
+	$LF
+	"Charlock).  Then we Return back to Rimuldar and walk to Charlock Castle,
+	$LF
+	"skipping one encounter along the way.  Before entering Charlock itself,
+	$LF
+	"we take a short jog around the swamp to help advance the RNG counter
+	$LF
+	"(swamps consume an extra RNG output per step, at a cost of less than
+	$LF
+	"half the time a step takes).
+	$LF
+]p
+[p 
+	"Inside Charlock, after skipping an encounter (and using some extra Heals
+	$LF
+	"to adjust the RNG state), we come across three pairs of Granite Titans.
+	$LF
+	"The room with the Titans has a gimmick in which the door closes behind
+	$LF
+	"you as soon as your party enters the room, and there are 3 forced
+	$LF
+	"encounters with a pair of Granite Titans each after 26, 28, and 30 more
+	$LF
+	"steps.  Luckily, the Titans are susceptible to Defeat (maybe that's why
+	$LF
+	"the dialogue line says "you'll have to defeat us first"?), so we arrange
+	$LF
+	"for one of our pilgrims to successfully Defeat both enemies in each
+	$LF
+	"battle before they have a chance to attack.  This is one place in which
+	$LF
+	"the sequential RNG output comes in useful to manipulate turn order: By
+	$LF
+	"forcing the RNG output to roll over right after randomizing party speed
+	$LF
+	"values, we guarantee that the enemies will get low speed rolls, allowing
+	$LF
+	"our characters to act first.
+	$LF
+]p
+[p 
+	"We need to skip one more encounter partway through B3.  Since we also
+	$LF
+	"need to advance the RNG counter for the Ortega battle, we go ahead and
+	$LF
+	"do that here as well, with a total of 8 Heal spells and 2 Wizard's Ring
+	$LF
+	"uses.  This takes about 30 seconds, but is still faster than walking out
+	$LF
+	"the equivalent number of steps.
+	$LF
+]p
+[p 
+	"On B4 we encounter that bane of all DW3 speedrunners, the Ortega battle.
+	$LF
+	"Ortega has an 88% chance of using Healall if his HP drops below half of
+	$LF
+	"the maximum (400), and he has 27 MP (enough for 3 Healall spells), which
+	$LF
+	"is why this encounter can stretch on for quite a while if one is
+	$LF
+	"unlucky.  Fortunately, King Hydra deals 154 damage per turn with two
+	$LF
+	"physical attacks, so by arranging for Ortega to start the battle with
+	$LF
+	"low HP, we only need to hit that 12% chance once to end the battle in
+	$LF
+	"two turns.  (A side effect of the RNG seed we use is that physical
+	$LF
+	"attacks always do maximum damage, which helps us out here.)
+	$LF
+]p
+[h3 
+	" Part 5: Boss rush -> ending
+	$LF
+]h3
+[p 
+	"The final boss rush was by far the hardest part of the route to
+	$LF
+	"calculate, since the RNG state at the end of each battle feeds directly
+	$LF
+	"into the next battle, and there are no random encounters on the final
+	$LF
+	"boss floor so we can't consume RNG outputs by walking around.  (We also
+	$LF
+	"can't return to the previous floor to adjust the RNG state, since that
+	$LF
+	"resets the boss rush and we'd have to start from the beginning again.)
+	$LF
+]p
+[p 
+	"We start out facing King Hydra, who took out Ortega so efficiently a
+	$LF
+	"couple of minutes ago.  This time, though, we get the RNG to work
+	$LF
+	"against him.  It still takes 4 turns to take him out, mainly because he
+	$LF
+	"regenerates 90-109 HP every turn, which is a fair fraction of our damage
+	$LF
+	"output.  (This is the only battle in the entire run that goes to a
+	$LF
+	"fourth turn.  The first turn can actually be skipped, but that requires
+	$LF
+	"10 heals on the map before entering the battle, which takes longer than
+	$LF
+	"just doing the extra turn and is boring to watch besides.)  The useless
+	$LF
+	"Blaze spell in the third turn is to set up the RNG state properly for
+	$LF
+	"the fourth turn; the wizard doesn't have any useful actions which would
+	$LF
+	"give the same effect.
+	$LF
+]p
+[p 
+	"Next up is Baramos Bomus, a reincarnation of the big boss we skipped
+	$LF
+	"earlier.  I guess some other hero took care of him?  Bomus tries to
+	$LF
+	"destroy us with Explodet, but he doesn't get very far as we destroy him
+	$LF
+	"in just two turns.  In the first turn, the wizard uses an Herb rather
+	$LF
+	"than parrying in order to advance the RNG counter; similarly to the
+	$LF
+	"previous battle, he has no other actions that give the same effect on
+	$LF
+	"RNG state.
+	$LF
+]p
+[p 
+	"As we approach Zoma and wade through some lag, Baramos (or at least his
+	$LF
+	"skeleton) comes back for more.  This time he has twice as much HP and
+	$LF
+	"attacks for around 200 damage, but a dose of Surround and he can't hit
+	$LF
+	"the broad side of a barn, going down for good in three turns.  Careful
+	$LF
+	"watchers can spot exactly where the RNG counter wraps around in turn 2.
+	$LF
+]p
+[p 
+	"Having taken care of Zoma's servants, we finally arrive at Zoma himself.
+	$LF
+	"Zoma's a pretty cold fellow, as can be seen from his blizzard breath,
+	$LF
+	"Snowblast, and freeze beam attacks.  Fortunately, we come from the
+	$LF
+	"future, in which Dragon Quest VIII taught us that Nook Grass is the
+	$LF
+	"perfect antidote to cold.  So we secretly switch our Medical Herbs for
+	$LF
+	"Nook Grasses and feed them to Zoma, who can't take the heat and drops
+	$LF
+	"dead in the second turn.  (The 5 Herbs we use are the theoretical
+	$LF
+	"minimum; even with perfect RNG giving 255 damage from each of 4 Herbs,
+	$LF
+	"the total of 1020 wouldn't be enough to defeat Zoma, whose initial HP is
+	$LF
+	"a constant 1023.)
+	$LF
+]p
+[p 
+	"With Zoma defeated, we get out of the crumbling castle and make our
+	$LF
+	"way to Tantegel to receive our well-deserved fanfare and lovely ending
+	$LF
+	"music.  The sequential RNG output can be seen once more here, in the
+	$LF
+	"straight diagonal line of tiles which disappear from the map as Charlock
+	$LF
+	"is destroyed.
+	$LF
+]p
+[h3 
+	" Etc.
+	$LF
+]h3
+[p 
+	"Route notes and scratchpad: http://pastebin.com/9Aimya4e
+	$LF
+]p
+[p 
+	"More details on glitches, random numbers, and other internal stuff:
+	$LF
+]p
+[ul 
+	[li 
+		" http://pastebin.com/PVzs5a4A (Dream Ruby glitch and dreams of ACE)
+		$LF
+	]li
+	[li 
+		" http://pastebin.com/WKQ9A21a (RNG details)
+		$LF
+	]li
+	[li 
+		" http://pastebin.com/FEXT7S3F (partial memory map)
+		$LF
+	]li
+	[li 
+		" http://pastebin.com/LCzssawF (list of BRK functions)
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Samsara)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Samsara)
+	": File replaced with a 
+	[a href=/userfiles/info/28706285680998942 
+		"version that adds FCEUX subtitles
+	]a
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Samsara)
+	": Impressive improvement, lovely subtitles, and a great audience reception. Accepting to Moons as an improvement to the 
+	(__wikiLink|1481M|published run)
+	"!
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Just an update to anyone who is wondering where it is. vaxherd has actually provided a dump with the fix, minor issue, I've been downloading it for 3 days. The other part is that the subtitles have also been taking some time, not due to trying to grab the fix, just that there's a bit to do, and make legible especially for the downloadables, hopefully, this will get done soon, just hope it wouldn't take much longer. Sorry for the delay.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Update. Everything is on track again!
+]p

@@ -1,0 +1,134 @@
+9
+[h4 
+	" Final Fantasy "Console Verification"
+	$LF
+]h4
+[p 
+	"The fm2 submitted is set up to run from the standard clean start. However, the true form of this run is a system that can create a TAS of the game for any starting SRAM state. All the code needed for this is available here:
+	$LF
+	"http://s000.tinyupload.com/index.php?file_id=18882796053558783368
+	$LF
+]p
+[p 
+	"I got the idea for this after dwangoAC described how he and realtime FF runner Feasel attempted to run the existing Final Fantasy TAS on an NES in the practice room at AGDQ 2014. They were unsuccessful but I realized that I could work around both of the major problems. dwangoAC asked me if I would be interested in preparing this for AGDQ 2015. Even though it was determined to not be a good candidate for the event I decided I would finish it for console verification.
+	$LF
+]p
+[p 
+	"The first problem is that no bot can yet play back a run with resets. There are plans and projects, but nothing working yet. Since my runs on this game use many soft and hard resets, such a system would have to work reliably and consistently to make it through the current TAS. 
+	$LF
+]p
+[p 
+	"To get around this I decided I would make a new TAS that did not use any resets or power cycles. At first I wasn't sure how much time this would add. It could be impossible to avoid a large number of unrunnable fights. Fighting those battles would take time and possibly require more healing items, getting more equipment or other setup. Or maybe I could avoid unrunnable fights but with a lot of pacing and extra random runnable battles in order to advance the encounter mechanism.
+	$LF
+]p
+[p 
+	"After some analysis I discovered that it wouldn't actually be that bad. This run has 184 random fights compared to 173 in 
+	(__wikiLink|2079M|any%)
+	". Some extra walking or sailing in circles is needed, but I discovered some other tricks to tweak things as well. There are only four unrunnable fights compared to two in any% and all four go pretty fast. So in the end this run is only about a minute and a half slower than the any% run.
+	$LF
+]p
+[p 
+	"A problem not unique to this game is that RAM is not initialized by the game at startup. Some versions of NES hardware will have cleared RAM after sitting powered down for a while. A more conclusive solution is the erase cart developed by true and Scrimpey that actively resets the RAM.
+	$LF
+]p
+[p 
+	"The next problem is that the seed for the battle RNG is stored in SRAM, the battery-backed memory used for the savegame. That means clearing the RAM will not get to same start state as the standard clean start state for TAS. In this case the hardware solution is much simpler: a cart eraser that deletes the SRAM memory. When I first started this did not exist, but true and others have since gotten it work.
+	$LF
+]p
+[p 
+	"The non-hardware solution to this is a little more complicated but pretty cool. Regardless of the SRAM state I can walk through the outer world until the first battle before desyncing. I do this and on starting that battle I hold down A, ordering my guys to attack the first enemy. That battle will consist of 3-5 imps. Four fighters beat them every time, but will take varying amounts of damage and time to do so. In the worst case it could take about 90 seconds. Anyway, by looking at what happened in that battle we can determine the value of the RNG counter. Specifically, I found that recording the final hp of everyone in the party would find the counter value about 90% of the time. Throwing in the number of enemies and the first and last party members to attack would be enough to find the value every time.
+	$LF
+]p
+[p 
+	"Once you know that value there are a few ways to proceed. You can hit the power and start all over with a run calibrated to that counter value. true and I were able to get the run going this way. My other idea was to let the bot know the counter value and have it tweak the run in real time. This is certainly possible and would have been a neat trick but it did require some hacking in to the bot's code and maybe some hardware tweaks to set up a port to get that info to the bot.
+	$LF
+]p
+[p 
+	"Continuing on from an unknown start has a few other complications. After that first fight my party members have an unknown amount of hp and in fact there is about a 5% chance that the first character dies! I deal with this variation by picking one of three different battles with first boss Garland and then going to the inn on first entering Pravoka. Still, if my first character died in the imp fight then the characters were in a different order on beating Garland and randomization of levelup stats means that my characters have different amounts of max HP. The variation is only 2-4 so I deal with it. It's only really an issue for the pirates fight.
+	$LF
+]p
+[p 
+	"In the end, the cart eraser is much more convenient than these tricks. But since I have everything set up I am going to release all the code needed to do this. The process involves using python scripts to generate lua that can then be used to record an fm2 tuned to a particular RNG value. As with the any% run I have also included the option to change the names used in the run. I have used lua to test that the run has synced and verified that my system can sync for any starting RNG value.
+	$LF
+]p
+[h4 
+	" About the run
+	$LF
+]h4
+[p 
+	"The run starts pretty close to the any% run. The first big change is skipping the treasure in Dwarf Cave and picking up some treasure in Earth Cave instead. That side trip in Earth Cave helps avoid unrunnable fights without just walking in circles. I pick up the Coral Sword for a better weapon and also a cabin for healing later. The Coral sword is used on Vampire and Lich instead of the Dragon sword. In the second trip to Lich I have my first unrunnable random fight against two Wizards. With a better weapon and a few levels compared to the fight in Marsh Cave I am able beat them much more easily.
+	$LF
+]p
+[p 
+	"After Earth Cave I proceed directly to Crescent Lake and Ice Cave with the exception of a short sailing excursion to prime the encounter list. This leads to no unrunnable encounters in Ice Cave. In Ice Cave I collect the Flame Sword and tent as in the any% run as well as a good chunk of gold to spend on the Bottle.
+	$LF
+]p
+[p 
+	"On the way to the airship is the longest set of extra pacing to set up encounters. I get on and off the ship because the ship moves faster and the encounter rate is higher on land. Even though the step on and off the ship does not increment encounters it is still worth it. This will also be the last place I need to move in circles just to set up encounters.
+	$LF
+]p
+[p 
+	"While using the Floater to reveal the airship I also equip the flame sword and use the cabin and tent to restore some hp.
+	$LF
+]p
+[p 
+	"The Sea Shrine and Waterfall are pretty straightforward. Still no unrunnable fights and about the same as any%. As usual, the robot is just where I need him to be and Dr Unne of Melmond moves down to talk to me.
+	$LF
+]p
+[p 
+	"The trip to Lefein is a little different because of two unrunnable ZomBull fights. ZomBulls are weak to flame and I have the flame sword. So even on a very low level I am able to beat them in one hit if I take some damage first. That was the purpose for restoring my hp earlier. This will be the last time I take damage in battle.
+	$LF
+]p
+[p 
+	"Moving on, I beat the Blue D without taking damage. Pick up Bane sword and use it on Tiamat as usual. Gurgu is a little different; instead of walking on lava to avoid encounters as much as possible I step on normal ground to run up the encounter list. This sets everything up for a fast trip through the final dungeon.
+	$LF
+]p
+[p 
+	"Temple of Fiends: Revisited actually goes quite a bit faster than in any% run. Because of how encounters fall, I can use Bane Sword on Phantom with no worries. The only and last unrunnable random encounter is one WORM that is quickly dispatched with Bane Sword. The rest of the dungeon is straightforward Bane Swording.
+	$LF
+]p
+[p 
+	"There were a couple spots where taking more damage would be convenient. But after looking into it, nothing was worth the time it would take to shop and use items or visit an inn. Unlike any% I don't need to use tents or cabins to save before reset, so I don't have any excuses to visit item shops or even open the menu. 
+	$LF
+]p
+[h4 
+	" Thanks
+	$LF
+]h4
+[p 
+	"Special thanks to true for playing this on his bot to verify. He also verified that the RNG finding method worked on console. 
+	$LF
+]p
+[p 
+	"Also thanks to dwangoAC for including this as an option for AGDQ though it wasn't accepted. Since it is so easy to set the character names I was hoping we could auction or raffle off the names in the verification movie to raise money for his AGDQ 2015 efforts. This will take some more planning and discussion though.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	": I'll handle this one
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	": Nevermind, backing out of judging this.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": I'll take this submission, then.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": This submission is made with console verification in mind, by avoiding resets that require the console's RAM to be cleared when console verifying. The justification given is that, when console verifying the run, the resets would cost time, as the cart would have to be removed, the RAM-clearing cart inserted and run, and reinserting the game cart before the verification process can resume. This would, in the end, make this run faster on console than the currently published run. However, we don't account for this when timing runs; this is because it is impossible to time the cart-swapping, clearing etc. for TAS timing purposes. Therefore, this added time is disregarded. As such, as this run is slower than the 
+	(__wikiLink|2079M|currently published run)
+	" and the run does not meaningfully add to the current published runs, rejecting.
+	$LF
+]p
+[p 
+	"As a side-note, given this run's goal to showcase a bot that has to figure out RNG on the fly from any SRAM by letting a fight run while holding a button, I have doubts whether this is an optimal run, compared to a proper TAS that would use savestates to know the RNG in advance.
+]p

@@ -1,0 +1,834 @@
+27
+[p 
+	"This page describes various crucial details regarding how systems initialize memory and details to be aware of regarding how this affects games and correlation with emulators. These important concepts in turn influence the rules that TASVideos establishes for movie acceptance.
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[a href=#heading-5638 
+				" Understanding memory initialization patterns
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-5639 
+						" Mathematics for the amount of possible initial memory states
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-5640 
+								" Possible/Impossible Graph
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-5641 
+						" Conceptual Diagram
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-5642 
+				" How memory initialization affects games
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-5643 
+						" Understanding mutual exclusivity
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-5644 
+				" Battery backed RAM or NVRAM
+				$LF
+			]a
+		]li
+		[li 
+			[a href=#heading-5645 
+				" Emulator behavior
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-5646 
+						" Persistent memory
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-5647 
+						" TASVideos requirements
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-5648 
+				" Sources of memory initialization entropy
+				$LF
+			]a
+		]li
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-5649 
+						" Manufacturing variance
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#heading-5650 
+				" Notes
+				$LF
+			]a
+		]li
+	]ul
+]div
+[h2 
+	" Understanding memory initialization patterns
+	$LF
+	[a id=heading-5638 
+	]a
+]h2
+[p 
+	"Memory initialization is typically not a well understood topic. People often think of memory as one giant block of bits, where every bit has a 50/50 probability of being on or off, independently from every other bit of memory. However, memory does not work this way.
+	$LF
+]p
+[p 
+	"Memory is often arranged in some kind of multidimensional grid, consisting of cells. These cells in turn may be arranged within some larger structure, such as separate RAM chips or separate sticks of RAM. Memory will have various controllers as a whole as well as on different hierarchical levels. RAM may also be managed in a way that certain combinations of physical bit settings are actually read as a more limited set. This is done on some systems in order to automatically correct errors that may occur, due to various non ideal situations causing a bit to flip unintentionally.
+	$LF
+]p
+[p 
+	"The structure that stores and manages bits of memory differs from platform to platform. However, a commonality to all platforms is that there are many complex relationships between the bits as a whole. This relationship may mean that rows or columns in a cell must all contain the same value during initialization. It may mean that a cell as whole will always the contain the same value for all bits within it during initialization. It may mean that due to electrical timings and fluctuations, all 
+	[em 
+		"early bits
+	]em
+	" close to the electric source will be 
+	[em 
+		"on
+	]em
+	", and  all the bits farther away will be 
+	[em 
+		"off
+	]em
+	", with the exact dividing line differing each time electricity is supplied anew. Such a case requires that there must be a running set of 
+	[em 
+		"on
+	]em
+	" bits followed by 
+	[em 
+		"off
+	]em
+	" bits, and there can be no other alterations in the middle. Whatever the case may be for a platform, one thing is certain, most bit combinations are impossible as a starting state.
+	$LF
+]p
+[p 
+	"An important way to view this is that the memory bits themselves are NOT random. Memory bits are initialized via propagation from other sources, and these other sources in turn may have some 
+	[em 
+		"randomness
+	]em
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" to them. Therefore blocks of memory will always contain some kind of pattern, even though this pattern may or may not be discernible.
+	$LF
+]p
+[h3 
+	" Mathematics for the amount of possible initial memory states
+	$LF
+	[a id=heading-5639 
+	]a
+]h3
+[p 
+	"It was stated earlier that 
+	[em 
+		"most bit combinations are impossible as a starting state
+	]em
+	". Let us review the math regarding the relationship of possible to impossible starting states proving this point.
+	$LF
+]p
+[pre 
+	"Let 
+	[tt 
+		"X
+	]tt
+	" be the amount of bits which can be truly random.
+	$LF
+	"Let 
+	[tt 
+		"R
+	]tt
+	" be the amount of bits in RAM.
+	$LF
+	"Let 
+	[tt 
+		"Y
+	]tt
+	" be the ratio of RAM bits to random bits.
+	$LF
+	"Therefore 
+	[tt 
+		"R = X*Y
+	]tt
+	", where 
+	[tt 
+		"Y >= 1
+	]tt
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	".
+	$LF
+	"Therefore 
+	[tt 
+		"R >= X
+	]tt
+	".
+	$LF
+]pre
+[p 
+	"When 
+	[tt 
+		"Y = 1
+	]tt
+	", 
+	[tt 
+		"R = X
+	]tt
+	". Most people are under the mistaken impression that 
+	[tt 
+		"Y
+	]tt
+	" is always 
+	[tt 
+		"1
+	]tt
+	". However, as described in the above section, 
+	[tt 
+		"Y
+	]tt
+	" is always much greater than 
+	[tt 
+		"1
+	]tt
+	".
+	$LF
+]p
+[pre 
+	"The amount of possible initial unique states, 
+	[tt 
+		"P
+	]tt
+	", is 
+	[tt 
+		"2⸢⸢X⸣⸣
+	]tt
+	".
+	$LF
+	"The amount of possible states RAM can be in is 
+	[tt 
+		"2⸢⸢R⸣⸣
+	]tt
+	".
+	$LF
+	"Let 
+	[tt 
+		"I
+	]tt
+	" be the amount of impossible initial states.
+	$LF
+]pre
+[pre 
+	"Therefore 
+	[tt 
+		"I = 2⸢⸢R⸣⸣ - 2⸢⸢X⸣⸣ = 2⸢⸢X*Y⸣⸣ - 2⸢⸢X⸣⸣
+	]tt
+	".
+	$LF
+]pre
+[p 
+	"In comparison of the ratio of 
+	[tt 
+		"P:I
+	]tt
+	", the amount of possible states is a bounded set, while the amount of impossible states is relatively an unbounded set where the amount of impossible states constantly grow with larger values of 
+	[tt 
+		"X
+	]tt
+	" and 
+	[tt 
+		"Y
+	]tt
+	".
+	$LF
+]p
+[p 
+	"Some examples:
+	$LF
+]p
+[pre 
+	"When 
+	[tt 
+		"X = 1
+	]tt
+	" and 
+	[tt 
+		"Y = 2
+	]tt
+	", 
+	[tt 
+		"P = 2⸢⸢1⸣⸣
+	]tt
+	" and 
+	[tt 
+		"I = 2⸢⸢1*2⸣⸣ - 2⸢⸢1⸣⸣
+	]tt
+	" which reduces to 
+	[tt 
+		"P = 2
+	]tt
+	" and 
+	[tt 
+		"I = 2
+	]tt
+	", making the ratio equal.
+	$LF
+	"When 
+	[tt 
+		"X = 2
+	]tt
+	" and 
+	[tt 
+		"Y = 2
+	]tt
+	", 
+	[tt 
+		"P = 2⸢⸢2⸣⸣
+	]tt
+	" and 
+	[tt 
+		"I = 2⸢⸢2*2⸣⸣ - 2⸢⸢2⸣⸣
+	]tt
+	" which reduces to 
+	[tt 
+		"P = 4
+	]tt
+	" and 
+	[tt 
+		"I = 12
+	]tt
+	", a ratio of 
+	[tt 
+		"1:3
+	]tt
+	".
+	$LF
+	"When 
+	[tt 
+		"X = 1
+	]tt
+	" and 
+	[tt 
+		"Y = 3
+	]tt
+	", 
+	[tt 
+		"P = 2⸢⸢1⸣⸣
+	]tt
+	" and 
+	[tt 
+		"I = 2⸢⸢1*3⸣⸣ - 2⸢⸢1⸣⸣
+	]tt
+	" which reduces to 
+	[tt 
+		"P = 2
+	]tt
+	" and 
+	[tt 
+		"I = 6
+	]tt
+	", a ratio of 
+	[tt 
+		"1:3
+	]tt
+	".
+	$LF
+	"When 
+	[tt 
+		"X = 2
+	]tt
+	" and 
+	[tt 
+		"Y = 3
+	]tt
+	", 
+	[tt 
+		"P = 2⸢⸢2⸣⸣
+	]tt
+	" and 
+	[tt 
+		"I = 2⸢⸢2*3⸣⸣ - 2⸢⸢2⸣⸣
+	]tt
+	" which reduces to 
+	[tt 
+		"P = 4
+	]tt
+	" and 
+	[tt 
+		"I = 60
+	]tt
+	", a ratio of 
+	[tt 
+		"1:15
+	]tt
+	".
+	$LF
+]pre
+[p 
+	"As can be seen when 
+	[tt 
+		"X >= 2
+	]tt
+	" and 
+	[tt 
+		"Y >= 3
+	]tt
+	", 
+	[tt 
+		"I > P
+	]tt
+	".
+	$LF
+]p
+[p 
+	"Bearing in mind that the amount of bits that are supplying perceived randomness is generally greater than 2, and that complex memory cell structure contains far more than 3 times the amount of bits than the size of the sources they depend on for initialization, it becomes apparent just how many impossible initialization states there are to any memory-based platform. The curve becomes pretty steep.
+	$LF
+]p
+[p 
+	"This proves that in nearly all cases, the amount of impossible cases greatly outnumber the amount of possible cases. Therefore it is a huge mistake for emulators to fill RAM completely randomly
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	", as that will in virtually all cases result in a starting state which is impossible for the platform being implemented.
+	$LF
+]p
+[p 
+	"Most people who are unfamiliar with this subject think that systems are designed such that 
+	[tt 
+		"Y = 1
+	]tt
+	", which in turn means 
+	[tt 
+		"R = X
+	]tt
+	", and 
+	[tt 
+		"I = 0
+	]tt
+	". However there is no hardware on the market that is known to have this property, and the odds of 
+	[tt 
+		"Y
+	]tt
+	" being 
+	[tt 
+		"1
+	]tt
+	" would be incredibly rare. Memory just isn't designed that way. I haven't seen any mass produced computer system where 
+	[tt 
+		"Y
+	]tt
+	" is anywhere close to 
+	[tt 
+		"1
+	]tt
+	".
+	$LF
+]p
+[h4 
+	" Possible/Impossible Graph
+	$LF
+	[a id=heading-5640 
+	]a
+]h4
+[p 
+	[img class=embed src=http://nach.tasvideos.org/images/memory-init-graph.png 
+	]img
+	$LF
+]p
+[p 
+	"This image depicts how the impossible cases outnumber the possible cases as the amount of random source bits 
+	[tt 
+		"X = 1..150
+	]tt
+	" and amount of RAM bits per random source bit 
+	[tt 
+		"Y = 1..20
+	]tt
+	" increases. The height of the bars show the magnitude of the ratio of impossible cases outnumbering the possible ones. The very top of the graph represents 
+	[tt 
+		"1:10⸢⸢80⸣⸣
+	]tt
+	".
+	$LF
+]p
+[h3 
+	" Conceptual Diagram
+	$LF
+	[a id=heading-5641 
+	]a
+]h3
+[p 
+	"See this image to get a better idea how memory is filled:
+	$LF
+]p
+[p 
+	[img class=embed src=http://nach.tasvideos.org/images/memory-init-example.png 
+	]img
+	$LF
+]p
+[p 
+	"In the upper left, are some bits which can be 
+	[em 
+		"random
+	]em
+	". These bits in turn influence other bits which are not random, but are initialized to some formula of their parent bits. These bits in turn fill the bits in the RAM.
+	$LF
+]p
+[p 
+	"Each platform and memory module has its own way of working, but any system you encounter will do something along these lines.
+	$LF
+]p
+[h2 
+	" How memory initialization affects games
+	$LF
+	[a id=heading-5642 
+	]a
+]h2
+[p 
+	"Not all games are equal regarding whether memory initialization differences affect them or not. Some games will initialize all used RAM to predefined values when they launch. When memory is initialized by the software itself, what the bits of memory contained when electricity was initially supplied to them becomes moot. When these games do something that appears random, it's usually because they're tied to a clock or some formula related to player input and possibly counters.
+	$LF
+]p
+[p 
+	"For games where the software makes use of uninitialized memory, how the game presents itself and the challenges it offers can change drastically based on what happened when electricity is supplied to the system. The ambient temperature and 
+	[a class=extlink href=https://en.wikipedia.org/wiki/Alternating_current rel=nofollow 
+		"current
+	]a
+	" 
+	[a class=extlink href=https://en.wikipedia.org/wiki/Utility_frequency rel=nofollow 
+		"oscillations
+	]a
+	" cycle in use when a system is powered on could alter where enemies appear and/or what they do for this kind of software. It could affect anything the game generates during the course of play, such as mazes, vitality, or other resources.
+	$LF
+]p
+[h3 
+	" Understanding mutual exclusivity
+	$LF
+	[a id=heading-5643 
+	]a
+]h3
+[p 
+	"Mutual exclusivity is an important concept which is also typically not well understood. People may understand all the other sections discussed here, but often fail to consider how enabling one possibility in a game also requires enabling or disabling another associated possibility.
+	$LF
+]p
+[p 
+	"Consider a fighting game where every match begins with the computer controlled opponent either performing a standard attack or blocking. The game may have a series of bits where each is associated with a different fighting round, which determine what the starting activity is. Imagine the platform in question can only initialize a byte in memory to 01010101 (55 hex) or 10101010 (AA hex). In this situation, every fighting round of the eight rounds alternates whether the computer controlled player begins with attacking or blocking. Having two rounds in a row of attacking or blocking would be technically impossible.
+	$LF
+]p
+[p 
+	"In this example, how a particular character behaves can have a full range of possibilities, but one possibility in practice will also force the outcome of other possibilities. Players may want to take advantage of a certain initial fighting pattern for certain rounds because that may be more entertaining or may end up being faster against the fighting character in question. However, setting a single bit in order to force how a certain round behaves, without also setting all other bits with it to be in a possible state will lead to the game as a whole being ran using an impossible situation.
+	$LF
+]p
+[p 
+	"Players may point to some record breaking movie where a particular round was also played in some record breaking fashion, and may want to force that particular round in their movie to be in the same state. However forcing this situation without offsetting the other bits of memory into a combined possible initial state means that multiple rounds are accelerated, when the game technically forces some rounds to start quickly, and others more slowly. Any record based on setting a single bit without also aligning its counterparts is cheating.
+	$LF
+]p
+[h2 
+	" Battery backed RAM or NVRAM
+	$LF
+	[a id=heading-5644 
+	]a
+]h2
+[p 
+	"Some cartridge-based games come with their own RAM inside the cartridge, and often 
+	[a class=extlink href=https://en.wikipedia.org/wiki/Static_random-access_memory rel=nofollow 
+		"Static RAM
+	]a
+	" with a battery is used in order to allow a game to save a player's progress. An alternate approach that could be used is also a cartridge which contains 
+	[a class=extlink href=https://en.wikipedia.org/wiki/Non-volatile_random-access_memory rel=nofollow 
+		"Non-Volatile RAM
+	]a
+	".
+	$LF
+]p
+[p 
+	"When a cartridge uses a form of persistent memory, this persistent memory may feature all the same potential for initialization patterns described above for system memory. In addition to that, it is also possible for the cartridge to have its RAM be preset to some state at the factory, one which would otherwise be impossible when initialized by supplying electricity.
+	$LF
+]p
+[p 
+	"For these kinds of cartridges which use battery powered RAM, when the battery dies, the game may start in some unusual way. Even though this way is atypical when compared to a fresh cart, it is still a valid initialization as batteries failing is an eventual occurrence.
+	$LF
+]p
+[p 
+	"Games often uses some kind of 
+	[a class=extlink href=https://en.wikipedia.org/wiki/Checksum rel=nofollow 
+		"checksum
+	]a
+	" on their persistent RAM in order to detect corruption due to a battery dying or a result of other issues such as electromagnetic alterations to some bits of memory. When a game sees that the RAM's checksum does not correlate with the other bits, it can initialize the memory to some state, which may match any potential factory initialization. Some games may report this occurred. It's also possible the game may just go into failure mode and refuse to start. In any case, it's unlikely that any potential possible starting state for memory when it first receives electricity will also happen to contain a valid checksum.
+	$LF
+]p
+[p 
+	"Due to all this, any RAM supplied on a cartridge has all the same behaviors and caveats system memory has. However it must be understood alongside the possibilities for factory setup, checksums, and how the game reacts to various situations.
+	$LF
+]p
+[h2 
+	" Emulator behavior
+	$LF
+	[a id=heading-5645 
+	]a
+]h2
+[p 
+	"Emulators have a large amount of variance regarding how faithful they are at implementing some platform. It is important to keep in mind that even the most faithful emulators do little to ensure conformance to memory initialization criteria and behavior.
+	$LF
+]p
+[p 
+	"The different initialization patterns certain kinds of RAM or systems exhibit is not a well studied nor well documented subject. Therefore, for games that make use of uninitialized RAM, they may often exhibit behavior in a particular emulator which is impossible on the official implementations for the platform in question.
+	$LF
+]p
+[p 
+	"Some emulators created by authors who mean well but do not understand this subject will initialize RAM with random values
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	". The randomization will cause the game to exhibit different behavior in the emulator each time it is played. Any of those behaviors will probably also differ from any scenario as a whole that is offered by the official platform.
+	$LF
+]p
+[h3 
+	" Persistent memory
+	$LF
+	[a id=heading-5646 
+	]a
+]h3
+[p 
+	"Persistent memory has many of the same problems as system memory. One of the added problems is that some games may refuse to start when persistent memory doesn't contain a valid checksum or certain values in certain areas. For these games, emulators often cannot play them, or they feature some kind of hack to force a few bits to a certain setting so the game starts. Such a starting state is likely invalid, but is typically consistent, and allows the game to function in what appears to be a normal fashion.
+	$LF
+]p
+[p 
+	"When dumping
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	" cartridge-based games that use persistent memory, ideally any pristine on-cartridge RAM should be dumped as well. This should be shipped alongside any ROM data and used by emulators as the initial cartridge RAM state. This is not typically done, and in many cases it is hard to find a pristine cartridge with its initial factory settings intact.
+	$LF
+]p
+[h3 
+	" TASVideos requirements
+	$LF
+	[a id=heading-5647 
+	]a
+]h3
+[p 
+	"TASVideos wants to ensure authenticity and reproducibility for movies that are published. Part of this is ensuring equal footing for the options available to players who make movies. It also entails ensuring that no intentional cheating is occurring.
+	$LF
+]p
+[p 
+	"Emulator memory initialization to some computer language's random number generator causes different players to have different situations when they play a game. It introduces non-deterministic occurrences which makes it difficult to compare one movie with another. This is unfair to players who are trying to optimize a game using what appears to be the same benchmarks. Therefore, we want to avoid any such randomized
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" memory initialization routines. While a fixed state an emulator offers may be invalid for the platform, more so is any randomized initial state it offers. Since neither is technically valid (although the fixed state 
+	[em 
+		"might
+	]em
+	" be), we want to aim for consistency.
+	$LF
+]p
+[p 
+	"Emulators often also allow memory editing so players can have fun with a game and try  to play them in new and interesting ways. While this may be fun, we also call this cheating. Even though someone may modify the memory in a game to allow some small part of the game to exhibit behavior that can sometimes be seen on the official platform, they fail to take into account how that behavior becomes inconsistent with how the rest of the game is played. Therefore we disallow any supplied memory state which is not shown to be a possible starting state for all the bits of memory as a combined unit.
+	$LF
+]p
+[h2 
+	" Sources of memory initialization entropy
+	$LF
+	[a id=heading-5648 
+	]a
+]h2
+[p 
+	"There are many different sources whose permutation of occurrences determine the memory initialization pattern that is applied.
+	$LF
+]p
+[ul 
+	[li 
+		" Current oscillations and spikes
+		$LF
+	]li
+	[li 
+		" Voltage regulation degrading
+		$LF
+	]li
+	[li 
+		" Ambient temperature
+		$LF
+	]li
+	[li 
+		" Electromagnetic interference
+		$LF
+	]li
+	[li 
+		" Electricity remaining in capacitors
+		$LF
+	]li
+]ul
+[p 
+	"This list is non-exhaustive.
+	$LF
+]p
+[h3 
+	" Manufacturing variance
+	$LF
+	[a id=heading-5649 
+	]a
+]h3
+[p 
+	"Not all units for a particular platform are necessarily identical. Some units may use different parts which are similar and compatible. Even parts which are considered identical may have minor variances as minute differences are not considered a manufacturing defect if they operate within a given range of acceptable behavior.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[hr 
+]hr
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h2 
+	" Notes
+	$LF
+	[a id=heading-5650 
+	]a
+]h2
+[p 
+	[br 
+	]br
+	$LF
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" On a philosophical level, I don't believe in the existence of randomness. However, the point here is that how certain pieces of hardware or software is initialized appears to be random, in that it's not fully deterministic from the hardware or software itself and can depend on external sources which have fluctuations.
+	$LF
+]p
+[p 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" Note that 
+	[tt 
+		"Y < 1
+	]tt
+	" is nonsensical.
+	$LF
+]p
+[p 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" Emulators typically don't use some random algorithm where each bit has a 50/50 probably of being 
+	[em 
+		"on
+	]em
+	" or 
+	[em 
+		"off
+	]em
+	" in isolation. Rather they typically use an 
+	[em 
+		[a class=extlink href=https://en.wikipedia.org/wiki/Linear-feedback_shift_register rel=nofollow 
+			"LFSR
+		]a
+		"-like
+	]em
+	" algorithm, or something similar, which has its own set of relationships between bits when used to initialize large bit streams. You can guarantee that no physical RAM hardware would use anything like one of these algorithms, as memory structure design isn't based on a looping number algorithm like basic random number generators are.
+	$LF
+]p
+[p 
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" Dumping is the process where the memory of a cartridge is copied to a more popular storage medium or personal computer.
+]p

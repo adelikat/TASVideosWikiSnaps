@@ -1,0 +1,245 @@
+9
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/glsquare.png 
+	]img
+	$LF
+]p
+[p 
+	"Time for another (Klondike) Solitaire submission! 264 frames (~4.5 seconds) faster than the published run on the same layout. I'm tired of not submitting stuff.
+	$LF
+]p
+[p 
+	"Youtube: http://www.youtube.com/watch?v=rIXPlhVhgsI
+	$LF
+]p
+[p 
+	"Nicovideo: http://www.nicovideo.jp/watch/sm15706357
+	$LF
+]p
+[p 
+	"Nicovideo (no account): http://www.nicozon.net/watch/sm15706357
+	$LF
+]p
+[ul 
+	[li 
+		" Music ON
+		$LF
+	]li
+	[li 
+		" Aims for fastest completion of one game (same layout as in 
+		(__wikiLink|user:mmbossman)
+		"'s run).
+		$LF
+	]li
+	[li 
+		" Plays at hardest level (3 card draw).
+		$LF
+	]li
+]ul
+[p 
+	"Version: FCEUX v2.1.4a.
+	$LF
+]p
+[p 
+	"Note that it works on both ROMS, so don't worry about the checksum.
+	$LF
+]p
+[p 
+	"If music is turned off, it saves like 3.5 seconds since it doesn't play the jingle at the beginning. But you wouldn't be able to get this layout, so who knows? I leave it on, because having the music off is never good.
+	$LF
+]p
+[p 
+	"It is entirely possible that the hardest level (3 card draw) is 
+	[em 
+		"faster
+	]em
+	" than 1 card draw, since you need less flips to get to where you want.
+	$LF
+]p
+[h4 
+	" About the run
+	$LF
+]h4
+[p 
+	"Well, I started out by disassembling the RNG in this game. Difficult, but it didn't take me more than 3 
+	$LF
+	"days. Details on that later.
+	$LF
+]p
+[p 
+	"So I decided to take a "break" (relatively speaking) and improve the published run.
+	$LF
+]p
+[p 
+	"Just as in the previous run, holding start at the beginning glitches out the intro. Since I had a frame to burn (just like 
+	(__wikiLink|user:mmbossman)
+	"), I used it to change the card back image. Alternatively, I had the option to change the color, but decided against it since seeing blue "red" cards flying around is a rather alien concept. Also, nothing beats actual red. Except maybe purple or pink.
+	$LF
+]p
+[p 
+	"First, I looked for a sequence of play that reduces downtime (e.g. transferring large stacks takes a lot of time). Once I had that, I did it again and optimized movement. Some methods include the following:
+	$LF
+]p
+[ul 
+	[li 
+		" You can press A at the same time as one or more direction keys to select a card.
+		$LF
+	]li
+	[li 
+		" You can press diagonals (e.g. up+left) and the cursor will go diagonally.
+		$LF
+	]li
+	[li 
+		" When going from one side to the other, it is faster to go through the very top row (with the deck and home slots), rather than the second row. Just the way the cursor works.
+		$LF
+	]li
+	[li 
+		" Often when transferring cards, it is faster to alternate left-right and right-left actions, if possible.
+		$LF
+	]li
+	[li 
+		" Near the end, it is faster to work off the part of the deck nearest the beginning (the first three cards on the flip after restoring the deck), since otherwise it takes a bit more time.
+		$LF
+	]li
+]ul
+[h4 
+	" About the layout
+	$LF
+]h4
+[p 
+	"Although the layout has a lot of cards that can easily be played, there are some undesirable things such has having both red jacks and both black sixes hidden in the upper right section of the pile. Furthermore, there is a black ten on top of one of the jacks. As anyone who plays Klondike Solitaire can tell you, this is not a good thing, as it severely restricts your options (indeed, playing the other black ten on the red jack that is not covered by the first black ten will pretty much ruin your game).
+	$LF
+]p
+[p 
+	"Is there a better layout that can make this faster? Possibly. But I haven't tried.
+	$LF
+]p
+[h4 
+	" Possible improvements
+	$LF
+]h4
+[p 
+	"Aside from a better layout, there might have been a strategy on the original layout that I missed.
+	$LF
+]p
+[h4 
+	" Screenshots
+	$LF
+]h4
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/Solitaire-2.png 
+	]img
+	$LF
+]p
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/Solitaire-3.png 
+	]img
+	$LF
+]p
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/Solitaire-4.png 
+	]img
+	$LF
+]p
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/Solitaire-6.png 
+	]img
+	$LF
+]p
+[p 
+	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/Solitaire-8.png 
+	]img
+	$LF
+]p
+[h4 
+	" Disassembly
+	$LF
+]h4
+[p 
+	"Here's how the initial deck is determined:
+	$LF
+]p
+[ol 
+	[li 
+		" The initial deck is determined from address 0006-0007, which is two bytes (16-bit) and little-endian. This "RNG" is merely a counter that advances by 1 every frame.
+		$LF
+	]li
+	[li 
+		" When the deck is to be generated (in this run, when address 0006 = 0x180), start with an empty 52-cell array and do the following.
+		$LF
+	]li
+	[li 
+		" 16-bit-multiply address 0006-0007 by 0x28.
+		$LF
+	]li
+	[li 
+		" Then add 0xE39. Then subtract 0x2D9.
+		$LF
+	]li
+	[li 
+		" Look at this new 16-bit value. If the upper byte is between 0x03 and 0x82 inclusive, or the lower byte is greater or equal to 0xDA, or less or equal to 0x59, subtract 0x2D9 and repeat this step. Otherwise, continue.
+		$LF
+	]li
+	[li 
+		" Take the low byte and mod it by the number of currently empty cells in the array (first time is 52, second is 51, ...). Call this number i. Starting from the end of the array (52nd cell), take the (i+1)th empty cell from the end (e.g. if i=0, take the first empty cell), skipping over any filled cells. Fill the (i+1)th empty cell so it is no longer empty, and the index of that cell (i.e. if it is the jth cell of the array, the index is j) is the value of the last card. Next time through is the second last card, then the third last card, etc.
+		$LF
+	]li
+	[li 
+		" Take the last 16-bit number produced in step 5. 16-bit-multiply it with 0x28.
+		$LF
+	]li
+	[li 
+		" Go back to step 4 until all cells in the array are filled (this determines the whole 52-card deck)
+		$LF
+	]li
+]ol
+[p 
+	"The values (1-52) of the cards correspond as follows, hearts are 1-13, diamonds 14-26, clubs 27-39, spades 40-52, and the ranks are A,2,3,... are in increasing order with A as 1/14/27/40 (depending on suit), 2 as 2/15/28/41, and so on.
+	$LF
+]p
+[p 
+	"Note that the game stores the deck differently, however. First of all, the values are from 0 to 51 (just subtract one). The card order (this applies only after the deck appears but before any cards are dealt), starting at address 03DD and going on for 52 bytes, is implemented similar to that of a linked list. That is, the current value in the array tells you the position in the array whose next number is the next value. 
+	$LF
+	"A slight issue occurs with the very first value; it is actually in 0x39C, since its otherwise normal spot is taken up by the end-of-deck marker 0xFF.
+	$LF
+]p
+[p 
+	"Here's a C++ file that shows the exact process, and a FCEUX Lua script that takes an existing position and shows a representation of the board (must be run after the deck appears but before any cards are dealt to the piles).
+	$LF
+]p
+[p 
+	"http://www.mediafire.com/download.php?9mdtzllzcrc9j7t
+	$LF
+]p
+[h4 
+	" Thanks
+	$LF
+]h4
+[p 
+	"Thanks to 
+	(__wikiLink|user:mmbossman)
+	" for the published run.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mukki)
+	": Judging...
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mukki)
+	": Accepting as an improvement to 
+	(__wikiLink|1096M|the currently published run)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing...
+	$LF
+]p
+[p 
+	"I fixed the ROM filename as well.
+]p

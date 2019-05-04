@@ -1,0 +1,328 @@
+2
+[h3 
+	"Movement
+	$LF
+]h3
+[p 
+	"Speed is 2 pixels per frame.
+	$LF
+]p
+[p 
+	"The character also moves in four frame blocks. Tapping a direction for one frame will have the character move for four frames. You can't interrupt this movement in the other three frames.
+	$LF
+]p
+[p 
+	"No diagonal movement. In the case where a diagonal direction is pressed, the game prioritizes horizontal movement.
+	$LF
+]p
+[p 
+	"Holding the direction continuously will allow the character to walk for 24 frames in 6 different walking images. As long as this direction is held down, the full 24 frame animation will keep the same direction, even the prioritized horizontal movement won't override this. This also interferes with poking with your sword using L or R buttons. After the 24th frame, the game will respond to other controls normally.
+	$LF
+]p
+[p 
+	"Releasing the d-pad, even for a frame, interrupts the 24 frame animation. Any frame will work: Start movement for one frame, then release sometime during the other three frames of forced movement.
+	$LF
+]p
+[p 
+	"No known left+right or up+down glitches.
+	$LF
+]p
+[h3 
+	"Swing a sword without meeting level requirement
+	$LF
+]h3
+[p 
+	"Begin a swing, then swap to the target sword that you want swung. The new sword will be used in the swing.
+	$LF
+]p
+[p 
+	"The Zantetsu Sword still does only minimal damage against metal enemies, and Pheonix is not cast when swapping to the Soul Blade. However, the Spirit Sword will deal 8 damage with the Power Bracelet at level 16.
+	$LF
+]p
+[h4 
+	" Repeat swing without B
+	$LF
+]h4
+[p 
+	"Enter the menu while the sword is in mid-swing, preferably at the last possible frame. After leaving the menu, it will be swung again. Only useful to swing swords while too low a level to normally do so. Does not cast Pheonix when swinging the Soul Blade with this trick.
+	$LF
+]p
+[h3 
+	" Equip an item ahead of time
+	$LF
+]h3
+[p 
+	"Simply set your item to whatever slot the item normally appears in. Once you acquire it, it will already be equipped.
+	$LF
+]p
+[p 
+	"Set the item to the blank spot that would hold Dream Rod, and you don't need a menu transition to equip it later. The Medical Herb doesn't need to be re-equipped when you pick up a second to replace the spent first herb.
+	$LF
+]p
+[p 
+	"Does not work with swords, armors, or magics. The cursor will be reset once you get the relevant equipment.
+	$LF
+]p
+[h3 
+	"The RNG
+	$LF
+]h3
+[p 
+	"There are sixteen bytes that hold the RNG information. Addresses 
+	[tt 
+		"7E0302
+	]tt
+	" to 
+	[tt 
+		"7E0311
+	]tt
+	" are where the RNG is stored. As well, there is a two-byte frame timer at address 
+	[tt 
+		"7E0312
+	]tt
+	" that is used at every screen transition.
+	$LF
+]p
+[p 
+	"There are two basic ways to affect the RNG:
+	$LF
+]p
+[ul 
+	[li 
+		" Change your interaction with enemies that use the RNG
+		$LF
+	]li
+	[li 
+		" Wait a number of frames before going through a screen transition of some sort
+		$LF
+	]li
+]ul
+[h4 
+	" RNG formula
+	$LF
+]h4
+[p 
+	"Whenever an enemy is defeated (size of GEM) or picks an action at random:
+	$LF
+]p
+[ul 
+	[li 
+		" Add values at 
+		[tt 
+			"7E0311
+		]tt
+		" and 
+		[tt 
+			"7E0310
+		]tt
+		" together, store in 
+		[tt 
+			"7E0310
+		]tt
+		$LF
+	]li
+	[li 
+		" Add values at 
+		[tt 
+			"7E0310
+		]tt
+		" and 
+		[tt 
+			"7E030F
+		]tt
+		" together, plus carry from last addition, store in 
+		[tt 
+			"7E030F
+		]tt
+		$LF
+	]li
+	[li 
+		" ... 
+		[em 
+			"and so on
+		]em
+		"...
+		$LF
+	]li
+	[li 
+		" Add values at 
+		[tt 
+			"7E0303
+		]tt
+		" and 
+		[tt 
+			"7E0302
+		]tt
+		" together, plus carry from last addition, store in 
+		[tt 
+			"7E0302
+		]tt
+		$LF
+	]li
+	[li 
+		" Add 1 to value at 
+		[tt 
+			"7E0312
+		]tt
+		$LF
+	]li
+]ul
+[p 
+	"The RNG value used for the game's decision making is at address 
+	[tt 
+		"7E0302
+	]tt
+	".
+	$LF
+]p
+[h4 
+	" Frame timer
+	$LF
+]h4
+[p 
+	"One more thing affects the RNG, but only at times you enter a new screen, typically a fade to black is seen. These include walking from one area to another, or releasing someone back at town. These do not include visiting the menu, although the timer still runs while you're in the menu.
+	$LF
+]p
+[p 
+	"Whenever you do go through a screen transition, a two-byte value at 
+	[tt 
+		"7E0312
+	]tt
+	" is transferred to two bytes at 
+	[tt 
+		"7E0302
+	]tt
+	". As well, 
+	[tt 
+		"7E0312
+	]tt
+	" is reset to -1 (or 65535 if reading as unsigned). A reminder, 
+	[tt 
+		"7E0312
+	]tt
+	" is a frame timer that increments by 1 every frame.
+	$LF
+]p
+[p 
+	"As changing the number of RNG calls can give a different set of numbers in your next transition, as well as delaying when you enter the next screen, this gives two ways to control the RNG. It is possible to calculate a list of RNG values in the future since the last transition.
+	$LF
+]p
+[h4 
+	" GEM sizes
+	$LF
+]h4
+[p 
+	"After calling the RNG, the game uses the one-byte value at 
+	[tt 
+		"7E0302
+	]tt
+	" to determine GEM size. This value, MOD 100, is compared against certain numbers to determine how large the GEM will be. These "certain numbers" depend on what area you're in.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Area
+			]th
+			[th 
+				"Large
+			]th
+			[th 
+				"Medium
+			]th
+		]tr
+		[tr 
+			[td 
+				"Grass Valley
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"GreenWood
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"St. Elles
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"12
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mountain of Souls
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"16
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dr. Leo's Laboratory
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"20
+			]td
+		]tr
+		[tr 
+			[td 
+				"Magridd Castle
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"24
+			]td
+		]tr
+		[tr 
+			[td 
+				"World of Evil
+			]td
+			[td 
+				"51
+			]td
+			[td 
+				"100
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"If wielding the Lucky Blade, these numbers are doubled. If the value MOD 100 is less than the numbers appropriate for the area, a larger GEM will drop. Large ones are worth 10, medium ones 5, and the default small ones are only worth 1.
+	$LF
+]p
+[h4 
+	" Enemy actions
+	$LF
+]h4
+[p 
+	"There are relatively few enemies that pick actions randomly. The plant enemies in the first areas move in random directions, and will call the RNG frequently to make this decision. All other enemies in the entire area of Grass Valley will not call the RNG as they make no random decisions.
+	$LF
+]p
+[p 
+	"Most enemies that are off-screen won't act. This includes the plant monsters. Therefore, getting them out of sight sooner or later will adjust how many calls are made to the RNG, as well as defeating them at different times.
+]p

@@ -1,0 +1,1046 @@
+3
+[ul 
+	[li 
+		" Recorded with FCEUX 2.1.3 (started with 2.1.2), old PPU
+		$LF
+	]li
+	[li 
+		" Fastest time
+		$LF
+	]li
+	[li 
+		" Luck manipulation
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[p 
+	"I started working on this right after finishing Dragon Warrior, as this game's discussion thread had just been revived about improving the 
+	(__wikiLink|995S|published run)
+	" from 2006. This was another of my old favorite games, and it seems I was still in the mood for some heavy luck manipulation, so I decided to see what I could do ...
+	$LF
+]p
+[p 
+	"2 months and a 
+	(__wikiLink|2619S|cancelled submission)
+	" later, I've improved the published run by 25:21 (91454 frames), and even my earlier attempt by 4:58 (17923)!
+	$LF
+]p
+[p 
+	"Most of the improvement came from the battles (now twice as fast), largely from better luck manipulation but also better strategies and route planning (sometimes at the cost of more walking or other delays, but always regained), and doing less inn trips.
+	$LF
+]p
+[p 
+	"For how linear this game is, there's quite a bit of route planning (who to get, weapons, etc.) ... I've redone fairly large parts more than once, and kept finding new improvements.
+	$LF
+]p
+[h4 
+	" Main changes
+	$LF
+]h4
+[ul 
+	[li 
+		" All-Out is used exclusively through the first half of the game, until Ma Chao
+		$LF
+	]li
+	[li 
+		" I only use the inn 14 times (previously 27) and never ever heal in battle (it's slower than the inn anyway)
+		$LF
+	]li
+	[li 
+		" Max TP gains on level up are maximized
+		$LF
+	]li
+	[li 
+		" All gullwings are bought in one trip instead of two
+		$LF
+	]li
+	[li 
+		" I skip Huo Hu (I don't need him, and only lose 5 TP)
+		$LF
+	]li
+	[li 
+		" I go the long way to get Guan Ping and Lu Bu (they're so much better than the alternatives that it's really worth the time)
+		$LF
+	]li
+	[li 
+		" I capture Wen Hun and (much later) Tai Si Ci and Lu Sun
+		$LF
+	]li
+	[li 
+		" I don't execute Yuan Shu, it's faster to destroy him later
+		$LF
+	]li
+	[li 
+		" Some weapon changes, like getting the Nu Long but not the Qing Guang
+		$LF
+	]li
+	[li 
+		" Different parties/orders
+		$LF
+	]li
+]ul
+[h4 
+	" Glitches
+	$LF
+]h4
+[p 
+	"When canceling the first character's command, a table index underflow (for TP used) clears a byte in the "character status" table. Guo Ji (from Xu Rong's battle, before Dong Zhuo 1) just happens to belong to that byte, so he's completely removed from the game!
+	$LF
+]p
+[p 
+	"An unexpected (but also minor) one came up near the end, when the game skipped the HP increase text on level up. I have no clue how it happened, but it did save a few more seconds (and looks funny) ...
+	$LF
+]p
+[h4 
+	" Luck manipulation
+	$LF
+]h4
+[p 
+	"The random number is 4 bytes (32bit), and changes in 2 ways:
+	$LF
+]p
+[ul 
+	[li 
+		" Simple randomizer function (bit shift and additions), called every frame (except lag) and in a few cases where a random value is needed
+		$LF
+	]li
+	[li 
+		" Add one of the bytes to another and use that as random, in many cases (but not all) where a random value is needed
+		$LF
+	]li
+]ul
+[p 
+	"That second one alone adds a lot of complexity, as it changes the random value sequence and depends on timing. For example, it's called after every step where a random battle can happen, so different step delays before a battle (or anything) will each give completely different results.
+	$LF
+]p
+[p 
+	"During All-Out in battle, I can only manipulate whole turns at once, by introducing delays between each (and canceling/restarting All-Out, which however takes time). Because of this, and the endless possibilities, there's no way I'll get perfect luck or even optimal manipulation ... but I still make most of the game seem much easier than it really is.
+	$LF
+]p
+[p 
+	"I've looked through the game code for everything that happens during All-Out (attacks, tactics, formulas, etc.), and simulated all of it in C so I could bruteforce through lots of delay combinations (up to 1 billion per hour!) and pick the best one I find. Depending on the battle, this ranged from near instant to a whole day ... and that's from a single starting point. I still had to do the rest manually (try different step delays and such, bruteforce All-Out for each), so there's still quite a bit of potential improvement left. But that's easier said than done ...
+	$LF
+]p
+[p 
+	"I've also done the same for random encounters, mostly for manipulating (and optimizing) the few specific encounters I need. Han Zhong, Wen Hun and Zhou Yu each came almost instantly with minimal rebel forces, and each was done multiple times to pick the best All-Out manipulation as well. Then the more extreme case, Lu Sun and Tai Si Ci by themselves (and in this order), is about a 1/20000 chance, and was limited to a very small area at 1/32 encounter rate ... but it still only cost half a second to manipulate!
+	$LF
+]p
+[p 
+	"You can see a screenshot of both in action (and overall setup while working on this run) here: 
+	[br 
+	]br
+	" http://acmlm.cjb.net:2/other/doae-bruteforce3.png
+	$LF
+]p
+[h4 
+	" Battle durations
+	$LF
+]h4
+[p 
+	"From first command to victory, not counting manipulation delays before each battle:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Enemy leader
+			]th
+			[th 
+				"Old
+			]th
+			[th 
+				"New
+			]th
+		]tr
+		[tr 
+			[th 
+				"Yellow Scarves
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Zhang Bao
+			]td
+			[td 
+				"1591
+			]td
+			[td 
+				"1066
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhang Jao (1)
+			]td
+			[td 
+				"2676
+			]td
+			[td 
+				"1869
+			]td
+		]tr
+		[tr 
+			[td 
+				"Han Zhong (capture)
+			]td
+			[td 
+				"1469
+			]td
+			[td 
+				"390
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhang Liang
+			]td
+			[td 
+				"850
+			]td
+			[td 
+				"690
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhang Jao
+			]td
+			[td 
+				"1885
+			]td
+			[td 
+				"1139
+			]td
+		]tr
+		[tr 
+			[th 
+				"Dong Zhuo
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Hua Xiong
+			]td
+			[td 
+				"1878
+			]td
+			[td 
+				"1555
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lu Bu (1)
+			]td
+			[td 
+				"2325
+			]td
+			[td 
+				"1382
+			]td
+		]tr
+		[tr 
+			[td 
+				"Li Jue
+			]td
+			[td 
+				"1215
+			]td
+			[td 
+				"877
+			]td
+		]tr
+		[tr 
+			[td 
+				"Xu Rong
+			]td
+			[td 
+				"3441
+			]td
+			[td 
+				"537
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dong Zhuo (1)
+			]td
+			[td 
+				"10069
+			]td
+			[td 
+				"1766
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lu Bu (2)
+			]td
+			[td 
+				"7126
+			]td
+			[td 
+				"2806
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dong Min
+			]td
+			[td 
+				"1372
+			]td
+			[td 
+				"802
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dong Zhuo (2)
+			]td
+			[td 
+				"4038
+			]td
+			[td 
+				"1020
+			]td
+		]tr
+		[tr 
+			[th 
+				"Yuan Shu
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Lei Bo
+			]td
+			[td 
+				"2986
+			]td
+			[td 
+				"1422
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ji Ling
+			]td
+			[td 
+				"2848
+			]td
+			[td 
+				"1422
+			]td
+		]tr
+		[tr 
+			[td 
+				"Han Xian
+			]td
+			[td 
+				"2853
+			]td
+			[td 
+				"1427
+			]td
+		]tr
+		[tr 
+			[td 
+				"Liang Ji
+			]td
+			[td 
+				"980
+			]td
+			[td 
+				"667
+			]td
+		]tr
+		[tr 
+			[td 
+				"Chen Lan
+			]td
+			[td 
+				"2481
+			]td
+			[td 
+				"1071
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yuan Shu
+			]td
+			[td 
+				"8592
+			]td
+			[td 
+				"1459
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yuan Shao (ambush)
+			]td
+			[td 
+				"787
+			]td
+			[td 
+				"618
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ji Zhou / Jing Zhou
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Lu Guang
+			]td
+			[td 
+				"5644
+			]td
+			[td 
+				"1415
+			]td
+		]tr
+		[tr 
+			[td 
+				"Jin Xuan
+			]td
+			[td 
+				"2640
+			]td
+			[td 
+				"1434
+			]td
+		]tr
+		[tr 
+			[td 
+				"Han Xuan
+			]td
+			[td 
+				"8157
+			]td
+			[td 
+				"2589
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhao Fan
+			]td
+			[td 
+				"892
+			]td
+			[td 
+				"690
+			]td
+		]tr
+		[tr 
+			[td 
+				"Xing Dao Rong
+			]td
+			[td 
+				"493
+			]td
+			[td 
+				"502
+			]td
+		]tr
+		[tr 
+			[td 
+				"Liu Du
+			]td
+			[td 
+				"590
+			]td
+			[td 
+				"439
+			]td
+		]tr
+		[tr 
+			[td 
+				"Xu Shou
+			]td
+			[td 
+				"753
+			]td
+			[td 
+				"394
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wen Hun (capture)
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"97
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yuan Tan
+			]td
+			[td 
+				"891
+			]td
+			[td 
+				"308
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ma Yan
+			]td
+			[td 
+				"316
+			]td
+			[td 
+				"208
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhang Yi
+			]td
+			[td 
+				"347
+			]td
+			[td 
+				"232
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yuan Shao
+			]td
+			[td 
+				"929
+			]td
+			[td 
+				"779
+			]td
+		]tr
+		[tr 
+			[th 
+				"Shu
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Liu Kui
+			]td
+			[td 
+				"3817
+			]td
+			[td 
+				"1243
+			]td
+		]tr
+		[tr 
+			[td 
+				"Meng Da
+			]td
+			[td 
+				"2759
+			]td
+			[td 
+				"1148
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yan Yan
+			]td
+			[td 
+				"3192
+			]td
+			[td 
+				"2138
+			]td
+		]tr
+		[tr 
+			[td 
+				"Huang Quan
+			]td
+			[td 
+				"1126
+			]td
+			[td 
+				"873
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ma Chao
+			]td
+			[td 
+				"3092
+			]td
+			[td 
+				"1825
+			]td
+		]tr
+		[tr 
+			[td 
+				"Li Yan
+			]td
+			[td 
+				"747
+			]td
+			[td 
+				"709
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lei Tong
+			]td
+			[td 
+				"1874
+			]td
+			[td 
+				"869
+			]td
+		]tr
+		[tr 
+			[td 
+				"Liu Zheng
+			]td
+			[td 
+				"2859
+			]td
+			[td 
+				"1449
+			]td
+		]tr
+		[tr 
+			[th 
+				"Wu
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Fan Zhang
+			]td
+			[td 
+				"2151
+			]td
+			[td 
+				"1397
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ling Tong
+			]td
+			[td 
+				"1730
+			]td
+			[td 
+				"1212
+			]td
+		]tr
+		[tr 
+			[td 
+				"Gan Ning
+			]td
+			[td 
+				"2311
+			]td
+			[td 
+				"1497
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhou Yu
+			]td
+			[td 
+				"2567
+			]td
+			[td 
+				"1967
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhou Yu (capture)
+			]td
+			[td 
+				"949
+			]td
+			[td 
+				"360
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhu Ge Jin
+			]td
+			[td 
+				"3188
+			]td
+			[td 
+				"2139
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ding Feng
+			]td
+			[td 
+				"1548
+			]td
+			[td 
+				"905
+			]td
+		]tr
+		[tr 
+			[td 
+				"Chen Pu
+			]td
+			[td 
+				"3604
+			]td
+			[td 
+				"1880
+			]td
+		]tr
+		[tr 
+			[td 
+				"Huang Gai
+			]td
+			[td 
+				"1089
+			]td
+			[td 
+				"554
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sun Yu
+			]td
+			[td 
+				"4293
+			]td
+			[td 
+				"2153
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sun Yi
+			]td
+			[td 
+				"1392
+			]td
+			[td 
+				"549
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhou Tai
+			]td
+			[td 
+				"1024
+			]td
+			[td 
+				"693
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sun Huan
+			]td
+			[td 
+				"940
+			]td
+			[td 
+				"921
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tai Si Ci
+			]td
+			[td 
+				"1618
+			]td
+			[td 
+				"707
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sun Quan
+			]td
+			[td 
+				"3070
+			]td
+			[td 
+				"1305
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lu Sun, Tai Si Ci (capture)
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"342
+			]td
+		]tr
+		[tr 
+			[th 
+				"Wei
+			]th
+			[th 
+				" 
+			]th
+			[th 
+				" 
+			]th
+		]tr
+		[tr 
+			[td 
+				"Xia Hou Yuan
+			]td
+			[td 
+				"1334
+			]td
+			[td 
+				"646
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zhang Liao
+			]td
+			[td 
+				"1578
+			]td
+			[td 
+				"806
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cao Zhi
+			]td
+			[td 
+				"1624
+			]td
+			[td 
+				"502
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cao Pi (1)
+			]td
+			[td 
+				"3888
+			]td
+			[td 
+				"2421
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cao Xiu
+			]td
+			[td 
+				"1442
+			]td
+			[td 
+				"638
+			]td
+		]tr
+		[tr 
+			[td 
+				"Xia Hou Shang
+			]td
+			[td 
+				"1645
+			]td
+			[td 
+				"655
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cao Pi (2)
+			]td
+			[td 
+				"5367
+			]td
+			[td 
+				"2371
+			]td
+		]tr
+		[tr 
+			[td 
+				"Si Ma Yi (1)
+			]td
+			[td 
+				"5610
+			]td
+			[td 
+				"2890
+			]td
+		]tr
+		[tr 
+			[td 
+				"Niu Jin
+			]td
+			[td 
+				"1341
+			]td
+			[td 
+				"548
+			]td
+		]tr
+		[tr 
+			[td 
+				"Si Ma Yi (2)
+			]td
+			[td 
+				"4091
+			]td
+			[td 
+				"2233
+			]td
+		]tr
+		[tr 
+			[td 
+				"Xun Huo
+			]td
+			[td 
+				"1065
+			]td
+			[td 
+				"913
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dian Wei
+			]td
+			[td 
+				"900
+			]td
+			[td 
+				"879
+			]td
+		]tr
+		[tr 
+			[td 
+				"Liu Dai
+			]td
+			[td 
+				"1013
+			]td
+			[td 
+				"880
+			]td
+		]tr
+		[tr 
+			[td 
+				"Le Xin
+			]td
+			[td 
+				"893
+			]td
+			[td 
+				"884
+			]td
+		]tr
+		[tr 
+			[td 
+				"Si Ma Shi
+			]td
+			[td 
+				"1245
+			]td
+			[td 
+				"607
+			]td
+		]tr
+		[tr 
+			[td 
+				"Si Ma Yi (3)
+			]td
+			[td 
+				"3202
+			]td
+			[td 
+				"2309
+			]td
+		]tr
+		[tr 
+			[th 
+				"Total
+			]th
+			[th 
+				"170292
+			]th
+			[th 
+				"82089
+			]th
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[p 
+	(__wikiLink|user:adelikat)
+	":  Accepting as a (big) improvement to the published movie.
+]p

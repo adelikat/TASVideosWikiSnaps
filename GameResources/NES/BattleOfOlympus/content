@@ -1,0 +1,762 @@
+19
+[p 
+	"This page documents the known esoteric tricks of Battle of Olympus.
+	$LF
+	"We concentrate here on tricks that are mainly usable in a TAS.
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-3938 
+						" Climbing on non-existing stairs
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-3939 
+						" Super fast horizontal motion.
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-3940 
+								" How velocity works
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3941 
+								" The fastest way to move to the right
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3942 
+								" The fastest way to move to the left
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3943 
+								" To halt immediately from any velocity
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-3944 
+						" Bypassing the red bush in the Peloponnesos forest without burning it
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-3945 
+								" Super speed
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-3946 
+								" Damage
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-3947 
+						" Bypassing the barrier in Crete
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-3948 
+								" Damage 
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-3949 
+						" Memory addresses
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-3950 
+						" Item drop formula
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Climbing on non-existing stairs
+	$LF
+	[a id=heading-3938 
+	]a
+]h3
+[p 
+	[em 
+		"Stub. 
+		(__wikiLink|TODO)
+		": Expand this section.
+	]em
+	$LF
+]p
+[p 
+	"Press up+down while descending/ascending stairs, and depending on situation,
+	$LF
+	"you might start climbing non-existing stairs.
+	$LF
+]p
+[p 
+	"When you reach the bottom or the top of the screen, depending on situation,
+	$LF
+	"you may make the screen scroll immediately to the left or the right, even
+	$LF
+	"repeatedly, by attempting to walk. This may enable immense shortcuts in the game.
+	$LF
+]p
+[h3 
+	" Super fast horizontal motion.
+	$LF
+	[a id=heading-3939 
+	]a
+]h3
+[h4 
+	" How velocity works
+	$LF
+	[a id=heading-3940 
+	]a
+]h4
+[p 
+	"Note that climbing has different mechanics. This explanation only
+	$LF
+	"applies to walking and jumping.
+	$LF
+]p
+[p 
+	""Velocity" here refers to a variable, found in the memory address $0053,
+	$LF
+	"which tells how much will be added to the hero's X position at every frame.
+	$LF
+	"Negative values mean leftwards motion, and positive values mean rightwards motion.
+	$LF
+]p
+[p 
+	"The high 4 bits refer to fullpixel motion, low 4 bits refer to subpixel motion. 2^4 is 16, thus divide the velocity by 16 to get the motion speed in pixels per frame.
+	$LF
+	"Examples:
+	$LF
+]p
+[ul 
+	[li 
+		" Velocity of +16 means moving to the right at 1.0 pix/frame
+		$LF
+	]li
+	[li 
+		" Velocity of −24 means moving to the left at 1.5 pix/frame (24 ∕ 16 = 1.5)
+		$LF
+	]li
+]ul
+[p 
+	"When the hero enters the view from somewhere, his velocity starts from
+	$LF
+	"either +16 or −16, depending on whether he moves to the right, or to
+	$LF
+	"the left, respectively.
+	$LF
+]p
+[p 
+	"When the player holds down the Left button:
+	$LF
+]p
+[pre 
+	" If velocity ≥ 0, velocity decreases by 2. (Meaning that the hero accelerates towards the left)
+	$LF
+	" If velocity = −24, nothing happens.
+	$LF
+	" If velocity < 0 and ≠ −24, velocity decreases by 1.
+	$LF
+]pre
+[p 
+	"When the player holds down the Right button:
+	$LF
+]p
+[pre 
+	" If velocity ≤ 0, velocity increases by 2.
+	$LF
+	" If velocity = 24, nothing happens.
+	$LF
+	" If velocity > 0 and ≠ 24, velocity increases by 1.
+	$LF
+]pre
+[p 
+	"When the player holds down both Left and right:
+	$LF
+]p
+[pre 
+	" If velocity = 15, the velocity is set to 16.
+	$LF
+	" If velocity = 16, nothing happens.
+	$LF
+	" If velocity ≠ 15 or 16, velocity increases by 2.
+	$LF
+]pre
+[p 
+	"When the player does not hold either Left or Right, or is holding Down:
+	$LF
+]p
+[pre 
+	" If the player is jumping, the velocity is preserved. Otherwise:  
+	$LF
+	" The velocity increases or decreases by 1 towards zero.
+	$LF
+]pre
+[p 
+	"However, when the player is fighting:
+	$LF
+]p
+[pre 
+	" The Left and Right keys do not affect at all, except to change the hero's facing.
+	$LF
+	" If the player is jumping, the velocity is preserved. Otherwise, it is set to 0 immediately.
+	$LF
+]pre
+[p 
+	"The velocity is a 8-bit signed integer variable, meaning
+	$LF
+	"that increasing +127 by 1 yields −128, and decreasing −128 by 1 yields +127.
+	$LF
+]p
+[p 
+	[img class=embed src=http://media.tasvideos.org/bootricks/zoom.gif 
+	]img
+	$LF
+]p
+[h4 
+	" The fastest way to move to the right
+	$LF
+	[a id=heading-3941 
+	]a
+]h4
+[p 
+	"Hold Left+Right, until the velocity is 16. Then hold only Right for 1 frame
+	$LF
+	"(to get the velocity into 17), and then hold Left+Right again, until the
+	$LF
+	"velocity is 127. Do not hold Right after that, or the velocity will wrap
+	$LF
+	"into −128 (Right) or −127 (Left+Right).
+	$LF
+]p
+[p 
+	"If you do not press any key, the velocity will start decreasing towards zero.
+	$LF
+	"To prevent the velocity from decreasing, jump. During the jump, the velocity is preserved. If you cannot jump, let the velocity decrease to +126, then press Right once to restore it into +127, and keep alternating it between +126 and +127.
+	$LF
+]p
+[h4 
+	" The fastest way to move to the left
+	$LF
+	[a id=heading-3942 
+	]a
+]h4
+[p 
+	"If you hold Left, the maximum velocity you can get is −24. To achieve further speed, you must use the wrapping trick. Increase your velocity towards the 
+	[em 
+		"right
+	]em
+	" until it reaches +126 or +127, then let it wrap by letting it increase by 1 (Right) or 2 (Left+Right). At that point, the hero will suddenly zoom to the left.
+	$LF
+]p
+[p 
+	"To prevent the velocity from falling (technically, increasing) from −128 to −127, use the same technique as with when going to the right: jump, or alternate.
+	$LF
+]p
+[p 
+	"Note that the velocity works the same way even when the hero is facing an obstacle,
+	$LF
+	"so you can achieve the zipping speed to the left even by walking towards a wall on
+	$LF
+	"the right side.
+	$LF
+]p
+[h4 
+	" To halt immediately from any velocity
+	$LF
+	[a id=heading-3943 
+	]a
+]h4
+[p 
+	"If you are standing on the ground, fight, and the velocity will drop to 0 immediately. You can then jump immediately if you want to continue moving slowly.
+	$LF
+	"If you are jumping, you can only slow down by changing the velocity into either direction with Left / Right / Left+right.
+	$LF
+]p
+[h3 
+	" Bypassing the red bush in the Peloponnesos forest without burning it
+	$LF
+	[a id=heading-3944 
+	]a
+]h3
+[h4 
+	" Super speed
+	$LF
+	[a id=heading-3945 
+	]a
+]h4
+[p 
+	"Gain super speed and jump over the bush.
+	$LF
+]p
+[h4 
+	" Damage
+	$LF
+	[a id=heading-3946 
+	]a
+]h4
+[p 
+	"Jump towards the bush, and turn to the right, before the collision.
+	$LF
+	"When the hero gets damage, he will be pushed to the left if you did it right.
+	$LF
+]p
+[h3 
+	" Bypassing the barrier in Crete
+	$LF
+	[a id=heading-3947 
+	]a
+]h3
+[h4 
+	" Damage 
+	$LF
+	[a id=heading-3948 
+	]a
+]h4
+[p 
+	[img class=embedright src=http://media.tasvideos.org/bootricks/boo-barrier.jpg 
+	]img
+	$LF
+	"Normally, the barrier in Crete will instantly kill Orpheus unless he 
+	$LF
+	"possesses the second fragment of love. But, when Orpheus is damaged by 
+	$LF
+	"one of the flying one-eyed monsters in the room, he briefly becomes 
+	$LF
+	"invincible. The invincibility time is long enough for Orpheus to slip 
+	$LF
+	"through the barrier. This trick allows Orpheus to obtain the third 
+	$LF
+	"fragment of love out of sequence, but, unfortunately, the path to 
+	$LF
+	"Tartarus will not open unless he leaves Crete with all three fragments 
+	$LF
+	"of love.
+	$LF
+]p
+[h3 
+	" Memory addresses
+	$LF
+	[a id=heading-3949 
+	]a
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Name
+			]th
+		]tr
+		[tr 
+			[td 
+				"0053
+			]td
+			[td 
+				"Velocity
+			]td
+		]tr
+		[tr 
+			[td 
+				"0063
+			]td
+			[td 
+				"X-axis position
+			]td
+		]tr
+		[tr 
+			[td 
+				"0052
+			]td
+			[td 
+				"X-axis subpixel
+			]td
+		]tr
+		[tr 
+			[td 
+				"0067
+			]td
+			[td 
+				"Y-axis position
+			]td
+		]tr
+		[tr 
+			[td 
+				"006D
+			]td
+			[td 
+				"Olives counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"006C
+			]td
+			[td 
+				"Bay leaves counter
+			]td
+		]tr
+	]tbody
+]table
+[h3 
+	" Item drop formula
+	$LF
+	[a id=heading-3950 
+	]a
+]h3
+[p 
+	"Item drop calculations for bay leaves and olives are based off the games global RNG.  When a player enters a new screen, there are 2 counters, 006C is the counter for bay leaves, 006D is the counter for olives, these get reset to '75' upon entering a new screen.  Before a drop is calculated, the game takes the sum of these two counters, subtracts 50 and if the result is greater than 50, this table is used:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Item
+			]th
+			[th 
+				"%
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"25%
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"Bay leaf
+			]td
+			[td 
+				"25%
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"25%
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"Olive
+			]td
+			[td 
+				"25%
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"If the result of subtracting 50 is less than or equal to 50, this table is used:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Offset
+			]th
+			[th 
+				"Item
+			]th
+			[th 
+				"%
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"Bay leaf
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"Olive
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"-
+			]td
+			[td 
+				"12.5%
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"After the game determines the drop table to use, it rolls the RNG:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Instruction
+			]th
+		]tr
+		[tr 
+			[td 
+				"$D7DD:18
+			]td
+			[td 
+				"        CLC                               
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7DE:A5 DA
+			]td
+			[td 
+				"     LDA $00DA                  
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7E0:29 48
+			]td
+			[td 
+				"     AND #$48                          
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7E2:F0 06
+			]td
+			[td 
+				"     BEQ $D7EA
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7E4:C9 48
+			]td
+			[td 
+				"     CMP #$48
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7E6:18
+			]td
+			[td 
+				"        CLC
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7E7:F0 01
+			]td
+			[td 
+				"     BEQ $D7EA
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7E9:38
+			]td
+			[td 
+				"        SEC                         
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7EA:26 DC
+			]td
+			[td 
+				"     ROL $00DC         
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7EC:26 DD
+			]td
+			[td 
+				"     ROL $00DD                 
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7EE:26 DA
+			]td
+			[td 
+				"     ROL $00DA          
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7F0:26 DB
+			]td
+			[td 
+				"     ROL $00DB                
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"$D7F2:A5 DA
+			]td
+			[td 
+				"    LDA $00DA
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"It loads 0xDA (this address is the games RNG), AND's it against 0x48, if the result is zero, it rotates 0xDC, 0xDD, 0xDA, 0xDB to the left thus changing 0xDA's value and then loads it.  If it isn't equal to zero after performing the AND, it simply keeps the the result from the AND in 0xDA and uses that while it performs the rotations.
+	$LF
+]p
+[p 
+	"The loaded 0xDA value is then AND'd against 3 (if the first table is used), or 7 (if the 2nd table was used).  The result of which determines the drop (i.e. if the result was a 3, an olive will drop, if a 1, an bay leaf etc...).
+	$LF
+]p
+[p 
+	"However there is one more check to perform before an item will finally drop.  The game once again checks the respective counters (olive/bay leaf) to see if the counter has reached zero.  If it has, no item will drop.  This means that there is a 75 item drop limit on bay leaves and olives per screen.  And both of them dropping can affect the % of drops that can occur within the screen.
+	$LF
+]p
+[pre 
+	"          
+	$LF
+]pre

@@ -1,0 +1,277 @@
+5
+[p 
+	"This is an improvement to NES Excitebike; faster times are obtained for all six tracks with a combined savings of 1.38s.  Time is saved by taking ramps at higher speeds and by a technique discovered by XKeeper which paradoxically gains time by going slower.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.1.1
+		$LF
+	]li
+	[li 
+		" As fast as possible by in-game timer
+		$LF
+	]li
+]ul
+[h3 
+	" The Times
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Track
+			]th
+			[th 
+				"Old Time
+			]th
+			[th 
+				"New Time
+			]th
+			[th 
+				"Improvement
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"36.54
+			]td
+			[td 
+				"36.19
+			]td
+			[td 
+				"0.35
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"38.24
+			]td
+			[td 
+				"37.84
+			]td
+			[td 
+				"0.40
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"38.86
+			]td
+			[td 
+				"38.67
+			]td
+			[td 
+				"0.19
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"41.98
+			]td
+			[td 
+				"41.96
+			]td
+			[td 
+				"0.02
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"41.02
+			]td
+			[td 
+				"41.00
+			]td
+			[td 
+				"0.02
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"31.74
+			]td
+			[td 
+				"31.34
+			]td
+			[td 
+				"0.40
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Cumulative in-game savings: 1.38s
+	$LF
+]p
+[h3 
+	" Comments
+	$LF
+]h3
+[p 
+	"First, some quotes from the forums:
+	$LF
+]p
+[p 
+	""Excitebike is a fun game to play, but it's quite easy to play it nearly perfectly by regular means."  --Bisqwit, 2004
+	$LF
+]p
+[p 
+	""Pretty bad idea doing a timettack I dont think it can be faster than someone at Twin Galaxies.  Very easy game."  --Phil, 2004
+	$LF
+]p
+[p 
+	"Well, five years and five submissions later, I think we're getting close...;)  
+	$LF
+]p
+[p 
+	"This submission really uses just 3 new techniques to save time:
+	$LF
+]p
+[h3 
+	" Taking ramps faster
+	$LF
+]h3
+[p 
+	"Not much to say here.  Excitebike is simple in that the only way to boost speed above 3.25px/frame is to hit the triangle ramps.  Speed can then be maintained indefinitely.
+	$LF
+]p
+[p 
+	"A couple minor discoveries allowed me to lose less speed taking the ramps in the 1st 3 tracks.  First, it's better to push up (switching lanes upward) at the last possible frame to take the shortest possible jump.  Second, the game seems to detect ramp collisions only every other frame.  This can lead to cases where one drops right through the ramp at a certain speed, but by dropping a frame somewhere, one can hit the ramp instead.
+	$LF
+]p
+[h3 
+	" Avoid getting too far ahead of the screen
+	$LF
+]h3
+[p 
+	"This trick, 
+	[a href=/forum/t/7739 
+		"discovered by XKeeper
+	]a
+	", makes use of the way the game tracks the bike's advancement on the track and saves time on tracks 0, 1 and 5.
+	$LF
+]p
+[p 
+	"Basically, a value ($64) is tracked, from 0 to 8, indicating how many pixels the bike must advance before showing more of the track.  At a speed of 1, it would take 8 frames to get from 8 down to 0; at speed 4, it would only take 2 frames.  Each frame, the bike's speed is subtracted and the value is checked.  If it's <0, the track advances and the value is increased by 8.  If >0, the track doesn't advance, and the value is left as is.
+	$LF
+]p
+[p 
+	"However, when speed is greater than 8, the value can actually wrap below 0 (255, 254, etc).  If speed is kept >8 long enough, the value hits <128, and several frames must elapse before advancing again.
+	$LF
+]p
+[p 
+	"Why does this happen?  My suspicion is the game logic just checks the highest bit in determining whether to advance.  For values 128-255, this bit is 1.  At 127, though, the high bit is 0, so the game interprets it as the bike needing to travel 127 pixels before advancing.
+	$LF
+]p
+[p 
+	"One further note is that one can finish a track a handful of frames earlier if the value is 128<value<0 when crossing the finish line.  So, there is no "optimal speed" per se; the best time is achieved by exceeding a speed of 8 for a brief time, then keeping speed at/near 8 so as to finish with the value < 0.
+	$LF
+]p
+[p 
+	"I abuse this behavior in various ways to do some fun stuff.  When the value is <0, the game will advance on every frame 
+	[b 
+		"as long as the speed is at least one
+	]b
+	".  So, I actually slow down substantially at the end of tracks 1 and 4 without losing any time.
+	$LF
+]p
+[h3 
+	" Optimizing the timer
+	$LF
+]h3
+[p 
+	"Finally, there's a global counter which determines when, at the beginning of a track, the bike can start accelerating.  However, this timing is not fixed in relation to when time starts!  The optimum situation is when the bike starts 2 frames before the timer does; the worst case is the timer starting 1 frame before the bike.  I drop a frame in track 2 to manipulate this effect to save a couple frames in track 3.  For tracks 3 and 4, the 0.02 savings is entirely due to this behavior.  Unfortunately, for track 5, dropping frames in the prior track did not alter the (worst possible) behavior, probably due to a frame rule. So track 5's lap time is 3 frames slower than in the published run due to this effect, despite having a faster overall time.
+	$LF
+]p
+[h3 
+	" Further Improvements
+	$LF
+]h3
+[p 
+	"I can't say this run is perfect, but I can say I have no ideas for improving it further, despite trying many, many things.  Good luck to all who try!
+	$LF
+]p
+[h3 
+	" Style
+	$LF
+]h3
+[p 
+	"I did the best I could with style in this game.  I decided to try for a certain "theme" for each track to try to spice things up...I added subtitles to the run to make the viewer aware, but here they are:
+	$LF
+]p
+[ul 
+	[li 
+		" Track 0:  Taking big, long jumps
+		$LF
+	]li
+	[li 
+		" Track 1:  Lots of wheelies!
+		$LF
+	]li
+	[li 
+		" Track 2:  Make other bikes crash
+		$LF
+	]li
+	[li 
+		" Track 3:  Minimalist (don't hit other bikes, no bounces, few turns)
+		$LF
+	]li
+	[li 
+		" Track 4:  Wrap-around the screen whenever possible
+		$LF
+	]li
+	[li 
+		" Track 5:  Bouncing ball!
+		$LF
+	]li
+]ul
+[p 
+	"I did other things, like intentionally overheating on track 4 to make it interesting.  Not sure if I did JXQ's run justice in this respect, but I tried...enjoy!
+	$LF
+]p
+[h3 
+	" Thanks
+	$LF
+]h3
+[p 
+	"Thanks to JXQ, Luke G, and FODA for the very enjoyable prior runs.  Thanks to XKeeper for a very impressive technical discovery, and to Randil for helping me figure out the game's timer behavior.
+	$LF
+]p
+[p 
+	(__wikiLink|user:mmbossman)
+	": Going slower to go faster, huh? Interesting. Accepting as an improvement.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Raiscan)
+	": Processing slowly to go faster.
+]p

@@ -1,0 +1,2884 @@
+11
+[p 
+	(youtube|v=tIjJZNM3rDA)
+	$LF
+]p
+[p 
+	"The video is commented with 
+	[a class=extlink href=https://github.com/clementgallet/ff6-tas/blob/master/ff6_captions.srt rel=nofollow 
+		"subtitles
+	]a
+	".
+	$LF
+]p
+[ul 
+	[li 
+		" Emulator: BizHawk 1.7.4
+		$LF
+	]li
+	[li 
+		" Rom: Final Fantasy III (U) (V1.0)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Contains soft resets
+		$LF
+	]li
+	[li 
+		" Abuses programming errors
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[p 
+	"Terra and her team are back to fight Kefka and save the world. This time, however, they didn't want to watch as Kefka uses the Statues to torn the world apart, so they skipped it directly to the final confrontation.
+	$LF
+]p
+[p 
+	"This tas is an improvement of the previously 
+	(__wikiLink|549M|published tas)
+	" by Erokky in 4:05:52.87 and the 
+	[a href=/userfiles/info/18484576099645314 
+		"non-published tas
+	]a
+	" by Catastrophe in 
+	[a class=extlink href=https://www.youtube.com/watch?v=-L4VS-Vdi1w rel=nofollow 
+		"4:16:34.88
+	]a
+	", thanks to an extreme use of the sketch glitch.
+	$LF
+]p
+[p 
+	"This is the 
+	[a href=/userfiles/info/18484027340882326 
+		"lua script
+	]a
+	" used to make our life much easier
+	$LF
+]p
+[h2 
+	" Tricks
+	$LF
+]h2
+[h3 
+	" Preemptive manipulation
+	$LF
+]h3
+[p 
+	"Getting preempitves/side attacks is the basics of many JRPG TASes. In this case, all the randomness at the start of a fight (preemptive, startup ATB, monster vigor) is determined based on the time the fight triggered. More precisely, the game uses the number of frames (range 1-60) within one second of the in-game timer as the RNG seed. As a consequence, there are 60 different battle configurations possible. The method to trigger preemptives/side attacks is simply to delay the beginning of the fight. This works well on the world map, but on towns/dungeons, there is a frame rule concerning movement: we can only start walking 1 every 4 frames. Because of this, we can only have access to 15 configurations out of the 60 ones. To be able to change this frame rule, there are several possibilities:
+	$LF
+]p
+[ul 
+	[li 
+		" Go in and out of the menu. You can set the frame rule you want by delaying the exit of the menu by 1, 2 or 3 frames. This is however very costly if you don't have any menuing to do.
+		$LF
+	]li
+	[li 
+		" Delay the enter in the dungeon from the world map. This is only useful for the first fight in the dungeon.
+		$LF
+	]li
+	[li 
+		" Delay the end of a previous winning fight. Fights usually have at least an XP gain message. You can delay the confirmation of this message which will alter the frame rule. Because most fights are escaped, this has a limited application. It is very useful for the Minecart sequence for example.
+		$LF
+	]li
+	[li 
+		" Add lag frames during the previous fight. By entering the inventory and moving items, it can make the game lag, which will alter the frame rule after the fight. The most reproducible way to add 1 lag frame is to switch the weapon and the buckler. Switching them again may add another lag frame, but this is definitively not an exact science. This trick is used extensively through the whole run.
+		$LF
+	]li
+]ul
+[h3 
+	" Desperation attack
+	$LF
+]h3
+[p 
+	"Desperation attacks are rather secret and powerful attacks in ff6. Under specific conditions, the attack command has 1/16 chance of triggering a character specific technique dealing massive damage to one enemy. Those conditions are:
+	$LF
+]p
+[ul 
+	[li 
+		" The character must be in the near fatal status, when HPs are lower than 1/8 of max HPs
+		$LF
+	]li
+	[li 
+		" The number of battle ticks must be over 768. In other words, we have to wait for about 25 seconds after the beginning of the fight.
+		$LF
+	]li
+	[li 
+		" The character must not be in the Muddle, Image, Clear or Zombie status
+		$LF
+	]li
+	[li 
+		" You can only cast one desperation attack per character per fight
+		$LF
+	]li
+	[li 
+		" Gau, Umaro and special characters don't have a desperation attack
+		$LF
+	]li
+]ul
+[p 
+	"The desperation attacks are magical attacks that ignore the defense of the enemy. So the amount of damage only depends on the level, the magic stats of the caster and the random variation. Strago and Relm desperation attacks are different, they kill instantly the target.
+	$LF
+]p
+[h3 
+	" Message speed tricks
+	$LF
+]h3
+[p 
+	"Escaping fights is usually faster to do when getting a preemptive or side attack. Sometimes, however, not all characters will run away immediately. The remaining characters will run away about two seconds after. This usually happens when the number of characters is higher than the number of enemies. In this case, there are two ways to get a faster run-away. The first solution is to get a front attack instead, and try to run away as soon as possible. This is used during Sabin scenario mainly, for the single Ghost fights. It saves about one second. The other solution is to set the Message Speed to 2 in the Options. In this case, all run-away during preemptives/side attacks will be perfect. The downside is of course that each battle message text box will be longer by about 16 frames. This includes the "Preemptive"/"Side attack" message and every command message. This is used twice in this run, during Mt Kolts and during Terra scenario, as there are many random fights and we control a team of three characters.
+	$LF
+]p
+[h3 
+	" Run-away trick
+	$LF
+]h3
+[p 
+	"The way the RNG works during fights is that you have a general counter stored in $BE which is used as an index in the random static array 
+	[tt 
+		"$C0FD00-$C0FDFF
+	]tt
+	". Each time the game pulls a random number, it increases the RNG index by one. During the fight, when no action is playing, the RNG index increases by one unit per frame. When an action is starting, the game pulls several random numbers to compute the action random factors (random damage, miss, criticals, chance of giving status, etc.) and then the RNG index is frozen until the animation of the action ended. If several actions are queued, then the RNG index will just increase by the number of random numbers pulled between each action.
+	$LF
+]p
+[p 
+	"There are several ways to manipulate the RNG, which is very useful to get criticals, desperation attacks and to manipulate the enemies behavior. The first one is simply to delay an action so that the RNG index will be frozen at a different value, and subsequent actions will use different random numbers. However, this is only possible when no action was made before it (typically the first action of the fight). Sometimes, you want to cast actions as fast as possible to queue them before enemies actions. In that case, there is a very useful trick using the run-away (R+L).
+	$LF
+]p
+[p 
+	"The game checks about every two seconds (more often with the Haste status) if each character is running away. If it is the case, it pulls a random number between 1 and a character specific run-away constant (stored in 
+	[tt 
+		"$3D71, $3D73, $3D75, $3D77
+	]tt
+	" for each character) and adds it to a counter (stored in 
+	[tt 
+		"$3D70, $3D72, $3D74, $3D76
+	]tt
+	" for each character). If this counter gets over the run-away difficulty (usually 2 times the number of enemies) then the character will escape the fight. The important part here is that you can make the game pull random numbers, thus increasing the RNG index, even during action animations. Let's say the animation takes 4 seconds and you have 4 characters in your party. At the end of the animation, you can set the RNG index to 9 different values. This is also useful to try to cast the desperation attack as soon as possible after the time limitation is passed. This trick is not working for preemptive/side attack battles, as the run-away counters are not increasing.
+	$LF
+]p
+[p 
+	"If this tricks allows you to increase the RNG index during animations, you can also do the opposite. When no animation is played, you can freeze the RNG index by popping the "Can't run away" text box. This was used several times in the run.
+	$LF
+]p
+[h3 
+	" Save/reset
+	$LF
+]h3
+[p 
+	"During the game startup, some RNG values are initialised based on a value stored in SRAM. In details, after the introduction, the game increments the address 
+	[tt 
+		"$307FF1
+	]tt
+	" (or 
+	[tt 
+		"$1FF1
+	]tt
+	" in SRAM). Then, when you load a save slot or you start a new game, it adds 13 to 
+	[tt 
+		"$307FF1
+	]tt
+	" and also stores this value into 
+	[tt 
+		"$1FA1
+	]tt
+	" and 
+	[tt 
+		"$1FA4
+	]tt
+	" (determines how many steps until next fight), 
+	[tt 
+		"$1FA2
+	]tt
+	" and 
+	[tt 
+		"$1FA3
+	]tt
+	" (determines which enemy formation will be fought), 
+	[tt 
+		"$1FA5
+	]tt
+	" (determines which enemy formation pack will be fought on the Veldt) and 
+	[tt 
+		"$1F6D
+	]tt
+	" (determines the NPC behaviour, the Lete river encounter randomness, the fish randomness, etc.). The address 
+	[tt 
+		"$307FF1
+	]tt
+	" is not contained in one of the 3 save slots, meaning that whatever slot you loaded, you will get the same randomness. During this run, we saved and reset the game twice to set all the encounter randomness to other values, which was useful to get the right fight at the right time.
+	$LF
+]p
+[p 
+	"Because we are supposed to make the TAS from a clear game state, address 
+	[tt 
+		"$307FF1
+	]tt
+	" was never set before so the game is using an uninitialised value. BizHawk sets the entire SRAM memory as 
+	[tt 
+		"0xFF
+	]tt
+	", so this value was used as the seed of the encounter randomness. Moreover, the 2-byte integer 
+	[tt 
+		"$1F6E-$1F6F
+	]tt
+	" is also not initialised by the game. This value is the danger counter that increases at every step and is compared with a random number to determine if a battle occurs. This value is stored in the save slot, so you recover it when loading your save, but if you start a new game, the game will not initialise this value. In BizHawk, the RAM is filled with numbers that do not follow a specific pattern. The address 
+	[tt 
+		"$1F6E-$1F6F
+	]tt
+	" contains the integer 
+	[tt 
+		"0xFDFB
+	]tt
+	". This is a very high value, which explains why, in the TAS, a fight is triggered after one step in the Narshe cave.
+	$LF
+]p
+[h3 
+	" Move across objects/event tiles
+	$LF
+]h3
+[h4 
+	" Simple clipping
+	$LF
+]h4
+[p 
+	"Entering and exiting the menu at the right time allows you to move on the same tile as a moving guard. This is used during Locke scenario to skip Celes.
+	$LF
+]p
+[h4 
+	" Simple party switch trick
+	$LF
+]h4
+[p 
+	"During a few sequences in the game where you have multiple parties to manage, you can switch between parties using the Y button. If you press X to enter the menu and then Y during the fade-out, you will still switch to the next party and the menu will open for them. You can also press again Y during the fade-in before the menu opens to switch again to another party, and this can be iterated for as long as you want. During all that time, monsters on the field will move, but fights won't trigger if a monster gets close to you. This trick is used during the Kefka at Narshe sequence, to allow a monster to move close to you without triggering the fight, saving about 8 seconds.
+	$LF
+]p
+[h4 
+	" Advanced party switch trick
+	$LF
+]h4
+[p 
+	"A related trick can be used to go through a tile associated with an event without triggering it. To do that, press Y just before reaching the event tile and use the above trick (X then Y during the fade-out) to go back to the party with the menu opened. Then, change the leader of the party and close the menu. You are now able to move without triggering the event of the tile you were standing on. This trick was used to skip Inferno in Kefka's tower. This trick can be linked multiple times to disable continuous event tiles, which allowed us to move on a specific conveyor belt backwards, skipping another boss in the tower (Poltergeist).
+	$LF
+]p
+[h3 
+	" Sketch glitch
+	$LF
+]h3
+[h4 
+	" In short
+	$LF
+]h4
+[p 
+	"The sketch glitch is the major glitch used in this run. Missing the sketch command with Relm, for specific characteristics of the 28th spell of the first character, may induce a partial rewriting of your inventory, graphical glitches, freezing or even a softlock. This glitch is only available on the v1.0 version of the US rom.
+	$LF
+]p
+[h4 
+	" How does it work?
+	$LF
+]h4
+[p 
+	"During a successful sketch, the game will get which monster was sketched and look for the sprite of that monster in the memory. It will copy the sprite in the RAM and display a flipped version on the screen. When the sketch misses, the game will still do all the procedure except for the display. The origin of the problem is in function 
+	[tt 
+		"C2/F5D2
+	]tt
+	":
+	$LF
+]p
+[pre 
+	"...
+	$LF
+	"C2/F5E1: A0 03 00     LDY #$0003
+	$LF
+	"C2/F5E4: B1 76        LDA ($76),Y    (get the enemy slot)
+	$LF
+	"C2/F5E6: 0A           ASL            (multiply by 2)
+	$LF
+	"C2/F5E7: AA           TAX
+	$LF
+	"C2/F5E8: C2 20        REP $20
+	$LF
+	"C2/F5EA: BD 01 20     LDA $2001,X    (get the enemy id in this slot)
+	$LF
+	"C2/F5ED: AA           TAX
+	$LF
+	"C2/F5EE: 7B           TDC
+	$LF
+	"C2/F5EF: E2 20        SEP $20
+	$LF
+	"C2/F5F1: 22 D1 24 C1  JSL $C124D1    (load the enemy sprite)
+	$LF
+	"...
+	$LF
+]pre
+[p 
+	"During a successful sketch, instruction 
+	[tt 
+		"LDA ($76),Y
+	]tt
+	" loads the enemy slot number (between 0 and 5), and get the monster id by looking at the array 
+	[tt 
+		"$2001-$200C
+	]tt
+	" containing the id (16-bit integer) of the 6 monsters present in battle. However, when the sketch misses, instruction 
+	[tt 
+		"LDA ($76),Y
+	]tt
+	" loads 
+	[tt 
+		"0xFF
+	]tt
+	" instead of the enemy slot number. So 
+	[tt 
+		"LDA $2001,X
+	]tt
+	" is wrongly fetching the 16-bit integer 
+	[tt 
+		"$20FF-$2100
+	]tt
+	" as the enemy id. This address is in the middle of the battle spell table. 
+	[tt 
+		"$20FF
+	]tt
+	" contains information about the usability of the 28th spell of the first character (was used/available). 
+	[tt 
+		"$2100
+	]tt
+	" contains the aiming byte of the 28th spell of the first character.
+	$LF
+]p
+[p 
+	"The function 
+	[tt 
+		"C1/24D1
+	]tt
+	" and sub-functions are executed with an incorrect enemy id. The next problem arises in function 
+	[tt 
+		"C1/215F
+	]tt
+	". This function loads the disposition of tiles in an enemy sprite. Indeed, tiles are stored in one dimension in the game memory, and it uses a mapping to place the tiles to build a two-dimensional sprite. The list of mappings for each enemy sprite is located starting 
+	[tt 
+		"$D2A820
+	]tt
+	". This function loads the mapping corresponding to the enemy id and stores it in the array 
+	[tt 
+		"$822D-$824C
+	]tt
+	". From this array, the game derives the height and the width of the enemy sprite in tile units. This is the critical portion of the function:
+	$LF
+]p
+[pre 
+	"C1/21B8: A6 00        LDX $00
+	$LF
+	"C1/21BA: C2 20        REP #$20       (set 16-bit accumulator)
+	$LF
+	"...
+	$LF
+	"C1/21BE: BD 2D 82     LDA $822D,X    (get mappings for this row of tiles of the bitmap)
+	$LF
+	"C1/21C1: F0 0B        BEQ $21CE      (if none of the tiles in this row are set, branch)
+	$LF
+	"...
+	$LF
+	"C1/21C7: E8           INX 
+	$LF
+	"C1/21C8: E8           INX 
+	$LF
+	"C1/21C9: E0 20 00     CPX #$0020
+	$LF
+	"C1/21CC: D0 F0        BNE $21BE      (loop for all 16 rows. When this loop exits,
+	$LF
+	"                                      X will hold the # of rows in the image
+	$LF
+	"                                      that have any valid tiles times 2.)
+	$LF
+]pre
+[p 
+	"The game computes the height of the sprite as the number of valid (non-zero) tiles in the mapping. Keep in mind that if the enemy id is wrong, the mapping array will also be wrong. If this mapping array starts with the 0 value, the computed height of the enemy sprite will be zero.
+	$LF
+]p
+[p 
+	"Now, the most important function is function 
+	[tt 
+		"C1/22A5
+	]tt
+	" which copies each tile of the enemy sprite from ROM to RAM, depending on the mapping array. This function is basically a double 'for' loop on the width and height of the enemy sprite. Then, a tile is copied for every bit set in the mapping array. Here is the portion of the code that decrements the sprite height and loops, at the end of the function:
+	$LF
+]p
+[pre 
+	"C1/22D7: CE 53 82     DEC $8253    (decrement adjusted monster height/8, iow, its tile height)
+	$LF
+	"C1/22DA: D0 C9        BNE $22A5    (loop if we haven't finished processing/copying
+	$LF
+	"                                    all the rows of the monster's tiles.)
+	$LF
+]pre
+[p 
+	"Notice that the game *first* decrements the height, and then checks if it's non-zero. What happens if the height is zero in the first place? The variable becomes 255, so the game will assume that the sprite has a tile height of 256! This is a very high value, the maximum tile height planned by the game is 16. This will lead to many more tile copies than normally, which will overwrite many other memory locations.
+	$LF
+]p
+[h4 
+	" Which variables affect the outcome of the glitch?
+	$LF
+]h4
+[p 
+	"As said earlier, the game will load the availability and the aiming of the 28th spell of the first character, and interpret them as the enemy id. During battle startup, the spell list of all character present in the battle is compressed and stored for each character. The compression is as followed: the whole spell list is placed in a table of three columns. If a row does not contain any spell known by a character present in the battle, that row is deleted. The remaining table is placed in the Magic menu for each character, with only their known spells. If we want to have a spell in the 28th slot, we have to learn at least 10 spells that will each one fill a different row. The route for the present TAS is to learn:
+	$LF
+]p
+[ul 
+	[li 
+		" Cure (Lv1), Fire (Lv3), Antdot (Lv6) and Drain (Lv12) with Terra's natural magic
+		$LF
+	]li
+	[li 
+		" Sleep (10 AP), Mute (13 AP) and Slow (15 AP) with Siren
+		$LF
+	]li
+	[li 
+		" Bio (13 AP) and Break (20 AP) with Shoat
+		$LF
+	]li
+	[li 
+		" Muddle (15 AP) and Imp (20 AP) with Stray
+		$LF
+	]li
+]ul
+[p 
+	"Here is how the magic list looks like during a fight where all 10 spells are present. 10 rows are filled so that Break is placed at the 28th position.
+	$LF
+]p
+[pre 
+	[b 
+		"Cure
+	]b
+	"     Cure 2    Cure 3
+	$LF
+	"Life     Life 2    
+	[b 
+		"Antdot
+	]b
+	$LF
+	[del 
+		"Remedy   Regen     Life 3
+	]del
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	"-
+	$LF
+	"Scan     
+	[b 
+		"Slow
+	]b
+	"      Rasp
+	$LF
+	[b 
+		"Mute
+	]b
+	"     Safe      
+	[b 
+		"Sleep
+	]b
+	$LF
+	[b 
+		"Muddle
+	]b
+	"   Haste     Stop
+	$LF
+	"Bserk    Float     
+	[b 
+		"Imp
+	]b
+	$LF
+	[del 
+		"Rflect   Shell     Vanish
+	]del
+	$LF
+	[del 
+		"Haste2   Slow2     Osmose
+	]del
+	$LF
+	[del 
+		"Warp     Quick     Dispel
+	]del
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	"-
+	$LF
+	[b 
+		"Fire
+	]b
+	"     Ice       Bolt
+	$LF
+	"Poison   
+	[b 
+		"Drain
+	]b
+	"     Fire 2
+	$LF
+	"Ice 2    Bolt 2    
+	[b 
+		"Bio
+	]b
+	$LF
+	[del 
+		"Fire 3   Ice 3     Bolt 3
+	]del
+	$LF
+	[b 
+		"Break
+	]b
+	"    Doom      Pearl
+	$LF
+	[del 
+		"Flare    Demi      Quartr
+	]del
+	$LF
+	[del 
+		"X-Zone   Meteor    Ultima
+	]del
+	$LF
+	[del 
+		"Quake    W.Wind    Merton
+	]del
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	"-
+	$LF
+]pre
+[p 
+	"Now that we know how to place a spell at the 28th position, we can focus on the characteristics of the spell that affect the sketch glitch. First, the aiming of the spell consists of an 8-bit integer where each bit has a different meaning:
+	$LF
+]p
+[ul 
+	[li 
+		" Bit 0 = Cursor Moveable
+		$LF
+	]li
+	[li 
+		" Bit 1 = One Side Only
+		$LF
+	]li
+	[li 
+		" Bit 2 = Autoselect both parties
+		$LF
+	]li
+	[li 
+		" Bit 3 = Autoselect one party
+		$LF
+	]li
+	[li 
+		" Bit 4 = Auto Confirm
+		$LF
+	]li
+	[li 
+		" Bit 5 = Multiple Selection possible
+		$LF
+	]li
+	[li 
+		" Bit 6 = Cursor Start on Enemy
+		$LF
+	]li
+	[li 
+		" Bit 7 = Random selection among all enemies and allies
+		$LF
+	]li
+]ul
+[p 
+	"There are 13 different aiming bytes represented in this game:
+	$LF
+]p
+[ul 
+	[li 
+		" 
+		[tt 
+			"0x00
+		]tt
+		" (Self): Warp
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x01
+		]tt
+		" (Allies or enemies, single): Safe, Haste, Bserk, Rflect, Shell, Vanish, Life, Life 2
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x02
+		]tt
+		" (Self): Quick
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x03
+		]tt
+		" (Allies, single target): Antdot, Remedy, Regen, Life 3
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x04
+		]tt
+		" (Allies and enemies, multi target): Quake, W Wind, Merton
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x21
+		]tt
+		" (Allies or enemies, single or multi target): Float, Cure, Cure 2, Cure 3
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x29
+		]tt
+		" (Allies or enemies, multi or single target): Haste 2
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x41
+		]tt
+		" (Enemies or allies, single target): Poison, Drain, Break, Doom, Pearl, Flare, Scan, Slow, Rasp, Mute, Sleep, Muddle, Stop, Imp, Osmose, Dispel
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x43
+		]tt
+		" (Enemies, single target): Demi
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x61
+		]tt
+		" (Enemies or allies, single or multi target): Fire, Ice, Bolt, Fire 2, Ice 2, Bolt 2, Bio, Fire 3, Ice 3, Bolt 3
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x69
+		]tt
+		" (Enemies or allies, multi or single target): Slow 2
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x6A
+		]tt
+		" (Enemies, multi target): X-Zone
+		$LF
+	]li
+	[li 
+		" 
+		[tt 
+			"0x6E
+		]tt
+		" (Enemies, multi target): Quartr, Meteor, Ultima
+		$LF
+	]li
+]ul
+[p 
+	"We used in this route the 
+	[tt 
+		"0x41
+	]tt
+	" aiming byte because it gives access to the shortest setups. The second characteristics is the availability of the spell. It is represented as a 8-bit integer, whose bit 7 is set if the spell is not available (grayed) or cleared if it is. When the game updates the availability of the spell (function 
+	[tt 
+		"C2/5763
+	]tt
+	"), the integer is shifted right and the new availability bit is stored in bit 7. At the beginning of the battle, the integer is initialised as 
+	[tt 
+		"0xFF
+	]tt
+	" and the game updates the availability of every spell.
+	$LF
+]p
+[p 
+	"During the fight, the game calls this update function when:
+	$LF
+]p
+[ul 
+	[li 
+		" The holder of the spell received a MP heal by an item. Items having the "Concerns MP" flag set are Tincture, Ether, X-Ether, Elixir, Megalixir, Sleeping Bag and Tent.
+		$LF
+	]li
+	[li 
+		" The holder of the spell consumes MP using the Magic, X-Magic, Esper or Lore commands. Spells costing 0 MP don't trigger the update.
+		$LF
+	]li
+	[li 
+		" The holder of the spell is imped or de-imped.
+		$LF
+	]li
+]ul
+[p 
+	"The game does 
+	[b 
+		"not
+	]b
+	" call the update function when:
+	$LF
+]p
+[ul 
+	[li 
+		" The holder of the spell attacks with a weapon with the "critical MP" property (like the Rune Edge), thus reducing his MPs.
+		$LF
+	]li
+	[li 
+		" The holder gets the Mute status. In this case, the Magic command is disabled, not every individual spell, as opposed to the Imp status where every spell except Imp are disabled.
+		$LF
+	]li
+]ul
+[p 
+	"For example, if we want to place the integer 
+	[tt 
+		"0x83
+	]tt
+	" (or 
+	[tt 
+		"0b10000011
+	]tt
+	") in the availability byte, we can do the following:
+	$LF
+]p
+[ol 
+	[li 
+		" Start the fight with the 28th spell available (
+		[tt 
+			"0x01111111
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" Use a Tincture on the first character (
+		[tt 
+			"0x0011111
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" Use a second Tincture (
+		[tt 
+			"0x00011111
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" Use a third Tincture (
+		[tt 
+			"0x00001111
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" Use a fourth Tincture (
+		[tt 
+			"0x00000111
+		]tt
+		")
+		$LF
+	]li
+	[li 
+		" Use Imp on the first character (
+		[tt 
+			"0x10000011
+		]tt
+		")
+		$LF
+	]li
+]ol
+[p 
+	"During a sketch, we saw that the game is using the mapping array 
+	[tt 
+		"$822D-$824C
+	]tt
+	" to determine if a tile must be copied from ROM to RAM. During a sketch glitch, however, as the sprite height is incorrectly set to 256, the corresponding mapping array will be 
+	[tt 
+		"$822D-$842C
+	]tt
+	", overflowing the next portion of memory. Addresses from 
+	[tt 
+		"$824D
+	]tt
+	" to 
+	[tt 
+		"$8258
+	]tt
+	" store local variables, but addresses starting 
+	[tt 
+		"$8259
+	]tt
+	" store the offsets of each enemy position. These offsets depend on the formation mold. Every enemy formation is using a specific formation mold, which gives the coordinates and maximal dimension of every enemy. There are 13 different molds used in the game. Each formation mold will lead to overwriting different parts of memory during a sketch glitch.
+	$LF
+]p
+[h4 
+	" Taking advantage of the sketch glitch
+	$LF
+]h4
+[p 
+	"The main beneficial outcome of the sketch glitch is to erase part of your in-battle inventory (
+	[tt 
+		"$2686-$2B85
+	]tt
+	"). At the end of the battle, the game loads the in-battle inventory into the general inventory (
+	[tt 
+		"$1869-$1A68
+	]tt
+	"). Thus all items that appeared during the sketch glitch are kept. The in-battle inventory stores 5 bytes per item:
+	$LF
+]p
+[ul 
+	[li 
+		" Byte 0: Item id
+		$LF
+	]li
+	[li 
+		" Byte 1: Item flags
+		$LF
+		[ul 
+			[li 
+				" 
+				[tt 
+					"0x08
+				]tt
+				": Is a shield
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x10
+				]tt
+				": Is a weapon
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x20
+				]tt
+				": Can be thrown
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x40
+				]tt
+				": Is a tool
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x80
+				]tt
+				": Not usable as an item in battle
+				$LF
+			]li
+		]ul
+		" Byte 2: Item targeting
+		$LF
+		[ul 
+			[li 
+				" 
+				[tt 
+					"0x01
+				]tt
+				": Cursor Moveable
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x02
+				]tt
+				": One Side Only
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x04
+				]tt
+				": Autoselect both parties
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x08
+				]tt
+				": Autoselect one party
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x10
+				]tt
+				": Auto Confirm
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x20
+				]tt
+				": Multiple selection possible
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x40
+				]tt
+				": Cursor Start on Enemy
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x80
+				]tt
+				": Random selection among all enemies and allies
+				$LF
+			]li
+		]ul
+		" Byte 3: Item quantity
+		$LF
+	]li
+	[li 
+		" Byte 4: Item equipability
+		$LF
+		[ul 
+			[li 
+				" 
+				[tt 
+					"0x01
+				]tt
+				": Onscreen character 0 can't equip item
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x02
+				]tt
+				": Onscreen character 1 can't equip item
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x04
+				]tt
+				": Onscreen character 2 can't equip item
+				$LF
+			]li
+			[li 
+				" 
+				[tt 
+					"0x08
+				]tt
+				": Onscreen character 3 can't equip item
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[p 
+	"Added to the fact that you have access to a bunch of new items, the sketch glitch also allows you to change the characteristics of an item without changing its type. Indeed, on some item slots, only part of the characteristics will be overwritten. Thanks to this, you are able to flag any item, leading to useful tricks like:
+	$LF
+]p
+[ul 
+	[li 
+		" Flagging an item as a weapon or a shield and equip it during the fight. The item will be kept in your equipment after the fight. All special effects of the item will be operative even if the item is not in the right spot (e.g. a Moogle Charm in the right hand will still remove random encounters)
+		$LF
+	]li
+	[li 
+		" Flagging an item as usable in fight and use it
+		$LF
+	]li
+	[li 
+		" Duplicating an item by overwriting its quantity
+		$LF
+	]li
+]ul
+[p 
+	"The Japanese equip-anything glitch still applies here. This glitch, only possible in the Japanese version of the game, allows you to equip an item in an equipment slot if:
+	$LF
+]p
+[ol 
+	[li 
+		" you put that item in the 255th slot
+		$LF
+	]li
+	[li 
+		" you don't have any item in your inventory that fits in that slot
+		$LF
+	]li
+	[li 
+		" you select Optimize
+		$LF
+	]li
+]ol
+[p 
+	"In the US version of the game, the developers disabled the 255th slot, but a sketch glitch can still put an item in that slot. You can then move that item into an equipment slot by the same method.
+	$LF
+]p
+[p 
+	"The sketch glitch also overwrite the in-battle Magic menu. This menu starts at address 
+	[tt 
+		"$208E
+	]tt
+	" for the first character and contains 4 bytes for each spell:
+	$LF
+]p
+[ul 
+	[li 
+		" Byte 0: Spell id
+		$LF
+	]li
+	[li 
+		" Byte 1: Spell availability
+		$LF
+	]li
+	[li 
+		" Byte 2: Aiming byte
+		$LF
+	]li
+	[li 
+		" Byte 3: Spell MP cost
+		$LF
+	]li
+]ul
+[p 
+	"We don't have as much freedom as the inventory, but a sketch glitch can give inaccessible magics. Magics are not only white/black/grey magics that we learn during the game, but also Espers, Skeans, SwdTechs, Blitz, Dances, Slots, Magitek, Lores, enemy attacks, desperation attacks and Interceptor attacks.
+	$LF
+]p
+[p 
+	"Also, for a few formation molds (2, 4 and 8), the sketch glitch overwrites the command list. This list is stored starting 
+	[tt 
+		"$202E
+	]tt
+	" and takes three bytes per command:
+	$LF
+]p
+[ul 
+	[li 
+		" Byte 0: Command id
+		$LF
+	]li
+	[li 
+		" Byte 1: Command availability
+		$LF
+	]li
+	[li 
+		" Byte 2: Aiming byte
+		$LF
+	]li
+]ul
+[p 
+	"Unfortunately, those molds are known to freeze the game easily.
+	$LF
+]p
+[p 
+	"The consequences of the sketch glitch for each mold and spell setup can be generated from this 
+	[a href=/userfiles/info/18358557059086853 
+		"lua script
+	]a
+	" which outputs a spreadsheet.
+	$LF
+]p
+[h4 
+	" Goggles glitch
+	$LF
+]h4
+[p 
+	"If a character attacks with the Goggles item (which can be placed here thanks to the sketch glitch) and another character opens the Magic menu at the same time, the menu will show items from the inventory if scrolled up or down. If an item is used, the character will cast the magic whose id corresponds to the id of the item. For example, if a character uses the Antidote item (id 
+	[tt 
+		"0xF2
+	]tt
+	") in the glitched Magic menu, he will cast Cyan's desperation attack Back Blade (id 
+	[tt 
+		"0xF2
+	]tt
+	"). In this run, we used the Goggles glitch with the items Black Belt (id 
+	[tt 
+		"0xD5
+	]tt
+	") and X-Potion (id 
+	[tt 
+		"0xEA
+	]tt
+	") to cast the magics Engulf (id 
+	[tt 
+		"0xD5
+	]tt
+	") and Bababreath (id 
+	[tt 
+		"0xEA
+	]tt
+	"). Because Black Belt is not a usable item, a sketch glitch is needed to flag it as usable. The magic Bababreath is normally cast by the boss Phunbaba on the party, it removes the target from the battle. It also works when casting on an enemy. The magic Engulf is described below.
+	$LF
+]p
+[h4 
+	" Engulf
+	$LF
+]h4
+[p 
+	"There is an enemy in the game called Zone Eater in the World of Ruin who has the Engulf attack. This attack removes the target from the battle. If all the party is engulfed, the party is sent inside the Triangle Island cave, where the secret character Gogo can be recruited. Thanks to the sketch glitch, the Engulf magic can be cast by a character as soon as Relm is recruited, in the World of Balance. If cast by a character, the magic will auto-target an enemy, so Muddle is necessary to be able to cast it on a character. In that case, if the entire party is engulfed, it will be sent inside the Triangle Island cave. If the party exists the cave using the light exit on top (using a Warp Stone won't work), it will appear on the Triangle Island in the World of Ruin. The airship will have the same coordinates as where it was left. Because of this, the party will be stuck if the airship was not left on the island beforehand.
+	$LF
+]p
+[h3 
+	"Unused tricks
+	$LF
+]h3
+[h4 
+	" Sleeping Bag
+	$LF
+]h4
+[p 
+	"When you make an item usable in fight thanks to the sketch glitch, most items that were not supposed to be used will cast Fire. Some items, however, will have its own effect. When using a Sleeping Bag on someone, it will recover all his MPs with no item animation. Compared to a Tincture or an Elixir, the Sleeping Bag is about 100 frames faster to use. It could have been possible to use it instead of the Tincture in the run, but the required sketch glitch before being able to use the Sleeping Bag made this strat slower in the end.
+	$LF
+]p
+[h4 
+	" Other glitched weapons
+	$LF
+]h4
+[p 
+	"The sketch glitch can allow a character to equip as a weapon every item in the game. When a character attacks, the game loads the weapon graphics from 
+	[tt 
+		"$ECE400+8*id
+	]tt
+	" to 
+	[tt 
+		"$626B-$6272
+	]tt
+	". Address 
+	[tt 
+		"$6270
+	]tt
+	" (unknown purpose, launching flag?) varies between 0 and 4 for regular weapons. This address is used in the following code:
+	$LF
+]p
+[pre 
+	"C1/C269:    AD7062      LDA $6270
+	$LF
+	"C1/C26C:    297F        AND #$7F
+	$LF
+	"C1/C26E:    0A          ASL A
+	$LF
+	"C1/C26F:    AA          TAX 
+	$LF
+	"C1/C270:    7C73C2      JMP ($C273,X)
+	$LF
+	$LF
+	"Pointers to code
+	$LF
+	$LF
+	"C1/C273:    86C2        (00)        
+	$LF
+	"C1/C275:    99C2        (01)
+	$LF
+	"C1/C277:    7DC2        (02)    
+	$LF
+	"C1/C279:    12C3        (03)
+	$LF
+	"C1/C27B:    73C3        (04)
+	$LF
+]pre
+[p 
+	"For glitched weapons, however, address 
+	[tt 
+		"$6270
+	]tt
+	" can take arbitrary values. So the above code will jump to a random place within C1 bank.
+	$LF
+]p
+[h4 
+	" Tier change
+	$LF
+]h4
+[p 
+	"With a sketch glitch against a formation mold 4, with a 0x41 aiming spell and 0xBF availability, the second command of the third character will be replaced with the command 32, which triggers the tier change during the Kefka fight. In this case, the tier change will load another enemy formation depending on the aiming of the command. The binary representation of the aiming value is the following two-bytes integer:
+	$LF
+]p
+[pre 
+	"0 0 foe6 foe5 foe4 foe3 foe2 foe1 0 0 0 0 char4 char3 char2 char1
+	$LF
+]pre
+[p 
+	"So we can load enemy formations with an id as high as 16143, knowing that formations are normally included between 0 and 575. This leads to 
+	[a class=extlink href=https://www.youtube.com/watch?v=0d3GKzEg2nU rel=nofollow 
+		"aberrant formations
+	]a
+	".
+	$LF
+]p
+[h4 
+	" Goggles glitch with other menus
+	$LF
+]h4
+[p 
+	"The Goggles glitch was used in this run with the Magic menu. It can be used with many more menus, but this was not actually deeply tested:
+	$LF
+]p
+[ul 
+	[li 
+		" SwdTech: Cyan will cast a magic whose id will be the id of the item + a constant (85). Indeed, the game indexed the SwdTechs starting 0, and adds a constant to get the corresponding magic id. For example, if you use the item Fire Shield (id 96) in the glitched SwdTech menu, Cyan will cast the magic 
+		[a class=extlink href=https://www.youtube.com/watch?v=QSQL79JFrbM rel=nofollow 
+			"Tek Laser
+		]a
+		" (id 181 = 96 + 85). The magic seems to automatically target the enemy, even if the target was set to be on the party.
+		$LF
+	]li
+	[li 
+		" Blitz: We couldn't get it to work
+		$LF
+	]li
+	[li 
+		" Tools: Edgar will damage the enemy, and sprites will start to move in an 
+		[a class=extlink href=https://www.youtube.com/watch?v=GF3D6RHguDY rel=nofollow 
+			"odd way
+		]a
+		" through the screen
+		$LF
+	]li
+	[li 
+		" Rage: Not tested, but we supposed that it would not have any effect, because there are 256 rages already
+		$LF
+	]li
+	[li 
+		" Slots: Setzer will cast a magic whose id is stored in the address 
+		[tt 
+			"$C24E4A + itemid
+		]tt
+		". For example, if Setzer uses the Potion item (id 
+		[tt 
+			"0xE9
+		]tt
+		") in the glitched Slots menu, he will cast the magic whose id is stored in 
+		[tt 
+			"$C24F33
+		]tt
+		" which is the desperation attack 
+		[a class=extlink href=https://www.youtube.com/watch?v=8gORmleyaDs rel=nofollow 
+			"MoogleRush
+		]a
+		" (id 
+		[tt 
+			"0xFA
+		]tt
+		").
+		$LF
+	]li
+	[li 
+		" Command: Instead of opening a sub-menu, we can change character by using X or Y. If done right, the command menu of the new character will be glitched as the item menu. This should allow us to cast any command.
+		$LF
+	]li
+]ul
+[h4 
+	" Alternative wrong warps
+	$LF
+]h4
+[p 
+	"There are at least three ways to do the Engulf wrong warp:
+	$LF
+]p
+[ul 
+	[li 
+		" The Engulf spell can be written in the magic list using the sketch glitch
+		$LF
+	]li
+	[li 
+		" The Engulf spell can be cast using the Goggles glitch, by using the Black Belt item
+		$LF
+	]li
+	[li 
+		" When triggering the sketch glitch against formation mold 3, the variable (
+		[tt 
+			"$3EBC
+		]tt
+		") that stores if the whole party was engulfed is rewritten. For specific sketch glitch setups, this variable is rewritten to a value that indicates that the party was engulfed. The downside is that a sketch glitch against mold 3 is followed by a freeze of the game, which can take minutes. This is however the safest way to do the wrong warp for an unassisted speedrun.
+		$LF
+	]li
+]ul
+[h2 
+	" Comparison
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Location
+			]th
+			[th 
+				"Present TAS
+			]th
+			[th 
+				"Erokky TAS
+			]th
+			[th 
+				"Difference
+			]th
+			[th 
+				"Cumulative difference
+			]th
+			[th 
+				"Commentary
+			]th
+		]tr
+		[tr 
+			[td 
+				"Introduction
+			]td
+			[td 
+				"8083
+			]td
+			[td 
+				"8065
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"Emulator differences probably
+			]td
+		]tr
+		[tr 
+			[td 
+				"Magitek Armor to Whelk
+			]td
+			[td 
+				"18526
+			]td
+			[td 
+				"17217
+			]td
+			[td 
+				"1291
+			]td
+			[td 
+				"1309
+			]td
+			[td 
+				"A slightly different route. Also because of uninitialised RAM, we got an extra fight in the cave
+			]td
+		]tr
+		[tr 
+			[td 
+				"Whelk fight
+			]td
+			[td 
+				"22301
+			]td
+			[td 
+				"21007
+			]td
+			[td 
+				"-15
+			]td
+			[td 
+				"1294
+			]td
+			[td 
+				"Closing the command window before the end of the fight saves a bit of time
+			]td
+		]tr
+		[tr 
+			[td 
+				"Terra escape
+			]td
+			[td 
+				"44434
+			]td
+			[td 
+				"43973
+			]td
+			[td 
+				"-833
+			]td
+			[td 
+				"461
+			]td
+			[td 
+				"We run away the two random fights
+			]td
+		]tr
+		[tr 
+			[td 
+				"Marshal Lobo fight
+			]td
+			[td 
+				"47618
+			]td
+			[td 
+				"47143
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"475
+			]td
+		]tr
+		[tr 
+			[td 
+				"To Figaro Castle
+			]td
+			[td 
+				"53861
+			]td
+			[td 
+				"53491
+			]td
+			[td 
+				"-105
+			]td
+			[td 
+				"370
+			]td
+		]tr
+		[tr 
+			[td 
+				"Figaro Castle
+			]td
+			[td 
+				"77000
+			]td
+			[td 
+				"76608
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"392
+			]td
+			[td 
+				"We waited more than 2 seconds for the Lete River manipulation, but only loosing 22 frames... maybe thanks to 1-letter names?
+			]td
+		]tr
+		[tr 
+			[td 
+				"M-Tek fight
+			]td
+			[td 
+				"79488
+			]td
+			[td 
+				"79196
+			]td
+			[td 
+				"-100
+			]td
+			[td 
+				"292
+			]td
+			[td 
+				"We got a Metal Kick instead of a Tek Laser
+			]td
+		]tr
+		[tr 
+			[td 
+				"To the Cave
+			]td
+			[td 
+				"83456
+			]td
+			[td 
+				"83201
+			]td
+			[td 
+				"-37
+			]td
+			[td 
+				"255
+			]td
+			[td 
+				"1-letter names
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cave
+			]td
+			[td 
+				"88470
+			]td
+			[td 
+				"88027
+			]td
+			[td 
+				"188
+			]td
+			[td 
+				"443
+			]td
+			[td 
+				"We made characters escape so Terra got the level up
+			]td
+		]tr
+		[tr 
+			[td 
+				"South Figaro
+			]td
+			[td 
+				"90774
+			]td
+			[td 
+				"90214
+			]td
+			[td 
+				"117
+			]td
+			[td 
+				"560
+			]td
+			[td 
+				"We bought a Goggles and set the Message Speed to 2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mt Kolts
+			]td
+			[td 
+				"100509
+			]td
+			[td 
+				"101987
+			]td
+			[td 
+				"-2038
+			]td
+			[td 
+				"-1478
+			]td
+			[td 
+				"Faster escaping thanks to the Message Speed 2 and no fight won
+			]td
+		]tr
+		[tr 
+			[td 
+				"Vargas fight
+			]td
+			[td 
+				"105318
+			]td
+			[td 
+				"107004
+			]td
+			[td 
+				"-208
+			]td
+			[td 
+				"-1686
+			]td
+			[td 
+				"Better Sabin ATB
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Returner's Hideout
+			]td
+			[td 
+				"110166
+			]td
+			[td 
+				"112006
+			]td
+			[td 
+				"-154
+			]td
+			[td 
+				"-1840
+			]td
+			[td 
+				"Another fast escape
+			]td
+		]tr
+		[tr 
+			[td 
+				"Returner's Hideout
+			]td
+			[td 
+				"121114
+			]td
+			[td 
+				"124203
+			]td
+			[td 
+				"-1249
+			]td
+			[td 
+				"-3089
+			]td
+			[td 
+				"Better river manipulation
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lete river
+			]td
+			[td 
+				"126839
+			]td
+			[td 
+				"131640
+			]td
+			[td 
+				"-1712
+			]td
+			[td 
+				"-4801
+			]td
+			[td 
+				"Didn't win the two mandatory fights
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ultros 1
+			]td
+			[td 
+				"129450
+			]td
+			[td 
+				"134126
+			]td
+			[td 
+				"125
+			]td
+			[td 
+				"-4676
+			]td
+			[td 
+				"Slower fight due to underleveled Terra
+			]td
+		]tr
+		[tr 
+			[td 
+				"Team splitting
+			]td
+			[td 
+				"132320
+			]td
+			[td 
+				"137081
+			]td
+			[td 
+				"-85
+			]td
+			[td 
+				"-4761
+			]td
+			[td 
+				"Renaming
+			]td
+		]tr
+		[tr 
+			[td 
+				"Locke Scenario
+			]td
+			[td 
+				"136256
+			]td
+			[td 
+				"153356
+			]td
+			[td 
+				"-12339
+			]td
+			[td 
+				"-17100
+			]td
+			[td 
+				"Skipping Celes
+			]td
+		]tr
+		[tr 
+			[td 
+				"TunnelArmor
+			]td
+			[td 
+				"139253
+			]td
+			[td 
+				"156372
+			]td
+			[td 
+				"-19
+			]td
+			[td 
+				"-17119
+			]td
+		]tr
+		[tr 
+			[td 
+				"Terra scenario
+			]td
+			[td 
+				"152729
+			]td
+			[td 
+				"170285
+			]td
+			[td 
+				"-437
+			]td
+			[td 
+				"-17556
+			]td
+			[td 
+				"Faster escaping thanks to the Message Speed 2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Doma
+			]td
+			[td 
+				"191574
+			]td
+			[td 
+				"211485
+			]td
+			[td 
+				"-2355
+			]td
+			[td 
+				"-19911
+			]td
+			[td 
+				"One less Grunt during a fight, Battle Speed 1 for Leader
+			]td
+		]tr
+		[tr 
+			[td 
+				"Phantom Train
+			]td
+			[td 
+				"210362
+			]td
+			[td 
+				"229993
+			]td
+			[td 
+				"280
+			]td
+			[td 
+				"-19631
+			]td
+			[td 
+				"More solo Bomb :(
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rizopas
+			]td
+			[td 
+				"225496
+			]td
+			[td 
+				"245074
+			]td
+			[td 
+				"53
+			]td
+			[td 
+				"-19578
+			]td
+			[td 
+				"Battle Speed 1, making more attacks from the enemies so more lag
+			]td
+		]tr
+		[tr 
+			[td 
+				"Veldt
+			]td
+			[td 
+				"246759
+			]td
+			[td 
+				"271176
+			]td
+			[td 
+				"-4839
+			]td
+			[td 
+				"-24417
+			]td
+			[td 
+				"No farming for Snare, but bad RNG
+			]td
+		]tr
+		[tr 
+			[td 
+				"End of Sabin scenario
+			]td
+			[td 
+				"256117
+			]td
+			[td 
+				"281353
+			]td
+			[td 
+				"-819
+			]td
+			[td 
+				"-25236
+			]td
+			[td 
+				"Perfect escape underwater
+			]td
+		]tr
+		[tr 
+			[td 
+				"Narshe
+			]td
+			[td 
+				"269312
+			]td
+			[td 
+				"294999
+			]td
+			[td 
+				"-451
+			]td
+			[td 
+				"-25687
+			]td
+			[td 
+				"Guard clip
+			]td
+		]tr
+		[tr 
+			[td 
+				"Kefka
+			]td
+			[td 
+				"271815
+			]td
+			[td 
+				"297538
+			]td
+			[td 
+				"-36
+			]td
+			[td 
+				"-25723
+			]td
+		]tr
+		[tr 
+			[td 
+				"Terra cutscene
+			]td
+			[td 
+				"282969
+			]td
+			[td 
+				"308794
+			]td
+			[td 
+				"-102
+			]td
+			[td 
+				"-25825
+			]td
+			[td 
+				"Renaming
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Zozo
+			]td
+			[td 
+				"295418
+			]td
+			[td 
+				"319649
+			]td
+			[td 
+				"1594
+			]td
+			[td 
+				"-24231
+			]td
+			[td 
+				"Save and Reset
+			]td
+		]tr
+		[tr 
+			[td 
+				"Zozo
+			]td
+			[td 
+				"302660
+			]td
+			[td 
+				"327460
+			]td
+			[td 
+				"-569
+			]td
+			[td 
+				"-24800
+			]td
+			[td 
+				"Solo Sabin
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dadaluma
+			]td
+			[td 
+				"305371
+			]td
+			[td 
+				"330239
+			]td
+			[td 
+				"-68
+			]td
+			[td 
+				"-24868
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to the Opera
+			]td
+			[td 
+				"331710
+			]td
+			[td 
+				"355225
+			]td
+			[td 
+				"1353
+			]td
+			[td 
+				"-23515
+			]td
+			[td 
+				"One extra fight on the way and more menuing
+			]td
+		]tr
+		[tr 
+			[td 
+				"Opera
+			]td
+			[td 
+				"372754
+			]td
+			[td 
+				"396797
+			]td
+			[td 
+				"-528
+			]td
+			[td 
+				"-24043
+			]td
+			[td 
+				"...I don't know
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rats
+			]td
+			[td 
+				"373878
+			]td
+			[td 
+				"397807
+			]td
+			[td 
+				"114
+			]td
+			[td 
+				"-23929
+			]td
+			[td 
+				"Bad rat RNG
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ultros 2
+			]td
+			[td 
+				"379291
+			]td
+			[td 
+				"403410
+			]td
+			[td 
+				"-190
+			]td
+			[td 
+				"-24119
+			]td
+		]tr
+		[tr 
+			[td 
+				"Airship cutscene
+			]td
+			[td 
+				"393629
+			]td
+			[td 
+				"417694
+			]td
+			[td 
+				"54
+			]td
+			[td 
+				"-24065
+			]td
+			[td 
+				"Having Sabin and Edgar here costs time
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Vector
+			]td
+			[td 
+				"395520
+			]td
+			[td 
+				"419501
+			]td
+			[td 
+				"84
+			]td
+			[td 
+				"-23981
+			]td
+			[td 
+				"Longer menuing
+			]td
+		]tr
+		[tr 
+			[td 
+				"Before Ifrit
+			]td
+			[td 
+				"404124
+			]td
+			[td 
+				"428660
+			]td
+			[td 
+				"-555
+			]td
+			[td 
+				"-24536
+			]td
+			[td 
+				"One less fight
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ifrit
+			]td
+			[td 
+				"405779
+			]td
+			[td 
+				"431504
+			]td
+			[td 
+				"-1189
+			]td
+			[td 
+				"-25725
+			]td
+			[td 
+				"Ifrit escape trick
+			]td
+		]tr
+		[tr 
+			[td 
+				"To Number 024
+			]td
+			[td 
+				"411286
+			]td
+			[td 
+				"437030
+			]td
+			[td 
+				"-19
+			]td
+			[td 
+				"-25744
+			]td
+		]tr
+		[tr 
+			[td 
+				"Number 024
+			]td
+			[td 
+				"414305
+			]td
+			[td 
+				"438515
+			]td
+			[td 
+				"1534
+			]td
+			[td 
+				"-24210
+			]td
+			[td 
+				"Old TAS used the Muddle/Phantom/Snare technique. We don't have Snare
+			]td
+		]tr
+		[tr 
+			[td 
+				"Before Minecart
+			]td
+			[td 
+				"425280
+			]td
+			[td 
+				"449571
+			]td
+			[td 
+				"-81
+			]td
+			[td 
+				"-24291
+			]td
+		]tr
+		[tr 
+			[td 
+				"Minecart
+			]td
+			[td 
+				"432868
+			]td
+			[td 
+				"457921
+			]td
+			[td 
+				"-762
+			]td
+			[td 
+				"-25053
+			]td
+			[td 
+				"Better enemy formations by putting Sabin in the first slot
+			]td
+		]tr
+		[tr 
+			[td 
+				"Number 128
+			]td
+			[td 
+				"435748
+			]td
+			[td 
+				"461410
+			]td
+			[td 
+				"-609
+			]td
+			[td 
+				"-25662
+			]td
+		]tr
+		[tr 
+			[td 
+				"Before Cranes
+			]td
+			[td 
+				"440598
+			]td
+			[td 
+				"466230
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"-25632
+			]td
+			[td 
+				"Lost time for ATB manipulation
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cranes
+			]td
+			[td 
+				"442010
+			]td
+			[td 
+				"467876
+			]td
+			[td 
+				"-234
+			]td
+			[td 
+				"-25866
+			]td
+			[td 
+				"Didn't need to steal Debilitator
+			]td
+		]tr
+		[tr 
+			[td 
+				"Esper World
+			]td
+			[td 
+				"464383
+			]td
+			[td 
+				"490296
+			]td
+			[td 
+				"-47
+			]td
+			[td 
+				"-25913
+			]td
+		]tr
+		[tr 
+			[td 
+				"Narshe cutscene
+			]td
+			[td 
+				"472604
+			]td
+			[td 
+				"496579
+			]td
+			[td 
+				"1938
+			]td
+			[td 
+				"-23975
+			]td
+			[td 
+				"Stop by on the Island to kill an Intangir
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cave to the Sealed Gate
+			]td
+			[td 
+				"490097
+			]td
+			[td 
+				"516111
+			]td
+			[td 
+				"-2039
+			]td
+			[td 
+				"-26014
+			]td
+			[td 
+				"Less fights
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Vector
+			]td
+			[td 
+				"499955
+			]td
+			[td 
+				"526013
+			]td
+			[td 
+				"-44
+			]td
+			[td 
+				"-26058
+			]td
+		]tr
+		[tr 
+			[td 
+				"Banquet
+			]td
+			[td 
+				"530121
+			]td
+			[td 
+				"560087
+			]td
+			[td 
+				"-3908
+			]td
+			[td 
+				"-29966
+			]td
+			[td 
+				"Didn't go for the Charm Bangle
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Thamasa
+			]td
+			[td 
+				"554823
+			]td
+			[td 
+				"583468
+			]td
+			[td 
+				"1321
+			]td
+			[td 
+				"-28645
+			]td
+			[td 
+				"Second save and reset
+			]td
+		]tr
+		[tr 
+			[td 
+				"Fire House
+			]td
+			[td 
+				"571283
+			]td
+			[td 
+				"600354
+			]td
+			[td 
+				"-426
+			]td
+			[td 
+				"-29071
+			]td
+			[td 
+				"Better Bomb placement
+			]td
+		]tr
+		[tr 
+			[td 
+				"Flame Eater
+			]td
+			[td 
+				"573908
+			]td
+			[td 
+				"603178
+			]td
+			[td 
+				"-199
+			]td
+			[td 
+				"-29270
+			]td
+			[td 
+				"Morph saves time
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Esper Cave
+			]td
+			[td 
+				"586853
+			]td
+			[td 
+				"616255
+			]td
+			[td 
+				"-132
+			]td
+			[td 
+				"-29402
+			]td
+		]tr
+		[tr 
+			[td 
+				"Before Ultros
+			]td
+			[td 
+				"593763
+			]td
+			[td 
+				"621863
+			]td
+			[td 
+				"1302
+			]td
+			[td 
+				"-28100
+			]td
+			[td 
+				"Won two fights for XP and MP
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ultros 3
+			]td
+			[td 
+				"595989
+			]td
+			[td 
+				"624204
+			]td
+			[td 
+				"-115
+			]td
+			[td 
+				"-28215
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rest of Esper Cave
+			]td
+			[td 
+				"606442
+			]td
+			[td 
+				"633106
+			]td
+			[td 
+				"1551
+			]td
+			[td 
+				"-26664
+			]td
+			[td 
+				"First sketch glitch to get Flame Shields
+			]td
+		]tr
+		[tr 
+			[td 
+				"Before Leo
+			]td
+			[td 
+				"614754
+			]td
+			[td 
+				"641425
+			]td
+			[td 
+				"-7
+			]td
+			[td 
+				"-26671
+			]td
+		]tr
+		[tr 
+			[td 
+				"Leo
+			]td
+			[td 
+				"619067
+			]td
+			[td 
+				"647522
+			]td
+			[td 
+				"-1784
+			]td
+			[td 
+				"-28455
+			]td
+			[td 
+				"Saved time with the Flame Shields
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rest of the cutscene
+			]td
+			[td 
+				"644204
+			]td
+			[td 
+				"672744
+			]td
+			[td 
+				"-85
+			]td
+			[td 
+				"-28540
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Kefka tower
+			]td
+			[td 
+				"655568
+			]td
+			[td 
+				"821759
+			]td
+			[td 
+				"-137651
+			]td
+			[td 
+				"-166191
+			]td
+			[td 
+				"Wrong Warp
+			]td
+		]tr
+		[tr 
+			[td 
+				"Road to Guardian
+			]td
+			[td 
+				"671076
+			]td
+			[td 
+				"844652
+			]td
+			[td 
+				"-7385
+			]td
+			[td 
+				"-173576
+			]td
+			[td 
+				"Skip Inferno and Moogle Charms
+			]td
+		]tr
+		[tr 
+			[td 
+				"Three Statues
+			]td
+			[td 
+				"679348
+			]td
+			[td 
+				"857351
+			]td
+			[td 
+				"-4427
+			]td
+			[td 
+				"-178003
+			]td
+			[td 
+				"Well, only two Statues
+			]td
+		]tr
+		[tr 
+			[td 
+				"Kefka cutscene
+			]td
+			[td 
+				"688189
+			]td
+			[td 
+				"867318
+			]td
+			[td 
+				"-1126
+			]td
+			[td 
+				"-179129
+			]td
+			[td 
+				"Skip Terra cutscene
+			]td
+		]tr
+		[tr 
+			[td 
+				"Kefka
+			]td
+			[td 
+				"689323
+			]td
+			[td 
+				"883418
+			]td
+			[td 
+				"-14966
+			]td
+			[td 
+				"-194095
+			]td
+			[td 
+				"Thanks Bababreath
+			]td
+		]tr
+		[tr 
+			[td 
+				"End
+			]td
+			[td 
+				"691104
+			]td
+			[td 
+				"885172
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"-194068
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	" Known improvements
+	$LF
+]h2
+[ul 
+	[li 
+		" Based on the above comparison table, it could have been faster to set Battle Speed to 6 just after the Phantom Train before Rizopas. We think Rizopas appearance is delayed when actions are made during the fight. And having the Battle Speed set to 1 caused the enemies to attack more often.
+		$LF
+	]li
+	[li 
+		" Some fights in Doma Castle were not good, especially the Grunt and Cadet fight.
+		$LF
+	]li
+	[li 
+		" The RNG on Sabin scenario was very bad: we got 3 fights against a single Bomb during the Phantom train (costing 3 seconds) and we got the unescapable fight against Templars and Soldiers on the Veldt. The latter is dependent on an uninitialised value in the RAM, which is set arbitrary by the emulator. The former, however, may be avoided by swapping scenarios (putting Terra last).
+		$LF
+	]li
+	[li 
+		" We forgot that we would need the Magic command on many people during Kefka tower, and thus Espers equipped. We had to lose time by equipping them one by one during the tower, we could have equipped them during just before the Opera.
+		$LF
+	]li
+	[li 
+		" We unequipped Sprint Shoes from Locke at the end of his scenario, but he is taking a few steps after that is affected by the presence of Sprint Shoes. We could have taken the Sprint Shoes from Terra instead.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.youtube.com/watch?v=RbOqFbIRp_k rel=nofollow 
+			"Rhizopas skip
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a class=extlink href=https://www.twitch.tv/videos/140917566?t=03h12m50s rel=nofollow 
+			"Kefka Tower skip and Kefka fight skip
+		]a
+		$LF
+	]li
+]ul
+[h2 
+	" Special Thanks
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[b 
+			"masterZed
+		]b
+		" for first documenting the sketch glitch. This was really useful to disassemble the glitch
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"amaurea
+		]b
+		" for writing a very complete lua script. It still had a few bugs, but fixing them didn't take us a long time and it was heavily useful for producing the tas.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Tanooki Teabag
+		]b
+		" for discovering the Goggles glitch
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"simon
+		]b
+		" for helping with the tas and writing a program which outputs the optimal magic route for the sketch glitch
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Yousei
+		]b
+		", 
+		[b 
+			"Novalia Spirit
+		]b
+		", 
+		[b 
+			"Mnrogar
+		]b
+		", 
+		[b 
+			"Imzogelmo
+		]b
+		", 
+		[b 
+			"Cless
+		]b
+		", 
+		[b 
+			"assassin
+		]b
+		", 
+		[b 
+			"Lenophis
+		]b
+		", 
+		[b 
+			"Terii Senshi
+		]b
+		", 
+		[b 
+			"abyssonym
+		]b
+		", and many other for all the work that has been done in the past 10 years for disassembling ff6 code
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Lord J
+		]b
+		" for concentrating all this information into a very useful program: ff6usME
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Catastrophe
+		]b
+		" for making the previous ff6 tas with sketch glitch route, which was useful to use for comparison. Also thanks for suggesting the ultimate spell: Bababreath, and the work for optimising the end game
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"LCC
+		]b
+		" for his deep knowledge of the game, for finding a few tricks that was helpful in the tas.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Erokky
+		]b
+		" for doing the previous tas and writing very valuable information in the submission text
+		$LF
+	]li
+]ul
+[h2 
+	" Suggested screenshots
+	$LF
+]h2
+[p 
+	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6_327400.png 
+	]img
+	$LF
+	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6_599001.png 
+	]img
+	$LF
+	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6_737929.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:FractalFusion)
+	": Changed game name to "Final Fantasy VI" to match that of the current publication.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": Judging.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": Accepting for publication to Moons in a new "sketch glitch" branch.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing.
+]p

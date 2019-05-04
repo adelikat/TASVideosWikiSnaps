@@ -1,0 +1,296 @@
+8
+[p 
+	"My work here is truly done.
+	$LF
+]p
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-1858 
+						" Introduction
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-1859 
+						" Game objectives
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-1860 
+						" Detailed informations
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-1861 
+						" The hardest challenge: the game manipulation
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-1862 
+						" List of techniques and oddities appeared in chronological order
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-1863 
+						" Miscellaneous
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 
+	" Introduction
+	$LF
+	[a id=heading-1858 
+	]a
+]h3
+[p 
+	"Nobody is perfect. Not even me so I improved my earlier TAS by 11 frames in total, mostly thanks to the fact that Rash's (the green battletoad) actions are processed earlier than Pimple's. This means he moves/jumps/hits earlier and faster. Also to thank your votes for best NES TAS on my 1st and 2nd versions of Battletoads TASes (that I really appreciate and really wanted to show some love), I changed the background music again and changed the ending. Spoiler ahead.
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+	[a id=heading-1859 
+	]a
+]h3
+[ul 
+	[li 
+		" Emulator used: FCEUX 2.2.1
+		$LF
+	]li
+	[li 
+		" Aims for shortest input (and fastest possible time to start the ending)
+		$LF
+	]li
+	[li 
+		" Entertains without losing a frame
+		$LF
+	]li
+	[li 
+		" Uses warps
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Manipulates cutscenes
+		$LF
+	]li
+	[li 
+		" Manipulates sound effects
+		$LF
+	]li
+	[li 
+		" Manipulates objects (memory corruption)
+		$LF
+	]li
+]ul
+[h3 
+	" Detailed informations
+	$LF
+	[a id=heading-1860 
+	]a
+]h3
+[p 
+	"This is the fastest possible way to finish the game. I optimized the game to death. Changing the route to use Rash for every situations where I need to be fast, I could improve
+	$LF
+]p
+[ul 
+	[li 
+		"1 frame on level 1
+		$LF
+	]li
+	[li 
+		"10 frames on level 3 by using only P2 to kick at the end before the jets
+		$LF
+	]li
+]ul
+[p 
+	"The reason I couldn't improve more frames earlier because there's 2 timed events: the spawn time of rats. They "spawned" every 16th frames, so in order to improve it, one would need to make a 16 frames improvement. This is impossible.
+	$LF
+]p
+[p 
+	"Now you may ask, why does feos added as co-author? While no input used by him, I used his lua scripts (his SVN trunk: 
+	[a class=extlink href=https://code.google.com/p/feos-tas/source/browse/trunk#trunk%2FDisAssemble rel=nofollow 
+		"https://code.google.com/p/feos-tas/source/browse/trunk#trunk%2FDisAssemble
+	]a
+	", look at LUA folder too) for observing subpixel positions and manipulating the ending. Also I used a lot of informations researched by him and his company (bonemage, AnS, DjtZlomus, DyLaX, I hope I didn't missed anyone out). Now let me explain how hard was to find the optimal ending.
+	$LF
+]p
+[h3 
+	" The hardest challenge: the game manipulation
+	$LF
+	[a id=heading-1861 
+	]a
+]h3
+[p 
+	"When you die with one of the toads while riding a jet, the game resets the "objects pointer" and when you respawn, it will erronously reads values from the memory and try to load them as an object. If you wouldn't press anything, it would load values like "FrameTimeCount, LevelId" and other values as an object.
+	$LF
+]p
+[ul 
+	[li 
+		"The first problem: there's 80 different objects with different parameters. This means that any value it reads (except 0x00 empty input), it will be spawned as an object.
+		$LF
+	]li
+	[li 
+		"The second problem: most of the objects are very bad for this scene: either tries to warp the toads to the next level, or crashes the game instantly, but there's also many different ones like enemies with random parameters or changing between scenes (intro, reset, warp screen etc).
+		$LF
+	]li
+	[li 
+		"The third problem: the game is CPU/PPU cycle dependent. This means that the game very frequently processes undefined asm instructions and the slightest change in the movie file can make a desync at the very end.
+		$LF
+	]li
+	[li 
+		"The fourth problem: when you spawn the object, the object pointer (what values will it read from the memory) also changes, so spawning the very same objects in different order yields in vastly diverse results.
+		$LF
+	]li
+	[li 
+		"The fifth problem: understanding the conditions to trigger the ending.
+		$LF
+	]li
+]ul
+[p 
+	"You may ask, how comes I could manipulate the game earlier without these tools: this is because I used a visual test to replicate the events in the earlier movie and reimplement it with different order of spawning objects. But since I wanted to make the perfect TAS, I had to investigate and verify that I really finish it as fast as possible.
+	$LF
+]p
+[p 
+	"While I tried to test a lot of things (and I could assure you that the real rerecord count for this project is around 250.000 rerecords (I used turbo A LOT) ), I couldn't find any way to trigger the ending with fewer frames. Now I don't even think it would be possible. It would take much more time to manipulate all the addresses that the object pointer erronously spaws rather than spawning them through P2's pad.
+	$LF
+]p
+[p 
+	"Now here's how I win the game.
+	$LF
+]p
+[ul 
+	[li 
+		" I suicide with one of the toads while riding on the jet.
+		$LF
+	]li
+	[li 
+		" I manipulate the RNG and game state (with various inputs before spawning and positioning) to make Pimple hit the air. The reason I used this is that it generates the fewest lag frames (and only P1 dies once which is required).
+		$LF
+	]li
+]ul
+[p 
+	"Now I had to manipulate these things: 
+	$LF
+]p
+[ul 
+	[li 
+		" Spawning objects that won't change later (some objects spawns with very limited timers therefore they will be switched with another "random" object)
+		$LF
+	]li
+	[li 
+		" Avoiding various objects ("end of level", enemies, things that modifies the object pointer)
+		$LF
+	]li
+	[li 
+		" Killing P1 to respawn while the spawned object 0x81 or 0x82 (AR, AL) to bring the "game over" screen stays before the next respawn.
+		$LF
+	]li
+]ul
+[p 
+	"Note that depending on when do you start the manipulation (the frame you respawned 1st), both the object counter and RNG and a few values will be changed. Most of the times, using the very same strategy (object wise) won't work with different start. There's no 100% strategy, just a verified technique. 
+	$LF
+]p
+[p 
+	"A huge thanks goes to feos and his company for making these observations and documenting them and the tools they made that let me to optimize and plan the input to the manipulation. Without their works, this TAS wouldn't have this ending but much longer (ending starts at frame 3690!), and wouldn't be optimized it as possible. This is why I added feos as a co-author
+	$LF
+]p
+[h3 
+	" List of techniques and oddities appeared in chronological order
+	$LF
+	[a id=heading-1862 
+	]a
+]h3
+[dl 
+	[dt 
+		"Manipulating cutscenes/texts
+	]dt
+	[dd 
+		" Using different input, it's possible to save 1-3 frames by loading those texts that gives fewer lag frames.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Manipulating music/background
+	]dt
+	[dd 
+		" Pausing very fast alternating on thetwo joystick mutes the music channel. The sideffect is flickering the background on level 3.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Using Rash primarily instead of Pimple
+	]dt
+	[dd 
+		" Rash's action processed earlier than Pimple's so he used to leave the 1st level faster, to scroll the camera earlier, to use the jet, etc.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Synchronizing actions that costs lag frames
+	]dt
+	[dd 
+		" Kicking, dashing, brutal hit etc costs lag frames so hitting something with both toads in the same frame halves it.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Optimizing movement
+	]dt
+	[dd 
+		" Starting fast running earlier is always faster, but sometimes it needs different input (LR instead of UL, empty, UL).
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Z-order mess up
+	]dt
+	[dd 
+		" Pressing left and right simultaneously brings up or down the player rapidly. Also used to get different subpositions.
+		$LF
+	]dd
+]dl
+[h3 
+	" Miscellaneous
+	$LF
+	[a id=heading-1863 
+	]a
+]h3
+[p 
+	"I hope you enjoyed my final TAS of Battletoads and I would also like to thanks the guys @ #tasvideos for answering my questions regarding this TAS (you know who I'm talking about). Anyone asking, this is how you finish Battletoads with 2P without using continue.
+	$LF
+]p
+[p 
+	"See you until my next tas =)
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Very nice improvement! Accepting.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Ilari)
+	": Uploading encodes I have...
+]p

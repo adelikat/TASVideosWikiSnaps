@@ -1,0 +1,339 @@
+4
+[h3 
+	" Introduction
+	$LF
+]h3
+[p 
+	"I always thought I wouldn't do a save-corruption run of this game.
+	$LF
+	"The fact that there is so little room for improvement that all runs would basically look the same, the fact that the 
+	(__wikiLink|1860M|published movie)
+	" was done on a now-obsoleted emulator known to lag less so that every new run will likely appear slower, and also the 
+	(__wikiLink|3890S|bad)
+	" 
+	(__wikiLink|3989S|submission)
+	" 
+	(__wikiLink|3903S|history)
+	" are not exactly inviting to take on this category.
+	$LF
+]p
+[p 
+	"After jlun2 raised my interest in save corruption lately, I experimented with the different game versions, and stumbled over a 10 frame improvement for the current Yellow run by optimized menuing (details below).
+	$LF
+	"But it felt cheap submitting a run like this, so I decided to look for more improvements, a different route that might be even faster and is worth submitting.
+	$LF
+	"After spending way too much time on it and many disappointing routes (I had an alternative Yellow route that is exactly 2 frames slower and a Red route that is 3 frames slower), I was about ready to give up and submit the 10 frame improvement (now with a little more confidence in its optimality) when I finally got it working.
+	$LF
+	"In the end it was a fun challenge, it basically comes down to a logic puzzle at this point that you need to solve, rather than playing a game.
+	$LF
+]p
+[h4 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		" Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+]ul
+[p 
+	[b 
+		"Used emulator:
+	]b
+	" BizHawk 1.8.0 (syncs on 1.1.0 - 1.6.1 and 1.8.0+)
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" About the run
+	$LF
+]h3
+[h4 
+	" Goal choice
+	$LF
+]h4
+[p 
+	"This run tries to finish the game as fast as possible, with no restrictions.
+	$LF
+]p
+[h4 
+	" Emulator Choice
+	$LF
+]h4
+[p 
+	"This movie uses the pre-1.7 frame timing and syncs on all pre-1.7 versions as well as 1.8 which allows to adjust the timing method.
+	$LF
+	"Note that the emulator used in the 
+	(__wikiLink|1860M|published movie)
+	" had less lag (due to emulation inaccuracies), which makes the total times not directly comparable.
+	$LF
+	"It can be best compared with 
+	(__wikiLink|3890S|Masterjun's submission)
+	", which is a re-sync of the published movie, making this run 66 frames faster.
+	$LF
+]p
+[h4 
+	" Version Choice
+	$LF
+]h4
+[p 
+	"I did quite a lot of testing with every Gen I version I could find.
+	$LF
+	"Firstly, the save corruption and the following memory corruption to end the game is possible in all of them, I'm pretty sure every single one can be beaten in less than 2 minutes.
+	$LF
+	"While the save corruption part is the same in all versions, the following memory manipulation to trigger the end of the game differs and makes some versions faster than others, due to differences in how the game memory is laid out.
+	$LF
+]p
+[p 
+	"The major difference is the memory alignment, separating between Japanese and non-Japanese versions.
+	$LF
+	"The general organization of the RAM is the same in all versions, but Japanese names only take up 6 bytes, while non-Japanese take up 11 bytes.
+	$LF
+	"This shifts all following data differently, and also makes switching the party Pokémon around behave differently (since the nickname and the OT name are being swapped as well).
+	$LF
+	"This happens to make getting the right bytes to the right places more difficult in the Japanese version, since the length of the Pokémon data (44), the length of the name (6) data and the length of the item data (2) are not relative prime, which means it's not possible to get any byte to any address just by switching these.
+	$LF
+	"It turns out to be a major problem for all Japanese versions, which makes their manipulation slower than the non-Japanese versions.
+	$LF
+	"(It's not impossible, though, you can always toss items or use the 1st Pokémon slot and use the species list to do exact byte manipulations.)
+	$LF
+]p
+[p 
+	"Since the relevant ROM addresses are the same for all international releases, the only question left is whether to use Yellow or Red/Blue.
+	$LF
+	"This really just came down to whichever version happens to have the faster route: R/B allows for more menuing optimizations and has a faster startup sequence, while Yellow's memory manipulation is easier.
+	$LF
+	"For the longest time I thought that Yellow would be faster, until I finally found a quick route for R/B, that turned out to be even faster.
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" How skipping to the end works
+	$LF
+]h3
+[p 
+	"When resetting the game while saving, it is possible to end up with a loadable save state where the complete party Pokémon data is filled with 0xff.
+	$LF
+	"This makes the game think we have 255 Pokémon in your party, which allows us to swap Pokémon after the 6th and thereby manipulate the following RAM areas.
+	$LF
+	"Specifically, we can change the ID of the current map (at $d35e) and the pointer to the map script (at $d36e) to execute the Hall of Fame cutscene and end the game right away.
+	$LF
+]p
+[p 
+	"The 
+	[a class=extlink href=https://github.com/iimarckus/pokered/blob/master/scripts/halloffameroom.asm rel=nofollow 
+		"Hall of Fame code
+	]a
+	" is the same in all versions of the game, but can be located at different places inside the ROM.
+	$LF
+	"There are two possible ways to jump into it, either calling the HallofFameRoomScript to run the full cutscene (as seen in the 
+	(__wikiLink|1860M|current publication)
+	"), or by jumping directly into HallofFameRoomScript2, which starts the Dex rating sequence immediately (as seen 
+	(__wikiLink|2434M|here)
+	").
+	$LF
+	"Note that it's not possible to jump any further into the sequence, such as executing the credits directly, since the ending bit of HallofFameRoomScript2 is actually needed to finish off the game as expected, by restarting after a button press (otherwise it would loop in the credits like seen 
+	(__wikiLink|3903S|here)
+	").
+	$LF
+]p
+[h3 
+	" Memory manipulation mechanics
+	$LF
+]h3
+[p 
+	"Memory manipulation will happen mostly by switching Pokémon in your party.
+	$LF
+	"When two Pokémon A and B are swapped, four things happen in this order:
+	$LF
+]p
+[ul 
+	[li 
+		" The species is swapped (1 byte): $d164 + A  <->  $d164 + B
+		$LF
+	]li
+	[li 
+		" The Pokémon data is swapped (44 bytes): $d16b + 44*A  <->  $d16b + 44*B
+		$LF
+	]li
+	[li 
+		" The Pokémon OT name is swapped (11 bytes): $d273 + 11* A <->  $d273 + 11*B
+		$LF
+	]li
+	[li 
+		" The Pokémon nickname is swapped (11 bytes): $d2b5 + 11*A  <->  $d2b5 + 11*B
+		$LF
+	]li
+]ul
+[p 
+	"Note that these memory areas are exactly back to back with 6 Pokémon in your party.
+	$LF
+	"With more than 6, however, they overlap, which can lead to some memory segments being moved around multiple times during one swapping operation, and allows more sophisticated memory manipulation.
+	$LF
+]p
+[p 
+	"Our goal is to change the following addresses:
+	$LF
+]p
+[ul 
+	[li 
+		" The map script pointer at $d36e, which is affected by the 12th Pokémon data or the 23rd OT name or the 17th nickname
+		$LF
+	]li
+	[li 
+		" The current map ID $d35e, which is affected by the 12th Pokémon data or the 22nd OT name or the 16th nickname
+		$LF
+	]li
+]ul
+[h3 
+	" Optimizations
+	$LF
+]h3
+[p 
+	"This run uses a lot of minor time savers, especially while menuing, most of which involve pressing multiple buttons on the same frame.
+	$LF
+]p
+[p 
+	"In most menus, the game allows you to press the up/down key together with the A key to move one element while simultaneously confirming, saving some frames (the concrete amount depends on the scroll lag of the menu).
+	$LF
+	"This seems so obvious that I was quite embarrassed to find out about it only as of lately.
+	$LF
+	"Note that this only works in R/B and not in Yellow.
+	$LF
+]p
+[p 
+	"In some menus (specifically the item menu in this run), you can scroll faster by pressing other keys while scrolling up/down.
+	$LF
+	"This works because the game only checks for some newly pressed key, not the up/down key specifically.
+	$LF
+	"That means by pressing left and right alternatingly while holding up/down, you can save a frame for each scrolled item compared to tapping the up/down key.
+	$LF
+	"This does work in Yellow as well (and would by itself allow for a 10 frame improvement over the published movie).
+	$LF
+]p
+[p 
+	[br 
+	]br
+	$LF
+]p
+[h3 
+	" Route
+	$LF
+]h3
+[h4 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		" The Trainer ID is manipulated to be 0x64bd, which is used as the map script address later. Other values work as well, this one is the fastest to manipulate, costing 17 extra frames. This is the only luck manipulation in this run, and brute-forcing it accounts for over 99% of the run's rerecords.
+		$LF
+	]li
+	[li 
+		" The player is given a default name ("RED"), it is not relevant in this run.
+		$LF
+	]li
+	[li 
+		" The enemy is also given the default name "JOHN". Part of the name will be later scrolled through in the item menu, and JOHN causes less lag frames, saving 30 frames over the second-fastest option "GARY".
+		$LF
+	]li
+	[li 
+		" After the intro, the game is immediately save-corrupted and loaded up again.
+		$LF
+	]li
+]ul
+[h4 
+	" Memory manipulation
+	$LF
+]h4
+[ul 
+	[li 
+		" Before the memory manipulation is started, I take a step downward. This changes the block-relative y coordinate from 0 to 1, reducing item scroll lag and therefore saving 8 frames.
+		$LF
+	]li
+	[li 
+		" First, the 4th Pokémon is switched with the 13th. This does not do any immediate good for us, but prepares important memory areas, specifically filling the 13th Pokémon data with all 0xff (from the save-corrupted 4th data) and filling the 4th nickname with all 0s (from the empty item list).
+		$LF
+	]li
+	[li 
+		" Next, swapping the 11th and the 12th. This moves all interesting bytes (including the manipulated Trainer ID) into the item data.
+		$LF
+	]li
+	[li 
+		" Next, swapping the 10th and the 13th. This uses the first preparation swap to do two things: It sets the item count to 16 (allowing us to swap items around) and it sets the number of caught Pokémon to 64 (which is important for Oak's Dex evaluation text).
+		$LF
+	]li
+	[li 
+		" Now, the items are moved around: the 1st item, containing what will later be the map ID 0xcf, is moved to slot 5, and the 3rd item, containing one half of the trainer ID, is moved to slot 13 to align it with the script pointer.
+		$LF
+	]li
+	[li 
+		" Using to more swaps (17 with 22 and 23 with 18), the aligned bytes are put in the right places, ending up with a map ID of 0xcf and a script pointer of 0x64bd.
+		$LF
+	]li
+	[li 
+		" After the menu is closed, everything is set up and the input file ends. Everything after this point does not need any inputs.
+		$LF
+	]li
+]ul
+[h4 
+	" The end
+	$LF
+]h4
+[ul 
+	[li 
+		" Map 0xcf is the 2nd floor of the Silph Co. building, which happens to be on the same ROM bank (0x16) as the Hall of Fame room, so the script pointer 0x64bd executes code at $16:64bd, which is inside the HallofFameRoomScript2, starting the Dex rating sequence immediately.
+		$LF
+	]li
+	[li 
+		" Even though we have 255 Pokémon in our party, the first species is set to 0xff so that none are registered in the Hall of Fame.
+		$LF
+	]li
+	[li 
+		" The number of caught Pokémon is 64, which causes an Oak text that doesn't require any button presses. Also, it seems the first line was one character too long, and the translators thought "Hmm, what to do... I know! Let's remove one 't' from the word 'getting' nobody will ever notice". I guess I should be thankful, since this run depends on this text not being any longer :D
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Accepting as an improvement to the 
+	(__wikiLink|1860M|published movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Spikestuff)
+	": Publishing. Meow~
+]p

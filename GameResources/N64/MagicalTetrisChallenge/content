@@ -1,0 +1,740 @@
+9
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#heading-4005 
+						" Tetris Parameters
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4006 
+						" Luck Manipulation
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4007 
+						" Scoring
+						$LF
+					]a
+				]li
+				[li 
+					[ul 
+						[li 
+							[a href=#heading-4008 
+								" Line Clears
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4009 
+								" End of Stage Bonus
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4010 
+								" Bonus Multiplier
+								$LF
+							]a
+						]li
+						[li 
+							[a href=#heading-4011 
+								" Miscellaneous
+								$LF
+							]a
+						]li
+					]ul
+				]li
+				[li 
+					[a href=#heading-4012 
+						" Magic Meter
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4013 
+						" AI
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4014 
+						" Attack Table
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#heading-4015 
+						" Miscellaneous
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[p 
+	"Magical Tetris Challenge is a rather obscure Tetris game made by Capcom in 1998. Like a lot of Tetris games, the objective is to clear multiple lines at once and/or clear lines with consecutive pieces to send attacks to your opponent, and whoever fills their field to the top first loses. But unlike most Tetris games, attacks don't come in the form of rising rows of garbage blocks. Instead, sending attacks fills up your opponent's queue with unusual, harder to use "magical" pieces which they then have to place.
+	$LF
+]p
+[p 
+	"The magical pieces start out as pentominoes. However, if you clear a line while you have magical pieces in your queue, you can counter some of your magical pieces, which turn into square blocks and are sent back to your opponent, showing up as "?"s in their queue. These are 2x2 square blocks after the first counter, but they can be countered right back, and they grow with every volley up to a maximum size of 5x5 after 4 counters.
+	$LF
+]p
+[p 
+	"If you let your queue fill to capacity, any overflow turns existing pieces in your queue into "!". A "!" piece can't be countered, and they're massive pieces you really do NOT want to get, such as pyramids and diamonds.
+	$LF
+]p
+[p 
+	"One other unique feature is a meter in the bottom corner. Single-line clears that don't counter anything fill up the meter. When it reaches the maximum, after the next piece you drop, your entire playing field will collapse down to the bottom, your lowest column gets removed entirely, and then everything above meter's height is erased and the meter grows longer for next time. Doing an All Clear is the only way to shrink the meter back down. 
+	$LF
+]p
+[h3 
+	" Tetris Parameters
+	$LF
+	[a id=heading-4005 
+	]a
+]h3
+[ul 
+	[li 
+		" ARE: 31 frames
+		$LF
+	]li
+	[li 
+		" Line clear delay: (16 + # of lines cleared) frames, skips ARE
+		$LF
+	]li
+	[li 
+		" DAS: (Likely not useful for TAS purposes)
+		$LF
+		[ul 
+			[li 
+				" Delay: 9 frames (first auto-shift occurs on frame 10)
+				$LF
+			]li
+			[li 
+				" Repeat rate: 1G (1 block/frame)
+				$LF
+			]li
+			[li 
+				" Does not charge during ARE.
+				$LF
+			]li
+			[li 
+				" Reversing direction without a frame of empty input preserves the charge.
+				$LF
+			]li
+		]ul
+		" Lock delay: 30 frames, no resets
+		$LF
+	]li
+	[li 
+		" Soft drop speed: 1G (1 block/frame)
+		$LF
+	]li
+]ul
+[h3 
+	" Luck Manipulation
+	$LF
+	[a id=heading-4006 
+	]a
+]h3
+[p 
+	"The game appears to always start with the same seed for the first round after boot, much like Sega's 1988 arcade Tetris and its famous "power-on pattern".
+	$LF
+]p
+[p 
+	"However, there are ways to advance the seed in mid-game without dropping a piece, meaning the piece sequence will not always be entirely the same throughout the match. Sending magical pieces advances the seed; each pentomino sent increments the seed when it gets added to the queue, while "!" and "?" pieces need to be verified. Clearing a line also advances the seed.
+	$LF
+]p
+[p 
+	"Since both players share the second-to-next piece in the middle when neither player has any magical pieces queued, it's possible to manipulate luck by simply stalling and waiting for the opponent to drop a piece.
+	$LF
+]p
+[p 
+	"Additionally, when the meter does its thing, the next several pieces in the sequence are guaranteed to be I's. Presumably this was programmed to help the player who just triggered their meter, since it tends to leave a flat playing field with one deep canyon in it, where an I would be extremely useful and anything else would be of minimal use. But with some luck manipulation and/or good timing, this can be exploited to get an All Clear.
+	$LF
+]p
+[h3 
+	" Scoring
+	$LF
+	[a id=heading-4007 
+	]a
+]h3
+[h4 
+	" Line Clears
+	$LF
+	[a id=heading-4008 
+	]a
+]h4
+[p 
+	"The base values are as follows, with the 
+	[em 
+		"n
+	]em
+	"th hit in a combo multiplied by 2^
+	[em 
+		"n
+	]em
+	":
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Lines
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"Points
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"Single
+			]td
+			[td 
+				"100
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"Double
+			]td
+			[td 
+				"250
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"Triple
+			]td
+			[td 
+				"750
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"Tetris
+			]td
+			[td 
+				"3000
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"Pentris
+			]td
+			[td 
+				"5000
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" End of Stage Bonus
+	$LF
+	[a id=heading-4009 
+	]a
+]h4
+[ul 
+	[li 
+		" Time bonus: The faster the more points, the exact formula has yet to be determined.
+		$LF
+	]li
+	[li 
+		" 1,000 points for each countered magical piece
+		$LF
+	]li
+	[li 
+		" 100,000 points for each All Clear
+		$LF
+	]li
+]ul
+[h4 
+	" Bonus Multiplier
+	$LF
+	[a id=heading-4010 
+	]a
+]h4
+[p 
+	"The multiplier is based purely on the highest combo achieved in the stage.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Max Combo
+			]th
+			[th 
+				"Multiplier
+			]th
+		]tr
+		[tr 
+			[td 
+				"0
+			]td
+			[td 
+				"x2
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"x1
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"x2
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"x5
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"x10
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"x20
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"x40
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"x100
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"x200
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"x400
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"x800
+			]td
+		]tr
+		[tr 
+			[td 
+				"11
+			]td
+			[td 
+				"x1000
+			]td
+		]tr
+		[tr 
+			[td 
+				"12
+			]td
+			[td 
+				"x1200
+			]td
+		]tr
+		[tr 
+			[td 
+				"13
+			]td
+			[td 
+				"x1400
+			]td
+		]tr
+		[tr 
+			[td 
+				"14
+			]td
+			[td 
+				"x1600
+			]td
+		]tr
+		[tr 
+			[td 
+				"15
+			]td
+			[td 
+				"x1800
+			]td
+		]tr
+		[tr 
+			[td 
+				"16
+			]td
+			[td 
+				"x2000
+			]td
+		]tr
+		[tr 
+			[td 
+				"17
+			]td
+			[td 
+				"x3000
+			]td
+		]tr
+		[tr 
+			[td 
+				"18
+			]td
+			[td 
+				"x4000
+			]td
+		]tr
+		[tr 
+			[td 
+				"19
+			]td
+			[td 
+				"x5000
+			]td
+		]tr
+		[tr 
+			[td 
+				"20
+			]td
+			[td 
+				"x10000
+			]td
+		]tr
+	]tbody
+]table
+[h4 
+	" Miscellaneous
+	$LF
+	[a id=heading-4011 
+	]a
+]h4
+[p 
+	"In Endless Mode, you also gain 1 point after each stage, added during the stage transition.
+	$LF
+]p
+[h3 
+	" Magic Meter
+	$LF
+	[a id=heading-4012 
+	]a
+]h3
+[p 
+	"The meter starts at level 2. Each time it triggers, it increases by one level (up to the max of 5), and each All Clear decreases it by one level. Levels map to heights (in blocks) as follows:
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Meter stage
+			]th
+			[th 
+				"Normal
+			]th
+			[th 
+				"Handicapped
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"10
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"12
+			]td
+		]tr
+		[tr 
+			[td 
+				"5 (max)
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"?
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"On Easy, the AI gets a handicapped meter. On Expert, the player gets a handicapped meter. Otherwise, the normal heights apply.
+	$LF
+]p
+[p 
+	"Only singles can generate "charges" that fill the meter. It takes 8 charges to fill one block of the meter. However, if you have pieces in your queue that can be countered, charges will go towards countering instead of the meter. After 30 seconds have passed in the match, the intensity level goes to LV-2 and singles start generating 2 charges each plus 1 attack.
+	$LF
+]p
+[p 
+	"There's a delay between the line clear and the charge actually being added to the meter, as illustrated by the attack object flying up to the top of the playfield and then moving back down to the meter. This appears to vary based on how much of the meter is already filled and whether or not the player has any magical pieces in their queue.
+	$LF
+]p
+[p 
+	"When it's full, the playfield collapses, dropping all blocks down as far as possible, then the lowest column is removed entirely and everything above the top of the meter is removed.
+	$LF
+]p
+[p 
+	"The playfield collapse triggered by the meter takes an additional 4 frames per hole (i.e. any empty cell with one or more blocks above it) and 1 frame per block in the lowest column (post-collapse).
+	$LF
+]p
+[h3 
+	" AI
+	$LF
+	[a id=heading-4013 
+	]a
+]h3
+[p 
+	"Easy and Normal mode appear to use the same AI, except in Normal mode the AI plays a bit faster. Expert uses a different AI, which will stall and wait for just the right piece to come up in the shared piece preview.
+	$LF
+]p
+[h3 
+	" Attack Table
+	$LF
+	[a id=heading-4014 
+	]a
+]h3
+[p 
+	"The number of magical pieces sent or countered in an attack depends on the number of lines cleared, whether or not it was part of a combo, and most notably the intensity level in the top center of the screen.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Clear
+			]th
+			[th 
+				"LV-1
+			]th
+			[th 
+				"LV-2
+			]th
+			[th 
+				"LV-3
+			]th
+			[th 
+				"LV-4
+			]th
+		]tr
+		[tr 
+			[td 
+				"Single
+			]td
+			[td 
+				"0+1
+			]td
+			[td 
+				"1+2
+			]td
+			[td 
+				"1+2
+			]td
+			[td 
+				"2+2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Double
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"Triple
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tetris
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"Pentris
+			]td
+			[td 
+				"?
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"10
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"Note on singles: Singles are special because they can contribute to your Magic Meter instead of sending garbage, but the charge will go towards countering instead if possible. In other words, a value of X+Y is processed as follows:
+	$LF
+]p
+[ol 
+	[li 
+		" Send X magical pieces, countering if possible.
+		$LF
+	]li
+	[li 
+		" Counter up to Y pieces.
+		$LF
+	]li
+	[li 
+		" Any of the Y charges not used to counter in step 2 go towards filling up the Magic Meter.
+		$LF
+	]li
+]ol
+[p 
+	"Combos add +1 to each clear from the 2nd hit onwards. For a single+combo, the combo's +1 counters first.
+	$LF
+]p
+[h3 
+	" Miscellaneous
+	$LF
+	[a id=heading-4015 
+	]a
+]h3
+[p 
+	"R to skip cutscenes and menu transitions.
+	$LF
+]p
+[p 
+	"Hard drop + rotate on the same frame: The game processes the drop, then the rotation, and 
+	[em 
+		"then
+	]em
+	" sets remaining lock delay to 0 -- similar to the behavior that allows Synchro moves in Tetris: The Grand Master.
+]p

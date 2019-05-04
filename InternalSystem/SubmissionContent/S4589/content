@@ -1,0 +1,1020 @@
+20
+[p 
+	"CD-MAN is a DOS game created by Creative Dimensions in 1989 and updated in 1992.  It would have been just your basic run-of-the-mill Pac Man clone, except for one  aspect: you could choose your game speed.  The options ranged from the mind-numbingly slow "Zzzzz..." to the literally impossible "Warp".  In fact, they made "Warp" so fast, that it is safe to argue that no one in history has ever beaten even the first level at that speed.  This TAS makes history by finally beating not just the first level, but all five levels, twice each.  And all in less than 2.5 seconds of actual gameplay.   
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: JPC-rr 11.2
+		$LF
+	]li
+	[li 
+		" Uses hardest difficulty (
+		[del 
+			"Ludicrous
+		]del
+		"Warp Speed)
+		$LF
+	]li
+	[li 
+		" 2 players simultaneous
+		$LF
+	]li
+	[li 
+		" Completes all levels twice
+		$LF
+	]li
+	[li 
+		" Uses JPC-rr's default CPU speed (CPUDIVIDER 50)
+		$LF
+	]li
+]ul
+[h3 
+	" Quick Encode
+	$LF
+]h3
+[p 
+	"Note: This video is at 
+	[b 
+		"game speed!
+	]b
+	" 
+	$LF
+	(youtube|v=4_DmxVZN1gE)
+	" 
+	$LF
+]p
+[p 
+	"Did you blink?  Here it is at 1/4 speed (15 fps)
+	$LF
+	(youtube|v=xQfc4ug2rwo)
+	" 
+	$LF
+]p
+[p 
+	"Still too fast?  Here it is at 1/10th speed (6 fps)
+	$LF
+	(youtube|v=SNFZ02c1sVQ)
+	" 
+	$LF
+]p
+[h3 
+	" Game Version Choice
+	$LF
+]h3
+[p 
+	"Probably more people recognize CD-Man Version 1.0 than do 2.0.  Version 1.0 was released in 1989 and featured a very familiar-looking hero.  It was also unfinished, with the third level explicitly saying so.
+	$LF
+]p
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4404/36544652124_48af42dbf9.jpg 
+	]img
+	" 
+	[img class=embed src=https://farm5.staticflickr.com/4511/37207368536_345b0f25e0.jpg 
+	]img
+	$LF
+]p
+[p 
+	"Version 2.0 was released in 1992 with some significant changes:
+	$LF
+]p
+[ul 
+	[li 
+		" Had five complete levels 
+		$LF
+	]li
+	[li 
+		" Only had to complete each level twice (instead of three times)
+		$LF
+	]li
+	[li 
+		" Changed the hero from a Pac Man copy to "The Snoofer" (probably to avoid a lawsuit)
+		$LF
+	]li
+	[li 
+		" Introduced two-player simultaneous play
+		$LF
+	]li
+]ul
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4335/37207367866_540607a8e8.jpg 
+	]img
+	" 
+	[img class=embed src=https://farm5.staticflickr.com/4460/36544652664_2ba4f5536c.jpg 
+	]img
+	$LF
+]p
+[p 
+	"Although both versions had the widely varying speed choices mentioned in the TAS description above, I chose to take on Version 2.0 because of the extra levels and the two-player simultaneous play.
+	$LF
+]p
+[h3 
+	" Warp Speed
+	$LF
+]h3
+[p 
+	"During the judging of the game, turska discovered that Warp speed is unbounded and is only limited by the clock speed of the CPU.  Much thanks, turska!  
+	$LF
+]p
+[p 
+	"At JPC-rr's default CPU speed during each frame of the game both the heroes and the villains both move up to twelve moves each.  
+	[em 
+		"That's twelve moves in 14 milliseconds or 0.014 seconds!
+	]em
+	$LF
+]p
+[p 
+	"JPC-rr's default clock speed of 20 MHz is appropriate for this TAS, as it matches the speed of 386 and 486 CPU clocks at the time of the game's release (1992) (see 
+	[a class=extlink href=http://www.islandnet.com/~kpolsson/micropro/proc1990.htm rel=nofollow 
+		"http://www.islandnet.com/~kpolsson/micropro/proc1990.htm
+	]a
+	").  Any future TASes should use the default clock speed.  
+	$LF
+]p
+[p 
+	"This insanely fast speed offered some unique challenges to making this TAS:
+	$LF
+]p
+[h4 
+	" Impossible Turns
+	$LF
+]h4
+[p 
+	"Due to the speed, there are some tight turns in the game that are simply impossible to make.  Even if you input commands to move and turn immediately one after the other, by the time it processes the command to turn, the hero has already moved past the turn.  This aspect made route planning a little trickier.
+	$LF
+]p
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4474/36999027410_2ca931785c_m.jpg 
+	]img
+	$LF
+]p
+[p 
+	"Example of an impossible turn
+	$LF
+]p
+[h4 
+	" Trial and Error
+	$LF
+]h4
+[p 
+	"The only way to TAS this game was frame-by-frame trial and error.  Each frame took many rerecords, as I had to slowly build up and buffer moves for each frame.  The cycle of input > save > frame-advance > restore > input > save > frame-advance > restore, is pretty tedious, so I had to do this TAS in bits and pieces, and have been working on this off-and-on since 2013.
+	$LF
+]p
+[p 
+	[b 
+		"Here's an example of what doing one frame would entail:
+	]b
+	$LF
+]p
+[p 
+	"The board at the start of the frame.  I've drawn in the routes I want the heroes to take:
+	$LF
+]p
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4451/37254503411_e92d1f8e34_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	"NOTE: P1 is on the left (blue path), P2 is on the right (red path)
+	$LF
+]p
+[pre 
+	"1. Save Slot 10 (In case we need to trapped several frames from now and need to get back here)
+	$LF
+	"2. Save Slot 1
+	$LF
+	"3. P2 Left
+	$LF
+	"4. P1 Left 
+	$LF
+	"5. P2 Down
+	$LF
+	"6. P1 Up
+	$LF
+	"7. Save Slot 2
+	$LF
+	"8. Frame Advance (checking to make sure inputs did what I expected)
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4389/36999082100_4accdff2ab_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"So far, so good.
+	]em
+	$LF
+]p
+[pre 
+	"9. Restore Slot 2
+	$LF
+	"10. P2 Right
+	$LF
+	"11. P1 Left
+	$LF
+	"12. Save Slot 3
+	$LF
+	"13. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4465/37254511061_ac2586ff70_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"Looks good.  Next to turn them.
+	]em
+	$LF
+]p
+[pre 
+	"14. Restore Slot 3
+	$LF
+	"15. P1 Up
+	$LF
+	"16. P2 Up
+	$LF
+	"17. Save Slot 4
+	$LF
+	"18. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4436/36999082820_026e039c58_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"Nope.  P2 made its turn, but P1 didn't make the turn up I wanted.  At least we know P2's corner isn't an impossible one
+	]em
+	$LF
+]p
+[pre 
+	"19. Restore Slot 3
+	$LF
+	"20. P2 Up
+	$LF
+	"21. P1 Up
+	$LF
+	"22. Save Slot 4
+	$LF
+	"23. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4496/36999082360_6bd2bf0895_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"Ugh. Still no. P1 Now made its turn, but P2 went past.  We'll have to do these one at a time
+	]em
+	$LF
+]p
+[pre 
+	"24. Restore Slot 2
+	$LF
+	"25. P2 Right
+	$LF
+	"26. P2 Up
+	$LF
+	"27. Save Slot 3
+	$LF
+	"28. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4351/37254511351_e604dbe4d7_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"P2 looks good.  Next for P1
+	]em
+	$LF
+]p
+[pre 
+	"29. Restore Slot 3
+	$LF
+	"30. P2 Down (Don't go any further out of your way than you need to.  Also, don't get too close to those spiders)
+	$LF
+	"31. P1 Left
+	$LF
+	"32. P1 Up
+	$LF
+	"33. Save Slot 4
+	$LF
+	"34. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4510/37254511531_9dc2a9c859_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"WHAT THE HELL, P2!  I thought you had eaten that dot!  Grumble, grumble...
+	]em
+	$LF
+]p
+[pre 
+	"35. Restore Slot 3
+	$LF
+	"36. P1 Left
+	$LF
+	"37. P1 Up
+	$LF
+	"38. P2 Down
+	$LF
+	"39. Save Slot 4
+	$LF
+	"40. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4395/37254510481_9fa20907e9_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"Hmm... hard to tell.  Let's advance another frame to see what happens
+	]em
+	$LF
+]p
+[pre 
+	"41. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4365/36999081660_434e110a4b_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"Yeah, that's what I wanted!  P2 lost a life.  Let's see if I can avoid that by turning
+	]em
+	$LF
+]p
+[pre 
+	"42. Restore Slot 4
+	$LF
+	"43. P2 Right
+	$LF
+	"44. Save Slot 5
+	$LF
+	"45. Frame Advance 
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4395/37254510481_9fa20907e9_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"Same as before.  Let's go one more
+	]em
+	$LF
+]p
+[pre 
+	"46. Frame Advance
+	$LF
+]pre
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4468/36999081790_041740009a_z.jpg 
+	]img
+	$LF
+]p
+[p 
+	[em 
+		"There we go!  I'll have P1 turn left at the start of the next frame to avoid those spiders
+	]em
+	$LF
+]p
+[pre 
+	"47. Restore Slot 5
+	$LF
+	"48. Frame Advance 
+	$LF
+	"1. Save Slot 11 (Store the latest good frame in case we need to get back here)
+	$LF
+	"2. Save Slot 1 (Start of a new frame)
+	$LF
+	"3. P1 Left
+	$LF
+	"... Trial and Error the next frame ...
+	$LF
+]pre
+[h3 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 
+	" Level 1
+	$LF
+]h4
+[p 
+	"Because you need to eat a key to open the gate to the upper-half of the level, a little bit of luck manipulation was required to get the key to show up in a convenient location.
+	$LF
+]p
+[h4 
+	" Level 2
+	$LF
+]h4
+[p 
+	"This level was the most annoying to do, as it has the most dots to eat, and lots of open areas.
+	$LF
+]p
+[h4 
+	" Level 3
+	$LF
+]h4
+[p 
+	"I had to redo this level several times (on both passes) as I got trapped a couple times by one of the rocket ships.  There were a number of impossible turns in this level which also spiced things up.
+	$LF
+]p
+[h4 
+	" Level 4
+	$LF
+]h4
+[p 
+	"Arguably this the hardest level when playing the game normally, due to its long narrow paths that are easy to get trapped in.  Fortunately, since it has so few dots, it was easy to TAS the entire level with the enemies being edible practically the entire time.
+	$LF
+]p
+[p 
+	"Here's an image of the route map I created for this level:
+	$LF
+]p
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4391/36999062490_fce6e90348_z.jpg 
+	]img
+	$LF
+]p
+[h4 
+	" Level 5
+	$LF
+]h4
+[p 
+	"Again, a pretty easy level to do.  On the second run through it, I end input one frame early, and let the heroes walk the long corridors at the top to end the TAS.
+	$LF
+]p
+[p 
+	"Once you beat Level 5 twice in the single player game, you get the following screen:
+	$LF
+]p
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4466/37254662211_377fa84d03_q.jpg 
+	]img
+	$LF
+	"(Looks like they left Pac Man in there!)
+	$LF
+]p
+[p 
+	"Unfortunately for the two player simultaneous game, it just takes you back the first level again.  I consider the TAS complete once Level 5 has been beaten twice.
+	$LF
+]p
+[h3 
+	" Other comments
+	$LF
+]h3
+[p 
+	"My goal in route planning was to have as little overlap and retracing in the heroes paths as possible, and for each hero to end the level at approximately the same time.  I'm sure a couple frames could be saved on better route planning, especially on the first couple levels where I was still getting the hang of things.  I do think I did a pretty decent job overall, and I'm satisfied with the result.  If anyone wants to start a frame war over this, they're welcome to it.  I won't be responding, as the amount of manual work to TAS this game isn't worth the few frames of savings for me.
+	$LF
+]p
+[p 
+	"I think a one player TAS would be worthwhile.  If anyone wants to pick it up, feel free to get in touch with me for tips and pointers.
+	$LF
+]p
+[p 
+	"It would also be interesting as a playaround to see if the game is even TASable at JPC-rr's fastest speed (CPUDIVIDER 1), and what that would even look like.
+	$LF
+]p
+[p 
+	"Suggested Screenshot: 2369
+	$LF
+]p
+[p 
+	[img class=embed src=https://farm5.staticflickr.com/4417/37207647806_002ce5d726.jpg 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	"Files:
+	$LF
+]p
+[p 
+	"HDD, 64 tracks, 63 sectors, 16 sides.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Filename
+			]th
+			[th 
+				"Size
+			]th
+			[th 
+				"MD5
+			]th
+			[th 
+				"Timestamp
+			]th
+		]tr
+		[tr 
+			[td 
+				"CDMAN2.EXE
+			]td
+			[td 
+				"35337
+			]td
+			[td 
+				"d0130eccbf574f3b12ffd0b27731a754
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"CDMAN2.ICO
+			]td
+			[td 
+				"766
+			]td
+			[td 
+				"962552a4f3bd73ca5cea109938c6eb8e
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"CHARTAB.CDM
+			]td
+			[td 
+				"3556
+			]td
+			[td 
+				"fea94215cca5e48347e6cd1b70bd36f8
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"DEMO.CDM
+			]td
+			[td 
+				"4746
+			]td
+			[td 
+				"45f9ab60a74ca150ab06e41682750cb4
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"DPS.NFO
+			]td
+			[td 
+				"7186
+			]td
+			[td 
+				"18274aa1d427691f3875916febd18e34
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"FILE_ID.DIZ
+			]td
+			[td 
+				"525
+			]td
+			[td 
+				"bfc71aeda77d7c3649ab52750413e775
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAFIX1.CDM
+			]td
+			[td 
+				"14202
+			]td
+			[td 
+				"773ac57bcbe95ce03e1cc68589414263
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAFIX2.CDM
+			]td
+			[td 
+				"10260
+			]td
+			[td 
+				"3053a9ca6b8813e097f38e52e59f908a
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAFIX3.CDM
+			]td
+			[td 
+				"11863
+			]td
+			[td 
+				"7e8a8847b58d7ff2ee5372fe3fcc74ac
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAFIX4.CDM
+			]td
+			[td 
+				"11788
+			]td
+			[td 
+				"0d204d644f804fe14ceb6fd7e03a4c60
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAFIX5.CDM
+			]td
+			[td 
+				"10851
+			]td
+			[td 
+				"5052a40229ce5e4de71c8b3d4f8750c0
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAPHIC1.CDM
+			]td
+			[td 
+				"69756
+			]td
+			[td 
+				"76d4649d371a3f0c4e49d89f133f6047
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAPHIC2.CDM
+			]td
+			[td 
+				"51319
+			]td
+			[td 
+				"9252a9e1d372663dab15dbc1155c35b9
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAPHIC3.CDM
+			]td
+			[td 
+				"60178
+			]td
+			[td 
+				"44ba97ca0e2dd0c068e4facc45194775
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAPHIC4.CDM
+			]td
+			[td 
+				"64206
+			]td
+			[td 
+				"8e059189ca2933a5c1707cc6979b8b93
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"GRAPHIC5.CDM
+			]td
+			[td 
+				"50233
+			]td
+			[td 
+				"864f6cb1a58d4df053a018be070b9369
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"HELP.CDM
+			]td
+			[td 
+				"4394
+			]td
+			[td 
+				"432a832047d26f24121c67a077ffb5e8
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"HIGHSC.CDM
+			]td
+			[td 
+				"2221
+			]td
+			[td 
+				"a22ef1926944541799714a1ede19db97
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"SCREEN1.CDM
+			]td
+			[td 
+				"43268
+			]td
+			[td 
+				"b8470c931013737c0e83d42f009bc396
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"SCREEN2.CDM
+			]td
+			[td 
+				"40308
+			]td
+			[td 
+				"0aa73ad4e1e2caa082d4b494d18ba8b1
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"SCREEN3.CDM
+			]td
+			[td 
+				"32900
+			]td
+			[td 
+				"d5a7a8757bfd40c1c7612dedfc3e5b7f
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"SCREEN4.CDM
+			]td
+			[td 
+				"38201
+			]td
+			[td 
+				"7a2122dd3c007686b9a31e80a02f3297
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"SCREEN5.CDM
+			]td
+			[td 
+				"35892
+			]td
+			[td 
+				"af0313441c572c811f5dc556b778c868
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"TITLE.CDM
+			]td
+			[td 
+				"70790
+			]td
+			[td 
+				"89e065f111ef192715ef61d86cd60a09
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"WOSHI.CDM
+			]td
+			[td 
+				"48041
+			]td
+			[td 
+				"ee674a77e95ccda72a97349701ff3c88
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+		[tr 
+			[td 
+				"XMUSE.BIN
+			]td
+			[td 
+				"204019
+			]td
+			[td 
+				"9e49ec23496bd585a760004bfb71ce63
+			]td
+			[td 
+				"19900101000000
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Nach)
+	": Replacing submission with 
+	[a href=/userfiles/info/20830882759795573 
+		"better file from author
+	]a
+	".
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": Judging.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:turska)
+	": This game's speed is poorly controlled and depends on system performance. This is not limited to the absurdly quick Warp speed setting used in this TAS; lower speed settings are also affected.
+	$LF
+]p
+[p 
+	"The Warp speed setting used in this TAS is absurdly fast at JPC-RR's default settings; in games like 
+	(__wikiLink|2247M)
+	", even a high speed remains watchable and does not alter gameplay under TAS conditions. The speed is so fast that movement is significantly restricted and affects strategy in the TAS; TASing it on a slower emulated system would have more freedom of movement, while a faster system would limit movement even more. This makes TASes done on slower/faster emulated systems and different speed not directly comparable.
+	$LF
+]p
+[p 
+	"To avoid these issues for future movies of this game, TASes of CD-Man should use a system speed setting that is equal or slower than JPC-RR's defaults; the default setting is CPU Frequency Divider = 50.
+	$LF
+	[br 
+	]br
+	$LF
+	[br 
+	]br
+	$LF
+	[br 
+	]br
+	$LF
+	"The copy of the game used in this submission is not "clean" - DPS.NFO is a warez release notice that is not found in official releases, such as those found on 
+	[a class=extlink href=https://archive.org/details/CD-Man rel=nofollow 
+		"The Internet Archive
+	]a
+	". This makes the movie desync on copies that lack this file. Aside from unused files and the resulting sync difference, the copy used is identical to the "official" Archive.org release.
+	$LF
+	[br 
+	]br
+	$LF
+	[br 
+	]br
+	$LF
+	[br 
+	]br
+	$LF
+	"Whether this run should be published in Moons or Vault is not straightforward. There are several factors favoring Moons:
+	$LF
+]p
+[ul 
+	[li 
+		"Good audience response.
+		$LF
+	]li
+	[li 
+		"Has a high chance of being nominated for awards, mainly Speedy TAS. Vault runs are ineligible for awards, so Vaulting this run would effectively disqualify it from being nominated.
+		$LF
+	]li
+	[li 
+		"One of the fastest TASes ever submitted.
+		$LF
+	]li
+	[li 
+		"Less than two seconds of gameplay. At such a speed, even Pac-Man makes for an entertaining TAS.
+		$LF
+	]li
+]ul
+[p 
+	"There are also problems, howewer:
+	$LF
+]p
+[ul 
+	[li 
+		"Pac-Man clones generally don't make for an entertaining game choice - if this game, or any of the countless similar games was TASed at a normal speed, they would most likely fail Moons entertainment requirements.
+		$LF
+	]li
+	[li 
+		"The run's speed is more a result of poor programming and choosing a high speed setting than the game's suitability for TASing.
+		$LF
+	]li
+	[li 
+		"The speed is so overboard that the gameplay is impossible to follow even with massive slowdown with up to twelve moves happening on a single frame.
+		$LF
+	]li
+]ul
+[p 
+	"While the issues are considerable, I think the run's uniqueness and favorable audience response outweigh them. Accepting for publication into Moons.
+	$LF
+]p
+[p 
+	"Since this is the only published run for this game, it doesn't need a "2-player" branch.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:fsvgm777)
+	": Processing.
+]p

@@ -1,0 +1,2999 @@
+7
+[p 
+	"This is an explanation of the strategy behind my console-verified Pokemon Yellow Any% Glitchless TAS, which you can watch at the following link.
+	$LF
+]p
+[p 
+	(youtube|v=jubeBUbs228)
+	$LF
+]p
+[p 
+	"If you want more thorough commentary on how the TAS works, this video is much better for that.
+	$LF
+]p
+[p 
+	(youtube|v=MOgv0mDdqUc)
+	$LF
+]p
+[p 
+	"Extrems has independently verified the accuracy of the TAS and done a beautiful console encode.
+	$LF
+]p
+[p 
+	(youtube|v=F6t0fdHay_o)
+	$LF
+]p
+[h2 
+	"Setup:
+	$LF
+]h2
+[p 
+	"This TAS is a rewrite of my previously submitted TAS on BizHawk 2.3, making it fully console accurate.  During attempts to verify the accuracy of the previous TAS using Extrems' GBI homebrew, we discovered nuances of the CPU's halt bug that had not been accounted for in any of the major accuracy focused emulators.  The TAS desynced just before Rock Tunnel due to the inaccuracy of our emulation.  Gifvex wrote a TASing ROM of Yellow to discover the halt bug nuances which were causing the desync and also wrote a useful testROM to verify the console's behavior.  Gifvex also wrote fixes for the emulator for Gambatte-Speedrun, and AlyoshaTAS and I ported those fixes to BizHawk's Gambatte core.  Alyosha also used the knowledge from this research to make his GBHawk core fully cycle-accurate for the purposes of Gen 1 Pokemon speedrunning.
+	$LF
+]p
+[p 
+	"We now use the pipeline described here to verify console accuracy of gameboy TASes.
+	$LF
+	"https://pastebin.com/DXiDT9ZT
+	$LF
+]p
+[p 
+	"This pipeline has been used to verify the TAS by both me and Extrems, and it was demonstrated publicly in the practice rooms at SGDQ 2018.
+	$LF
+]p
+[p 
+	"I used a gbc_bios.bin for the GBC firmware and set CGB in GBA to True for GBP verification purposes.
+	$LF
+]p
+[h2 
+	"Legend:
+	$LF
+]h2
+[p 
+	"Frame = The smallest unit of time that can be observed realistically in emulation.  The game accepts some inputs on every frame (for example in nickname menus), some (in the overworld) every other frame, and some (primarily in textboxes) every 3 frames. GB/GBC games play back at approximately 59.7275 Frames Per Second.
+	$LF
+]p
+[p 
+	"FAF = First Actionable Frame (the first frame where an input is useful for advancing gameplay)
+	$LF
+]p
+[p 
+	"PrintLetterDelay = The use of mashing during textboxes to cause differences in frame and CPU cycle counts and in turn advance the RNG or manipulate the timing of an input window.
+	$LF
+]p
+[p 
+	"Red Bar = The sound effect and HP bar color change caused if 
+	[em 
+	]em
+	"(
+	[em 
+	]em
+	"(Current HP * 48 / Max HP) < 10).  Being in red bar cancels level up jingles when in trainer battles (worth 2.5 seconds per level up) cancels death cries (40 frames per death) and cancels text box clear jingles (timesave unknown, around a frame per clear).
+	$LF
+]p
+[p 
+	"Also, notably being in Red Bar removes lag from a different jingle that plays when a move is super effective or not very effective.  At face value, using a move with a shake animation is ~55 frames faster than a move with a flash animation.  This drops to 27 frames for super effective shakes vs normal flashes and 10 frames faster for not very effective shakes vs normal flashes.  However, the lag reduction from red bar makes a red bar NVE shake 26 frames faster than a normal flash animation, and a red bar super effective shake 34 frames faster.  On top of this, the act of changing moves typically loses 7 frames, making shake animation moves of any kind at least 12 frames faster than flash animation moves for the purpose of this TAS (19 frames if you don't have to swap back to using the flash move).  You also have to account for the length of a move name for exact timings, but that is not relevant to the decision making process.  Good examples of the use of this optimization are Double Kick shakes on the Route 3 Ekans and the 2nd Route 3 Metapod.
+	$LF
+]p
+[p 
+	"Color lag = The lag caused changes by colors in Pokemon Yellow.  Likely due to some flaw in the way that colors were hacked into the Pokemon Red engine to make Pokemon Yellow, color changes often cause lag.  This can be seen most clearly in a stutter that occurs on map transitions (for instance between Route 1 and Viridian City).  It also happens when the HP bars change color in battle and when a Pokemon is sent into battle in Red or Yellow bar, because the HP bar color is assumed to be green and then updated to Red or Yellow when the game notices that the poke is at lower HP.  The value of Red Bar jingle skips far outweighs the time lost to the color lag from the HP bar.  A good example of how we optimize for this is as Brock, where we intentionally low roll our first Double Kick on Onix in order to prevent hitting it into Red Bar with the 2nd use of Double Kick.
+	$LF
+]p
+[p 
+	"Gen 1 Miss = An oversight in the code for the accuracy check causes moves with 100% accuracy to still have a 1 in 256 chance to miss/fail.  This means that we can cause an enemy to miss even if they're locked into using a theoretically deadly move, or miss our own moves if we need to. 
+	$LF
+]p
+[p 
+	"DSUM = A label for the predictable outcomes caused by deterministic behavior of the random number generator.  This behavior leads to an encounter cycle which constantly loops through the ten encounter slots in order.
+	$LF
+]p
+[p 
+	"Consecutive Input Delay = In Pokemon Yellow, if you press a button it needs to be released for a frame in order for it to be pressed again, otherwise the game will just see the button as being held the whole time.  This can be counteracted via a trick to reapply the relevant button press.  The key is to press a different button (typically a directional button) on the same frame that you want to press the initial button again, it will register a 2nd press of the initial button and not a hold of the initial button.  This is done when a directional input is used to reapply B while exiting shops (which can be done in RTA) and to reapply up/down in the fly menu and item bag.  The trick is also useful when B reapplies A to get on the Bike (also used in RTA), to deposit Pikachu (not useful in RTA), and to throw a poke ball from slot 1 (used in RTA).  In general it could be used to select any slot 1 bag item in the overworld or in battle, but the relevant ones are the poke ball throws and the bike.
+	$LF
+]p
+[p 
+	"Ranges = The damage formula in Pokemon Gen 1 is modified by a random number, rerolled until it lands between 217 and 255 inclusive. The move is multiplied by this number and divided by 255 to obtain a range of possible damage between ~85% and 100%.  Because we manipulate random number generation, we can manipulate these damage ranges to our liking.  Also, because of the way much of the 8 bit math rounds down calculations, the full calculated damage is only a 1/39 chance (217 to 255 inclusive is 39 possible rolls).
+	$LF
+]p
+[p 
+	"Glitchless = the category this TAS was written for.  I followed the RTA Pokemon Speedrunning community's ruleset for Glitchless, so while arbitrary code execution glitches like Brock Through Walls and Trainer Fly are disallowed, certain glitches that are not avoidable in RTA such as Gen 1 Misses are allowed, as well as oversights such as using Poke Doll on the Marowak ghost in Lavender Tower.  This ruleset is uncontroversial in the RTA community at this point.
+	$LF
+]p
+[p 
+	"Note: This TAS is a rewrite of my previous TAS in 1:37:21, which succeeded in saving 40 seconds from that TAS.  There are no known previous TASes of Yellow ENG Glitchless in any ruleset.  There is a somewhat improvable TAS of the JPN release, whose times are not easily comparable due to the text differences and (more importantly) the game does not have colors like the ENG release, meaning that it has no color lag.  As there were no TASes of the ENG game prior to these two, the main goal was to establish a very competitive baseline for TASes of this game and category.
+	$LF
+]p
+[p 
+	"Here's a link to the old JPN cart TAS: https://www.youtube.com/watch?v=l01wqxsPHB4
+	$LF
+]p
+[h2 
+	"Route:
+	$LF
+]h2
+[h3 
+	"Intro Sequence
+	$LF
+]h3
+[p 
+	"The TAS begins by pressing Start, A, and Start on FAF for 2 segments of the intro cutscene and the title screen with Pikachu.  This strategy is borrowed from RTA manips; each input can be buffered for several seconds but the TAS can just press the relevant button on FAF.  We then press down and then Left+A when opening the options menu.  This executes "fast options," a trick where all of the options are set simultaneously because the Left press from opening the options menu is reapplied repeatedly as the game loops to display each of the options.  This trick also works with right instead of left, but left sets the options we need for the run.  Because the options are set instantly, you can press B on FAF once the options open and proceed to starting a new game.
+	$LF
+	"In general in the run I use the B button to clear text boxes so that I don't forget to use it to clear end of paragraph text boxes, which can be cleared faster with B.  The end of paragraph text boxes are notable by their lack of a jingle when cleared.  The key with the intro sequence is to then use A to choose to set your own name and then pick a single character name and press start on the following frame.  The same is done for the rival.
+	$LF
+]p
+[h2 
+	"Rival 1
+	$LF
+]h2
+[p 
+	"Technically, we could save a few frames by setting the options in a separate menu once the game loads, but not doing so led to some extremely fortunate early RNG with Gen 1 Misses and the NidoranM encounter timing and DVs.
+	$LF
+	"After obtaining Pikachu (whose stats can be manipulated by changing the walk path to the catch grass or delaying frames before talking to oak to receive it), we lose to rival 1 in 2 turns.  The fight involves an 18 HP Pikachu gen 1 missing growl and Eevee critting tackle for 9, then Pikachu gen 1 missing growl again and Eevee critting tackle again.  We choose to gen 1 miss Growl instead of Thundershock because the "but it failed" text is so much faster than the "Pikachu's thundershock missed" text.  The necessary RNG for this rare fight can be found with relatively little delay because of the number of combinations of delay possible.  You can vary walk paths that obtain 18 HP pikachus, vary delays before opening the fight menu, delay the down or up press to get to growl, and delay selecting growl.  You can also introduce PrintLetterDelay, most crucially on the "Pikachu used Growl" box to look for gen 1 misses and independently on the "Eevee used Tackle" box to look for 9 damage crits.
+	$LF
+]p
+[h2 
+	"Route 1
+	$LF
+]h2
+[p 
+	"We manipulate no encounters by varying the walk path and if necessary using an A press to cause the game to delay 2 frames checking if there's something to pick up or an NPC to talk to. We also use these tricks to manipulate the goalie NPC leaving room for us to walk up to viridian optimally.  We get the parcel and walk back down the right side through the grass because we know we can manipulate away the encounters and this reduces ledge hops, which lose 8 frames.  We talk to oak from behind to move Pikachu out of the Rival's way and manipulate route 1 encounters again.
+	$LF
+]p
+[h2 
+	"Viridian Shop
+	$LF
+]h2
+[p 
+	"We buy 4 poke balls in Viridian in the TAS: 1 for Nido, 1 for a flyer, 1 for L8 sandshrew on route 3 in red bar (which we end up not getting, but the 2 frames lost for the 4th ball is nearly irrelevant in comparison to the value of being able to catch one if in red bar at that time), and 1 for bag space (the extra for bag space is extremely crucial).  After buying the balls, we press B and then reapply it with a direction+B to begin leaving the shop, then press B 2 more times to finish leaving.  After exiting the shop we advance through the catch tutorial.
+	$LF
+]p
+[h2 
+	"Nido catch
+	$LF
+]h2
+[p 
+	"We use a series of specific walk paths into a pause in the route 3 grass  to manipulate an L6 Male Nido with stats F6EE (in hexadecimal).  F attack is necessary for ranges, low+even defense is helpful for red bar in the forest and after Misty, E speed is necessary, and E/F special is necessary for damage ranges (both give fine HP but E is even so slightly lower HP which is better).  After encountering the Nido, the catch is done optimally with down->A to open items->B+A to reapply A and throw the ball.
+	$LF
+]p
+[p 
+	"It is one of the great miracles of this TAS that the DSUM cycle happens to allow for an L6 NidoranM with such a short wait and with an optimal walk path from Viridian.  It is pure coincidence that losing the Rival 1 fight with 2 growl gen 1 misses and 2 tackle crits leads to the DSUM cycle being set up perfectly, when we could theoretically have needed to waste as much as 10 seconds just to shift the encounter cycle or find a way to shift the cycle without losing time.
+	$LF
+]p
+[h2 
+	"Viridian Forest
+	$LF
+]h2
+[p 
+	"We manipulate encountering a Pidgeotto with specific stats in the forest and take extra Yolo grass which is only viable in a TAS.  The stats we get are E2E3, mostly even for low HP DV and with high attack to give Nido red bar immediately and low special to help pikachu's crit damage.  The optimal fight to find is a Sand Attack fail from Pidgeotto, a T-shock crit for 14, another sand attack fail, a t-shock crit for 13, Pidgeotto gust crit to kill Pikachu, swap in Nidoran, Pidgeotto gust  max roll crit for 21 to put Nido to 1 HP, then Nido Tackle hit.  In the current TAS I was not able to find a 1/39 14 damage crit from one of the pikachu hits into a sand attack miss or a 1/39 tackle, so I crit the Nido Tackle to finish the kill.
+	$LF
+]p
+[p 
+	"On Bug Catcher 2 we swap Horn Attack to slot 1 immediately because Leer is useless in the TAS and then Horn Attack into a 4 damage tackle to set up perfect HP for Red Bar L9 and L10 and to survive Diglett's scratch in Brock's gym.  We intentionally avoid critting Caterpie on turn 1 to avoid color lag and the 2nd Horn Attack crits for a kill.  on Metapod we crit Horn Attack into String Shot Fail (maintaining Green bar on Metapod).  On any of the early fights where we can't kill a Metapod or Caterpie, String Shot fails are the fastest thing that the opponent can do, and they're pretty easy to find because enemies have a 1 in 4 chance to miss stat/stage modifying moves against you.  We then crit Horn Attack again putting Metapod into red bar and get string shot fail again and finish with non-crit Tackle to save a Horn Attack, which is useful in Mt Moon.
+	$LF
+]p
+[p 
+	"After Bug Catcher 2 we're in Red Bar so we can catch a pidgey if we see one using the same tricks as with the Nido catch, either here or after bug catcher 3 works.
+	$LF
+]p
+[p 
+	"On Bug Catcher 3, we crit Horn Attack twice and get String Shot fail from Caterpie.
+	$LF
+]p
+[h2 
+	"Brock's Gym
+	$LF
+]h2
+[p 
+	"On Light Year guy we take Scratch to 1 HP from Diglett, then get a high roll Horn Attack crit into Sandshrew gen 1 missing Scratch into a 1/39 horn attack crit.  This is probably the hardest series of RNG to set up, as those three events alone are about a 1 in 400,000 chance to happen together.
+	$LF
+]p
+[p 
+	"At Brock, we 1/39 non-crit the Geodude with Double Kick into a tackle Miss, allowing us to finish with a single Double Kick non-crit shake (Double Kick is much slower if both shakes hit).  On Onix we manipulate Bide into a Double Kick min roll crit.  The min roll is necessary to avoid hitting Onix into red bar and causing extra color lag.
+	$LF
+]p
+[h2 
+	"Route 3:
+	$LF
+]h2
+[p 
+	"We 1/39 crit the first Caterpie and skip red barring L14 because it's slightly faster to not lose a full turn taking Caterpie damage and instead get quick attacked by the next Rattata, additionally this lets us not get crit by Grimer's Pound in Mt Moon.  We also crit Horn Attack to kill Weedle and the 2nd Caterpie.
+	$LF
+]p
+[p 
+	"At Shorts guy we get quick attacked back to 1 HP and high roll crit Double Kick on Rattata for the 1 shake.  On Ekans we high roll crit Horn Attack into a Leer fail (same 1/4 to fail as String Shot earlier on the Metapod and Caterpie) into finishing with a Double Kick.
+	$LF
+]p
+[p 
+	"We fight the bottom Bug Catcher instead of Lass because we can guarantee Kakuna crit, Caterpie 1/39 roll, and Metapod Crit, making the 4 poke fight faster than exiting the route and resetting the trainer positions to be able to fight the 2 poke trainer.
+	$LF
+	"On the last Bug Catcher, we crit the first Caterpie with Horn Attack and then get a 1/39 critical on the Metapod.  It would technically be faster here if we would also manip Metapod gen 1 missing Harden.  We then finish with Double Kick.
+	$LF
+]p
+[p 
+	"After evolving to Nidorino, we barely are not in Red Bar.  This means that there is no way to catch an L8 Sandshrew in red bar without losing a turn to one of the fights in order to take damage, and therefore getting Charmander as our slave for Dig, Cut, and Strength is faster even though you have to overwrite moves on Charmander.  Coincidentally, the DSUM also is in a reasonable part of the cycle to get an L8 Sandshrew somewhere along route 3 if in the future one were to find a way to get red bar for the catch without losing too much time.
+	$LF
+]p
+[h2 
+	"Mt Moon
+	$LF
+]h2
+[p 
+	"We manipulate no encounters through Mt Moon and skip getting the usual Rare Candy that RTA gets because the experience does not save enough time.  Another rewrite might evolve to Nidoking before the Super Nerd, but the fight improvements are offset by Nidoking's much longer cry for 2 fights and the difficulty of regaining Red Bar.
+	$LF
+]p
+[p 
+	"At Super Nerd, we hit Grimer with a tackle on the first turn to avoid color lag, then kill it with a crit Horn Attack.  We then crit Voltorb with Horn Attack and crit Koffing turn 1, because the color lag is faster than swapping to Tackle and back (you have to switch back to Horn Attack anyway when you Tackle Grimer).
+	$LF
+]p
+[p 
+	"At Jessie and James, we crit Ekans with Horn Attack and crit Meowth with Double Kick, then we hit Koffing with our Horn Attack that we saved from Tackling Metapod and don't crit it the first turn to avoid color lag.  On turn 2 we crit Horn Attack to kill while still avoiding the color lag.
+	$LF
+]p
+[h2 
+	"Cerulean City
+	$LF
+]h2
+[p 
+	"In Cerulean we deposit Pikachu and center before Misty to set up a warp point for Dig in Cerulean and maximize red bar potential.  We fight Misty before going to Nugget Bridge so that we can use Bubblebeam, which has a shake animation and makes our fights much faster as a result, and all those hits can be in red bar since we can regain it from the Misty battle.  It also lets us kill Sandshrew and Onix in 1 turn without crits.  On the way to Cerulean we walk in a specific path to manipulate good movement from the NPCs so that we can get to the PC efficiently, then we deposit Pikachu and use A->B+A to avoid consecutive input lag on the deposit.  When leaving the PC we use B to leave because it lets us cancel some PC jingles.  We hold B during textboxes when using the center to speed up their display.
+	$LF
+]p
+[h2 
+	"Misty Gym
+	$LF
+]h2
+[p 
+	"Immediately upon entering Misty's Gym, we evolve to Nidoking so that we aren't prompted to learn Poison Sting.
+	$LF
+]p
+[p 
+	"We hit Goldeen with a non-crit Horn Attack to avoid color lag, get Tail Whip fail from Goldeen, then crit Horn Attack on turn 2.  On Misty we crit Staryu and get hit by Water Gun to set up our HP for Starmie, then Double Kick Staryu to finish the kill.  On Starmie, we get hit by Bubblebeam turn 1 to 1 HP to set up red bar for Nugget Bridge, then we crit Horn Attack, then we get a Water Gun gen 1 miss, then we crit Horn Attack again, then we get Harden (easier to find than a 2nd gen 1 miss) into a final Horn Attack crit.  If you get multiple nearly perfect HA crit ranges you can finish Starmie with a Double Kick critical (even through Harden because the crit ignores the Harden).
+	$LF
+]p
+[p 
+	"After Misty we menu immediately to eliminate any extra turn frames while leaving the gym and teach Bubblebeam to Nidoking over Horn Attack.  To get to Bubblebeam you can use a sequence of left and right presses to repeatedly eliminate consecutive input lag when pressing down to get to bubblebeam.  This technique is extremely useful for slots 3-4 (to the point that very experienced runners could benefit from it in RTA) and the TAS can continue to do it perfectly for any slot, eliminating the item menu windup time.
+	$LF
+]p
+[h2 
+	"Nugget Bridge
+	$LF
+]h2
+[p 
+	"We skip the Cerulean Rare Candy because its experience is nearly useless then head to Nugget Bridge.  We crit Spearow with Bubblebeam at Bridge Rival, then a normal Bubblebeam on Sandshrew and Rattata, then a 1/39 crit Double Kick on Eevee for a single shake animation.
+	$LF
+]p
+[p 
+	"Nugget 1's Caterpie and Weedle both die to non-crit Bubblebeam
+	$LF
+]p
+[p 
+	"Nugget 2's Pidgey and NidoranF both die to crit Bubblebeam
+	$LF
+]p
+[p 
+	"On Nugget 3 we get Quick Attack crit back to 1 HP to set up optimal HP for Raticate hitting us to guaranteed Red Bar through the heal pad, then we hit Rattata with a non-crit bubblebeam to kill.  Ekans and Zubat both die to crit Bubblebeam.
+	$LF
+]p
+[p 
+	"Nugget 4: Pidgey and NidoranF both die to crit Bubblebeam
+	$LF
+]p
+[p 
+	"Nugget 5: Mankey dies to crit Bubblebeam, then we teach Thrash over Tackle in slot 2
+	$LF
+]p
+[p 
+	"Rocket: Thrash
+	$LF
+]p
+[h2 
+	"Route before Bill
+	$LF
+]h2
+[p 
+	"We get Charmander and nickname him a 1 character name to save about 1.5 seconds, primarily because of the Strength uses in Victory Road.
+	$LF
+]p
+[p 
+	"Hiker: Bubblebeam
+	$LF
+]p
+[p 
+	"Girlfriend+Boyfriend: We would use Bubblebeam to kill these pokes and avoid the Thrash windup, but Bubblebeam PP is too tight so we just use Thrash.
+	$LF
+]p
+[p 
+	"Lass: Thrash
+	$LF
+]p
+[p 
+	"Get the Ether after the Lass to help fill the bag and to restore Horn Drill PP later
+	$LF
+]p
+[p 
+	"Bill: clear the cutscene textboxes with Bill to get the SS Ticket
+	$LF
+]p
+[h2 
+	"Surge Split
+	$LF
+]h2
+[p 
+	"Non-crit Thrash kills Machop and Drowzee so we can get Dig.  We get the fast Full Restore in the underground to help fill the bag. Then we Thrash the 3 Pidgeys and the Spearow+Raticate fight.  At Raticate we manip getting hit to exactly 2 HP to maintain perfect red bar through the heal pad in Lavender Tower.  At the SS Anne Rival we manip a 4 turn thrash that only crits the Sandshrew and clears an Eevee range naturally.  We then get Cut and leave the boat.  We exit the boat on a frame that sets the first can in Surge's gym to be can 4, which is up the middle cans and can have a 2nd can also in the middle row.  We then walk to the bush in front of Surge's gym and menu to teach Cut to Charmander and then teach Dig over his first move, using left and right again to reapply up and down inputs when moving around the item bag.  Because we've already started picking up extraneous items to fill the bag, it's faster to teach cut before dig and take the timeloss from using cut in slot 2.
+	$LF
+]p
+[p 
+	"In Surge's gym we pick can 4 which we know is the first can from manipping it while exiting the boat.  We pick the can on a frame which also manips can 7 to be the 2nd can, conveniently right next to where we're standing.
+	$LF
+]p
+[p 
+	"Surge: An optimal fight would be Growl Fail->Thrash non-crit->Growl Fail->Thrash non-crit, but we took a thunderbolt miss on the 2nd Raichu turn because the delay I was finding to manip the 2nd Growl fail was taking longer than just accepting a Thunderbolt whiff.
+	$LF
+	"After Surge we get the Bike Voucher and Dig back to Cerulean.
+	$LF
+]p
+[p 
+	"At Surge during this TAS I discovered that causing PrintLetterDelay during end of paragraph text boxes can lead to clearing them sooner.  I do not know why, but it likely has something to do with aligning the end of the text box with an earlier 3 frame clear window.
+	$LF
+]p
+[h2 
+	"Fly Split:
+	$LF
+]h2
+[p 
+	"We manip good RNG from the NPC in the bike shop and get the bicycle.  Then outside the shop we swap up the bike and teach Thunderbolt in Slot 4.  We hold B through the cut animations to clear their text boxes frame perfectly.
+	$LF
+]p
+[p 
+	"4 Turn Thrash: We manip a 4 Turn Thrash fight that actually lasts 4 turns and has no useless crits.  We then manipulate no useless crits on the Venonat trainer including a good Thrash range on Venonat.  In Rock Tunnel we have to manipulate away encounters while progressing through to each fight. We swap bubblebeam to slot 1 on Cubone because we want to teach Horn Drill in Slot 1 and not overwrite Thrash, then we use Bubblebeam on cubone and Thunderbolt on Slowpoke.  We Thunderbolt the lone Slowpoke again and then get good Thrash ranges on Oddish and Bulbasaur.  At the hiker, we previously copied a strat from an old JPN TAS which manipulated the Geodudes and the Graveler into gen 1 missing Selfdestruct, which eliminates animating their HP Bar as it drops.  It turned out the amount of text this strat involves in ENG, combined with the problem of manipulating 3 gen 1 misses in quick succession, made the strat much slower than just using 3 Bubblebeams, to the extent that it was more valuable to use them here than to cancel Thrash windups in other places.  After the hiker we Thrash the final Lass, avoiding Quick Attacks since our HP is already set up for red bar through the heal pad.  After rock tunnel, we get the Max Ether hidden in a tree to fill up bag space and fill up PP while dropping an item before Giovanni.  At the Gambler, we use Bubblebeam on the Growlithe and Thunderbolt Crit on the Vulpix to avoid a Thrash windup.
+	$LF
+]p
+[p 
+	"In the underground, we get the Elixer while facing it from the top in order to avoid turning in the following building.  In the Underground we also have the first example of reapplying A to get on the Bicycle a frame faster by avoiding consecutive input lag.
+	$LF
+]p
+[h2 
+	"Shopping
+	$LF
+]h2
+[p 
+	"In the Celadon shop: 2x TM07, 2x Poke Doll, Fresh Water, 7 X Speed (all shops using a direction to reapply B while leaving and using a direction to reapply down presses getting to the items)
+	$LF
+]p
+[p 
+	"Bike everywhere up to the Fly house
+	$LF
+]p
+[p 
+	"Outside the fly house, swap slot 2 with Poke Doll, teach fly, teach HD over BB, use Fly (in the Fly menu, you can reapply down presses a frame faster by using left or right presses on alternating FAF down presses).
+	$LF
+]p
+[p 
+	"HD, Thrash, Leer, TB moves at tower
+	$LF
+]p
+[h2 
+	"Lavender tower: Don't forget to manip away encounters here
+	$LF
+]h2
+[p 
+	"Rival: HD x5
+	$LF
+]p
+[p 
+	"Gastlies: TB
+	$LF
+]p
+[p 
+	"J&J: HD x3
+	$LF
+]p
+[p 
+	"Fly to Celadon, Center, go to the Safari Zone (center is fine because we just lost red bar from the heal pad anyway)
+	$LF
+]p
+[p 
+	"Swap Poke Doll in slot 2 with X Speeds in front of Snorlax, then use Poke Flute
+	$LF
+]p
+[p 
+	"Manip away encounters in the Safari Zone while getting HM03 and the Gold Teeth. This should fill the last bag slots so that we do not receive unnecessary TMs from gym leaders.
+	$LF
+]p
+[h2 
+	"Koga Gym:
+	$LF
+]h2
+[p 
+	"Dig out of the Safari Zone and then fly to Koga.
+	$LF
+]p
+[p 
+	"Juggler: Thrash crit->crit->non-crit->crit
+	$LF
+]p
+[p 
+	"Juggler 2: Thrash non-crit->Confusion crit->Thrashcrit (get 3 HP redbar off hypno confusion crit)
+	$LF
+]p
+[p 
+	"Koga: X Speed->4x Horn Drill
+	$LF
+]p
+[p 
+	"Get strength after Koga's gym
+	$LF
+]p
+[h2 
+	"Cinnabar Mansion:
+	$LF
+]h2
+[p 
+	"Fly to Pallet, manip the NPC to walk out of your way while you go to the water (you really have to manip this before the Fly to make it work right), Use Ether on Horn Drill, then teach Surf over Nidoking's Leer in slot 3 since it will be used only once.  We can go to the mansion this early because we can manip away encounters regardless of Nidoking's level, whereas RTA needs to outlevel encounters in order to avoid them with Super Repels.
+	$LF
+]p
+[p 
+	"Mansion: Blizz over Thrash (HD, Blizz, Surf, TB), use this menu as part of encounterless manip.
+	$LF
+	"After getting the Secret Key, dig out of the Mansion and bike to Erika's gym.
+	$LF
+]p
+[h2 
+	"Erika's Gym:
+	$LF
+]h2
+[p 
+	"Exeggcute: Blizz
+	$LF
+]p
+[p 
+	"Erika: Blizz, Blizz, Blizz
+	$LF
+]p
+[p 
+	"After Erika, cut the bush below Erika, leave the gym, and fly to Blaine.
+	$LF
+]p
+[h2 
+	"Blaine's Gym:
+	$LF
+]h2
+[p 
+	"Answer the questions ABBBAB
+	$LF
+]p
+[p 
+	"Blaine: X Speed, Tail Whip fail, HD x3
+	$LF
+]p
+[p 
+	"Dig out of Blaine's Gym and bike to Silph
+	$LF
+]p
+[h2 
+	"Silph:
+	$LF
+]h2
+[p 
+	"Walk to floor 5 and get the hidden Elixer there (this one is faster to get than the Lavender Tower hidden Elixer, also walking to floor 5 is faster than taking the elevator)
+	$LF
+]p
+[p 
+	"Arbok: HD
+	$LF
+]p
+[p 
+	"Rival: Blizz, HD, Elixer->Ember to 1 HP->Surf, HD, HD
+	$LF
+]p
+[p 
+	"J&J: Blizz Crit, TB Crit, TB
+	$LF
+]p
+[p 
+	"Giovanni: TB Crit x2->Blizz x2
+	$LF
+]p
+[p 
+	"Dig out, bike to Sabrina, X Speed->HD x3
+	$LF
+]p
+[p 
+	"Dig out of Sabrina, then Fly to Viridian
+	$LF
+]p
+[h2 
+	"Giovanni Gym:
+	$LF
+]h2
+[p 
+	"Use Ether on Horn Drill then bike to the Giovanni gym
+	$LF
+]p
+[p 
+	"Cooltrainer: Blizz
+	$LF
+]p
+[p 
+	"Blackbelt: TB crit x3
+	$LF
+]p
+[p 
+	"Exit and re-enter the building to reset the Blackbelt's location
+	$LF
+]p
+[p 
+	"Giovanni: X Speed, Guard Spec, HD x5
+	$LF
+]p
+[h2 
+	"Viridian Rival
+	$LF
+]h2
+[p 
+	"Teach strength to Charmander, teach fissure over tbolt, bike to Viridian Rival
+	$LF
+]p
+[p 
+	"Rival: Blizz, Fissure, X Speed->QA->Fissure x4
+	$LF
+]p
+[p 
+	"We set up X Speed on Ninetales to let it damage us slightly and maintain red bar through the first Gengar at Agatha and also outspeed Viridian Rival's Kadabra
+	$LF
+]p
+[h2 
+	"Victory road:
+	$LF
+]h2
+[p 
+	"Use Charmander's Strength to execute the boulder puzzles, but do swag boulders instead of A presses to manipulate encounters away because it looks cooler and loses the same amount of time
+	$LF
+]p
+[p 
+	"When you get back on the bike after falling through the boulder hole, use Elixer then get back on the bike
+	$LF
+]p
+[p 
+	"- Should have only 1 Elixer at this point
+	$LF
+]p
+[h2 
+	"E4
+	$LF
+]h2
+[p 
+	"Moves: Drill, Blizz, Surf, Fissure
+	$LF
+]p
+[p 
+	"At the E4, deposit Pidgey and Charmander
+	$LF
+]p
+[p 
+	"- Lorelei: drill, drill, drill, fissure, fissure
+	$LF
+]p
+[p 
+	"- Bruno: blizz, blizz crit, blizz crit, blizz, drill
+	$LF
+]p
+[p 
+	"- Agatha: x speed -> lick no para, fissure, blizz crit, fissure, drill, fissure
+	$LF
+]p
+[p 
+	"After Agatha, we menu immediately and use the last Elixer.  This lets us leave Agatha's room faster because the gates open as we exit the menu.  Then, we do not have to give Gyarados a turn while he misses Hydro Pump
+	$LF
+]p
+[p 
+	"- Lance: drill, fissure, fissure, hyper miss -> blizz, blizz crit
+	$LF
+]p
+[p 
+	"- Champ: drill, x speed -> Kinesis fail, drill, drill, drill, fissure, fissure.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": File replaced with a trimmed version provided by the author.
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": Judging, since I'll have to determine this submission's fate anyway.
+	$LF
+]p
+[p 
+	(__wikiLink|user:feos)
+	": I made a comparison table for both submissions. It relies in entering and exiting the battle mode, $F0 == 8.
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-865 
+				"Hide
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-866 
+				"Show
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-865 
+		]div
+		[div class=tab-pane fade id=y-866 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							" Encounter 
+						]th
+						[th 
+							" 5860S 
+						]th
+						[th 
+							" 6023S 
+						]th
+						[th 
+							" Diff 
+						]th
+						[th 
+							" Delta 
+						]th
+					]tr
+					[tr 
+						[td 
+							"  1 start   
+						]td
+						[td 
+							"   3950 
+						]td
+						[td 
+							"   3950 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  1 end     
+						]td
+						[td 
+							"   5019 
+						]td
+						[td 
+							"   5019 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  2 start   
+						]td
+						[td 
+							"   8287 
+						]td
+						[td 
+							"   8287 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  2 end     
+						]td
+						[td 
+							"   9932 
+						]td
+						[td 
+							"   9932 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  3 start   
+						]td
+						[td 
+							"  20513 
+						]td
+						[td 
+							"  20513 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  3 end     
+						]td
+						[td 
+							"  21420 
+						]td
+						[td 
+							"  21420 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  4 start   
+						]td
+						[td 
+							"  22592 
+						]td
+						[td 
+							"  22592 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  4 end     
+						]td
+						[td 
+							"  24071 
+						]td
+						[td 
+							"  24071 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  5 start   
+						]td
+						[td 
+							"  25116 
+						]td
+						[td 
+							"  25116 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  5 end     
+						]td
+						[td 
+							"  27839 
+						]td
+						[td 
+							"  27839 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  6 start   
+						]td
+						[td 
+							"  28652 
+						]td
+						[td 
+							"  28652 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  6 end     
+						]td
+						[td 
+							"  31495 
+						]td
+						[td 
+							"  31495 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  7 start   
+						]td
+						[td 
+							"  31957 
+						]td
+						[td 
+							"  31957 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  7 end     
+						]td
+						[td 
+							"  33094 
+						]td
+						[td 
+							"  33094 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  8 start   
+						]td
+						[td 
+							"  33551 
+						]td
+						[td 
+							"  33551 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  8 end     
+						]td
+						[td 
+							"  35201 
+						]td
+						[td 
+							"  35201 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  9 start   
+						]td
+						[td 
+							"  37228 
+						]td
+						[td 
+							"  37228 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							"  9 end     
+						]td
+						[td 
+							"  39819 
+						]td
+						[td 
+							"  39819 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 10 start   
+						]td
+						[td 
+							"  40302 
+						]td
+						[td 
+							"  40302 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 10 end     
+						]td
+						[td 
+							"  43676 
+						]td
+						[td 
+							"  43676 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 11 start   
+						]td
+						[td 
+							"  45730 
+						]td
+						[td 
+							"  45730 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 11 end     
+						]td
+						[td 
+							"  48376 
+						]td
+						[td 
+							"  48376 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 12 start   
+						]td
+						[td 
+							"  48584 
+						]td
+						[td 
+							"  48584 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 12 end     
+						]td
+						[td 
+							"  50919 
+						]td
+						[td 
+							"  50919 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 13 start   
+						]td
+						[td 
+							"  51133 
+						]td
+						[td 
+							"  51133 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 13 end     
+						]td
+						[td 
+							"  54145 
+						]td
+						[td 
+							"  54145 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 14 start   
+						]td
+						[td 
+							"  54395 
+						]td
+						[td 
+							"  54395 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 14 end     
+						]td
+						[td 
+							"  56832 
+						]td
+						[td 
+							"  56832 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 15 start   
+						]td
+						[td 
+							"  63453 
+						]td
+						[td 
+							"  63453 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 15 end     
+						]td
+						[td 
+							"  66556 
+						]td
+						[td 
+							"  66556 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 16 start   
+						]td
+						[td 
+							"  67803 
+						]td
+						[td 
+							"  67803 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 16 end     
+						]td
+						[td 
+							"  70464 
+						]td
+						[td 
+							"  70464 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 17 start   
+						]td
+						[td 
+							"  76481 
+						]td
+						[td 
+							"  76481 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 17 end     
+						]td
+						[td 
+							"  78387 
+						]td
+						[td 
+							"  78387 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 18 start   
+						]td
+						[td 
+							"  78810 
+						]td
+						[td 
+							"  78810 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 18 end     
+						]td
+						[td 
+							"  82342 
+						]td
+						[td 
+							"  82342 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 19 start   
+						]td
+						[td 
+							"  85200 
+						]td
+						[td 
+							"  85200 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 19 end     
+						]td
+						[td 
+							"  87989 
+						]td
+						[td 
+							"  87989 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 20 start   
+						]td
+						[td 
+							"  89186 
+						]td
+						[td 
+							"  89186 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 20 end     
+						]td
+						[td 
+							"  90982 
+						]td
+						[td 
+							"  90982 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 21 start   
+						]td
+						[td 
+							"  91155 
+						]td
+						[td 
+							"  91155 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 21 end     
+						]td
+						[td 
+							"  92953 
+						]td
+						[td 
+							"  92953 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 22 start   
+						]td
+						[td 
+							"  93128 
+						]td
+						[td 
+							"  93128 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 22 end     
+						]td
+						[td 
+							"  95608 
+						]td
+						[td 
+							"  95608 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 23 start   
+						]td
+						[td 
+							"  95778 
+						]td
+						[td 
+							"  95778 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 23 end     
+						]td
+						[td 
+							"  97536 
+						]td
+						[td 
+							"  97536 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 24 start   
+						]td
+						[td 
+							"  97711 
+						]td
+						[td 
+							"  97711 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 24 end     
+						]td
+						[td 
+							"  99482 
+						]td
+						[td 
+							"  99482 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 25 start   
+						]td
+						[td 
+							" 100415 
+						]td
+						[td 
+							" 100415 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 25 end     
+						]td
+						[td 
+							" 102288 
+						]td
+						[td 
+							" 102288 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 26 start   
+						]td
+						[td 
+							" 104052 
+						]td
+						[td 
+							" 104052 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 26 end     
+						]td
+						[td 
+							" 105452 
+						]td
+						[td 
+							" 105452 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 27 start   
+						]td
+						[td 
+							" 105737 
+						]td
+						[td 
+							" 105737 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 27 end     
+						]td
+						[td 
+							" 107527 
+						]td
+						[td 
+							" 107527 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 28 start   
+						]td
+						[td 
+							" 107915 
+						]td
+						[td 
+							" 107915 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 28 end     
+						]td
+						[td 
+							" 109786 
+						]td
+						[td 
+							" 109786 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 29 start   
+						]td
+						[td 
+							" 110165 
+						]td
+						[td 
+							" 110165 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 29 end     
+						]td
+						[td 
+							" 112373 
+						]td
+						[td 
+							" 112373 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 30 start   
+						]td
+						[td 
+							" 117656 
+						]td
+						[td 
+							" 117656 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 30 end     
+						]td
+						[td 
+							" 119601 
+						]td
+						[td 
+							" 119601 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 31 start   
+						]td
+						[td 
+							" 122768 
+						]td
+						[td 
+							" 122768 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 31 end     
+						]td
+						[td 
+							" 124975 
+						]td
+						[td 
+							" 124975 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 32 start   
+						]td
+						[td 
+							" 125195 
+						]td
+						[td 
+							" 125195 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 32 end     
+						]td
+						[td 
+							" 127240 
+						]td
+						[td 
+							" 127240 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 33 start   
+						]td
+						[td 
+							" 130619 
+						]td
+						[td 
+							" 130619 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 33 end     
+						]td
+						[td 
+							" 133302 
+						]td
+						[td 
+							" 133302 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 34 start   
+						]td
+						[td 
+							" 141075 
+						]td
+						[td 
+							" 141075 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 34 end     
+						]td
+						[td 
+							" 142918 
+						]td
+						[td 
+							" 142918 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 35 start   
+						]td
+						[td 
+							" 150109 
+						]td
+						[td 
+							" 150109 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 35 end     
+						]td
+						[td 
+							" 152845 
+						]td
+						[td 
+							" 152845 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 36 start   
+						]td
+						[td 
+							" 153344 
+						]td
+						[td 
+							" 153344 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 36 end     
+						]td
+						[td 
+							" 155627 
+						]td
+						[td 
+							" 155627 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 37 start   
+						]td
+						[td 
+							" 156777 
+						]td
+						[td 
+							" 156777 
+						]td
+						[td 
+							"     0 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 37 end     
+						]td
+						[td 
+							" 158585 
+						]td
+						[td 
+							" 158587 
+						]td
+						[td 
+							"     2 
+						]td
+						[td 
+							"      2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 38 start   
+						]td
+						[td 
+							" 159027 
+						]td
+						[td 
+							" 159029 
+						]td
+						[td 
+							"     2 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 38 end     
+						]td
+						[td 
+							" 160305 
+						]td
+						[td 
+							" 160307 
+						]td
+						[td 
+							"     2 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 39 start   
+						]td
+						[td 
+							" 160551 
+						]td
+						[td 
+							" 160553 
+						]td
+						[td 
+							"     2 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 39 end     
+						]td
+						[td 
+							" 162325 
+						]td
+						[td 
+							" 162328 
+						]td
+						[td 
+							"     3 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 40 start   
+						]td
+						[td 
+							" 163520 
+						]td
+						[td 
+							" 163519 
+						]td
+						[td 
+							"    -1 
+						]td
+						[td 
+							"     -4 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 40 end     
+						]td
+						[td 
+							" 165902 
+						]td
+						[td 
+							" 165903 
+						]td
+						[td 
+							"     1 
+						]td
+						[td 
+							"      2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 41 start   
+						]td
+						[td 
+							" 166485 
+						]td
+						[td 
+							" 166487 
+						]td
+						[td 
+							"     2 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 41 end     
+						]td
+						[td 
+							" 168650 
+						]td
+						[td 
+							" 168653 
+						]td
+						[td 
+							"     3 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 42 start   
+						]td
+						[td 
+							" 169827 
+						]td
+						[td 
+							" 169831 
+						]td
+						[td 
+							"     4 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 42 end     
+						]td
+						[td 
+							" 171758 
+						]td
+						[td 
+							" 171762 
+						]td
+						[td 
+							"     4 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 43 start   
+						]td
+						[td 
+							" 182402 
+						]td
+						[td 
+							" 182418 
+						]td
+						[td 
+							"    16 
+						]td
+						[td 
+							"     12 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 43 end     
+						]td
+						[td 
+							" 185677 
+						]td
+						[td 
+							" 185693 
+						]td
+						[td 
+							"    16 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 44 start   
+						]td
+						[td 
+							" 187390 
+						]td
+						[td 
+							" 187404 
+						]td
+						[td 
+							"    14 
+						]td
+						[td 
+							"     -2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 44 end     
+						]td
+						[td 
+							" 189196 
+						]td
+						[td 
+							" 189210 
+						]td
+						[td 
+							"    14 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 45 start   
+						]td
+						[td 
+							" 190974 
+						]td
+						[td 
+							" 190989 
+						]td
+						[td 
+							"    15 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 45 end     
+						]td
+						[td 
+							" 192317 
+						]td
+						[td 
+							" 192333 
+						]td
+						[td 
+							"    16 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 46 start   
+						]td
+						[td 
+							" 192548 
+						]td
+						[td 
+							" 192564 
+						]td
+						[td 
+							"    16 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 46 end     
+						]td
+						[td 
+							" 193906 
+						]td
+						[td 
+							" 193922 
+						]td
+						[td 
+							"    16 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 47 start   
+						]td
+						[td 
+							" 194440 
+						]td
+						[td 
+							" 194461 
+						]td
+						[td 
+							"    21 
+						]td
+						[td 
+							"      5 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 47 end     
+						]td
+						[td 
+							" 195051 
+						]td
+						[td 
+							" 195072 
+						]td
+						[td 
+							"    21 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 48 start   
+						]td
+						[td 
+							" 195996 
+						]td
+						[td 
+							" 196015 
+						]td
+						[td 
+							"    19 
+						]td
+						[td 
+							"     -2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 48 end     
+						]td
+						[td 
+							" 198570 
+						]td
+						[td 
+							" 198589 
+						]td
+						[td 
+							"    19 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 49 start   
+						]td
+						[td 
+							" 203577 
+						]td
+						[td 
+							" 203596 
+						]td
+						[td 
+							"    19 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 49 end     
+						]td
+						[td 
+							" 204294 
+						]td
+						[td 
+							" 204313 
+						]td
+						[td 
+							"    19 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 50 start   
+						]td
+						[td 
+							" 214012 
+						]td
+						[td 
+							" 214039 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      8 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 50 end     
+						]td
+						[td 
+							" 217351 
+						]td
+						[td 
+							" 217378 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 51 start   
+						]td
+						[td 
+							" 218030 
+						]td
+						[td 
+							" 218057 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 51 end     
+						]td
+						[td 
+							" 220672 
+						]td
+						[td 
+							" 220699 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 52 start   
+						]td
+						[td 
+							" 221133 
+						]td
+						[td 
+							" 221160 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 52 end     
+						]td
+						[td 
+							" 224340 
+						]td
+						[td 
+							" 224368 
+						]td
+						[td 
+							"    28 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 53 start   
+						]td
+						[td 
+							" 238006 
+						]td
+						[td 
+							" 238032 
+						]td
+						[td 
+							"    26 
+						]td
+						[td 
+							"     -2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 53 end     
+						]td
+						[td 
+							" 239408 
+						]td
+						[td 
+							" 239434 
+						]td
+						[td 
+							"    26 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 54 start   
+						]td
+						[td 
+							" 239992 
+						]td
+						[td 
+							" 240019 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 54 end     
+						]td
+						[td 
+							" 242499 
+						]td
+						[td 
+							" 242528 
+						]td
+						[td 
+							"    29 
+						]td
+						[td 
+							"      2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 55 start   
+						]td
+						[td 
+							" 248482 
+						]td
+						[td 
+							" 248511 
+						]td
+						[td 
+							"    29 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 55 end     
+						]td
+						[td 
+							" 251310 
+						]td
+						[td 
+							" 251339 
+						]td
+						[td 
+							"    29 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 56 start   
+						]td
+						[td 
+							" 255530 
+						]td
+						[td 
+							" 255559 
+						]td
+						[td 
+							"    29 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 56 end     
+						]td
+						[td 
+							" 256862 
+						]td
+						[td 
+							" 256893 
+						]td
+						[td 
+							"    31 
+						]td
+						[td 
+							"      2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 57 start   
+						]td
+						[td 
+							" 259894 
+						]td
+						[td 
+							" 259925 
+						]td
+						[td 
+							"    31 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 57 end     
+						]td
+						[td 
+							" 263828 
+						]td
+						[td 
+							" 263855 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"     -4 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 58 start   
+						]td
+						[td 
+							" 265146 
+						]td
+						[td 
+							" 265173 
+						]td
+						[td 
+							"    27 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 58 end     
+						]td
+						[td 
+							" 267566 
+						]td
+						[td 
+							" 267594 
+						]td
+						[td 
+							"    28 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 59 start   
+						]td
+						[td 
+							" 268711 
+						]td
+						[td 
+							" 268739 
+						]td
+						[td 
+							"    28 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 59 end     
+						]td
+						[td 
+							" 271790 
+						]td
+						[td 
+							" 271819 
+						]td
+						[td 
+							"    29 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 60 start   
+						]td
+						[td 
+							" 275027 
+						]td
+						[td 
+							" 275056 
+						]td
+						[td 
+							"    29 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 60 end     
+						]td
+						[td 
+							" 277913 
+						]td
+						[td 
+							" 277944 
+						]td
+						[td 
+							"    31 
+						]td
+						[td 
+							"      2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 61 start   
+						]td
+						[td 
+							" 280686 
+						]td
+						[td 
+							" 280718 
+						]td
+						[td 
+							"    32 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 61 end     
+						]td
+						[td 
+							" 282143 
+						]td
+						[td 
+							" 282175 
+						]td
+						[td 
+							"    32 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 62 start   
+						]td
+						[td 
+							" 282546 
+						]td
+						[td 
+							" 282578 
+						]td
+						[td 
+							"    32 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 62 end     
+						]td
+						[td 
+							" 284973 
+						]td
+						[td 
+							" 285005 
+						]td
+						[td 
+							"    32 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 63 start   
+						]td
+						[td 
+							" 286663 
+						]td
+						[td 
+							" 286697 
+						]td
+						[td 
+							"    34 
+						]td
+						[td 
+							"      2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 63 end     
+						]td
+						[td 
+							" 290826 
+						]td
+						[td 
+							" 290867 
+						]td
+						[td 
+							"    41 
+						]td
+						[td 
+							"      7 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 64 start   
+						]td
+						[td 
+							" 294985 
+						]td
+						[td 
+							" 295031 
+						]td
+						[td 
+							"    46 
+						]td
+						[td 
+							"      5 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 64 end     
+						]td
+						[td 
+							" 299607 
+						]td
+						[td 
+							" 299654 
+						]td
+						[td 
+							"    47 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 65 start   
+						]td
+						[td 
+							" 317065 
+						]td
+						[td 
+							" 317127 
+						]td
+						[td 
+							"    62 
+						]td
+						[td 
+							"     15 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 65 end     
+						]td
+						[td 
+							" 320827 
+						]td
+						[td 
+							" 320887 
+						]td
+						[td 
+							"    60 
+						]td
+						[td 
+							"     -2 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 66 start   
+						]td
+						[td 
+							" 321677 
+						]td
+						[td 
+							" 321737 
+						]td
+						[td 
+							"    60 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 66 end     
+						]td
+						[td 
+							" 325323 
+						]td
+						[td 
+							" 325393 
+						]td
+						[td 
+							"    70 
+						]td
+						[td 
+							"     10 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 67 start   
+						]td
+						[td 
+							" 326182 
+						]td
+						[td 
+							" 326253 
+						]td
+						[td 
+							"    71 
+						]td
+						[td 
+							"      1 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 67 end     
+						]td
+						[td 
+							" 330350 
+						]td
+						[td 
+							" 330424 
+						]td
+						[td 
+							"    74 
+						]td
+						[td 
+							"      3 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 68 start   
+						]td
+						[td 
+							" 332228 
+						]td
+						[td 
+							" 332302 
+						]td
+						[td 
+							"    74 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 68 end     
+						]td
+						[td 
+							" 336143 
+						]td
+						[td 
+							" 336212 
+						]td
+						[td 
+							"    69 
+						]td
+						[td 
+							"     -5 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 69 start   
+						]td
+						[td 
+							" 337526 
+						]td
+						[td 
+							" 337595 
+						]td
+						[td 
+							"    69 
+						]td
+						[td 
+							"      0 
+						]td
+					]tr
+					[tr 
+						[td 
+							" 69 end     
+						]td
+						[td 
+							" 343247 
+						]td
+						[td 
+							" 343322 
+						]td
+						[td 
+							"    75 
+						]td
+						[td 
+							"      6 
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+	]div
+]div

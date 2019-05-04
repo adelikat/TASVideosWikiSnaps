@@ -1,0 +1,1850 @@
+13
+[p 
+	"Encode with Overlay
+	$LF
+	(youtube|v=m7egGLSQ2GU)
+	$LF
+]p
+[p 
+	"Encode without Overlay
+	$LF
+	(youtube|v=ODdwb0b5aHU)
+	$LF
+]p
+[p 
+	"Though a Youtube encode with commentary is not available yet, here is a livestream where both myself and Stryder7x are commentating. https://www.twitch.tv/videos/145626330
+	$LF
+]p
+[h2 
+	"Game Overview
+	$LF
+]h2
+[p 
+	"Paper Mario, first release in Japan in August of 2000, is a role-playing game developed by Intelligent Systems. Peach has been kidnapped by Bowser, who has stolen the Star Rod, which allows him to grant any wish. In order to counteract the effects of the Star Rod, Mario must locate the seven star spirits who, together, can stop Bowser’s evil plans.
+	$LF
+]p
+[p 
+	"As opposed to the 
+	(__wikiLink|2818M|previously published any% TAS)
+	", Mario actually grabs all the star spirits this time. Regardless, there are still many glitches that allow us to speed through all 8 chapters.
+	$LF
+]p
+[h2 
+	"Game Objectives:
+	$LF
+]h2
+[ul 
+	[li 
+		"Abuses Programming Errors
+		$LF
+	]li
+	[li 
+		"Heavy Glitch Abuse
+		$LF
+	]li
+	[li 
+		"Heavy Luck Manipulation
+		$LF
+	]li
+	[li 
+		"Genre: RPG
+		$LF
+	]li
+]ul
+[h2 
+	"Emulator Settings:
+	$LF
+]h2
+[ul 
+	[li 
+		"BizHawk 1.11.9
+		$LF
+	]li
+	[li 
+		"Pure Interpreter
+		$LF
+	]li
+	[li 
+		"GLideN64
+		$LF
+		[ul 
+			[li 
+				"http://imgur.com/a/TOJ0v
+				$LF
+			]li
+		]ul
+		"ROM MD5 Checksum: DF54F17FB84FB5B5BCF6AA9AF65B0942
+		$LF
+	]li
+	[li 
+		"ROM SHA1 Checksum: B9CCA3FF260B9FF427D981626B82F96DE73586D3
+		$LF
+	]li
+]ul
+[h2 
+	"Useful RAM Watch Addresses:
+	$LF
+]h2
+[p 
+	"All addresses listed are Big Endian.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Display
+			]th
+		]tr
+		[tr 
+			[td 
+				"10F1B0
+			]td
+			[td 
+				"X-Pos
+			]td
+			[td 
+				"4 Byte
+			]td
+			[td 
+				"Float
+			]td
+		]tr
+		[tr 
+			[td 
+				"10F1B4
+			]td
+			[td 
+				"Y-Pos
+			]td
+			[td 
+				"4 Byte
+			]td
+			[td 
+				"Float
+			]td
+		]tr
+		[tr 
+			[td 
+				"10F1B8
+			]td
+			[td 
+				"Z-Pos
+			]td
+			[td 
+				"4 Byte
+			]td
+			[td 
+				"Float
+			]td
+		]tr
+		[tr 
+			[td 
+				"10F1DC
+			]td
+			[td 
+				"Speed
+			]td
+			[td 
+				"4 Byte
+			]td
+			[td 
+				"Float
+			]td
+		]tr
+		[tr 
+			[td 
+				"0743F0
+			]td
+			[td 
+				"RNG
+			]td
+			[td 
+				"4 Byte
+			]td
+			[td 
+				"Hex
+			]td
+		]tr
+		[tr 
+			[td 
+				"10F208
+			]td
+			[td 
+				"Mario’s Angle
+			]td
+			[td 
+				"4 Byte
+			]td
+			[td 
+				"Float
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	"What is “All Cards”?
+	$LF
+]h2
+[p 
+	"All Cards is a category in Paper Mario 64 that requires the player to physically touch all 7 Star Spirit Cards, as opposed to any% which touches none. It’s generally more entertaining as more of the game is played, whereas the any% category requires you to frequently return to Chapter 5 and perform Peach Warp.
+	$LF
+]p
+[h2 
+	"General Tech
+	$LF
+]h2
+[p 
+	[b 
+		"Out of Bounds
+	]b
+	" - When leaving the ground in Paper Mario, the game begins to count the time spent airborne. After a couple seconds off of the ground, Mario’s fall will slow to a halt and his Y position will begin to rapidly increase. If Mario passes through any solid floor during this time, he will respawn there. However, if Mario remains in the air for too long, he will instead respawn at the position he was original at before he left the ground. By using a controlled fall out of bounds, we can abuse this property to respawn on the other side of many obstacles in the game.
+	$LF
+]p
+[p 
+	[b 
+		"NPC Clip
+	]b
+	" - In certain areas of the game, we can use the speed of a spin or applying other situational methods in order to move into the space between an NPC’s hitbox and a solid wall. By then hammering to freeze ourselves in place or occasionally simply jumping we can cause the NPC’s hitbox to push us through whatever solid object they are standing next to.
+	$LF
+]p
+[p 
+	[b 
+		"Lakilester Clip
+	]b
+	" - If Mario is positioned precisely at a corner and faces away from the corner, he can then use Lakilester and clip through the corner. Lakilester’s hitbox is different from Mario’s hitbox. When we use Laki while facing away near a corner, the game tries to keep Mario’s position when he lands on Laki, but Laki’s larger hitbox detects that Mario’s current position is invalid. To try and fix this, the game will send Mario elsewhere. Right after Chapter 6, this allows Mario to be placed out-of-bounds so that we can retrigger the escape volcano escape cutscene.
+	$LF
+]p
+[p 
+	[b 
+		"Lakilester Teleport
+	]b
+	" - When Lakilester is far away from Mario and runs to catch up to him, hopping on Laki will cause Mario’s position to be offset, which can be used in Chapter 5 to displace Mario out of bounds.
+	$LF
+]p
+[p 
+	[b 
+		"Loading Zone Storage (LZS)
+	]b
+	" - Touching a loading zone while the control pad is neutral and then jumping immediately after prevents you from taking the loading zone until you stop jumping or do not reset the control pad to neutral right before jumping. This can be used to immediately leave an area after completing a task. In addition, by reaching a sufficient distance from the loading zone, we can use LZS to exploit a subtle mechanic which causes Mario to move toward the center of it. This allows us to enter the next area at such a highly skewed angle that we immediately fall out of bounds, bypassing obstacles by going underneath them. This glitch is also applicable on certain Star Spirit cards. By performing LZS on these cards, we can grab the card whilst leaving the room, completely skipping the following Peach intermission.
+	$LF
+]p
+[p 
+	[b 
+		"Spin Canceling
+	]b
+	" - Spinning and then jumping after 16 frames (w/o Speedy Spin) or 21 frames (w/ Speedy Spin) is the fastest form of basic movement. Small ledges also auto-cancel Mario’s spin, which often saves time over jumping. In addition, moving at a precise angle against walls will actually give you a speed boost, and instantly cancels the end of your spin in one frame. You can immediately start spinning again afterwards. There are two different types of cancels which we refer to as short and long spin cancels. Short spin cancels are slightly slower than long cancels as you stop more frequently. Whether or not you get a short and long spin appears to depend on the direction that Mario is facing and the properties of the wall.
+	$LF
+]p
+[p 
+	[b 
+		"RNG
+	]b
+	" - Within battles, RNG is based off of a frame counter. If we waste frames in different parts of a battle, and then attack the enemy on the same frame as before, the RNG remains the same (with the exception of the beginning of the Final Bowser fight). Outside of battle, frames can be wasted in different spots to produce different results. RNG is commonly manipulated in battle to change the Power Bounce cap. After doing a certain number of jumps, the game will randomly determine whether or not Mario can continue bouncing. 
+	[a class=extlink href=https://docs.google.com/spreadsheets/d/1eR2zXv6iuFPp6pNGOeAd56IoWOHTC3CTKz9sDOfmA5c rel=nofollow 
+		"The degree to which each bounce’s chance of succeeding varies from enemy to enemy.
+	]a
+	" Because you cannot delay or speed up Mario while he is jumping on the enemy, it is essentially determined on the last input before Mario jumps on the enemy. The exception is with the Goombario text glitch (explained below). Scrolling a text box back and forth while bouncing on Bowser in phase 1 changes the RNG of the Power Bounce cap, allowing us to deal 5 Power Bounces without wasting any time. Another use of RNG manipulation is with the Close Call badge, which allows Mario to sometimes dodge attacks from an enemy.
+	$LF
+]p
+[p 
+	[b 
+		"Quick Jump
+	]b
+	" - Before hitting an enemy, Mario has a crouching animation. Pressing A slightly before the animation starts will cause him to crouch earlier and for a shorter period of time, saving up to 1/3 of a second. The enemy’s in-battle position changes the A press timing and varies the number of frames saved from this technique.
+	$LF
+]p
+[h2 
+	"Tricks/Glitches Used in the Run
+	$LF
+]h2
+[h3 
+	"Prologue
+	$LF
+]h3
+[p 
+	[b 
+		"Jr. Troopa Skip
+	]b
+	" - After falling from Goompa's balcony and then entering Jr. Troopa’s Playground, we can use LZS to immediately take the loading zone after interacting with the bush with the hammer in it. This skips the Jr. Troopa battle, saving over one minute and twenty seconds initially, though some of that time is lost later on as a result of being at a lower level. It is interesting to note that we must trigger the bush from the bottom. Otherwise, we do not acquire the hammer after leaving the room.
+	$LF
+]p
+[p 
+	[b 
+		"Black Toad Skip
+	]b
+	" - We can use an NPC Clip to get out of bounds and fall and respawn in the wall of the Post Office. Then we can fall again to pass behind the Black Toads and enter Chapter 1.
+	$LF
+]p
+[h3 
+	"Chapter 1
+	$LF
+]h3
+[p 
+	[b 
+		"Kooper Cutscene Skip
+	]b
+	" - By performing LZS in the first Koopa Village Room, we can skew our angle and land out-of-bounds behind the leftmost house. From there, we can fall to the loading zone behind Kooper’s house. This skips entering and leaving Kooper’s house, in addition to skipping a small cutscene with a Fuzzy.
+	$LF
+]p
+[p 
+	[b 
+		"Epic Timesaver v2.0
+	]b
+	" - In the Koopa Bros. Fortress, you can jump off from the top of the staircase, briefly hold up, tap down, and land underneath the stairs, allowing you to enter the pit room earlier than intended. After fighting the three Koopas and retrieving the key, we can get back out-of-bounds easily. Since the staircase was never lowered, collision on the right side of the back wall doesn’t exist. From there, we can fall to the right and land at the door on the top floor. Altogether this saves time from fighting a Koopa to lower the staircase.
+	$LF
+]p
+[p 
+	[b 
+		"Chain Climb
+	]b
+	" - In the last fortress room, the collision by the staircase is poorly programmed, allowing us to clip out-of-bounds with ease. The chain at the bottom of the staircase actually has collision all the way to the top of the room. With some precise angling, Mario is able to scale to the top of the room. This saves about 3 seconds over falling out-of-bounds and landing up top.
+	$LF
+]p
+[p 
+	[b 
+		"Bombette Animation Cancel
+	]b
+	" - To access Mt. Rugged you have to use Bombette to blow up a rock that is preventing the train from departing. Using Bombette close to the platform ledge causes her to hit the ledge on her ascent. As a result, she quickly falls back down. You can’t talk to NPCs while Bombette is in the air, so cancelling her animation allows us to talk to the train conductor several seconds earlier.
+	$LF
+]p
+[h3 
+	"Mt. Rugged
+	$LF
+]h3
+[p 
+	[b 
+		"Quick Letter
+	]b
+	" - By clipping out-of-bounds thanks to some poor collision at the back edge of the staircase, we can land on the room’s seam, fall to the left, store the top loading zone, and fall back to the lower floor to skew the loading zone. By skewing the loading zone enough, we can fall out-of-bounds in the next room and land right by the letter.
+	$LF
+]p
+[p 
+	[b 
+		"Parakaryless Seed
+	]b
+	" - Thanks to the common theme of poor collision in this game, we can squeeze out-of-bounds on one section of the wall, fall out of the room, and land by the Bub-ulb who will give us one of the seeds required to access Chapter 6. This saves around 45 seconds,  eliminating a lot of backtracking after getting Parakarry.
+	$LF
+]p
+[p 
+	[b 
+		"Blue House Skip
+	]b
+	" - There is a blue house in Toad Town containing a pipe that leads to the later areas of the sewers. It is normally inaccessible until Chapter 5 as the door is locked from inside. Using a precisely positioned frame-perfect jump, this house can be accessed early, allowing us to enter Chapter 5 right away.
+	$LF
+]p
+[h3 
+	"Chapter 3
+	$LF
+]h3
+[p 
+	[b 
+		"Record Skip
+	]b
+	" - With a precise initial position and angle, Mario can jump into the corner of the chest in the record player room and open the chest, even though the Boo is guarding it still. This skips the need to get the record in the first place.
+	$LF
+]p
+[p 
+	[b 
+		"Bow Skip
+	]b
+	" - By using LZS on the loading zone to the right of Boo’s mansion, we can land out-of-bounds and bypass a gate that normally requires Bow to open, effectively saving over a minute.
+	$LF
+]p
+[p 
+	[b 
+		"Stanley Skip
+	]b
+	" - By abusing some wonky collision on the town buildings, you can land out-of-bounds and bypass a cutscene, saving about 15 seconds.
+	$LF
+]p
+[p 
+	[b 
+		"Key Glitch
+	]b
+	" - In Tubba Blubba’s bedroom, you normally have to activate his cutscene and then open the chest afterwards. The cutscene trigger is shaped oddly, so it is actually possible to open the chest whilst the Tubba Blubba cutscene occurs. Closing either Tubba’s text box or the key’s text box will trigger cutscene flags, so we can advance the Tubba cutscene faster than intended. In addition it causes some humorous graphical glitches while he is sleeping.
+	$LF
+]p
+[p 
+	[b 
+		"Quick Escape
+	]b
+	" - Upon leaving the mansion, you can use Parakarry from the second floor porch and ascend to the top of the rail. From there, you can fall down to the main door and leave. This saves time over having to run down a staircase to the right.
+	$LF
+]p
+[h3 
+	"Chapter 5
+	$LF
+]h3
+[p 
+	[b 
+		"Yoshi Skip
+	]b
+	" - Using precise jumps, we are able to climb a tree and then jump over it to get out of bounds. From there we can navigate the seams and gain immediate access to the volcano. This skips rescuing the Yoshis and obtaining the Ultra Stone, which takes a very long time and would also require Watt, who we don’t have yet.
+	$LF
+]p
+[p 
+	[b 
+		"Lava Puzzle Skip
+	]b
+	" - Using Flarakarry on the edge of the platform in the room before the Ultra Hammer allows Mario to reach the edge of the left side. From there, we can fall down to the left and skip solving the puzzle to block off the lava. Opening the Ultra Hammer chest sets our game progression past the puzzle, so when we return to the puzzle room, it’s already solved.
+	$LF
+]p
+[p 
+	[b 
+		"Flarakarry
+	]b
+	" - A precisely-positioned use of Parakarry can allow us to slightly clip into the wall and touch the loading zone behind it. This skips pushing a blue block all the way across the room, hammering a number of blocks, the Spiny Tromp breaking through the wall, and a small cutscene involving Kolorado.
+	$LF
+]p
+[p 
+	[b 
+		"Shop Clip
+	]b
+	" - Using Parakarry against the left side of the item shop allows us to clip onto the seam of the building. From there, we can navigate out-of-bounds, fall, and land right by the spring that lets us enter Chapter 4. This saves time over moving farther left and opening up two sets of doors.
+	$LF
+]p
+[h3 
+	"Chapter 4
+	$LF
+]h3
+[p 
+	[b 
+		"Parakarry Clip
+	]b
+	" - In the right room in the Pink Station, you can use Parakarry to clip inside the back wall, which skips waiting for a Shy Guy to open up the back panel. This can also be done while leaving the room to skip hitting the springs.
+	$LF
+]p
+[h3 
+	"Chapter 2
+	$LF
+]h3
+[p 
+	[b 
+		"Key Skip
+	]b
+	" - In the main room of Dry Dry Ruins, we can perform LZS on the top left loading zone and meander our way down the staircase to the left. When the loading zone takes us, it sends us through the locked passageway, but the passageway’s loading zone is triggered, overrides the previous loading zone we were taking, and sends us through the locked passageway.
+	$LF
+]p
+[p 
+	[b 
+		"Stone Chomp Skip
+	]b
+	" - After hitting the stone block, which reveals a Stone Chomp, we can perform LZS on the loading zone, grab the Lunar Stone, and leave the room immediately after. This LZS skips the need to fight the Stone Chomp in order to leave the room.
+	$LF
+]p
+[p 
+	[b 
+		"Bombette LZS
+	]b
+	" - The bottom passageway must be blown up to access it. While Bombette falls down and blows up the wall, we can perform an LZS to enter the loading zone before the wall’s collision is fully cleared. If we were to use LZS by itself, the wall would not be destroyed, requiring a future use of Bombette. However, performing LZS during Bombette’s explosion allows the game enough time to correctly flag the wall as “blown up” while the next room loads. Because most loading zone triggers extend infinitely upwards, we can fall off for a frame to trigger the bottom loading zone and land back up top while taking the bottom loading zone. This saves time because it skips Mario’s falling animation, during which he cannot take loading zones.
+	$LF
+]p
+[h3 
+	"Chapter 6
+	$LF
+]h3
+[p 
+	[b 
+		"Yellow Berry Skip
+	]b
+	" - By performing an LZS in the main room in Flower Fields, Mario’s angle can be skewed, making it possible to maneuver to the back of the room, skipping a long process of obtaining the yellow berry and opening the gate to that room. This is performed twice since I have to go back to the yellow berry room shortly after.
+	$LF
+]p
+[p 
+	[b 
+		"Sushie Skip
+	]b
+	" - By using LZS around the right loading zone, which conveniently does not have invisible walls surrounding it, we can maneuver to the back of the room and fall down left towards the loading zone. This skips the use of Sushi in this room, which actually only saved 2 frames but was absolutely worth it.
+	$LF
+]p
+[p 
+	[b 
+		"Bubble Berry Skip
+	]b
+	" - This glitch is identical to the Lakilester Early trick used in theany% TAS. We can use LZS to skew our entry into the Bubble Berry room. It was actually a few frames faster to clip through the tree to reach the optimal position position for our skew faster.
+	$LF
+]p
+[p 
+	[b 
+		"Sun Tower Skip
+	]b
+	" - Thanks to the lack of loading zone walls in this chapter, we can LZS around the back of the loading zone and fall up top, talk to the Sun at the top of the tower and immediately leave. This skips the use of Bombette to allow Mario to access the spiral staircase.
+	$LF
+]p
+[p 
+	[b 
+		"Clippy
+	]b
+	" - There is a one frame window in which you can switch partners while entering an encounter. If you enter a battle while riding Laki and switch partners after the battle, the game incorrectly keeps Lakilester’s hitbox parameters. As a result, Mario is able to reach higher platforms and push farther into objects than intended. This is used to obtain the Ultra Boots because we don’t have the Ultra Hammer anymore at this point. Once on top of the loading zone ceiling, we can use Laki, and he teleports us down into the loading zone.
+	$LF
+]p
+[h3 
+	"Chapter 7
+	$LF
+]h3
+[p 
+	[b 
+		"Peach Warp
+	]b
+	" - Peach Warp involves re-triggering the ending of Chapter 5. In doing so, the game sends us to the next Peach intermission. If it detects that we’re in a post-Chapter 6 state, like we are at this point, it sends us to the corresponding Peach Intermission for Chapter 7. This can be done through a precise Laki Clip and maneuvering our way to the bottom loading zone. This loading zone is otherwise not accessible because lava is covering the bottom of the room.
+	$LF
+]p
+[p 
+	"In the following room, we have to perform a Laki Teleport. We can hop on and off Laki and rush to the bottom edge of the room. Due to how far away Laki is, he displaces Mario to the right when he rushes over to us. This allows us to land out-of-bounds, fall to the right, and bypass a set of invisible walls that would otherwise prevent us from reaching the escape cutscene again.
+	$LF
+]p
+[p 
+	"Peach Warp is performed at this point because we can skip the first half of Chapter 7. After the short intermission, we are placed right outside of the Crystal Palace. Luckily, entering the Crystal Palace from here reverts our story progression back to Chapter 7. Completing Chapter 7 from here allows us to beat the Crystal King and grab the last Star Spirit Card.
+	$LF
+]p
+[p 
+	[b 
+		"Blue Key Skip
+	]b
+	" - The collision on the left wall outside of the Crystal Palace is pretty wonky. Using a series of frame perfect jumps, I can navigate my way behind the mirror wall and enter the Crystal Palace from the back door. This makes it possible to smash a wooden panel without fighting a Duplighost. Because this wooden panel’s existence affects the corresponding foreground room, we can grab the Red Key immediately after. This same skip can be executed to reach the front of the palace, skipping the entire blue door section of the palace.
+	$LF
+]p
+[p 
+	[b 
+		"Duplighost Cutscene Skip
+	]b
+	" - By positioning Mario near the edge of the loading zone following the Kooper imposter cutscene, we can spin from a precise position to trigger the loading zone, which takes the loading zone before the coordinate-based cutscene where the NPCs carry Mario back into the room.
+	$LF
+]p
+[p 
+	[b 
+		"Reverse Blue House Clip
+	]b
+	" - By using a precise left angle against the back stack of boxes, Lakilester will gradually rise up to the top of the Blue House. By switching our angle to the right, Laki will clip outside of the house, allowing Mario to reach the following loading zone without having to unlock and open the house’s door.
+	$LF
+]p
+[p 
+	[b 
+		"Shooting Star Summit Clip
+	]b
+	" - Using a Lakilester Clip, Mario can fall out of bounds and respawn at the top of the Shooting Star Summit, instead of climbing to the top.
+	$LF
+]p
+[h3 
+	"Chapter 8
+	$LF
+]h3
+[p 
+	[b 
+		"Basement Skip
+	]b
+	" - Instead of progressing normally through the Chapter 8 basement, we instead head leftward, across the lava, toward the screen with the castle’s entrance. Using a series of precise angles, Mario can clip inside the back of the castle’s wall and reach the front entrance. This saves time over the any% TAS’s block clip, which involves spin jumping onto the badge block and using Parakarry to fly across.
+	$LF
+]p
+[p 
+	[b 
+		"Hub Room Clip
+	]b
+	" - The wall at the bottom-left of the stairs in the first hub room is not properly connected, and with the right positioning, Mario can walk right though. This saves a few frames as we do not have to climb the stairs. This does not work in the similarly designed room later in the castle.
+	$LF
+]p
+[p 
+	[b 
+		"Flood Room Skip
+	]b
+	" - The method for doing this trick used in this run was accidentally discovered in the any% TAS while fooling around in the room. If you ride Lakilester on the water, and then ride him over into the hole that the spring came out of, Mario will fall through the floor. With precise out of bounds movement, we are able to reach the key on the top floor. At this water level, the loading zone to the next area is blocked by an invisible wall. By using the Hammer to obtain the key, we are able to avoid having to do additional clips in order to reach it.
+	$LF
+]p
+[p 
+	[b 
+		"Cannonless
+	]b
+	" - Using a Lakilester clip in a precise position along the second stair will cause Mario to fall out of bounds and respawn underneath the stairs. From there, Mario can spin up right and land on the seam of the room. This skips getting into encounters with all of the cannons in this room.
+	$LF
+]p
+[p 
+	[b 
+		"Castle Key LZS
+	]b
+	" - In the room with the Hammer Bro, you can perform LZS on the middle loading zone, use the Hammer Bro.’s hammer to get extra height, jump over the statue, and take the pathway hidden behind the statue. This skips the slow process of pushing the statue to the side.
+	$LF
+]p
+[p 
+	[b 
+		"Goombario Text Glitch
+	]b
+	" - Pressing C-Down a frame before falling into the Final Bowser cutscene causes two text boxes to appear: Goombario’s text box and Bowser’s text box. We can press C-Down again to end Goombario’s text box, leaving Bowser’s text box on screen. Because the game registers that a text box closed, the cutscene advances while Bowser’s text box remains on screen. When the next event in the cutscene starts, we can advance the text box to end it prematurely. The text box that should normally appear at that point in the cutscene will then pop up while the cutscene advances further. This saves time because as the cutscene plays, we can advance to the end of each text box and immediately start the next sequence of the cutscene.
+	$LF
+]p
+[p 
+	[b 
+		"Luigi Skip
+	]b
+	" - After Mario returns to his house, he and Luigi leave to visit Peach at her castle. By holding down as Mario jumps up to the pipe outside of his house, the transition to the next screen will begin instead of waiting for Luigi to enter the pipe as well. As this ends the cutscene early, the portion of it where Luigi talks to Mario in Toad Town never occurs.
+	$LF
+]p
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-607 
+				"Hide Route
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-608 
+				"Show Route
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-607 
+		]div
+		[div class=tab-pane fade id=y-608 
+			[p 
+				[b 
+					"Prologue
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Jr. Troopa Skip, then return and obtain 10 coins from the block. (10C)
+				$LF
+			]p
+			[p 
+				"- 4 coins from spring & Fire Flower. (14C) (1I)
+				$LF
+			]p
+			[p 
+				"- Get & equip Power Jump.
+				$LF
+			]p
+			[p 
+				"- Get a Goomnut. (2I)
+				$LF
+			]p
+			[p 
+				"- Get 2 coins and Close Call. (16C)
+				$LF
+			]p
+			[p 
+				"Goomba Bros. Fight: (20 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump Red; Headbonk Red. (3 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Jump Blue; Do Nothing. (1 FP)
+				$LF
+			]p
+			[p 
+				"T3: Fire Flower (1I).
+				$LF
+			]p
+			[p 
+				"- Eat Goomnut. (0I) (4 FP)
+				$LF
+			]p
+			[p 
+				"Goomba King Fight: (50 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump Goomba King; Headbonk Tree. (2 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Jump Goomba King; Headbonk Goomba King. (0 FP)
+				$LF
+			]p
+			[p 
+				"Buy three Fright Jars at the Shroom Grocery. (6C) (3I)
+				$LF
+			]p
+			[p 
+				"Magikoopa Fight: (66 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump; Headbonk x2. (Block) (3 FP)
+				$LF
+			]p
+			[p 
+				"T2: Jump x2.
+				$LF
+			]p
+			[p 
+				"- Post Office Black Toad Skip.
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 1
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Get Fright Jar. (3I)
+				$LF
+			]p
+			[p 
+				"- Get POW Block and 5 coins from the block. (5I)(6C)
+				$LF
+			]p
+			[p 
+				"- Kooper Cutscene Skip.
+				$LF
+			]p
+			[p 
+				"Fuzzy Fight: (78 XP)
+				$LF
+			]p
+			[p 
+				"T1: POW Block; Untimed Power Shell. (4I) (0 FP)
+				$LF
+			]p
+			[p 
+				"- Get 5 coins, the Thunderbolt, and Fire Flower. (11C) (6I)
+				$LF
+			]p
+			[p 
+				"- Hit the Heart Block before entering Koopa Bros. Fortress.
+				$LF
+			]p
+			[p 
+				"Key Fight: (84 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump, Untimed Power Shell. (0 FP)
+				$LF
+			]p
+			[p 
+				"- Get Power Bounce.
+				$LF
+			]p
+			[p 
+				"- Epic Timesaver 2.0.
+				$LF
+			]p
+			[p 
+				"Paratroopa Fight 1: (84 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (5I)
+				$LF
+			]p
+			[p 
+				"Manipulate a POW Block item drop. (6I)
+				$LF
+			]p
+			[p 
+				"Paratroopa Fight 2: (84 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (5I)
+				$LF
+			]p
+			[p 
+				"- Manipulate a POW Block item drop. (6I)
+				$LF
+			]p
+			[p 
+				"Koopa Fight: (84 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (5I) (0 FP)
+				$LF
+			]p
+			[p 
+				"- Manipulate another POW Block item drop. (6I)
+				$LF
+			]p
+			[p 
+				"- 20 coins from Fire Bars on the way to the Fortress Key, then get Bombette. (31C)
+				$LF
+			]p
+			[p 
+				"-Get Bombette.
+				$LF
+			]p
+			[p 
+				"Jail Fight: (90 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (5I)
+				$LF
+			]p
+			[p 
+				"- Collect 9 coins from the fight. (40C) 
+				$LF
+			]p
+			[p 
+				"- Get the other Fortress Key (Epic Timesaver), unlock the top door, and then double Pie Jump.
+				$LF
+			]p
+			[p 
+				"Cannon Fight: (105 XP)
+				$LF
+			]p
+			[p 
+				"T1: POW Block; Do Nothing. (4I)
+				$LF
+			]p
+			[p 
+				"T2: POW Block. (3I)
+				$LF
+			]p
+			[p 
+				"- Level Up: FP (10 | 10 | 3) (10 FP)
+				$LF
+			]p
+			[p 
+				"- Collect 10 coins from this fight. (50C)
+				$LF
+			]p
+			[p 
+				"Koopa Bros. Fight: (143 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump; Bomb. (5 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Jump; Bomb. (0 FP)
+				$LF
+			]p
+			[p 
+				"T3: POW Block. (2I)
+				$LF
+			]p
+			[p 
+				"T4: Fire Flower. (1I)
+				$LF
+			]p
+			[p 
+				"Jr. Troopa Fight: (164 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump; Bomb. (5 FP)
+				$LF
+			]p
+			[p 
+				"T2: Thunderbolt; Bomb. (0I) (2 FP)
+				$LF
+			]p
+			[p 
+				"- Buy Speedy Spin, take off Power Jump, equip Power Bounce and Speedy Spin. (0C)
+				$LF
+			]p
+			[p 
+				"- Get the Magical Seed, bomb trick, then take the train to Mt. Rugged.
+				$LF
+			]p
+			[p 
+				[b 
+					"Mt. Rugged
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Quick Letter via Mt. Rugged clip, Buzzar Letter with LZS.
+				$LF
+			]p
+			[p 
+				"- Parakarryless Seed 4.0, then get Kooper letter, then a Whacka Bump on the way back. (1I)
+				$LF
+			]p
+			[p 
+				"- Give Parakarry the letters, then hit Heart Block and leave Mt. Rugged. (10 FP)
+				$LF
+			]p
+			[p 
+				"- Go to Shroom Grocery, sell the Whacka Bump, and buy 10 Fright Jars. (10I) (14C)
+				$LF
+			]p
+			[p 
+				"- Blue House Skip, swap to Parakarry, then head to Blooper.
+				$LF
+			]p
+			[p 
+				"Blooper Fight: (185 XP) 
+				$LF
+			]p
+			[p 
+				"T1: Power Bounce x14; Shell Shot. (Don’t Block) (4 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x11. (1 FP)
+				$LF
+			]p
+			[p 
+				[b 
+					"Getting Sushie
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Trigger into Chapter 5, get Sushie, then return and cross the water to the Dark Koopa room.
+				$LF
+			]p
+			[p 
+				"- Get into peril by getting first struck by two of the Dark Koopas. (Don’t Block)
+				$LF
+			]p
+			[p 
+				"Dark Koopa 1: (185 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (9I)
+				$LF
+			]p
+			[p 
+				"Dark Koopa 2: (185 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (8I)
+				$LF
+			]p
+			[p 
+				"Dark Koopa 3: (185 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (7I)
+				$LF
+			]p
+			[p 
+				"- Reach 25 coins and 6 FP after the battles. (25C) (6 FP)
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 3
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Record Skip
+				$LF
+			]p
+			[p 
+				"- Get the Super Boots, skip Bow using LZS.
+				$LF
+			]p
+			[p 
+				"- Stanley Skip.
+				$LF
+			]p
+			[p 
+				"- Upgrade Parakarry, then bed jump to get Mega Rush. (27C)
+				$LF
+			]p
+			[p 
+				"- Get the Maple Syrup, then do Key Glitch and Quick Escape. (8I)
+				$LF
+			]p
+			[p 
+				"- Switch to Sushie, take off Speedy Spin and equip Mega Rush just before Tubba’s Heart.
+				$LF
+			]p
+			[p 
+				"Tubba’s Heart: (185 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Bounce x8; Do Nothing (3 FP).
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x7. (0 FP).
+				$LF
+			]p
+			[p 
+				"Tubba Blubba: (219 XP)
+				$LF
+			]p
+			[p 
+				"T1: Jump x2.
+				$LF
+			]p
+			[p 
+				"Level Up: BP (10 | 10 | 6). (10 FP)
+				$LF
+			]p
+			[p 
+				"- Equip Speedy Spin, Power Jump, & Close Call, then LZS Card.
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 5
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Perform Yoshi Skip & First cycle the lava platform.
+				$LF
+			]p
+			[p 
+				"- Perform Lava Puzzle Skip & get the Ultra Hammer.
+				$LF
+			]p
+			[p 
+				"- Reach 37 Coins and get into Peril using the Fire Bars. (37C)
+				$LF
+			]p
+			[p 
+				"- Perform Flarakarry to skip the Kolorado cutscene.
+				$LF
+			]p
+			[p 
+				"- Switch to Sushi during Kolorado cutscene.
+				$LF
+			]p
+			[p 
+				"Lava Piranha: (261 XP)
+				$LF
+			]p
+			[p 
+				"Phase 1:
+				$LF
+			]p
+			[p 
+				"T1: Jump x2; Belly Flop. (Close Call x3)
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x7; Belly Flop. (7 FP)
+				$LF
+			]p
+			[p 
+				"Phase 2:
+				$LF
+			]p
+			[p 
+				"T1: Squirt; Power Bounce x6. (1 FP)
+				$LF
+			]p
+			[p 
+				"T2: Jump x2.
+				$LF
+			]p
+			[p 
+				"- Get the Jammin’ Jelly & Chapter 5 Magical Seed. (9I)
+				$LF
+			]p
+			[p 
+				"- Swim across with Sushie, then swap to Parakarry and clip into Chapter 4. 
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 4
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Go to Chapter 4 and go to the Red Station, then go to the Pink Station.
+				$LF
+			]p
+			[p 
+				"- Hit Blue Switch on the way and Parakarry clip at Pink Station.
+				$LF
+			]p
+			[p 
+				"Fuzzy Fight: (261 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (8I)
+				$LF
+			]p
+			[p 
+				"- Get Frying Pan, Parakarry clip again, then left to Red Station. (39C)
+				$LF
+			]p
+			[p 
+				"- Take the left loading zone and switch to Goombario.
+				$LF
+			]p
+			[p 
+				"Lantern Ghost: (281 XP)
+				$LF
+			]p
+			[p 
+				"T1: Do Nothing; Do Nothing.
+				$LF
+			]p
+			[p 
+				"T2: Do Nothing; Do Nothing. (Block ½ for peril)
+				$LF
+			]p
+			[p 
+				"T3: Headbonk x2 Lantern; Power Bounce x5 Lantern Ghost. (7 FP)
+				$LF
+			]p
+			[p 
+				"T4: Headbonk x2 Lantern; Power Bounce x5 Lantern Ghost. (4 FP)
+				$LF
+			]p
+			[p 
+				"- Get Watt, then Upgrade Bombette and eat a Maple Syrup while on the platform. (7I) (10 FP)
+				$LF
+			]p
+			[p 
+				"- Go to the right of Red Station and swap to Watt after bombing the wall.
+				$LF
+			]p
+			[p 
+				"- Switch to Parakarry right before the fight.
+				$LF
+			]p
+			[p 
+				"General Guy: (320 XP)
+				$LF
+			]p
+			[p 
+				"Phase 1:
+				$LF
+			]p
+			[p 
+				"T1: Jump x2; Sky Dive.
+				$LF
+			]p
+			[p 
+				"T2: Star Storm.
+				$LF
+			]p
+			[p 
+				"T3: Jump x2 (Close Call).
+				$LF
+			]p
+			[p 
+				"T4: Jump x2.
+				$LF
+			]p
+			[p 
+				"Phase 2:
+				$LF
+			]p
+			[p 
+				"T1: Power Bounce x7; Shell Shot. (Manipulate Bomb attack; Close Call) (4 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x7. (1 FP)
+				$LF
+			]p
+			[p 
+				"- Level Up: BP (10 | 10 | 9). (10 FP)
+				$LF
+			]p
+			[p 
+				"- Move during cutscene to save frame.
+				$LF
+			]p
+			[p 
+				"- LZS the Card; then talk to Chet Rippo and Upgrade FP for 39 coins. (5 | 20 | 6) (10 FP)
+				$LF
+			]p
+			[p 
+				"- Go to Forever Forest and get the final Magical Seed.
+				$LF
+			]p
+			[p 
+				"Electro Blooper: (343 XP)
+				$LF
+			]p
+			[p 
+				"T1: Shell Shot; Eat Jammin’ Jelly. (Don’t block) (20 FP) (6I)
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x5; Do Nothing. (17 FP)
+				$LF
+			]p
+			[p 
+				"T3: Shell Shot; Power Bounce x4. (11 FP)
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 2
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Head to Dry Dry Ruins, get a Ruins Key and head to the Triangle Stone.
+				$LF
+			]p
+			[p 
+				"Stone Chomp 1: (353 XP)
+				$LF
+			]p
+			[p 
+				"T1: First Strike Jump; Jump x1.
+				$LF
+			]p
+			[p 
+				"- LZS through the locked door and head to the Lunar Stone.
+				$LF
+			]p
+			[p 
+				"- LZS to get the Lunar Stone.
+				$LF
+			]p
+			[p 
+				"- Go to treasure room to obtain the Super Hammer.
+				$LF
+			]p
+			[p 
+				"- LZS through the cracked wall while breaking it.
+				$LF
+			]p
+			[p 
+				"- Bomb the wall, and grab the Diamond Stone after the Stone Chomp fight.
+				$LF
+			]p
+			[p 
+				"Stone Chomp 2: (363 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Bomb. (5 FP)
+				$LF
+			]p
+			[p 
+				"- Manipulate 3 FP drops total to reach 8 FP from the two Stone Chomps. (8 FP)
+				$LF
+			]p
+			[p 
+				"Tutankoopa: (389 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Bounce x9; Shell Shot. (2 FP)
+				$LF
+			]p
+			[p 
+				"- LZS card, then head back through sewers to Toad Town.
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 6
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Give Minh T. all of the Magical Seeds, enter Flower Fields, then go to Petunia’s room.
+				$LF
+			]p
+			[p 
+				"Mole Fight x1: (397 XP)
+				$LF
+			]p
+			[p 
+				"T1: Jump x2.
+				$LF
+			]p
+			[p 
+				"- Get a Red Berry.
+				$LF
+			]p
+			[p 
+				"Mole Fight x2: (397 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (5I)
+				$LF
+			]p
+			[p 
+				"Mole Fight x3: (397 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (4I)
+				$LF
+			]p
+			[p 
+				"Mole Fight x4: (397 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (3I)
+				$LF
+			]p
+			[p 
+				"- Yellow Berry Skip.
+				$LF
+			]p
+			[p 
+				"- Get a Blue Berry for the gate and talk to Lily, and head to Rosie afterwards.
+				$LF
+			]p
+			[p 
+				"Maze Fight: (397 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (2I)
+				$LF
+			]p
+			[p 
+				"- Get the Maple Syrup and eat it before the Lakilester fight. (12 FP) (3I)
+				$LF
+			]p
+			[p 
+				"- Talk to Rosie, then get Fertile Soil and Crystal Berry.
+				$LF
+			]p
+			[p 
+				"- Talk to Rosie again, then do Yellow Berry Skip again and place the Water Stone.
+				$LF
+			]p
+			[p 
+				"- Perform Bubble Berry Skip, get the Shooting Star, and do Sun Tower Skip. (3I)
+				$LF
+			]p
+			[p 
+				"Lakilester: (415 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Bounce x5; Shell Shot. (6 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x4; Shell Shot. (0 FP)
+				$LF
+			]p
+			[p 
+				"Level Up: BP (5 | 20 | 9). (20 FP)
+				$LF
+			]p
+			[p 
+				"- Solve the puzzle, grab the Thunder Rage, and break the Puffpuff Machine. (4I)
+				$LF
+			]p
+			[p 
+				"Machine Fight: (415 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (3I)
+				$LF
+			]p
+			[p 
+				"- LZS and get and equip S. Jump Charge.
+				$LF
+			]p
+			[p 
+				"Huff N. Puff Fight: (453 XP)
+				$LF
+			]p
+			[p 
+				"T1: S. Jump Charge; Do Nothing. (Block) (16 FP)
+				$LF
+			]p
+			[p 
+				"T2: S. Jump Charge; Do Nothing. (Close Call) (12 FP)
+				$LF
+			]p
+			[p 
+				"T3: Power Bounce x7. (9 FP)
+				$LF
+			]p
+			[p 
+				"- Touch the card and do the Peach scene.
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 7
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"- Get the Ultra Boots with LZS, Peach Warp to Ch. 7, then do Blue Key Skip.
+				$LF
+			]p
+			[p 
+				"- Switch to Bombette while unlocking the Crystal Palace door.
+				$LF
+			]p
+			[p 
+				"Clubba Fight 1: (462 XP)
+				$LF
+			]p
+			[p 
+				"T1: Power Jump; Bomb. (15 FP)
+				$LF
+			]p
+			[p 
+				"Clubba Fight 2: (462 XP)
+				$LF
+			]p
+			[p 
+				"T1: Fright Jar. (2I)
+				$LF
+			]p
+			[p 
+				"Clubba Fight 3: (508 XP)
+				$LF
+			]p
+			[p 
+				"T1: Shooting Star; Power Bomb. (1I) (9 FP)
+				$LF
+			]p
+			[p 
+				"Level Up: HP (10 | 20 | 9). (20 FP)
+				$LF
+			]p
+			[p 
+				"- Perform Duplighost Cutscene Skip.
+				$LF
+			]p
+			[p 
+				"- Pause and equip P-Up D-Down.
+				$LF
+			]p
+			[p 
+				"- Switch to Parakarry.
+				$LF
+			]p
+			[p 
+				"Crystal King Fight: (559 XP)
+				$LF
+			]p
+			[p 
+				"T1: S. Jump Charge; Shell Shot front Crystal Bit. (Block 1/2) (16 FP)
+				$LF
+			]p
+			[p 
+				"T2: S. Jump Charge; Shell Shot Crystal King. (10 FP)
+				$LF
+			]p
+			[p 
+				"T3: Swap to Lakilester, Power Bounce x9. (7 FP)
+				$LF
+			]p
+			[p 
+				[b 
+					"Chapter 8
+				]b
+				":
+				$LF
+			]p
+			[p 
+				"Koopatrol Fight: (579 XP)
+				$LF
+			]p
+			[p 
+				"T1: Thunder Rage; Power Bomb. (0I) (14 FP)
+				$LF
+			]p
+			[p 
+				"- Bomb the wall, Switch to Lakilester, fast wall strats, and Basement Skip.
+				$LF
+			]p
+			[p 
+				"- Perform the Fast Flood Room glitch, Cannonless, Bowser Block LZS timesaver.
+				$LF
+			]p
+			[p 
+				"- Complete the quiz. (1, 1, 2, 1, 1)
+				$LF
+			]p
+			[p 
+				"Duplighost Fight: (579 XP)
+				$LF
+			]p
+			[p 
+				"T1: Up & Away.
+				$LF
+			]p
+			[p 
+				"Jr. Troopa Fight: (~600+ XP)
+				$LF
+			]p
+			[p 
+				"T1: S. Jump Charge; Do Nothing. (Don't block) (10 FP)
+				$LF
+			]p
+			[p 
+				"T2: S. Jump Charge; Do Nothing. Close Call. (7 FP) 
+				$LF
+			]p
+			[p 
+				"T3: Power Bounce x7. (4 FP)
+				$LF
+			]p
+			[p 
+				"Level Up: FP (10 | 25 | 9). (25 FP)
+				$LF
+			]p
+			[p 
+				"Hallway Bowser: (~660 XP)
+				$LF
+			]p
+			[p 
+				"T1: S. Jump Charge; Switch to Goombario. (21 FP) (Manipulate Fire and don’t block to reach peril) 
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x8. (18 FP) 
+				$LF
+			]p
+			[p 
+				"- Tattle Glitch.
+				$LF
+			]p
+			[p 
+				"Final Bowser:
+				$LF
+			]p
+			[p 
+				"Phase 1:
+				$LF
+			]p
+			[p 
+				"T1: S. Jump Charge; Swap to Parakarry; Close Call Claw. (14 FP)
+				$LF
+			]p
+			[p 
+				"T2: Power Bounce x8; Shell Shot. (8 FP)
+				$LF
+			]p
+			[p 
+				"T3: Star Beam.
+				$LF
+			]p
+			[p 
+				"Phase 2:
+				$LF
+			]p
+			[p 
+				"T1: Peach Beam; Shell Shot; Butt Stomp.
+				$LF
+			]p
+			[p 
+				"T2: S. Jump Charge; Shell Shot; Close Call Claw.
+				$LF
+			]p
+			[p 
+				"T3: Power Bounce x6; Shell Shot.
+				$LF
+			]p
+			[p 
+				"- Luigi Skip, then celebrate at Peach’s party!
+				$LF
+			]p
+		]div
+	]div
+]div
+[h2 
+	"Chapter-by-Chapter Comments
+	$LF
+]h2
+[h3 
+	"Prologue
+	$LF
+]h3
+[p 
+	"More time was probably spent on this part of the game than any other, simply due to its length and our motivation to shave as many frames off of the any% TAS’s prologue as possible. Possibly the biggest improvement is a new strategy in the second room of Peach’s Castle. You can clip onto the staircase railing and spin rather than walk up all the stairs. For the first few doors in the castle we perform a spin buffer. Right before our last spin is about to end, we can press Z, jump, and hold C-down. This buffers our next spin until we release C-down or open a door, allowing Mario to humorously open the door while spinning. For the Bowser fight and all subsequent fights, we can perform Quick Jumps to shorten Mario’s crouching animation before jumping.
+	$LF
+]p
+[p 
+	"Just like in the previous TAS, spinning off the side of the table in Goompa’s house is the fastest way to reach the porch. After returning to the front of the house, jumping on the table is still faster, since you are positioned farther away from the left corner of the table. After falling off the porch, a few frames were saved by talking to Goompa farther down, thereby shortening Mario’s walking distance for the cutscene. Just like the any% TAS, Jr. Troopa Skip is performed in the playground to eliminate the need to fight Jr. Troopa. A few more frames were saved by more optimally angling Mario towards the bush and retrieving the hammer from farther away. As opposed to the any% TAS, we have to re-enter the playground to grab a few coins which will be used to buy Speedy Spin and a few Fright Jars later. We can slightly shorten the hammer animation by pressing B two frames after the hammer hits the ground. Once we return to the previous room, we can use a hammer cancel after hitting the yellow block. On our ascent towards the Fire Flower, we grab four coins to contribute to our fund for future items. Similarly to the any% TAS, the Fire Flower will be used to knock out the Red and Blue Goombas.
+	$LF
+]p
+[p 
+	"Upon returning to Goomba Village, I jump before opening the fence, allowing Goompa to reach the gate faster for the cutscene. In addition I perform a spin buffer, causing Mario to start the gate cutscene while spinning. After retrieving the Goomnut from the right tree, we pause and equip the newly acquired Power Jump badge, which will allow Mario to deal additional damage for the cost of FP. In cases such as opening up the passage to Goomba Road, hammer cancelling is not possible, as Mario immediately enters a cutscene. Spin cancelling can be used throughout Goomba Road to save a significant amount of time. While we spin through the first room, we hit both the coin blocks. In the following room we acquire Close Call, which will be a quintessential strategy in avoiding attacks from powerful enemies. Upon entering the Red and Blue Goombas cutscene, we can perform a spin buffer, causing Mario to spin during the cutscene. One contributing factor as to why retrieving a Fire Flower is faster is because there would be an additional text box if only one goomba was killed during a turn. We eat the Goomnut to recover FP in preparation for the Goomba King battle. In the Goomba King fight, we can have Goombario hit the tree, which in turn deals 3 damage to all 3 enemies and instantly killing both the Red and Blue Goombas. A few frames were saved spinning through the Goomba Fortress by taking a more optimal angle through the doorway.
+	$LF
+]p
+[p 
+	"We head into the shop and grab three Fright Jars. These will be used for fights in Chapter 1. On the way to Star Summit, we can fall off for a frame, hold up-right, and land back on the ground, instantly cancelling our spin instead of jumping out of it. Our fight with the Magikoopa slightly differs from the any% TAS. In order to conserve FP for a Fuzzy fight in Chapter 1, we do two regular jumps instead of an additional Power Jump. A few frames were wasted before returning to Toad Town in order to manipulate the right Toad’s position. By positioning him against the right railing, we can perform Black Toad Skip to quickly enter Chapter 1.
+	$LF
+]p
+[h3 
+	"Chapter 1
+	$LF
+]h3
+[p 
+	"Similar to any%, we acquire the Fright Jar from the rightmost block for the Jail fight in Koopa Bros. Fortress. In the subsequent room, we can time our POW Block pickup with the tree cutscene such that the block falls while we pick up the POW Block. The POW Block will be used for the Fuzzy fight in Koopa Village. Before leaving that room, we hit the coin block to make up for spending 5 coins on a third Fright Mask. Unlike the any% TAS, we cannot skip Kooper due to his required use in Chapter 7. Because of this, we head downwards towards Koopa Village. After talking with one of the Koopas, we can perform the Koopa Cutscene Skip to save a few seconds. For some reason, pushing against the diagonal wall allows for an additional speed boost to help skew our angle faster. The following Fuzzy mini-game involves a bit of RNG. The Fuzzies toss around Kooper’s shell and land in one of the four trees. Each phase, the Fuzzies get faster and jump fewer times. The first time, it is most optimal to hit the second tree on the left because it is closest to Mario. We have to make our way to the left for the Kooper cutscene, so for the second and third phases we manipulate the Fuzzy to be in the leftmost tree. In addition, bad RNG resulted in overall time loss if we were to manipulate the Fuzzy to be in the leftmost tree during the first phase. After the first phase, we were also able to do a spin buffer to add in a bit of style. During the Fuzzy fight, we use a POW Block and an untimed Power Shell to defeat the Fuzzies in a single turn.
+	$LF
+]p
+[p 
+	"Upon leaving Koopa Village, it’s possible to skew our angle and land out-of-bounds in the bridge room to the left, but due to the amount of time it takes to skew our angle and navigate out-of-bounds to the bridge is sadly slower than just going through the room normally. On the way to the Koopa Bros. Fortress, we grab the five coins near the Koopa and grab the Thunder Bolt, which will be used for the cannon fight at the end of Chapter 1. Though we can skip this room like we did in the any% TAS with Kooper Skip, it’s faster to complete the room normally. On our way out, we grab the Fire Flower, which will be used for the Koopa Bros. fight. Before entering the fortress, we hit the heart block to restore FP. We can also do a spin buffer to stylishly spin while gaining FP.
+	$LF
+]p
+[p 
+	"By first striking the first Koopa in the fortress, we can eliminate him by following up with a Power Jump, set off the bomb, and have the bomb explode, all in the first turn. Two rooms later, we maneuver into the back cell and grab Power Bounce. This badge will save a lot of time in fights by allowing us to perform multiple jumps in one turn. In certain cases, such as this, it’s faster to hammer the item because it allows us to grab the badge from farther right, since we have to go back to the right again anyway. Epic Timesaver 2.0 is performed to quickly access the pit fights. During all three of these fights I manipulate POW Block drops. Two of these will be used for the upcoming cannon fight while the other will be used for the Chapter 1 boss battle. After the three fights, I head left to grab the fortress key. In this room, there are two fire bars. Jumping over them 10 times will cause 10 coins to spawn. We were able to find the address that keeps track of how many times Mario “jumped” over the fire bar. As it turns out, Mario can cause this address to jump up while midair if he goes in front of the fire bar, moves behind it, and moves in front of it again. Doing this optimally, we were able to only jump a total of six times across the two fire bars. We grab Bombette, and exit the jail cell. The jail fight can be ended shortly with the use of a Fright Jar. After the fight, I grabbed the 9 coins that always spawn after this battle. Upon leaving this room, you can jump from the bottom ledge of the staircase through the bottom of the floor. This saves a few frames over climbing the remaining stairs. After grabbing the key in the Power Bounce room, I ended up coincidentally opening the door on the same frame that Bombette lands on the floor. When this happens, Mario freezes in the air as he’s entering the door. In the room with the two switches, you can jump from the bottom edge around the walls that normally require the use of Kooper to push them aside. After hitting the following staircase switch, it was a few frames faster to fall off the staircase, spin, and then jump back on. We can use LZS in the small cell to quickly grab the key and leave. In the following room, we perform the chain climb to ascend to the outside of the fortress. It’s interesting to note that you can actually maneuver in between the Bullet Bills that the cannons shoot. From there, it’s fastest to spin cancel along the top and jump over the occasional Bullet Bill. For the cannon fight, we can use both of our POW Blocks to end the fight in two turns. Afterwards, we level up FP and grab the coins that drop from the battle.
+	$LF
+]p
+[p 
+	"Peach Intermissions occur in between each chapter in the game, though we’ll be skipping a few, and each one requires a bit of movement with Peach (the exception being the intermission after Chapter 7). Optimizing Peach intermissions is pretty simple since the fastest movement is always to just take a direct angle wherever I have to go. During this first Peach cutscene, we have to reveal a pathway behind the fireplace and read Bowser’s diary. He enters the room shortly after, returns Peach to her room, and we return to Mario’s perspective.
+	$LF
+]p
+[p 
+	"Upon gaining control of Mario, the elder star asks us if we would like a tutorial on how to use special abilities granted by the Star Spirit Cards. Skipping the tutorial by saying no both times skips a minute long tutorial that is completely unnecessary. As we venture back to Toad Town, we encounter Jr. Troopa for the first time, since we skipped him in the Prologue. He can be taken out pretty quickly using a Power Jump, a Thunderbolt, and two bombs.
+	$LF
+]p
+[p 
+	"Once we re-enter Toad Town, I spin slightly up-left to bring Mario closer to the set position he moves to during this Twink cutscene, which saves a few frames. Since we have exactly 50 coins, we can afford the Speedy Spin badge, which coincidentally spawned in the best slot (the rightmost) without wasting any time. Speedy Spin will drastically cut down movement time by increasing Mario’s top spinning speed from 8 to 10.8. We pause immediately after acquiring it to equip Speedy Spin and Power Jump while unequipping Power Jump. On the way down to the train, we talk to the Bub-ulb to the right who will give us one of the four seeds required to access the door to Chapter 6. We can perform the Bombette Animation Cancel while blowing up this rock, allowing us to talk to the Train conductor earlier. In addition, this part was tricky to optimize. Depending on both Mario’s and Bombette’s position, they may take a longer time to enter the train. By positioning both Mario and Bombette as close to the train door as possible, I was able to shorten their walking animations by several frames.
+	$LF
+]p
+[h3 
+	"Mt. Rugged
+	$LF
+]h3
+[p 
+	"We head towards Mt. Rugged for a short period of time to acquire Parakarry and grab the second magical seed to access Chapter 6. Leaving Chapter 2 and completing it later will skip some quests in Dry Dry Outpost that saves time overall. Once we progress through a few rooms, we can perform the Quick Letter trick and grab the first of three letters required to have Parakarry join our party. Two rooms later, we can perform LZS on the top loading zone, fall down, grab the letter, and immediately leave the room. This skips the use of the spring in the bottom left corner of the room. With all three letters for Parakarry, we return back left. On the way, we can perform the Parakarryless Seed 4.0 trick, easily saving around 30 seconds by eliminating backtracking. In the room to the left, I grab the second letter with Kooper. Next, we head down and grab the Wacka Bump, which can be sold for 64 coins in the Shroom Grocery in Toad Town. It was a few frames slower to hammer the Wacka Bump instead of walking up to it due to how close Mario is to the Wacka Bump. It was a few frames faster to talk to Parakarry from the left side. Upon giving Parakarry the third letter, Mario will walk for a bit to a set position. The amount of time it takes Mario to move to that position is always the same because the game amplifies his speed the farther away he is from Parakarry. Therefore, we can talk to him just barely to the left, move to the left set position rather than the right, and regain control of Mario closer to the heart block. We hit the block to regain FP in preparation for the Blooper fight. With Parakarry now in our party, we can leave Mt. Rugged and head towards the sewers.
+	$LF
+]p
+[p 
+	"The time it takes to reach the Shroom Grocery as opposed to the lower shop is a few seconds longer, but the Shroom Grocery sells the Wacka for more, allowing us to buy 10 Fright Jars that will be used throughout the rest of the run to end fights as fast as possible. To access the sewers early, we perform Blue House Skip and head down the pipe. During the Blooper fight, we use two sets of Power Bounces in conjunction with a Shell Shot to quickly deplete Blooper’s 30 health. Killing Blooper reveals the blue warp pipe to Chapter 5. We’ll head inside for a bit to acquire Sushi.
+	$LF
+]p
+[h3 
+	"Acquiring Sushi
+	$LF
+]h3
+[p 
+	"It may seem odd that we venture into Chapter 5 for the sole purpose of getting Sushi, but grabbing Sushi before Chapter 3 allows us to swim across the sewers and access the Chapter 3 warp pipe. This skips the need to venture through the Forbidden Forest and skips a Jr. Troopa fight. The fight itself justifies getting Sushi first, as the battle would be incredibly long due to the need to conserve FP. Therefore, it’s overall faster to grab Sushi to access Chapter 3.
+	$LF
+]p
+[p 
+	"At the moment, the game does not correctly identify that we’re in Chapter 5, so Sushi isn’t obtainable yet. We venture to the right and talk to Kolorado in front of the volcano. Once our story progression is correctly set to Chapter 5, we can head back left towards Sushi. Once acquiring Sushi, our job in Chapter 5 is done for the time being. We can return to the sewers, swim left, and enter the Dark Koopas room. The warp pipes are only revealed once all three Koopas are killed. During these fights I have to manipulate 5 FP to drop as well as some coins. The chance of Fright Jars scaring Dark Koopas is relatively low, so a few frames had to be wasted inside and outside of battle in order to manipulate the Fright Jars to work and to get enough FP drops after the battle. After reaching 25 coins and 6FP, I head down the pipe and begin Chapter 3.
+	$LF
+]p
+[h3 
+	"Chapter 3
+	$LF
+]h3
+[p 
+	"We first head inside Bow’s Mansion to acquire the Super Boots. We can perform the new Record Skip glitch and skip the process of obtaining the record. With the weight from the chest, we can place it on the chandelier to reveal a hidden doorway in the back. We can head down the staircase, go right, and open the chest to reveal another set of Boos. They toss around the Super Boots. The number of times they toss it is RNG-dependent, but thanks to some careful manipulating, we can reduce the number of tosses to the minimum of six. Since we were able to move for a bit before the Boos come out of the chest, I positioned Mario so that he can immediately hammer the Boo that is holding the Super Boots. The fastest way to break all panels in this game is to jump for five frames and spin jump at the peak of our jump height. Initially, I thought it would be fastest to spin jump at the lowest height possible during Mario’s descent, but due to Mario’s increased downward velocity during his spin jump, it’s faster to do it at the peak of his jump. After revealing the staircase, we can jump up the top edge of it. Near the top of the staircase, we can jump through the top floor and reach the door earlier. It’s interesting to note that there’s a rocking chair at the bottom left corner of the room that almost allows us to scale to the top floor without using the staircase. When the rocking chair sways, its top collision rises really high in the air. It’s possible to reach the floor from the top of the rocking chair with the use of Ultra Boots because it grants us more height, but the Super Boots do not allow us enough height to reach the top floor. With our newly acquired Super Boots, we leave Bow’s mansion and head through Gusty Gulch.
+	$LF
+]p
+[p 
+	"Before entering the right loading zone though, we have to perform Bow Skip. This allows us to bypass the gate that normally requires Bow to open. A few rooms later, Bow comes out to talk to one of the Boo’s, even though she’s not in our party. She disappears shortly after, and we never see her again. We can perform Stanley Skip to avoid triggering a cutscene with Tubba Blubba and a ghost named Stanley, saving several seconds. After progressing through a few rooms, we can skip a required use of Parakarry by abusing some faulty collision on the edge of the wall near the Hyper Cleft.
+	$LF
+]p
+[p 
+	"Once inside Tubba Blubba’s castle, we head to the left in order to grab a key to the right foyer door. After grabbing the key, we upgrade Parakarry. Upgrading a partner grants you one additional attack option for said partner and also increases their attack damage. Parakarry’s Shell Shot is used very often, so increasing Parakarry’s attack power will help shorten fights by a decent bit. Shortly after, I intentionally get caught by the Sentinel patrolling the staircase. By getting thrown out of the castle and re-entering the main foyer, I can save a few seconds over having to backtrack through all the rooms I entered. Once inside the main foyer again, I unlock the right passageway and spin up the staircase. I head into a room with spikes to grab another castle key. Normally Bow’s ability is required to avoid the spikes, but Speedy Spin allows us to reach the chest without her. To return to the beginning of the room, it’s a few frames faster to just get hit by the spikes and respawn by the door. A few rooms later, we push the grandfather clock to the side, clip up the side of the bed, and grab Mega Rush. When Mario is at one HP, this badge will increase his attack power by 4, significantly cutting down the required number of Power Bounces for enemies. We grab the Maple Syrup so that we can restore FP later in the run. A few rooms later, we meet Tubba Blubba, who can be avoided by spinning against the top of the room. By heading into the back room, we can grab another castle key that will unlock the right door. From there, we can head towards Tubba Blubba’s bedroom. Once we enter the room, we perform the Key Glitch, allowing us to progress through the two cutscenes faster than intended. Once we leave, Tubba Blubba wakes up and chases after us. Once he breaks the top platform, the game forces us to enter the room to the right. During the door transition, we can press A and enter the next room while floating, similar to the scenario in Koopa Bros. Fortress. Immediately following that, we can perform the Quick Escape glitch to land at the bottom of the foyer and begin running away towards Gusty Gulch.
+	$LF
+]p
+[p 
+	"After leaving the mansion, there is usually a text box that shows up from the Boos, alerting that Tubba Blubba is going to break through soon, but navigating through the room quickly skips this text box. Once we reach the windmill, we can switch to Sushi while unlocking the door. This is the best time to switch to Sushi since we need her out later anyway and not switching partners at this time would require us to stand still while the door unlocks. In the last room before the heart fight, we have to unequip Speedy Spin and equip Mega Rush due to our low BP. With Mega Rush equipped, we can take out Tubba’s heart in two quick turns with an 8 cap and a 7 cap. After defeating the heart, we head outside for the humorously easy Tubba Blubba fight. Since we have Mega Rush equipped, we can deplete all of Tubba Blubba’s health with two regular jumps. During our level up, we increase our BP to allow for more badges later on. After regaining control of Mario, I equip Speedy Spin, Power Jump, and Close Call. We perform a card LZS by storing the left loading zone and landing on the card during Mario’s descent. This correctly sets our story progression past Chapter 3 whilst skipping the Peach intermission. Since Chapter 3 is now complete, we can head into Chapter 5.
+	$LF
+]p
+[h3 
+	"Chapter 5
+	$LF
+]h3
+[p 
+	"It’s faster to complete Chapter 5 before 4 because it skips some quests in order to reach Chapter 4, and it skips a lot of movement throughout Chapter 4. Though our story progression is not correctly set yet, entering the volcano for the first time correctly places us in Chapter 5. To skip a long sequence of events to reach the volcano, we can perform Yoshi Skip and fall out-of-bounds towards the Mt. Lavalava’s entrance.
+	$LF
+]p
+[p 
+	"Platform cycles are not reliant on RNG, so there’s no way to manipulate a better cycle in the second room of Mt. Lavalava. The first cycle, thanks to the Kolorado cutscene, can be reached pretty easily. In the main room of the volcano, we head down the staircase and take the pulley to the bottom right loading zone. We perform the Lava Puzzle Skip to save several seconds. In the Ultra Hammer room, we push one block into the lava and use Parakarry to fly over the remaining section of lava. With the Ultra Hammer, we can now break the block to the right of Kolorado. There is actually a way to get past this block without the use of the Ultra Hammer, but we need the Ultra Hammer later in the run anyway. In addition, getting past the block without the Ultra Hammer is several seconds slower as opposed to breaking it normally and scrolling through the text boxes in the cutscene that follows afterwards. In the next room, since Mario moves to a fixed position while Kolorado falls down, I spin down-right to trigger the cutscene as early as possible. From there, I grab onto the pulley and slide down to the right loading zone. After the Indiana Jones-esque boulder chases after us, we reach the lava room infamously known as the God Cycle Room. Moving through this room as optimal as possible leaves us a few frames short of reaching the right platform in a single cycle. This would save 10 seconds if it was found to be possible. Since it isn’t possible at this point in time, we have enough time to get into peril and break the right fire bar and grab the coins that drop from it. Interestingly, every other time I get hit by the fire bar, I can press C-right and take damage from the fire bar quicker than I normally would be able to. Fire bars are very weird to say the least. I was able to spin straight through the fire bar at the end and it counted as jumping over it, so the coins spawned. In the following room, we perform Flarakarry to skip the process of having the trapped boulder break open the wall. While Kolorado talks, I can switch to Sushi in preparation for the Lava Piranha battle. The Lava Piranha fight has two phases, the first of which can be ended quickly by jumping twice, using Sushi’s Belly Flop, Close Calling all three attacks, Power Bouncing seven times, and using Belly Flop again. Once to second phase begins, I use Sushi’s Squirt attack to cool off the Lava Piranha, Power Bounce six times, and then jump twice more. Lava Piranha is defeated and we are able to grab the Star Spirit Card. Interestingly, you cannot perform Card LZS on this specific card. If you were to, the card would actually remain in the room no matter how many times you performed it. This is because Mario’s story progression isn’t actually updated until after the volcano escape cutscene.
+	$LF
+]p
+[p 
+	"After escaping the volcano, we return to Peach’s perspective. During this intermission, Peach has to avoid getting noticed by the Koopatrols and participates in a quiz. We intentionally get half of the answers wrong in order to avoid acquiring a Jammin’ Jelly after winning. Though we need to grab one, additional text boxes inevitably cause this Jammin’ Jelly to be slower than getting one with Mario. For participating, Peach gets the Sneaky Parasol, which will allow her to transform into any NPC she encounters throughout her cancel. This will come into use in a later intermission.
+	$LF
+]p
+[p 
+	"We return to Mario’s perspective and immediately grab the Jammin’ Jelly hidden behind the tree. We head towards the tree that Sushi was hiding in so that we can reach the chest that flew out from the volcano. Inside is a volcano vase that we can use to trade with Kolorado for a Chapter 6 magical seed. Upon returning to the sewers, we head left and up a few pipes to Toad Town. This method of returning to Toad Town is a few seconds faster compared to going right and up through the Blue House. We head left and perform the Shop Clip to access Chapter 4 quickly.
+	$LF
+]p
+[h3 
+	"Chapter 4
+	$LF
+]h3
+[p 
+	"Immediately upon entering Chapter 4, we head towards the green station and then the pink station. Because we’re in a post-Chapter 4 state, all the stations are accessible from the start. However, we need to be in a Chapter 4 state in order to fight the boss, General Guy. Therefore, we have to head to the pink station and collect a Frying Pan in order to correctly set our story progression. One thing that is independent from Mario’s story progression is the upside-down portion of the track between the blue and red stations. Because we’re able to go to any station, we can immediately flip that upside-down panel, and from there we’ll be able to access any station at any time. It was a few frames faster to go from blue to green, and then green to pink rather than going from blue to red and red to pink due to the geometry of the green station allowing me to press the switch faster than at the red station. On the way to the Frying Pan we can perform the Parakarry Clip to skip a Shy Guy cutscene. During the Fuzzy fight, I use a Fright Jar to quickly scare them away. I perform the same Parakarry Clip to skip the springs while returning to the left loading zone. Now that we are properly set in a Chapter 4 state, we’re able to head to the red station since we previously flipped the panel that prevents the Toy Train from going to red station. Before we head towards General Guy, we need to grab Watt in order to get past an upcoming room. If you were to somehow fight General Guy without Watt, oddly enough, the Star Spirit Card won’t spawn after the battle. We spend the first two turns getting hit in order to reach peril and activate our Mega Rush. The trick behind the Lantern Ghost fight is that you can only deal damage to him when his lantern is lit up, which can be done easily by headbonking two times with Goombario. Doing two sets of Power Bounces deals enough damage to quickly defeat the Lantern Ghost.
+	$LF
+]p
+[p 
+	"Oddly enough, you have to wait a few frames before attempting to break Watt free from the lantern or Mario’s hammer just goes right through it. After leaving the Lantern Ghost room, I swap to Bombette for an upcoming room and eat the Maple Syrup. I do both of these actions while in the rotating platform room because the platforms will continue to move for a few frames while the menus are opening, saving a few frames. In addition, I upgrade Bombette here. Initially, we thought that upgrading Bombette in Chapter 2 would be faster, but since we have to wait for the platforms to move up in this room, and since the platforms move while we upgrade a partner here, it’s a few frames faster to upgrade here. A few rooms later, I swap back to Watt and activate her near the right side of the room. By using Watt, the Shy Guys around me can see the wall and blow it up. A few frames before the cutscene starts, I can actually let go of Watt, dimming the room again to show that the Shy Guys should’ve been able to blow up the wall while in the dark. I switch to Parakarry and encounter General Guy. I can defeat the first set of enemies by double jumping a Shell Shotting with Parakarry. The Stilt Guys can be taken care of with the Star Storm ability. The next set of Shy Guys can be defeated in two turns by double jumping. In between turns I manipulate a Close Call to dodge the slingshot attack. During the second phase, I manipulate a  cap Power Bounce, Shell Shot, and Close Call General Guy’s faster attack. I can drain the rest of General Guy’s health by performing another Shell Shot and a 4 cap Power Bounce. We level up BP, which we’ll trade to Chet Rippo in a bit. This card happens to update our story progression upon grabbing it, meaning we can LZS into the card and skip the Peach Intermission. With that, we leave and head back to Toad Town.
+	$LF
+]p
+[p 
+	"Once we arrive at Toad Town, we talk to Chet Rippo, who will lower our HP and BP and raise our FP by 10. Lowering our HP to 5 will allow us to get into peril quicker. Next, we head into the Forever Forest and grab the last Magical Seed for Chapter 6. The Forever Forest consists of identical rooms. There are four loading zones in each room, but only one will send you to a different room. The correct loading zone can be identified by observing minute differences compared to other loading zones, such as eyes poking out of a bush. After navigating our way to the Bub-ulb, we can take the nearest incorrect loading zone. This places us in the first room of the Forever Forest, and taking the loading zone we just came from returns us back to Toad Town. Once we return, we take the pipe down to the sewers, break the grey block, and fight Electro Blooper. On the first turn, I shell Shot and recover some FP while getting down to peril. I can quickly defeat Electro Blooper by dealing two sets of Power Bounces and another Shell Shot. By fighting Blooper, we reveal 3 blue warp pipes. We take the left one, which leads us to Dry Dry Outpost from Chapter 2.
+	$LF
+]p
+[h3 
+	"Chapter 2
+	$LF
+]h3
+[p 
+	"As mentioned earlier, going through Chapter 2 in a post-Chapter 2 state allows us to skip some quests in order to find the Dry Dry Ruins. One complication that occurs while being in a post-Chapter 2 state is that Tutankoopa will not spawn inside his room. Therefore, we will have to grab the Super Hammer, which will correctly set our story progression back to Chapter 2. In addition, we’ll need the Triangle, Lunar, and Diamond Stones to reach Tutankoopa. On our way through the ruins, we grab the key in the sand. Interestingly, Dry Dry Ruins keys can be used on any door, rather than a specific door, in the ruins. In the following room, I head down the staircase and head towards the Triangle Stone. As a result of breaking the grey block, a Stone Chomp spawns from the wall, and the only way to get out is by fighting him. We can defeat both Stone Chomps in battle by first striking the first one and jumping on the second one. I additionally manipulated 1FP to drop after the battle for later. Heading back left, I perform Key Skip, thereby conserving our only key. Interestingly, I was able to activate the lock while taking the loading zone. Leaving the menu up for a frame longer will actually crash the game. I close out of it on the last possible frame for some entertainment value. In the next room, I can jump underneath the right staircase in order to reduce my jump height, allowing me to spin earlier. Since we conserved the first key we grabbed, we can open the following door without having to go through the three Pokeymummy fights. Next we head to the Moon Stone room. This room is slightly different from the Triangle Stone room, in that the Stone Chomp only appears after we acquire the stone. This means that, after breaking the grey block, we can LZS into the Moon Stone and skip the intended Chomp fight. A few rooms later, I can jump under the staircase like before and reduce my jump height. By acquiring the Super Hammer, we have set our story progression back to Chapter 2, and after grabbing the Diamond Stone, we can head towards Tutankoopa.
+	$LF
+]p
+[p 
+	"In the next room, I perform the Bombette LZS and take the bottom loading zone. Unfortunately, in the Diamond Stone room, the Stone Chomp appears immediately after breaking the grey block, so there is no known way to skip this fight. These chomps can be taken care of easily by using Power Bomb. Additionally, I manipulated 2FP to drop for later fights. With all three stones, I head back up to fight Tutankoopa. After placing the third stone, I was able to face up left and trigger the text box during the cutscene, which adds a bit of silliness. Tutankoopa can be taken care of with a Shell Shot and a 0.4% chance 9 cap. We LZS into the Star Spirit Card, and return back to Toad Town the same way that we came. After heading back up the sewers to Toad Town, we can finally give Minh Tea the four Magical Seeds and progress into Flower Fields.
+	$LF
+]p
+[h3 
+	"Chapter 6
+	$LF
+]h3
+[p 
+	"Once we enter the chapter, we immediately head right and talk to Petunia, who will give us a Magical Bean once we defeat the moles around her. In order to conserve a Fright Jar for a later battle, we can defeat the single mole by double jumping. Right after defeating the first mole, I hit the tree and grab the Red Berry, which we’ll need to access a passage blocked by a gate guard. The rest of the moles in this room can be dealt with using some Fright Jars. After defeating the fourth set of moles, I perform LZS and talk to Petunia. This LZS saves a few frames from having to spin all the way back to the loading zone after talking to Petunia. We receive the Magical Bean, which is one of three required items in order to grow a magical bean stalk and climb up to the cloud to defeat Huff n Puff. Next, we perform the Yellow Berry Skip and grab the Blue Berry on the way to the right loading zone. Due to how far away from the loading zone Lily is, LZSing before talking to her was slower. Lily asks us to go retrieve the Water Stone in order to refill the spring. While returning back left, I grab a Maple Syrup that will be used to recover some FP later. Due to the short length of opening the blue gate and the amount of time it takes to skew our angle in the previous room, it’s faster to just hand the Blue Berry to the gate guard and open the gate normally. At the start of the maze room, we encounter two Lakitus who encounter us. We can use one of our Fright Jars to take care of them and the Spinies. We navigate our way to the center pipe, which allows us to reach the left loading zone. It’s possible to LZS around the room and navigate to the loading zone out-of-bounds, but it’s significantly slower than taking the pipe normally. Upon talking to Rosie, we can buffer a spin to make for an interesting walking animation. She will exchange it for a Crystal Berry, which we’ll have to visit Posie for. She can be reached by taking the bottom left loading zone in the main Flower Fields room. Similarly to the Blue Berry gate sequence, it is slower to skip the Red Berry. After talking to Posie, we retrieve some Fertile Soil and the Crystal Berry. With that, we head back to Rosie, acquire the Water Stone, and perform Yellow Berry Skip again to reach Lily. Lily gives us the Miracle Water. Though we have all three ingredients for the bean stalk, we must first talk to the sun in order for the bean stalk to grow.
+	$LF
+]p
+[p 
+	"We can perform Bubble Berry Skip, followed by Sun Tower Skip to quickly talk to the sun. One the way, we grab a Shooting Star for use in a later battle. He tells us to go break the Puff Puff Machine so that he can shine brightly in the sky. On our return, Lakilester encounters us, and we have to fight him before he joins our party. Two sets of Power Bounces and Shell Shots with a Close Call can take him down with ease. We level up BP to make room for a few more badges later on. Lakilester joins our party, and we continue towards the Puff Puff Machine. In the platform puzzle room, we have to navigate around the spikes and break the blocks in a certain order so that we can reach the top left loading zone: Green up, purple down, red up, green down, green up, purple up. After we hammer the machine twice, the enemies encounter us. They’re dealt with using just a Fright Jar. The number of times you have to hit the machine varies depending on how many times you hit each side. The fastest way to destroy the machine is one hit on the right, followed by four hits on the left. I had to delay a few left hammers because they wouldn’t destroy the machine if they occurred any earlier. Before the machine breaks, I can spin left and cause Lakilester to talk during the cutscene. Closing the text box returns the camera to Mario’s location. Now that the machine has been broken, the sun can shine in the sky. Everything’s set up now, and we can place down the three ingredients to create the bean stalk.
+	$LF
+]p
+[p 
+	"Once in the clouds, we store the right loading zone and jump our way to the rising clouds. This allows us to acquire Super Jump Charge during the first cloud cycle and leave the room immediately after. We pause on the way to Huff n Puff in order to equip Super Jump Charge. We run into Huff n Puff and go to battle. For the first two turns, we use Super Jump Charge in order to increase our Power Bounce jump damage. After close calling both attacks, we can manipulate a 7 cap Power Bounce and eliminate Huff n Puff. It is not possible to LZS into this card because it does not directly advance our story progression for some reason.
+	$LF
+]p
+[p 
+	"During this Peach cutscene, we have to copy one of the Koopatrols, talk to one of the guards by the door to acquire the main entrance key, copy a Clubba, and return back to the same guard. He lets us enter the following room, and we sneak our way into the Kammy Koopa cutscene. She quickly recognizes Peach, and we return back to Mario’s perspective.
+	$LF
+]p
+[p 
+	"Upon gaining control of Mario, we head immediately back to Toad Town and perform Blue House Skip again. We head farther down the sewers and use Clippy in conjunction with Laki Teleporting to clip through the yellow block that normally requires the use of the Ultra Hammer. Now that we have the Ultra Boots, our jump animations in battle will be faster, and our attack power will be increased by one, allowing some fights to be slightly shorter. We head towards Mt. Lavalava and perform Peach warp. To reiterate, we perform Peach warp so that we can skip the first half of Chapter 7 and immediately enter the Crystal Palace afterwards.
+	$LF
+]p
+[h3 
+	"Chapter 7
+	$LF
+]h3
+[p 
+	"Upon gaining control of Mario, we perform Blue Key Skip and enter the palace from the back door. From there, we can head through a few rooms and break a panel, which will reveal a path beneath the counterpart room on the opposite side of the Crystal Palace. We use Blue Key Skip again to return back to the foreground, and head through the newly revealed pathway below. After Bombette blows up the wall, a few Duplighosts disguise themselves as Bombette, and we have to hammer all the fakes. We grab the key and return to the main palace room. We unlock the main door using the newly acquired key and fight three Clubbas. During the first battle, we can eliminate the Clubba by Power Jumping and Bomb. The Gray Magikoopa runs away automatically. The next set of enemies can be dealt with easily using a Fright Jar. In the following fight, I use the Shooting Star from Chapter 6 in conjunction with Bombette’s Power Bomb. We level up HP now, since more difficult enemies make it impossible to get into peril from only 5HP. Once all three fights are done, the statues in the background are destroyed, revealing a doorway. To access it, we backtrack to the left, go through the path in the mirror and go right. In the following room, I use Bombette to activate the rotating platform. Standing on the left and jumping right amplifies Mario’s speed, saving a significant number of frames. Unfortunately, even with a hammer cancel, it’s not possible to hammer the switch and stand on the platform in time. I switch to Kooper and toss him through the following room’s hole in the wall. I have to wait a bit before the copy of Mario through the mirror tosses Kooper, so I fool around for a bit while waiting. I perform the Duplighost Cutscene Skip and progress to the next room. Using Kooper in the foreground causes Kooper’s reflection on the opposite side of the mirror to hit the blue switch, revealing a pathway to access the right door. The right door is locked, and in order to access it, we have to backtrack for a key. The direct path to the key in the foreground is blocked by a statue. To reveal the hidden pathway, we have to head behind the mirror and push a smaller copy of the statue that is covering the hole. We fall down and progress right in order to grab P-Up D-Down, which will raise our attack power by one and lower our damage by one. Once we equip it, we head back into the foreground, grab the key, and enter the puzzle room while switching to Laki. The puzzle room consists of three Albino Dinos and their statue counterparts. The orientation of the statues can be changed depending on which direction you talk to the Albino Dinos from. After pushing the left statue farther left, we talk to the left Dino from the front so that the statue faces backwards, and talk to the middle Dino from the top so that the statue faces downwards. We push the left statue to its designated spot, push the middle statue one block closer to the center of the room, and then have the two left Dinos face right. I have to push the right statue first, otherwise I won’t have space to push the right statue. This is contrary to the RTA method, where they push the middle block all the way to the right, face it downards, push it towards the center, and push the already left facing statue one block. Our method of solving the puzzle is a few seconds faster simply because we push the statues less in exchange for talking to the Dinos a few more times. We can clip up the side of the staircase to avoid spinning up all the steps. After completing that, we head into the following rooms for the Crystal King Fight. I use Super Jump Charge and use Laki’s Spiny Toss on the front Crystal Bit. This will allow us to get into peril by only taking 5 and then 4 damage. We charge our jump once more, and then deal 9 Power Bounces, which is a 0.4% chance, identical to Tutankoopa from Chapter 2. With the Crystal King defeated, we enter the Peach Intermission.
+	$LF
+]p
+[p 
+	"Now that we’ve completed Chapter 7, we head back to Toad Town and head towards Shooting Star Summit. Once we return through the Blue House, we can perform the Reverse Blue House Skip, and head North. In addition, once we reach the summit, we perform the Shooting Star Summit Clip and head up to the Starway. Once we reach the Star Sanctuary, we meet with the Elder Star who allows us to use the starship to fly towards Bowser’s Castle.
+	$LF
+]p
+[h3 
+	"Chapter 8
+	$LF
+]h3
+[p 
+	"The main entrance to Bowser’s Castle is locked, so we head to the right in order to grab the key. I switch to Bombette in preparation for the Koopatrol fight. I use a Thunder Rage and Power Bomb to take out both Koopatrols in one turn. With the key, we can now enter the castle’s main door. A few rooms later, the door tricks us, and we fall down into the basement. Once we ride Laki back to the front of the castle, we can perform Basement Skip and return through the front of the castle. In the Hub Room, we can use the Hub Room Clip to quickly ascend towards the right door. A few rooms later, I perform the Flood Room Skip, grab the key, and return to the locked door on the right. Immediately after, we perform Cannonless and meander along the seam of the room to avoid the cannon encounters. Pushing the rightmost statue reveals a hidden path. The door in the following room is locked, so we have to reveal yet another path to go retrieve its corresponding key. Yet again, we have to go through another hidden path that can be accessed quicker using the Castle Key LZS. Once we retrieve the key, we backtrack through a few rooms and unlock the next door. In the following room, we have to participate in a quiz in order to progress. Failure to complete the quiz successfully will result in having to fight three Anti-Guys. The correct choices for the quiz questions are the first choice, first, second, first, and first. We progress through the door and head towards the top door. Though this Hub Room is identical to the first, it’s actually not possible to clip out-of-bounds like in the previous one. A few rooms later, we use Kooper to raise the platforms, and jump our way across to grab the key. Backtracking a bit, we can use this key to unlock the lower door near the Hammer Bros. The next five rooms are identical, but only one of the two right loading zones works. The order is up, down, down, up, down, and up. Completing these rooms allows us to progress to the end of Bowser’s Castle. We encounter a duplighost disguised as Peach. Running left with the Duplighost for a certain amount of time and then heading back right allows you to hammer “Peach” three times and encounter the Duplighost. All four of them can be killed immediately by using Up & Away. In the following room we encounter Jr. Troopa for the final time. He can be taken care of easily using two Super Jump Charges, a Close Call on his attack, and a seven Power Bounce cap. At this point, it doesn’t matter whether we level up FP or BP, but it’s faster to level up FP since you would have to scroll to the right to level up BP. Once we reach Peach’s Castle, we head inside and fight Hallway Bowser.
+	$LF
+]p
+[p 
+	"Hallway Bowser can be dealt with by Super Jump Charging, using his fire to get into peril, and dealing an 8 cap. I also switch to Goombario here to help manipulate RNG and in preparation for an upcoming glitch. Once we spin our way up to the top, we can perform the Goombario Text Glitch to advance the cutscene faster than intended. In addition, we can keep a two-part text box up during the first phase to help manipulate RNG during the first phase. During the first turn of phase one, I use Super Jump Charge, switch to Parakarry, and use text box scrolling to close call Bowser’s Claw, which is the fastest of his three attacks. Using text box scrolling, I can also manipulate an 8 cap without wasting a frame. I finish up the first phase with a Shell Shot. Once Twink defeats Kammy Koopa, we return to the second phase of Final Bowser. I use Peach Beam to get rid of Bowser’s invincibility, Shell Shot, and manipulate Bowser’s Butt Stomp in order to get into peril. I use Super Jump Charge, Shell Shot, and Close Call the claw attack. From here, a six Power Bounce cap and a Shell Shot will finish off Bowser for good.
+	$LF
+]p
+[p 
+	"And of course, since Luigi did absolutely nothing to help, we perform Luigi Skip since saving frames is more important.
+	$LF
+]p
+[h2 
+	"Possible Improvements
+	$LF
+]h2
+[ul 
+	[li 
+		"RNG could definitely shave off a significant amount of frames had it been better throughout the run. Most notably, it’s a few seconds faster to use the text box during phase 1 of Final Bowser to manipulate a 9 Power Bounce cap. As a result, I could get an 8 cap on phase 2 and skip an entire Shell Shot attack. Though I did get this before based off of a different set of RNG, I was not able to get it this time around. It’s a one in 1,099,647 chance, so it’s difficult, but possible.
+		$LF
+	]li
+]ul
+[h3 
+	"Author’s Comments
+	$LF
+]h3
+[p 
+	"Returning back to Paper Mario 64 was annoying at first, but I absolutely had a blast coming back to this game. All Cards as a category has always interested me since it shows off more of the game compared to any%. Stryder7x was a huge help in coming up with optimizations throughout the run, and it’s safe to say I couldn’t have finished this without his help.
+	$LF
+]p
+[p 
+	"Alright, so at the time that I wrote this entire submission, the TAS was done with a time of 2:32:13. As I was working on commentary, Record Skip and Parakarryless Seed 4.0 were found, saving almost a minute by themselves. I was debating whether or not this timesave was worth redoing the entire TAS for. And then, twitter user Isotarge showed me the correct settings for eliminating the infamous pause glitch. That by itself saves nearly another minute. With a total projected timesave of almost 2 minutes, I decided it was worth it to redo. In addition, we had a few RTA runners look over the route again and made some improvements. Overall, I’m really happy with the outcome and the final time.
+	$LF
+]p
+[h2 
+	"Special Thanks To:
+	$LF
+]h2
+[p 
+	"For Routing: Stryder7x, Bonecrusher1022, r0bd0g, Rain, and Exylophone
+	$LF
+]p
+[p 
+	"For Glitches: Exylophone, Bonecrusher, r0bd0g, DsyDude, Rainmaker, Kagemitsu, Flare, Stealthyween
+	$LF
+]p
+[p 
+	"The Paper Mario community
+	$LF
+]p
+[h2 
+	"Suggested Screenshot:
+	$LF
+]h2
+[p 
+	"Frame: 109031
+	$LF
+	[a class=extlink href=http://imgur.com/Cw4YxNt rel=nofollow 
+		"http://imgur.com/Cw4YxNt
+	]a
+	$LF
+]p
+[p 
+	"Frame: 407868
+	$LF
+	[a class=extlink href=http://imgur.com/Uz3fxwS rel=nofollow 
+		"http://imgur.com/Uz3fxwS
+	]a
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Masterjun)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Masterjun)
+	": That's a long submission text. So yeah there is not much I can even say about this. Great viewer response, very optimized run, nice goal choice showing off more of the game but still including one glitch after the other, keeping the whole run interesting.
+	$LF
+]p
+[p 
+	"Accepting to Moons as a new category for this game.
+	$LF
+]p
+[p 
+	(__wikiLink|user:thecoreyburton)
+	": Processing.
+	$LF
+]p
+[p 
+	(__wikiLink|user:thecoreyburton)
+	": In addition to the problems (and solutions) fsvgm777 posted in the submission thread, there are a number of other problems to deal with. Not only that, but different versions of GLideN64 fix certain things and break others. Looks like this one is going to take a while.
+]p

@@ -1,0 +1,136 @@
+24
+[h4 
+	" Positioning
+	$LF
+]h4
+[p 
+	"Every time you press B, 0x80 is subtracted from Y subpixel speed. Otherwise, it either is nullified (on the ground), or just increases by 8 (in midair) each frame. Max Y speed is 3.0.
+	$LF
+]p
+[p 
+	"Every frame you hold direction, X subpixel speed increases by 16. Limit is 2.00.
+	$LF
+]p
+[h4 
+	" Enemies
+	$LF
+]h4
+[p 
+	"They spawn with frame step of 46. Spawn slot depends on RNG which is rolled several times per frame while enemies or their eggs, or frag score is on-screen. So by picking eggs at different frames you can manipulate where the next enemy spawns.
+	$LF
+]p
+[p 
+	"However, in the first wave, they always spawn at the same spots: upper, upper and left slots.
+	$LF
+]p
+[p 
+	"Addresses $7C-$80 show which enemy occupies what spawn slot.
+	$LF
+]p
+[h4 
+	" Details
+	$LF
+]h4
+[div class= 
+	[ul class=nav nav-tabs role=tablist 
+		[li class=nav-item 
+			[a class=active nav-link data-toggle=tab href=#y-326 
+				"RAM
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-327 
+				"HUD Script
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-328 
+				"RNG Roll
+			]a
+		]li
+		[li class=nav-item 
+			[a class=nav-link data-toggle=tab href=#y-329 
+				"Set spawn slot
+			]a
+		]li
+	]ul
+	[div class=tab-content 
+		[div class=tab-pane active id=y-326 
+			[p 
+				(addresses|addrset=57)
+				$LF
+			]p
+		]div
+		[div class=tab-pane fade id=y-327 
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-328 
+			[pre 
+				[code class=language-snescom 
+					$LF
+					"$D440 LDY #$03
+					$LF
+					"$D442 ASL rng1
+					$LF
+					"$D444 ROL rng2
+					$LF
+					"$D446 ROL
+					$LF
+					"$D447 ROL
+					$LF
+					"$D448 EOR rng1
+					$LF
+					"$D44A ROL
+					$LF
+					"$D44B EOR rng1
+					$LF
+					"$D44D LSR
+					$LF
+					"$D44E LSR
+					$LF
+					"$D44F EOR #$FF
+					$LF
+					"$D451 AND #$01
+					$LF
+					"$D453 ORA rng1
+					$LF
+					"$D455 STA rng1
+					$LF
+					"$D457 DEY
+					$LF
+					"$D458 BPL $D442
+					$LF
+					"$D45A RTS 
+					$LF
+					$LF
+				]code
+			]pre
+		]div
+		[div class=tab-pane fade id=y-329 
+			[pre 
+				[code class=language-snescom 
+					$LF
+					"$EB2F JSR RNG Roll
+					$LF
+					"$EB32 LDA rng1
+					$LF
+					"$EB34 AND #$03
+					$LF
+					"$EB36 BNE $EB3C
+					$LF
+					"$EB38 LDY $0032
+					$LF
+					"$EB3A BEQ $EB2F
+					$LF
+					"$EB3C STA spawn slot,X
+					$LF
+					$LF
+				]code
+			]pre
+		]div
+	]div
+]div

@@ -1,0 +1,325 @@
+8
+[h2 
+	"Making dump file
+	$LF
+]h2
+[ul 
+	[li 
+		" Load the movie file (as savestate or as movie, it doesn't matter if it starts from poweron).
+		$LF
+	]li
+	[li 
+		" If you have some sort of subtitle Lua script, start it.
+		$LF
+	]li
+	[li 
+		" Go to System -> Start Dumping
+		$LF
+	]li
+	[li 
+		" Pick file to save the dump to.
+		$LF
+	]li
+	[li 
+		" If you want to, you may want to enter 
+		[em 
+			"command trap-timed <duration-in-ns>
+		]em
+		" to JPC-RR command line (it is the console window you started JPC-RR from). <duration-in-ns> is duration of the movie in nanoseconds (put 9 zeros after number of seconds). This way the dumping automatically cuts out at specified time. This is optional.
+		$LF
+	]li
+	[li 
+		" Hit System -> Start. The movie dumping starts.
+		$LF
+	]li
+	[li 
+		" Wait until the dumped segment ends. Then just close the emulator (either from close window button of JPC-RR window or System -> Quit). The emulator closes dumps as part of orderly shutdown, even if there is active dump going on.
+		$LF
+	]li
+	[li 
+		" Now you have the dump file.
+		$LF
+	]li
+]ul
+[h3 
+	" Notes:
+	$LF
+]h3
+[ul 
+	[li 
+		" If you want to, you can dump to named pipe / named FIFO.
+		$LF
+	]li
+	[li 
+		" Concatenation of dump files is concatenation of their contents.
+		$LF
+	]li
+]ul
+[h2 
+	" Programs needed
+	$LF
+]h2
+[ul 
+	[li 
+		" dumpconvert.exe (from 
+		[a class=extlink href=http://ilari.tasvideos.org/streamtools-r11.7a.7z rel=nofollow 
+			"JPC-RR stream tools
+		]a
+		").
+		$LF
+	]li
+	[li 
+		" x264 (for --output-x264) (This file needs to be downloaded.)
+		$LF
+	]li
+	[li 
+		" oggenc (for --output-oggenc) (optional, for Ogg Vorbis)
+		$LF
+	]li
+]ul
+[h2 
+	" Making lossless video and audio
+	$LF
+]h2
+[h3 
+	" 60 fps fixed
+	$LF
+]h3
+[blockquote 
+	" dumpconvert --video-width=640 --video-height=400 --video-framerate=60 --audio-delay=1.895 --output-wav=audio.wav --output-x264=raw.avi,crf=0,fullrange=on dump.jmd
+	$LF
+]blockquote
+[ul 
+	[li 
+		" 
+		[b 
+			[tt 
+				"--video-width=640
+			]tt
+		]b
+		" Sets video width to 640. 640 is the most common value here (its rare to see anything else). See the emulator statusbar during actual game to see what to put here.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--video-height=400
+			]tt
+		]b
+		" Sets video height to 400. 400 is the most common value here (480 is also ocassionally seen, anything else is rare). See the emulator statusbar during actual game to see what to put here.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--video-framerate=60
+			]tt
+		]b
+		" Set video framerate to 60. For videos with anything else as framerate, its simpler to use automatic framerate as opposed to trying to figure out what the proper framerate is.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--audio-delay=1.895
+			]tt
+		]b
+		" Delay audio by 1.895s. The proper value here is length of logo minus codec delay. 1.895 is for 2 second logo and 0.105s codec delay (HE-AAC at 44100Hz). If you use Ogg Vorbis as codec, this is the logo length. NOTE: 2 (2 nanoseconds) is not the same here as 2.0 (2 seconds)!
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--output-wav=audio.wav
+			]tt
+		]b
+		" Output audio as WAV to audio.wav
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--output-x264=raw.avi,crf=0,fullrange=on
+			]tt
+		]b
+		" Output video as raw.avi, settings being "lossless" encoding (crf=0).
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"dump.jmd
+			]tt
+		]b
+		" The actual dump file.
+		$LF
+	]li
+]ul
+[p 
+	"If Ogg Vorbis audio is OK and you have oggenc, you could also replace 
+	[b 
+		[tt 
+			"--output-wav
+		]tt
+	]b
+	" option with 
+	[b 
+		[tt 
+			"--output-oggenc=audio.ogg,quality=3
+		]tt
+	]b
+	" (adjust quality to taste, 3 is reasonable). In this case, the audio delay should be length of logo, since Vorbis has no known codec delay.
+	$LF
+]p
+[p 
+	"If you don't have x264 that works with dumpconvert, you can also dump raw i420 by using 
+	[b 
+		[tt 
+			"--output-rawi420=video.yuv
+		]tt
+	]b
+	" instead of 
+	[b 
+		[tt 
+			"--output-x264
+		]tt
+	]b
+	" option. If this results red and blue swapped around, use 
+	[b 
+		[tt 
+			"--output-rawi420-uvswap=video.yuv
+		]tt
+	]b
+	" (swap red and blue before writing). Note that these files will be large.
+	$LF
+]p
+[h3 
+	" Variable fps
+	$LF
+]h3
+[blockquote 
+	" dumpconvert --video-width=640 --video-height=400 --video-framerate=auto --audio-delay=1.895 --output-wav=audio.wav --output-x264=raw.avi,crf=0,fullrange=on --output-timecodev2=times.txt --video-max-dedup=29 dump.jmd
+	$LF
+]blockquote
+[ul 
+	[li 
+		" 
+		[b 
+			[tt 
+				"--video-width=640
+			]tt
+		]b
+		", 
+		[b 
+			[tt 
+				"--video-height=400
+			]tt
+		]b
+		", 
+		[b 
+			[tt 
+				"--audio-delay=1.895
+			]tt
+		]b
+		", 
+		[b 
+			[tt 
+				"--output-wav=audio.wav
+			]tt
+		]b
+		", 
+		[b 
+			[tt 
+				"--output-x264=raw.avi,crf=0,fullrange=on
+			]tt
+		]b
+		" see above
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--video-framerate=auto
+			]tt
+		]b
+		" Set automatic variable framerate
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--output-timecodev2=times.txt
+			]tt
+		]b
+		" Write timecode data to times.txt
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"--video-max-dedup=29
+			]tt
+		]b
+		" Allow eliding up to 29 back to back identical frames
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			[tt 
+				"dump.jmd
+			]tt
+		]b
+		" The actual dump file.
+		$LF
+	]li
+]ul
+[p 
+	"Note: Due to output being variable fps without correct timecodes, the timecodes in raw.avi will be who knows what. Take this into consideration when inserting subtitles.
+	$LF
+]p
+[h2 
+	" Very quick'n'dirty way to make WIP encode (no logo, no subtitles)
+	$LF
+]h2
+[blockquote 
+	" dumpconvert --video-width=640 --video-height=400 --video-framerate=auto --output-oggenc=audio.ogg,quality=3 --output-x264=video.mkv,crf=20 --output-timecodev2=times.txt --video-max-dedup=29 dump.jmd
+	$LF
+]blockquote
+[blockquote 
+	" mkvmerge --aspect-ratio=1:4/3 --timecodes=1:times.txt -o wipencode.mkv video.mkv audio.ogg
+	$LF
+]blockquote
+[h2 
+	" Streamtools errata:
+	$LF
+]h2
+[ul 
+	[li 
+		" --output-x264 does not appear to work with stock x264 on Windows. It does work with direct264 on Windows and stock x264 on Linux (and presumably other unix-like systems).
+		$LF
+	]li
+	[li 
+		" letterbox rescaler can use odd offsets, leading to problems with chroma subsampling (letterbox2 forces offsets to be even)
+		$LF
+	]li
+	[li 
+		" Pre-compiled version does not have letterbox2.
+		$LF
+	]li
+]ul
+[p 
+	"This is for producing stuff for further encoding (see 
+	(__wikiLink|EncodingGuide|the encoding guide)
+	"). Thus advanced features like logo insertion, subtitling are not covered here.
+	$LF
+]p

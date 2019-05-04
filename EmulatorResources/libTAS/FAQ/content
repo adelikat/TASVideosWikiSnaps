@@ -1,0 +1,115 @@
+2
+[h4 
+	" The game is very slow!
+	$LF
+]h4
+[p 
+	"Using an OpenGL software driver makes the game run very slowly, but it is necessary for being able to use savestates. Indeed, if we use hardware acceleration, we cannot save the state of the GPU inside savestates, so loading savestates often results in a crash. Nethertheless, fast-forward skips most OpenGL rendering functions, so you should get a decent framerate with fast-forward enabled.
+	$LF
+]p
+[h4 
+	" Why did my savestates disappear after I restart the game?
+	$LF
+]h4
+[p 
+	"Savestates are invalid after restarting the game, because part of the game state is different at each execution. This includes memory layout, processes/threads identifiers, file identifiers, and in general any communication protocol to the outside (X server connection, sockets, etc.). It may be possible to get savestates valid upon game restart, but it would require a lot of work and I don't feel it is worth right now.
+	$LF
+]p
+[h4 
+	" The game softlocks at startup/after a short time
+	$LF
+]h4
+[p 
+	"They are many reasons why a game would softlock when launching with the tool, but many games softlock because they are waiting in a loop for time to advance (without drawing or sleeping). The best way to check this is to set 
+	[tt 
+		"Runtime > Debug > Uncontrolled time
+	]tt
+	" before starting the game. It will disable the deterministic timer and will let the game access to real time. If the game does not softlock anymore, then we are likely witnessing this scenario. However, we cannot keep this setting because it makes input recording/playback highly non-deterministic.
+	$LF
+]p
+[p 
+	"There is a setting which tries to overcome this softlock, under menu 
+	[tt 
+		"Runtime > time tracking
+	]tt
+	". Basically, it increases the time when a specific function, that asks for current time, has been called a certain number of times. Either you find the right function to check, starting by 
+	[tt 
+		"main thread
+	]tt
+	", by trial-and-error until the game does not softlock anymore, or you can look at the debug log by enabling 
+	[tt 
+		"Runtime > Debug Logging > Print Categories > Time Get
+	]tt
+	", and see which function is continuously called by the game.
+	$LF
+]p
+[p 
+	"Checking an item under 
+	[tt 
+		"Runtime > time tracking > main thread
+	]tt
+	" affects sync, but it won't lower the determinism of the game execution. Checking an item under 
+	[tt 
+		"Runtime > time tracking > secondary thread
+	]tt
+	", however, may make the game non-deterministic.
+	$LF
+]p
+[p 
+	"If this doesn't solve the softlock, then you gather information about it as explained below
+	$LF
+]p
+[h4 
+	" How do I report a crash/softlock/problem?
+	$LF
+]h4
+[p 
+	"You can open an 
+	[a class=extlink href=https://github.com/clementgallet/libTAS/issues rel=nofollow 
+		"issue
+	]a
+	" with the following information:
+	$LF
+]p
+[ul 
+	[li 
+		" Which game did you use? Which version? Steam or DRM-free?
+		$LF
+	]li
+	[li 
+		" Which version or commit number of libTAS?
+		$LF
+	]li
+	[li 
+		" What happens?
+		$LF
+	]li
+	[li 
+		" Does libTAS reports errors on the console?
+		$LF
+	]li
+	[li 
+		" Does the game reports something on the console?
+		$LF
+	]li
+	[li 
+		" If you encounter a crash or a softlock, can you launch the game with 
+		[tt 
+			"Start and attach gdb
+		]tt
+		", and reach that point. Then on the console you should have a gdb prompt "
+		[tt 
+			"(gdb) 
+		]tt
+		"" if the game crashed, or press 
+		[tt 
+			"Ctrl-C
+		]tt
+		" if the game softlocked to get one. Then enter 
+		[tt 
+			""thread apply all bt"
+		]tt
+		" and paste the result in the github issue.
+		$LF
+	]li
+]ul

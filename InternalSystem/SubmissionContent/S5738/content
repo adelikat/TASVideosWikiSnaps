@@ -1,0 +1,237 @@
+11
+[p 
+	(youtube|v=QN3OAslHPZA|w=640|h=480)
+	$LF
+]p
+[p 
+	"This is an improvement of 40 frames to 
+	(__wikiLink|5518S)
+	". At first glance this movie appears to be 581 frames slower, but with the newer version of Bizhawk the SMS bios is required which adds 621 frames at the start of the TAS.  
+	$LF
+]p
+[p 
+	"25 frames are saved from optimized application of the pause glitch and and the other 15 frames are saved from movement in levels. The timesaves are broken down as follows.
+	$LF
+]p
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Segment
+			]th
+			[th 
+				"Frames Saved
+			]th
+		]tr
+		[tr 
+			[td 
+				" Title screen pause glitch 
+			]td
+			[td 
+				" 2 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Movement in 1-1
+			]td
+			[td 
+				" 4 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Pause glitch when entering the warp room 
+			]td
+			[td 
+				" 21 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Movement in 7-1 
+			]td
+			[td 
+				" 3 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Pause glitch between 7-1 and 7-2 
+			]td
+			[td 
+				" 1 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Movement in 7-2 
+			]td
+			[td 
+				" 8 
+			]td
+		]tr
+		[tr 
+			[td 
+				" Pause glitch between 7-2 and 7-3 
+			]td
+			[td 
+				" 1 
+			]td
+		]tr
+	]tbody
+]table
+[p 
+	"I (The8bitbeast) have done all of the inputs in this TAS but I’ve decided to add Aloysha and Sonikkustar as coauthors because I was constantly checking against the published TAS by Aloysha (which was essentially Sonikkustar’s movement with Aloysha’s pause glitch) and I’ve learnt a lot from studying this TAS.
+	$LF
+]p
+[h2 
+	"Useful Addresses
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"X Position
+			]th
+			[td 
+				"0031
+			]td
+		]tr
+		[tr 
+			[th 
+				"X Velocity
+			]th
+			[td 
+				"0205
+			]td
+		]tr
+		[tr 
+			[th 
+				"Y Position
+			]th
+			[td 
+				"0034
+			]td
+		]tr
+		[tr 
+			[th 
+				"Y Velocity
+			]th
+			[td 
+				"0207
+			]td
+		]tr
+	]tbody
+]table
+[h2 
+	"Route
+	$LF
+]h2
+[p 
+	"The first thing to do is change to the tiger character who has the fastest running speed. This is done by finding an item called the psycho stick which lets you change characters from the pause menu. The earliest time to get the psycho stick is from an egg early in the first level. Once the tiger character is chosen the next goal is to reach a point in Level 1 where a secret warp room can be accessed by hitting a specific part of the sky. This warp room can take you to round 7. Then levels 7-1, 7-2 and 7-3 are completed normally to finish the game. 
+	$LF
+]p
+[h2 
+	"Pause Glitch
+	$LF
+]h2
+[p 
+	"There is a glitch present in many Master System games which can allow you to reduce loading times with the use of the pause button. The following description of the glitch is taken from the submission text of 
+	(__wikiLink|5518S)
+	" and is given here for completeness:
+	$LF
+]p
+[p 
+	"It’s possible to reduce loading times by abusing non-maskable interrupts (NMIs) that are generated in the SMS when the 'pause' button is hit. It might seem counter-intuitive that pressing the pause button would make a game go faster, but it does turn out to be the case if pressed at the right time.
+	$LF
+]p
+[p 
+	"Here is what the game is doing during typical loading screen frame:
+	$LF
+]p
+[pre 
+	" Halt, wait for interrupt (~50000 cycles)
+	$LF
+	" Vblank, Execute necessary code for the frame (~7000 cycles)
+	$LF
+	" Repeat
+	$LF
+]pre
+[p 
+	"What happens when you press pause, is that an NMI occurs in those ~50000 cycles where nothing is happening. The NMI itslef doesn't do anything important except for Return to where the code would be executing after a normal interrupt, so basically it's doing two frames in one. EX:
+	$LF
+]p
+[pre 
+	" Halt, wait for interrupt (zero cycles in this case since pause is pressed immediately)
+	$LF
+	" NMI
+	$LF
+	" Execute frame code
+	$LF
+	" Halt again
+	$LF
+	" VBlank, frame code again
+	$LF
+]pre
+[p 
+	"The basic idea is that the return from interrupt returns to the same place regardless of which interrupt is triggered. There is plenty of time in a frame to add another interrupt without effecting anything else.
+	$LF
+]p
+[h2 
+	"Movement Optimization Techniques
+	$LF
+]h2
+[p 
+	"The first thing I do is break the first egg to get the bird fly. While this is not strictly necessary it saves a lot of time over the run. The egg is broken by punching it twice, but after each punch you lose all speed. Since you do 2 punches you lose the speed twice, so if the punches are closer together this saves time. If the egg is punched on the first possible frame the arm takes a long time to reach the egg, then the second punch also takes a long time to hit the egg, which means the punches have to be spread out, so the punches must be left until later to avoid this.
+	$LF
+]p
+[p 
+	"The next technical part is entering the warp room. The entrance must be hit 3 times. So I hit it the first 2 times with the bird fly and the last time with the punch. If you punch too early you hit the warp room open and lose all speed so it takes you longer to enter the warp room. So the punch must be left until you are much closer to the entrance.
+	$LF
+]p
+[p 
+	"7-1, 7-2 and 7-3 have a lot of slopes. These slow you down even if you jump off frame perfectly, but the internal speed value doesn’t decrease. If you run up the slope, when you reach the top you will do a little jump automatically. If you are still on a lower speed after hitting the slope then doing this auto jump off the top causes you to speed up quicker. This saves 2 frames at the end of 7-1.
+	$LF
+]p
+[p 
+	"There are also moving stairs in 7-1, 7-2 and 7-3. These speed you up by 6.67% if you’re at full speed. Once again the internal speed value is not affected. I try to spend as much time as possible on these when the route allows it.
+	$LF
+]p
+[p 
+	"The last hit on the final boss doesn’t matter too much. Once you land the last hit the boss has to run off the screen, but if you hit him later he moves closer to the edge and leaves the screen quicker.
+	$LF
+]p
+[p 
+	"There is a slight clip in the final fight done by ducking and jumping into a roof then pressing left or right in the roof. This is useless in this TAS but it will be slightly more useful in a warpless TAS.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Removed Alyosha from author list by his request.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Judging.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Replaced movie file with a 2-frame improvement.
+	$LF
+]p
+[p 
+	(__wikiLink|user:Mothrayas)
+	": Since the time loss is exclusively due to the BIOS addition, and the movie does improve upon the previous movie in game time, it counts as an improvement. Accepting as an improvement to the 
+	(__wikiLink|3418M|published movie)
+	".
+	$LF
+]p
+[p 
+	(__wikiLink|user:Fog)
+	": Processing.
+]p

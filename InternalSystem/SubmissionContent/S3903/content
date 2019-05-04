@@ -1,0 +1,180 @@
+12
+[p 
+	"This TAS of Pokémon Yellow resets while saving to screw up some memory so that it can complete the game as fast as possible. Now faster than the 
+	(__wikiLink|3890S|previous submission)
+	" by 35 frames (about ~0.5 second).
+	$LF
+]p
+[p 
+	(youtube|v=gwBbWGeFZVw)
+	$LF
+]p
+[p 
+	"Nicovideo (account): http://www.nicovideo.jp/watch/sm20420089 
+	[br 
+	]br
+	$LF
+	"Nicovideo (no account): http://www.nicozon.net/watch/sm20420089
+	$LF
+]p
+[h4 
+	" Game objectives
+	$LF
+]h4
+[ul 
+	[li 
+		" Emulator used: BizHawk v1.4.1
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+]ul
+[h4 
+	" How we beat the game
+	$LF
+]h4
+[p 
+	"Normally, when resetting the game while saving it will say that the save file is corrupted. If you reset at the perfect time it will let you load the game which has corrupted RAM. The game fills every address starting from $D162 to $D2F5 with 0xFF which will make the game think you have 255 Pokemon. Since the game only has place for 6 Pokemon, it will overwrite other addresses when you switch Pokemon beyond the 6th spot.
+	$LF
+]p
+[p 
+	"Previously, TASes would overwrite $D35D with a value (usually 0x76 or 0xD0) that loads bank 0x16, and puts 0x6401 (01 64) at $D36D to load the code for the Hall of Fame.
+	$LF
+]p
+[p 
+	"This TAS overwrites $D35D with 0xF8, loading bank 0x3C where some Hall of Fame data is, and puts 0x50F1 (F1 50) at $D36D to enter the credits routine at address 0x50F1.
+	$LF
+]p
+[p 
+	"The choice of 0x50F1 is motivated by the fact that both bytes occur as character values in name strings. Thus, by naming Rival as AJS× (that's a times symbol there), we get the string 80 89 92 F1 50 at $D349, and we can easily switch F1 50 over to $D36D with some Pokemon switches.
+	$LF
+]p
+[p 
+	"To get 0xF8 to $D35D, we enable the item menu by switching memory so that the item quantity is 255, and then throw away 8 of the 5th item so $D326 becomes 0xF8. We can then switch it over to $D35D.
+	$LF
+]p
+[p 
+	"(Since we used the values from the rival name and creating fitting values by tossing items, we no longer have to luck manipulate the Trainer ID which saves frames)
+	$LF
+]p
+[p 
+	"The resulting jump into the credits routine results in a glitched mess of the credits screen, mostly with "THE END" in it. So, enjoy.
+	$LF
+]p
+[ul 
+	[li 
+		" Names the rival AJS× (that's a times symbol there). Memory at $D34C-D is F1 50.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Resets while saving at the right time to corrupt memory.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Loads corrupted save file. Number of Pokemon is now 255.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Switches 7th Pokemon with 10th. Number of items is now 255.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Goes to items and dumps 8 of the 5th item. $D326 is now 0xF8.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Switches 14th Pokemon with 22nd. $D34C-D is switched to $D3A4-5 so now $D3A4-5 is F1 50.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Switches 22nd Pokemon with 17th. $D3A4-5 is switched to $D36D-E so now $D36D-E is F1 50. In addition, $D326 is switched to $D35D so now $D35D is 0xF8.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Leave the Pokemon menu. Since the map is F8, the game loads ROM bank 3C. It reads 0x50F1 from the map pointer and thinks that it is a valid address and so executes the address, which is in the middle of the credits routine.
+		$LF
+	]li
+]ul
+[h4 
+	" Other strategies we tested
+	$LF
+]h4
+[ul 
+	[li 
+		" We tried to manipulate the 0xF8 (which we created here by tossing items) with the Trainer ID, because switching items is faster than tossing them. Unfortunately that takes one pokemon switch more and the glitched items take long to load. So assuming the luck manipulation would take +0 frames it is 93 frames slower than this run.
+		$LF
+	]li
+	[li 
+		" Jumping to bank 0x18 and to address $4F55 executes the HoF routine 
+		[a class=extlink href=http://www.youtube.com/watch?v=Uuw_l3TqYA8 rel=nofollow 
+			"as soon as you close the menu
+		]a
+		". That is because it calls address $3EB4, which is a function pointer so it depends on A which function it will execute. To execute the HoF routine A has to be 0x55. A will be the low byte of the address it jumped to (in this case we jumped to $4F55 so low byte is 0x55). At every $3EB4 call there is a 
+		[em 
+			"LD A,#??
+		]em
+		" right before it, which means he loads the value 0x?? into A. So we have to find a $3EB4 call that is at address $xx55, but there is no. The good thing however is that in bank 0x18 starting from address $4F54 it is: 3E 15 CD B4 3E which means LD A,#15 : CALL $3EB4. We jump to $4F55 and the game thinks the 0x15 is an instruction, so it executes DEC D : CALL $3EB4 which doesn't change A so the HoF is executed. Unfortunately we can't manipulate the jump to $4F55 with the name of the rival and other ways of manipulating turn out to be slower.
+		$LF
+	]li
+]ul
+[h4 
+	" Thanks
+	$LF
+]h4
+[p 
+	"Thanks to 
+	(__wikiLink|user:p4wn3r)
+	" and 
+	(__wikiLink|user:gia)
+	", for their previous runs as well as all the research they did to dissect the game.
+	$LF
+]p
+[h4 
+	" Screenshots
+	$LF
+]h4
+[p 
+	[img class=embed src=http://i.imgur.com/W2zFRAV.png 
+	]img
+	[img class=embed src=http://i.imgur.com/HYX7Zte.png 
+	]img
+	[img class=embed src=http://i.imgur.com/ByEIZ3p.png 
+	]img
+	[img class=embed src=http://i.imgur.com/vF9phl4.png 
+	]img
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:feos)
+	": This was a great try. I'm proud of the effort put into disassembling this game. Unfortunately, this run does not complete/beat the game. It leaves it in an infinite loop somewhere during the THE END drawing event. The game then does not react on the B button that normally resets it after the ending, and the save that is normally created after you beat the game is not being made here. The game does not come into the finished state and does not proceed as it was finished. See 
+	[a href=/forum/p/343683#343683 
+		"these
+	]a
+	" 
+	[a href=/forum/p/344451#344451 
+		"posts
+	]a
+	" for more information. Rejecting.
+]p
