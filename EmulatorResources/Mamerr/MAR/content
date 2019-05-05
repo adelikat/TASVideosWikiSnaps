@@ -199,7 +199,230 @@
 			]p
 			[pre 
 				[code class=language-c 
-					$UNPRINTABLE TEXT!!!
+					$LF
+					"#define INP_HEADER_SIZE		56
+					$LF
+					"#define INP_HEADER_MAJVERSION	1
+					$LF
+					"#define INP_HEADER_MINVERSION	0
+					$LF
+					$LF
+					"struct game_driver
+					$LF
+					"{
+					$LF
+					"	const char *		source_file;			/* set this to __FILE__ */
+					$LF
+					"	const char *		parent;				/* if this is a clone, the name of the parent */
+					$LF
+					"	const char *		name;				/* short (8-character) name of the game */
+					$LF
+					"	const char *		description;			/* full name of the game */
+					$LF
+					"	const char *		year;				/* year the game was released */
+					$LF
+					"	const char *		manufacturer;			/* manufacturer of the game */
+					$LF
+					"	const machine_config_token *machine_config;		/* machine driver tokens */
+					$LF
+					"	const input_port_token	*ipt;				/* pointer to array of input port tokens */
+					$LF
+					"	void  (*driver_init)	(running_machine *machine); 	/* DRIVER_INIT callback */
+					$LF
+					"	const rom_entry *	rom;				/* pointer to list of ROMs for the game */
+					$LF
+					"	const char *		compatible_with;
+					$LF
+					"	      UINT32		flags;				/* orientation and other flags; see defines below */
+					$LF
+					"	const char *		default_layout;			/* default internally defined layout */
+					$LF
+					"};
+					$LF
+					$LF
+					"struct _input_port_private
+					$LF
+					"{
+					$LF
+					"	/* global state */
+					$LF
+					"	UINT8			safe_to_read;		/* clear at start; set after state is loaded */
+					$LF
+					$LF
+					"	/* types */
+					$LF
+					"	input_type_state *	typestatelist;		/* list of live type states */
+					$LF
+					"	input_type_state *	type_to_typestate[__ipt_max][MAX_PLAYERS]; /* map from type/player to type state */
+					$LF
+					$LF
+					"	/* specific special global input states */
+					$LF
+					"	digital_joystick_state	joystick_info[MAX_PLAYERS][DIGITAL_JOYSTICKS_PER_PLAYER]; /* joystick states */
+					$LF
+					$LF
+					"	/* frame time tracking */
+					$LF
+					"	attotime		last_frame_time;	/* time of the last frame callback */
+					$LF
+					"	attoseconds_t		last_delta_nsec;	/* nanoseconds that passed since the previous callback */
+					$LF
+					$LF
+					"	/* playback/record information */
+					$LF
+					"	FILE *			record_file;		/* recording file (NULL if not recording) */
+					$LF
+					"	FILE *			playback_file;		/* playback file (NULL if not recording) */
+					$LF
+					"	UINT32			current_frame;
+					$LF
+					"	UINT32			total_frames; 		/* accumulated frames during playback or recording */
+					$LF
+					"	UINT32			rerecord_count;
+					$LF
+					"	UINT32			bytes_per_frame;
+					$LF
+					"	UINT8			movie_header[INP_HEADER_SIZE];
+					$LF
+					"	char			movie_filename[_MAX_PATH];
+					$LF
+					"	UINT32			movie_readonly;
+					$LF
+					"};
+					$LF
+					$LF
+					"static void record_init(running_machine *machine)
+					$LF
+					"{
+					$LF
+					"	char filename[_MAX_PATH];
+					$LF
+					$LF
+					"	strncpy(filename, options_get_string(machine->options(), OPTION_RECORD),_MAX_PATH);
+					$LF
+					"	if (scheduled_record_file[0] != 0) {
+					$LF
+					"		strncpy(filename,           scheduled_record_file, _MAX_PATH);
+					$LF
+					"		strncpy(current_movie_file, scheduled_record_file, _MAX_PATH);
+					$LF
+					"		scheduled_record_file[0] = 0;
+					$LF
+					"	}
+					$LF
+					$LF
+					"	/* if file, open */
+					$LF
+					"	if (filename[0] != 0) {
+					$LF
+					"		strncpy(machine->input_port_data->movie_filename, filename, _MAX_PATH);
+					$LF
+					"		record_open_file(machine, filename);
+					$LF
+					"	}
+					$LF
+					"}
+					$LF
+					$LF
+					"static void record_open_file(running_machine *machine,const char* filename)
+					$LF
+					"{
+					$LF
+					"	input_port_private *portdata = machine->input_port_data;
+					$LF
+					$LF
+					"	set_bytes_per_frame(machine);
+					$LF
+					$LF
+					"	/* open the record file  */
+					$LF
+					"	portdata->record_file = fopen(filename, "w+b");
+					$LF
+					"	if (!portdata->record_file) {
+					$LF
+					"		mame_printf_info("Failed to open file %s for recording.\n", filename);
+					$LF
+					"		return;
+					$LF
+					"	}
+					$LF
+					$LF
+					"	/* fill in the header */
+					$LF
+					"	memset(portdata->movie_header, 0, sizeof(portdata->movie_header));
+					$LF
+					"	memcpy(portdata->movie_header, "MAMETAS\0", 8);
+					$LF
+					"	portdata->movie_header[0x08] = INP_HEADER_MAJVERSION;
+					$LF
+					"	portdata->movie_header[0x09] = INP_HEADER_MINVERSION;
+					$LF
+					"	strcpy((char *)portdata->movie_header + 0x0c, machine->gamedrv->name);
+					$LF
+					"	sprintf((char *)portdata->movie_header + 0x18, "%s", build_version);
+					$LF
+					$LF
+					"	// initialize movie
+					$LF
+					"	movie.pointer = movie.buffer;
+					$LF
+					"	movie.size = 0;
+					$LF
+					"	portdata->movie_readonly = 0;
+					$LF
+					"}
+					$LF
+					$LF
+					"static void record_end(running_machine *machine, const char *message)
+					$LF
+					"{
+					$LF
+					"	input_port_private *portdata = machine->input_port_data;
+					$LF
+					$LF
+					"	/* only applies if we have a live file */
+					$LF
+					"	if (portdata->record_file != NULL)
+					$LF
+					"	{
+					$LF
+					"		int movie_buffer_length = movie.pointer - movie.buffer;
+					$LF
+					"		int frame = movie_buffer_length / portdata->bytes_per_frame;
+					$LF
+					"		double framerate = ATTOSECONDS_TO_HZ(machine->primary_screen->frame_period().attoseconds);
+					$LF
+					"		
+					$LF
+					"		memcpy(portdata->movie_header + 0x30, &framerate, sizeof(double));
+					$LF
+					"		fwrite(portdata->movie_header,    1, sizeof(portdata->movie_header),   portdata->record_file);
+					$LF
+					"		fwrite(&frame,                    1, sizeof(frame),                    portdata->record_file);
+					$LF
+					"		fwrite(&portdata->rerecord_count, 1, sizeof(portdata->rerecord_count), portdata->record_file);
+					$LF
+					"		fwrite(movie.buffer,              1, movie_buffer_length,              portdata->record_file);
+					$LF
+					$LF
+					"		/* close the file */
+					$LF
+					"		fclose(portdata->record_file);
+					$LF
+					"		portdata->record_file = NULL;
+					$LF
+					$LF
+					"		/* pop a message */
+					$LF
+					"		if (message != NULL)
+					$LF
+					"			popmessage("Recording Ended\nReason: %s", message);
+					$LF
+					"	}
+					$LF
+					"}
+					$LF
+					$LF
 				]code
 			]pre
 		]div

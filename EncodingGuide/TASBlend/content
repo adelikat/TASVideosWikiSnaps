@@ -178,7 +178,179 @@
 			]p
 			[pre 
 				[code class=language-sh 
-					$UNPRINTABLE TEXT!!!
+					"#include <stdlib.h>
+					$LF
+					"#include <stdio.h>
+					$LF
+					"#include <string.h>
+					$LF
+					$LF
+					"int main(int argc, char** argv)
+					$LF
+					"{
+					$LF
+					"  unsigned char *firstframe, *secondframe, *outframe;
+					$LF
+					"  unsigned int width = 0, height = 0, framesize = 0, curarg = 3;
+					$LF
+					"  unsigned long startframe = 0, endframe = 0, curframe = 0, i = 0;
+					$LF
+					"  unsigned short first33 = 1;
+					$LF
+					"  FILE* outfile = 0;
+					$LF
+					"  if (argc < 5)
+					$LF
+					"  {
+					$LF
+					"    fprintf(stderr, "usage: tasblend <width> <height> <startframe> <endframe> [<startframe> <endframe> [...]]\n");
+					$LF
+					"    exit(1);
+					$LF
+					"  }
+					$LF
+					"  width = atoi(argv[1]);
+					$LF
+					"  height = atoi(argv[2]);
+					$LF
+					"  startframe = atoi(argv[3]);
+					$LF
+					"  endframe = atoi(argv[4]);
+					$LF
+					"  framesize = width*height*3;
+					$LF
+					"  firstframe = (unsigned char *)malloc(sizeof(unsigned char)*framesize);
+					$LF
+					"  if (!firstframe)
+					$LF
+					"  {
+					$LF
+					"    perror("Couldn't malloc firstframe");
+					$LF
+					"    exit(2);
+					$LF
+					"  }
+					$LF
+					"  secondframe = (unsigned char *)malloc(sizeof(unsigned char)*framesize);
+					$LF
+					"  if (!secondframe)
+					$LF
+					"  {
+					$LF
+					"    perror("Couldn't malloc secondframe");
+					$LF
+					"    free(firstframe);
+					$LF
+					"    exit(3);
+					$LF
+					"  }
+					$LF
+					"  outframe = (unsigned char *)malloc(sizeof(unsigned char)*framesize);
+					$LF
+					"  if (!outframe)
+					$LF
+					"  {
+					$LF
+					"    perror("Couldn't malloc outframe");
+					$LF
+					"    free(firstframe);
+					$LF
+					"    free(secondframe);
+					$LF
+					"    exit(4);
+					$LF
+					"  }
+					$LF
+					"  while (!feof(stdin))
+					$LF
+					"  {
+					$LF
+					"    if (fread(firstframe, sizeof(unsigned char), framesize, stdin) < framesize)
+					$LF
+					"      break;
+					$LF
+					"    if (fread(secondframe, sizeof(unsigned char), framesize, stdin) < framesize)
+					$LF
+					"    {
+					$LF
+					"      fwrite(firstframe, sizeof(unsigned char), framesize, stdout);
+					$LF
+					"      break;
+					$LF
+					"    }
+					$LF
+					"    if (curframe >= startframe && curframe < endframe)
+					$LF
+					"    {
+					$LF
+					"      if (first33 > 0)
+					$LF
+					"      {
+					$LF
+					"        for (i = 0; i < framesize; i++)
+					$LF
+					"          outframe[i] = (firstframe[i] * 33 + secondframe[i] * 67) / 100; 
+					$LF
+					"      }
+					$LF
+					"      else
+					$LF
+					"      {
+					$LF
+					"        for (i = 0; i < framesize; i++)
+					$LF
+					"          outframe[i] = (firstframe[i] * 67 + secondframe[i] * 33) / 100; 
+					$LF
+					"      }
+					$LF
+					"      fwrite(outframe, sizeof(unsigned char), framesize, stdout);
+					$LF
+					"      first33 = (first33 > 0) ? 0 : 1;
+					$LF
+					"    }
+					$LF
+					"    else
+					$LF
+					"    {
+					$LF
+					"      if (curframe >= endframe && curarg+1 < argc)
+					$LF
+					"      {
+					$LF
+					"        curarg += 2;
+					$LF
+					"	if (curarg+1 < argc)
+					$LF
+					"	{
+					$LF
+					"          first33 = 1;
+					$LF
+					"	  startframe = atoi(argv[curarg]);
+					$LF
+					"	  endframe = atoi(argv[curarg+1]);
+					$LF
+					"	}
+					$LF
+					"      }
+					$LF
+					"      fwrite(firstframe, sizeof(unsigned char), framesize, stdout);
+					$LF
+					"    }
+					$LF
+					"    curframe += 2;
+					$LF
+					"  }
+					$LF
+					"  free(firstframe);
+					$LF
+					"  free(secondframe);
+					$LF
+					"  free(outframe);
+					$LF
+					"  return 0;
+					$LF
+					"}
+					$LF
 				]code
 			]pre
 		]div

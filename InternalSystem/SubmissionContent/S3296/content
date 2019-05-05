@@ -85,9 +85,71 @@
 	$LF
 ]pre
 [pre 
-	$UNPRINTABLE TEXT!!!
+	"local boringmodes = {0,4,0x10,0x14,0x18,0x1c,0x20,0x24,0x28}
+	$LF
+	"function disable_hud()
+	$LF
+	"	local mode = memory.readbyte(0xfff600)
+	$LF
+	"	for _,m in ipairs(boringmodes) do
+	$LF
+	"		if mode == m then
+	$LF
+	"			return true
+	$LF
+	"		end
+	$LF
+	"	end
+	$LF
+	"	if mode == 0x8c then
+	$LF
+	"		local time = memory.readlong(0xfffe22)
+	$LF
+	"		return not (time > 0 and time < 5)
+	$LF
+	"	end
+	$LF
+	"	return false
+	$LF
+	"end
+	$LF
+	$LF
+	"gens.registerafter(function()
+	$LF
+	"	if level_started then
+	$LF
+	"		if memory.readbyte(0xFFFFB000) == 0 and level_started ~= false then
+	$LF
+	"			print(string.format("|level%03d|
 	(frames|amount=%d)
-	$UNPRINTABLE TEXT!!!
+	"|", level, movie.framecount() - first_frame))
+	$LF
+	"			level_started = false
+	$LF
+	"		end
+	$LF
+	"	else
+	$LF
+	"		if disable_hud() ~= true and memory.readbyte(0xFFFFB000) ~= 0 then
+	$LF
+	"			if level == -1 then
+	$LF
+	"				print("! Timetable\n||Level||Time||")
+	$LF
+	"			end
+	$LF
+	"			level = level + 1
+	$LF
+	"			level_started = true
+	$LF
+	"			first_frame = movie.framecount()
+	$LF
+	"		end
+	$LF
+	"	end
+	$LF
+	"end)
+	$LF
 ]pre
 [p 
 	"The script times the length from the time you can first control Sonic to the time when you lose control of Sonic; while it might be slightly better to time the exact moment you touch the giant ring, you can still die up until the point I chose to base time on.

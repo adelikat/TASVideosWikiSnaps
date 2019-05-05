@@ -143,6 +143,174 @@
 ]h3
 [pre 
 	[code class=language-sh 
-		$UNPRINTABLE TEXT!!!
+		"#include <stdlib.h>
+		$LF
+		"#include <stdio.h>
+		$LF
+		"#include <string.h>
+		$LF
+		$LF
+		"int main(int argc, char** argv)
+		$LF
+		"{
+		$LF
+		"  unsigned char *prevframe, *curframe;
+		$LF
+		"  unsigned int width = 0, height = 0, framesize = 0;
+		$LF
+		"  unsigned int i = 0, tot = 20;
+		$LF
+		"  unsigned long framenum = 0;
+		$LF
+		"  unsigned short dup = 255;
+		$LF
+		"  unsigned long fpsnum = 0, fpsden = 0;
+		$LF
+		"  FILE* outfile = 0;
+		$LF
+		"  char outfilename[256];
+		$LF
+		"  if (argc < 6)
+		$LF
+		"  {
+		$LF
+		"    fprintf(stderr, "usage: dedup <outfile> <fpsnum> <fpsden> <width> <height> [<max consecutive dup frames>]\n");
+		$LF
+		"    exit(1);
+		$LF
+		"  }
+		$LF
+		"  strncpy(outfilename, argv[1], 256);
+		$LF
+		"  fpsnum = atoi(argv[2]);
+		$LF
+		"  fpsden  = atoi(argv[3]);
+		$LF
+		"  width = atoi(argv[4]);
+		$LF
+		"  height = atoi(argv[5]);
+		$LF
+		"  if (argc >= 7)
+		$LF
+		"  {
+		$LF
+		"    tot = atoi(argv[6]);
+		$LF
+		"  }
+		$LF
+		"  framesize = width*height*3;
+		$LF
+		"  prevframe = (unsigned char *)malloc(sizeof(unsigned char)*framesize);
+		$LF
+		"  if (!prevframe)
+		$LF
+		"  {
+		$LF
+		"    perror("Couldn't malloc prevframe");
+		$LF
+		"    exit(2);
+		$LF
+		"  }
+		$LF
+		"  curframe = (unsigned char *)malloc(sizeof(unsigned char)*framesize);
+		$LF
+		"  if (!curframe)
+		$LF
+		"  {
+		$LF
+		"    perror("Couldn't malloc prevframe");
+		$LF
+		"    free(curframe);
+		$LF
+		"    exit(3);
+		$LF
+		"  }
+		$LF
+		"  outfile = fopen(outfilename, "w");
+		$LF
+		"  if (!outfile)
+		$LF
+		"  {
+		$LF
+		"    perror("Couldn't open output file");
+		$LF
+		"    free(prevframe);
+		$LF
+		"    free(curframe);
+		$LF
+		"    exit(4);
+		$LF
+		"  }
+		$LF
+		"  fprintf(outfile, "# timecode format v2\n");
+		$LF
+		"  while (!feof(stdin))
+		$LF
+		"  {
+		$LF
+		"    if (fread(curframe, sizeof(unsigned char), framesize, stdin) < framesize)
+		$LF
+		"      break;
+		$LF
+		"    if (dup != 255)
+		$LF
+		"    {
+		$LF
+		"      if (!memcmp(prevframe, curframe, framesize))
+		$LF
+		"      {
+		$LF
+		"        dup = 1;
+		$LF
+		"	i++;
+		$LF
+		"	if (tot > 0 && i >= tot)
+		$LF
+		"	{
+		$LF
+		"	  dup = 0;
+		$LF
+		"	  i = 0;
+		$LF
+		"	}
+		$LF
+		"      }
+		$LF
+		"    }
+		$LF
+		"    if (!dup || dup == 255)
+		$LF
+		"    {
+		$LF
+		"      if (fwrite(curframe, sizeof(unsigned char), framesize, stdout) < framesize)
+		$LF
+		"        break;
+		$LF
+		"      memcpy(prevframe, curframe, framesize);
+		$LF
+		"      fprintf(outfile, "%lu.%06lu\n", 
+		$LF
+		"          framenum*1000*fpsden/fpsnum,
+		$LF
+		"	  (framenum*10000000000*fpsden/fpsnum+5)/10%1000000);
+		$LF
+		"    }
+		$LF
+		"    framenum++;
+		$LF
+		"    dup = 0;
+		$LF
+		"  }
+		$LF
+		"  fclose(outfile);
+		$LF
+		"  free(prevframe);
+		$LF
+		"  free(curframe);
+		$LF
+		"  return 0;
+		$LF
+		"}
+		$LF
 	]code
 ]pre

@@ -27,7 +27,123 @@
 		[div class=tab-pane fade id=tabs-18-1 
 			[pre 
 				[code class=language-lua 
-					$UNPRINTABLE TEXT!!!
+					"-- feos, 2012
+					$LF
+					"-- Duck Tales 2 lag counter and HUD
+					$LF
+					$LF
+					"lagged = false
+					$LF
+					"lastXpos = 0
+					$LF
+					"lastYpos = 0
+					$LF
+					"lastXcam = 0
+					$LF
+					"lastYcam = 0
+					$LF
+					$LF
+					"function Stuff()
+					$LF
+					"	Xpos = memory.readbyte(0x96) + (memory.readbyte(0x97)*0x100) + (memory.readbyte(0x95)/400)
+					$LF
+					"	Ypos = memory.readbyte(0x99) + (memory.readbyte(0x9A)*0x100) + (memory.readbyte(0x98)/400)
+					$LF
+					"	Xcam = memory.readbyte(0x17) + memory.readbyte(0x18)*0x100
+					$LF
+					"	Ycam = memory.readbyte(0x1A) + memory.readbyte(0x1B)*0x100
+					$LF
+					"	timer = memory.readbyte(0x8F)
+					$LF
+					"	RNG = memory.readbyte(0x90)
+					$LF
+					"	bossHP = memory.readbyte(0xB9)
+					$LF
+					"	bossInv = memory.readbyte(0xB8)
+					$LF
+					"	
+					$LF
+					"	Xspd = Xpos - lastXpos
+					$LF
+					"	Yspd = Ypos - lastYpos
+					$LF
+					"	Xcamspd = Xcam - lastXcam
+					$LF
+					"	Ycamspd = Ycam - lastYcam
+					$LF
+					"	
+					$LF
+					"	gui.text( 0, 8, string.format("X: %.2f\nY: %.2f",Xpos,Ypos))
+					$LF
+					"	gui.text(170, 8, string.format("Xcam: %4d\nYcam: %4d",Xcam,Ycam))
+					$LF
+					"	gui.text(115, 8, string.format("Tmr: %d\nRNG: %X\nHP: %d\nInv: %d",timer,RNG,bossHP,bossInv))
+					$LF
+					"	gui.text(Xpos-Xcam, Ypos-Ycam, string.format("%.2f\n%.2f",Xspd,Yspd), "#00ff00ff")
+					$LF
+					"	
+					$LF
+					"	lastXpos = Xpos
+					$LF
+					"	lastYpos = Ypos
+					$LF
+					"	lastXcam = Xcam
+					$LF
+					"	lastYcam = Ycam
+					$LF
+					"	
+					$LF
+					"	for i = 0, 8 do
+					$LF
+					"		id		= memory.readbyte(0x405+i)
+					$LF
+					"		xSub	= memory.readbyte(0x4A5+i)/400
+					$LF
+					"		x		= memory.readbyte(0x4B5+i) + memory.readbyte(0x4C5+i)*0x100 - Xcam
+					$LF
+					"		ySub	= memory.readbyte(0x4D5+i)/400
+					$LF
+					"		y		= memory.readbyte(0x4E5+i) + memory.readbyte(0x4F5+i)*0x100 - Ycam		
+					$LF
+					"		state	= memory.readbyte(0x415+i)
+					$LF
+					"		speed	= memory.readbyte(0x465+i)
+					$LF
+					"		
+					$LF
+					"		if x<0 then x=0 elseif x>242 then x=242 end
+					$LF
+					"		if id>0 then
+					$LF
+					"			gui.text(x, y, string.format("%X\n%X",id,state))
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"end
+					$LF
+					$LF
+					"function DetectLag()
+					$LF
+					"	lagged = (memory.readbyte(0x88) == 0)
+					$LF
+					"end
+					$LF
+					$LF
+					"function SetLag()
+					$LF
+					"	emu.setlagflag(lagged)
+					$LF
+					"end
+					$LF
+					$LF
+					"memory.registerexecute(0xC780, DetectLag)
+					$LF
+					"memory.registerexecute(0xD362, SetLag)
+					$LF
+					"emu.registerafter(Stuff)
+					$LF
 				]code
 			]pre
 		]div

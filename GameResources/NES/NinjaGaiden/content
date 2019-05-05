@@ -790,17 +790,372 @@
 			]pre
 			[pre 
 				[code class=language-lua 
-					$UNPRINTABLE TEXT!!!
+					"curves = {}
+					$LF
+					"function PredictBird()
+					$LF
+					"	-- feos, 2014
+					$LF
+					"	-- draws birds trajectories
+					$LF
+					"	-- color marks direction
+					$LF
+					"	for slot = 0, 7 do
+					$LF
+					"		if (memory.readbyte(0x400 + slot) ~= 11) or (memory.readbyte(0x498 + slot) == 0) then
+					$LF
+					"			curves.slot = nil
+					$LF
+					"		else
+					$LF
+					"			if (curves.slot == nil) then curves.slot = {} end
+					$LF
+					"			local ryuY      = memory.readbyte(0x8A)
+					$LF
+					"			local ryuX      = memory.readbyte(0x86)
+					$LF
+					"			local birdY     = memory.readbyte(0x480 + slot)
+					$LF
+					"			local birdX     = memory.readbyte(0x460 + slot)       + memory.readbyte(0x458 + slot)/256
+					$LF
+					"			local birdSpeed = memory.readbytesigned(0x450 + slot) + memory.readbyte(0x448 + slot)/256
+					$LF
+					"			local newY = 0
+					$LF
+					"			local newX = 0
+					$LF
+					"			local newSpeed = 0
+					$LF
+					"			while (#curves.slot <= 200) do
+					$LF
+					"				if (#curves.slot == 0) then
+					$LF
+					"					if (birdY > ryuY)
+					$LF
+					"					then newY = birdY - 1
+					$LF
+					"					else newY = birdY + 1
+					$LF
+					"					end
+					$LF
+					"					if (birdX > ryuX)
+					$LF
+					"					then newSpeed = birdSpeed - 16/256
+					$LF
+					"					else newSpeed = birdSpeed + 16/256
+					$LF
+					"					end
+					$LF
+					"					newX = birdX + newSpeed
+					$LF
+					"				else
+					$LF
+					"					local index = #curves.slot
+					$LF
+					"					local tempY = curves.slot[index].oldY
+					$LF
+					"					local tempX = curves.slot[index].oldX
+					$LF
+					"					local tempSpeed = curves.slot[index].oldSpeed
+					$LF
+					"					if (tempY > ryuY)
+					$LF
+					"					then newY = tempY - 1
+					$LF
+					"					else newY = tempY + 1
+					$LF
+					"					end
+					$LF
+					"					if (tempX > ryuX)
+					$LF
+					"					then newSpeed = tempSpeed - 16/256
+					$LF
+					"					else newSpeed = tempSpeed + 16/256
+					$LF
+					"					end
+					$LF
+					"					newX = tempX + newSpeed
+					$LF
+					"				end				
+					$LF
+					"				table.insert(curves.slot, {oldY = newY, oldX = newX, oldSpeed = newSpeed})
+					$LF
+					"			end
+					$LF
+					"			if (#curves.slot == 200) then table.remove(curves.slot, 1) end			
+					$LF
+					"			for index = 1, #curves.slot do
+					$LF
+					"				local color = nil
+					$LF
+					"				if (curves.slot[index].oldSpeed < 0) then color = "#008800" else color = "#0000ff" end
+					$LF
+					"				gui.box  (curves.slot[index].oldX - 1, curves.slot[index].oldY - 1,
+					$LF
+					"						  curves.slot[index].oldX + 1, curves.slot[index].oldY + 1, color)
+					$LF
+					"			end
+					$LF
+					"			for index = 1, #curves.slot do
+					$LF
+					"				gui.pixel(curves.slot[index].oldX, curves.slot[index].oldY, "white")
+					$LF
+					"			end
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"end
+					$LF
 				]code
 			]pre
 			[pre 
 				[code class=language-lua 
-					$UNPRINTABLE TEXT!!!
+					"function GetCell(X,Y)
+					$LF
+					"	local temp = memory.readbyte(0xE7CC+SHIFT(X,4))+memory.readbyte(0x5F)
+					$LF
+					"	if (temp >= 0xC0) then temp = temp-0xC0 end
+					$LF
+					"	Y = Y-0x40
+					$LF
+					"	if (Y < 0) then Y = 0 end
+					$LF
+					"	temp = SHIFT(Y,5)+temp
+					$LF
+					"	return temp
+					$LF
+					"end
+					$LF
+					$LF
+					"function DrawBG(arg,offset,x,y)
+					$LF
+					"	local color2 = "#00ff00ff"
+					$LF
+					"	local function box(color,text)
+					$LF
+					"		gui.box(x,y+offset,x+16,y+offset+16,color)
+					$LF
+					"		if (text == 1) then
+					$LF
+					"			gui.text(x+1,y+offset+1,string.format("%d",arg))
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"	local function line(up,down,left,right)
+					$LF
+					"		if (up    == 1) then gui.line(x   ,y+offset   ,x+16,y+offset   ,color2) end
+					$LF
+					"		if (down  == 1) then gui.line(x   ,y+offset+16,x+16,y+offset   ,color2) end
+					$LF
+					"		if (left  == 1) then gui.line(x   ,y+offset   ,x   ,y+offset+16,color2) end
+					$LF
+					"		if (right == 1) then gui.line(x+16,y+offset   ,x+16,y+offset+16,color2) end
+					$LF
+					"	end
+					$LF
+					"	if (arg ~= 0) then
+					$LF
+					"		if     (arg == 1) then line(0,0,0,1) -- right wall
+					$LF
+					"		elseif (arg == 2) then line(0,0,1,0) -- left wall
+					$LF
+					"		elseif (arg == 3) then line(0,0,1,1) -- two-sided wall
+					$LF
+					"		elseif (arg == 4) then line(1,0,0,1) -- right corner
+					$LF
+					"		elseif (arg == 5) then line(1,0,1,0) -- left corner
+					$LF
+					"		elseif (arg == 6) then line(1,0,1,1) -- two-sided corner
+					$LF
+					"		elseif (arg == 7) then line(1,0,0,0) -- floor
+					$LF
+					"		elseif (arg == 8) then box("#ff000066",0) -- ejecting block
+					$LF
+					"		elseif (arg == 9) then box("#00ff0066",0) -- ladder
+					$LF
+					"		elseif (arg >= 12) and (arg <= 15)
+					$LF
+					"		then box("#ffffff66",0) -- exits
+					$LF
+					"		else box("#00ff0066",1)
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"end
+					$LF
+					$LF
+					"function ViewBG(style)
+					$LF
+					"	-- feos, 2014
+					$LF
+					"	-- style: 0=none, 1=new, 2=old, 3=both
+					$LF
+					"	local base = 0x300
+					$LF
+					"	local RyuX = memory.readbyte(0x86)
+					$LF
+					"	local RyuY = memory.readbyte(0x8A)
+					$LF
+					"	local RyuYspeed = memory.readbytesigned(0x89)
+					$LF
+					"	local RyuXspeed = memory.readbytesigned(0xAD)+memory.readbyte(0xAC)/256
+					$LF
+					"	if (AND(memory.readbyte(0x84),4) == 0) then RyuYspeed = 0 end
+					$LF
+					"	local RyuCell = GetCell(RyuX, RyuY+RyuYspeed)
+					$LF
+					"	local RyuRow = math.floor(RyuCell/6)
+					$LF
+					"	local Screen = memory.readwordsigned(0x51)
+					$LF
+					"	if (AND(style,1) == 1)
+					$LF
+					"	and (memory.readbyte(0x1FC) == 0x87)
+					$LF
+					"	or  (memory.readbyte(0x1F3) == 0xD8) then
+					$LF
+					"		for tRow = RyuRow-14, RyuRow+14 do
+					$LF
+					"			for tLine = 0,5 do
+					$LF
+					"				local address = base+((tRow*6+tLine)%0xC0)
+					$LF
+					"				local hi = SHIFT(memory.readbyte(address),  4)
+					$LF
+					"				local lo =   AND(memory.readbyte(address),0xF)
+					$LF
+					"				local x = (tRow-RyuRow)*16+RyuX-RyuX%0x10-Screen%0x10
+					$LF
+					"				local y = tLine*32+64
+					$LF
+					"				DrawBG(hi, 0,x,y)
+					$LF
+					"				DrawBG(lo,16,x,y)
+					$LF
+					"			end
+					$LF
+					"		end
+					$LF
+					"		gui.box(xpos-9,ypos+RyuYspeed-1,xpos+5,ypos+RyuYspeed-5,"#0000ff66")
+					$LF
+					"	end
+					$LF
+					"	if (AND(style,2) == 2) then
+					$LF
+					"		for cell = 0,191 do
+					$LF
+					"			local hi = SHIFT(memory.readbyte(base+cell),  4)
+					$LF
+					"			local lo =   AND(memory.readbyte(base+cell),0xF)
+					$LF
+					"			local bX = math.floor(cell/6)
+					$LF
+					"			local bY = cell%6
+					$LF
+					"			local rX = (RyuRow%32)*6-1
+					$LF
+					"			local rY = math.floor(RyuY/16)*8-32
+					$LF
+					"			if (hi == 0) then hi = " " else hi = string.format("%X",hi) end
+					$LF
+					"			if (lo == 0) then lo = " " else lo = string.format("%X",lo) end
+					$LF
+					"			gui.text(bX*6,bY*16+9,hi.."\n"..lo)
+					$LF
+					"			gui.box(rX,rY,rX+6,rY+8,"#00ff0000")
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"end
+					$LF
 				]code
 			]pre
 			[pre 
 				[code class=language-lua 
-					$UNPRINTABLE TEXT!!!
+					"function Spawns()
+					$LF
+					"	-- feos, 2014
+					$LF
+					"	-- uncovers which spawns will occur per frame
+					$LF
+					"	local SubCur= memory.readbyte(0x50)/25.6
+					$LF
+					"	local PosCur= AND(memory.readbyte(0x51),0xF)
+					$LF
+					"	local BlCur = memory.readbyte(0x4E)
+					$LF
+					"	local Blptr = memory.readword(0x96)
+					$LF
+					"	local Yptr  = memory.readword(0x98)
+					$LF
+					"	local IDptr = memory.readword(0x9A)
+					$LF
+					"	local Count = memory.readbyte(0xB4)
+					$LF
+					"	local Iterator = memory.readbyte(0xB5)-8
+					$LF
+					"	local IteratorLast = memory.readbyte(0xB5)-1
+					$LF
+					"	if (Blptr == 0) then return end
+					$LF
+					"	while (Iterator < 0) do Iterator = Count+Iterator end
+					$LF
+					"	if (IteratorLast < 0) then IteratorLast = Count+IteratorLast end	
+					$LF
+					"	local Interrupt = AND(memory.readbyte(0x4C),0x40)
+					$LF
+					"	local forward = memory.readbyte(0x3D)
+					$LF
+					"	if (memory.readbyte(0x1FC) == 0x87)
+					$LF
+					"	or (memory.readbyte(0x1F3) == 0xD8) then
+					$LF
+					"		for i = 0,Count-1 do
+					$LF
+					"			local color1 = "white"
+					$LF
+					"			local block = memory.readbyte(Blptr+i)
+					$LF
+					"			local ypos  = memory.readbyte(Yptr +i)
+					$LF
+					"			local id    = memory.readbyte(IDptr+i)
+					$LF
+					"			local x = i*16%256+1
+					$LF
+					"			local y = 57+math.floor(i/16)*30
+					$LF
+					"			if (block == BlCur) then gui.box(x-1,y-1,x+12,y+23,"#00ff0088") end
+					$LF
+					"			if (forward == 0) then backspawn = -0xD else backspawn = 0xE end
+					$LF
+					"			if (block == (BlCur+backspawn)) then gui.box(x-1,y-1,x+12,y+23,"#ff00ff88") end
+					$LF
+					"			if (i+1 >= Iterator) and (i+1 < Iterator+8)
+					$LF
+					"			or (i+1 < Iterator+8-Count) then color1 = "#ffccaaff" end
+					$LF
+					"			if (Interrupt > 0) then color2 = "red" else color2 = "#44ffffff" end
+					$LF
+					"			gui.text(x,y,string.format("%X\n%X\n%X",block,ypos,id),color1)
+					$LF
+					"			gui.text(108,41,string.format("Block: %X.%02d.%d\nIterator: %02d-%02d/%d",
+					$LF
+					"				BlCur,PosCur,SubCur,Iterator,IteratorLast,Count),color2,"#000000ff")
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"end
+					$LF
 				]code
 			]pre
 		]div

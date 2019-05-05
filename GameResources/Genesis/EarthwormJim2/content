@@ -56,7 +56,165 @@
 		[div class=tab-pane fade id=tabs-18-1 
 			[pre 
 				[code class=language-lua 
-					$UNPRINTABLE TEXT!!!
+					$LF
+					"gui.register(function()
+					$LF
+					"	camx = memory.readword(0xffa172)
+					$LF
+					"	camy = memory.readword(0xffa174)
+					$LF
+					"	
+					$LF
+					"	Objects()
+					$LF
+					"	Bounce()
+					$LF
+					"end)
+					$LF
+					$LF
+					"function Objects()
+					$LF
+					"	local base0 = 0xffa2ea
+					$LF
+					"	for i=0,0x23 do
+					$LF
+					"		local base = base0+i*0x6e
+					$LF
+					"		local id = memory.readbyte(base)
+					$LF
+					"		if id>0 and id~=0x82 then
+					$LF
+					"			local hp = memory.readbytesigned(base+1)
+					$LF
+					"			local x = memory.readword(base+2)-4096-camx
+					$LF
+					"			local y = memory.readword(base+4)-4096-camy
+					$LF
+					"			--local x = Clamp(x,0,310)
+					$LF
+					"			--local y = Clamp(y,0,214)
+					$LF
+					"			local dx = memory.readwordsigned(base+0x18)
+					$LF
+					"			local dy = memory.readwordsigned(base+0x1a)
+					$LF
+					"			local hitboxbase = memory.readlong(base+0x14)
+					$LF
+					"			local x1 = memory.readbyte(hitboxbase+2)
+					$LF
+					"			local x2 = memory.readbyte(hitboxbase+4)
+					$LF
+					"			local y1 = memory.readbyte(hitboxbase+3)
+					$LF
+					"			local y2 = memory.readbyte(hitboxbase+5)
+					$LF
+					"			--PostRngRoll(base,x,y)
+					$LF
+					"			if x1>0 and x2>0 and y1>0 and y2>0 then
+					$LF
+					"				local of = 124
+					$LF
+					"				x1 = x1+x-of
+					$LF
+					"				x2 = x2+x-of
+					$LF
+					"				y1 = y1+y-of
+					$LF
+					"				y2 = y2+y-of
+					$LF
+					"				gui.box(x1,y1,x2,y2,0,"green")
+					$LF
+					"			end
+					$LF
+					"			if hp>0 then
+					$LF
+					"				gui.text(x,y-2,hp,"green")
+					$LF
+					"			end
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"end
+					$LF
+					$LF
+					"function Bounce()
+					$LF
+					"	if memory.readbyte(0xffa515)==0x60
+					$LF
+					"	then offset = 8
+					$LF
+					"	else offset = 0 end
+					$LF
+					"	local counter = memory.readbyte(0xfffc87)
+					$LF
+					"	local a0 = 0xfffc88
+					$LF
+					"	local d0 = SHIFT(memory.readbyte(a0+counter),-5)+offset
+					$LF
+					"	local a3 = 0x25d482
+					$LF
+					"	local vel = memory.readword(a3+d0)
+					$LF
+					"	local bounce = 0
+					$LF
+					"	if     vel == 0x200 then bounce = 3
+					$LF
+					"	elseif vel == 0x3e0 then bounce = 1
+					$LF
+					"	else                     bounce = 2
+					$LF
+					"	end
+					$LF
+					"	gui.text(0,0,string.format("next bounce: %d",bounce))
+					$LF
+					"end
+					$LF
+					$LF
+					"function Dump()
+					$LF
+					"	for p=0x275fea,0x277b79 do
+					$LF
+					"		local a = memory.readbyte(p)
+					$LF
+					"		if a==0x62 then
+					$LF
+					"			table.insert(bombs,string.format("%X",p))
+					$LF
+					"		elseif a==8 then
+					$LF
+					"			table.insert(goback,string.format("%X",p))
+					$LF
+					"		elseif a==3 then
+					$LF
+					"			table.insert(goforth,string.format("%X",p))
+					$LF
+					"		end
+					$LF
+					"	end
+					$LF
+					"	print("bombs:")
+					$LF
+					"	print(bombs)
+					$LF
+					"	print("")
+					$LF
+					"	print("goback:")
+					$LF
+					"	print(goback)
+					$LF
+					"	print("")
+					$LF
+					"	print("goforth:")
+					$LF
+					"	print(goforth)
+					$LF
+					"	print("")
+					$LF
+					"end
+					$LF
+					$LF
 				]code
 			]pre
 		]div

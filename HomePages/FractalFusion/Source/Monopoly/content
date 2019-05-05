@@ -114,7 +114,229 @@
 			]p
 			[pre 
 				[code class=language-c_white 
-					$UNPRINTABLE TEXT!!!
+					"#include <stdio.h>
+					$LF
+					"void rndfunc1(unsigned long *a);
+					$LF
+					"void rndfunc1(unsigned long *a, int x);
+					$LF
+					"void init(char *d);
+					$LF
+					"void printarray(char *d);
+					$LF
+					"void setupcards(unsigned long *a, char *chance, char *commchest);
+					$LF
+					"int main()
+					$LF
+					"{
+					$LF
+					"   unsigned long a,b;
+					$LF
+					"   char chance[16];
+					$LF
+					"   char commchest[16];
+					$LF
+					"   int x;
+					$LF
+					$LF
+					"   a=0x64EEB2; //starting "random" seed (random as in used by the game's RNG)
+					$LF
+					$LF
+					"   x=0;
+					$LF
+					"   while(1)
+					$LF
+					"   {
+					$LF
+					"     b=a;
+					$LF
+					$LF
+					"     setupcards(&b,chance,commchest);
+					$LF
+					$LF
+					"     //testing for specific cards; change to suit requirements
+					$LF
+					"     if(chance[0]==4 && commchest[1]==4 && commchest[0]!=7)
+					$LF
+					"         break;
+					$LF
+					"	 //chance first repairs; comm chest first not gotojail; second repairs
+					$LF
+					$LF
+					"     // or for example: if(chance[0]==8 && commchest[0]==15 && chance[1]==3)
+					$LF
+					"     // chance first advtostcharles; second back3space; comm chest first grandopera
+					$LF
+					$LF
+					"     rndfunc1(&a);
+					$LF
+					"     x++;
+					$LF
+					"   }
+					$LF
+					$LF
+					"   printarray(chance);
+					$LF
+					"   printf("\n");
+					$LF
+					"   printarray(commchest);
+					$LF
+					"   printf("%X\n",a);
+					$LF
+					$LF
+					"   printf("Delay: %d",x);
+					$LF
+					$LF
+					$LF
+					"   getchar();
+					$LF
+					"   return(0);
+					$LF
+					"}
+					$LF
+					"void rndfunc1q(unsigned long *a)
+					$LF
+					"{
+					$LF
+					"    long b,c;
+					$LF
+					"    char x;
+					$LF
+					"    b=*a;
+					$LF
+					"    c=b<<1;
+					$LF
+					"    c^=b;
+					$LF
+					"    if (c&0x200000) x=1; else x=0;
+					$LF
+					"    *a=((*a<<1)+x);
+					$LF
+					"}
+					$LF
+					"void rndfunc1(unsigned long *a, int x)
+					$LF
+					"{
+					$LF
+					"    for(int i=1;i<=x;i++)
+					$LF
+					"            rndfunc1q(a);
+					$LF
+					"}
+					$LF
+					"void init(char *d)
+					$LF
+					"{
+					$LF
+					"    for(int i=0;i<=15;i++)
+					$LF
+					"    {
+					$LF
+					"    d[i]=0xFF;
+					$LF
+					"    }
+					$LF
+					"}
+					$LF
+					"void printarray(char *d)
+					$LF
+					"{
+					$LF
+					"    for(int i=0;i<=15;i++)
+					$LF
+					"            printf("%d\n",d[i]);
+					$LF
+					"}
+					$LF
+					"void setupcards(unsigned long *a, char *chance, char *commchest)
+					$LF
+					"{
+					$LF
+					"   unsigned char ramf7, r, cardno;
+					$LF
+					"   init(chance);
+					$LF
+					"   init(commchest);
+					$LF
+					$LF
+					"   rndfunc1q(a);
+					$LF
+					"   ramf7=0;
+					$LF
+					"   cardno=15;
+					$LF
+					"   while(1)   //chance //throw random array index from 0 to 15
+					$LF
+					"   {
+					$LF
+					"       rndfunc1(a,3);
+					$LF
+					"       r=*a%256;
+					$LF
+					"       r^=ramf7;
+					$LF
+					"       r/=16;
+					$LF
+					$LF
+					"       if(chance[r]>=0)     //spot already occupied
+					$LF
+					"       {
+					$LF
+					"          ramf7++;
+					$LF
+					"          continue;
+					$LF
+					"       }
+					$LF
+					$LF
+					"       chance[r]=cardno;
+					$LF
+					"       if(cardno==0) break;
+					$LF
+					"       cardno--;
+					$LF
+					"   }
+					$LF
+					"   cardno=15;
+					$LF
+					"   ramf7=16;
+					$LF
+					$LF
+					"   while(1)  //commchest
+					$LF
+					"   {
+					$LF
+					"       rndfunc1(a,3);
+					$LF
+					"       r=*a%256;
+					$LF
+					"       r^=ramf7;
+					$LF
+					"       r/=16;
+					$LF
+					$LF
+					"       if(commchest[r]>=0)
+					$LF
+					"       {
+					$LF
+					"          ramf7++;
+					$LF
+					"          continue;
+					$LF
+					"       }
+					$LF
+					$LF
+					"       commchest[r]=cardno;
+					$LF
+					"       if(cardno==0) break;
+					$LF
+					"       cardno--;
+					$LF
+					$LF
+					"   }
+					$LF
+					"}
+					$LF
 				]code
 			]pre
 		]div

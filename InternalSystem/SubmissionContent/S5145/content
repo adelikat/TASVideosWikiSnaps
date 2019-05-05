@@ -364,7 +364,32 @@
 	$LF
 ]p
 [pre 
-	$UNPRINTABLE TEXT!!!
+	"C3/166D: 20D119    JSR $19D1      Calculate SRAM checksum and stores it in $E7
+	$LF
+	"C3/1670: 20EB19    JSR $19EB      Determine if save file is corrupted:
+	$LF
+	"| C3/19EB:	C220    	REP #$20      
+	$LF
+	"| C3/19ED:	A5E7    	LDA $E7      Load calculated checksum
+	$LF
+	"| C3/19EF:	CDFE1F  	CMP $1FFE    Does it match this file's checksum?
+	$LF
+	"| C3/19F2:	D002    	BNE $19F6    Branch if they don't match
+	$LF
+	"| C3/19F4:	8001    	BRA $19F7    Skip next instruction if they match
+	$LF
+	"| C3/19F6:	7B      	TDC          Set A to 0
+	$LF
+	"| C3/19F7:	A8      	TAY          Transfer A to Y
+	$LF
+	"| C3/19F8:	E220    	SEP #$20
+	$LF
+	"| C3/19FA:	60      	RTS
+	$LF
+	"C3/1673: 8491      STY $91        Save result
+	$LF
+	"C3/1675: F00B      BEQ $1682      Branch if result is 0: skip savefile
+	$LF
 ]pre
 [p 
 	"The consequence of this code is that a savefile is considered as corrupted if the checksum does not match, or if the checksum is 0. In our case, because the checksum is stored at the end of the savefile, it will be 0. So even if the checksum is correct, we won't be able to load the savefile.
