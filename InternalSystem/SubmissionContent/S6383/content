@@ -1,0 +1,664 @@
+4
+[h3 
+	" Game objectives :
+	$LF
+]h3
+[p 
+	"- Emulator used: Bizhawk 2.3.1
+	$LF
+]p
+[p 
+	"- Aims for fastest time
+	$LF
+]p
+[p 
+	"- Uses Slots
+	$LF
+]p
+[p 
+	"- Doesn't switch CDs except when asked for
+	$LF
+]p
+[p 
+	"- Heavy Luck Manipulation
+	$LF
+]p
+[h4 
+	" This is an improvement of 48 522 frames over my cancelled submission.
+	$LF
+]h4
+[p 
+	"Most of it comes from a new skip. A little bit from picking the Ether from a different, closer place. A little bit from better understanding of the main RNG which lead to way more optimal manipulation. The rest is from a different step-route because of the skip.
+	$LF
+]p
+[p 
+	(youtube|v=IBDCFRnt784)
+	$LF
+]p
+[p 
+	"Currently processing......
+	$LF
+]p
+[h3 
+	" Comments :
+	$LF
+]h3
+[p 
+	"Doesn't switch CDs except when asked for :
+	$LF
+]p
+[p 
+	"It is possible to greatly reduce the length of FMV or even skip them by swaping Discs and tricking the game into loading the wrong one. However by TASVideos rules : "For games that consist of multiple images that are intended to be used in a specific order, inserting a new image is only allowed when the game explicitly prompts for it, and the intended order must be respected."
+	$LF
+]p
+[p 
+	"Slots :
+	$LF
+]p
+[p 
+	"S Level 2 Limit is called Slots. The reels determine what various effects will occur, depending on the combination of the six symbols. Getting three S triggers a move called "Game Over" that kills instantly the enemy (including Boss). This is very powerful and warrant two separate categories in the RTA community. As a first TAS, I went with the fastest way, which is using Slots.
+	$LF
+	"I understand that some people would prefer No Slots, but getting T to use Powersoul+Death Sentence over again almost all the time would not make it much more interesting IMO.
+	$LF
+]p
+[p 
+	"Naming Characters :
+	$LF
+]p
+[p 
+	"As Dialog boxes don't load instantly, renaming our characters to one letter name sometimes saves a few frames by reducing the length of the dialog. Aerith is the only one we can't rename since we will skip this part, but the gain of the skip outweights it greatly.
+	$LF
+]p
+[p 
+	"ATB : Wait or Active ?
+	$LF
+]p
+[p 
+	"We nearly always want Wait because this allows us to manipulate the RNG to our favour. When a command is selected, all ATBs freeze. This can delay enemies' attacks, or make us wait for a better spot without the fear of the enemy attacking. There is one exception. We put Active before Bottomswell, because this makes Poison act way more frequently.
+	$LF
+]p
+[p 
+	"Pause ? :
+	$LF
+]p
+[p 
+	"The RNG in-battle can also be manipulated by pausing/unpausing. It takes the same time as ATB on wait but can be done without full ATB which is sometimes useful.
+	$LF
+]p
+[p 
+	"RNG in battle :
+	$LF
+]p
+[p 
+	"Changes every four frames and when called. Is used for Damage, Attack chosen, Critical Hits, Miss, Steal,...
+	$LF
+	"The pointer is at 0x62E18 and choose in the table from 0x62E10 to 0x62E17.
+	$LF
+]p
+[p 
+	"Starting ATB :
+	$LF
+]p
+[p 
+	"Changes every input-frame. Simply delaying the start of a battle would change it.
+	$LF
+	"Unless in special formation, the maximum you can get is 224/255 full. Someone (us or enemy) will always be at 224/255.
+	$LF
+]p
+[p 
+	"Global RNG :
+	$LF
+]p
+[p 
+	"Address : 0x95DC8
+	$LF
+	"Increase by : 0x4A630
+	$LF
+]p
+[p 
+	"While it is rarely of huge interest, there are a couple places where it matters :
+	$LF
+]p
+[p 
+	"- Shinra Elevator. If the Global RNG isn't in a good spot, some floors are unavailable (which sometimes happens to be the employee floor and would force us to an extra fight).
+	$LF
+]p
+[p 
+	"- Junon mini-game. It determines which button you have to press and thus how fast the mini-game will end.
+	$LF
+]p
+[p 
+	"- Dialogs inside the rocket (more or less fast depending on D's movement).
+	$LF
+]p
+[p 
+	"AND THE MOST IMPORTANT :
+	$LF
+]p
+[p 
+	"- Number of encounters during Final Descent. I had to TAS up to Hojo's fight to see what RNG I had. Then go back to the Temple of Ancients and carefully manipulate the RNG all the way to Hojo to get a 0 encounter Final Descent without much delay. Oh boy, was that a pain !
+	$LF
+]p
+[p 
+	"Stats boost :
+	$LF
+]p
+[p 
+	"Every time a character gains a level, its stats can get boosted. This is determined by the RNG at the end of the fight. We can manipulate the boosts to our liking by simply delaying the final blow.
+	$LF
+]p
+[p 
+	"Critical Hits :
+	$LF
+]p
+[p 
+	"A Critical may occur based on Luck Stat and Levels from both you and the enemy. While we have very little maneuver on the Levels, we can increase Luck to the Max at every Stat Boost. Having 17 Luck for Guard Scorpion is the most desirable. Reaching the 22 mark for Jenova birth doubles our odds to Critical.
+	$LF
+]p
+[p 
+	"Weird Level Up :
+	$LF
+]p
+[p 
+	"By beating Heli-Gunner, C also gets a Level Up, even if he is not in the party. This includes his Stat Boost and should be manipulated.
+	$LF
+]p
+[p 
+	"Field "Random" Encounters :
+	$LF
+]p
+[p 
+	"While in the field, there is 2 important values to keep track of. The StepID and the Danger value. StepID : 0x9c540 (1 byte) Danger : 0x7173c (2 bytes)
+	$LF
+]p
+[p 
+	"For every StepID there is a limit, which if the Danger is above, triggers a battle. Those values are set in stone and are the same everytime you start the game, which makes the encounters not really random. Every field has its own Danger stat, which is the value that gets added to the Danger everytime there is a check. Some are very low (32), some are very high (170). This value can get divided by 4 if you are walking on the frame of the Check. A check is performed every 16 frames of movement (at 60fps) on field with possible encounters. At this point, StepID is increased by 2 and Danger is increased by Danger stat. There is also a value that keeps track of how many times, StepID reaches 256 and roll over back to 0, so values of the StepID limits are different on each loop.
+	$LF
+]p
+[p 
+	"Here is the formula : 
+	$LF
+]p
+[p 
+	"rnlist = {0xB1, 0xCA, 0xEE, 0x6C, 0x5A, 0x71, 0x2E, 0x55, 0xD6, 0x00, 0xCC, 0x99, 0x90, 0x6B, 0x7D, 0xEB, 0x4F, 0xA0, 0x07, 0xAC, 0xDF, 0x8A, 0x56, 0x9E, 0xF1, 0x9A, 0x63, 0x75, 0x11, 0x91, 0xA3, 0xB8, 0x94, 0x73, 0xF7, 0x54, 0xD9, 0x6E, 0x72, 0xC0, 0xF4, 0x80, 0xDE, 0xB9, 0xBB, 0x8D, 0x66, 0x26, 0xD0, 0x36, 0xE1, 0xE9, 0x70, 0xDC, 0xCD, 0x2F, 0x4A, 0x67, 0x5D, 0xD2, 0x60, 0xB5, 0x9D, 0x7F, 0x45, 0x37, 0x50, 0x44, 0x78, 0x04, 0x19, 0x2C, 0xEF, 0xFD, 0x64, 0x81, 0x03, 0xDA, 0x95, 0x4C, 0x7A, 0x0B, 0xAD, 0x1F, 0xBA, 0xDD, 0x3E, 0xF9, 0xD7, 0x1A, 0x29, 0xF8, 0x18, 0xB3, 0x20, 0xF6, 0xD1, 0x5E, 0x34, 0x92, 0x7B, 0x24, 0x43, 0x88, 0x97, 0xD4, 0x0F, 0x35, 0xAA, 0x83, 0x68, 0x27, 0xA8, 0xD5, 0xBE, 0xFA, 0x14, 0x31, 0xAF, 0x10, 0x0D, 0xD8, 0x6A, 0xCE, 0x23, 0x61, 0xF3, 0x3D, 0xA4, 0x08, 0x33, 0xE3, 0xA9, 0x38, 0xE6, 0x93, 0x1D, 0x1C, 0xF0, 0x0E, 0x87, 0x59, 0x65, 0x82, 0xBC, 0xFF, 0xFE, 0x7E, 0x8F, 0xC1, 0x1E, 0xF5, 0xCB, 0x49, 0x02, 0x32, 0x09, 0xC4, 0x8E, 0xC6, 0x2B, 0x40, 0xA7, 0x17, 0x76, 0x3B, 0x16, 0x2A, 0xC8, 0xFB, 0xB2, 0x58, 0xA5, 0x15, 0xAE, 0x25, 0xCF, 0x46, 0xC7, 0x48, 0xB4, 0x0A, 0x3F, 0xC9, 0x06, 0x85, 0x51, 0x89, 0x62, 0x4D, 0x12, 0x8C, 0xEA, 0xA2, 0x98, 0x4B, 0x79, 0x6F, 0x5C, 0x47, 0x30, 0x1B, 0xE7, 0xC5, 0x22, 0x9C, 0xE8, 0x96, 0x3A, 0xE4, 0x7C, 0xE0, 0x69, 0xA1, 0xB7, 0x05, 0x39, 0x74, 0x01, 0x9F, 0xBD, 0xC3, 0x84, 0xFC, 0x77, 0x86, 0x13, 0x4E, 0xBF, 0xF2, 0x53, 0x5B, 0xED, 0x21, 0x8B, 0x6D, 0xC2, 0x41, 0xB6, 0xDB, 0x3C, 0xD3, 0x28, 0xEC, 0x2D, 0xE2, 0x9B, 0xA6, 0x42, 0x52, 0x57, 0x5F, 0xE5, 0xAB, 0xB0, 0x0C}
+	$LF
+]p
+[p 
+	"t ={};
+	$LF
+]p
+[p 
+	"StepID = memory.readbyte(0x9c540);
+	$LF
+]p
+[p 
+	"bloop = memory.readbyte(0x9AD2C);
+	$LF
+]p
+[p 
+	"t(value)=(rnlist
+	"[StepID+1]
+	"-bloop)%256;
+	$LF
+]p
+[p 
+	"dangerMAX(value)=( (t(value)+1)*256)%65536;
+	$LF
+]p
+[p 
+	"(Note that a dangerMAX of 0 is treated like it's 65535 and you don't get a battle)
+	$LF
+]p
+[p 
+	"Now that we know that, how to efficiently reduce the number of encounters.
+	$LF
+]p
+[p 
+	"As we said, the game only checks every 16 frames and walking on a check reduces the increase by 4 times. So we can actually run for 14 frames and walk for 2 and get the same result as walking 16 frames, except covering more distance. This is called Stutter-Step.
+	$LF
+]p
+[p 
+	"Menu Glitch. If you press Menu on the frame a battle is suppose to start, you will effectively skip it. The game register that you got a battle but the Danger Value is not reset. This also has a downside. If there is no "random" encounter between a Menu Glitch and a mandatory battle, the latter gets to happen twice, resulting in a huge time loss. On the plus side, it only costs 80ish frames and if you have to go to the menu anyway, you can combine both.
+	$LF
+]p
+[p 
+	"Reseting the Danger Value. There is no other way around than accepting a battle and escape. As mentionned above, this has to be done before a mandatory fight if there was a Menu Glitch before. If one of our characters gets to act before all the enemies, he can freeze all ATBs and unfreeze it at the appropriate time for an instant escape.
+	$LF
+]p
+[p 
+	"World Map Random Encounters :
+	$LF
+]p
+[p 
+	"Those are not fixed and can be easily avoided by changing direction or rotating the camera for one or several frames.
+	$LF
+]p
+[p 
+	"World Map movement :
+	$LF
+]p
+[p 
+	"The fastest way of travel is diagonally. If I do anything else, it's most likely for RNG manipulation purpose (good battle,...)
+	$LF
+]p
+[p 
+	"Dodge paralysis :
+	$LF
+]p
+[p 
+	"Activating two events at the same time (usually by talking to someone on the same frame you trigger the first one), results most of the time in keeping control of the character during an usual paralysis. It allows to exit the screen and ending the event without watching it, or to keep doing things while you're not supposed to.
+	$LF
+]p
+[h4 
+	" Early game strategy :
+	$LF
+]h4
+[p 
+	"Manipulation of C and B Luck stat to have a 3% chance Critical against Guard Scorpion helps tremendously.
+	$LF
+]p
+[p 
+	"At the beginning, our characters don't have strong moves even with Critical, but we can buy Grenades that do a lot of damage. It's by far the fastest way a dealing with enemies at this point.
+	$LF
+]p
+[h4 
+	" Tsunaskip :
+	$LF
+]h4
+[p 
+	"Found very recently by Tsunamods, this skip is done by clipping into the guards and getting past them to reach Wall Market right after the 7th Heaven. It saves a tremendous amount of time !
+	$LF
+]p
+[h4 
+	" Boss Battle and StepID :
+	$LF
+]h4
+[p 
+	"Some bosses are on a field with random encounters. For those one, you can manipulate the start of the fight and the StepID at the same time. Doing so, we can start the fight in Preemptive (used for Aps and Jenova Birth)
+	$LF
+]p
+[h4 
+	" Shinra HQ Elevator :
+	$LF
+]h4
+[p 
+	"Very simple, the floor you end up on is determined by the frame you pressed the button, very little manipulation is done to get the perfect outcome. 1 fight against 2 enemies and 3 Shinra employees.
+	$LF
+]p
+[h4 
+	" Mayor Domino's Password :
+	$LF
+]h4
+[p 
+	"At first, I needed the Elixir there. But a skip brought to my attention much later, made it not necessary anymore. I decided to keep it and not redo everything at the cost of 100ish frames, to preserve my sanity.
+	$LF
+]p
+[h4 
+	" Heli Gunner :
+	$LF
+]h4
+[p 
+	"The fight must end with R Limit, otherwise Heli Gunner will do an extra move which cost a lot of time.
+	$LF
+]p
+[pre 
+	$LF
+]pre
+[h4 
+	" Chocobo Farm :
+	$LF
+]h4
+[p 
+	"Little detour to get Chocobo Lure. Will be very useful later.
+	$LF
+]p
+[h4 
+	" Midgar Zolom skips :
+	$LF
+]h4
+[p 
+	"Depending on your position in the swamp, it is possible to not get chased by the Zolom right away, which combining with diagonal movement, makes it possible to cross unarmed with very little manipulation. Right after, opening the menu on the right frame skips an event.
+	$LF
+]p
+[h4 
+	" Junon :
+	$LF
+]h4
+[p 
+	"We refill Grenades one last time. During the CPR mini-game, you need to reach a value of 41. The maximum you can get per turn is supposed to be 10, but if you press on the last frame possible you get 11. So you can get 41 in 4 turns instead of 5. 
+	$LF
+]p
+[p 
+	"During the parade, we don't want to aim for the maximum reward. We do need the 6 Ethers which will come very handy later. 
+	$LF
+]p
+[p 
+	"During the reception, I tried every single delay possible, and this is the fastest outcome I could get. It is possible to have better RNG, but it would require a slower preface, which wouldn't be worth it. We also need the Force Stealer Reward.
+	$LF
+]p
+[h4 
+	" Jenovah Birth :
+	$LF
+]h4
+[p 
+	"Thanks to all previous manipulation, C's Luck is at 22. Which gives him 2% chance of Critical instead of 1.
+	$LF
+]p
+[h4 
+	" Bridge to North Corel :
+	$LF
+]h4
+[p 
+	"We need to fight a Bomb, to steal a Right Arm from it. This item will one shot a boss later.
+	$LF
+]p
+[h4 
+	" North Corel :
+	$LF
+]h4
+[p 
+	"Little bit of shopping. We have now access to Tranquilizer and Hyper to respectively, reduce damage and boost Limit Gauge filling. We can also get Molotov, to replace the Grenades for the next couple of fights.
+	$LF
+]p
+[h4 
+	" Corel Prison :
+	$LF
+]h4
+[p 
+	"We now have S who's gonna be the main killer for the rest of the run. In order to gain Slots, he needs to kill 40 enemies by himself. The 9 enemies from Prison are going to be dealt with Molotov which are slightly faster than Ifrit.
+	$LF
+]p
+[h4 
+	" Dyne :
+	$LF
+]h4
+[p 
+	"This is why we steal a Right Arm. Dyne is dealt with in a blink of an eye. Little manipulation so he doesn't counter upon death.
+	$LF
+]p
+[h4 
+	" Chocobo race :
+	$LF
+]h4
+[p 
+	"As it ends when the second place arrives, we need at least one opponent's Chocobo to be fast. Then we can push another a tiny bit each time by bumping into him until near the end, which cause the fast chocobo to speed to catch up, then he ends up sprinting in the end. It's way faster than just sprinting and waiting for them.
+	$LF
+]p
+[h4 
+	" World Map :
+	$LF
+]h4
+[p 
+	"Time to get a Chocobo.
+	$LF
+	"We encounter one with an Harpy to learn Aqualung and we need to use Tranquilizers to survive. Due to Harpy's AI, it cannot start with Aqualung, so it is a bit faster to manipulate it to do so instead of waiting for the second turn. S deals the final blow to increase his kill count. Little bit of ATB manipulation too, for the Chocobo not to flee.
+	$LF
+]p
+[h4 
+	" Canyon Cosmo skip :
+	$LF
+]h4
+[p 
+	"Dismounting a Chocobo and stepping in the sand causes you to be able to drive the buggy while still being technically on the Chocobo. Now you can't exit the buggy or get an encounter or the trick won't work.
+	$LF
+	"Drive the buggy in front of Canyon Cosmo just before it breaks. Get out and forward, then back in 10 frames later and drive. This allows to completely skip Canyon Cosmo and directly to Mount Nibel.
+	$LF
+]p
+[p 
+	"BrutalAl originally found the skip but it was not made public AFAIK. Thanks to Meesbaker for showing it to me.
+	$LF
+]p
+[h4 
+	" Encounters :
+	$LF
+]h4
+[p 
+	"We continue to raise S kills count. Faster now thanks to Aqualung, but since it costs a lot of MP, it's the reason we needed to win Ether in Junon.
+	$LF
+]p
+[h4 
+	" Materia Keeper :
+	$LF
+]h4
+[p 
+	"Poisoning the enemy and getting its HP done to 7777, will trigger the Lucky Seven, which makes every next attack he does do 7777 damage. That includes self-damage from Poison, which kills it instantly.
+	$LF
+]p
+[h4 
+	" Palmer :
+	$LF
+]h4
+[p 
+	"S Limit 'Dice' is used. It multiplies by 100 the sum of the dices. You get an extra X2 if you have a double. So aiming for 6 and 6 to do 2400 damage.
+	$LF
+]p
+[h4 
+	" Gold Saucer :
+	$LF
+]h4
+[p 
+	"Note that it is not possible to date B with the Tsunaskip because we need to push barrels at Aerith in the church to lower her affection.
+	$LF
+]p
+[p 
+	"The last sequence of Speed Square with Aerith is controlled by the Main RNG. But since it moves every frame at the entrance of the Event Square, it's also easily manipulable.
+	$LF
+]p
+[h4 
+	" Temple of Ancients :
+	$LF
+]h4
+[p 
+	"S learns Slots before the Red Dragon.
+	$LF
+]p
+[p 
+	"Before Demon's Gate is the last time the Main RNG moves very fast. So we need to start positionning it right and carefully monitor it from now on until Hojo.
+	$LF
+]p
+[h4 
+	" Bone Village :
+	$LF
+]h4
+[p 
+	"We need to buy Hi-Potions for S, but we also need to have a very low amount of Gil to save time later. So we buy a lot of unnecessary Hi-Potions as well as a couple of Phoenix Down for after Schizo.
+	$LF
+]p
+[p 
+	"Starting to search for the Lunar Harp updates your Main RNG increase value for the last time of the game depending on your frame count. For this TAS I ended up with 145 (can have 16 differents values)
+	$LF
+]p
+[p 
+	"Which means I need a main RNG of 60 or 205 at the start of Hojo's fight for a 0 encounter Final Descent.
+	$LF
+	"Pressing Confirm at the right time after digging gets you the Lunar Harp without having to open the chest.
+	$LF
+]p
+[h4 
+	" Forgotten Capital :
+	$LF
+]h4
+[p 
+	"We can open the chest from one floor above at the same time than starting to rest. This allows us to keep control of our character and skip one event. Don't exit the house too early or the glitch will not have effect and it will still be daytime. Which means you can do some menuing at no cost.
+	$LF
+]p
+[p 
+	"We took R with us in the team since he has the fastest reaction to Aerith's death.
+	$LF
+]p
+[h4 
+	" Icicle Inn :
+	$LF
+]h4
+[p 
+	"When Elena tries to punch you, dodge to the right. Then press Confirm at the right time, so you interrupt the Soldier from running and get a little skip.
+	$LF
+]p
+[h4 
+	" Gaea’s Cliff :
+	$LF
+]h4
+[p 
+	"We only need 3 Icicles down to proceed. C gets the Dragon Armlet and a Tranquilizer to survive the next boss. S gets Wizard Bracelet to enhance Aqualung. S could survive Schizo too, but this would require an extra menuing and lose time overall compare to just revive him afterwards.
+	$LF
+]p
+[h4 
+	" Whirlwind Maze :
+	$LF
+]h4
+[p 
+	"Getting hit by the wind triggers a battle.
+	$LF
+]p
+[h4 
+	" Junon 2 :
+	$LF
+]h4
+[p 
+	"FMV Skip. After the cannon has fired, in the computers room, you actually have control over B despite his model being invisible. Which means you can exit the screen by the bottom and skip a whole bunch of FMV. 
+	$LF
+]p
+[p 
+	"Scarlet Slaping game. Despite looking way cooler, slaping Scarlet five times in a row is slightly slower than accepting your fate :(
+	$LF
+]p
+[p 
+	"With B on non-encounter places, we carefully manipulate the step counter so it takes an extra 14 steps to trigger the next battle. It's very important to do so in this TAS, or we would have need an extra battle and 15 seconds lost later.
+	$LF
+]p
+[h4 
+	" Mideel :
+	$LF
+]h4
+[p 
+	"A team of R and S get the fastest dialogs. Delaying some textboxes' closing for main RNG manipulation.
+	$LF
+]p
+[h4 
+	" Fort Condor :
+	$LF
+]h4
+[p 
+	"This is why we had to spend a lot of Gil in Bone Village. You can set up a Tristoner for 1000 Gil and immediately destroy it. Once you don't have enough Gil anymore, the mini-game stops and you get a battle. Every 1000 Gil extra you have at the start of the mini-game, gets you an extra Tristoner and lose 70ish frames. Losing the battle puts us back at the entrance and we can proceed.
+	$LF
+]p
+[h4 
+	" Train to North Corel :
+	$LF
+]h4
+[p 
+	"The third enemy is too slow in hiting S. Getting the Limit ready on the second fight is faster overall.
+	$LF
+]p
+[h4 
+	" North Corel 2 :
+	$LF
+]h4
+[p 
+	"Dodge Paralysis to skip an event. However we cannot exit by the right just yet. We have to go towards the Gold Saucer and back.
+	$LF
+]p
+[h4 
+	" Mideel 2 and C's Past :
+	$LF
+]h4
+[p 
+	"There is absolutely nothing going on here... Very boring part imo...
+	$LF
+]p
+[h4 
+	" Junon 3 :
+	$LF
+]h4
+[p 
+	"Having D in the party for Junon increases the loading screens' length by 10-15 frames. Which means that it is faster to take R and switch to D after than getting D all the way. 
+	$LF
+]p
+[p 
+	"Getting attacked from both side. During those fights, we can abuse the fact that a Limit gauge being filled increase significantly the speed of the ATB right away. Thanks to that and combining with Wait, S can act twice in a row and skip the Soldier's second turn.
+	$LF
+]p
+[h4 
+	" Rocket Town 2 :
+	$LF
+]h4
+[p 
+	"Switching R with D as D will be mandatory. C gets his Power Wrist back to help one fight. Senior Grunt cannot be one-hit killed by Aqualung, so we have to find a way for its reminding HP. First one is done with a Critical Braver from C. Second one gets 2 S-Mine.
+	$LF
+]p
+[p 
+	"Against Rude there was no good starting ATB, so we had to let Rude get one attack. It costs very little though.
+	$LF
+]p
+[p 
+	"The main RNG also decides the start of D's textbox after the explosion. Optimally it would be 100ish frames faster, but nothing we can do with what we have.
+	$LF
+]p
+[h4 
+	" City of Ancients :
+	$LF
+]h4
+[p 
+	"Slightly non optimal trajectories to boost the main RNG further. Barely visible to the naked eye though.
+	$LF
+]p
+[h4 
+	" Midgar Skip Glitch :
+	$LF
+]h4
+[p 
+	"Hold Down+Right+Run before seeing Hojo and you will trigger the sequence battle instead of the normal event. This saves a lot of time too. 
+	$LF
+	"Unfortunately, this glitches the music for the rest of the run...
+	$LF
+]p
+[h4 
+	" Hojo :
+	$LF
+]h4
+[p 
+	"On the final transformation, Hojo misses S on the attack that would have put him to sleep. So we don't have to wake him by attacking and saves a bit of time.
+	$LF
+]p
+[h4 
+	" North Crater :
+	$LF
+]h4
+[p 
+	"Take the Save Crystal chest at the same time a rock is falling, so you can keep moving and exit the textbox when the second rock is falling for dodge paralysis.
+	$LF
+]p
+[p 
+	"Save Crystal glitch. Take out the Save Crystal on the same frame you climb down and you get another dodge paralysis. This skips a lot of dialogs when spliting the party.
+	$LF
+]p
+[h4 
+	" Final Descent :
+	$LF
+]h4
+[p 
+	"You only have 1/256 odds of a 0 encounter. Our manipulation paid off big time here :)
+	$LF
+]p
+[h4 
+	" Safer Sephiroth :
+	$LF
+]h4
+[p 
+	"Unfortunately S can't survive his first attack, so somebody else has to get sacrificed. However, with Gigas Armlet and Defend, in addition to Jem Ring to avoid being paralyzed, he'll survive the second and boom... The End...
+	$LF
+]p
+[p 
+	"/// THANKS FOR WATCHING ///
+	$LF
+]p
+[p 
+	"Thanks to : antd and BrutalAl especially for a lot of their work (RNG, Critical Hits, Random Encounter, Early boss fights, dodge paralysis, Final Descent manipulation,...). This TAS couldn't have been done without them.
+	$LF
+]p
+[hr 
+]hr
+[p 
+	(__wikiLink|user:ThunderAxe31)
+	": Judging.
+]p
