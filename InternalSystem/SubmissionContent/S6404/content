@@ -1,0 +1,93 @@
+1
+[p 
+	"1001 Spikes is a platform game released in 2014, consisting of a series of levels with various traps and hazards. This TAS completes the whole game (both Ukampa and Antartica worlds) with the main protagonist Aban Hawkins.
+	$LF
+]p
+[p 
+	(youtube|v=FXWmS4Zq0nQ)
+	$LF
+]p
+[h3 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS 1.3.4
+		$LF
+	]li
+	[li 
+		" Genre: Platform
+		$LF
+	]li
+]ul
+[h3 
+	" Framerate settings
+	$LF
+]h3
+[p 
+	"The game runs at 60 fps, but if we set the framerate setting of libTAS to 60 fps, it will cause perdiodic lag frames. From what I understand, the game runs a busy loop at the end of each frame to wait for the correct frame length, but because libTAS advances time at exactly 1/60 second, the game often don't consider that enough time has passed (maybe because of large vs. strict comparison operator). Thus, libTAS failsafe mechanism operates to prevent the softlock, advancing the time slightly. Eventually, all those extra times add up to a full frame time, and libTAS adds an extra lag frame to compensate.
+	$LF
+]p
+[p 
+	"The function that queries time in the busy loop is clock_gettime(), which has a precision of a nanosecond. So, to make sure that the game always validate the frame length, we choose a frame length by rounding up the theoretical one to the next nanosecond, which leads to a frame length of 16666667 nanoseconds. Thus, the framerate setting in libTAS for this movie is 1000000000/16666667, or 59.9999988 fps. This fixes the issue, while minimizing the discrepancy of the movie length compared to the theoretical one. One last thing: libTAS 1.3.4 GUI does not allow such high numbers for the framerate, but it is only a limitation of the GUI, not the underlying code. Thus, the framerate will be displayed incorrectly but is correct inside the movie and is handled correctly by the game.
+	$LF
+]p
+[h3 
+	" Basic gameplay
+	$LF
+]h3
+[p 
+	"The move set of Aban is simple, he has two jump buttons of different height (one and two tiles height), without any gradation possible. He can also throw a knife, with a maximum of three on-screen. When close to an enemy, pressing forward+attack triggers a stab attack, with a high speed but a long recovery. Jumping or stabbing does not save time on flat ground over walking.
+	$LF
+]p
+[h3 
+	" Stab clipping
+	$LF
+]h3
+[p 
+	"When stabbing, Aban's hitbox is slightly moved forward, so it's back enter inside a wall. If he turns around at that point, the game will push him toward the closest free space, which can be downward, upward or to the side. When performing a high jump and a stab against a three-tiles wall, we have just enough height so that we can clip upward, resulting in doing a three-tile jump. The major limitation of this tech is that we need an enemy nearby to perform the stab. Also, at the exact frame when we clip upward, Aban is considered on the ground so we can jump immediately, or use coyote time to jump a few frames later.
+	$LF
+]p
+[h3 
+	" Fast menu
+	$LF
+]h3
+[p 
+	"After a level is completed, it is faster to exit to the map, then select the next stage.
+	$LF
+]p
+[h3 
+	" Randomness manipulation
+	$LF
+]h3
+[p 
+	"There are very few random elements in this game, but some of them do matter for the speedrun:
+	$LF
+]p
+[ul 
+	[li 
+		" The flame throwers in level 2-5 aim at a random angle. One of them had to be manipulated to be able to jump under the flames
+		$LF
+	]li
+	[li 
+		" The fireballs in level 5-1 have a random angle. The last ones needed to be manipulated to take the door as quickly as possible
+		$LF
+	]li
+	[li 
+		" After the Ukampa boss and the jewel sequence, the right path opens at a random time. We needed the block to break as soon as possible
+		$LF
+	]li
+]ul
+[p 
+	"The only two ways of manipulating the randomness is to change the seed (set using the initial system time), or to break blocks that spawn pieces in random directions.
+	$LF
+]p
+[h3 
+	" Thanks
+	$LF
+]h3
+[p 
+	"Thanks twyn and berumondo for their advices and suggestions!
+	$LF
+]p
