@@ -1,34 +1,34 @@
 3
-[p 
+[div class=p 
 	[a class=intlink href=/JudgeGuidelines 
 		"Judge Guidelines
 	]a
 	":
 	$LF
-]p
+]div
 [blockquote 
 	"the game should reach a stage where it complete itself, no matter how long it takes.
 	$LF
 ]blockquote
-[p 
+[div class=p 
 	"...
 	$LF
-]p
+]div
 [blockquote 
 	[b 
 		"no matter how long it takes
 	]b
 	$LF
 ]blockquote
-[p 
+[div class=p 
 	[img class=embed src=http://i.imgur.com/HzeDlIr.png 
 	]img
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=n_PylKovg5k)
 	$LF
-]p
+]div
 [h3 id=TheGameObjectives 
 	" The Game Objectives
 	$LF
@@ -66,11 +66,11 @@
 	" The Comments
 	$LF
 ]h3
-[p 
+[div class=p 
 	"This is probably the most amount of effort I've ever put into an April Fools submission.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"Masterjun
 	]b
@@ -118,12 +118,12 @@
 	]b
 	": ...alright.
 	$LF
-]p
+]div
 [h3 id=TheCode 
 	" The Code
 	$LF
 ]h3
-[p 
+[div class=p 
 	"I wrote 
 	[del 
 		"flutter A.I
@@ -134,12 +134,12 @@
 	]em
 	" take a long time anymore). The code accounts for deaths and will continue the procedure anyways, and it also checks for completion, where it will then start rolling the credits and end the game in the usual manner.
 	$LF
-]p
+]div
 [h3 id=TheSetup 
 	" The Setup
 	$LF
 ]h3
-[p 
+[div class=p 
 	[small 
 		"If you're Viewerxyz just skip ahead to 
 		[b 
@@ -160,12 +160,12 @@
 	]em
 	" method of reaching ACE. In this run however I limited myself to using only a single controller, and it turned out I was able to leave out the 4 extra buttons, too. This meant that this run could be replicated in BizHawk which doesn't support neither multitap nor the 4 extra buttons.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"You might've noticed that I have included a lot of information into the encode. Basically the first thing I do is set up the x and y positions of 5 specific shells (the low bytes, to be more precise). In fact, I actually need to set up an additional shell, but setting it up now would only result in it being replaced later on. Then I spawned two Yoshi's and did the invisible tongue glitch to set up the chuck eating glitch. After that I set up one byte of the extended sprites (coin sparkles), the position of the additional shell and then the second byte of the extended sprites (coin sparkles again). I continued with spawning the green shell in the lowest slot and setting up its x position. Doing all this while also delaying one gametimer and finally pausing the game to offset the second gametimer from the first. Finally I spawned the chuck and killed the visible Yoshi so that the chuck is on the tongue of the now visible Yoshi (which is back at the Yoshi block).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This triggers a jump to open bus which executes an opcode based on the 
 	[em 
 		"green shell position
@@ -184,12 +184,12 @@
 	]em
 	", which happens to be one controller register and stores it to the stack. This is how total control is gained.
 	$LF
-]p
+]div
 [h3 id=TheSetupPlanning 
 	" The Setup Planning
 	$LF
 ]h3
-[p 
+[div class=p 
 	[small 
 		"OK at this point even you should probably skip to 
 		[b 
@@ -212,16 +212,16 @@
 	]b
 	") that I used in the AGDQ run of SMAS+SMW (you might remember that Super Mario Maker on SNES), but it turned out that it doesn't work because of one ROM vector which is different for the SMAS+SMW cartridge. So I was back to the chuck eating glitch which requires a more difficult setup.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Eating a chuck with Yoshi can be done in different ways. The 
 	[a class=intlink href=/2926M 
 		"game end glitch
 	]a
 	" run uses a coin which is collected while simultaneously licked by Yoshi creating a replacable sprite on Yoshi's tongue which results in the chuck spawning on said tongue. However, this creates coin sparkles which overwrite important data to manipulate where the glitch is going. Another way of eating a chuck is by using a mushroom instead of a coin, but that takes too long to set up (eating a bunch of berries and collecting the midway point). I decided on using two Yoshi's to perform the glitch. This works because when you lick a sprite with Yoshi and then overwrite that Yoshi with another Yoshi, the fact that the now invisible Yoshi has a specific sprite slot on his tongue remains. This means despawning the visible Yoshi (for example by killing) reactivates the old Yoshi and the tongue.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The code jump to open bus when you eat a chuck and it will execute 
 	[a class=extlink href=http://pastebin.com/1jKvFdvP rel=nofollow 
 		"shenanigans
@@ -232,44 +232,44 @@
 	]tt
 	"). Executing 0xFC requires the value at the address at address $01+chuckslot to be 0xFC. I found out that if the chuck is in slot #8, I need the sprite with the lowest slot to have the xposition low byte to be 0x81, which will turn into 0x8F (because it adds an offset of 14 apparently) which then turns into $8F01 (0x01 because of $09) and that turns into $018F01 (because DB is 0x01) and luckily that holds 0xFC.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So far so good, the code now jumps to whatever address $1804 points to. $1804 are the ypositions of minor extended sprites which are being used for coin sparkles for example. The only problem with coin sparkles is the fact that they spawn in bundles of 4, the 3rd takes up $1805 and the fourth uses $1804. You can avoid spawning the fourth by collecting the coin close to the edge of the screen, meaning you can manipulate the low and the high byte seperately. Now where do we jump to? Of course we simply jump to the start of yposition data of normal sprites which is followed by xposition data meaning we have a bunch of values we can manipulate right!? No, we have two problems here. The first problem is the fact that it would be address $00D8 which is impossible to get with coin sparkles at the start of the level. So we instead jump to some other location that can be manipulated more easily to jump to $00D8. Which location you ask? Controller registers of course. By holding B, Y, select, down and L the values at $4218 read 20 E4 00 (the 00 because we don't have a second controller... or at least it isn't pressing anything) which translates to 
 	[tt 
 		"JSR $00E4
 	]tt
 	"... but wait a minute, that isn't $00D8 at all! Well yeah, you can also change it to $00D8 if you want but we still have problem number 2 to discuss.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The second problem is the fact that the most important part of the whole glitch, the part that starts even before the TAS, the payload itself, is pretty limited in size and shape. SMW uses 12 sprites slots (#0 to #B) but in YI2 the slots #A and #B are reserved for special sprites. We also need the chuck in slot #8, two Yoshi's (preferably in slots #9 and #7 then) and the 
 	[em 
 		"lowest slot xposition
 	]em
 	" sprite (in slot #6 then). So we only have 6 ypositions and 6 xpositions to work with. The important part is that the two blocks are not back to back so each block has to jump to the other (this is also why I could simply jump to $00E4, the xpositions, instead of $00D8, the ypositions, and it turned out that switching the blocks made it faster to manipulate the values) and one of the blocks also needs to jump out.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So the full code I wrote was:
 	$LF
-]p
+]div
 [pre 
 	"$00D8: B2 13 D0 09 F0 60
 	$LF
 	"$00E4: CB 48 CB CB D0 EE
 	$LF
 ]pre
-[p 
+[div class=p 
 	"or simply:
 	$LF
-]p
+]div
 [pre 
 	"$00D8: LDA ($13) : BNE $00E5 : BEQ $013E
 	$LF
 	"$00E4: WAI : PHA : WAI : WAI : BNE $00D8
 	$LF
 ]pre
-[p 
+[div class=p 
 	[tt 
 		"LDA ($13)
 	]tt
@@ -341,33 +341,33 @@
 	]tt
 	".)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Since the amount of bytes I can write is pretty limited and I'm not able to write 00's, I simply wrote code to write code somewhere else. That 
 	[em 
 		"somewhere else
 	]em
 	" is where I put my code which simulates the main game loop with some additional hooks like overwriting parsed input or resetting the bowser fight when the end of the current input is reached or simply when you die.
 	$LF
-]p
+]div
 [h3 id=TheLength 
 	" The Length
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Let's see here. We start counting the time after the arbitrary code execution is reached. This means that reaching 1-frame-inputs takes 0 seconds. We have 9 buttons to check and resetting takes about 37 frames + 1 frame execution = 38 frames each time. Thus, reaching 2-frame-inputs takes 512*38 frames or about 5:24 minutes. Reaching 3-frame-inputs takes the amount of time to reach 2 frames plus testing all the 2-frame-inputs meaning 512*38 + (512^2)*39. You can see a pattern here and the general formula for the amount of seconds it takes to reach n-frame-inputs is
 	$LF
-]p
+]div
 [pre 
 	[a class=extlink href=http://www.wolframalpha.com/input/?i=1%2F60+*+sum+(i%3D1+to+n-1)+of+(+(512%5Ei)+*+(37%2Bi)+)+seconds rel=nofollow 
 		"1/60 * sum (i=1 to n-1) of ( (512^i) * (37+i) )
 	]a
 	$LF
 ]pre
-[p 
+[div class=p 
 	"I've told you all this, but you will notice that you can eventually approximate it with just 512^n because exponentials. But let's be accurate for the first few frames.
 	$LF
-]p
+]div
 [table 
 	[tbody 
 		[tr 
@@ -516,7 +516,7 @@
 	" The Suggested Screenshot
 	$LF
 ]h3
-[p 
+[div class=p 
 	[img class=embed src=http://i.imgur.com/M2oYLCw.png 
 	]img
 	[br 
@@ -524,45 +524,45 @@
 	$LF
 	"It's right about when the earth dies.
 	$LF
-]p
+]div
 [h3 id=TheJudge 
 	" The Judge
 	$LF
 ]h3
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Samsara 
 		"Samsara
 	]a
 	$LF
-]p
+]div
 [h3 id=TheJudge'sComment 
 	" The Judge's Comment
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Also ends earl
 	$LF
-]p
+]div
 [h3 id=TheJudge'sVerdict 
 	" The Judge's Verdict
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The Judge (hereafter referred to as Sexy Queen Samsara (hereafter referred to as Samsara)) has verified that this run does achieve its goal of ending input early. Samsara (hereafter referred to as The Judge (hereafter referred to as Pablo (hereafter referred to as Samsara))) is still in the process of verifying that the run does in fact complete. Once Samsara (hereafter referred to as Samsara) verifies that the run does indeed come to a state of completion, the run (hereafter referred to as Samsara) will be rightfully placed in the "decision: accepted" (hereafter referred to as "samsara: samsara" category of the site. Until then, Samsara cannot place Samsara within the "samsara:samsara" catesara, sosara Samsara shallsara rejectsara thisara Samsarasara.
 	$LF
-]p
+]div
 [h3 id=TheJudge'sObligatoryJokeComment 
 	" The Judge's Obligatory Joke Comment
 	$LF
 ]h3
-[p 
+[div class=p 
 	"ill end ur moms input early
 	$LF
-]p
+]div
 [h3 id=TheJudge'sRetraction 
 	" The Judge's Retraction
 	$LF
 ]h3
-[p 
+[div class=p 
 	"nvm that sounds weird lmao
-]p
+]div

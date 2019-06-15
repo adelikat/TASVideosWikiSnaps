@@ -1,16 +1,16 @@
 9
-[p 
+[div class=p 
 	(youtube|v=0s3Q-JF1YfE)
 	$LF
-]p
+]div
 [h3 id=Introduction 
 	" Introduction
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Pokemon Crystal is known to have a trick to clone Pokemon. If the system loses power as the game saves, after it updates stored Pokemon but before it updates party Pokemon, some data could now be in both locations. Crystal accepts this despite a 16-bit checksum in the save because it does not apply to auxiliary data like stored Pokemon. The checksum is to keep corruption in the main data unlikely. “Unlikely.”
 	$LF
-]p
+]div
 [h4 id=Categories 
 	" Categories
 	$LF
@@ -29,13 +29,13 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	[b 
 		"Used emulator:
 	]b
 	" BizHawk 2.3
 	$LF
-]p
+]div
 [h3 id=Objectives 
 	" Objectives
 	$LF
@@ -44,37 +44,37 @@
 	" Save corruption
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Crystal stores a 16-bit checksum of the main save data in the save to try to detect corruption and load the backup save if necessary. While it is unlikely that this value can accidently match, it is not impossible. When save data is cleared from the title screen, all of save memory is set to $00. Undetected save corruption can occur here if the values written to the main save data before power off still sum to $0000 and match the zeroed checksum. As the checksum is 16 bits, the theme becomes “push the checksum over $ffff to overflow to $0000.” This can be done and controlled through box names, which let the player enter up to 8 characters to label boxes of stored Pokemon. This movie names additional boxes past those required for the arbitrary code execution to increase the checksum and cause the collision. Thank you to luckytyphlosion who asked again if checksum collision could be set up.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This movie wants to corrupt the save to have a Cyndaquil with no string terminator in its nickname. All this requires is a reset after Cyndaquil's data saves and before its nickname's terminator saves, but BizHawk movies are only designed to reset on frame boundaries. The subframe precision required can still be found with the equal frame lengths setting. A Game Boy frame completes every 70224 cycles while the LCD is on but the time between is arbitrary while the LCD is off. The default setting syncs frame boundaries to frame completions, yet EFLs have a frame boundary every 70224 cycles regardless of when frames complete. Over the course of this movie, the Game Boy frame timing is shifted relative to the EFL frame boundary with the variable lengths of LCD off periods. This allows a reset between when the L and the terminator in Cyndaquil are written to the save data.
 	$LF
-]p
+]div
 [h4 id=1500or<DAY> 
 	" 15 00 or <DAY>
 	$LF
 ]h4
-[p 
+[div class=p 
 	"see also: 
 	[a class=extlink href=https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310 rel=nofollow 
 		"https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310
 	]a
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"To summarize the link, if the text engine reads the control character $15 and it is followed by a $00, the program counter will end up at $cd52, an address near manipulable memory. This movie has the text engine try to read Cyndaquil's unterminated nickname to display it on the STATS screen. The nickname is copied to a string buffer which the text engine reads past because of the lack of a terminator. An item quantity buffer is not far from this string buffer, and the Antidote quantity scrolled to in the Cherrygrove Mart menu provides a $15 there for the text engine to read. A max item quantity buffer is the next byte and is set to $63 at the Antidotes, but is then set to $00 when CANCEL is used to leave the mart menu.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Once the text engine reads the $15 $00, code execution begins at $cd52 and the address that follows the $15 $00 is on the stack. That address is the location of the last loaded Pokemon data. One step up after the mart window places 
 	[tt 
 		"ret nz
 	]tt
 	" at $cd70, memory of pointers for the background map, which is reached without issue and sends execution to the Pokemon data. The manipulated trainer ID and DV bytes in Cyndaquil's data there are interpreted as the instructions below. This is enough to jump into the memory for box names where more values can be controlled. The box names require a couple lower bytes in addresses to be character values, and the number of entry points from here is already limited.
 	$LF
-]p
+]div
 [pre 
 	"; af = $0100
 	$LF
@@ -97,12 +97,12 @@
 	" Arbitrary code execution
 	$LF
 ]h4
-[p 
+[div class=p 
 	"see also: 
 	(__wikiLink|/4233S|4233S)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This movie uses a modified version of MrWint's box names that execute code input from the joypad. Aside from address changes between the games and setups, there are two small changes: 
 	[tt 
 		"or [hl]
@@ -117,7 +117,7 @@
 	]tt
 	" was faster to input before I learned the mechanics below, but it's the same, yet the higher value still contributes to the checksum. The jump before the first box is fast to input and does not cause any issues with a clever box name there. That box is covered after the two primary boxes. Note it is faster to scroll the list to boxes before they are named, and hold to scroll as opposed to press -> release a bunch is break even for Box 4 and faster for Box 5 and up.
 	$LF
-]p
+]div
 [dl 
 	[dt 
 		"Box names
@@ -127,10 +127,10 @@
 		$LF
 	]dd
 ]dl
-[p 
+[div class=p 
 	"Also thank you to MrWint's submission for how to format this section.
 	$LF
-]p
+]div
 [table 
 	[tbody 
 		[tr 
@@ -337,7 +337,7 @@
 		]tr
 	]tbody
 ]table
-[p 
+[div class=p 
 	"Box 4 has two more goals in addition to high values for the checksum. The 6th character is where Box 6 loops back to, because it was fast to input. However, the string terminator opcode is 
 	[tt 
 		"ld d, b
@@ -360,7 +360,7 @@
 	]tt
 	", an instruction that resets the game. Box 4 is named in such a way where both jump locations interpret different instructions to satisfy those goals.
 	$LF
-]p
+]div
 [table 
 	[tbody 
 		[tr 
@@ -492,10 +492,10 @@
 		]tr
 	]tbody
 ]table
-[p 
+[div class=p 
 	"Below are the joypad inputs and commands executed to reach the usual end. Refer to MrWint's submission for the nuances of this process. It accomplishes many of the same things as that submission so the comments are mimicked for comparison. One difference here is the warp data pointer is set to the player coordinates and the map values are written in that area. Warp data entries start with coordinates that need to match to warp, and this way there is already a match. An idea from luckytyphlosion was to end input early through Crystal's auto input system, which uses a pointer to run-length encoded inputs. For this movie, there happens to be a (properly terminated!) series of bytes in memory that plays out the rest almost perfectly.
 	$LF
-]p
+]div
 [pre 
 	"Joypad     Command
 	$LF
@@ -666,28 +666,28 @@
 ]ul
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/ThunderAxe31 
 		"ThunderAxe31
 	]a
 	": This is going to require some time. Judging.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/ThunderAxe31 
 		"ThunderAxe31
 	]a
 	": Adding the label "save glitch".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/ThunderAxe31 
 		"ThunderAxe31
 	]a
 	": Not only this TAS introduces a new glitch that breaks the game with an unprecedented speed, but it's also highly optimized. A possible faster setup has been theorized, but after some discussion and research, it seemed to me that it would not be verifiable on real console due to the fact that it would rely on non-deterministic data. In any case, such hypothetical improvement would require to remake the run from scratch, and it wouldn't save much time compared to this submission, nor would it prove the setup used for this submission to be poorly executed. Clearing the data at beginning was the best choice.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"For what concerns the branching, there are two separate aspects to take in account: similarity between games and similarity between movies. Since Pokémon Crystal is a Gen II Pokémon game, it can obsolete and be obsoleted by Pokémon Gold and Silver, even though the glitch abused in this movie is only available in Crystal. Since the 
 	[a class=intlink href=/2565M 
 		"current fastest-completion movie
@@ -698,18 +698,18 @@
 	]a
 	" with the "save glitch" label, and even though it's much longer and uses a different glitch, its movie goal is the same as the one for this submission, so the obsoletion chain will be changed in order for this submission to obsolete it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The audience reception was vastly positive, so this submission is accepted for Moons as an improvement of the 
 	[a class=intlink href=/2504M 
 		"published "save glitch" movie
 	]a
 	" .
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Spikestuff 
 		"Spikestuff
 	]a
 	": Publishing.
-]p
+]div

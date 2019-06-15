@@ -1,16 +1,16 @@
 6
-[p 
+[div class=p 
 	"Recently, 
 	[a class=intlink href=/Forum/P/351550#351550 
 		"a glitch was found
 	]a
 	" that can replace an egg with a null sprite so that you can basically take any sprite with you. I use this glitch to confuse the game with its indexing and jump to controller data to manipulate some data and jump to the credits.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=nFLbk8QlQw8)
 	$LF
-]p
+]div
 [pre 
 	$LF
 ]pre
@@ -44,34 +44,34 @@
 	" Comments
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The glitch happens when you grab the egg from the head of a Mouser and let him despawn before he "realized" that you took it from him (without him touching the floor). Then the egg also despawns but you still "have" this egg (the RAM value of the egg counter is still showing that you have this egg) and the sprite slot of that egg is also saved, but opened so that every sprite can take its place. So far so good but the problem that people had was that when they went into the goal ring, the game crashes for 99% of the sprites that were brought. So I took a look at what was going on with the game and found out that it checks every egg you have and indexes it so that every different sprite ID has it's own function (a normal egg just returns from this function). This is probably for the other sprites you can have, for example a key or a big egg and so on. I quickly found out that a Shy Guy will bring the code to $02:608C... and that just happens to be the x position of Yoshi!
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So $608C is the low byte, $608D is the high byte, $608E is the y subposition and $608F is some value from 0x04 to 0xFC (probably for calculation stuff)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So I want to jump to controller data, that would be JMP $4218, in hex: 4C 18 42, but I had a better idea that made the run a bit faster: instead of JMP $4218 I would JML $024218, in hex: 5C 18 42 02, because getting my x position to 0x5C instead of 0x4C was faster.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So I will cover changing x position low byte later, but how do I change my x position high byte to 0x18? I don't! The high byte is 0x0E at the end of 2-2 and jumping to $420E wasn't a problem because YI is good at recovering from BRKs (0x00), so I just let the game jump over some of the registers. Changing y subposition to 0x42 wasn't a big problem either, you just have to press B and release B at the correct times, and the last value wasn't a problem, it just was 0x02 (it could have been every value from 0x00 - 0x04).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So now to the x position change. The goal ring is not movable so how do I trigger the goal ring while being at the correct position? I just use another null sprite egg to change the properties of the goal to make it possible to lick it and spit it out. Then it recovers itself so I can trigger it again.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"When the code is at controller data, I couldn't just use WAI to get the next input, because IRQ is activated every H-Blank, so it will stop there. Changing the mode of IRQ (so that it only fires at V-Blank) also isn't possible since it changes itself back to the other mode. Deactivating IRQ also isn't an option because NMI is very short and returns while Auto-Joypad Read is enabled (so the controller data is garbage).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The way I did it was just activating DMA controllers to stop the game for a few frames (that is why strange things are going on with the video at the end). That worked wonderful and all I had to do was set Data Bank and Direct Page to zero, setting gamemode ($0118) to 0x1B and jumping to the start of the main game routine (which loads the gamemode and decides what to do/where to jump next) to trigger the credits. The good thing is that normally the main game routine is called at the highest stack value, meaning that the code will never return back to the controller data/egg routine/garbage code.
 	$LF
-]p
+]div
 [h3 id=Stagebystagecomments 
 	" Stage by stage comments
 	$LF
@@ -80,22 +80,22 @@
 	" Intro
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Trying to get 14 coins as fast as possible to do the 
 	[a class=intlink href=/3881S 
 		"warp glitch
 	]a
 	" to go to 2-2.
 	$LF
-]p
+]div
 [h4 id=2-2 
 	" 2-2
 	$LF
 ]h4
-[p 
+[div class=p 
 	"I took the fastest route I could think of while getting 4 eggs for the third/last room. There I had to manipulate sprite slots to do the glitch and win the game.
 	$LF
-]p
+]div
 [h3 id=Othercomments 
 	" Other comments
 	$LF
@@ -136,19 +136,19 @@
 	" Suggested Screenshots
 	$LF
 ]h4
-[p 
+[div class=p 
 	[img class=embed src=http://puu.sh/3Lme6.png 
 	]img
 	" 
 	[img class=embed src=http://puu.sh/3LmeO.png 
 	]img
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Nach 
 		"Nach
 	]a
 	": Once of the most awesome runs of the year, accepting.
-]p
+]div

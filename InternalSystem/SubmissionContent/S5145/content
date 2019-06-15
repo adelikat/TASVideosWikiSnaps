@@ -1,8 +1,8 @@
 5
-[p 
+[div class=p 
 	(youtube|v=ykJyvOiXjAQ)
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Emulator: lsnes rr2-beta23
@@ -37,7 +37,7 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"We have shown a proof of concept for arbitrary code execution in the Japanese version of the game a year ago. However, it requires to gather one of several items that are only available in the late game (after about 2 hours of run), so we let it go. After the discovery of the game over glitch that lead to the 
 	[a class=intlink href=/2922M 
 		"latest TAS
@@ -48,15 +48,15 @@
 	]a
 	".
 	$LF
-]p
+]div
 [h3 id=GlitchleadingtoACE 
 	" Glitch leading to ACE
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The glitch used to get control over the game is based on the Japanese exclusive equip glitch. This glitch allows you to equip any item in any equipment slot. To equip an item on a weapon slot, for example, you must:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" get rid of every weapon that a character can equip, so that the equip menu on that slot would show an empty list
@@ -71,11 +71,11 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"In unassisted speedruns, this glitch is used to equip items that raise your defense and/or magic defense drastically. In this TAS, we are using this glitch on the weapon slot.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"During a fight, when you attack with a weapon, the game loads the weapon graphics properties from address 
 	[tt 
 		"$ECE400+8*id
@@ -90,7 +90,7 @@
 	]tt
 	", which stores if the weapon has a short or long range animation, takes values between 0 and 4. According to this value, the game calls a different function, as shown below: 
 	$LF
-]p
+]div
 [pre 
 	"$C1/C217 AD 40 62    LDA $6240       load $6240
 	$LF
@@ -116,7 +116,7 @@
 	"$C1/C229 21 C3                       call $C1/C321 when $6240 = 4
 	$LF
 ]pre
-[p 
+[div class=p 
 	"However, for items that are not weapons, address 
 	[tt 
 		"$6240
@@ -131,28 +131,28 @@
 	]tt
 	" which starts with instruction:
 	$LF
-]p
+]div
 [pre 
 	"$C1/8D7A 1B          TCS      Push accumulator to the stack pointer
 	$LF
 ]pre
-[p 
+[div class=p 
 	"This instructions corrupts the stack, and will lead us to full control of the game (detailed in another section). The goal of the present TAS is then to collect one of the four items to trigger the ending sequence.
 	$LF
-]p
+]div
 [h3 id=Mid-framereset 
 	" Mid-frame reset
 	$LF
 ]h3
-[p 
+[div class=p 
 	"As said in the introduction, all of the four items are only found in the later part of the game. This is why we will be using mid-frame reset to corrupt the game saves. Here are the different options that we used in this TAS:
 	$LF
-]p
+]div
 [h4 id=WorldMapteleport 
 	" World Map teleport
 	$LF
 ]h4
-[p 
+[div class=p 
 	"World Map coordinates are stored in addresses 
 	[tt 
 		"$1F60
@@ -163,12 +163,12 @@
 	]tt
 	" (Y). We can save once at coordinates (X1,Y1), then move to coordinates (X2,Y2), save on the same slot and reset just after the game overwrites the X coordinate. We will be left with a savefile containing (X2,Y1) stored coordinates. This helps to move rather freely around the World Map. Only a few spots are not accessible with this technique (Thamasa and the Triangle Island).
 	$LF
-]p
+]div
 [h4 id=WorldMapteleportanywhere 
 	" World Map teleport anywhere
 	$LF
 ]h4
-[p 
+[div class=p 
 	"This technique can only be used once. The principle is that the game starts inside a town (Narshe) for the first 15 minutes, and the World Map coordinates are never written until you leave the town. They contain uninitialized values until then. When you exit Narshe normally, the game copies the parent coordinates (
 	[tt 
 		"$1F6B-$1F6C
@@ -179,7 +179,7 @@
 	]tt
 	"). We can manage to load the uninitialized values as coordinates:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" We save before leaving Narshe in slot 1
@@ -206,10 +206,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"In lsnes emulator, it is possible to manipulate the initial RAM values to some extend by setting the value of the Real Time Clock that acts as a seed. The first value of the RAM is set to the lower byte of the RTC, and each consecutive value is generated using a recursive formula:
 	$LF
-]p
+]div
 [pre 
 	"value = (value >> 1) ^ ( ( (value & 1) - 1) & 0xedb88320)
 	$LF
@@ -218,14 +218,14 @@
 	" Map warping
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Map id is stored as a 2-bytes value in address 
 	[tt 
 		"$1F64
 	]tt
 	". Using the same principle as with coordinates, it is possible to warp to a new map by using one byte from one map and another byte from a second map. Here is the list of (hopefully) all save points in the World of Balance, and the new interesting maps that we have access using this trick:
 	$LF
-]p
+]div
 [pre 
 	"Map                            | Map ID
 	$LF
@@ -319,26 +319,26 @@
 	" Checksum
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The game has a mechanism to detected corrupted savefiles, so we have to bypass it. When saving, it computes the sum of all values of the savefile in a 2-bytes value (
 	[tt 
 		"$1FFE-$1FFF
 	]tt
 	") and stores it at the end of the savefile. When loading, it computes the checksum and compares to the stored value. If they differ, the savefile is considered as corrupted and cannot be loaded. To overcome this check, we have to modify values in our save so that the checksum match after the sub-frame reset. The easiest way to change a lot of values is to modify the colors of the different window themes.
 	$LF
-]p
+]div
 [h3 id=Routeplanning 
 	" Route planning
 	$LF
 ]h3
-[p 
+[div class=p 
 	"We investigated the quickest way to collect one of the four items (X-Ether, Gold Hairpin, Czarina Ring, Charm Bangle). The fastest route we found was to enter the Ancient Castle using map warping, where there is both an X-Ether and a Gold Hairpin. To enter the Ancient Castle, we need to save in a map with id 
 	[tt 
 		"01xx
 	]tt
 	" (we chose the Cave to the Sealed Gate) and in the Phantom Train. To enter the Phantom Train, we need both Sabin and Cyan in our team, otherwise the game will softlock. There are several ways to quickly get Cyan and Sabin in our team:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Manage to enter Narshe (using save corruption), and reach the snowfields where you can trigger the Kefka fight. At the end, you have a character selection screen and you can place Sabin and Cyan in your team. Estimated time: 6 minutes
@@ -357,14 +357,14 @@
 	" Checksum bug
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The initial route we designed involved an early Narshe escape. When you load the game for the first time, it sets all values in the SRAM to 0. We could take this in our advantage because the map id of the World Map is 
 	[tt 
 		"0000
 	]tt
 	". By reaching the first save point in Narshe and save/reset just before the map id is overwritten, we could produce a savefile that spawns you on the World Map. Then, we could enter Narshe again and trigger the Kefka at Narshe sequence. However, this did not work because of a flaw in the game programming.
 	$LF
-]p
+]div
 [pre 
 	"C3/166D: 20D119    JSR $19D1      Calculate SRAM checksum and stores it in $E7
 	$LF
@@ -393,22 +393,22 @@
 	"C3/1675: F00B      BEQ $1682      Branch if result is 0: skip savefile
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The consequence of this code is that a savefile is considered as corrupted if the checksum does not match, or if the checksum is 0. In our case, because the checksum is stored at the end of the savefile, it will be 0. So even if the checksum is correct, we won't be able to load the savefile.
 	$LF
-]p
+]div
 [h4 id=Actualroute 
 	" Actual route
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The first option was still thought to be possible at first, by transferring the event flags from one save at the beginning of Narshe to another save after Narshe. However, we could not do it in practice because we could not control the checksum to match between both savefiles. This was due to the fast that we have 11 Moogles joining the party, which modifies a lot of values in memory and greatly altered the checksum. With only the game options at our disposal to modify the checksum we are limited by the range we can access. In the end, we had to drop this quickest choice.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The current route uses the third way of recruiting Sabin and Cyan. Although it may be slower, the Imperial Camp is very close to the Phantom Train, meaning less travelling. Also, Zozo's boss would be difficult to beat quickly because of an underleveled party.
 	$LF
-]p
+]div
 [h3 id=Arbitrarycodeexecution 
 	" Arbitrary code execution
 	$LF
@@ -417,7 +417,7 @@
 	" The setup
 	$LF
 ]h4
-[p 
+[div class=p 
 	"As started in the previous section, attacking with one of the four items corrupts the stack by setting the stack pointer to 
 	[tt 
 		"0x000E
@@ -476,8 +476,8 @@
 	]tt
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"We are looking at jumping into RAM or SRAM, and this means getting out of the 
 	[tt 
 		"C1
@@ -496,12 +496,12 @@
 	]tt
 	" is also possible. By examining if there is such instruction in our accessible addresses, we found a good candidate:
 	$LF
-]p
+]div
 [pre 
 	"$C1/CEC7 5C 6F 60 AE  JML $AE606F
 	$LF
 ]pre
-[p 
+[div class=p 
 	"This jumps to address 
 	[tt 
 		"$006F
@@ -520,8 +520,8 @@
 	]tt
 	", meaning we have to wait 14 minutes in the fight.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So we looked at another solution, by trying to increase our range of accessible addresses. Now we looked at any jump and return instructions. Because 
 	[tt 
 		"$10
@@ -548,7 +548,7 @@
 	]tt
 	" bank. We found a really interesting piece of code:
 	$LF
-]p
+]div
 [pre 
 	"$C1/CE59 A5 0E       LDA $0E    Loads battle counter $0E-$0F
 	$LF
@@ -563,7 +563,7 @@
 	"$C1/CE60 85 10       STA $10    Stores in $10-$11
 	$LF
 ]pre
-[p 
+[div class=p 
 	"By choosing carefully our battle counter value, we could control 
 	[tt 
 		"$11
@@ -642,8 +642,8 @@
 	]tt
 	" to jump again at the beginning of the menu color configuration, because we won't have enough place to write the full code.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Before writing the full code, we must be sure to be able to execute the above 
 	[tt 
 		"JML
@@ -658,17 +658,17 @@
 	]tt
 	", we get:
 	$LF
-]p
+]div
 [pre 
 	"Battle counter:  $0F = ...abcde | $0E = fghijklm
 	$LF
 	"Return address:  $12 = ghijklm0 | $11 = abcdefgh
 	$LF
 ]pre
-[p 
+[div class=p 
 	"So the constraints on the return address are:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" the high byte must be even
@@ -679,17 +679,17 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"We found one good match which is:
 	$LF
-]p
+]div
 [pre 
 	"Battle counter: 01000110 11010001 (4A 51)
 	$LF
 	"Return address: 10100010 01010010 (A2 52)
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The game will first jump to 
 	[tt 
 		"C1/CE4A
@@ -712,7 +712,7 @@
 	]tt
 	":
 	$LF
-]p
+]div
 [pre 
 	"$C1/A253 0E 00 A7      ASL $A700
 	$LF
@@ -720,22 +720,22 @@
 	$LF
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Thanks to this new setup, we lowered the time to wait to 
 	[tt 
 		"0x4A51 = 19025
 	]tt
 	" frames, or 5 minutes and 17 seconds. However, because TAS convention times to the last input, we will use this to our advantage.
 	$LF
-]p
+]div
 [h4 id=Thecode 
 	" The code
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We need to write a code that will trigger the ending without any input to do. In details, we need to:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Place the ending sequence as the current event
@@ -762,14 +762,14 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Also, there are some constraints on writing using window colors: every other value must be < 0x80.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Here is the following code used in this TAS:
 	$LF
-]p
+]div
 [pre 
 	"C2 20          REP #$20              16-bit accumulator
 	$LF
@@ -810,10 +810,10 @@
 	" The fight
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We need to find a fight where eventually the holder of the glitched weapon will attack at exactly 19025 frames after the beginning. There are several way to provoke an attack without any input, the one we chose was to get the character muddled, so that he automatically executes a random command. We found the Goblin enemy in the Cave to the Ancient Castle that has a very interesting battle script:
 	$LF
-]p
+]div
 [pre 
 	" If 1 or fewer monster(s) (total) is/are remaining:
 	$LF
@@ -822,10 +822,10 @@
 	"   Rand. spell: Blaze or Nothing or Nothing
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Locke is naturally level 6 as we are doing Narshe with Terra level 4 and he gets a +2 bonus when joining, so he will be the holder of the glitched weapon as he is sensible to L.3 Muddle. The battle strat is then to kill all enemies except one Goblin, and manipulate his RNG so that we will cast L.3 Muddle and Locke will attack at the exact moment to trigger ACE. This took about 20 hours of work actually, more than the entire rest of the TAS, but the result is good.
 	$LF
-]p
+]div
 [h3 id=Runcomments 
 	" Run comments
 	$LF
@@ -834,7 +834,7 @@
 	" Movie creation
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We starts the TAS by checking "Random initial state" and setting "Initial RTC value" to 
 	[tt 
 		"29857
@@ -849,16 +849,16 @@
 	]tt
 	" for ACE.
 	$LF
-]p
+]div
 [h4 id=Narshe 
 	" Narshe
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Nothing special about Narshe itself. We must get Terra to level 4 so Locke joins at level 6. Level 4 Terra is mandatory anyway to get a quick kill on Whelk.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Before leaving Narshe, we save at the beginners class so that the uninitialized values for world map coordinates does not get rewritten. Then, we go up and open the menu so the map Y coordinate takes the value of 
 	[tt 
 		"0x34
@@ -873,67 +873,67 @@
 	]tt
 	".
 	$LF
-]p
+]div
 [h4 id=OutsideNarshe 
 	" Outside Narshe
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We load the save file in the class room and save/reset on the save outside Narshe to overwrite the world map coordinates. By loading the file, we will be placed at coords 
 	[tt 
 		"9B-CD
 	]tt
 	" in the World Map in the Vector continent.
 	$LF
-]p
+]div
 [h4 id=TotheSealedGate 
 	" To the Sealed Gate
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We use another world map teleport using Y coord from Narshe save and X coord from Vector to arrive near Gau's father house. We buy here a Sprint Shoes and sell Locke's weapon. We use another teleport to arrive in the bridge to the cave. We enter the cave, grab the Assassin weapon for Locke and make our way to the save point. We save/reset once to transfer the weapon to the savefile around Gau's father house, and another save/reset to write the map id on the savefile that has the map coords 
 	[tt 
 		"18-34
 	]tt
 	".
 	$LF
-]p
+]div
 [h4 id=ImperialCamp 
 	" Imperial Camp
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We continue our way until the Imperial Camp, and do the whole sequence (almost) normally. We have help from Locke's weapon which has a 1/4 chance of killing the target. This does not work on MTek Armor, too bad.
 	$LF
-]p
+]div
 [h4 id=PhantomTrain 
 	" Phantom Train
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We use a save/reset to teleport over the tile of the Forest entrance. This allows us to enter from the exit, and cut a part of the Forest. We enter the train and save/reset to overwrite only the first byte of the map id. By loading this savefile, we appear in the cave to the Ancient Castle at coordinates 
 	[tt 
 		"18-34
 	]tt
 	". If we didn't manipulate the coordinates in Narshe, we would appear in the walls out of bounds, and we would be stuck.
 	$LF
-]p
+]div
 [h4 id=AncientCastle 
 	" Ancient Castle
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We enter the Castle, and use the fights to move Locke's Assassin at the bottom of the inventory. We can then equip the Assassin on Cyan using the equip glitch. We grab the X-Ether and leave the Castle. We equip the X-Ether on Locke and a Shield. The shield is mandatory, otherwise Locke would attack with bare hands during the fight and the glitch won't trigger. We write the code to execute by changing the colors in the menu.
 	$LF
-]p
+]div
 [h4 id=Lastfight 
 	" Last fight
 	$LF
 ]h4
-[p 
+[div class=p 
 	"We kill the two enemies with Cyan, using the wait trick (opening a menu to freeze the enemies ATB during an animation). Then we produce lag in the RNG counter by selecting and un-selecting a weapon, to get the right setup. When we confirm Locke's steal command, the movie ends. After 5 minutes of fight, Locke attacks and the ending triggers.
 	$LF
-]p
+]div
 [h3 id=SpecialThanks 
 	" Special Thanks
 	$LF
@@ -960,32 +960,32 @@
 	" Suggested screenshots
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Frames 73132
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6ace_73132_low.png 
 	]img
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/fsvgm777 
 		"fsvgm777
 	]a
 	": Replaced with a LSMV that removes an empty SRM file. The total time remains unchanged.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Samsara 
 		"Samsara
 	]a
 	": (J)udging.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Samsara 
 		"Samsara
 	]a
@@ -995,12 +995,12 @@
 	]a
 	" Therefore, we cannot accept it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I see three big arguments in the submission thread, so let me break them down real quick.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"1. "This is a different kind of ACE, so it should be a separate category"
 	]b
@@ -1033,8 +1033,8 @@
 	]a
 	". Since this was treated as an improvement to the published run (thus, the fastest run) and not as an entertainment-based category, we have to treat it as such as well.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"2. "This run is more entertaining, so it should be a separate category"
 	]b
@@ -1043,8 +1043,8 @@
 	]br
 	"That is also not how we do things. This is not a playaround run, we cannot treat it as such. The authors intended for this to be an improvement to the published run as the fastest time for this game. Unfortunately for them, a separate team completed a run with a faster time that just so happens to not be nearly as entertaining. Sure, entertainment is a huge focus for us as TASers, but for years now it has not been the primary focus. We do publish new categories if people find them entertaining enough, but not two runs in the same category. And yes, all of these arguments do end up going in circles and coming around to the same point, that the detractors are almost literally saying "publish this run in the same category as a different category".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"3. "The faster run is not being submitted, so this should be published anyway"
 	]b
@@ -1053,15 +1053,15 @@
 	]br
 	"Pop quiz: Is this how we do things? No. The existence of the faster run is the reason why we can't accept it. It doesn't matter where it exists, how it exists, or when it exists. What matters is that we have it as public knowledge. There's an input file for us to easily verify it. There's an encode for people to watch it. It's there. It's faster. We don't publish RTA runs here, but if a TAS is slower than an RTA run then we reject it exactly because of that. Part of the judgement process is verifying that the run in question is the fastest known record for the game. We're human, we do miss clear and known improvements sometimes, especially ones hosted nowhere except on a OneDrive link that's only shared on Twitter to a small group of people, and yes there are times where we accidentally publish a run before we find a known improvement. But this is not the case.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Trust me, I think this is a great run and I would have loved to see it accepted and published, but this particular run in its current state, as I and others have mentioned several times before, cannot be published, even as a different category. I extended some leniency, hoping that there was a way the run could be salvaged and improved or at least explained in a way that makes it drastically different enough to publish, but over the responses I see in the thread it doesn't look like anything I suggested is going to be met. There was a slight ray of hope in the Nico TAS starting from dirty SRAM, but looking at the file more closely the SRAM is blank, much in the same way that this submission was at first, so it turned from a ray of hope into the final nail in the coffin.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Rejecting for not beating the 
 	[a class=intlink href=/Userfiles/Info/31600816429815863 
 		"fastest known time
 	]a
 	".
-]p
+]div

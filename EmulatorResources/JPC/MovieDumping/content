@@ -1,8 +1,8 @@
 9
-[p 
+[div class=p 
 	"This is a work-in-progress guide for creating and converting JMD dumps (made with JPC-RR) into standard lossless AVI, and using those dumps with the TASVideos Encoding Package. Because there are multiple ways to go about doing this, this guide will cover the steps which are easiest to follow for beginners in some of the most typical scenarios.
 	$LF
-]p
+]div
 [h2 id=Settinguptheemulator 
 	" Setting up the emulator
 	$LF
@@ -28,10 +28,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Generally, "Fda image" will be FREEDOS and "Hdd image" will be the game's newly created image.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Load the movie file using Snapshot > Load > Movie.
@@ -58,38 +58,38 @@
 	" Requirements:
 	$LF
 ]h4
-[p 
+[div class=p 
 	"JPC-RR Streamtools: http://www.elisanet.fi/ilari_l/streamtools-r11.8.7z
 	[br 
 	]br
 	$LF
 	"TimecodeFPS: http://www.mediafire.com/?a51pifo438i7hdb
 	$LF
-]p
+]div
 [h3 id=Pre-conversion: 
 	" Pre-conversion:
 	$LF
 ]h3
-[p 
+[div class=p 
 	"JPC-RR dumps do not always have the same frame rate and will almost always change resolution at some point during the dump. Before you start, it's recommended you load the game and JRSR movie up in JPC-RR and note down the revelant information. The frame rate can be seen in a companion status window to JPC-RR and defaults to 60fps. The default rate it shows is not indicative of the game's frame rate until the emulator has been started, so it's important to hit "System > Start" and note down the frame rate once emulation has actually begun. Typically, this will be 125875/1796 or 60. Here's an image of what you might see: https://i.imgur.com/kibN9ZG.png
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Note: Currently, this guide only deals with consistent frame rates. It is possible that the game instead has a variable frame rate. In these cases, the frame rate will not be consistent throughout the entire movie. Please check the entire dump before setting a constant frame rate, as otherwise frames may be dropped.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The resolution is displayed along the bottom status bar of the main JPC-RR window. It can (and almost always does) change as the movie goes on, so it's important to note down the resolutions as time goes on. As an example, the DOS sections often display at 720x400, whilst the gameplay sections might display at the VGA standard of 640x400. It's important to play the movie through to the end and note down all the resolutions of the movie you are dumping. Here's an image of what you might see: https://i.imgur.com/tWGBnIa.png
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Alternatively, the following command line will use 
 	[em 
 		"dumpresolution
 	]em
 	" to save the frame rate at each timestamp to a readable text file:
 	$LF
-]p
+]div
 [blockquote 
 	" dumpresolution movie.jmd >> resolutions.txt
 	$LF
@@ -98,50 +98,50 @@
 	" Conversion:
 	$LF
 ]h3
-[p 
+[div class=p 
 	"This step can be done in a more efficient way (by combining everything into a single pass), but for simplicity's sake it is written in individual instructions. If you're familiar with JPC-RR and dumpconvert then you can proceed however is most comfortable to you.
 	$LF
-]p
+]div
 [h4 id=Audio: 
 	" Audio:
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The following command line converts the audio from the JMD dump to "output_audio.wav".
 	$LF
-]p
+]div
 [blockquote 
 	" dumpconvert --output-wav=output_audio.wav movie.jmd
 	$LF
 ]blockquote
-[p 
+[div class=p 
 	"If the movie you're encoding uses PC Speaker effects (either by itself, or in conjunction with other audio methods), it's important to attenuate the volume. In such cases, the following command line can be used instead:
 	$LF
-]p
+]div
 [blockquote 
 	" dumpconvert --audio-mixer-attenuate=org.jpc.emulator.peripheral.PCSpeaker-0:10 --output-wav=output_audio.wav movie.jmd
 	$LF
 ]blockquote
-[p 
+[div class=p 
 	"If you are uncertain which to use, it's worth noting that it seems possible to use the second command line on dumps which do not use the PC Speaker without any currently noted adverse effects.
 	$LF
-]p
+]div
 [h4 id=Video: 
 	" Video:
 	$LF
 ]h4
-[p 
+[div class=p 
 	"In order to maintain the clarity of the resulting encode, for each resolution the run uses, a separate lossless video track should be dumped. The most reliable way to get the correct frame timings is with the framerate mode set to auto. dumpconvert supports a variety of video output methods, included x264 and RAW video, but it's most efficient to use CSCD for lossless encoding. The following command line converts a typical 720x400 clip to "output_video_720_400.avi", with accompanying timecodes named "output_times_720_400.txt":
 	$LF
-]p
+]div
 [blockquote 
 	"dumpconvert --video-width=720 --video-height=400 --video-framerate=auto --output-cscd=output_video_720_400.avi --video-max-dedup=20 --output-timecodev2=output_times_720_400.txt movie.jmd
 	$LF
 ]blockquote
-[p 
+[div class=p 
 	"As most (likely all) JPC-RR dumps will contain multiple resolutions, the above command line should be repeated for each resolution with the appropriate changes made. Here's an adjustment for 640x400
 	$LF
-]p
+]div
 [blockquote 
 	"dumpconvert --video-width=640 --video-height=400 --video-framerate=auto --output-cscd=output_video_640_400.avi --video-max-dedup=20 --output-timecodev2=output_times_640_400.txt movie.jmd
 	$LF
@@ -150,14 +150,14 @@
 	" Adjustments:
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Now that all the footage has been converted, it needs to be adjusted for use in the encoding package. Like before, there are several alternate ways to go about doing this, some being more efficient than what is about to be described. If you're experienced, then proceed in whatever way best suits your needs.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Create a new AVISynth and input the following lines (although changes will need to be made to suit your dump):
 	$LF
-]p
+]div
 [blockquote 
 	"LoadCPlugin("C:\timecodefps.dll")
 	[br 
@@ -190,22 +190,22 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"If your frame rate is a solid number (60, for instance) then use that number as fpsnum and set fpsden to 1, eg. fpsnum=60, fpsden=1.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Change "output_video_720_400.avi_0000_0000.avi" and "output_times_720_400.txt" to whatever you named the converted files earlier.
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Make sure the timecodes you use match the dump (although it shouldn't matter).
 	$LF
 	"If there are multiple dumps for the resolution you chose, you can separate them with a comma. The following is an example of how you'd do so:
 	$LF
-]p
+]div
 [blockquote 
 	"AVISource("output_video_720_400.avi_0000_0000.avi", "output_video_720_400.avi_0000_0001.avi", "output_video_720_400.avi_0000_0002.avi")
 	$LF
@@ -228,26 +228,26 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Once this is done, you can proceed to the encoding stage.
 	$LF
-]p
+]div
 [h3 id=Encoding: 
 	" Encoding:
 	$LF
 ]h3
-[p 
+[div class=p 
 	"There are a few adjustments that need to be made to the encoding package in order to make the HD encodes represent the best possible resolution. By default, dumpconvert ensures that any portion which doesn't match the destination resolution will have been pre-lanczos resized to those dimenions (unless you intentionally specified otherwise). In order to have more control over this, in the previous steps lossless AVI files were created at every resolution the game used so we can manipulate this in whatever way we choose.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Typically, encoding clips with multiple resolution would require a small amount of modification to the TASVideos Encoding Package to suit the dump's needs. Because most DOS games use two resolutions (one for the DOS portion at the start, and then another from when the game boots until the movie finishes), I made some quick changes that make the package suitable for these situations. You can download this modified version of the TASVideos Encoding Package as it was on 10/02/2018 here: http://www.mediafire.com/file/fxhqorrx2s8kf74/DOS_Encoding_Package.zip
 	[br 
 	]br
 	$LF
 	"Please note that this package will only work as intended in the above situation, any other circumstances will require different or additional changes. If you have a knowledge of AVISynth, it's recommended that instead of downloading the package above, you handle these modifications yourself.
 	$LF
-]p
+]div
 [h4 id=Ifyou'reusingthepackageabove,you'llneedtodothefollowing: 
 	" If you're using the package above, you'll need to do the following:
 	$LF
@@ -266,10 +266,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"The script will automatically change how it handles the scaling based on the mode it's in (meaning HD will be treated differently to standard encodes, in order to achieve the best result). You can now treat the script and package as you would for a normal encode.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Note: DOS often uses a significant amount of duplicate frames. You should also ensure that the run subtitles start, change, and end on unique frames, so as to not interfere with the deduplication process.
-]p
+]div

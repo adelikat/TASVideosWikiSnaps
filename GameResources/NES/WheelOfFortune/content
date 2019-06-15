@@ -1,13 +1,13 @@
 4
-[p 
+[div class=p 
 	"NES Wheel of Fortune game mechanics and assembly documentation.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"See also 
 	(__wikiLink|/GameResources/NES/WheelOfFortune/PuzzleList|Game Resources/NES/Wheel Of Fortune/Puzzle List)
 	$LF
-]p
+]div
 [h4 id=AddressesrelatedtopuzzleselectionandRNG 
 	" Addresses related to puzzle selection and RNG
 	$LF
@@ -38,10 +38,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Key inputs (NES standard):
 	$LF
-]p
+]div
 [table 
 	[tbody 
 		[tr 
@@ -122,14 +122,14 @@
 	" RNG
 	$LF
 ]h4
-[p 
+[div class=p 
 	"What the below does: Random stuff. Note that, as far as is known, addresses 0x341, 0x381, 0x3A1, 0x3A2 are always 0 when this is executed. Not all values are possible, even if all possible inputs (0x20-0x22) are entered.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"When on the screen showing the round, carry is always set at execution of 00:87F8, and the game polls all inputs 0x20-0x22. When on the spin screen, carry is always clear at execution of 00:87F8, and the game only polls input from 0x22 (0x20 and 0x21 are set to zero).
 	$LF
-]p
+]div
 [pre 
 	[code class=language-snescom 
 		"00:8C4C:E6 0A     INC $000A
@@ -184,14 +184,14 @@
 	" Puzzle selection routines
 	$LF
 ]h4
-[p 
+[div class=p 
 	"What the below does: A puzzle selection subroutine, which also messes with the RNG. It is as follows: Let X be a random multiple of 4 from 0 to 0x7C, and add a random number from 0 to 3 if it is not 0x74, 0x78, or 0x7C. Let Y be a random number from 0 to 7. Then take the (Y+1)th high-end bit of address 0x780+X. If it is 0, turn the 0 bit to 1 (this selects a puzzle) and return success (0). If it is 1, return failure (1).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Address 0x17 starts at 8. Each time failure is returned, 0x17 is decremented and the subroutine is called again. This subroutine executes up to 8 times.
 	$LF
-]p
+]div
 [pre 
 	[code class=language-snescom 
 		"04:8006:A5 0B     LDA $000B
@@ -303,14 +303,14 @@
 		$LF
 	]code
 ]pre
-[p 
+[div class=p 
 	"Puzzle selection routine:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"What the below does: If all bytes of 0x780-0x7FC are 0xFF, turn them all to 0.
 	$LF
-]p
+]div
 [pre 
 	[code class=language-snescom 
 		"04:8065:A2 7C     LDX #$7C
@@ -339,10 +339,10 @@
 		$LF
 	]code
 ]pre
-[p 
+[div class=p 
 	"What the below does: Address 0x17 starts at 8 and the subroutine at 04:8006 executed. Each time failure is returned, 0x17 is decremented and the subroutine is called again. This subroutine executes up to 8 times. If at any time the subroutine returns success, then a bit in the range 0x780-0x7FC has been turned from 0 to 1 (a puzzle has been selected).
 	$LF
-]p
+]div
 [pre 
 	[code class=language-snescom 
 		"04:807C:A9 08     LDA #$08
@@ -359,10 +359,10 @@
 		$LF
 	]code
 ]pre
-[p 
+[div class=p 
 	"What the below does: If it still returns failure after 8 times, then take the last value of X (from description above), and let Z be the largest multiple of 32 less than X. Starting from address 0x780+Z, take the first byte that is not 0xFF (that means a puzzle is available there). If it reaches address 0x7FC and that byte is 0xFF, then go back to 0x700 and keep trying.
 	$LF
-]p
+]div
 [pre 
 	[code class=language-snescom 
 		"04:8089:A5 0B     LDA $000B
@@ -417,10 +417,10 @@
 		$LF
 	]code
 ]pre
-[p 
+[div class=p 
 	"What the below does: From the above byte which is not 0xFF, take the first high-end bit that is 0. Turn the 0 to 1 (this selects a puzzle).
 	$LF
-]p
+]div
 [pre 
 	[code class=language-snescom 
 		"04:80B0:A9 80     LDA #$80
@@ -449,10 +449,10 @@
 	" ROM bank of puzzles
 	$LF
 ]h4
-[p 
+[div class=p 
 	"All pointers are 2-byte little-endian values to NES addresses (04:xxxx range). For example, the hex string "EC 81" points to the address 04:81EC.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		"04:81D8-81E9 (ROM 101E8-101FC): pointers to 81EC-89BD range (marking categories?)
@@ -475,14 +475,14 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Note: The last puzzle (1001st puzzle/puzzle #1000) at 04:C5F5-C607 (ROM 14605-14617) can never be called by the game's puzzle selection routine.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Puzzles are stored in a modified ASCII form:
 	$LF
-]p
+]div
 [table 
 	[tbody 
 		[tr 
@@ -727,10 +727,10 @@
 		]tr
 	]tbody
 ]table
-[p 
+[div class=p 
 	"As well, the following rules apply to indicate new line or end of puzzle:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" The last symbol before a new line has 0x80 added to its value.
@@ -741,10 +741,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"For example, the following string is WHEEL@OF@FORTUNE (@ meaning newline):
 	$LF
-]p
+]div
 [pre 
 	"57 48 45 45 CC 4F C6 46 4F 52 54 55 CE C5
 	$LF
@@ -780,10 +780,10 @@
 	" Spin mechanics
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The spin for speed-up round uses the following randomization rules, in this order:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Set address 0x0A to 0 and 0x8A to 0.

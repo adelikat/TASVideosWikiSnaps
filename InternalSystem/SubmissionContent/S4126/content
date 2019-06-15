@@ -1,5 +1,5 @@
 7
-[p 
+[div class=p 
 	[em 
 		""Pokémon Gold and Silver"
 	]em
@@ -9,7 +9,7 @@
 	]em
 	", many new features and gameplay changes were introduced. And it turned out that one of the features, storing the game corner coins in a coin case that is, would allow to beat Red in under an hour, while never defeating the Elite Four in the first place.
 	$LF
-]p
+]div
 [pre 
 	$LF
 ]pre
@@ -35,7 +35,7 @@
 	" Emulator and ROM
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The movie was recorded on 
 	[a class=extlink href=https://code.google.com/p/vba-rerecording/downloads/detail?name=vba-rerecording-svn480-win32.7z&can=2&q= rel=nofollow 
 		"VBA-RR v23.6 svn480
@@ -44,33 +44,33 @@
 	$LF
 	"I used a standard EU Gold Version ROM found on the Interwebz. MD5: a6924ce1f9ad2228e1c6580779b23878, filename: Pokemon Gold Version (UE) [C][!].gbc
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"VBA seems to have problems with emulating the Real Time Clock while recording a movie, and Bizhawk seems to really like desyncing movies. Since having a movie is much better than not having it in the first place, I decided to use VBA, despite its RTC problems.
 	$LF
-]p
+]div
 [h3 id=Comments 
 	" Comments
 	$LF
 ]h3
-[p 
+[div class=p 
 	"This is my second, way better attempt of using Coin Case glitches to beat the game; you can see my previous (absolutely failed) attempt here: 
 	(__wikiLink|/4084S|4084S)
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The run uses only two glitches: Pokémon cloning glitch and the Coin Case glitch. The Coin Case glitch is what the run is focusing on, since it allows for getting the Holy Grail of glitches - arbitrary code execution.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"On Pokémon Gold/Silver, there is a popular glitch involving opening the Coin Case after listening to Machop/Machamp's cry. Usually it just causes the game to restart in a weird color scheme - however, there is much more to it than expected. The Coin Case text script is improperly terminated, so the game tries to execute commands past the actual script, leading to arbitrary code execution. This text script error causes the game to jump to address $E112. By listening to specific cries, manipulating the party Pokémon list and by standing in specific locations on the map, it is possible to redirect that accidental jump to a useful location, giving me a possibility to run my own code by storing specific items into the PC box.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So the goal of the run is to turn the Coin Case's bad habit of executing arbitrary code into our favor, by forcing it to:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Somehow warp me to Mt. Silver
@@ -89,14 +89,14 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"I won't be getting into much detail about how the Coin Case glitch works: instead read this thread on Glitch City Laboratories Forums: 
 	[a class=extlink href=http://forums.glitchcity.info/index.php/topic,6716.0.html rel=nofollow 
 		"http://forums.glitchcity.info/index.php/topic,6716.0.html
 	]a
 	". We already have a possiblity to execute some code, by storing items into the PC box. Now, how to make the code do everything mentioned above? Since we can execute anything directly on the console/emulator, it's possible to write any part of memory. So everything can be done by just changing a couple memory addresses:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" DA00 -> 03, DA01 -> 56: Will warp me to Mt. Silver after leaving the current building.
@@ -111,14 +111,14 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"To change those addresses, I created a simple "memory writer" program, which allows me to write a more complicated "memory writer" program, which finally writes the memory addresses I want.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Below is a list of items I had to acquire before doing anything:
 	$LF
-]p
+]div
 [div class= 
 	[ul class=nav nav-tabs role=tablist 
 		[li class=nav-item 
@@ -191,10 +191,10 @@
 			]pre
 		]div
 		[div class=tab-pane fade id=tabs-3640-2 
-			[p 
+			[div class=p 
 				"Thankfully, all those items are available at the game beginning, in Goldenrod Department Store.
 				$LF
-			]p
+			]div
 			[h3 id=Whathappens 
 				" What happens
 				$LF
@@ -203,30 +203,30 @@
 				" The first program
 				$LF
 			]h4
-			[p 
+			[div class=p 
 				"Doing everything possible with just items is not a great idea, since we don't want going around the whole region just to get necessary items. A better solution is to make a simple program, which will write to a specified memory location, and jump to it afterwards. The first argument, controlled by the quantity of Potions, is the lower 4 bits of the byte I want to write. Quantity of Fresh Water controls the high 4 bits. Then the amount of X-Accuracies controls the least significant byte of the address to write, with the most significant one is always 0xDB. This allows me to write something more complicated to the (DB01-DB10) address range.
 				$LF
-			]p
-			[p 
+			]div
+			[div class=p 
 				"Because it saves time and items, the program exits in a wrong way, which will cause a very annoying side-effect: the menus will scroll the text like they were textboxes.
 				$LF
-			]p
+			]div
 			[h4 id=Thesecondprogram 
 				" The second program
 				$LF
 			]h4
-			[p 
+			[div class=p 
 				"As soon as I deposit all the items in their respective places, I start writing the payload. Thankfully, the nearest place which allows the Coin Case to work is 4 steps from the PC. I optimized the withdraw/deposit combination so it would display the least amount of menus as possible (saves a lot of time, because of the side-effect mentioned above). Eventually, DB01 contains a sequence:
 				$LF
-			]p
+			]div
 			[pre 
 				"D6 12 21 FE DA 2C 2C 22 33 00 AF 3C 21 F6 12 E9
 				$LF
 			]pre
-			[p 
+			[div class=p 
 				"Or in assembly:
 				$LF
-			]p
+			]div
 			[pre 
 				"sub $12
 				$LF
@@ -251,58 +251,58 @@
 				"jp hl
 				$LF
 			]pre
-			[p 
+			[div class=p 
 				"What the code does is takes the value set with the items (Potions and Fresh Waters), and subtracts 0x12 from it - this is to allow me to write values less than 0x10. Then it loads this value to $DA00, and returns control back to the game.
 				$LF
 				"By swapping the last item (TM41) with Parlyz Heals, the code is modified to jump to the second part.
 				$LF
-			]p
-			[p 
+			]div
+			[div class=p 
 				"One of the bytes is skipped, and set to NOP, which does nothing. The problem is that DB0A is actually in the middle of the fifth party Pokémon data, and specifies if the Pokémon has any status problems. Setting it to anything but 0 would cause the addresses to change around, which would mess up the code.
 				$LF
-			]p
-			[p 
+			]div
+			[div class=p 
 				"Next, this program is delicately modified, so it writes a value to $DA01 - it only requires to change one byte.
 				$LF
-			]p
+			]div
 			[h4 id=Thethirdprogram 
 				" The third program
 				$LF
 			]h4
-			[p 
+			[div class=p 
 				"The two last addresses need to be set to the same value - 00. To speed things up, I write a yet another program - which will replace parts of the previous one. I change the bytes at $DB03 to:
 				$LF
-			]p
+			]div
 			[pre 
 				"EA 22 DA EA A3 D8
 				$LF
 			]pre
-			[p 
+			[div class=p 
 				"Instead of writing one address at a time, this one writes two: $DA22 and $D8A3. This modification is entered and executed exactly like the previous one - by running around, changing the amounts of Fresh Waters and Potions. 
 				$LF
-			]p
-			[p 
+			]div
+			[div class=p 
 				"Finally, I execute the final piece of code, and by going through the stairs in Goldenrod Pokemon Center... I end up on Mt. Silver. The game must be saved once more, because of the previously described side-effect, which causes the credits to require mashing A to go through. Saving and resetting gets rid of this effect, and after reloading the game, we can finally talk to Red and win the battle with him, without even fighting.
 				$LF
-			]p
+			]div
 			[h3 id=Remarks 
 				" Remarks
 				$LF
 			]h3
-			[p 
+			[div class=p 
 				"Special thanks to Sanqui, for discovering the actual arbitrary code part of the coin case glitch.
 				$LF
-			]p
+			]div
 			[hr 
 			]hr
-			[p 
+			[div class=p 
 				[a class=intlink href=/Users/Profile/Mothrayas 
 					"Mothrayas
 				]a
 				": Judging.
 				$LF
-			]p
-			[p 
+			]div
+			[div class=p 
 				[a class=intlink href=/Users/Profile/Spikestuff 
 					"Spikestuff
 				]a
@@ -312,13 +312,13 @@
 				]a
 				".
 				$LF
-			]p
-			[p 
+			]div
+			[div class=p 
 				[a class=intlink href=/Users/Profile/Mothrayas 
 					"Mothrayas
 				]a
 				": This movie displays a very impressive technical trick to glitch to the end using arbitrary code. However, during the first half of the movie, the gameplay is plagued by a significant amount of suboptimalities and sloppiness, and is clearly improvable in many areas, including overworld movement and item collection. Rejecting due to noticable suboptimality.
-			]p
+			]div
 		]div
 	]div
 ]div

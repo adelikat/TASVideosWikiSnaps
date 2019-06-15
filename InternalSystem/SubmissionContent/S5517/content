@@ -1,12 +1,12 @@
 7
-[p 
+[div class=p 
 	"This movie is a movie for Atari 2600 "Dragster." The game itself is incredibly short and fairly straightforward, but it has some historical significance for gaming and speedruns in general. The primary goal is simple: clear a quarter-mile track by holding your engine in red-line and shifting at opportune times. This was among the first games to emphasize speed as a primary metric for success as opposed to score.     
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=jszP5YZxjLU)
 	$LF
-]p
+]div
 [h3 id=Gameobjectives 
 	" Game objectives
 	$LF
@@ -45,34 +45,34 @@
 	" Comments
 	$LF
 ]h3
-[p 
+[div class=p 
 	"There's quite a history for this game. It initially released with a challenge in the manual to beat "Activision's Best" by matching or beating a time of 5.74. The actual time an Activision employee achieved prior to launch was a 5.64, but they wanted to advertise a more generally achievable time. In 1982, player Todd Rogers claimed a time of 5.51, which was supposedly verified in front of Activision staff and received wide acclaim. To this day, that time has not been beaten or tied.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I took interest with the game based on this story and the fairly suspicious fact that nobody beyond Rogers has ever achieved better than 5.61. Clearly there must be some obscure bug that he used to gain such a significant advantage, right?
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Thus, I disassembled and reverse engineered the entirety of Dragster. This was key in understanding the major pieces of the speed and distance system, but also gave me a chance to check for what shenanigans you might be able to pull off with oddball inputs or otherwise.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"And I came up with nothing. The game has some very strict checks for inputs, and on every reset and boot will completely clear all memory related to any of the interesting values. Checks related to major mechanics are all fairly straightforward, and errant inputs have no sway in most of them. Player 1 and 2 inputs are handled on opposing frames, and they each have their own distinct memory addresses for each mechanic. So there's not a whole lot you can do outside of just playing normally. Mechanics explained in more detail below.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Based on all this reversing, 
 	[a class=extlink href=https://docs.google.com/spreadsheets/d/1HhaBah7e48lBRA18v8Mgr-fRVZS5DUJb_pnOsBTC34c/edit?usp=sharing rel=nofollow 
 		"I built a model
 	]a
 	" of the speed system so that I could easily identify impacts of shifting at certain times. The inputs can be directly used in emulator, and I verified that they give the correct times and behavior.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This movie covers both the best solution we've developed so far in terms of in-game time and distance on Player 1, as well as the minimum number of frames of input to reach the finish on Player 2. Both were theorized in the spreadsheet and later verified in BizHawk.
 	$LF
-]p
+]div
 [h3 id=GameMechanics 
 	" Game Mechanics
 	$LF
@@ -181,116 +181,116 @@
 		]tr
 	]tbody
 ]table
-[p 
+[div class=p 
 	"Add 1 to any of the above addresses for equivalent Player 2 address.
 	$LF
-]p
+]div
 [h4 id=VictoryConditions 
 	" Victory Conditions
 	$LF
 ]h4
-[p 
+[div class=p 
 	"You complete the track as soon as your distance exceeds 0x60. If you shift into first gear before the countdown is 0, you are marked as "Early" and disqualified. If you push your tachometer value too far into the red, your engine will blow out, and you'll also be disqualified.
 	$LF
-]p
+]div
 [h4 id=GeneralOperation 
 	" General Operation
 	$LF
 ]h4
-[p 
+[div class=p 
 	"You have only two gameplay-related inputs: the gas (button) and clutch (left on stick). You can also reset at any time, but it just starts from the countdown. There is a second mode where you also must steer with up/down, but that mode isn't used in this movie. You start in gear 0, and every time you engage and then release the clutch the gear value increments by 1, up to a maximum of 4. You can rev your tachometer up to a maximum value of 0x1F; at 0x20 or higher, you will blow out.
 	$LF
-]p
+]div
 [h4 id=SpeedandDistanceMechanics 
 	" Speed and Distance Mechanics
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The game sets up a moving "speed limit" of sorts based on your tachometer value and current gear. On every active player frame, the game checks if your current speed is less than the current "speed limit;" if the speed is less than, it increases speed by 2. If equal, no change. If the limit is less than your speed though, speed decrements by 1. Additionally, if the clutch is currently engaged, speed does not decrement or increment.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The speed limit itself is equal to the tachometer value rotated left by the current gear value minus 1. If the tachometer is in redline condition (value equal or greater than 0x20), an extra 1 is also rotated in, giving you an extra limit overhead of +1 at gear 2, +2 at gear 3, and +4 for gear 4.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Every player frame, the current speed is added to the subdistance. If subdistance overflows, the distance value is incremented.
 	$LF
-]p
+]div
 [h4 id=TachometerandShiftingMechanics 
 	" Tachometer and Shifting Mechanics
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Since the tachometer is the lone direct influence on your maximum speed, it's important to maintain as high a value as possible throughout play while avoiding blowouts. However, the game has a fixed acceleration window for the tachometer based on the difference between the current speed and the speed limit. If the current speed is more than 0x10 below the speed limit, the tachometer value is decremented by 1, affecting the speed limit for the next player frame. This mechanic discourages shifting up too quickly.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The tachometer value will change based on a frame rule to check whether the gas is currently engaged. As the gear increases, the frame rule for checking whether the gas input is held also increases. At gear 1, it checks every player frame. 2 is every other player frame; 3 every 4th; 4 every 8th. If the gas is held when the frame rule is engaged, the tachometer value increments by 1. If it is not held, the value will decrease by 1. This frame rule occurs based on the global frame counter, which means that the frame counter value itself influences the incrementing pattern of higher gears.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The tachometer also behaves differently while the clutch is engaged or in gear 0. In either case, rather than incrementing or decrementing by 1, it will instead change by 3. This is still dependent on whether the gas is also held during the frame that the clutch is engaged. This activity occurs instantly regardless of the frame rule.
 	$LF
-]p
+]div
 [h4 id=Strategy 
 	" Strategy
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The general strategy is to maintain as high of a tachometer value for as long as possible, and then shift after reaching the maximum possible speed for your current gear. However, since the distance between your max speed and the current speed affects tachometer increments and decrements, it is sometimes better to shift earlier and maintain a higher entrance value to a particular gear. Additionally, once in gear 4, successive shifts are used to re-raise the tachometer value once speed reaches a point it can no longer increase. This temporary rise in the speed ceiling allows for optimal progression.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Shifting as late as possible without affecting speed is beneficial to the subdistance; for every frame earlier that a shift occurs, 2 subdistance units are lost. Removing a shift entirely would save a lot more than that, but you generally can't remove a shift without losing speed incrementing opportunities elsewhere.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Until you reach the speed ceiling, there is no benefit to letting the speed fall by 1 unit during a player frame. The loss of an effective 3 speed cascades throughout the rest of play and makes a huge difference in distance. At the speed ceiling, however, you can briefly lose 1 speed in order to gain 2 and then lock in your max speed of 253 instead of 252. This helps a fair bit as soon as I reach 252 for the first time, but is detrimental any time before that.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Finally, since the frame counter influences the tachometer increment pattern, it's key to play around with all of the 8 possible seeds to find an optimal shifting pattern. A different seed alone can have a significant influence on end time; getting a 5.57 is not possible under all seeds.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"For completing the game in the fewest frames, the goal was instead to get to a fast enough speed and rev the tachometer to max before stopping all inputs. This allowed the speed to continue advancing for a dozen or so frames before the tachometer had gone down far enough to force the speed into decreasing. Then it was just enough to have it limp across the finish line under its remaining momentum.
 	$LF
-]p
+]div
 [h4 id=ClosingComments 
 	" Closing Comments
 	$LF
 ]h4
-[p 
+[div class=p 
 	"I opened these comments with mentioning Rogers's claimed 5.51. Over the course of this investigation, I've pretty well determined that a 5.51 is not possible according to the available game model. Since there are no details on what actually happened when he claimed it or who might have witnessed it, there's no way to say if it was cheated or a result of a hardware problem or if it even happened at all. Either way, this research and model should be enough to show that it's not possible on normal conditions. Even with some types of cheating (starting in gear 1 without shifting, starting with 2 speed, etc), a 5.51 is not possible.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"As for the movie itself, this is the best I've been able to find that maximizes the remaining subdistance after crossing the finish line with a 5.57 (this specific solution originally pointed out by Reddit user Kragnir). In this case, you end up with 98 units of "spare" subdistance; still about 158 units away from the next best timer value of 5.54. The inputs for this are demonstrated by the Player 1 slot, and the last input frame is 508. Note that there is a delay at the beginning in order to align the correct frame rule.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"As a secondary goal, I went for the typical TASVideos goal of least frames of input to finish, regardless of in-game time. This is demonstrated by Player 2, and the last input occurs on frame 343. Note that this could be improved by 2 frames but would require a different frame counter value than the IGT goal, so this tradeoff was made to be able to show off both at once.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"There might be room for improvements, but I've checked all of the obvious alternatives that follow the general strategy rules. Even if improvements are found, I expect that they would only provide small amounts of additional subdistance on the shown 5.57; 5.54 is a long way off, yet. The number of possible positions for 9-10 shifts over the course of all ~250 optimizable frames is tractable, so it is possible to brute-force a true optimal solution. Until then, feel free to toy around with the spreadsheet model and see what you can come up with.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"~Omni
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/feos 
 		"feos
 	]a
 	": Judging...
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/feos 
 		"feos
 	]a
@@ -300,45 +300,45 @@
 	]a
 	" the movie file.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/feos 
 		"feos
 	]a
 	": This is a great movie in so many aspects.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"First, it deconstructs this advertising myth that lived for so long.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Second, it includes extremely elaborate research, to the point of full simulation.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Third, it showcases 2 types of goals in the same run: fastest real time and fastest in-game time.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Fourth, in optimizing in-game time, it uses a special goal: achieving farthest distande 
 	[em 
 		"and
 	]em
 	" subdistance in the shortest time. So by that it beats the known run by Samsara, who likely hasn't set such a goal, so the runs are probably not very comparable. They are probably also not comparable due to heavy emulation improvements of the A2600 core that has happened since that run was made. Though Samsara's run stops sooner while getting the same in-game time, it doesn't reach the subdistance reached in this run, so basically it's overall speed is lower.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"If someone reimplements that movie to reach farther subdistance than this run does, in the same amount of time, or to reach the same subdistance sooner, it might obsolete this run. Finding the perfect formula for real time movie length against farthest subdistance might be a challenge, if we default to getting the same in-game time for fair comparison.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"But since we're not here to make and publish only unbeatable movies, especially when the improvement is only potential, I'm accepting this gem to Moons.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Fog 
 		"Fog
 	]a
 	": Processing.
-]p
+]div

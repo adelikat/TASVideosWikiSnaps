@@ -1,8 +1,8 @@
 37
-[p 
+[div class=p 
 	(listlanguages)
 	$LF
-]p
+]div
 [hr 
 ]hr
 [div class=toc 
@@ -49,7 +49,7 @@
 		]li
 	]ul
 ]div
-[p 
+[div class=p 
 	[em 
 		""The art of TAS has surpassed merely playing a game. TASing is the game itself, and sometimes even that is eclipsed by making things play that game for you too. Metagaming of sorts. The best players of this game know how to break all the rules, and this necessitates understanding the architecture and peculiarities of the target, and of the tools used to work said target."
 	]em
@@ -59,22 +59,22 @@
 	]a
 	".
 	$LF
-]p
+]div
 [h3 id=Preamble 
 	" Preamble
 	$LF
 ]h3
-[p 
+[div class=p 
 	[a class=extlink href=http://en.wikipedia.org/wiki/Reverse_engineering rel=nofollow 
 		"Reverse engineering
 	]a
 	" is the process of discovering the technological principles of a device, object, or system through analysis of its structure, function, and operation. It often involves taking something (a mechanical device, electronic component, computer program, or biological, chemical, or organic matter) apart and analyzing its workings in detail to be used in maintenance, or to try to make a new device or program that does the same thing without using or simply duplicating (without understanding) the original.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"In good old days, TASing was messing around with a game and trying to play it as has not been seen yet. It worked, because it was generally new. But as new people were getting involved, new games were being TASed, old runs were getting obsoleted constantly, the community ended up with a standard of TASing that was greatly superior over the former one. It was a natural process due to two main aspects:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Level of optimization was constantly upgrading, new tricks were being found and used, old ones were being optimized.
@@ -85,58 +85,58 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Now, to make a run that is consistent with the modern TAS standards, one would need to apply the most advanced methods to the game he TASes. Which is, figuring out exactly how the game internally works, and using that knowledge directly during TAS creation.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This guide aims to teach the methods that are at once easy and effective, and that can be applied to a vast majority of games. The only problem may be the lack of certain tools in emulators.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"Note: This guide will rely on the most powerful emulator in terms of reverse engineering - FCEUX. The knowledge collected in it can be effectively used with any other gaming platform/emulator that provides similar tools.
 	]em
 	$LF
-]p
+]div
 [h3 id=RAMmap 
 	" RAM map
 	$LF
 ]h3
-[p 
+[div class=p 
 	[em 
 		"Note: You can launch FCEUX's Hex Editor to observe the RAM as the game proceeds. Debug -> Hex Editor. It is also useful to resize the window so that 16 lines are only visible at once.
 	]em
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Zero Page is addresses from $0000 to $00FF. Games use it for temporary variables that change very often or for ones that need the fastest access to; it is usual that addresses from Zero Page proceed different unrelated variables from the main memory. So these addresses, even though they can contain some important variables you can already use stably, in most cases are still unreliable. You would need to find the original addresses that represent real states of the game RAM and don't get filled with unrelated values.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"$0100 - $01FF is Stack that is also used for temporary needs.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The third page is frequently used for sprite data, you can notice that by the specific nature of how they values change.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Then goes the actual game data that you can fruitfully investigate. And there are some common ways of how it is organized. Aside from some unique counters and such, nearly every game uses some kinds of arrays to store data controlling objects.
 	$LF
-]p
+]div
 [h3 id=Objects 
 	" Objects
 	$LF
 ]h3
-[p 
+[div class=p 
 	"This term is pretty self-descriptive. All units in the game that interact with each other and with the environment are conventionally called objects. And they use to have a set of attributes that is common for all of them. You can create a virtual table where current objects will be present as rows and their attributes as columns. And if you fill in the addresses that account for each object's attribute respectively, you will see the system.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"That imaginary table is not far from how objects are actually mapped. At first there could go an array of object IDs that sit in the available slots. Then an array of sprite IDs for each object. Or something like an object state that rules the actions. There are also spatial coordinates, consisting of 2 or 3 variables. The most usual ones are:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" X low byte
@@ -163,26 +163,26 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"There can also be Z axis coordinate. And there is a difference if your character is a part of common object map, or has unique attributes and addresses for them.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Some games use absolute in-level values for object coordinates. Some only process their positions relatively to camera. Camera X and Y can also consist of 2 bytes each, and it is usually not a part of object map. So you can sometimes get the true on-screen position of objects just by subtracting the absolute in-level coordinate out of full camera position. Some games just store on-screen positions separately, but those can be untrue.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"There may be speed addresses, facing, all kinds of other attributes. You won't need some of them, and some will be hard to interpret.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"You will need to figure out, what is columns and what is rows. Some games have object slots as columns and attributes as rows. Others host all attributes right after declaring an ID, making slots rows and attributes columns. Some games divide the object table in a sane way relatively to the hex window, like having 16 or 8 slots for objects, or having 16 attributes for each of them. That makes the whole object map look distinguishable for an eye.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Once you get some parts of object table clear, you don't need to search for each attribute manually, you could just notice the changes and predict the actual use, like:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Low X byte increases from 0 to 255 and resets back to 0, increasing the high X byte.
@@ -213,34 +213,34 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Some games keep bosses as usual objects, some store their attributes in special places. You would need to find some of them: hit points, invulnerability timer, position, state/movement. It will help to understand their actions and to find ways to control them, or at least keep track of them.
 	$LF
-]p
+]div
 [h3 id=Randomnumbergenerators 
 	" Random number generators
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Figuring out why a certain action occurs differently is actually not that hard. But it requires using a debugger and setting breakpoints, as well as dumping the executed code to a log file (or a window).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"At first you must define the visible attribute that changes, and that you want to control. Like, the frame the enemy does some kind of attack. Or the type of that attack. Or the position some object spawns at. Pretty much anything that seems random and changes as you change gameplay.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Then you should find the address that represents that attribute. It can be done by using the RAM Search tool, sifting out the addresses that change exactly along with that visible attribute.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Then you set a breakpoint on Writing to that address. And launch the movie that changes it. It is important to know how often is it written to. In most cases the breakpoint will be hit only once in a certain time segment (say, once in a few seconds). And the value that is being written matches the one that you see in RAM afterwards. You should mark the frame it gets written to somehow, or note it in a text file, or make a savestate right before it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Then you should dump the code that is executed just before the breakpoint is hit. In many cases, logging only the frame the breakpoint is hit is useful. But make sure you log all the hits if there are plenty of them per frame. Advancing several "steps into" after the last one, to get all involved code logged, may be a good habit. Observing it during execution is not that handy. But reading its dump will show you how the value that was written to your address was born. It can be:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Written as is from ROM.
@@ -255,28 +255,28 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"In the first case, you would need to find the condition that makes the game jump to that exact position and write that value. Because if it jumps to another place, another value will be written.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"In the rest 2 cases you need to find where the end value comes from. If it is written directly from another address, set a breakpoint on writing to it and trace how it gets there (several breakpoints before setting the end value can occur, rely on the last one that writes the value affecting your main address). If it was messed around with, using other addresses values, you must debug the routine that is done each time, which provides different result getting different source values.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Once the trace is found for one case, you should change the gameplay so that the value in question changes, and similarly trace what was different of the things that affect it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Basically, you will be stepping back in time to find the reason. And when you have enough stuff debugged and traced, you can get the exact idea of how your semi-random value works. You can even replicate the code in lua and predict the future values depending on gameplay. And, most importantly, you will be able to affect the semi-random source that is used by that value, controlling the latter  effectively. Or you will find out that it is not random at all and can not be affected without harm towards speed. It is a puzzle after all, you solve it!
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"Note: Some emulators support symbolic debugging and tracing. It is an extremely useful feature that replaces the addresses you want with the words you want. This way you won't see just pointless numbers in your code, but sane words describing what function an address implements.
 	]em
 	$LF
-]p
+]div
 [h3 id=Links 
 	" Links
 	$LF
@@ -603,7 +603,7 @@
 ]table
 [hr 
 ]hr
-[p 
+[div class=p 
 	[em 
 		(__wikiLink|/TODO|TODO)
 	]em
@@ -617,4 +617,4 @@
 	": Expand this guide with details..
 	[br 
 	]br
-]p
+]div

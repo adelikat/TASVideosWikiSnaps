@@ -1,12 +1,12 @@
 6
-[p 
+[div class=p 
 	(youtube|v=zew4pQ_1ZSU)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"EDIT: The rerecord count should be 40365 according to the lsnes message window when the movie is loaded, but shows up as just 1 for some reason.
 	$LF
-]p
+]div
 [h4 id=Details 
 	" Details
 	$LF
@@ -45,54 +45,54 @@
 	" cpadolf's comments  
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Recently a set of discoveries in the Super Metroid speedrunning community involving the fabled Space/Time beam led some runners to beat the current any% TAS, obviously something had to be done about that. This new TAS beats the current any% TAS by 23446 frames, or about 6.5 minutes (thereby turning it into a low% run instead of an any% run), and finishes with an ingame time of about 06:15 (although it's displayed as 00:05, more on that later). This substantial improvement comes from using an entirely new route and a new way of finishing the game involving arbitrary code execution, a phenomenon that seems to become more and more common in the TAS communtiy. As an aside, with the timing used for runs in the real time speedrunning community this run is about 12:30.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The point of the route is to get to Gold Torizo as fast as possible and use the so called "GT Code" which instantly gives Samus most of her upgrades and a lot of ammo, enabling the glitching that takes place afterwards. There are basically two routes for doing this, both of which were fully run through and optimized. The first one is to go to Kraid in order to receive the Varia Suit that will take you through norfair and LN without having to collect a bunch of energy tanks. This is the one that was used by Saturn in his GT code run, and is used by the real time speedrunners (minus the hi-jump boots which can be skipped with some tricky kago balling and walljumping during the lava dive before LN). The second one is to skip out on Kraid and instead use the somewhat unknown and never before (to my knowledge) constructively used pause glitch that keeps Samus from dying as long as the game is constantly being paused. The second option turned out to be faster by about 30 seconds despite the game only being able to run for about 1 second per 2 seconds of paused time.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"In order to make it all the way to GT with the pause abuse a reserve tank had to be collected as Samus has to have at least 1 energy when riding on an elevator to keep from dying, and to refill on energy before using the PB in the Gold Pirate room in LN as the game can't be paused after a PB has been placed. Because of the time saved by avoiding an extra pause a lot of extra drops were farmed and damage avoided throughout the run in order to minimize the amount of pauses. An interesting side effect of the pause glitch is that the game clock stops running while Samus health is 0, which makes the ingame clock about 20 seconds lower than it should be by the point that GT is reached, therefore displaying a 00:05 at the end instead of 00:06.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"With that I'll leave it over to amaurea and total to get into the more technical stuff of the glitching in the run.
 	$LF
-]p
+]div
 [h4 id=Amaureascomments 
 	" amaureas comments
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Some of the first TASes of Super Metroid made use of a glitched beam combination called the "Murder beam", which was activated by shooting a charged shot to the left with all the beams equipped, even the incompatible Plasma and Spazer beams. That combination results in a sort of area-of-effect damage that keeps damaging nearby enemies forever, and was used in the Mother Brain fight until it was discovered that it was faster to just shoot optimally charged normal beams.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Since then, no glitched beams have been used in TASes here, though two other non-crashing beam combinations were known: The zero range, zero-damage, rapid-fire "chainsaw beam", and the seriously glitched space-time beam (uncharged plasma, spazer and ice), which could bring the bosses back to life, retile the rooms, reset items, or trigger the escape sequence. But despite the known potential of the space-time beam it was not used here, possibly due to it being emulated differently by the previous generation of snes emulators. Its most powerful effects may have been thought to be emulation errors.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This TAS uses not only the space-time beam, but also another beam previously thought to be useless: The charged space-time beam. After performing a trace log while firing the various glitched beam combinations, I found that out of the 8 possible glitched beams, the three known beams (murder, chainsaw and space-time) jumped to ROM data, while the remaining 5 all jump to RAM. That is why the former beams were reliable enough to use, and why the latter beams would always lead to a crash: RAM contents are variable, but rarely contain sequences of bytes that when interpreted as machine code do anything safe. In particular, more than half of all RAM values are 0, which when interpreted as an instruction means BRK, aka "hang forever".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"But on the other side, while ROM is unchangable, the player can to some extent control the content of RAM. Many of the glitched beams jump to interesting RAM locations, but the one used in this TAS (but not the only potentially useful one) is the charged space-time beam, which jumps to ram location 0x900a0a, where we can find Samus' super missile count, followed by her power bomb count and selected item etc. These are all under the player's control, and have a large enough range that it is possible to perform some interesting operations.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"For example, a super missile count of 32 corresponds to the instruction JSR (jump to subroutine), which lets us jump to a location of our choice based on the power bomb count. The most promising targets are the gamepad auto-read registers at location 0x4218 to 0x421f, which contain the current button presses of four gamepads, effectively giving us 8 consecutive bytes which we can freely choose, and which we can update every frame. Reaching these registers would be enough to let us execute arbitrary code, and take total control over the game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"However, both the super missile and power bomb counts are 2-byte variables, and what forms the address to jump to is the second byte of the super missile count and the first byte of the power bomb count. Jumping to 0x4218 using JSR would require 0x18 in the second byte of super missiles, and 0x42 in the first byte of power bombs, for a total of 6176 super missiles and 66 power bombs. Which would take a while to get. So we can't jump there directly. With reasonable ammunition counts, we can hope to jump to addresses 0x0000, 0x0100, 0x0200, 0x0300, ..., 0x3200. That's a lot to choose from, but most of them are hard to influence and contain large stretches of repetetive bytes, such as tile maps etc. But at least two of these are suitable: 0x0400 (OAM data), and 0x0b00 (position and scroll-related variables). The former is what I used in 
 	[a class=extlink href=https://www.youtube.com/watch?v=ogDqhpnm3yg rel=nofollow 
 		"this demonstration video
 	]a
 	", but it is quite fickle, and requires the right enemies at the right position in the room. The second one I had given up on after almost making it work, because I thought Samus' relative screen position could never get much larger than 256, which would not get me the bytes I needed:
 	$LF
-]p
+]div
 [pre 
 	"     b00 height       stand=(15,ORA,A),jump=(13,ORA,A),aimdown (0a,bad),crouch=(10,BPL,nop)
 	$LF
@@ -111,50 +111,50 @@
 	"     b07 y_screenrel high
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The first 4 bytes here are not useable, but can be made equivalent to harmless operations that bring us to 0x0b04. There we have 4 bytes in a row related to the Samus' screen-relative x and y position. If these could take any value, then we could use this to perform a jump to 0x4218. But when I first investigated this, I thought both these scroll values would be between 0 and 255 (i.e. Samus inside the screen) or at least not values much higher than that. That would make 0x0b05 and 0x0b06 zero, as indicated in the excerpt from my notes above, and would limit us to the same kind of restricted jump that brought us here in the first place.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"But total pointed out that I had forgotten out-of-bounds travel (OOB), where it is possible to get almost arbitrarily far outside the screen. That made this method an easy and reliable (to a TASer anyway) method: Position Samus such that her screen-relative position is (x,y) = (0x1182,0x??37), where the ??-part is irrelevant. This corresponds to the machine code
 	$LF
-]p
+]div
 [pre 
 	"     $90/0B04 82 11 37    BRL $3711
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Which finally brings us to the gamepad auto-read registers! At that point we have total control over the game: We could for example set up a jump from the last register to the first one, trapping the game inside this 8-byte register range (this is what I did in my OAM example). But total found a more efficient setup, as he will explain.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"See the 
 	[a class=intlink href=/GameResources/SNES/SuperMetroid#TehcnicalDetails 
 		"Super Metroid game resources page
 	]a
 	" for a more detailed analysis of the glitched beams.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Potential improvements: While we investigated the other glitched beams, we were not exhaustive, and they may be usable for gaining control earlier. This includes the standard murder beam, if fired in another direction than left. It might also be possible to gain control without the use of glitched beams at all, by triggering a glitched door transition while out of bounds (for example using the X-ray gltich). I've discussed this with PJBoy, but we didn't find a concrete way of realizing this. To execute larger amounts of arbitrary code, it will be useful to use the manual gamepad registers instead, as the current method only lets us execute about 2-3 instructions per frame.
 	$LF
-]p
+]div
 [h4 id=Total'scomments 
 	" total's comments
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Now that we've finally managed to direct the game to execute code from controller registers using the methods explained by amaurea we need to make sure that we can stay in control for long enough to change the game state and do any other modifications that might be needed to keep the game from crashing. This can be done as explained earlier by crafting a loop that keeps code execution within the controller registers but in this case there's a slightly more efficient method using the games own programming against it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So what we can do now is to overwrite the function pointer in memory for the charged space-time beam (the one that right now points to 0x0a0a where our first entry point is) with 0x4218. This has the effect that for the following frames as long as the space-time beam projectile still exists, when the game runs code to update it, it will no longer be using the chain of super missile and power bomb count and positional requirements but instead helpfully enter the controller registers as a subroutine. This gives us plenty of controllable bytes each frame since we only need one byte to return control back to the game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Below is the final five frames of meaningful input using four controllers and some quick notes on what they do (the 0-3 buttons are extra bits that can be set, but does not represent a button on the controller):
 	$LF
-]p
+]div
 [pre 
 	"   ...Su...A.L.0..3|....ud...XL.0...|B...ud.r.X....2.|.Ys......XLR0.2. 
 	$LF
@@ -167,10 +167,10 @@
 	"   RTS
 	$LF
 ]pre
-[p 
+[div class=p 
 	"As explained above, this is our first chance to run our own code and we'll use it right away to overwrite the function pointer so the game will keep calling into the controller registers no matter our ammo or position. Before returning back to the game we'll also have to clean up the stack so we return back to the right place.
 	$LF
-]p
+]div
 [pre 
 	"   ..s..dl.A.L.0..3|....u..rA..R0...|B...ud.r........|.........XL..... 
 	$LF
@@ -181,10 +181,10 @@
 	"   RTS
 	$LF
 ]pre
-[p 
+[div class=p 
 	"This sets 0x0998 in RAM to 0x26 which changes the gamestate and tells the game that we've just finished it, and it will now start a fadeout into the ending.
 	$LF
-]p
+]div
 [pre 
 	"   B.......A.L.0..3|BY.Su.....L....3|B...udlr........|.Ys......XLR012.
 	$LF
@@ -195,10 +195,10 @@
 	"   RTS
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Since we still have a few frames to work with while the game is fading out, there's some small details we can do while we're waiting for the ending to start. So why not be nice and make sure our animal friends make it out safely.
 	$LF
-]p
+]div
 [pre 
 	"   BY..udlrA.L.0..3|....u..rAX..0...|B...ud.r...R..2.|.........XL..... 
 	$LF
@@ -209,10 +209,10 @@
 	"   RTS
 	$LF
 ]pre
-[p 
+[div class=p 
 	"And this increases our missile count to get a nice item completion percent.
 	$LF
-]p
+]div
 [pre 
 	"   .Y......A..R01..|................|.Ys.........01..|................ 
 	$LF
@@ -221,57 +221,57 @@
 	"   RTS
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Before returning full control to the game, we delete the charged space-time beam projectile to make sure the game does not try to call into the controller registers again.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"It should be noted that instead of overwriting the function for the beam handling code, there are a few other pointers that can be overwritten to keep in control of the game that will persist through door transitions and does not need an active fired beam projectile. It is not used in this case since it would require quite a bit more code to setup and was not needed in this case where we just need to end the game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"As mentioned before this run also uses the uncharged space-time beam a few times. First to exit Golden Torizo's room without fighting him and also resetting the super missile in the room, and finally to create a door transition block that will place us out-of-bounds in the next room which is needed to be able to manipulate the screen-relative position enough to be able to execute code.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The way this works is that when you fire the uncharged space-time beam, the game jumps into the middle of a routine in ROM that does a memory copy into RAM. But since we're entering that routine from the wrong place and with non-intended values in the X and Y registers, this routine will copy a whole lot more data than it is supposed to. It will end up overwriting data for events, items collected, bosses defeated and so on which is what makes it possible to collect the same super missile pack three times. An even more destructive thing happens as well though, it will also overwrite room data with "garbage" blocks where some of these will be valid door transition blocks. We abuse this by using these to first escape GT's room and fight, and last to quickly get out-of-bounds in the room left of GT's room where we can finally get into position to fire the charged space-time beam and ending the game.
 	$LF
-]p
+]div
 [h4 id=Thanksto 
 	" Thanks to
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Big thanks to all of the Super Metroid speedrunning community for their recent efforts in glitching the game, as well as all the people actively contributing to the TASvideos forum thread. Special thanks to hero of the day for suggesting the use of the pause glitch to skip going to kraid.
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
 	": Judging.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
 	": This is a quite unique run. It uses a debug code to aid in reaching its end goal faster, which is arbitrary code execution. We have had varying precedents on runs using cheat codes that were accepted, and that were rejected. These cases all differ in multiple fields, including whether the debug code or cheat code is conventionally accessible in gameplay, whether they are intentionally put in the game for the player to use, and how much of an impact they have on gameplay. But in the end, this just turns out to be an entirely unique case. This is because the run does not just clear the game like a normal playthrough - it takes over control of the game code to trigger the ending.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The movie rules contain a rule against cheat codes, so if the rules are to be followed, this run would be rejected. However, we need to look at the spirit of the rule here. Normally, cheat codes are used to make gameplay easier - make it simpler to finish the game. However, in this case, the run is not ordinarily "finishing the game". It does not actually make "gameplay" easier, because what it actually affects here can barely be called "gameplay". In odd instances such as these, where the game is not being conventionally played or finished, we can make an exception to this rule.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So putting aside the use of the debug code, we are met with a nice, entertaining and well-received run which finishes the game fast. Accepting for Moons. This run will not obsolete any previous run - the current any% ("X-Ray glitch") seems to hold enough merit on its own to keep publication, as it is a more "true" run which completes the game without arbitrary code execution or use of debug codes.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Ilari 
 		"Ilari
 	]a
 	": Processing.
-]p
+]div

@@ -1,5 +1,5 @@
 20
-[p 
+[div class=p 
 	[tt 
 		"zmv
 	]tt
@@ -9,15 +9,15 @@
 	]a
 	", a SNES emulator.
 	$LF
-]p
+]div
 [h3 id=ZMVfileformatdescription 
 	" ZMV file format description
 	$LF
 ]h3
-[p 
+[div class=p 
 	"ZMV file is structured as follows:
 	$LF
-]p
+]div
 [table 
 	[tbody 
 		[tr 
@@ -157,21 +157,21 @@
 	" Savestate
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Next follows a ZST format savestate.
 	$LF
 	"This save state is only loaded if the movie begins from savestate or the version of ZSNES used to make the movie is the different than the one playing it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"On reset or power on without SRAM clear where the version matches, only the SRAM is loaded from the Savestate.
 	$LF
-]p
+]div
 [h4 id=Stream 
 	" Stream
 	$LF
 ]h4
-[p 
+[div class=p 
 	"After the optional savestate, comes the actual stream of movie data.
 	[br 
 	]br
@@ -184,11 +184,11 @@
 	$LF
 	"Each event is at least 1 byte long.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The first byte of the event has the following format:
 	$LF
-]p
+]div
 [pre 
 	"  000 1-byte flags:
 	$LF
@@ -209,18 +209,18 @@
 	"     bit 0: "1" if this is command data instead any of the above
 	$LF
 ]pre
-[p 
+[div class=p 
 	"If the event is a command, the other seven bits define the command. The command could be "reset now" or similar things.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"If the event is RLE data, next follows 4 bytes which is the frame to repeat current input until (inclusive).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"If the event is a "chapter" update, the packet follows with a ZST format savestate. Using a header of:
 	$LF
-]p
+]div
 [pre 
 	"  000 3-byte little endian unsigned int: save state size in format defined above
 	$LF
@@ -233,17 +233,17 @@
 	"  above size+007 9-byte: previous controller input bits
 	$LF
 ]pre
-[p 
+[div class=p 
 	[br 
 	]br
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"If the event is a "controller" update, next comes the controller data
 	$LF
 	"for each changed controller, 12 bits per controller, or 20 bits in the case of the super scope, zeropadding up to full bytes. The minimum length of the controller data is 2 bytes, and the maximum length is 9 bytes. Controller format:
 	$LF
-]p
+]div
 [pre 
 	"   bit 11: A
 	$LF
@@ -270,10 +270,10 @@
 	"   bit 0:  Right
 	$LF
 ]pre
-[p 
+[div class=p 
 	"For example, if this frame contained input for controllers 1 and 2:
 	$LF
-]p
+]div
 [pre 
 	"   byte 1:
 	$LF
@@ -330,7 +330,7 @@
 	"       bit 0:  P2 R
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The number of "controller" update events in the stream should be equal
 	$LF
 	"to the "number of frames" field in the file header.
@@ -341,59 +341,59 @@
 	$LF
 	"to the "number of internal chapters" field in the file header.
 	$LF
-]p
+]div
 [h4 id=Internalchapterindex 
 	" Internal chapter index
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Position in file: (file_size - author_name_length - 2 - external_chapter_count * (zst_size + 4+2+9+4) - internal_chapter_count*4)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Internal chapters are "chapters" made during the movie recording.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The internal chapter index is an index for quickly finding all the internal
 	$LF
 	"chapters in the movie stream. Finding the internal chapter index is another
 	$LF
 	"story though...
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Each item in the internal chapter index is 4 bytes long, and follows this format:
 	$LF
-]p
+]div
 [pre 
 	"  000 4-byte little-endian unsigned int: offset of the chapter in the file
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The offset is counted from the file beginning (zerobased), and points to the
 	$LF
 	"chapter data in the movie stream (after the flag byte).
 	$LF
-]p
+]div
 [h4 id=Externalchapters 
 	" External chapters
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Position in file: ( file_size - author_name_length - 2 - external_chapter_count * (zst_size + 4+2+9+4) )
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"External chapters are "chapters" made during the movie playback.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Each item in the external chapter begins with a savestate,
 	$LF
 	"followed by this table:
 	$LF
-]p
+]div
 [pre 
 	"   000 4-byte little-endian unsigned int: frame number
 	$LF
@@ -414,22 +414,22 @@
 	"   00F 4-byte little-endian unsigned int: offset to movie stream from beginning of file
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The size of an external chapter is therefore (zst_size + 4+2+9+4) bytes.
 	$LF
-]p
+]div
 [h4 id=Externalchaptercount. 
 	" External chapter count.
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Position in file: (file_size - author_name_length - 2)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This is a 2-byte field.
 	$LF
-]p
+]div
 [pre 
 	"  000 2-byte little-endian unsigned int: number of external chapters
 	$LF
@@ -438,11 +438,11 @@
 	" Author name
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Position in file: (file_size - author_name_length)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Last in the file comes the author name field, which is an
 	$LF
 	[a class=extlink href=http://www.php.net/utf8_encode rel=nofollow 
@@ -456,20 +456,20 @@
 	$LF
 	"The number of characters in this field can be calculated only by iterating it.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"(Surprise, the length of this field is in the header, even though
 	$LF
 	"the number of external chapters isn't.)
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	"See also: 
 	(__wikiLink|/Emulatorresources|Emulator resources)
 	", 
 	[a class=intlink href=/FAQ 
 		"frequently asked questions
 	]a
-]p
+]div

@@ -1,16 +1,16 @@
 6
-[p 
+[div class=p 
 	(youtube|v=dmq5_y343Js)
 	$LF
-]p
+]div
 [h3 id=Introduction 
 	" Introduction
 	$LF
 ]h3
-[p 
+[div class=p 
 	"A speedrun classic: an accidental crash while routing one category leads to the RTA record in another dropping by a full minute the following week. This movie takes advantage of a miracle in hardware timing and efficiently executes arbitrary code to skip to the end of the game. This submission also reveals emulation accuracy has reached a point where the cycle-sensitive first generation Pokemon games sync with console.
 	$LF
-]p
+]div
 [h4 id=Categories 
 	" Categories
 	$LF
@@ -29,13 +29,13 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	[b 
 		"Used emulator:
 	]b
 	" BizHawk 2.2.2
 	$LF
-]p
+]div
 [h3 id=Abouttherun 
 	" About the run
 	$LF
@@ -44,26 +44,26 @@
 	" Platform choice
 	$LF
 ]h4
-[p 
+[div class=p 
 	"This movie uses CGB-in-GBA. The Game Boy Player uses Game Boy Advance hardware and is the preferred platform in the RTA community. It does not sync on Game Boy Color because GBA adds an operation to the bios and the extra cycles offset the random number generator.
 	$LF
-]p
+]div
 [h4 id=Versionchoice 
 	" Version choice
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Blue version is used over Red to save 9 frames in version differences. Blue loses 7 frames to a longer cry from the Pokemon on the title screen, but gains 16 frames from a shorter preset rival name. The glitch used in this route works identically on both versions.
 	$LF
-]p
+]div
 [h4 id=Luckmanipulation 
 	" Luck manipulation
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The random number generator in Pokemon Blue is delicate. The routine uses the value of a hardware timer to adjust the two bytes used as random numbers, so any slight change in when the routine is run will affect all random numbers from there on. Every input in this movie was produced by a series of scripts that tried variations in movement and delays to find quick setups for lucky situations.
 	$LF
-]p
+]div
 [h3 id=Arbitrarycodeexecution 
 	" Arbitrary code execution
 	$LF
@@ -72,34 +72,34 @@
 	" The glitch
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Maps have a list of scripts and an index for which script should run. The map script is run before the joypad is processed in the overworld and before the player blacks out in battle. Basic maps with trainers have three scripts in the list: check if a trainer can see the player, display the text and start a battle, and end the battle. The first two scripts each increment the index and the third zeroes it to have the scripts run in a cycle. When the player talks to a trainer directly, the text increments the index twice in place of the first two scripts.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Wild encounters are rolled before the map script is run. If the player finds then blacks out to an encounter where a trainer will be able to see the player, the map script run then will increment the index before the player warps. The second script will run when the player returns to the map and reference values it expects were set by the first script. Those values can be changed by other events while outside of the map. The only notable value change in this variation is the blackout cleared the flag that indicates the player was seen by a trainer. Trainer text checks that flag to know if the player talked to the trainer directly. Now the second script will display text which increments the index twice before the script increments the index itself and starts a battle.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"An index of 4 in Viridian Forest points past the list of scripts and into a list of text. The text at this position contains a control character and inline code to talk to a trainer. The text engine would read the control character then execute the following data as code, but as a map script it is executed as code from the start, and the code interpretation of the character causes the next two bytes to be skipped. This misses the trainer header, or what defines the text data and the flag that indicates if the trainer was defeated. A cleared flag in read-only memory is checked so the code continues, displays invalid text which still increments the index twice, and starts a battle.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Index 6 does the same but with a set flag in read-only memory. No battle starts and invalid, invisible text of a defeated trainer prints when the map script is run. A trainer is talked to manually to increment the index twice. Index 8 points to similar text with inline code to pick up an item, which reads a function address at a position in a list. The position is what is skipped due to the control character, and the invalid position used instead points past the list and into video memory. Video memory is locked when the LCD controller draws the screen and reads will return $FF. The lower byte of the 16-bit address is read in a locked period, but video memory unlocks in the few cycles before the upper byte is read. The actual value in memory is accessible and the resulting address is $F8FF.
 	$LF
-]p
+]div
 [h4 id=Thesetup 
 	" The setup
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The data at $F8FF is a live copy of working memory. Stored here includes the data for Pokemon in the enemy party starting at slot three, all the original trainer names of Pokemon in the enemy party, the in-game timer values, and the data for Pokemon in the PC. A trainer with three or more Pokemon is never battled so slot three onwards in the enemy party remains full of zeroes.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Enemy party OT names are only seen in link cable trades and the game gets away with the player name there in NPC parties. This leaves two copies of the player name in memory because the most Pokemon in an enemy party at once in the route is two. The player name entered in the intro is "♀:[Mn]a.", where "[Mn]" is the single character. These values correspond to the following assembly:
 	$LF
-]p
+]div
 [pre 
 	"push af
 	$LF
@@ -112,14 +112,14 @@
 	"ld a, [$ff00+c]
 	$LF
 ]pre
-[p 
+[div class=p 
 	"In-game time at execution is 8:49:23 including frames, or "ld [$1731], sp". This instruction has no effect.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"PC data starts with a list of Pokemon in the PC then the data of each Pokemon. The list is structured as Pokemon count, the species of each Pokemon, then a terminator, or $01 $99 $FF here. The relevant values in the data of Bulbasaur are its species again, $99, and the first byte of its original trainer ID, $C9. The ID is generated in the intro. These values correspond to the following assembly:
 	$LF
-]p
+]div
 [pre 
 	"ld bc, $FF99
 	$LF
@@ -128,10 +128,10 @@
 	"ret
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Below is a trace of the previous assembly. The initial register values are shown and comments highlight the result of the important operations. The code at $07A0 is the middle of a map change function that warps the player to the map in the A register. $76 is the map ID for the Hall of Fame.
 	$LF
-]p
+]div
 [pre 
 	"; af = $FF20
 	$LF
@@ -261,14 +261,14 @@
 ]ul
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
 	": Judging.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
@@ -278,10 +278,10 @@
 	]a
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Spikestuff 
 		"Spikestuff
 	]a
 	": Publishing.
-]p
+]div

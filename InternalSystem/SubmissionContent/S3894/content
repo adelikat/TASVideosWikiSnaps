@@ -1,15 +1,15 @@
 5
-[p 
+[div class=p 
 	[em 
 		"All your base are belong to pi.
 	]em
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=tNPisyK43Lc)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Nicovideo (account): http://www.nicovideo.jp/watch/sm20328346 
 	[br 
 	]br
@@ -20,18 +20,18 @@
 	$LF
 	"Mediafire: http://www.mediafire.com/download.php?jl622v3bcd46bte (~1.88MB)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Download package (C++ input parser and script file): http://tasvideos-moviefiles.googlecode.com/files/piscript.zip
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Information that is even more technical than what is covered here: 
 	[a class=intlink href=/Forum/Viewtopic.php?p=342003#342003 
 		"forum/viewtopic.php?p=342003#342003
 	]a
 	$LF
-]p
+]div
 [h4 id=Goals 
 	" Goals
 	$LF
@@ -54,31 +54,31 @@
 	" About the TAS
 	$LF
 ]h4
-[p 
+[div class=p 
 	"You may have seen 
 	[a class=intlink href=/2187M 
 		"bortreb's "Total Control Hack" movie
 	]a
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Well, this TAS is a bit different. Instead of ponies, you get pi.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[img class=embed src=http://i19.photobucket.com/albums/b185/jhchan8/pi_smaller.jpg 
 	]img
 	$LF
-]p
+]div
 [h4 id=Whatinthenameofpiisgoingon 
 	" What in the name of pi is going on
 	$LF
 ]h4
-[p 
+[div class=p 
 	"To hijack program control, you need two things:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" A way to divert the program counter (PC) into RAM.
@@ -89,37 +89,37 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Conventional thinking (such as in 
 	[a class=intlink href=/1860M 
 		"p4wn3r's 1:09.63 TAS
 	]a
 	") has shown that the address D36D-D36E is a well-used gateway to send the PC into RAM. Just put any 16-bit number there (little-endian) and the PC will jump to whatever it says when you close the menu. Furthermore, using memory-manipulation glitches such as switching Pokemon beyond the 6th position, and switching and tossing glitched items, you can pretty much write whatever you want from D16A onward. And how do you switch Pokemon beyond the 6th position, if such a thing is even imaginable? Just do a reset at the right time while saving and it will overwrite the Pokemon counter so the game thinks you have 255 Pokemon.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I inject the following sequence into D366 (don't ask): 
 	[tt 
 		"22 00 76 00 F0 F5 D4 50 D3
 	]tt
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Provided that the bytes from D350 to D365 are all 00 (which they are), these 9 bytes will magically hijack the GB and give you complete control of everything you ever wanted, only limited by the GB's hardware. Other sequences including shorter ones exist but I chose this sequence to be as fast as possible. To help out, the rival is given a completely illogical name.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Once the sequence is planted, I close the menu. The game reads D350 off the gateway address and thinks that it is a valid ROM address and so jumps there. The sequence and all future programs are craftily hacked together in a way that is hard to describe casually, so I'll just say this: given enough room (which I have more than enough of), you can write a very simple RAM-writing program. Congrats, you can now write whatever you want.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The payload (final program), which is only 152 bytes long, is a simple VRAM manipulator. It starts out by writing into the tile bank at positions F3-F7 the 8x8 tiles for pi, pi upside down, decimal point, zero, and one, where the last 3 are in Pokemon font (they were somehow erased after leaving the menu; none of the other digits were harmed). The program then enters an input-interactive state where you can feed it key input which can change the tile map. For this TAS, visible tilemap is practially divided into two spaces: topspace (top 12 rows) and bottomspace (bottom 6 rows). The two columns on both sides are unusable. For technical reasons, the bottomspace effectively extends below the bottom of the screen by two rows.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"It works somewhat like this (0x means hexadecimal):
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Feeding it a number from 0x00 to 0xED writes to a cache (at D600) representing the bottomspace (8 rows by 16 columns). Each number writes the tile for either pi or pi upside down in the cache at a given position. The cache exists in order to sync the bottomspace input. To perform a do-nothing-visible action, feed it the number 0xED. It writes off the bottom of the screen.
@@ -138,39 +138,39 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"There is no guarantee that VRAM writing occurs in a safe (to a real GB) manner; it does not check for status of FF40-FF41 (for reference, pages 51-53 of http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf ).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Anyway, scripting VRAM to do what I want is a bit too hard to do entirely with manual hex-editing, so I wrote a simple C++ parser that converts ANSI (ASCII) into input. This allows me to use a text editor instead, and organize the script using characters that the parser ignores.
 	$LF
-]p
+]div
 [h4 id=Aboutthescriptused 
 	" About the script used
 	$LF
 ]h4
-[p 
+[div class=p 
 	"I did my best to sync the "actions" of the tiles with the background music. First, note that dumping cache to bottomspace and writing directly to topspace cannot occur on the same frame, so they must be at least one frame apart.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Second, placing the frame on which the tile appears and the frame on which the peak of a sound effect first occurs on the same frame is not guaranteed to be perceived as sync. The human brain does not work that way. From my own testing, it seems best for the frame on which the tile appears to occur 5 or 6 frames back. Results may vary by person, state of mind, and method of encoding of course.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The normal beat window is 15 frames (this is the width between the first two notes of the Pokemon music when you start in the bedroom). This means that, when syncing to a 15-frame beat, each frame is limited to dumping 14 tiles into VRAM. Some notes occur with a window of 7-8 frames; I can pull this off early on, but I decided that later on it was too much of a hassle to maintain so I ignored those notes.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I threw in a few references to pi, games, or mathematical stuff that can easily be represented by dot matrix display. Otherwise, there's not much else to talk about. For more information about technical details, see this post: 
 	[a class=intlink href=/Forum/Viewtopic.php?p=342003#342003 
 		"forum/viewtopic.php?p=342003#342003
 	]a
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Well anyway, enjoy the TAS and help yourself to 
 	[a class=extlink href=http://www.youtube.com/watch?v=eDiSYp_51iY rel=nofollow 
 		"some pi
@@ -181,16 +181,16 @@
 	]a
 	" if you wish.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Happy Pi Day!
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Nach 
 		"Nach
 	]a
 	": Accepting as improvement to existing run.
-]p
+]div

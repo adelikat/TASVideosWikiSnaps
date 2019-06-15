@@ -1,21 +1,21 @@
 7
-[p 
+[div class=p 
 	"In order to run any lua code in emulators that support it, you need to know what functions to call.
 	$LF
-]p
+]div
 [h2 id=Generalregisters 
 	"General registers
 	$LF
 ]h2
-[p 
+[div class=p 
 	"These registers are typically called once per frame, or otherwise repeatedly called without any special condition needed to trigger them.
 	$LF
-]p
+]div
 [h3 id=Emu.frameadvance()--"Boundary" 
 	"emu.frameadvance() -- "Boundary"
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Not actually a register. Typically, you stick 
 	[tt 
 		"emu.frameadvance()
@@ -26,27 +26,27 @@
 	]tt
 	" loop. When called, Lua releases control back to the emulator so that it can advance a frame or whatever it likes. This does not force the emulator to advance the frame, as the user still has full control over the emulator speed, and can still frame-step as desired.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"For bots, this is one of the two good places to use. All emulators should accept 
 	[tt 
 		"joypad.set
 	]tt
 	" here, and usually without any frame delay.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"For the time being, do not use this function in 
 	[b 
 		"DeSmuME
 	]b
 	". It is glitched: While the frame counter will increment, DeSmuME will fail to emulate the frame, and nothing will happen. Other than a changed frame counter and likely desyncs for movie making.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Sample use:
 	$LF
-]p
+]div
 [pre 
 	" local JoypadUp = {up=true}
 	$LF
@@ -69,22 +69,22 @@
 	"gui.register(function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The registered function is called whenever the emulator updates its display. For all emulators, there are no guarantees that the function is called every frame. If you wish to create a bot to play parts of the game for you, this is a bad register to use, as some frames might be skipped without the bot ever knowing it happened. However, it is recommended to put most or all display-related and user-input code in this register.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Some emulators continuously updates their display even when the emulation is paused, thus calling such a registered function repeatedly. This is a very useful effect, as such scripts can react to a function like 
 	[tt 
 		"input.get()
 	]tt
 	", and through that, run code based on what the user presses, without requiring the user to advance a frame.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Sample use:
 	$LF
-]p
+]div
 [pre 
 	" local function ShowInputKeys()
 	$LF
@@ -109,30 +109,30 @@
 	"emu.registerbefore(function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The registered function should be called after the user hits the frame advance key, when the emulator updates a few internal variables, but before the actual emulation of the game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Whether 
 	[tt 
 		"joypad.set
 	]tt
 	" has no delay or is even used is inconsistent across emulators, however.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"If you wish to create a bot for use in 
 	[b 
 		"DeSmuME
 	]b
 	", it is recommended to use this register.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Sample use:
 	$LF
-]p
+]div
 [pre 
 	" local function Fn()
 	$LF
@@ -147,18 +147,18 @@
 	"emu.registerafter(function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The registered function should be called immediately after the frame is emulated. Like with 
 	[tt 
 		"emu.registerbefore
 	]tt
 	", there are a few noted inconsistencies across emulators.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Sample use:
 	$LF
-]p
+]div
 [pre 
 	" local function Fn()
 	$LF
@@ -175,19 +175,19 @@
 	"Specialized registers
 	$LF
 ]h2
-[p 
+[div class=p 
 	"From here, the use of registers are more specialized. Functions called from these registers aren't necessarily from frame advancing, but rather due to other triggers. These registers are for more advanced coders to use.
 	$LF
-]p
+]div
 [h3 id=Savestate.registerload(function) 
 	"savestate.registerload(function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The registered function is called whenever the user loads a state.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This function will be passed any values stored in the savestate that was returned by a function registered with 
 	[tt 
 		"savestate.registersave
@@ -198,31 +198,31 @@
 	]tt
 	" in order to have this function work.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Useful in restoring some difficult-to-reproduce information stored by 
 	[tt 
 		"savestate.registersave
 	]tt
 	". Even without that, it's also useful in detecting when the user decides to load a state.
 	$LF
-]p
+]div
 [h3 id=Savestate.registersave(function) 
 	"savestate.registersave(function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The registered function is called whenever the user saves a state.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"If this function returns any values, these values are stored along with the savestate. These values are passed to the registerload function.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Typically useful if there's any important information about the current state for your lua code, that you can't easily fetch from the game's memory.
 	$LF
-]p
+]div
 [h3 id=Memory.register(intaddress,{intsize,}function) 
 	"memory.register(int address,{ int size,} function)
 	$LF
@@ -231,18 +231,18 @@
 	"memory.registerwrite(int address,{ int size,} function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Whenever the selected memory location is written to, the emulator immediately calls the registered function, halting emulation until the function returns. Optionally, you can insert a number for the size, triggering the function on a range of addresses instead of just one. When called, the function is passed the address and size of what it's registered to.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Be warned: Even if the source of the change is your lua code, it will trigger this register. Ensure that the function registered within doesn't end up calling itself endlessly, either by wrapping an if statement around the related 
 	[tt 
 		"memory
 	]tt
 	" function or have the function de-register itself before it makes the change.
 	$LF
-]p
+]div
 [h3 id=Memory.registerexec(intaddress,{intsize,}function) 
 	"memory.registerexec(int address,{ int size,} function)
 	$LF
@@ -255,32 +255,32 @@
 	"memory.registerexecute(int address,{ int size,} function)
 	$LF
 ]h3
-[p 
+[div class=p 
 	"When the emulator executes the selected memory location, it immediately calls the registered function, halting emulation until the function returns. Otherwise quite similar to the above 
 	[tt 
 		"memory.register
 	]tt
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Most likely, if you're using these functions, you've already looked into the 
 	[a class=intlink href=/ReverseEngineering 
 		"debugger
 	]a
 	", or otherwise viewed the individual instructions of the game. If not, these functions will rarely, if ever, be of use. Good if you want to detect when a particular routine takes place.
 	$LF
-]p
+]div
 [hr 
 ]hr
 [h2 id=Howtouseregisters 
 	"How to use registers
 	$LF
 ]h2
-[p 
+[div class=p 
 	"A few things you might want to know about how to use the registers. It's quite easy to use registering functions wrong.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Good example
@@ -305,10 +305,10 @@
 	" end
 	$LF
 ]pre
-[p 
+[div class=p 
 	"It's perfectly fine to have the registering function outside of the frameadvance loop, and in fact is highly recommended to do so. Furthermore, you can have one registered function doing one thing and the frameadvance loop do another.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Bad example 1 (don't do it!)
@@ -328,7 +328,7 @@
 	")
 	$LF
 ]pre
-[p 
+[div class=p 
 	"By sticking 
 	[tt 
 		"SomeFunction()
@@ -339,7 +339,7 @@
 	]tt
 	" instead (note lack of parentheses), it gives the function itself to the register. This is good.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Bad example 2 (don't do this, either!)
@@ -362,20 +362,20 @@
 	" end
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The registering functions should be called once and only once, in many cases. By placing a registering function in a loop, you end up calling the registering function far more than once. Bad idea. Especially if the registered function throws an error. It is irritating to deal with the flood of error messages as the emulator runs, when one produces erroneous code in the registered function.
 	$LF
-]p
+]div
 [hr 
 ]hr
 [h2 id=Referencetables 
 	"Reference tables
 	$LF
 ]h2
-[p 
+[div class=p 
 	"For the joypads:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Immediate: The data is transferred without any frame delay. The best possible case.
@@ -644,9 +644,9 @@
 ]table
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/FatRatKnight 
 		"FatRatKnight
 	]a
 	": I only know about FCEUX, Snes9x, VBA, and an older version of DeSmuME. Someone else will have to fill us in on the other emulators and recent happenings on DeSmuME.
-]p
+]div

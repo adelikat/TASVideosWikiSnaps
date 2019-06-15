@@ -1,16 +1,16 @@
 8
-[p 
+[div class=p 
 	"As the hero of this game, Link just doesn't understand why his name isn't in the title of the game. Who is this mysterious 
 	[em 
 		"Zelda
 	]em
 	" person? Even after beating the game, he is as clueless as ever...
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=X0HW0fGuGDQ)
 	$LF
-]p
+]div
 [h3 id=Gameobjectives 
 	" Game objectives
 	$LF
@@ -45,7 +45,7 @@
 	" Comments
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Shortly after 
 	[a class=intlink href=/4698S 
 		"the previous movie
@@ -60,16 +60,16 @@
 	]a
 	".
 	$LF
-]p
+]div
 [h3 id=Theglitchthattriggersitall 
 	" The glitch that triggers it all
 	$LF
 ]h3
-[p 
+[div class=p 
 	"When the game tries to spawn a new sprite, it will check for a free slot (0x00) and puts the new value (the value of the sprite) in the free slot. In the FDS version of this game, if you fill up all slots and play the whistle to spawn a new sprite (for example when the whistle reveals a new exit), the game tries to find free slot but it overflows (it actually counts backwards and underflows) and puts the value in a dangerous location.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This dangerous location can be the 
 	[em 
 		"state
@@ -88,7 +88,7 @@
 	]em
 	" does nothing dangerous when being executed.
 	$LF
-]p
+]div
 [h3 id=Filenames 
 	" Filenames
 	$LF
@@ -101,22 +101,22 @@
 	" 4C 40 06 36 2F 64 24 24
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The first 5 bytes are 
 	[em 
 		"ZELDA
 	]em
 	" and the last 2 are left blank (0x24), which means that the important code starts at:
 	$LF
-]p
+]div
 [pre 
 	" $063D: 0E 4B 06  ASL $064B
 	$LF
 ]pre
-[p 
+[div class=p 
 	"which effectively changes the 4th letter in the 3rd filename from 0x36 to 0x6C (which is necessary, because the characters only ranged from 0x00 to 0x64). Then, the main loop starts:
 	$LF
-]p
+]div
 [pre 
 	" $0640: 20 4B 06  JSR $064B
 	$LF
@@ -136,35 +136,35 @@
 		$LF
 	]del
 ]pre
-[p 
+[div class=p 
 	[em 
 		"$0640:
 	]em
 	" So the main loop starts by making a subroutine call to $064B.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"$064B:
 	]em
 	" This jumps to whatever is inside $642F, which is $EA1F and happens to be the routine that deals with the input. After returning, A holds only the newly pressed buttons and Y holds all the buttons.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"$0643:
 	]em
 	" An Arithmetic Shift Left is done so that the Carry is 1 if A was just pressed, else the Carry is 0.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"$0644:
 	]em
 	" This will branch forward if B was not just pressed (since B is now the MSB), but if B was indeed just pressed this frame then we go to:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"$0646:
 	]em
@@ -174,14 +174,14 @@
 	]em
 	" but the microprocessor still does something according to the bits in the opcode. The important part is, that this instruction shifts a byte in memory one bit to the left. Which byte is shifted is given by whatever address is in $0002, which is $0602 because that is where the address was stored when the glitch started (remember how the glitch started by jumping to $0602?). Y is being added to the $0602 to give the final address that is being shifted. It will shift the Carry into the LSB, which was previously set at $0643.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[em 
 		"$0648:
 	]em
 	" Jump to the start of the main loop.
 	$LF
-]p
+]div
 [h3 id=Thecodeitself 
 	" The code itself
 	$LF
@@ -190,82 +190,82 @@
 	" Writing the code
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The small problem with this way of writing code is that it is really slow. You write the code by shifting bits, and you have to repress the buttons. In FCEUX this means you effectively write with a speed of 1 bit per 2 frames, which is 3.75 bytes per second (REALLY SLOW)... 
 	[small 
 		"(well it's not really 3.75 bytes per second because of clever ways of writing code, which I explain later
 	]small
 	")
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I say 
 	[em 
 		"in FCEUX
 	]em
 	" because this emulator only lets you input once per frame, even when it is polled multiple times. This also had the effect that sometimes some buttons were lost (because of unfortunate timing) and I had to wait a frame.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The whole memory where we want to write stuff is filled with 0x00's. This, and the fact that we are shifting from the right means that the lower the bytes are, the faster we can write them. For example a 0x00 takes no time at all, because we can just skip it. A 0x01 just takes 1 bit, 0x02 and 0x03 take 2 bits and so on. All bytes from 0x80 to 0xFF take all 8 bits and so I tried to avoid them as much as possible.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"To shift in 1 bits, the Carry has to be set, so we have to newly press A for that frame (see $0643), and remember that we had to also newly press B (see $0644) to actually make the shift. Holding both A and B means that Y is at least 0xC0. Since Y is added to the address (which is $0602), we can write code starting at $06C2.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"A way to actually execute the code is to corrupt the filename code. By shifting a 0 to $064B, changing it from 0x6C to 0xD8, we can escape from the loop. It will fail at the 0x22 at $0654, so we change that to a 0x44. Then the code will execute to our code, only that $06C2 is part of the BRK (the 0x00 instruction) at $06C1, so we don't start our code at $06C2, but $06C3.
 	$LF
-]p
+]div
 [h4 id=Requirements 
 	" Requirements
 	$LF
 ]h4
-[p 
+[div class=p 
 	"So, the credits are loaded with Level 9, which means we have to actually load it. This can be done by setting $0010 to 0x09 (level 9), $0011 to 0x00 (do something) and $0012 to 0x02 (load the bank).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"After the level is loaded, we have to finish the game somehow. This is done by setting $0011 to 0x00 (do something) and $0012 to 0x13 (credits routine).
 	$LF
-]p
+]div
 [h4 id=Let'sgo 
 	" Let's go
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Starting at $06C3:
 	$LF
-]p
+]div
 [pre 
 	" 29 02 20 4C 84 09 09 85 10 6E 00 20 A5 3C D0 FC 09 13 20 4C 84 20 7B 63
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Cool, huh? Let's see...
 	$LF
-]p
+]div
 [pre 
 	" $06C3: 29 02     AND #$02
 	$LF
 	" $06C5: 20 4C 84  JSR $844C
 	$LF
 ]pre
-[p 
+[div class=p 
 	"We are in luck and A is 0xCA which means we can change it to 0x02 by ANDing, which is faster than LDA #$02, because that would be A9 02 and remember that writing A9 is slower than writing 29. Jumping to $844C does quite a bit setup for us. It sets $0012 to whatever is in A (which is 0x02), it sets $0011 to 0x00 and it returns with A being 0x00.
 	$LF
-]p
+]div
 [pre 
 	" $06C8: 09 09     ORA #$09
 	$LF
 	" $06CA: 85 10     STA $0010
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Because A returned as 0x00, we can use ORA to set A to 0x09, which again, is faster than using the slow LDA. Then we set $0010 to 0x09 and we finished our first requirement. Only the problem now is that where do we return to? How do we continue the game? How do we continue the code after Level 9 loaded?
 	$LF
-]p
+]div
 [pre 
 	" $06CC: 6E 00 20  ROR $2000
 	$LF
@@ -274,28 +274,28 @@
 	" $06D1: D0 FC     BNE $06CF
 	$LF
 ]pre
-[p 
+[div class=p 
 	"NMI is disabled by the game to avoid interrupts (updating the screen) before the game is done calculating the frame. We manually activate it by shifting the Carry (which is thankfully set) into the NMI enable bit in $2000. Then we start our own "infinite loop" which continues until $003C holds 0x00. $003C is basically a timer that counts down until we can move in the dungeon. So the code continues when the level is loaded and we can basically move.
 	$LF
-]p
+]div
 [pre 
 	" $06D3: 09 13     ORA #$13
 	$LF
 	" $06D5: 20 4C 84  JSR $844C
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Since $003C should be 0x00 by now, A is also 0x00 (because of the LDA $003C), which means we can, again, change it to 0x13 by using the fast ORA. Then we, again, call $844C which does the same thing as before, only with a different A. $0012 is set to 0x13 and $0011 is set to 0x00. At this point we could write a quick infinite loop to show the credits and so on, but that would result in a crash as soon as you press something after the credits. To avoid that, the last piece of code is this:
 	$LF
-]p
+]div
 [pre 
 	" $06D8: 20 7B 63  JSR $637B
 	$LF
 ]pre
-[p 
+[div class=p 
 	"$637B is the infinite loop the game uses, so the game is back to normal now and starts the credits routine.
 	$LF
-]p
+]div
 [h3 id=SpecialThanksto 
 	" Special Thanks to
 	$LF
@@ -310,25 +310,25 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	[small 
 		"(Seriously though, who is Zelda?
 	]small
 	")
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Nach 
 		"Nach
 	]a
 	": I don't know what's going on. I can't make any sense of this. Consider yourself as glitching out the judge☺ابوSنصرO محمدT بEنV محEمد فا Россия²راYبی‎(T)נ"ך. Accepting as new run for this game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Spikestuff 
 		"Spikestuff
 	]a
 	": Publishing!
-]p
+]div

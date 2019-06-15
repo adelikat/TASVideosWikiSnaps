@@ -1,8 +1,8 @@
 7
-[p 
+[div class=p 
 	(youtube|v=Qux6-e6e-R8)
 	$LF
-]p
+]div
 [h3 id=Categories 
 	" Categories
 	$LF
@@ -71,7 +71,7 @@
 	" About the run
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Some terms or concepts used in the TAS (such as Cooltrainer) have been explained in the 
 	[a class=intlink href=/4376S 
 		"previous submission
@@ -82,7 +82,7 @@
 	]a
 	" by gifvex, except that Blue version is used over Red version as it manipulates the required trainer ID faster than Red version, factoring in time lost from Blue version's slower preset player name.
 	$LF
-]p
+]div
 [h4 id=Intro 
 	" Intro
 	$LF
@@ -214,14 +214,14 @@
 	" Obtaining Item Underflow
 	$LF
 ]h4
-[p 
+[div class=p 
 	"Note that the remaining sections make heavy use of 
 	[a class=extlink href=https://www.github.com/pret/pokered rel=nofollow 
 		"the pokered disassembly
 	]a
 	" labels. Each time a new label is mentioned or referenced much later than previous references, the address in square brackets will be listed next to it.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" 
@@ -426,30 +426,30 @@
 	" Quantity 255
 	$LF
 ]h4
-[p 
+[div class=p 
 	"When the game has to completely remove an item from the inventory, it shifts the items below in order to fill up the empty item slot, until it reaches the end of list terminator (marked as CANCEL). If an item with a quantity of 255 is below the tossed item, then the game mistakes the quantity of 255 for the end of list terminator and stops shifting the remaining items upwards. This leads to interesting side effects such as duplicating the 255 quantity item, or having another item represent the cancel button (despite not actually being the 0xff item). While the former effect makes obtaining the farming setup faster, the latter effect is relevant in obtaining Item Underflow.
 	$LF
-]p
+]div
 [h4 id=ItemUnderflow/DryUnderflow 
 	" Item Underflow/Dry Underflow
 	$LF
 ]h4
-[p 
+[div class=p 
 	"When the game merges two same items via swapping, it checks if the on-screen menu needs to be resized (note that this only refers to the current four items shown on screen). If the resulting list length is one, then the menu should be resized to 01 (only being able to use the first item). However, if a merge was somehow accomplished so that the resulting list length is zero (or any other value), then the menu is not resized. In normal gameplay, this does not matter as it is impossible to merge two items with only one item in the inventory. However, by having a non-CANCEL item act as the cancel button, we can merge two items together while having only one item in the inventory. By doing this twice, we can underflow the number of items in the inventory to 255.
 	$LF
-]p
+]div
 [h4 id=LWA(LuckyWinsAgain) 
 	" LWA (Lucky Wins Again)
 	$LF
 ]h4
-[p 
+[div class=p 
 	"LWA, or "Lucky Wins Again" (poking fun at my successful attempts of finding new ways to break the Gen 1/2 glitched speedruns) is the main farming glitch used to catch the remaining 148 Pokémon in the game. The glitch abuses the capability for a mart to create a buffer overflow. When a mart is loaded, the game copies the list to 
 	[em 
 		"wItemList
 	]em
 	" [0xcf7b], terminated by 0xff. Therefore if we were to create a mart that has a terminator much later than expected, the copied data would overflow into unrelated memory. By controlling the buffer overflow, we can overwrite five main variables allowing us to catch Pokémon at a very fast rate. These variables are:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" 
@@ -492,10 +492,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Other relevant variables that are affected as a side effect of the buffer overflow:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" 
@@ -542,14 +542,14 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"To create this custom mart, text pointer manipulation is used. Firstly, the base text pointer is replaced to be 0xf31d (echo RAM copy of 
 	[em 
 		"wNumBagItems
 	]em
 	" [0xd31d]). From there, 0xf32f, the location where the Pewter Museum sign would read its text using pointer lookup, is manipulated to 0xf32b, which points to the earliest possible address that we can set up this glitch (anything earlier would require tossing the "CANCEL" item which requires too much preparation). At 0xf32b, we set its value to 0xfe. This causes the game to call the mart code instead, as in the text ID engine the game checks the first byte of the text to see if it matches specific values and does alternate functions based on them. In this case, 0xfe will treat the NPC (or sign) as a mart. By removing any early instances of 0xff, setting the actual terminator much later, and manipulating the expanded inventory pack to align correctly with the destination, we can create a buffer overflow that will desirably corrupt memory according to the above values to efficiently catch Pokémon.
 	$LF
-]p
+]div
 [h3 id=Alternativesconsidered 
 	" Alternatives considered
 	$LF
@@ -568,10 +568,10 @@
 	" Reasons for rejection
 	$LF
 ]h3
-[p 
+[div class=p 
 	"LWA isn't very interesting to watch and becomes boring pretty quickly, but the overall goal (catching all Pokémon) is considered 100% and is thus Vault-able. However, it could be deemed rejectable for not being entertaining enough for Moons and using somewhat arbitrary restrictions for Vault, which aims to go as fast as possible. These restrictions are in particular:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Does not modify Pokédex flags.
@@ -582,10 +582,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"Other restrictions were self-imposed during the routing of this TAS. These restrictions might not even matter towards fastest completion time as LWA may be the fastest setup anyway, although other setups that do not follow the other self-imposed have not been looked into.
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Does not use glitches that allow executing arbitrary ROM addresses. Modifying the map script pointer (called every overworld frame) comes close to this as it allows specifying an arbitrary ROM address, but fails to completely cover the entire ROM space as only ROM banks that are used by maps can be executed. It is still not used for this TAS.
@@ -648,14 +648,14 @@
 ]ul
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
 	": Judging.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
@@ -669,18 +669,18 @@
 	]a
 	" have also been updated as a result of the discussion surrounding this movie, in order to define what levels of glitches are (not) allowed for full completion movies.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Since this movie is much more repetitive in achieving its goal, only relying on one major glitch to collect all Pokémon in one chain, it also can only be accepted in the Vault tier based on entertainment grounds. As such, accepting to the Vault as an improvement to the 
 	[a class=intlink href=/2653M 
 		"published "Gotta Catch 'Em All!" movie
 	]a
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Spikestuff 
 		"Spikestuff
 	]a
 	": Gotta Break 'Em All! PUBLISHING!... Wait... that's not how the song goes.
-]p
+]div

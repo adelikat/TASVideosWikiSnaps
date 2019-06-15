@@ -5,20 +5,20 @@
 	]b
 	$LF
 ]h2
-[p 
+[div class=p 
 	"The upgrade trick in Final Fantasy 3 is a bug that allows you to take items gained in combat and use them to turn other items in your inventory into other things and upgrade your lead character.  There are plenty of methods stated on the internet for getting this to work, but are all needlessly complicated in execution.  This article focuses on the causes of the glitch and is somewhat technical; a simpler explanation focusing more on the execution will be forthcoming.  For clarity's sake, I used screenshots taken from a translated ROM.
 	$LF
-]p
+]div
 [h3 id=Memory 
 	[b 
 		"Memory
 	]b
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Memory block 60C0-610F contains the values for your inventory and the first line of your lead character's stats.  Its in-battle format is as follows:
 	$LF
-]p
+]div
 [pre 
 	"       ┌─────Index
 	$LF
@@ -47,11 +47,11 @@
 	"  Status─────┘
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Each slot in your inventory is split between two bytes.  The first is the "index", or what the stack contains.  The second is the stack's "quantity", how many of an item is in the stack.  Immediately following your inventory is your first character's vital statistics, but we'll get into that later.  For now we'll focus on the inventory.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		[em 
 			"***IMPORTANT!***
@@ -59,26 +59,26 @@
 	]b
 	"  The way your inventory is formatted when you're not in combat is different from when you're in combat.  Keep this in mind when you're poking around the memory for yourself.  The bug is the result of the battle's format, so we'll deal exclusively with that format.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"Example:
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Just after finishing the Earth Shrine and de-equipping your party, your inventory would look something like this:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[img class=embed src=http://i354.photobucket.com/albums/r401/Ferret_Warlord/Final_Fantasy_III_J-0.png 
 	]img
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"And, when in combat, the inventory memory block would look like this:
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
@@ -91,24 +91,24 @@
 	"60Fx: 00 00│00 00│00 00│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"B2 is the index for SouthWind, and you have two; A6 is the index for Potion, and you have five; 1E is the index for Knife, and you have four; etc.
 	$LF
-]p
+]div
 [h3 id=ItemDrops 
 	[b 
 		"Item Drops
 	]b
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The largest a stack can be is 99.  If you have 99 in a stack, and you get an item drop, then the game deals with the extra item by finding the next empty quantity byte after the stack, dropping its index there and dropping its quantity in the next index.  Let's demonstrate using potions.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"During combat...
 	$LF
-]p
+]div
 [pre 
 	"       ┌───A6 is the index for potions
 	$LF
@@ -121,10 +121,10 @@
 	"60Cx: A6 63│00 00│00 00│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Now, combat is over, and you win a potion.
 	$LF
-]p
+]div
 [pre 
 	"        ┌───Stack is full, drop potion into next empty quantity
 	$LF
@@ -139,10 +139,10 @@
 	"60Cx: A6 63│00 00│00 00│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"So what you end up with is...
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
@@ -157,33 +157,33 @@
 	" 00│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"So now you have 166 of nothing, and no kaiser claws (item at index 01).  These values are meaningless, so they get zeroed when the inventory is reorganized.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Now, what would happen if you had a stack of four leather helmets two slots after your potion stack?  Arranged, your inventory would look like this:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[img class=embed src=http://i354.photobucket.com/albums/r401/Ferret_Warlord/Final_Fantasy_III_J-1.png 
 	]img
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"And in battle memory would look like this:
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
 	"60Cx: A6 63│00 00│62 04│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Get into combat and win a potion.
 	$LF
-]p
+]div
 [pre 
 	"                ┌──The index for the dropped potion
 	$LF
@@ -212,40 +212,40 @@
 	"                      helmet's index!
 	$LF
 ]pre
-[p 
+[div class=p 
 	"So now the helmet stack no longer refers to index 62, but index 63, since the dropped potion's quantity got added to its index.  Congratulations, you now have four onion helmets!
 	$LF
-]p
+]div
 [h3 id=TwoItemDrops 
 	[b 
 		"Two Item Drops
 	]b
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Sometimes, you may win more than one of the same item in combat.  If your stack of that item is full, the game treats each extra as a separate item and simply iterates the process described above.  The good news is that you're almost always garaunteed glitchy behavior because of this.  Let's use potions again as an example.
 	$LF
-]p
+]div
 [h3 id=SpawningKaiserClaws 
 	[b 
 		"Spawning Kaiser Claws
 	]b
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Before combat, you have a stack of 99 potions.
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
 	"60Cx: A6 63│00 00│00 00│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"You win two potions.  It handles the first normally.
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
@@ -260,10 +260,10 @@
 	" 0│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"But the second one...
 	$LF
-]p
+]div
 [pre 
 	"                      ┌──Here's an empty quantity!
 	$LF
@@ -274,10 +274,10 @@
 	"60Cx: A6 63│00 A6│01 00│00 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"And so...
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
@@ -292,30 +292,30 @@
 	" 00│00 00│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"It doesn't bother checking to see if the slot is occupied.  This results in 166 of nothing, a stack of no kaiser claws, and a stack of 166 kaiser claws.  You just spawned claws out of nothing.  The other two meaningless stacks get discarded and the other stack gets reset to 99 since you can't have any more than that.
 	$LF
-]p
+]div
 [h3 id=UpgradingTwoItemsinOneShot 
 	[b 
 		"Upgrading Two Items in One Shot
 	]b
 	$LF
 ]h3
-[p 
+[div class=p 
 	"So, now you have an onion helmet, but want to get the rest of the onion armor.  You buy four leather robes and four copper rings, and arrange them in your inventory with your potions thusly.
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
 	"60Cx: A6 63│00 00│73 04│00 00│8B 04│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"73 and 8B are the indexes for leather robes and copper rings respectively.  You get into combat and win two potions.
 	$LF
-]p
+]div
 [pre 
 	"                 ┌──First dropped potion is dealt with as
 	$LF
@@ -346,10 +346,10 @@
 	"                            └──But this one is empty.
 	$LF
 ]pre
-[p 
+[div class=p 
 	"And so you have...
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
@@ -372,41 +372,41 @@
 	" 04│00 00│00 00│00 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"In one shot, your robe and ring have become an onion armor and onion glove respectively.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This method can be done with any number of dropped items.  Just remember that the process iterates itself with each dropped item and arrange your inventory accordingly.
 	$LF
-]p
+]div
 [h3 id=UpgradingtheLeadCharacter 
 	[b 
 		"Upgrading the Lead Character
 	]b
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Here's a tip: the way the game checks for a quantity byte is by checking each odd byte in sequence after the full stack.  It also fails to go back to the beginning of the inventory once it reaches the end of your pack.  This means that there's opportunity to corrupt other pieces of data.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Look back at the chart at the beginning of the article.  You'll see that your lead character's data comes immediately after your party's inventory.  It is possible to abuse the game's method for dealing with extra items in order to give your lead character an edge.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Place a potion at the end of your inventory like this:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[img class=embed src=http://i354.photobucket.com/albums/r401/Ferret_Warlord/Final_Fantasy_III_J-2.png 
 	]img
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Cropping off the first three lines of your inventory, the memory block should now look something like this when in combat.
 	$LF
-]p
+]div
 [pre 
 	"       ┌─────Index
 	$LF
@@ -429,14 +429,14 @@
 	"  Status─────┘
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Some notes: Like most systems, multi-byte numbers are read from right to left, so the larger digits are on the right.  Strings, like your character's name, are read from left to right.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"With this setup, enter combat and win a potion.  Here's what happens:
 	$LF
-]p
+]div
 [pre 
 	" 
 	$LF
@@ -465,10 +465,10 @@
 	"is this one.
 	$LF
 ]pre
-[p 
+[div class=p 
 	"This results in...
 	$LF
-]p
+]div
 [pre 
 	"       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
 	$LF
@@ -485,54 +485,54 @@
 	" B2 A6 AE FF FF│28 00│32 00
 	$LF
 ]pre
-[p 
+[div class=p 
 	"The rightmost byte for your character's experience was set to A6.  And since this byte represents the upper range of this number, this means your character just gained 10,878,976 experience in one round of combat.  The game will reset this to 9,999,999 in a bit, but still, your character has the maximum amount of experience allowable.  Since the game is programmed to prevent gaining more than one level per combat, this means your character will gain one level per round of combat.  Note that also the lead's name gets affected; in this case, Dock's name is changed to Eock.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"You can do some other things with this too.  Place the potion stack one space back and you can change your character's class.  However, this is mostly pointless: Stat changes aren't made unless you go through the job menu.  All glitching yourself a job does is allow you to equip different equipment; all other stats are transferred to the new job.  You can also crash the game if you try this as a ninja.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Also, if you have already performed the mass experience bug and get two potions with the same setup, or if you get three potions in one round without having done the bug, the character's max HP will shoot up to 9999.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Plus, you can chain the bugs together.  Place a stack to be upgraded at the end of your inventory, place the potion stack two spaces back, and get two potion drops in one combat round.  You'll upgrade the stack and gain a ton of experience that way.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"Can you upgrade your other characters?
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Theoretically, yes, but you'd have to keep everyone else dead up until the ancient's labyrinth, and that's probably not practical.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"Can you do other things with the bug?
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Everything else is too far removed from the inventory to be of use.
 	$LF
-]p
+]div
 [h2 id=ItemIndexList 
 	"Item Index List
 	$LF
 ]h2
-[p 
+[div class=p 
 	"This list was pulled directly from 
 	[a class=extlink href=http://www.gamefaqs.com/nes/563415-final-fantasy-iii/faqs/13262 rel=nofollow 
 		"EmeraldThunder21's savestate hacking guide
 	]a
 	".
 	$LF
-]p
+]div
 [pre 
 	"00	Nothing
 	$LF

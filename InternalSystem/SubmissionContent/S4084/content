@@ -3,16 +3,16 @@
 	" Introduction
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Hi there! In this exciting episode of 'Pokémon Gold: The Game', a young boy named 'A' is going to run around Johto buying and selling items he finds on his journey. Then, he will look in his Coin Case and will make a call to his best friend '999', who will make him a Pokémon Champion without ever fighting the Elite Four.
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	"This run does not aim for the fastest possible time. It was made to show the people that Generation I isn't the only Pokémon game series that can be completed with pure glitches. I am also 100% sure that this run could be significantly improved, since I have no knowledge about how RNG works in Generation II. I was solving all my problems by inserting big amounts of delay between important actions, so that RNG gets a chance to cycle a couple of times. And, since it is my first TAS ever (excluding the tests), I may have made a bunch of obvious mistakes along the way.
 	$LF
-]p
+]div
 [h3 id=Categories 
 	" Categories
 	$LF
@@ -43,94 +43,94 @@
 	" Emulator/ROM
 	$LF
 ]h3
-[p 
+[div class=p 
 	"The movie was recorded on 
 	[a class=extlink href=https://code.google.com/p/vba-rerecording/downloads/detail?name=vba-rerecording-svn480-win32.7z&can=2&q= rel=nofollow 
 		"VBA-RR v23.6 svn480
 	]a
 	". Since VBA has problems with emulating the Real Time Clock while recording a movie, and correct RTC values are crucial for the run, the RTC emulation was turned off. All other settings were left at their defaults.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I used a standard UE Gold Version ROM found on the Interwebz. MD5: a6924ce1f9ad2228e1c6580779b23878, filename: Pokemon Gold Version (UE) [C][!].gbc
 	$LF
-]p
+]div
 [h3 id=Abouttherun 
 	" About the run
 	$LF
 ]h3
-[p 
+[div class=p 
 	"This run is abusing 3 different programming errors:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"1. Pokémon cloning glitch
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"In order to buy all the items needed, a huge amount of money is required. Thankfully, using the Pokémon cloning glitch to clone a Pokémon holding an item duplicates the item too. So, to get that huge amount of money, 3 Pokémon holding 3 valuable items (Nugget, PP Up, Big Mushroom) are cloned, essentially doubling my amount of cash.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"2. Coin Case glitch/glitch dimension
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"On Pokémon Gold/Silver, there is a popular glitch involving opening the Coin Case after listening to Machop/Machamp's cry. The Coin Case text script is improperly terminated, so the game tries to execute commands past the actual script, leading to arbitrary code execution. 
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This text script error causes the game to jump to address $E112. By listening to specific cries, manipulating the party Pokémon list and by standing in specific locations on the map, it is possible to redirect that accidental jump to a useful location - I chose my 4th boxed item as a location to store my code (more on that later).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"3. Glitched Pokégear numbers
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"There exist only 36 different numbers a player can hold in their Pokégear contact list. However, the maximum value for a byte is 255, not 36. So there exist (255-36 equals... umm...) 219 numbers with no behavior assigned. Every number has a pointer, which tells the game where to look for the script to execute after calling a number.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"All those script pointers are located in a table. Like with the glitch Pokémon in Gen I, requesting a script pointer for a number with ID bigger than 36 will cause the game to read a pointer from a memory area beyond the table. And by sheer luck, the number ID 255 (0xFF) happens to have a script pointer that triggers the Hall Of Fame sequence!
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[b 
 		"Creating the payload
 	]b
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"So the goal of the run is to turn the Coin Case's bad habit of executing arbitrary code into our favor, by causing it to add a glitch person with ID 255 into the Pokégear. Then, by calling that newly added person - we complete the game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I'm not going to describe the method how the Coin Case's arbitrary code execution works in much detail. If you're interested in the inner workings of this glitch, visit this link: http://forums.glitchcity.info/index.php/topic,6716.0.html
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The address $E112, the initial jumping location, is a ECHO RAM section which contains several music/sound related addresses. By playing different sounds and cries it is possible to change the code flow and jump somewhere else. Machop's cry contains a sequence which will redirect the instruction pointer to $EB12.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Now at $EB12, a table of current color palettes is located. By standing in specific areas, it is again possible to redirect the code flow. The grassy area in front of Bill's lab is such a specific area - it contains a jump to $FA98.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"After this jump, we're finally located somewhere more useful - in the middle of the third party Pokémon data. This is where the most manipulation potential is. But instead of trying to construct opcodes by catching Pokémon with specific IVs, I decided to use fourth Pokémon's moveset and ID number to create yet another jump to $F61D - 4th item in the PC box. Now, I can construct my own program inside my PC.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The code used to add the person only has to do two different things:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Add the actual person to the list (write 0xFF to any address between $D9C6 and $D9CF)
@@ -141,10 +141,10 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"So normally, this piece of machine code should look like this:
 	$LF
-]p
+]div
 [pre 
 	"ld   a,$ff
 	$LF
@@ -160,14 +160,14 @@
 	$LF
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Sadly, it would be way too easy if it was possible with such a little bit of effort. The opcodes we can use are severely limited by the maximum quantity (99) and the item availability. The real code used to add the glitch ID 255 to the Pokégear is a lot more difficult to understand, and half of it are just elaborate ways of doing nothing, just to pad the opcodes and make them representable as items.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Below is the item list used in the run, and the code it evaluates to.
 	$LF
-]p
+]div
 [div class= 
 	[ul class=nav nav-tabs role=tablist 
 		[li class=nav-item 
@@ -369,40 +369,40 @@
 	" Explaining certain steps
 	$LF
 ]h3
-[p 
+[div class=p 
 	"At the game's very beginning (first 8 minutes of the game), all actions are delayed on purpose, most noticeably, by continuously mashing the A button, causing the text scrolling to be delayed. For some reason, with insufficient time delay, I wasn't able to successfully get the Coin Case to do what I wanted.
 	$LF
 	"Also, derping on the new game menu at the game start is required to get a proper trainer ID.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"While travelling from town to town, I collect every possible valuable item I can find. The real problem with getting all the needed items is the lack of money. So I try to earn as much money as I can, so later only one item duplication round is needed to satisfy my needs.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The real time clock is very important to the trick. If the glitch person 255 is called after the morning has passed, the game would say that 'the number is out of the area'. Also, the lady who gives out TM21 (Frustration) comes only on Sundays.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Special thanks to Sanqui, for discovering the actual arbitrary code part of the coin case glitch.
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
 	": Judging.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Mothrayas 
 		"Mothrayas
 	]a
 	": While this run does well to showcase an arbitrary code execution glitch that can be used to enter the Hall of Fame, there are a number of issues that make it unsuitable for publication:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" It is slower than the current unassisted any% record of 
@@ -421,6 +421,6 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"For these reasons, I'm rejecting the run for publication. Good luck on your future attempts!
-]p
+]div

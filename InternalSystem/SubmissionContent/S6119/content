@@ -1,60 +1,60 @@
 13
-[p 
+[div class=p 
 	"This is an explanation of the strategy behind a console-verified Pokemon Yellow Any% NSC TAS in 9:52.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=L9P82Owm4Kk)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"A previous revision in 10:17 showed at GDQx 2018 and can be seen now at the following link:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=GwvqGWVivVg)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This was an improvement from an initial prototype which was made for the 2018 Pokemon Speedrun (PSR) Marathon with a time of 11:28:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	(youtube|v=3xPtvpgxxrY)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Credit goes to Luckytyphlosion and Gifvex for glitch routing, Stringflow for helping with botting setups for more intense RNG, and GoddessMaria's general assistance including looking at forest and gen 1 miss manips.  
 	$LF
-]p
+]div
 [h2 id=Setup 
 	"Setup
 	$LF
 ]h2
-[p 
+[div class=p 
 	"We now use the pipeline described here to verify console accuracy of gameboy TASes. https://pastebin.com/DXiDT9ZT
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"This pipeline has been used to verify TASes by both me and Extrems, and it was demonstrated publicly in the practice rooms at SGDQ 2018.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I used a gbc_bios.bin for the GBC firmware and set CGB in GBA to True for GBP verification purposes.
 	$LF
-]p
+]div
 [h2 id=GeneralStrategy 
 	"General Strategy
 	$LF
 ]h2
-[p 
+[div class=p 
 	"RAM Addresses in BizHawk are offset C000 lower than those listed in other sources; addresses are Big Endian and in WRAM.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"End of Paragraph Textboxes that can be cleared with B faster than with A/without a jingle can frequently be cleared faster by adding B presses earlier in the textbox due to JoyPadLowSensitivity
 	$LF
-]p
+]div
 [h2 id=Route 
 	"Route
 	$LF
@@ -63,181 +63,181 @@
 	"Intro
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Manip TID 26F1 (RAM Address 1358 in BizHawk), current manip waits 4-3-12-2 frames on the first 4 inputs of the TAS to get this.  This corresponds to the first half of the party count address.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Start a new game, and hold B while text is appearing while clearing text with A, switching which input holds and which one clears as needed to avoid consecutive input lag.  This achieves the same effective text speed as Fast without setting options before New Game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Name your character the default Yellow, which corresponds to a data value of 61 which can be swapped into the owned pokemon count
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Name your rival the default Blue, which has a side effect of improving the speed of the battle transition before Oak catches Pikachu.  The transition reads from invalid memory because battle transitions are based on your first pokemon's level and the opponent's level, but you don't have any owned pokemon yet!  This out of bounds read ends up pulling from rival name.  By either writing 5 characters into a non default name and then deleting 4 of them (useful for glitchless) or in a shorter run like NSC using a default name, you'll guarantee the ~30 frame faster transition.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Set options using fast options: inputs Start->Up->Up->Left+A->B->Start.  This is the payoff for not setting options before new game, it is faster in TAS timing to set options after the game loads as the start menu is a few frames less laggy than entering options from the main menu.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Pikachu Manipulation Strategy
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Before leaving the house, set up rDIV in System Bus FF04 so that the desired Pikachu DVs are possible.  A Pikachu with DVs 70C8, 70C9, 70D8, 70D9, 71D8 or 71D9 is needed for ACE and the optimal rival battle.  These DVs are generated from successive calls to HRandomAdd, and HRandomAdd is calculated by addition of its current value and rDIV, so for instance to generate Pika 70C9 HRA=C9 and rDIV=A7 are needed so that HRA2 = HRA + rDIV= C9 + A7 = 70.  In decimal the ACE-worthy Pikas come from rDIV values of 151,152,167,168, and 169.  Within a given map, rDIV tends to be stuck cycling in increments of 18.3125 so that it repeats every 14 frames.  In order to break the cycle efficiently, the amount of time spent on previous maps needs to be varied to find different LCD disable lengths between maps.  The last textbox before DVs can then be delayed to get to the right part of the cycle for 151-152 or 167-169.  Also, in Oak's house where Pika DVs are obtained, textbox delays (especially before the last end of paragraph text box) will shift the initial HRA value (C9 in the example) without shifting rDIV on a given frame.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Practically this means delaying the last input before Pika DVs at least 14 frames to provide buffer space for the rDIV cycle, then changing up turns while walking, delaying walking, pressing A to check for NPCs, and delaying textboxes (especially end of paragraph boxes) on a previous map such as parts of Mom's house while watching Pika's DVs until DVs that correspond to the good rDIV values are found.  Then in Oak's house removing a frame before Pika DVs and adding it in different areas of Oak's house will generate several different initial HRA rolls, hopefully landing on or near C8/C9/D8/D9.  If C7/CA/D7/DA are found, removing another frame from before Pika DV generation and adding it to the immediately prior textboxes is more likely to shift HRA by a single value.
 	$LF
-]p
+]div
 [h3 id=RivalOneandCutscenes 
 	"Rival One and Cutscenes
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Use this Strategy to manip a Pikachu with DVs 70C8, 70C9, 70D8, 70D9, 71C8, or 71C9
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Win in 3 turns in red bar by critting Eevee with Thundershock, taking a 7 damage 1/39 high roll tackle, hitting Eevee with non-crit Thundershock, taking a 10 damage 1/39 high roll critical hit tackle, then critting Thundershock again.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Avoid encounters, get the parcel, take all yolograss, deliver the parcel, avoid encounters again and buy two poke balls.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Do the old man catch tutorial.  This is an improvement from the previous route which would lose about 7 seconds by catching the extra pokemon and using the Viridian Center instead of deathwarping to Pallet and catching the extra pokemon on the way back to Viridian.
 	$LF
-]p
+]div
 [h3 id=ACE 
 	"ACE
 	$LF
 ]h3
-[p 
+[div class=p 
 	"Take all the yolograss and DeathFly off a Pidgeotto, it needs 8 Attack for a better range to 1 shot this Pikachu.  Hope that the rDIV manipulation doesn't need to be done again for Pidgeotto to show up in the right part of the DSUM cycle.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"On the way back to Viridian, catch any encounter with DVs 76XX (here 76XC with the Special value of C causing a Nidoking encounter in the forest)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Deposit Pikachu, ideally moving the NPC who blocks the optimal path out of the way.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"We no longer need to reset here, resetting in TAS only serves to avoid a later encounter and the reset is slower than the encounter by ~7s.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Don't flash the pokedex, this was a relic from the RTA route (saved ~5s).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Go back towards the forest and enter the 2nd house on a frame where the bird moves left and the girl moves up immediately.  The NPCs will have timers that are randomly set between 0 and 127 after each movement; we want to manipulate them to roll low so we can repeatedly move them.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Girl NPC Timer: BizHawk Address 0228
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Bird NPC Timer: BizHawk Address 0238
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Manipulate the Bird to move left 3 times and the girl to move up twice in total, including their movements as you're entering.  While you're doing this flash the town map in the back of the room once.  Walk to the tile 1 up and 3 right from the entrance as the NPCs finish getting into place.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Manipulate the bird to move left again just after you stop on that tile, then move right on a frame that puts FE in RAM Address 0331 and continue walking down and then left to leave the house.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Walk back to the forest and hop the first ledge you see once on your way there.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Choose Buy in the Mart, Double input 12 down then hold Down through 4 click items which need a B press to pass, then double input 6 down, press A scroll down to 89 and press B.  Then double input 5 down and buy 4F.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Press B and hold with Left to reapply B to leave the buy menu, then press B twice more to close the shop.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Don't step right (no longer needed), open the menu, open items and use 4F only once to use the manipulated TID, Pikachu's DVs, and the stat experience gained from Eevee as code to set party count to 84 causing party underflow.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Open the party, your cursor location during these swaps can be tracked at RAM Address 0C26 starting at 0:
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Swap slots 0 and 13
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Swap slots 12 and 23
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Swap slots 23 and 15
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Swap slots 17 and 83 (scroll up past 0)
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Close the menu and press up to enter the Hall of Fame.  These swaps use the wild encounter's DVs (76 from attack and defense) to point to the Hall of Fame and then the item count to set the Hall of Fame Script straight to the credits past the initial Oak dialogue.  The Yellow character name is also swapped into owned pokemon count to prevent an input when Oak assesses your pokedex.  This saves 18 seconds over an ACE route that does not change the quantity of seen pokemon.  The TAS ACE route now used is unique from the RTA route due to the near impossibility of manipping the unbuffered trainer ID (4 consecutive 1 frame 60fps inputs) and the impracticality of manipping Pikachu DVs through several textboxes and NPC timers.
 	$LF
-]p
+]div
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/Memory 
 		"Memory
 	]a
 	": Judging
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Memory 
 		"Memory
 	]a
 	": Updating with 711 frame improvement.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Memory 
 		"Memory
 	]a
 	": Updating with 823 frame improvement.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Memory 
 		"Memory
 	]a
 	": Optimization seems good.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The run was definitely entertaining especially with the new improvements. The glitches in particular were entertaining.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Now while the run does indeed not corrupt save data (anymore), we typically prefer labels that prefer to say what a movie does rather than what it does not, so I am relabeling to "game end glitch".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"I felt the run wasn't different enough from 
 	(__wikiLink|/3655M|3655M)
 	" for the reasons listed in 
@@ -246,16 +246,16 @@
 	]a
 	". Many others also felt that the runs were very similar. Since this is the faster and arguably more entertaining of the two runs, I believe it should obsolete Blue.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Accepting to Moons to obsolete 
 	(__wikiLink|/3655M|3655M)
 	".
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/Spikestuff 
 		"Spikestuff
 	]a
 	": Publishing.
-]p
+]div

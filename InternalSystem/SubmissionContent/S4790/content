@@ -1,8 +1,8 @@
 12
-[p 
+[div class=p 
 	(youtube|v=axnOPbBt_qs)
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" Emulator: lsnes rr2-beta23
@@ -29,39 +29,39 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"During the 
 	[a class=intlink href=/2725M 
 		"previous TAS
 	]a
 	", we managed to get the Moogle Kutan in our crew to save the world. We are pleased to announce that this time, we also managed to get Kurin with us. As a side effect, we saved more than two hours and a half over the previous TAS, achieving a final time of 32 minutes and 54 seconds using a new game breaking glitch involving 52 gameover in a row on the world map.
 	$LF
-]p
+]div
 [h3 id=Gameoverglitch 
 	" Gameover glitch
 	$LF
 ]h3
-[p 
+[div class=p 
 	"On May 2015, a 
 	[a class=extlink href=https://www.youtube.com/watch?v=gAlIrkiqA_k rel=nofollow 
 		"new ff6 glitch
 	]a
 	" was discovered, where dying 52 times in a row on the world map leads to odd consequences. Often the game will freeze, sometimes it will trigger glitched cutscenes.
 	$LF
-]p
+]div
 [h4 id=Deciphering 
 	" Deciphering
 	$LF
 ]h4
-[p 
+[div class=p 
 	"In this game, the developers have implemented a script language for scripted events, which contains everything from music, graphical effects, invoking windows, dialogues, character movements, etc. Two events in this game have a behaviour very close to the JSR and RTS assembly instructions. The first one (event B2) saves the pointer to the current event into a stack and starts executing a series of sub events. The second one (event FE) finishes the series of sub events by loading the event pointer from the top of the stack. Every call to event B2 is meant to be eventually followed by a call to event FE.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"During a gameover screen, however, the game calls event B2 twice but only once event FE. This has the consequence of filling the event pointer stack, which can lead to a stack overflow with repeating gameovers. This is generally unnoticed, because entering any inside map (towns or dungeons) will clear the event pointer stack.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The event pointer stack is stored starting 
 	[tt 
 		"$0594
@@ -96,8 +96,8 @@
 	]tt
 	" values. We are not sure if these values are actually used by the game.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"After the 51 gameover, 
 	[tt 
 		"$E8
@@ -120,20 +120,20 @@
 	]tt
 	" have changed and contains the some scanline location coordinates. The game loads those values as the current event pointer, and executes events starting this location. This is what is causing the glitch.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"By conducting a lot of tests, we observed that address 
 	[tt 
 		"$0630-$0632
 	]tt
 	" is dependent on the frame where the gameover is confirmed, the inputs pressed 3 frames before confirmation and the number of characters in the party.
 	$LF
-]p
+]div
 [h4 id=Triggeringtheending 
 	" Triggering the ending
 	$LF
 ]h4
-[p 
+[div class=p 
 	"To trigger the game ending, one way is to set the event pointer to the address of the ending, which is located at 
 	[tt 
 		"$CA0F70
@@ -144,8 +144,8 @@
 	]tt
 	").
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"As expected, no value of 
 	[tt 
 		"$0630-$0632
@@ -164,7 +164,7 @@
 	]tt
 	". Here is a summary of what is present in these addresses:
 	$LF
-]p
+]div
 [pre 
 	"$1600-$184F: Character data (592 bytes, 37 bytes each character)
 	$LF
@@ -188,7 +188,7 @@
 	$LF
 	$LF
 ]pre
-[p 
+[div class=p 
 	"Our goal is to write somewhere in RAM an event that will jump to the ending. A few events can do that: B2, B3, B6, B7, BD, BE, C0-CF, following by the destination address (e.g. 
 	[tt 
 		"B2 4E 13 00
@@ -203,7 +203,7 @@
 	]tt
 	" heavily depend on the number of characters in the party. Here is roughly which address we have access:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" 1 character: 
@@ -234,11 +234,11 @@
 		$LF
 	]li
 ]ul
-[p 
+[div class=p 
 	"The earliest point where we can trigger the glitch is with a party of two characters. With this party, we can jump to the addresses storing the inventory, the Espers and magics. The problem is that we cannot write any of the jumping events above in memory because no item with the corresponding id is available, and we are limited to 99 for item quantities. Of course, we don't have any Esper or magic available.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Then, for a very small time, we have access to a 1 character party (solo Terra) during Figaro castle. With this party, we can jump to part of the character data, gold, game time, steps and part of the inventory. Character data would have been very encouraging, but the only characters we can control are Terra and Locke, which are at the beginning of the section, outside our range. Like before, we cannot write the event code using the inventory, but we can use either one byte of the Gold or one byte of the step counter easily. The second problem was to write the destination address in RAM next to the event code, which is of the form 
 	[tt 
 		"XX 13 00
@@ -249,11 +249,11 @@
 	]tt
 	" and luckily, we have access to the Mithril Pike (id 1D), the Buckler (id 5A) and the Mithril Shield (id 5C).
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Here is the state of the memory starting $1860:
 	$LF
-]p
+]div
 [pre 
 	"|     Gold     |   Game Time  | Step counter |                  Inventory
 	$LF
@@ -264,11 +264,11 @@
 	"                                               Knife   |      |         |  Pike   | Shield  |
 	$LF
 ]pre
-[p 
+[div class=p 
 	"We tried to jump directly to the step counter, but we only could jump to the Gold address. That is why we manipulated the first byte of the Gold value to be A0 (by selling stuff), an event which takes 5 bytes as argument, so that we arrive at the beginning of the step counter.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Event C1 has 3 arguments: t1 (2 bytes), t2 (2 bytes) and addr (3 bytes). The meaning of this event is: if the story bit t1 or the story bit t2 is true, then jump to 
 	[tt 
 		"$CA0000+addr
@@ -283,11 +283,11 @@
 	]tt
 	", in the middle of the colours of the windows.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Now we have full control over the events we can trigger. We previously changed the value of those colours so that the bytes starting $1D5A are:
 	$LF
-]p
+]div
 [ul 
 	[li 
 		" 
@@ -353,19 +353,19 @@
 	" Narshe
 	$LF
 ]h4
-[p 
+[div class=p 
 	"As opposed to the previous TAS, we did not need to level-up Terra so that other characters who join get a higher level. However, we still need Terra to be at least level 4 so that the quick kill on Whelk is possible. The fastest way we found was to escape the first and fourth fights, to fight the third one and to make Wedge escape the second fight. This gives level 4-3-2 for Terra, Vicks and Wedge, respectively. The quick kill on Whelk was barely possible by manipulating the random damage to always be a high value. The fight against Marshal and Lobo was improved from the previous TAS by manipulating both Lobo not to attack. Both Mithril Pike and Mithril Shield are removed from Mog for the glitch.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"Extra steps were used to manipulate the battle RNG, because we had to do a lot of steps anyway for the glitch.
 	$LF
-]p
+]div
 [h4 id=Figaro 
 	" Figaro
 	$LF
 ]h4
-[p 
+[div class=p 
 	"The inventory is sorted as described above during the two random fights to Figaro castle. After being solo Terra, two Tonics and 4 Echo Screen are bought to get Gold to 
 	[tt 
 		"xxxxA0
@@ -376,19 +376,19 @@
 	]tt
 	" at the second fight in the world map.
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"The first fight in the desert is manipulated to get Terra's HP as low as possible. A critical could not be manipulated for the Sand Ray because this enemy has the bad habit of skipping his turn; it was replaced with his special attack.
 	$LF
-]p
+]div
 [h4 id=Glitch 
 	" Glitch
 	$LF
 ]h4
-[p 
+[div class=p 
 	"One step before the second fight, the battle speed was set to 1 so that the enemy can act faster. The fight to get the gameover to was chosen to be a solo enemy, so that the initial ATB are very high. 51 gameover later, the message and gameover screen were confirmed at the right frame and the input was chosen so that the game loads address $1860 as the event pointer. As explained above, this eventually triggers the ending.
 	$LF
-]p
+]div
 [h3 id=SpecialThanks 
 	" Special Thanks
 	$LF
@@ -429,31 +429,31 @@
 ]ul
 [hr 
 ]hr
-[p 
+[div class=p 
 	[a class=intlink href=/Users/Profile/ars4326 
 		"ars4326
 	]a
 	": (Replaced movie file with updated version that accesses full ending).  Claimed for judging!
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/ars4326 
 		"ars4326
 	]a
 	": Hello, Keylie and Kadmony.  Fantastic work on executing this unique 'game end glitch' method, as well as listing out the intricate details in the submission text.  The minor strategic optimizations made during battles were a treat to watch, as well.  Altogether though, as others have expressed in the thread, there honestly just isn't too many ways that one can make 52 straight game-overs entertaining.  The payoff of watching the glitched ending (with more Moogles, this time around!) was indeed enjoyable, but the more repetitive 15+ minute lead-in must also be considered.  Outstanding work, nonetheless!
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	"edit: Accepting for publication to the Vault, and to obsolete the current '
 	[a class=intlink href=/2725M 
 		"sketch glitch
 	]a
 	"' run.  Reason being, an issue was brought up in the thread concerning how this movie, initially (and similar to the 'sketch glitch' run) soft-locked at the end and didn't technically complete the game.  Keylie addressed this and made some adjustments to this run which allowed the complete ending to take place.  Therefore, for the sake of consistency, we've got to abide by this standard going forward.  And since the 'sketch glitch' run soft-locks, it now must be obsoleted by a run that doesn't.  
 	$LF
-]p
-[p 
+]div
+[div class=p 
 	[a class=intlink href=/Users/Profile/fsvgm777 
 		"fsvgm777
 	]a
 	": Processing.
-]p
+]div
