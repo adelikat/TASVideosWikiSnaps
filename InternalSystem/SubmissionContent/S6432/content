@@ -1,0 +1,540 @@
+2
+[div class=p 
+	"Because Super Mario World wasn't beaten fast enough already, we decided to further optimize this category to save an additional 8 frames over the 
+	[a class=intlink href=/4797S 
+		"previous run
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Video with commentary:
+	$LF
+]div
+[div class=p 
+	(youtube|v=DNan2hVEqLY)
+	$LF
+]div
+[div class=toc 
+	[ul 
+		[li 
+			[ul 
+				[li 
+					[a href=#GeneralInformation 
+						" General Information
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#TheTrickSoFar 
+				" The Trick So Far
+				$LF
+			]a
+			[ul 
+				[li 
+					[a href=#OpenBus 
+						" Open Bus
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#TheMiracle 
+						" The Miracle
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#ThePayload 
+						" The Payload
+						$LF
+					]a
+				]li
+			]ul
+		]li
+		[li 
+			[a href=#What'sNew? 
+				" What's New?
+				$LF
+			]a
+			[ul 
+				[li 
+					[a href=#NewMovement 
+						" New Movement
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#NewPayload 
+						" New Payload
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#TwoFramePayloads 
+						" Two Frame Payloads
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#SpecialThanks 
+						" Special Thanks
+						$LF
+					]a
+				]li
+				[li 
+					[a href=#SuggestedScreenshot 
+						" Suggested Screenshot
+						$LF
+					]a
+				]li
+			]ul
+		]li
+	]ul
+]div
+[h3 id=GeneralInformation 
+	" General Information
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator: lsnes rr2-β23
+		$LF
+	]li
+	[li 
+		" Version: U
+		$LF
+	]li
+	[li 
+		" Objective: Reach the credits as quickly as possible
+		$LF
+	]li
+	[li 
+		" Categories:
+		$LF
+		[ul 
+			[li 
+				" Heavy glitch abuse
+				$LF
+			]li
+			[li 
+				" Corrupts memory
+				$LF
+			]li
+			[li 
+				" Genre: Platform
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h2 id=TheTrickSoFar 
+	" The Trick So Far
+	$LF
+]h2
+[div class=p 
+	"The primary catalyst for this credits warp is unchanged from 
+	[a class=intlink href=/4315S 
+		"when Masterjun discovered it
+	]a
+	": having Yoshi eat a specific Charging Chuck.
+	$LF
+]div
+[div class=p 
+	"Normally they're immune to Yoshi's tongue, so how?  A null sprite is left on Yoshi's tongue by grabbing a coin with Mario after Yoshi starts to eat the coin.  If the Charging Chuck spawns at this moment, it ends up being the target of Yoshi's ravenous stomach.
+	$LF
+]div
+[div class=p 
+	"Since Charging Chuck was never meant to be eaten, when the game tries to apply the effect of eating one, the assembly jumps to the garbage location $14A13.  $14A13 is located in Open Bus.
+	$LF
+]div
+[h3 id=OpenBus 
+	" Open Bus
+	$LF
+]h3
+[div class=p 
+	"Open Bus isn't so much a location as it is a lack of one: the last value in the Data Bus is used instead of what's at that location.  In this case, the Data Bus is 0x01, so the assembly run is 01 01, or ORA ($01,x).
+	$LF
+]div
+[div class=p 
+	"X is a register that will be 0x09 thanks to the previous assembly, but 0x0A (0x01 + 0x09) is a temporary.  What temporary, you may be asking?  Since the current object being processed is Yoshi, the last thing it was used for was calculating the high byte of Yoshi's X position.  In order for the trick to work, this needs to be 0x0107, which is tile information that happens to be 0x17 for this level.
+	$LF
+]div
+[div class=p 
+	"With a pointless ORA complete, the program counter moves forward two bytes and reads from $14A15, which is (surprise) still Open Bus.  The Data Bus is now 0x17, however, which results in 17 17, or ORA ($17),Y.  Conveniently, $17 and $18 contain a copy of the controller data, which makes it possible to perform a miracle...
+	$LF
+]div
+[h3 id=TheMiracle 
+	" The Miracle
+	$LF
+]h3
+[div class=p 
+	"This part was glossed over in Masterjun's original explanation, so let me explain in more detail just how unlikely this thing is.
+	$LF
+]div
+[div class=p 
+	"We want to get to somewhere between $4218 and $421F because that's where the raw controller data is stored.  This is no simple task, since we started at $14A13, which is both later than our target and in the wrong bank.  To make it even harder, the area just before $4218 is various CPU registers, many of which will cause a BRK instruction that will send us right back to $4A13 if interrupts haven't been disabled.  The only thing we can do is set the Data Bus to something, which has to then not only get us to before $4218, but also disable interrupts before we hit $4xxx.
+	$LF
+]div
+[div class=p 
+	"That's exactly what happens here, albeit in a roundabout way:
+	$LF
+]div
+[ul 
+	[li 
+		" First, we manipulated the controller data to be 0xE0A0, which causes the game to load 0x06 into the Data Bus.
+		$LF
+	]li
+	[li 
+		" 06 06 is ASL $06.  $06 in this case is 0xFF, which is changed to 0xFE and loaded into the Data Bus.  Note: $06 is also changed to 0xFE.
+		$LF
+	]li
+	[li 
+		" FE FE FE is INC $FEFE,X.  This location happens to be 0x01, which incremented is 0x02.
+		$LF
+	]li
+	[li 
+		" 02 02 is COP $02.  This triggers a very brief interrupt that immediately returns to $14A1E, putting 0x01 in the Data Bus again.
+		$LF
+	]li
+	[li 
+		" Once again, 0x01 results in 0x17, which results in 0x06.
+		$LF
+	]li
+	[li 
+		" This time, $06 is 0xFE, which is changed to 0xFC and loaded into the Data Bus.
+		$LF
+	]li
+	[li 
+		" FC FC FC, or JSR ($FCFC,X), is where the first magic happens. The entire area around $FCFC is also Open Bus.  Because of the way indirect JSR works, this happens to be 
+		[b 
+			"the low byte of where the instruction was read.
+		]b
+		"  Since this was called at $14A24, this causes the jump to go to $12626 with 0x26 in the Data Bus.
+		$LF
+	]li
+	[li 
+		" 26 26 is ROL $26.  $26 in this case is based on the position of Mario, but in this case we'll go with $27, resulting in $4D in the Data Bus.
+		$LF
+	]li
+	[li 
+		" 4D 4D 4D is EOR $4D4D, which occurs in a loop until enough time passes and an interrupt occurs.  This interrupt once again jumps back to $1xxxx, putting 0x01 in the Data Bus.
+		$LF
+	]li
+	[li 
+		" For the third time, 0x01 results in 0x17, which results in 0x06.
+		$LF
+	]li
+	[li 
+		" Now $06 is 0xFC, which is changed to F8 and loaded into the Data Bus.
+		$LF
+	]li
+	[li 
+		" F8 is SED, which just sets the decimal flag.  As this doesn't change the Data Bus, this happens over and over until we reach $14016.
+		$LF
+	]li
+	[li 
+		" Remember how I mentioned there are CPU registers prior to our target?  As it turns out, this location is actually only 
+		[b 
+			"partially
+		]b
+		" Open Bus.  By what can only be described as a miracle, the resulting instruction here is FB, which swaps the emulation and carry flag.
+		$LF
+	]li
+]ul
+[div class=p 
+	"This causes the system to enter emulation mode, effectively disabling interrupts and allowing us to do a few hundred garbage commands before eventually reaching $4219, early in where we were trying to get.  Success!
+	$LF
+]div
+[h3 id=ThePayload 
+	" The Payload
+	$LF
+]h3
+[div class=p 
+	"In order to warp to the credits, several steps need to happen:
+	$LF
+]div
+[ul 
+	[li 
+		" Emulation mode needs to be disabled so interrupts work again.
+		$LF
+	]li
+	[li 
+		" Decimal mode needs to be disabled so calculations work as expected.
+		$LF
+	]li
+	[li 
+		" The game mode $100 needs to be set to 0x18.
+		$LF
+	]li
+	[li 
+		" The data bank needs to be 0x00.
+		$LF
+	]li
+	[li 
+		" The current cutscene $13C6 needs to be set to 0x08.
+		$LF
+	]li
+	[li 
+		" The main game loop at $8072 needs to start running again.
+		$LF
+	]li
+]ul
+[div class=p 
+	"If all of the above is done correctly, the game will fade out and start playing the credits!
+	$LF
+]div
+[h2 id=What'sNew? 
+	" What's New?
+	$LF
+]h2
+[div class=p 
+	"All of the above was already done in the previous submissions, but with better movement and a more efficient payload, further improvements have been made.
+	$LF
+]div
+[h3 id=NewMovement 
+	" New Movement
+	$LF
+]h3
+[div class=p 
+	"The first improvement to movement comes when landing on Yoshi: by landing when the vertical subpixel is sufficiently high (.a-.f if not holding B), Mario will be able to start moving a frame faster.
+	$LF
+]div
+[div class=p 
+	"The rest of the movement centers around grabbing the coin from the opposite side.  This difference allows the fireballs, which move slower than Mario, to be spit out much sooner than before.  Accordingly, the shell can be picked up earlier, allowing Mario and the camera to be further to the right.
+	$LF
+]div
+[div class=p 
+	"In order to reduce lag, various objects are only active every so many frames.  In the case of the fireball, it can only collide with objects every four frames.  The fireballs that can collide on a given frame vary depending on the ID of the fireball.  For example, 2, 6, and 10 would collide on one frame while 3, 7, and 11 would collide on the next.  By spitting out the first set of fireballs so the right number are out, this frame rule can be manipulated to hit the shell on whatever frame is optimal.
+	$LF
+]div
+[div class=p 
+	"Ultimately, Mario hopped at the maximum 49 speed instead of straddling 47-49 at the end in order to make the shell hit the wall as soon as possible.  It touched the fireball on its rightmost pixel on the frame its collision is active.
+	$LF
+]div
+[div class=p 
+	"The biggest thing holding back this new movement is Yoshi's position.  As explained above, Yoshi needs to have a certain high byte for his X position or else the trick doesn't work.  Unfortunately, Yoshi effectively must bounce off the wall to be far enough left, so going high is not an option.  If there was a way to get around this limitation, several more frames would be possible to save.
+	$LF
+]div
+[h3 id=NewPayload 
+	" New Payload
+	$LF
+]h3
+[div class=p 
+	"The original payload was broken up into five frames, doing all the things mentioned above directly while sacrificing 5 of the 8 bytes in a frame to loop to the beginning and get new controller data.
+	$LF
+]div
+[div class=p 
+	"The new payload reduces that to three frames by taking advantage of the "intended" logic to start the credits.  The new payload looks like this:
+	$LF
+]div
+[pre 
+	"(E0) 0A FB 64 10 CB -- --
+	$LF
+	" D8  0B AB 64 10 CB 80 F8
+	$LF
+	" CA  20 20 CA 20 72 80 F8
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Byte
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Description
+				$LF
+			]th
+		]tr
+		[tr 
+			[td 
+				"0A
+			]td
+			[td 
+				"ASL A
+			]td
+			[td 
+				"Only purpose is clearing carry
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"FB
+			]td
+			[td 
+				"XCE
+			]td
+			[td 
+				"Disables emulation mode
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"64 10
+			]td
+			[td 
+				"STZ $10
+			]td
+			[td 
+				"Needed for controller data to fully update during interrupt
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"CB
+			]td
+			[td 
+				"WAI
+			]td
+			[td 
+				"Waits for the next interrupt (next instruction will be new controller data)
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"80 F8
+			]td
+			[td 
+				"BRA $F8
+			]td
+			[td 
+				"Jump back to $4218
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"D8
+			]td
+			[td 
+				"CLD
+			]td
+			[td 
+				"Disables decimal mode
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"0B
+			]td
+			[td 
+				"PHD
+			]td
+			[td 
+				"Puts 0x00 on the stack
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"AB
+			]td
+			[td 
+				"PLB
+			]td
+			[td 
+				"Sets the Data Bank to 0x00
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"CA
+			]td
+			[td 
+				"DEX
+			]td
+			[td 
+				"Decrements X to 0x08
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"20 20 CA
+			]td
+			[td 
+				"JSR $CA20
+			]td
+			[td 
+				"Calls a location that sets $100 to 0x18 and $13C6 to X
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"20 72 80
+			]td
+			[td 
+				"JSR $8072
+			]td
+			[td 
+				"Starts running the main game loop again
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Those paying close attention above will notice the last "80" is used by both 20 72 80 and 80 F8.  It was the final byte saved to get it down to three frames.
+	$LF
+]div
+[h3 id=TwoFramePayloads 
+	" Two Frame Payloads
+	$LF
+]h3
+[div class=p 
+	"It's entirely possible to make two frame payloads that work on emulator.  These payloads avoid sacrificing bytes for the interrupt and instead loop back to $2000~$4000 repeatedly while hoping the controller data isn't updated at the wrong time.
+	$LF
+]div
+[div class=p 
+	"Unfortunately, none of these worked on console, so three frames is the best we have.
+	$LF
+]div
+[h3 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h3
+[div class=p 
+	"BrunoVisnadi: He came up with most of the new movement mentioned above.
+	$LF
+]div
+[div class=p 
+	"dwangoAC: I threw a bunch of payloads at him and he happily tried each one until we managed to get one to work on console.  He also did the commentary in the console-verified video!
+	$LF
+]div
+[div class=p 
+	"Ilari: Open Bus is a complicated beast, and I was only able to walk through most of it thanks to him.
+	$LF
+]div
+[div class=p 
+	"Masterjun: For making a miracle happen.
+	$LF
+]div
+[h3 id=SuggestedScreenshot 
+	" Suggested Screenshot
+	$LF
+]h3
+[div class=p 
+	[img class=embed src=https://imgur.com/GPMjKh9.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Nach 
+		"Nach
+	]a
+	": Judging.
+]div
