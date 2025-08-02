@@ -1,0 +1,2769 @@
+21
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/mJnU2A2.jpg 
+	]img
+	$LF
+]div
+[h2 id=MovieGoals 
+	"Movie Goals
+	$LF
+]h2
+[ul 
+	[li 
+		"Emulator used: FCEUX 2.2.3
+		$LF
+	]li
+	[li 
+		"Beat the game as fast as possible
+		$LF
+	]li
+	[li 
+		"Terrorize the other judges
+		$LF
+	]li
+]ul
+[h2 id=TargetCategories 
+	"Target categories
+	$LF
+]h2
+[ul 
+	[li 
+		"Takes damage to save time
+		$LF
+	]li
+	[li 
+		"Uses death to save time
+		$LF
+	]li
+	[li 
+		"Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		"Unlicensed game
+		$LF
+	]li
+	[li 
+		"Genre: RPG
+		$LF
+	]li
+]ul
+[h2 id=AboutTheGame 
+	"About the game
+	$LF
+]h2
+[div class=p 
+	"I present you Pokémon White Jade, the game you never heard about! The game was produced by an unlicensed Chinese company known as Jncota, and it's currently available in Chinese language only. Despite anything you may think from a first look, this is mostly a bootlegged NES backport of Pokémon Gold/Silver, from which the Kanto Map was copied. Graphics mostly come from Gen II and III games, while the Pokémon species are taken from Gen IV games. On top of all that, there were introduced a bunch of arbitrary differences in about every aspect of the game itself. Don't worry, below I will explain everything you need to know.
+	$LF
+]div
+[div class=p 
+	"If you think that a NES backport of a Pokémon game sounds like an unique thing, think about it again. I discovered the existence of a total of 
+	(__wikiLink|displaytext=13 unique NES Pokémon backports|href=/HomePages/ThunderAxe31/NesPokemonBackports)
+	", not counting alternate title screen versions! The real fun has only just begun!
+	$LF
+]div
+[h2 id=AboutTheRun 
+	"About the run
+	$LF
+]h2
+[div class=p 
+	"In this game, nothing is what it seems. In order to translate stuff, I had to use an optical character recognition software, and I still had to draw many characters by hand into the Google Translate engine. This helped with understanding how to progress through the story events, but I still had to figure out by myself the actual effect of some moves and items present in the game. Most notably, each badge is required for being able to use a key item that allows to progress through the Kanto region.
+	$LF
+]div
+[div class=p 
+	"It turns out the programmers were total jerks. Many moves have no actual effect at all. There are no Repel items, while the wild encounters are unavoidable. But most importantly, the Ether item doesn't recover 10 PPs like in the original Pokémon games, but instead it recovers half of the max PPs. Rounded down. Imagine discovering this when you're 90% into the TAS production. But on the bright side, this motivated me into writing a bot, namely DankBot, which resulted in a roughly ~1 minute faster run.
+	$LF
+]div
+[div class=p 
+	"The route I developed required a lot of luck manipulation, which would make it impossible to follow the same choices in a real-time attempt. It takes in account every quirk of the game engine, which also makes it much different than what a regular Pokémon game speedrun looks like. Most notably, there are many less mandatory fights, and the player's Pokémon grow much slower, so it's always faster to catch a stronger Pokémon at certain points through the run, even in a real-time attempt. For the rest, you're forced to follow a very linear event line until the end.
+	$LF
+]div
+[h2 id=AboutDankbot 
+	"About DankBot
+	$LF
+]h2
+[div class=p 
+	"For optimizing RNG manipulation across the whole run, I wrote a Lua bot specifically for this game (and other Jncota Pokémon backports :) ). You can download it by clicking 
+	[a class=intlink href=/Userfiles/Info/62514018295035506 
+		"there
+	]a
+	". All you need to do is to play the game until the beginning of the first fight (the sailor), and start the script from there. It doesn't matter the exact moment when you launch it, as long as it's after start talking with the sailor and before that the battle menu is fully loaded, as the bot automatically proceeds through dialogues and loading times. Then, if you enable the unthrottled emulation speed and wait 3 days straight, you'll get the same movie file that I submitted here.
+	$LF
+]div
+[div class=p 
+	"The bot tries a different delay for each fight turn and creates a new savestate for each successful attempt of getting a desired outcome. It gradually replaces the savestates that resulted in getting the same result slower. After enough attempts of optimizinh the current fight turn, it proceeds to the next turn and does attempt different delays as well, and it will also start from each of the savestates stored during the previous fight turn. In other words, the bot creates and manages savestate branches from which each subsequent attempt will be attempted as well. Or if you prefer, it's a brute forcing approach to micro routing.
+	$LF
+]div
+[h2 id=RngEngine 
+	"The RNG engine
+	$LF
+]h2
+[div class=p 
+	"RNG in this game is stored at addresses 0x5F and 0x5A, both 1-byte. The first value is just a frame counter that wraps around after 255, while the other is a random number that changes every time RNG is used for determing the outcome of something. RNG affects moves damage, fails, critical hits, Pokémon capture success, and wild Pokémon species and level. The moveset of a wild Pokémon is not predetermined, but it's affected by both RNG and the position of the map tile you where you encountered it.
+	$LF
+]div
+[div class=p 
+	"In this game, RNG can be manipulated by waiting before executing certain actions:
+	$LF
+]div
+[ul 
+	[li 
+		"When starting a fight (except some which won't affect RNG)
+		$LF
+	]li
+	[li 
+		"When you confirm a move to use in a fight turn
+		$LF
+		[ul 
+			[li 
+				"The move you choose affects dialogue lenght and thus cause different RNG changes
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"When you access an overworld location that features wild Pokémon encounters, also gym 7 for some reason
+		$LF
+		[ul 
+			[li 
+				"When you begin walking after loading an above mentioned location, but more than 1 frame of delay doesn't make difference
+				$LF
+				[ul 
+					[li 
+						"If you didn't wait before starting moving, you'll also get a different RNG change whatever your first step is straight or it's a turnaround
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+	]li
+]ul
+[h2 id=LocationsData 
+	"Locations data
+	$LF
+]h2
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-5422-0 
+					"hide
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-5422-1 
+					"Wild Pokémon Encounters
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-5422-2 
+					"Deathwarp Locations
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-5422-0 
+		]div
+		[div class=tab-pane fade id=tabs-5422-1 
+			[div class=p 
+				"Note that the ID value corresponds to the Pokédex entry number, which is different than any official Pokémon game.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"Route 6
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"10
+						]td
+						[td 
+							"Murkrow
+						]td
+						[td 
+							"2-5
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"13
+						]td
+						[td 
+							"Happiny
+						]td
+						[td 
+							"2-5
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"39
+						]td
+						[td 
+							"Budew
+						]td
+						[td 
+							"2-5
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"67
+						]td
+						[td 
+							"Dialga
+						]td
+						[td 
+							"4-7
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 7
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"10
+						]td
+						[td 
+							"Murkrow
+						]td
+						[td 
+							"8-12
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"13
+						]td
+						[td 
+							"Happiny
+						]td
+						[td 
+							"8-12
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"42
+						]td
+						[td 
+							"Machop
+						]td
+						[td 
+							"8-12
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 16
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"13
+						]td
+						[td 
+							"Happiny
+						]td
+						[td 
+							"15-20
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"42
+						]td
+						[td 
+							"Machop
+						]td
+						[td 
+							"15-20
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"43
+						]td
+						[td 
+							"Combee
+						]td
+						[td 
+							"15-20
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 17
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"22
+						]td
+						[td 
+							"Medicham
+						]td
+						[td 
+							"20-25
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"42
+						]td
+						[td 
+							"Machop
+						]td
+						[td 
+							"20-25
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"43
+						]td
+						[td 
+							"Combee
+						]td
+						[td 
+							"20-25
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"45
+						]td
+						[td 
+							"Meditite
+						]td
+						[td 
+							"20-25
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"37
+						]td
+						[td 
+							"Wingull
+						]td
+						[td 
+							"20-25
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 18
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"43
+						]td
+						[td 
+							"Combee
+						]td
+						[td 
+							"23-27
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"45
+						]td
+						[td 
+							"Meditite
+						]td
+						[td 
+							"23-27
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"47
+						]td
+						[td 
+							"Pichu
+						]td
+						[td 
+							"23-27
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 15
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"42
+						]td
+						[td 
+							"Machop
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"43
+						]td
+						[td 
+							"Combee
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"45
+						]td
+						[td 
+							"Meditite
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"51
+						]td
+						[td 
+							"Charnivine
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 14
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"17
+						]td
+						[td 
+							"Roselia
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"43
+						]td
+						[td 
+							"Combee
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"45
+						]td
+						[td 
+							"Meditite
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"51
+						]td
+						[td 
+							"Charnivine
+						]td
+						[td 
+							"29-31
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 12
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"76
+						]td
+						[td 
+							"Tentacool
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"Marril
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"23
+						]td
+						[td 
+							"Wooper
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"37
+						]td
+						[td 
+							"Wingull
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 11
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"11
+						]td
+						[td 
+							"Vespequeen
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"15
+						]td
+						[td 
+							"Cherrim
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"18
+						]td
+						[td 
+							"Clefairy
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"26
+						]td
+						[td 
+							"Cherubi
+						]td
+						[td 
+							"31-34
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 8
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"75
+						]td
+						[td 
+							"Uxie
+						]td
+						[td 
+							"46-48
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"78
+						]td
+						[td 
+							"Mime Jr.
+						]td
+						[td 
+							"46-48
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Rock Cave
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"20
+						]td
+						[td 
+							"Mistribas
+						]td
+						[td 
+							"34-36
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"28
+						]td
+						[td 
+							"Chatot
+						]td
+						[td 
+							"34-36
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"31
+						]td
+						[td 
+							"Gible
+						]td
+						[td 
+							"34-36
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"34
+						]td
+						[td 
+							"Bonsly
+						]td
+						[td 
+							"34-36
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 9
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"39
+						]td
+						[td 
+							"Budew
+						]td
+						[td 
+							"35-38
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"44
+						]td
+						[td 
+							"Hippopotas
+						]td
+						[td 
+							"35-38
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"53
+						]td
+						[td 
+							"Octillery
+						]td
+						[td 
+							"35-38
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"70
+						]td
+						[td 
+							"Gastrodon
+						]td
+						[td 
+							"35-38
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"46
+						]td
+						[td 
+							"Skorupi
+						]td
+						[td 
+							"35-38
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Power Plant
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"82
+						]td
+						[td 
+							"Ponyta
+						]td
+						[td 
+							"34-37
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"40
+						]td
+						[td 
+							"Pikachu
+						]td
+						[td 
+							"34-37
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"44
+						]td
+						[td 
+							"Hippopotas
+						]td
+						[td 
+							"34-37
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"49
+						]td
+						[td 
+							"Feebas
+						]td
+						[td 
+							"34-37
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"53
+						]td
+						[td 
+							"Octillery
+						]td
+						[td 
+							"34-37
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 5
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"48
+						]td
+						[td 
+							"Machamp
+						]td
+						[td 
+							"40-43
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"52
+						]td
+						[td 
+							"Abomasnow
+						]td
+						[td 
+							"40-43
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 24
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"46
+						]td
+						[td 
+							"Skorupi
+						]td
+						[td 
+							"36-39
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"84
+						]td
+						[td 
+							"Machamp
+						]td
+						[td 
+							"36-39
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"53
+						]td
+						[td 
+							"Octillery
+						]td
+						[td 
+							"36-39
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"70
+						]td
+						[td 
+							"Gastrodon
+						]td
+						[td 
+							"36-39
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 25
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"70
+						]td
+						[td 
+							"Gastrodon
+						]td
+						[td 
+							"37-39
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"Marril
+						]td
+						[td 
+							"37-39
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"37
+						]td
+						[td 
+							"Sudowoodo
+						]td
+						[td 
+							"37-39
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"39
+						]td
+						[td 
+							"Budew
+						]td
+						[td 
+							"37-39
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Diglett Cave
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"21
+						]td
+						[td 
+							"Machoke
+						]td
+						[td 
+							"44-46
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"29
+						]td
+						[td 
+							"Drapion
+						]td
+						[td 
+							"44-46
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"32
+						]td
+						[td 
+							"Riolu
+						]td
+						[td 
+							"44-46
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"35
+						]td
+						[td 
+							"Bronzong
+						]td
+						[td 
+							"44-46
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 2
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"55
+						]td
+						[td 
+							"Cleffa
+						]td
+						[td 
+							"45-47
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"59
+						]td
+						[td 
+							"Chansey
+						]td
+						[td 
+							"45-47
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"66
+						]td
+						[td 
+							"Hoothoot
+						]td
+						[td 
+							"45-47
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"68
+						]td
+						[td 
+							"Munchlax
+						]td
+						[td 
+							"45-47
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 4
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"52
+						]td
+						[td 
+							"Abomasnow
+						]td
+						[td 
+							"43-45
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"55
+						]td
+						[td 
+							"Cleffa
+						]td
+						[td 
+							"43-45
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"Marril
+						]td
+						[td 
+							"43-45
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"24
+						]td
+						[td 
+							"Whishcash
+						]td
+						[td 
+							"43-45
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 1
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"85
+						]td
+						[td 
+							"Azurill
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"87
+						]td
+						[td 
+							"Honchkrow
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"12
+						]td
+						[td 
+							"Noctowl
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"16
+						]td
+						[td 
+							"Gabite
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 21
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"16
+						]td
+						[td 
+							"Gabite
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"19
+						]td
+						[td 
+							"Raichu
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"27
+						]td
+						[td 
+							"Stuntank
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"38
+						]td
+						[td 
+							"Quagsire
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"49
+						]td
+						[td 
+							"Feebas
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"54
+						]td
+						[td 
+							"Azumarill
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"71
+						]td
+						[td 
+							"Lumineon
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 20
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"54
+						]td
+						[td 
+							"Azumarill
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"71
+						]td
+						[td 
+							"Lumineon
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"72
+						]td
+						[td 
+							"Finneon
+						]td
+						[td 
+							"50-51
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 19
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"50
+						]td
+						[td 
+							"Remoraid
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"72
+						]td
+						[td 
+							"Finneon
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"73
+						]td
+						[td 
+							"Tentacruel
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"Garchop
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 22
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"50
+						]td
+						[td 
+							"Remoraid
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"84
+						]td
+						[td 
+							"Girafarig
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"85
+						]td
+						[td 
+							"Azurill
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"86
+						]td
+						[td 
+							"Unown
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"38
+						]td
+						[td 
+							"Quagsire
+						]td
+						[td 
+							"47-49
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Victory Road
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"36
+						]td
+						[td 
+							"Sudowoodo
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"57
+						]td
+						[td 
+							"Blissey
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"61
+						]td
+						[td 
+							"Croagnuk
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"64
+						]td
+						[td 
+							"Heracross
+						]td
+						[td 
+							"55-58
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 26
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"41
+						]td
+						[td 
+							"Roserade
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"56
+						]td
+						[td 
+							"Mr. Mime
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"60
+						]td
+						[td 
+							"Snorlax
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"61
+						]td
+						[td 
+							"Croagnuk
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"64
+						]td
+						[td 
+							"Heracross
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"Garchop
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"67
+						]td
+						[td 
+							"Dialga
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 27
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"69
+						]td
+						[td 
+							"Clefable
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"77
+						]td
+						[td 
+							"Toxicroak
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"79
+						]td
+						[td 
+							"Mesprit
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"50
+						]td
+						[td 
+							"Remoraid
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"64
+						]td
+						[td 
+							"Heracross
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Route 28
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"81
+						]td
+						[td 
+							"Azelf
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"83
+						]td
+						[td 
+							"Ponyta
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"88
+						]td
+						[td 
+							"Hippowdon
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"71
+						]td
+						[td 
+							"Lumineon
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"72
+						]td
+						[td 
+							"Finneon
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"73
+						]td
+						[td 
+							"Tentacruel
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"54
+						]td
+						[td 
+							"Azumarill
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"92
+						]td
+						[td 
+							"Mantine
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"93
+						]td
+						[td 
+							"Snover
+						]td
+						[td 
+							"58-60
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"Mt. Silver
+				]b
+				$LF
+			]div
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"ID
+						]th
+						[th 
+							"Pokémon
+						]th
+						[th 
+							"Level
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"50
+						]td
+						[td 
+							"Remoraid
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"62
+						]td
+						[td 
+							"Weawile
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"63
+						]td
+						[td 
+							"Lucario
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"73
+						]td
+						[td 
+							"Tentacruel
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"Garchop
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"90
+						]td
+						[td 
+							"Palkia
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"65
+						]td
+						[td 
+							"Spiritomb
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"91
+						]td
+						[td 
+							"Milotic
+						]td
+						[td 
+							"60-62
+							$LF
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-5422-2 
+			[pre 
+				"S.S. Acqua -> S.S. Acqua
+				$LF
+				$LF
+				"Vermilion City -> Vermilion City
+				$LF
+				"Route 6        -> Vermilion City
+				$LF
+				"Diglet Cave    -> Vermilion City
+				$LF
+				$LF
+				"Route 7      -> Saffron City
+				$LF
+				"Saffron City -> Saffron City
+				$LF
+				$LF
+				"Celadon City -> Celadon City
+				$LF
+				"Route 16     -> Celadon City
+				$LF
+				"Route 17     -> Celadon City
+				$LF
+				"Route 18     -> Celadon City
+				$LF
+				$LF
+				"Route 11     -> Fuchsia City
+				$LF
+				"Route 12     -> Fuchsia City
+				$LF
+				"Route 13     -> Fuchsia City
+				$LF
+				"Route 14     -> Fuchsia City
+				$LF
+				"Route 15     -> Fuchsia City
+				$LF
+				"Route 19     -> Fuchsia City
+				$LF
+				"Fuchsia City -> Fuchsia City
+				$LF
+				$LF
+				"Route 8   -> Lavender Town
+				$LF
+				"Route 10  -> Lavender Town
+				$LF
+				"Rock Cave -> Lavender Town
+				$LF
+				$LF
+				"Route 9     -> Route 9
+				$LF
+				"Power Plant -> Route 9
+				$LF
+				$LF
+				"Route 25 -> Cerulean City
+				$LF
+				"Route 24 -> Cerulean City
+				$LF
+				"Route  4 -> Cerulean City
+				$LF
+				"Route  5 -> Cerulean City
+				$LF
+				$LF
+				"Pewter City -> Pewter City
+				$LF
+				"Mt. Moon    -> Pewter City
+				$LF
+				"Route 2     -> Pewter City
+				$LF
+				"Route 3     -> Pewter City
+				$LF
+				$LF
+				"Route 1      -> Viridian City
+				$LF
+				"Route 22     -> Viridian City
+				$LF
+				"Victory Road -> Viridian City
+				$LF
+				"Route 26     -> Viridian City
+				$LF
+				$LF
+				"Route 21 -> Pallet Town
+				$LF
+				$LF
+				"Route 20        -> Cinnabar Island
+				$LF
+				"Route 21        -> Cinnabar Island
+				$LF
+				"Seafoam Islands -> Cinnabar Island
+				$LF
+				$LF
+				"Indigo Plateau -> Indigo Plateau
+				$LF
+				$LF
+				"Route 28            -> Mt. Silver (outide)
+				$LF
+				"Mt. Silver (outide) -> Mt. Silver (outide)
+				$LF
+				"Mt. Silver (inside) -> Mt. Silver (outide)
+				$LF
+				$LF
+				"Route 27 -> New Bark Town
+				$LF
+			]pre
+		]div
+	]div
+]div
+[h2 id=StepByStepComments 
+	"Step-by-step comments
+	$LF
+]h2
+[div class=p 
+	"This is were I'll explain why of every action I've executed in this play, and since there are literally no documentations of this game in the whole internet, the judge will have to confirm every of my statements. :)
+	$LF
+]div
+[h3 id=Begin 
+	"The begin
+	$LF
+]h3
+[div class=p 
+	"We skip the developer logo, the title screen,  start a new game, meet prof. Rowan, 
+	[del 
+		"w
+	]del
+	"talk mom, go to the Pokémon laboratory. Pretty cliché so far, even though the general ambiance may not look too much familiar.
+	$LF
+]div
+[div class=p 
+	"We have to choose between one of the three Gen IV starters. The mandatory choice is Piplup, because it starts with the move Leer. Which it doesn't lower the adversary defense, but instead it raises our own Attack. By two stages. Like every other stat-affecting move in the game.
+	$LF
+]div
+[div class=p 
+	"The prof's assistant will give us two Potions, which happens to be indispensable for the success of our second fight.
+	$LF
+]div
+[h3 id=SSAcqua 
+	"S.S. Acqua
+	$LF
+]h3
+[div class=p 
+	"The same events as Pokémon Gold/Silver. We go directly to the lower floor of the ship, just to talk to the sailor which won't let us pass through. Then we get back to the higher floor and enter the cabin where another sailor spawned. We challenge him to a fight for the story to proceed.
+	$LF
+]div
+[div class=p 
+	"The fight is pretty simple. We build attack stat with Leer (wow it still sounds dumb) and we attack with Tackle, while manipulating our Pokémon to strike critical hits, and the opponent to either fail or use a non-damaging move. Simple, no? Of course I did take in account any other possible choice. By the way, leveling up resets our stat changes, so we have to build attack stat again after each level up.
+	$LF
+]div
+[h3 id=LtSurge 
+	"Lt. Surge
+	$LF
+]h3
+[div class=p 
+	"Right after arriving to Vermilion City, we go straight for the first gym. No worries about the double hidden switch, as the programmers didn't bother to code it in. Nor did they bother to code the collisions of the trash bins at all. So we just "overfly" the bins and the trainers... Right, because this isn't an Electric type gym, but a Flying type one!
+	$LF
+]div
+[div class=p 
+	"We directly challenge Lt. Surge. We can already notice how quick the enemy levels are raising. Defeating Honchkrow is the first actual challenge in this TASing project. This opponent Pokémon has a much high level, and it only has a damaging move. With 100% accuracy. So we have to manipulate the damage to the minimum, and also consume both of our Potions. When we finally take it down, we have only 1 HP left. With a bit more of manipulation we could keep 1 more HP, but that wouldn't be necessary.
+	$LF
+]div
+[h3 id=Sabrina 
+	"Sabrina
+	$LF
+]h3
+[div class=p 
+	"After getting our well deserved badge, we head North, for Saffron City. Along the way, in Route 6, we have to talk with an NPC, placed in the upper left. Due to how doors work, we have to first enter in the building, and then exit. This is necessary for being able to get through the narrow way for reaching this NPC, which will give us HM Cut, a mandatory key item for accessing certain places. We'll also get HM Rock Smash in Saffron City from another NPC, which also allows use to pass through certain overworld obstacles.
+	$LF
+]div
+[div class=p 
+	"We get to the second gym and skillyfully dodge the stare of the gym trainers in our way. The timing of their turning around is determined by a frame rule or two, I didn't care to look into it too much, as I've implemented a bunch of additional checkpoints in my bot for manipulating them optimally anyway.
+	$LF
+]div
+[div class=p 
+	"Sabrina is very challenging, as her last two Pokémon don't feature any non-damaging move, so we'll have to manipulate them to fail, while also striking critical hits. You'll be able to notice much longer waitings before selecting our move.
+	$LF
+]div
+[div class=p 
+	"Now we can use HM Rock Smash to smash rocks that block our way. HMs can't be taught, and there is no need to, as they're used directly in the overworld. Because the programmers didn't care.
+	$LF
+]div
+[h3 id=CatchingMedicham 
+	"Catching Medicham
+	$LF
+]h3
+[div class=p 
+	"After getting our second badge, we aim for Celadon City. We could get here a couple of seconds faster if we abused an intentional game over, but that would make we lost precious money that are necessary for our upcoming shopping. Before challenging the gym we have to buy 3 Poké Balls and 2 Ethers. Then we go to Route 17 to catch a Medicham, as our Piplup has become completely useless already.
+	$LF
+]div
+[div class=p 
+	"When we catch a new Pokémon, we manipulate RNG in order to get it at the highest level possible, while also having a favorable moveset, which is critical. Our Medicham needs to have Fire Punch, High Jump Kick, and Tri Attack, which are the most powerful attacks available when capturing it in this Route. We also want to have Fire Punch at the first move slot, because it's the move we're going to use the most, and moving the move selection cursor consumes about 10 frames.
+	$LF
+]div
+[div class=p 
+	"Weakening a wild Pokémon increases the capture chances, but it's unnecessary if we can just manipulate RNG for a quick success anyway.
+	$LF
+]div
+[h3 id=Erika 
+	"Erika
+	$LF
+]h3
+[div class=p 
+	"There are a lot of mandatory fights in this gym, but worry not! Medicham, with her strong Fire Punch, will beat the chlorophyll out of these foul plants. We let Piplup go KO because it's faster than removing it from our party.
+	$LF
+]div
+[h3 id=Janine 
+	"Janine
+	$LF
+]h3
+[div class=p 
+	"With some neat movements, I'll sneak through two gym trainers. Such a ninja I am, differently from Janine, who's not using "Ninja" type Pokémon here... but "Cute" type instead. Which our supereffective High Jump Kick will erase from existence.
+	$LF
+]div
+[h3 id=Route15 
+	"Route 15
+	$LF
+]h3
+[div class=p 
+	"Since the wild Pokémon encounters run on a step count that it's decided when the location is loaded, we can't walk in the grass too much. But at the same time, we have to avoid getting caught by the stare of the trainers, and that's why we're walking this weird way. It's optimal.
+	$LF
+]div
+[h3 id=Whishcash 
+	"Whishcash
+	$LF
+]h3
+[div class=p 
+	"It's worth noting that in Route 13 we'll face our second RNG-mupulation-intensive fight: the fisherman with three Wishcash. These are so much strong that our Medicham can barely beat them. The first two are level 35, and require at least 4 hits in order to be taken down, all crits of course. Since we have one spare High Jump Kick to use, I've implemented in my bot the ability to automatically figure out to which out of the two use it, since the time save is purely situational to RNG. The third an last Wishcash is level 34, and we can barely bring it KO with three High Jump Kicks, and lots of RNG manipulation.
+	$LF
+]div
+[div class=p 
+	"You may have noticed that we also took some damage, don't worry, that didn't waste time, as this fight is so hard that the bot wasn't able to avoid getting hit, which is something that it's usually faster. Actually, the fact that we took some damage it's actually a good thing, as we're going to get an intentional game over later.
+	$LF
+]div
+[div class=p 
+	"Right after winning this painful fight, we get into the house placed to the close North, in order to get HM Surf. Remember that HMs are not taught, but used directly on the spot? Well, in this case the programmers didn't even care to code a dialogue when using it, so we can directly swim on water just by moving towards it.
+	$LF
+]div
+[h3 id=RockTunnel 
+	"Rock Tunnel
+	$LF
+]h3
+[div class=p 
+	"Wild Pokémon encounters are unavoidable. All we can do is just manipulate the step count in order to limit their amount slightly. With a good manipulation, we can avoid at least one encounter for each room. It's also worth mentioning that different Pokémon species will result in a slightly different loading time, and of course I took this in consideration when coding my bot.
+	$LF
+]div
+[h3 id=PowerPlant 
+	"Power Plant
+	$LF
+]h3
+[div class=p 
+	"We have to first talk with chief for being made aware that a Machine Part has been stolen. Then we head to Cerulean City to retrieve it, in the fifth gym. Returning back to the Power Plant will force us to face a trainer, but instead we're going straight to challenge the closest trainer available, in order to get an intentional game over. Getting knocked out in one hit requires to manipulate a specific attack from the opponent Pokémon, on top of being a critical hit. We'll deathwarp in front of the Pokémon Center placed at the entrance of Rock Tunnel, because that's how deathwarp points work in this game: there is a predetermined place depending on the location where you got defeated. This allowed us to save some walking time, as well as avoiding the unavoidable trainer that I've already mentioned, which will never get the chance to annoy us.
+	$LF
+]div
+[div class=p 
+	"We return the Machine Part and we get... a Poké Flute. And we can't use it before getting the fifth badge.
+	$LF
+]div
+[h3 id=CatchingMachamp 
+	"Catching Machamp
+	$LF
+]h3
+[div class=p 
+	"Since Medicham became obsolete, we go get a new Pokémon. Route 5 features only two Pokémon: Abromasnow and Machamp. The former can't have any decent move, while the latter can turn out with some very good ones. Again, we manipulate RNG in order to get the highest level possible, 43. The moves we want instead are Rock Slide, Cross Chop, Mega Kick. The order doesn't matter in this case.
+	$LF
+]div
+[h3 id=Misty 
+	"Misty
+	$LF
+]h3
+[div class=p 
+	"We head to Route 25 and win some mandatory battles in order to meet Misty, so that she gets back to her gym and becomes available for getting rekt. After getting to the gym, we directly challenge her and her stacked team of overpowered Water type Pokémon... or are they? Yeah, they're Water type, but they're no threat. At all.
+	$LF
+]div
+[h3 id=Brock 
+	"Brock
+	$LF
+]h3
+[div class=p 
+	"We get back to Vermilion City through a shortcut, and we wake up Snorlax with our Poké Flute... and there is no fight because the programmers didn't care to program it. Then we pass through Diglet Cave by encountering only two wild Pokémon, which requires very tight manipulation due to the required amount of steps. Note that when you begin walking on the first possible frame, the encounter step counter will be initialized after your first step, which effectively means you a chance of having an extra free step. We have to get it three times in a row, in order to pass through with encountering only two wild Pokémon.
+	$LF
+]div
+[div class=p 
+	"We beat both Brock and the other gym trainer by consuming all PPs left. This required some planning, and it was necessary to take in consideration all the possible moves that Machamp could have.
+	$LF
+]div
+[h3 id=Garchomp 
+	"Garchomp
+	$LF
+]h3
+[div class=p 
+	"After beating Brock, the path to Emerald Town opened, so we walk and swim all the way to Route 21, where we can find a surprising Pokémon at a surprising level. A Garchomp, level 58! Both stats and moveset are overpowered. We manipulate the moveset to be Take Down, Cross Chop, Hyper Beam, and... Ice Ball, which will also be necessary at a certain point. Anyway, we want Hyper Beam to be at the top, since we're going to use it extensively, with the aid of the two Ethers we bought way back after getting the second badge. Garchomp is strong, but our adversaries are going to be as well.
+	$LF
+]div
+[div class=p 
+	"The reason why I've entered and exited the 7th gym was for resetting the encounter steps counter. This allowed to avoid one wild encounter in Route 20, and saving about 45 frames.
+	$LF
+]div
+[h3 id=Blaine 
+	"Blaine
+	$LF
+]h3
+[div class=p 
+	"Before challenging Blaine, we defeat a wild Pokémon on the way. This will save time later, since the experience bar grows very slowly when you defeat the first Pokémon after leveling up. This also happens to save time after the next level up, as so it happens to have another weak Pokémon right after the next level up.
+	$LF
+]div
+[div class=p 
+	"Take Down is relatively powerful and has lots of PPs, making it a mandatory choice for the moveset of our Garchomp. It's enough to blast Blaine away.
+	$LF
+]div
+[div class=p 
+	"Right after getting out of the "gym", some mysterious person speaks to us. Who could he be???
+	$LF
+]div
+[h3 id=Blue 
+	"Blue
+	$LF
+]h3
+[div class=p 
+	"It was him. The overworld sprites used surely make no sense. Anyway, it must be mentioned that he has a Spiritomb... which is immune to both Normal and Fighting moves. It looks like the programmers get to be faithful to original series only for giving us more annoyances... Guess which is the only non-Normal and non-Fighting move that Garchomp can have? That's right, it's Ice Ball. And guess which move doesn't have any side effect, just like all other moves in this game? That's right, it's Ice Ball. This means the move power will always be 30. For these reasons, our cool Garchomp has to deliver 6 hits in order to take down this cursed ghost... all of them critical hits, of course.
+	$LF
+]div
+[h3 id=PokMonLeague 
+	"Pokémon League
+	$LF
+]h3
+[div class=p 
+	"First, we get again to Pallet Town, where we have to meet Oak in order to get the Certificate will grant us access to Victory Road. Thanks to that, we can get to the Pokémon League, where we'll fight the Elite Four and the Champion.
+	$LF
+]div
+[div class=p 
+	"Right after arriving to the League, we deposit all our Pokemon except Garchomp. You'd think that it's for saving time at the Hall of Fame, but that's not the case. It's actually just for making the next deathwarp much quicker.
+	$LF
+]div
+[div class=p 
+	"For the rest, the only remark I have about the fights there, is that we're going to use both Ethers on Hyper Beam, in two different moments. In order to save time, we do that outside of battles.
+	$LF
+]div
+[div class=p 
+	"After beating the Champion, we get acknowledged as the new Champion... with just a short dialogue.
+	$LF
+]div
+[div class=p 
+	"We're warped back at the entrance of the League, from which we head back to Victory Road just for getting a quick deathwarp. Since the city before Victory Road is Emerald City, that's where the game is programmed to warp us. Note that the guy at left gives HM Waterfall, but we literally don't need it. It only allows to pick a couple of items from ground, found inside Mt. Silver.
+	$LF
+]div
+[h3 id=Red 
+	"Red
+	$LF
+]h3
+[div class=p 
+	"We can now get to Mt. Silver, as the guard blocking the passage has gone after that we beat the League. In in the second screen, before entering Mt. Silver, we walk in a weird zig-zagging way in order to walk as few steps as possible in the grass, barely avoiding an encounter. Differently than from the original series, turning your sprite around does consume time, but we can't really avoid any more turning here, I swear.
+	$LF
+]div
+[div class=p 
+	"Surprise! Red TALKS. There isn't anything particularly broken about this fight, but his whole team is overall strong.
+	$LF
+]div
+[div class=p 
+	"After beating him, he will automatically start a short dialogue. That's the very last story event. Nothing else happens after that. No credits roll. Not even a crappy congratulations screen. This is the ending point of the game, but I must admit that I hope I'm wrong. Please, anyone check if there is anything else left to do...
+	$LF
+]div
+[div class=p 
+	"We could get back to New Bark Town through Route 28, but there isn't anything of interest to find. So my last input is just for closing the textbox of Red's dialogue.
+	$LF
+]div
+[h2 id=Considerations 
+	"Considerations
+	$LF
+]h2
+[div class=p 
+	"Working on this TAS was great! It took me weeks to figure out the game mechanics, and more weeks to figure out an optimal route, and more weeks to develop the DankBot, but it has been a lot of fun. Despite the fact that the game lacks a lot of features that you'd expect to be there, there are also a lot of unique aspects that made it interesting and challenging to work with. Maybe it's just me being entusiast about bootleg games for being obscure and exotic, but I really think that it was really worth it. It also happened to a be chance to test my limits and improve my TASing skills, and after finishing this project I feel that my possibilities in that regard have widened.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Noxxa 
+		"Noxxa
+	]a
+	": Claiming for judgment.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Noxxa 
+		"Noxxa
+	]a
+	": Quality of the run seems quite good. While the game does not appear to have a definite end, defeating Red and clearing his final dialogue looks like an appropriate ending point. And while it is a rather obscure bootleg, the game itself appears quite decent, with some odd quirks but nothing really game-breaking. It's definitely higher quality than many other bootleg games that have been accepted in the past.
+	$LF
+]div
+[div class=p 
+	"In terms of viewer experience, it's a rather typical Pokémon-like speed playthrough, which generally isn't that notable. The facts that it isn't a known game and that it is all in Chinese make it significantly less appealing to the majority of our viewerbase; if not for the author commentary subtitles, there would be very little to follow at all.
+	$LF
+]div
+[div class=p 
+	"Accepting for the Vault.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Noxxa 
+		"Noxxa
+	]a
+	": Also, cleared the rerecord count from the submission file (in order to be consistent with eliminating excessive bot rerecords from movie statistics). The original listed rerecord count was 6051845.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Noxxa 
+		"Noxxa
+	]a
+	": Replaced movie file with a fixed non-bot rerecord count and subtitle fixes.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": I don't have a witty bootleg joke on this one... Publishing.
+	[br 
+	]br
+	$LF
+	"Changed the title to 
+	[em 
+		"Pocket Monsters: White Jade Version
+	]em
+	" as there's no official western release of this bootleg. And the naming convention chosen by this Chinese bootleg follows the Japanese title.
+]div

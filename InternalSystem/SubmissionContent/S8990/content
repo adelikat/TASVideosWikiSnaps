@@ -1,0 +1,1456 @@
+6
+[div class=p 
+	"That's right, I'm back for more. Last year, I colored all the dinosaurs by intuition: keep the backgrounds purple, keep the larger regions yellow or pink, and try to confine gray to the smallest detail regions. This time, I've got the power of computer science on my side.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Color all 16 dinosaurs such that no two adjacent regions are the same color 
+		$LF
+	]li
+	[li 
+		" Do so using the smallest number of colors (which is 4)
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#GameObjectives 
+					" Game objectives
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#WhatIsTheFourColorTheorem 
+					" What is the Four-color Theorem?
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Algorithm 
+					" The Algorithm
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Modeling 
+							" Modeling
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Core 
+							" Core
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Execution 
+							" Execution
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Conclusion 
+							" Conclusion
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Comments 
+					" Comments
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#P2pOptimization 
+							" p2p Optimization
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#FreehandOptimization 
+							" Freehand Optimization
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MiracleFrames 
+							" Miracle Frames
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Definitions 
+							" Definitions
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#DinoByDinoComments 
+					" Dino by dino comments
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#1Stegosaurus 
+							" #1 - Stegosaurus
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#2Spinosaurus 
+							" #2 - Spinosaurus
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#3Brontosaurus 
+							" #3 - Brontosaurus
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#4Viktor 
+							" #4 - Viktor
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#5Triceratops 
+							" #5 - Triceratops
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#6Vinnie 
+							" #6 - Vinnie
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#7Pterodactyl 
+							" #7 - Pterodactyl
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#8Crested 
+							" #8 - Crested
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#9Duckbill 
+							" #9 - Duckbill
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#10VernVirginSOwn 
+							" #10 - Vern (Virgin's own!)
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#11CrestedDuckbill 
+							" #11 - Crested Duckbill
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#12Vera 
+							" #12 - Vera
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#13MiniStegosaurus 
+							" #13 - Mini Stegosaurus
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#14TheMightyTRex 
+							" #14 - The Mighty T-Rex
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#15Torosaur 
+							" #15 - Torosaur
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#16Protoceratops 
+							" #16 - Protoceratops
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Totals 
+							" Totals
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Faq 
+					" FAQ
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#FinalThoughts 
+					" Final Thoughts
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=WhatIsTheFourColorTheorem 
+	" What is the Four-color Theorem?
+	$LF
+]h3
+[div class=p 
+	"The four color theorem is kind of like a game. You have an area divided into discrete regions--say, a map of the world, or a picture of a dinosaur--and you have to color all the regions in. There's only one rule: two adjacent regions cannot be the same color. You could trivially color any dinosaur by this rule if you picked a different color for every single region, but that's no fun! Therefore, the goal of this game is to get a low score: what's the fewest number of colors you can use? The 
+	[a href=https://en.wikipedia.org/wiki/Four_color_theorem rel=noopener external nofollow 
+		"four color theorem
+	]a
+	" states that, for any given dinosaur, you will never need more than four colors... as long as your dinosaurs aren't too weird.
+	$LF
+]div
+[div class=p 
+	"The particular weirdness we dinosaur colorers have to deal with is 
+	[b 
+		"exclaves,
+	]b
+	" or separate island regions that are forced to be the same color. If Alaska has to be the same color as the continental U.S., then you could contrive a scenario where more than four colors are required. This doesn't actually cause problems for the run, as evidenced by last year's submissions, but it 
+	[em 
+		"could
+	]em
+	" have. More on this in the relevant dinosaurs' sections.
+	$LF
+]div
+[h3 id=Algorithm 
+	" The Algorithm
+	$LF
+]h3
+[div class=p 
+	"In standard graph colorings, we don't care which colors are used, or where. In dinosaur coloring, however, not all regions and colors are created equal. Pink and yellow take 1 pass to fill, purple obviously takes 0 passes because it's already there, and gray takes 2 passes because it has to put down a layer of pink primer. Therefore, the dinosaur coloring problem is a layer on top of typical graph coloring where you have to find an 
+	[em 
+		"optimal
+	]em
+	" solution based on the weights of the colors and regions.
+	$LF
+]div
+[h4 id=Modeling 
+	" Modeling
+	$LF
+]h4
+[div class=p 
+	"Each dinosaur is modeled as an undirected graph, in typical fashion (with exclaves treated as one merged vertex). Each vertex and each color has a weight; these weights are multiplied together when computing the overall score of a solution.
+	$LF
+]div
+[div class=p 
+	"I determined the vertex weights empirically by manually TASing a frame perfect fill of each region using pink (picture 
+	(__wikiLink|displaytext=this|href=/8258S)
+	" but pinker). So by definition, pink has a weight of 1. I've observed subtle, inexplicable variations
+	$LF
+	"(miracle frames) when using yellow, but I've chosen to ignore these and treat yellow as also having a weight of 1. Purple obviously has a weight of 0, and the two-pass gradient fill of gray would seem to have a weight of 2. But through further testing, I found that it's 2N - 1 (miracle frames notwithstanding), which I've captured by adding a constant addend as part of each color's definition.
+	$LF
+	"So the weight of a vertex v colored with color c is W
+	[sub 
+		"v
+	]sub
+	"[v] * W
+	[sub 
+		"c
+	]sub
+	"[c] + C
+	[sub 
+		"c
+	]sub
+	"[c], where:
+	$LF
+]div
+[div class=p 
+	[b 
+		"V
+	]b
+	" is the number of vertices in the graph 
+	[br 
+	]br
+	$LF
+	[b 
+		"C
+	]b
+	" is the number of colors (always 4 in this case) 
+	[br 
+	]br
+	$LF
+	[b 
+		"W
+		[sub 
+			"v
+		]sub
+	]b
+	" is the list of vertex weights, from 0 to V - 1 
+	[br 
+	]br
+	$LF
+	[b 
+		"W
+		[sub 
+			"c
+		]sub
+	]b
+	" is the list of color weights, from 0 to C - 1 
+	[br 
+	]br
+	$LF
+	[b 
+		"C
+		[sub 
+			"c
+		]sub
+	]b
+	" is the list of color constants, from 0 to C - 1 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"It would be more accurate to measure a separate yellow, pink, and gray fill, and make the weights a V x C matrix.
+	$LF
+]div
+[div class=p 
+	"Determining adjacencies was the hardest part. I didn't do this algorithmically, but by hand. For most regions, the adjacencies are obvious, but for many others, the black outlines
+	$LF
+	"and pixel art aesthetic make it difficult to determine. For these cases, I invented the knight's move heuristic - if the two colored regions can be reached by a knight's move, then they are adjacent.
+	$LF
+	"These results lined up with FractalFusion's writeup
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" and the community consensus during the toenail incident.
+	$LF
+	"These drawings also contain solid black pupil regions with small specular highlights. I considered the specular highlight to take up the entire black border region, just to be safe--and keep things interesting!
+	$LF
+]div
+[div class=p 
+	"Here is an example of a dinosaur that has been modified to show you how I see the adjacencies. It gives me the willies, so this is the only one you get.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-4463-0 
+					"Hide
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-4463-1 
+					"Show
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-4463-0 
+		]div
+		[div class=tab-pane fade id=tabs-4463-1 
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/2GdcDg4.png 
+				]img
+				$LF
+			]div
+		]div
+	]div
+]div
+[h4 id=Core 
+	" Core
+	$LF
+]h4
+[div class=p 
+	"The core algorithm is rather crude. It just tries all possible combinations with some basic pruning. It is surprising that it runs as fast as it does.
+	$LF
+	"The theoretical runtime is O(C
+	[sup 
+		"V
+	]sup
+	"), which would be on the order of 4
+	[sup 
+		"30
+	]sup
+	" = 1,152,921,504,606,846,976 (1 quintillion) for these graphs.
+	$LF
+	"The reasons it runs as fast as it does are twofold:
+	$LF
+]div
+[ol 
+	[li 
+		" The graphs have clear outliers in terms of weight and degree which eliminate lots of possibilities.
+		$LF
+	]li
+	[li 
+		" I iterate the vertices in decreasing order of degree to best take advantage of this.
+		$LF
+	]li
+]ol
+[div class=p 
+	"The stegosaurus in particular 
+	[em 
+		"needs
+	]em
+	" this degree-based ordering. It went from making no progress overnight to running in less than 100 ms.
+	$LF
+]div
+[div class=p 
+	"jgrapht has a coloring algorithm called LargestDegreeFirstColoring
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	", which evidently dates back to the 60's. Therefore, this degree-based ordering is not a new idea, even if it's in a different context.
+	$LF
+]div
+[div class=p 
+	"With certain negative weights or constants, a region could have negative multiplied score, which would render my pruning incorrect.
+	$LF
+	"However, this situation is unrealistic, so I've ignored it.
+	$LF
+	"A solution threshold is already in place to account for the fuzzy magic of TASing. It may be possible to include in this threshold a minimum potential negative value
+	$LF
+	"from the node and color weights to ensure correctness.
+	$LF
+]div
+[h4 id=Execution 
+	" Execution
+	$LF
+]h4
+[div class=p 
+	"This is where the automation ends and the gamer intuition begins. The core algorithm has no notion whatsoever of pen movement; the colorings output by the core are considered goals to be achieved with frame perfect movement. But sometimes, a coloring just doesn't work out, and you lose 10 to 20 frames to meandering movement. For this reason, I added a solution threshold to the core; maybe a slower coloring would be more conducive to fast pen movement and save some frames. This indeed happened on several dinosaurs.
+	$LF
+]div
+[h4 id=Conclusion 
+	" Conclusion
+	$LF
+]h4
+[div class=p 
+	"The algorithm is crude, but effective on the given dataset. However, based on what I see in jgrapht, even regular graph coloring is either try all the possibilities with some basic pruning, or weird special cases and heuristics
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	". Therefore, I don't think this approach can be substantially improved.
+	$LF
+]div
+[div class=p 
+	"If you'd like to double check my work or play around with other graphs,
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	" my code can be found on GitHub.
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	" Go easy on me, now!
+	$LF
+]div
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" 
+	(__wikiLink|href=/Forum/Posts/523096|implicitdisplaytext=Forum/Posts/523096)
+	" 
+	[br 
+	]br
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" 
+	[a href=https://jgrapht.org/javadoc/org.jgrapht.core/org/jgrapht/alg/color/LargestDegreeFirstColoring.html rel=noopener external nofollow 
+		"https://jgrapht.org/javadoc/org.jgrapht.core/org/jgrapht/alg/color/LargestDegreeFirstColoring.html
+	]a
+	" 
+	[br 
+	]br
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" 
+	[a href=https://jgrapht.org/javadoc/org.jgrapht.core/org/jgrapht/alg/color/package-summary.html rel=noopener external nofollow 
+		"https://jgrapht.org/javadoc/org.jgrapht.core/org/jgrapht/alg/color/package-summary.html
+	]a
+	" 
+	[br 
+	]br
+	$LF
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" 
+	[a href=https://www.romhacking.net/hacks/5126/ rel=noopener external nofollow 
+		"https://www.romhacking.net/hacks/5126/
+	]a
+	" 
+	[br 
+	]br
+	$LF
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	" 
+	[a href=https://github.com/warmCabin/dino-coloring/ rel=noopener external nofollow 
+		"https://github.com/warmCabin/dino-coloring/
+	]a
+	$LF
+]div
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"As a refresher, there are two coloring modes: point-to-point (p2p) and freehand, which you access by pressing A and B respectively. Freehand lets you move the pen during the fill, while the p2p pen gets stuck in place; this means freehand is faster, ceteris paribus. However, the freehand pen moves 2 pixels at a time, so certain tiny regions may be inaccessible. These are accounted for in my code with "freeze" constraints in the input files, so I can spit out colorings for both modes. A few of them were close enough that I had to try both.
+	$LF
+]div
+[h4 id=P2pOptimization 
+	" p2p Optimization
+	$LF
+]h4
+[div class=p 
+	"When I run my algorithm, I get an output that looks something like this: 
+	$LF
+]div
+[pre 
+	"Pink: 
+	"[1, 14, 16, 33, 39, 41, 42, 43, 45, 47, 49, 54]
+	$LF
+	"Yellow: 
+	"[5, 7, 9, 10, 11, 12, 13, 15, 17, 34, 37, 38, 40, 44, 46, 50, 51]
+	$LF
+	"Purple: 
+	"[0, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 35, 52]
+	$LF
+	"Gray: 
+	"[2, 3, 4, 6, 8, 36, 48, 53]
+	$LF
+]pre
+[div class=p 
+	"From there, I can sort of color by numbers without really thinking about the picture. "OK, my pen starts at 1, but 14 is a bit of a trek, so let's try looping back to 54 through 33. Yellow's on 34, so now I can switch and hopefully come back to 14 and 16 later. So now we'll do 48 through 51, wrap back to 5 through 17, and... I guess I gray is on 8, so let's go back 9 and..." You get the idea. And once I do this, I get a feel for the patterns and bottlenecks, and realize that maybe I can swap pink and yellow for a more optimal pattern. That's basically the process for p2p colorings.
+	$LF
+]div
+[h4 id=FreehandOptimization 
+	" Freehand Optimization
+	$LF
+]h4
+[div class=p 
+	"You want the region where the pen starts to be pink, or at least something very close by. You want to pair long movements with long waits, and do the tiny regions of each color at the end of that pass.
+	$LF
+]div
+[h4 id=MiracleFrames 
+	" Miracle Frames
+	$LF
+]h4
+[div class=p 
+	"I believe in miracles, I swear I've seen a few.
+	$LF
+]div
+[div class=p 
+	"This is something that has 
+	[del 
+		"plagued
+	]del
+	" blessed me throughout the run. I built each graph on a prototype movie that fills out each section frame perfectly.
+	$LF
+	"This has been 99% accurate, but 
+	[em 
+		"sometimes,
+	]em
+	" a given section takes a few frames more or less to fill in. This doesn't seem to be based on framerules, or whether you just loaded a new color,
+	$LF
+	"or if you waited X amount of time, or 
+	[em 
+		"anything
+	]em
+	" predictable. It seems to be based on where you click with the pen, what color you have selected, and what colors are around you
+	[sup 
+		"[
+		[a href=https://tasvideos.org/TextFormattingRules#ReferencesLinks rel=noopener external nofollow 
+			"citation needed
+		]a
+		"]
+	]sup
+	".
+	$LF
+	"Upper left corners seem to be good for this.
+	$LF
+]div
+[div class=p 
+	"These are only applicable to big regions, particularly gray ones. I don't think it affects any overall colorings, though.
+	$LF
+]div
+[div class=p 
+	"Because these are completely unpredictable, I'm choosing to ignore them. Or I guess, I'm assuming that all colorings are equally affected. I encourage anyone reading this to download my run and check for miracle frames. I'll make you a coauthor and I'll DM you a fun fact about Mega Man 2.
+	$LF
+]div
+[h4 id=Definitions 
+	" Definitions
+	$LF
+]h4
+[dl 
+	[dt 
+		" Meander Frames
+	]dt
+	[dd 
+		" How many frames were wasted meandering with the pen after I could have pressed A. The absolute theoretical minumum is 0 for freehand dinos, and V-1 (V=number of regions) for p2p dinos.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		" Miracle Frames
+	]dt
+	[dd 
+		" Unpredictable timesave that pops up based on where in the region you started the fill. Especially affects large gray regions.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		" Miracle Pixels
+	]dt
+	[dd 
+		" Pixels that grant you miracle frames.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		" Dual colorings
+	]dt
+	[dd 
+		" Since yellow and pink are identical (mostly), any coloring has a twin where the yellows and pinks are all swapped. I chose the mathy word "dual" to refer to this.
+		$LF
+	]dd
+]dl
+[h3 id=DinoByDinoComments 
+	" Dino by dino comments
+	$LF
+]h3
+[h4 id=1Stegosaurus 
+	" #1 - Stegosaurus
+	$LF
+]h4
+[pre 
+	"Regions: 54
+	$LF
+	"Frames saved: 106
+	$LF
+	"Meander frames: 111
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"p2p
+			]td
+			[td 
+				"freehand
+			]td
+		]tr
+		[tr 
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/x99hTbS.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/tcHFEI4.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Wow, that's a lot of regions! 20 more than the next lowest. I wish I could ease you into this discussion with one or two easy examples, but nope! We're diving 
+	[em 
+		"straight
+	]em
+	" in, baby. Like the first level of Sokoban.
+	$LF
+]div
+[div class=p 
+	"This dinosaur gave me the most trouble out of the bunch by far. This was not the first dinosaur I colored, so by this point my code and workflow were well established. Most of these colorings took, at the absolute worst, 200 ms to find, but something about this dinosaur absolutely 
+	[em 
+		"wrecked
+	]em
+	" my code. I left it running overnight, and no progress. I tried having it iterate the nodes in decreasing order of degree to help with the pruning, but still no luck. I then plugged the graph into a real computer science graph theory library, and it told me it takes 5 colors!! I have checks for that in 
+	[em 
+		"my
+	]em
+	" code, but I don't spit it out until I've already churned through all eleventy billion possibilities. So that's now implemented as a precondition before I attempt any colorings.
+	$LF
+]div
+[div class=p 
+	"After removing some of my evidently impossible adjacencies (don't worry, your favorite toenails are still touching), I got an answer in about 1 second. Turns out the iteration order optimization 
+	[em 
+		"is
+	]em
+	" necessary, as it still takes the lifetime of the universe if I turn that off. I think this is caused by those 15 spot regions that can be independently colored yellow or pink if the body is purple.
+	$LF
+]div
+[div class=p 
+	"Compared to my old coloring, it kind of swaps the legs and belly regions from gray to pink. In freehand, the eye would be next to the sky, so the coloring ends up way different. It would allegedly be 199 frames slower, so I didn't try it--p2p churn usually only costs 30-60 frames. What good is this code if I'm not going to trust it, anyway?
+	$LF
+]div
+[div class=p 
+	"Now, onto the execution phase. The purple spots are like a desert. In my menuing, I avoided crossing them at all costs.
+	$LF
+	"Except that's not true. I tried a bunch of different routes, and it turns out that crossing the desert and even doing a bit of backtracking
+	$LF
+	"was baaarely worth it over a solution that avoids crossing the desert by cycling the color selection back to pink.
+	$LF
+]div
+[div class=p 
+	"There are 111 meander frames. If I set the algorithm threshold to 111 frames, the thing churns for a couple minutes before running out of heap space. So I'm happy with this coloring...
+	$LF
+]div
+[h4 id=2Spinosaurus 
+	" #2 - Spinosaurus
+	$LF
+]h4
+[pre 
+	"Regions: 31
+	$LF
+	"Frames saved: 76
+	$LF
+	"Meander frames: 18
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/dqhIvR3.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"This is the first dinosaur with an exclave (0 and 31* on the picture), although you wouldn't know it because I leave it blank. Everything the exclave touches is already touching the sky, so it has no effect on the coloring, for better or for worse.
+	$LF
+]div
+[div class=p 
+	"Compared to the pure output, I swapped regions 23 and 24. It loses 2 frames of fill time, but saves travel time.
+	$LF
+]div
+[div class=p 
+	"My initial coloring had 24 meander frames. I put that as my search threshold, which helped me find an alternate solution with a gray arm that was 4 frames faster overall.
+	$LF
+]div
+[h4 id=3Brontosaurus 
+	" #3 - Brontosaurus
+	$LF
+]h4
+[pre 
+	"Regions: 27
+	$LF
+	"Frames saved: 177
+	$LF
+	"Meander frames: 
+	[b 
+		"0
+	]b
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/ZpamCsJ.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The first dino I tested my nascent code on. It's one of the most substantial timesaves, and one of the only meander-free ones! It's also the first dinosaur that benefits from a filled background and blank body.
+	$LF
+]div
+[h4 id=4Viktor 
+	" #4 - Viktor
+	$LF
+]h4
+[pre 
+	"Regions: 27
+	$LF
+	"Frames saved: 40
+	$LF
+	"Meander frames: 1
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/ofS2Xd7.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"AINTNOWAY. The algorithm came up with the EXACT same coloring as my manual one! All of this timesave comes from pen movement. Surprisingly, this is not the smallest difference, either.
+	$LF
+]div
+[div class=p 
+	"Tweaking it so the thumb (region 3) is gray is conducive to good pen movement. Saves 35 frames.
+	$LF
+]div
+[h4 id=5Triceratops 
+	" #5 - Triceratops
+	$LF
+]h4
+[pre 
+	"Regions: 26
+	$LF
+	"Frames saved: 181
+	$LF
+	"Meander frames: 1
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/cgLPWmr.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Compared to the optimal coloring, I swapped which eye is gray and which eye is yellow (regions 18 and 19). Since 25 is so far away, the benefit of the faster eye coloring would lost. Better to be closer.
+	$LF
+]div
+[h4 id=6Vinnie 
+	" #6 - Vinnie
+	$LF
+]h4
+[pre 
+	"Regions: 25
+	$LF
+	"Frames saved: 61
+	$LF
+	"Meander frames: 
+	[b 
+		"0
+	]b
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"p2p
+			]td
+			[td 
+				"freehand
+			]td
+		]tr
+		[tr 
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/ZodbLnw.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/2WLZEka.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"This is the first exclave we actually get to see. Once again, everything it touches already touches the sky, so no effect.
+	$LF
+]div
+[div class=p 
+	"The right eye spot (22) cannot be colored in freehand, but it's adjacent to the sky, so freehand and p2p have two very different solutions. However, Coloring the background and leaving the dino purple is only 
+	[em 
+		"7 frames slower
+	]em
+	" than the other way around (according to the algorithm), which is wild. Since this doesn't take pen movement into account, the freehand solution is faster by far.
+	$LF
+]div
+[h4 id=7Pterodactyl 
+	" #7 - Pterodactyl
+	$LF
+]h4
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/XQexLnV.png 
+	]img
+	$LF
+]div
+[pre 
+	"Regions: 26
+	$LF
+	"Frames saved: 77
+	$LF
+	"Meander frames: 11
+	$LF
+]pre
+[div class=p 
+	"This coloring is almost identical to my old one. The only (nontrivial) difference is the major derpage on regions 7 and 8. It's pretty obvious those can be purple. I lose 7 frames at the beginning as I navigate to region 6, which made me wonder if forcing the background pink could have a positive outcome, but it loses 32 frames. Which is surprisingly little...
+	$LF
+]div
+[h4 id=8Crested 
+	" #8 - Crested
+	$LF
+]h4
+[pre 
+	"Regions: 29
+	$LF
+	"Frames saved: 45
+	$LF
+	"Meander frames: 1
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/nPHURzC.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Compared to the old one: The chest is gray and the arm is pink. I also didn't noticed that you can totally make one of the eyes purple.
+	$LF
+]div
+[div class=p 
+	"Funny story: as I started work on this dino, I had some code in place that attempted to eliminate dual colorings, but it was totally jank and would reject valid solutions. I noticed this by looking at the output for the crested dinosaur and saying 
+	[b 
+		"I don't believe you.
+	]b
+	" Just raw intuition.
+	$LF
+]div
+[h4 id=9Duckbill 
+	" #9 - Duckbill
+	$LF
+]h4
+[pre 
+	"Regions: 33
+	$LF
+	"Frames saved: 135
+	$LF
+	"Meander frames: 7
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/KZ3Sa2q.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"21 is unreachable in freehand, but the optimal coloring makes it purple anyway, so it's fine. The eyes are supposed to be yellow, but it takes so long to mash back to yellow that it's 2 frames faster to just use gray.
+	$LF
+]div
+[h4 id=10VernVirginSOwn 
+	" #10 - Vern (Virgin's own!)
+	$LF
+]h4
+[pre 
+	"Regions: 32
+	$LF
+	"Frames saved: 21
+	$LF
+	"Meander frames: 75
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"p2p
+			]td
+			[th 
+				"freehand
+			]th
+		]tr
+		[tr 
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/n6R9YdT.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/61cjLF0.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Still not the smallest timesave!
+	$LF
+]div
+[div class=p 
+	"This one needs to be p2p. Region 27 is untouchable, so regions 0 
+	[em 
+		"and
+	]em
+	" 2 need to be colored to accommodate it.
+	$LF
+]div
+[div class=p 
+	"For the record, the old coloring has 80 meander frames, so this coloring is probably only 16 frames faster ceteris paribus.
+	$LF
+]div
+[h4 id=11CrestedDuckbill 
+	" #11 - Crested Duckbill
+	$LF
+]h4
+[pre 
+	"Regions: 28
+	$LF
+	"Frames saved: 133
+	$LF
+	"Meander frames: 43
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"p2p
+			]td
+			[td 
+				"freehand
+			]td
+		]tr
+		[tr 
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/UgAmLcb.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/cbNwguH.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"It's a bit of a hot take, but I still consider region 0 and 23 to be adjacent, which leads to another major p2p/freehand difference. The optimal freehand coloring would be 139 frames slower. Not worth it.
+	$LF
+]div
+[div class=p 
+	"I'm actually quite surprised that it's faster to fill region 2 and not leave it purple. I mean, it twists around the beak, the eyebrows, all those spines... I tried freezing region 2 as purple and my code spit out a coloring 84 frames slower.
+	$LF
+]div
+[h4 id=12Vera 
+	" #12 - Vera
+	$LF
+]h4
+[pre 
+	"Regions: 30
+	$LF
+	"Frames saved: 33
+	$LF
+	"Meander frames: 58
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"p2p
+			]td
+			[td 
+				"freehand
+			]td
+		]tr
+		[tr 
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/0JRFKGF.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/RzdAnYa.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Lots of very annoying tiny regions here. Not as bad as the stegosaurus, though.
+	$LF
+]div
+[div class=p 
+	"p2p saves 661 frames over freehand here, which is 
+	[em 
+		"huge.
+	]em
+	" None of that "maybe I should try it..." attitude here!
+	$LF
+]div
+[div class=p 
+	"58 frames seems like a lot of meandering, but upping the threshold isn't usually very productive on p2p drawings. I didn't bother.
+	$LF
+]div
+[div class=p 
+	"It wanted me to make region 22 gray, but I'm not comfortable doing that on a 1-pixel region. It's a gradient, you wouldn't be able to tell! So I forced it pink and lost maybe 5 frames.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/MnDBPhh.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"For the record, the loss counter reads 79 on the old run. 79 - 58 = 21 frames due to movement, and 12 frames due to the coloring.
+	$LF
+]div
+[h4 id=13MiniStegosaurus 
+	" #13 - Mini Stegosaurus
+	$LF
+]h4
+[pre 
+	"Regions: 29
+	$LF
+	"Frames saved: 153
+	$LF
+	"Meander frames: 1
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/JhfhQsd.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"I managed to color all the tiny regions at the bottom and lose 0 frames! This gave me trouble last time. I only lost 1 frame in total to reach the tail (region 6) from the start. Ain't no way to save that frame unless you make the body pink, which is a big no no. 
+	[br 
+	]br
+	$LF
+	"Sometimes, things just work out :)
+	$LF
+]div
+[div class=p 
+	"I foresee a judging problem here. I now consider regions 18 and 20 to be adjacent, but I didn't last time. Does that invalidate the old run...? Luckily, this is the favorable arrangement of regions 20 and 21, so even under the old interpretation, this coloring is still optimal. I guess you can just pretend this isn't an issue. In fact, you can pretend I didn't even bring it up. Just forget it. It's fine.
+	$LF
+]div
+[h4 id=14TheMightyTRex 
+	" #14 - The Mighty T-Rex
+	$LF
+]h4
+[pre 
+	"Regions: 34
+	$LF
+	"Frames saved: 16
+	$LF
+	"Meander frames: 82
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/L0q8o8Y.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Behold, the smallest timesave of the bunch!
+	$LF
+]div
+[div class=p 
+	"The new coloring is a little bit faster in some of the detail regions, which don't contribute much. Apparently I only save 9 meander frames from last time.
+	$LF
+]div
+[div class=p 
+	"We have another harmless exclave here. I'm also continuing with the hot take that regions 0 and 27 are touching, which forces me to use p2p if I want to keep the background purple.
+	$LF
+]div
+[div class=p 
+	"I tried searching within an 82 frame threshold and got like 100,000 results (including duals). I managed to salvage a few from the spew of console output, and they were just silly. Just random obvious mistakes.
+	$LF
+]div
+[h4 id=15Torosaur 
+	" #15 - Torosaur
+	$LF
+]h4
+[pre 
+	"Regions: 30
+	$LF
+	"Frames saved: 191
+	$LF
+	"Meander frames: 15
+	$LF
+]pre
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"freehand
+			]td
+			[td 
+				"p2p
+			]td
+			[td 
+				"freehand, yellowbod
+			]td
+		]tr
+		[tr 
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/yg92FTS.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/E1HRdpI.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/ib7qyOo.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"My old friend, the forgotten pixel! In case you forgot, too: it can't be reached in p2p mode, but it can in freehand. It's really funny.
+	$LF
+]div
+[div class=p 
+	"These are the two rival colorings, plus one that's freehand but region 0 is forced purple as an added bonus. p2p is considered 147 frames slower, and p2p is already the naturally slower mode.
+	$LF
+]div
+[div class=p 
+	"I tried a 15-frame threshold, and nothing promising came up. One of them has one of the eyes gray, which might be able to serve as a little pit stop.
+	$LF
+]div
+[h4 id=16Protoceratops 
+	" #16 - Protoceratops
+	$LF
+]h4
+[pre 
+	"Regions: 22
+	$LF
+	"Frames saved: 261
+	$LF
+	"Meander frames: 9
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/OUJwRZK.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Behold, the greatest timesave of the bunch!
+	$LF
+]div
+[div class=p 
+	"Just watch the old movie and you'll see. The protoceratops' body is a 767 frame slog. Other than that, regions 4, 5, and 16 (leg, belly, and third appendage) are in the same sort of triplet scenario where you can either make the belly gray, or the other two.
+	$LF
+]div
+[h4 id=Totals 
+	" Totals
+	$LF
+]h4
+[div class=p 
+	"1724 frames saved in all. This is the actual real life frame count. I occasionally had to move the p2p pen a couple of regions aside to reveal the delicate features it was hiding, which I specifically factored out of the dino-by-dino notes, so this number may be a few frames off from what you expect.
+	$LF
+]div
+[div class=p 
+	"The rerecord count may seem a bit low after reading all of this. A big part of that, I think, is this utility I wrote that can tell me when the next region is ready to be filled. Guessing when the pencil was ready honestly could've taken up half my rerecords in the first movie. Maybe I'll make a test file and see if that's true...
+	$LF
+]div
+[h3 id=Faq 
+	" FAQ
+	$LF
+]h3
+[div class=p 
+	"More like, anticipated asked questions. Or, a framing device to help me express miscellaneous thoughts.
+	$LF
+	"FDHMEMT?
+	$LF
+]div
+[dl 
+	[dt 
+		" Why do you switch palettes? Isn't that slow?
+		$LF
+	]dt
+]dl
+[div class=p 
+	"Yep; it's a time/entertainment tradeoff. I just think it's easier on the eyes. This run would sync on any palette;
+	$LF
+	"even though I can move the pen during the palette swaps, I chose not to so that it could sync on the first America palette.
+	$LF
+	"I might make a version that uses that palette.
+	$LF
+]div
+[dl 
+	[dt 
+		" Can't you do anything about all that waiting?
+		$LF
+	]dt
+]dl
+[div class=p 
+	"Uh, yes? I just saved 30 seconds of it. Besides, you're not playing, you're just watching. It's ALL waiting to YOU.
+	$LF
+]div
+[dl 
+	[dt 
+		" I mean, can't you do anything funny with the pencil during the flood fills?
+		$LF
+	]dt
+]dl
+[div class=p 
+	"There's not a whole lot I can do. There's no music to jam to, and I'm unable to create sound effects of my own.
+	$LF
+	"In the p2p dinos, I can't even move my pencil, so I am TRULY stuck!
+	$LF
+	"In a couple of freehand dinos, I had to modify a coloring halfway through; in those cases, I implemented the change as a last
+	$LF
+	"second juke. I also tried to put the pen somewhere cute at the end of each freehand coloring. I could always do more, but
+	$LF
+	"would it 
+	[em 
+		"really
+	]em
+	" make a difference?
+	$LF
+]div
+[dl 
+	[dt 
+		" Does it matter what order you do them in?
+		$LF
+	]dt
+]dl
+[div class=p 
+	"Nope! Since you have to end each coloring by pressing start, you can't end input early on a long region.
+	$LF
+]div
+[dl 
+	[dt 
+		" It's kind of bogus that the background regions count. Aren't those like the oceans in a map?
+		$LF
+	]dt
+]dl
+[div class=p 
+	"Fair point. Apparently the RTA community calls that Any%, whereas my interpretation is 100%.
+	$LF
+	"I think the 100% version is more interesting.
+	$LF
+]div
+[dl 
+	[dt 
+		" Can't you just reset instead of listening to that stupid jingle?
+		$LF
+	]dt
+]dl
+[div class=p 
+	"The title screen is slow. This would lose exactly 200 frames each time.
+	$LF
+]div
+[dl 
+	[dt 
+		" This algorithm of yours... may I see it?
+		$LF
+	]dt
+]dl
+[div class=p 
+	[a href=https://github.com/warmCabin/dino-coloring/ rel=noopener external nofollow 
+		"Yes
+	]a
+	"!
+	$LF
+]div
+[h3 id=FinalThoughts 
+	" Final Thoughts
+	$LF
+]h3
+[div class=p 
+	"Last year, I assumed there would be very little interest in this run. So I rushed out the submission in one night, making some glaring mistakes in the process, and abandoned the thread. Why dwell on a joke that wasn't gonna land, right? Boy was I wrong. Thank you and apologies to everyone, especially FractalFusion for the graphs, and Randomno for picking up my slack and fixing the movie. Hopefully this can make up for it.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": I remember the debacle of this submission last year. I wasn't sure if it was a joke or not. Well, it has turned out to be a phenomenon. This time around, the science behind this is even more fascinating than ever. The idea of a "four color theorem", actually is very amusing. Having 7 votes...all yes (me included :) ), I see no other option than to continue the trend of "Alternative" ..as this is very good work. Congrats on the computations. This is amazing to see how far this concept can go.
+	$LF
+]div
+[div class=p 
+	"Accepting over 
+	(__wikiLink|href=/5436M|implicitdisplaytext=5436M)
+	" to Alternative.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

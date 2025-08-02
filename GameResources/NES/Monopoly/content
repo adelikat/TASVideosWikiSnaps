@@ -1,0 +1,388 @@
+1
+[h4 id=Rng 
+	" RNG
+	$LF
+]h4
+[div class=p 
+	"RndVal1_A = $0037
+	[br 
+	]br
+	$LF
+	"RndVal1_B = $0038
+	[br 
+	]br
+	$LF
+	"RndVal1_C = $0039
+	[br 
+	]br
+	$LF
+	"RndVal2   = $0302
+	[br 
+	]br
+	$LF
+	"RndCount1 = $0027
+	[br 
+	]br
+	$LF
+	"RndCount2 = $00F7
+	$LF
+]div
+[div class=p 
+	"Execution of RndFunc1: The current 24-bit
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" random seed RndVal1 is left-shifted by 1.
+	$LF
+	"The new entering bit is 0 if the 3rd and 4th bits from the left are the same, and 1 otherwise.
+	[br 
+	]br
+	$LF
+	"This is an event of what is better known as a 
+	[a href=http://en.wikipedia.org/wiki/Linear_feedback_shift_register rel=noopener external nofollow 
+		"linear feedback shift register
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Execution of RndFunc2: Execute RndFunc1 5 times and add 35 to RndVal2 (mod 256).
+	$LF
+]div
+[div class=p 
+	"Randomization occurs every frame (except those which are lagging or playing sound effects).
+	$LF
+	"Which randomization occurs on a frame depends on which stage the game is at.
+	$LF
+]div
+[div class=p 
+	"Note: All divisions and moduli operate on 
+	[em 
+		"unsigned
+	]em
+	" 8-bit integers.
+	$LF
+]div
+[div class=p 
+	"Before the game:
+	$LF
+]div
+[ul 
+	[li 
+		" Random seed at frame 7: 3E2AD2
+		$LF
+	]li
+	[li 
+		" Increment of RndCount1 begins after a button is pressed to begin.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Game is not at enter-name screen: Increment RndCount1. Then execute RndFunc1 once. (RndCount1++, RndVal1 << 1)
+		$LF
+	]li
+	[li 
+		" Game is at enter-name screen: Increment RndCount1. Then execute RndFunc1 once. Then take RndCount1, mod 32, and execute RndFunc1 that many times. Then execute RndFunc1 once. If A is pressed, reset RndCount1. (RndCount1++, RndVal1 << 2-33)
+		$LF
+	]li
+	[li 
+		" Game is setting card decks:
+		$LF
+	]li
+]ul
+[ol 
+	[li 
+		[ol 
+			[li 
+				" Execute RndFunc1 once.
+				$LF
+			]li
+			[li 
+				" Reset RndCount2.
+				$LF
+			]li
+			[li 
+				" Ready the Chance deck array.
+				$LF
+			]li
+			[li 
+				" Execute RndFunc1 three times.
+				$LF
+			]li
+			[li 
+				" Take last 8 bits of RndVal1, XOR with RndCount2, integer divide by 16, and use this value as an offset to the deck array.
+				$LF
+			]li
+			[li 
+				" Check deck array. If already occupied, increment RndCount2. Otherwise occupy offset, and try next card.
+				$LF
+			]li
+			[li 
+				" Go back to step 4 unless the deck is full (no more cards). In that case go back to step 3, set RndCount2 to 16, and repeat with the Community Chest deck array. When both decks are done, stop.
+				$LF
+			]li
+		]ol
+	]li
+]ol
+[ul 
+	[li 
+		[ul 
+			[li 
+				" (RndVal1 << a lot)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"During the game:
+	$LF
+]div
+[ul 
+	[li 
+		" Game is not showing overhead board: Execute RndFunc1 once. (RndVal1 << 1)
+		$LF
+	]li
+	[li 
+		" Player is waiting to roll: Just before this happens, reset RndCount1. Increment RndCount1. Then execute RndFunc1 once, then RndFunc2 once, then, if not turn after double or opposing player menu, execute RndFunc1 twice. (RndCount1++, RndVal1 << 8 or 6, RndVal2 += 35)
+		$LF
+	]li
+	[li 
+		" Player is rolling: Increment RndCount1. Then execute RndFunc1 once, then RndFunc2 once, then RndFunc2 twice, then if RndCount1 is divisible by 4, execute RndFunc1 twice. (RndCount1++, RndVal1 << 18 or 16, RndVal2 += 105)
+		$LF
+	]li
+	[li 
+		" Player has thrown the dice: Execute RndFunc1 once, then RndFunc2 once. (RndVal1 << 6, RndVal2 += 35)
+		$LF
+	]li
+	[li 
+		" On the frame to get dice roll:
+		$LF
+	]li
+]ul
+[ol 
+	[li 
+		[ol 
+			[li 
+				" Execute RndFunc1 once, then RndFunc2 once, then RndFunc1 five times.
+				$LF
+			]li
+			[li 
+				" Take last 8 bits of RndVal1, XOR with RndVal2, mod 6, and increment for Die 2.
+				$LF
+			]li
+			[li 
+				" Execute RndFunc1 five times.
+				$LF
+			]li
+			[li 
+				" Take last 8 bits of RndVal1, mod 6, and increment for Die 1.
+				$LF
+			]li
+		]ol
+	]li
+]ol
+[ul 
+	[li 
+		[ul 
+			[li 
+				" (RndVal1 << 16, RndVal2 += 35).
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-2921-0 
+					"Minimize Tab
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-2921-1 
+					"Monopoly RNG Disassembly
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-2921-0 
+		]div
+		[div class=tab-pane fade id=tabs-2921-1 
+			[div class=p 
+				"Everything marked (Acmlm) was found by 
+				[a class=intlink href=/Users/Profile/Acmlm 
+					"Acmlm
+				]a
+				".
+				$LF
+				"Everything else was found by 
+				[a class=intlink href=/Users/Profile/FractalFusion 
+					"FractalFusion
+				]a
+				".
+				$LF
+			]div
+			[div class=p 
+				"Some additional comments were added to the code.
+				$LF
+			]div
+			[ul 
+				[li 
+					" Random functions:
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-snescom 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" Random analysis:
+					$LF
+				]li
+			]ul
+			[pre 
+				$LF
+				"(Acmlm)
+				$LF
+				"37 38 39                            0302
+				$LF
+				[del 
+				]del
+				[del 
+				]del
+				[del 
+				]del
+				[del 
+				]del
+				[del 
+				]del
+				[del 
+				]del
+				[del 
+					"-
+					$LF
+					"70 19 EE = 011100000001100111101110 ¦ 00  Before starting (random 1)
+					$LF
+					"E0 33 DC = 111000000011001111011100 ¦ 00  $0037-0039 << 1
+					$LF
+					"C0 67 B9 = 110000000110011110111001 ¦ 00  $0302      + 00
+					$LF
+					"80 CF 72 = 100000001100111101110010 ¦ 00
+					$LF
+					"01 9E E4 = 000000011001111011100100 ¦ 00
+					$LF
+					"03 3D C8 = 000000110011110111001000 ¦ 00
+					$LF
+					"06 7B 90 = 000001100111101110010000 ¦ 00
+					$LF
+					"0C F7 20 = 000011001111011100100000 ¦ 00
+					$LF
+					"19 EE 40 = 000110011110111001000000 ¦ 00
+					$LF
+					"33 DC 81 = 001100111101110010000001 ¦ 00
+					$LF
+					"67 B9 02 = 011001111011100100000010 ¦ 00
+					$LF
+					$LF
+					"80 CF 72 = 100000001100111101110010 ¦ 00  Before rolling (random 2)
+					$LF
+					"CF 72 05 = 110011110111001000000101 ¦ 23  $0037-0039 << 8, $0027 is reset when this activates
+					$LF
+					"72 05 46 = 111000100000010101000110 ¦ 46  $0302      +$23
+					$LF
+					"05 46 58 = 000001010100011001011000 ¦ 69
+					$LF
+					$LF
+					"3F 2B A1 = 001111110010101110100001 ¦ D2  While rolling (random 3)
+					$LF
+					"84 17 CE = 100001000001011111001110 ¦ 3B  $0037-0039 <<18,16,16,16,18,16,16,16,... depending on $0027
+					$LF
+					"CE 30 E1 = 110011100011000011100001 ¦ A4  $0302      +$69
+					$LF
+					"E1 49 44 = 111000010100100101000100 ¦ 0D
+					$LF
+					"44 8F 6F = 010001001000111101101111 ¦ 76
+					$LF
+					"BC D9 1B = 101111001101100100011011 ¦ DF
+					$LF
+					$LF
+					"                                          After rolling (random 4)
+					$LF
+					"                                          $0037-0039 << 6, 16 when getting dice values
+					$LF
+					"                                          $0302      +$23
+					$LF
+				]del
+			]pre
+			[ul 
+				[li 
+					" before game:
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-snescom 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" during game:
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-snescom 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[div class=p 
+	"(RNG = Random Number Generator)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" The RndVal1 RNG is actually 22-bit, not 24-bit, because the first two bits are superfluous.
+	$LF
+]div
+[div class=p 
+	"Some trivia:
+	$LF
+]div
+[ul 
+	[li 
+		" The RndVal1 RNG has a period of 2^22-1. Since 0 is a pathological case, it means that all nonzero 22-bit numbers are contained in this period.
+		$LF
+	]li
+	[li 
+		" The RndVal1 RNG is slightly biased toward the die numbers 1, 2, 3, 4, because of mod 6 operating on (unsigned) 8-bit numbers.
+		$LF
+	]li
+	[li 
+		" The RndVal1 RNG is reversible, a fact which can also be derived from its period.
+	]li
+]ul

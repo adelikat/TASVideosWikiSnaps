@@ -1,0 +1,659 @@
+9
+[div class=p 
+	(youtube|h=480|v=_HGva7PZol8|w=640)
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk-2.3.2
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+]ul
+[div class=p 
+	"This TAS is faster than the 47 units RTA world record by 1h40.
+	$LF
+]div
+[h3 id=AboutTheGame 
+	" About the game
+	$LF
+]h3
+[div class=p 
+	"Fire Emblem: Thracia 776 (ファイアーエムブレム　トラキア776) is the fifth game of the serie, originally released through the Nintendo Power (japanese only flash cartridge service) before receiving a proper ROM cartridge the following year (only in Japan). There are a few minor differences between the two versions but nothing important as far as this TAS is concerned. The story takes place during the events of Fire Emblem: Genealogy of the Holy War, with Leif trying to retake Manster and liberate northern Thracia.
+	$LF
+]div
+[div class=p 
+	"At the end of the game, you are given a ranking based solely on two factors, those being the total turn count and whether or not you have 47 units alive (the maximum number possible in one playthrough) in your army. In particular, the highest rank, SSS, can only be achieved by having the 47 units alive.
+	$LF
+]div
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=SpecificFeaturesOfThisGame 
+	" Specific features of this game
+	$LF
+]h4
+[div class=p 
+	"This game has several unique features compared to other Fire Emblem games. The most notables ones for this TAS being :
+	$LF
+]div
+[ul 
+	[li 
+		" Fatigue: Doing an action (Fight, Dance, Steal) with any unit increases his Fatigue by 1 (or between 1 or 5 for Staves, depending of the Staff used). A unit with a Fatigue greater than their maximum HP cannot be deployed in the next chapter. Fatigue is reseted to 0 when not deploying the unit or by giving him a Stamina Drink. Leif isn't affected by this mechanic.
+		$LF
+	]li
+	[li 
+		" Rescue/Capture: A unit can rescue an ally if his BLD is higher than that of the ally (mounted units are treated as 20 BLD ones), and will have his STR, MGC, SKL, SPD and DEF halved if the rescued unit's BLD is more than half of the rescuer's one (or more than BLD + 5 if the rescuer is mounted). You can also capture an enemy unit by winning a battle against him (with STR, MGC, SKL, SPD and DEF halved). The same penalties apply than if it was an ally, and you can trade items with him. The enemy tends to prioritize capturing over attacking, and no battle occurs if the attacked target is unharmed.
+		$LF
+	]li
+	[li 
+		" Escape Maps: In some chapters you must escape with your army, and once Leif Escapes, any other unit left will be lost (you get one opportunity to get back the units lost in chapter 21x, which is also an Escape Map).
+		$LF
+	]li
+	[li 
+		" Minimum deployement: In addition to the maximum number of units you can deploy, there is also a minimum number, presumably to prevent cheeses in Escape Maps. If you don't have enough units available, everyone will be deployed regardless of their Fatigue.
+		$LF
+	]li
+	[li 
+		" MOV growth: Most characters have a movement growth rate (usually between 1% and 3%), movement which can go up to 20. Needless to say it can be very useful early on when you don't have access to the Warp Staff yet, or for Escape Maps. A pop up message appears after the level up to say to the movement was increased.
+		$LF
+	]li
+	[li 
+		" Movement Stars: About half of the cast have "Movement Stars" (between 1 and 5), which give them a (number of stars x 5%) chance to move again once per turn (not taking dance into account). Starting from chapter 7, any character will also lose his ability to re-move if he Seizes or Escapes, and the only way to get back this ability is to end the turn normally (i.e. by not finishing the chapter in one turn) or getting danced by Lara.
+		$LF
+	]li
+	[li 
+		" Staves: All the Staves have a (60 + 4 x SKL)% accuracy, meaning that any unit with less than 10 SKL can miss when using a Staff (you still get the Exp and the Weapon Exp from it, and it doesn't cost a Staff use). Status like Sleep last forever and can only be cured with a Restore Staff.
+		$LF
+	]li
+	[li 
+		" Battle Accuracy: Hit cannot go higher than 99% and lower than 1%, so every attack can either hit or miss and is subject to the RNG.
+		$LF
+	]li
+	[li 
+		" Critical Rates: When two units are fighting, both of them can only have a maximum critical rate of 25% for the first round of combat (so if the critical rate should be higher than that, it is reduced to 25%). After that, if one of the unit has an extra round of combat (because his Attack Speed is higher by 4 or more than the opponent's one), then it's critical rate for this round of combat will be the expected critical rate (i.e. the one displayed in the battle summary) multiplied by the Pursuit Coefficient of the unit (can go from 0 to 5).
+		$LF
+	]li
+	[li 
+		" Critical hit damage: The critical hit damage formula is 
+		[small 
+			"ATK x2) - DEF), as opposed to the 
+			[small 
+				"ATK - DEF) x 3) in the later games.
+				$LF
+			]small
+		]small
+	]li
+	[li 
+		" Deployment order: Unlike later games, you can't choose where your deployed units will spawn, as it depends only on when you deployed them for the last time. Since for some chapters the units are separated into several groups, a big part of the planning for this TAS was to find in which way I had to deploy my units in order to have them at the right spot at the right time, given the other constraints.
+		$LF
+	]li
+]ul
+[h4 id=Rng 
+	" RNG
+	$LF
+]h4
+[div class=p 
+	"This is the last Fire Emblem game to use a 1 RN system, meaning that what is displayed on screen are the true odds (except for critical rates).
+	$LF
+]div
+[div class=p 
+	"Each time the RNG is reseted, the game randomly picks a number between 1 and 64 (that I will conveniently call seed from now on) and use it with the Knuth's subtractive RNG to generate the first random numbers, and the following ones are calculated with the formula RN#(N) = (RN#(N-55) - RN#(N-24)) modulo 100
+	$LF
+]div
+[div class=p 
+	"The RNG is often reseted, in particular at the start of each chapter and each time you open a menu screen. Checking the stats of a unit is faster than opening the option menu, but this second option is less laggy (lag = the seed isn't advancing) so it is the fastest option if I must wait some time for a specific seed anyway. Opening a menu costs at least ~60 frames, so most of the optimization of this TAS was to find the less time consuming combinaison of opening menus and burning RNs.
+	$LF
+]div
+[div class=p 
+	"There are two efficient ways to burn RNs, the first one is to watch the battle summary (right before the battle), as it will "simulate" the battle and so it will burn the RNs accordingly, the other one is to move an unit to a different place to force the game to burn RNs to dertermine the path to take (slower but more accurate). There are also some oddities that can burn 1 or 2 RNs at a time, like the Bragi's Blade.
+	$LF
+]div
+[div class=p 
+	"Since you must always watch the battle summary before doing an actual battle, some RNs strings for a particular battle may be inaccessible because you can't "sync" the RNs with them (i.e. after the simulation from the battle summary, the RNs are right where you want them to be). The more complex the battle (several attacks, several skills involved), the more likely you are to not be able to sync the RNs with a specific string.
+	$LF
+]div
+[h4 id=NotableCharacters 
+	" Notable characters
+	$LF
+]h4
+[ul 
+	[li 
+		" Leif: The lord of the game, he must reach the end of every map to Seize/Escape. Since you can't really warp him in Escape Maps (or else you would lost the warper and the Warp Staff), it is important for him to get a high mobility through his 3% MOV growth.
+		$LF
+	]li
+	[li 
+		" Safy: The only Staff user who can use the Warp Staff early on. She needs 60 Weapon Exp to reach A-rank Staff but thanks to her personnal Hammerne Staff she can get 10 Weapon Exp per turn, which is fast enough by the time you get the Warp Staff at the end of chapter 8.
+		$LF
+	]li
+	[li 
+		" Lara: Thief who can later be promoted as a dancer.
+		$LF
+	]li
+	[li 
+		" Lifis: Thief with 7 base MOV and decent stats, making him the best candidate to rescue and transport other units with poor mobility in the early chapters.
+		$LF
+	]li
+	[li 
+		" Sleuf: A priest able to use the Warp Staff as soon as recruited. Unlike Safy, he also has movement stars.
+		$LF
+	]li
+	[li 
+		" Sara: A cleric able to use the Rescue Staff as soon as recruited, with 5 movement stars.
+		$LF
+	]li
+	[li 
+		" Deen: Wyvern Rider with excellent stats, mobility, and movement stars.
+		$LF
+	]li
+]ul
+[h3 id=RoutePlanning 
+	" Route Planning
+	$LF
+]h3
+[h4 id=NewGame 
+	" New game+
+	$LF
+]h4
+[div class=p 
+	[a href=https://tasvideos.org/UserFiles/Info/637844587121772752 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/637844587121772752
+	]a
+	$LF
+]div
+[div class=p 
+	"After completing the game, as long as you don't delete the save file, you will be able to speed up units movement (allies and enemies), saving 2 frames per tile. Since (tens of?) thousands of tiles are crossed in this TAS, the total time saved from this is probably between 5 and 10 minutes.
+	$LF
+]div
+[h4 id=GaidenChapters 
+	" Gaiden chapters
+	$LF
+]h4
+[div class=p 
+	"There are 8 optionnal chapters that you will visit if you meet certain conditions, and all but 2 of them are supposed to be mandatory to recruit all 47 units, but due to an oversight, it is possible to not visit chapter 8x and yet recruit everyone. Chapters 4x, 11x and 24x require to make significant detours in order to fulfill their conditions.
+	$LF
+]div
+[h4 id=OutlinesOfTheStrategy 
+	" Outlines of the strategy
+	$LF
+]h4
+[div class=p 
+	"Prior to chapter 8, Leif must Seize/Escape without the help of the Warp Staff so the more movement he has the better it is. The aim was to fight as little as possible while still reaching the following thresholds:
+	$LF
+]div
+[div class=p 
+	"Leif:
+	$LF
+]div
+[ul 
+	[li 
+		" 5 SKL at Level 4 (35% growth rate, to proc 3 out of 3 times)
+		$LF
+	]li
+	[li 
+		" 4 MGC at Level 5 (10%, 4/4)
+		$LF
+	]li
+	[li 
+		" 8 BLD at Level 10 (15%, 3/9)
+		$LF
+	]li
+	[li 
+		" 11 MGC at Level 14 (10%, 11/13)
+		$LF
+	]li
+	[li 
+		" 10 BLD at Level 16 (15%, 5/15)
+		$LF
+	]li
+	[li 
+		" 19 MOV at Level 16 (3%, 13/15)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Lifis:
+	$LF
+]div
+[ul 
+	[li 
+		" 8 BLD at Level 6 (10%, 2/2)
+		$LF
+	]li
+	[li 
+		" 12 MOV at Level 15 (2%, 5/5)
+		$LF
+	]li
+	[li 
+		" Enough STR and SKL to kill people
+		$LF
+	]li
+]ul
+[div class=p 
+	"Lara:
+	$LF
+]div
+[ul 
+	[li 
+		" 9 MOV at Level 4 (3%, 2/2)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Sleuf:
+	$LF
+]div
+[ul 
+	[li 
+		" 9 MOV at Level 10 (7%, 4/4)
+		$LF
+	]li
+	[li 
+		" 24 HP at Level 13 (35%, 6/7)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Deen:
+	$LF
+]div
+[ul 
+	[li 
+		" 12 MOV at Level 6 (6%, 3/3)
+		$LF
+	]li
+	[li 
+		" Enough STR and SKL to kill people
+		$LF
+	]li
+]ul
+[div class=p 
+	"Leif in particular had a hard time getting all these rare stats, with the combinaison of MAG, BLD, MOV and movement star proc at the same time being impossible in any reasonable amount of time.
+	$LF
+]div
+[div class=p 
+	"The most efficient way to clear Escape Maps is just to fast forward with Leif while carrying someone, while leaving behind units without Movement Stars. You can get back captured units in chapter 21x, but I don't have an ulimited amount of ressources to do so. After some planning, I determined that the optimal number of units I could let captured was 21.
+	$LF
+]div
+[div class=p 
+	"Karin and Nanna are both units with 4 BLD, poor mobility, and needed later in the game to recruit other characters, which is why Leif and Lifis are both trained to 8 BLD in order to rescue them without any movement penalty. Lara can somehow follow them with only a few MOV level ups.
+	$LF
+]div
+[h4 id=GlitchesAndTricks 
+	" Glitches and tricks
+	$LF
+]h4
+[div class=p 
+	"Most text boxes can be skipped earlier than intended by pressing start at a specific frame.
+	$LF
+]div
+[div class=p 
+	"When using a long range staff like Rescue or Sleep, there is a 1-frame windows after selecting the staff where you can select the next or previous target before the camera starts moving, which is especially useful when your target is on the bottom side of the map, as it prevents the camera from going to the upper side of the map for nothing.
+	$LF
+]div
+[h3 id=ChapterByChapterComments 
+	" Chapter by chapter comments
+	$LF
+]h3
+[div class=p 
+	"Most enemy stats (apart from some bosses) are slighlty randomized at the start of a chapter (including MOV) right after the RNG is reseted, and since there are 64 different seeds, it means there are only 64 different sets of stats possible. Some strategies require some specific stats to work (like low enough to be OHKO or an extra point of MOV).
+	$LF
+]div
+[h4 id=Chapter1 
+	" Chapter 1
+	$LF
+]h4
+[div class=p 
+	"The second soldier must have 6 MOV and 3 or less LUK, the boss must have 1 or less LUK (2 seeds possible).
+	$LF
+	"With my Turn 1 formation, if the first soldier is still alive and the second one happens to have 6 MOV, the later will attack Leif in close combat for some reason (usually he will always attack from a distance, thus wasting some time with the Light Brand animation). The boss must be killed with a critical hit, and Leif must get a MGC, MOV and Movement Star proc, which is only possible with the 5% crit string, which is why Leif must have 5 SKL and the boss must have 1 LUK at most (else the attack will have less than a 5% critical rate). Eyvel got the Life Ring from one of the houses.
+	$LF
+]div
+[h4 id=Chapter2 
+	" Chapter 2
+	$LF
+]h4
+[div class=p 
+	"The boss must have the minimum amount of HP and MGC, as well as not too much Avoid (1 seed possible).
+	$LF
+	"There are 6 seeds with a 31 HP/1 MGC boss, but out of them, only one works with the 66% hit string.
+	$LF
+]div
+[h4 id=Chapter2x 
+	" Chapter 2x
+	$LF
+]h4
+[div class=p 
+	"Lifis is recruited by having him captured by the end of the chapter. Meanwhile, Leif took as much Exp as possible on his way.
+	$LF
+]div
+[h4 id=Chapter3 
+	" Chapter 3
+	$LF
+]h4
+[div class=p 
+	"Some enemies must be weak enough to be killed by Lifis (4 seeds possible).
+	$LF
+	"One specific kid must be saved to get the Warp Staff at the end of chapter 7, and another one is saved in oder to recruit Dalsin in the next chapter. This is the last (and most convenient) chapter to have Tanya be captured, in order to re-recruit Dagdar later on without visiting chapter 8x. Important items were taken out of Leif and Lifis pockets in order to not have to retrieve them in chapter 4 chests.
+	$LF
+]div
+[h4 id=Chapter4 
+	" Chapter 4
+	$LF
+]h4
+[div class=p 
+	"Some enemies must be weak enough, bottom right soldier must have enough BLD to capture Machyua (3 seeds possible).
+	$LF
+	"First of a serie of 4 Escape Maps. Leif is rescuing Karin while Lifis and Lara are doing whatever they can to gain some Exp, including giving items with the Steal command. The NPC civilians must all flee in order to unlock chapter 4x
+	$LF
+]div
+[h4 id=Chapter4x 
+	" Chapter 4x
+	$LF
+]h4
+[div class=p 
+	"Some enemies must be weak enough, one of the top soldier must have 1 more MOV to attack Asbel instead of Ced (1 seed possible).
+	$LF
+	"The NPCs must flee in order to recruit Hicks in chapter 6.
+	$LF
+]div
+[h4 id=Chapter5 
+	" Chapter 5
+	$LF
+]h4
+[div class=p 
+	"The exit of the map will not open until you open the door to the arena. Lifis must dodge all the attacks in the last enemy phase to force the remaining enemies to attack Leif, allowing him to leveling up rare stats without having to proc a movement star.
+	$LF
+]div
+[h4 id=Chapter6 
+	" Chapter 6
+	$LF
+]h4
+[div class=p 
+	"I purchased 7 Door Keys, which will barely be enough for the rest of the game.
+	$LF
+]div
+[h4 id=Chapter7 
+	" Chapter 7
+	$LF
+]h4
+[div class=p 
+	"Lifis visited one of the house to get a Pure Water, which will be used much later in the run.
+	$LF
+]div
+[h4 id=Chapter8 
+	" Chapter 8
+	$LF
+]h4
+[div class=p 
+	"Leif and Lifis got the last bit of Exp they needed to reach the MOV thresholds of the next chapters. Safiya got the Life Ring from chapter 1 to help manage her Fatigue, else she wouldn't be able to do all her actions in later chapters. Since I previously unequipped Marty, he will walk to to shop to try to buy a weapon, thus getting closer to Carrion who can capture him and move out of enemies range.
+	$LF
+]div
+[h4 id=Chapter9 
+	" Chapter 9
+	$LF
+]h4
+[div class=p 
+	"With their high MOV, Leif and Lifis can carry 2 units with them, allowing me to leave only 2 units behind. The various cavaliers rescued Leif and co and then escape with them so that Leif and co kept their movement stars ability at the start of the next chapter.
+	$LF
+]div
+[h4 id=Chapter10 
+	" Chapter 10
+	$LF
+]h4
+[div class=p 
+	"This boss is a pain to kill, his avoid is so high that I can't get (in a reasonnable amount of time) an RNs string with a crit + MOV + Movement Stars proc. Lifis and Lara used their movement stars to get a Rescue Staff and a Stamina Drink.
+	$LF
+]div
+[h4 id=Chapter11 
+	" Chapter 11
+	$LF
+]h4
+[div class=p 
+	"One specific soldier must have 6 MOV so that he doesn't block my way on turn 2. The Poison Lance knight in the central area (the first one to move) must be weak enough to not be able to deal damage to Fred (1 seed possible).
+	$LF
+	"The knights in the central area follow a random movement pattern, where if they don't have a target in range, they will move to a random tile among those available to them (this includes the tile they are standing on). The enemy phase 1 was meticulously manipulated to have 2 of the 4 Javelin knights ended up next to Fred, while the other 2 were in range of Leif and Lifis. Once Lifis enters the central area, an event is triggered which turns Fred into an ally and unlocks chapter 11x.
+	$LF
+	"On enemy phase 2, since the Poison Lance knight can't damage Fred, he will just move randomly, and he was manipulated to end his turn next to Fred. Thanks to the previous manipulations, the 3 cases next to Fred are now occupied, so the 5 knights without range weapons can't engage anyone and thus don't waste time with battles.
+	$LF
+	"This boss is unkillable and will leave on the next enemy phase after you tried to hit him, so Ronan was warped to him and he then immediatly thrown his weapon to force the knight to capture him without a fight.
+	$LF
+]div
+[h4 id=Chapter11x 
+	" Chapter 11x
+	$LF
+]h4
+[div class=p 
+	"The mage in the boss room must be strong enough to deal damage to Leif (3 seeds possible).
+	$LF
+	"Fred appears and is officially recruited at the start of turn 2. Olwen could also be recruited but you can alternatively recruit another character in chapter 16A, which is faster. Leif captured the boss and stole his Door Key.
+	$LF
+]div
+[h4 id=Chapter12 
+	" Chapter 12
+	$LF
+]h4
+[div class=p 
+	"Mareeta appears (and is automatically recruited) at the end of Turn 1. Salem may use his Sleep Staff during the enemy phase, and he was manipulated to not do so.
+	$LF
+]div
+[h4 id=Chapter12x 
+	" Chapter 12x
+	$LF
+]h4
+[div class=p 
+	"Once Perne is recruited, all enemies will start to flee instead of fighting. Leif must have 10 BLD to capture (i.e. recruit) Troude.
+	$LF
+]div
+[h4 id=Chapter13 
+	" Chapter 13
+	$LF
+]h4
+[div class=p 
+	"With 19 MOV, Leif has just enough mobility to Escape on Turn 1 with Lara, thus dodging a very long enemy phase.
+	$LF
+]div
+[h4 id=Chapter14 
+	" Chapter 14
+	$LF
+]h4
+[div class=p 
+	"Some key units must not have an extra point of movement, the enemy turn order must be favorable to reduce the length of the enemy phase (very few number of seeds possible)
+	$LF
+	"There can't be more than 50 enemy units at the same time in a chapter, so it's actually beneficial to not kill enemies in order to prevent reinforcements to appear. The Dracoknights at the end each have a 70% to move each turn.
+	$LF
+]div
+[h4 id=Chapter15 
+	" Chapter 15
+	$LF
+]h4
+[div class=p 
+	"I must end the chapter by visiting the church in order to recruit Sleuf  in the next chapter.
+	$LF
+]div
+[h4 id=Chapter16a 
+	" Chapter 16A
+	$LF
+]h4
+[div class=p 
+	"Since I didn't recruit Olwen, I must recruit Ilios, which isn't an issue since I wouldn't be able to finish the chapter in one turn anyway.
+	$LF
+]div
+[h4 id=Chapter17a 
+	" Chapter 17A
+	$LF
+]h4
+[div class=p 
+	"After an Ensorcel Staff boost, Sleuf has enough MAG to put the sub-boss and Misha to sleep. For some reason the pegasus knights will not attack Deen if he is exactly in range of them.
+	$LF
+]div
+[h4 id=Chapter18 
+	" Chapter 18
+	$LF
+]h4
+[div class=p 
+	"Very specific knights must have +1 MOV (1 seed possible).
+	$LF
+	"Recruiting Xavier is considered one of the, if not the hardest recruitement in the whole serie. 8 NPCs must first talk to 8 specific knights (and turn them green) before Leif can finally recruit him, and if any of the NPCs or knights die before the talk, then there is no way to recover from it. The 8 knights are hard coded to not try to kill or capture the NPCs. Also, they all have 2 movement stars, meaning 10% chance to move again each turn.
+	$LF
+	"The main issue with the optimal strategy of talking to the 8 knights in a single turn (thus preventing them from fighting each other on a subsequent enemy phase) is that the NPCs move in a fixed order, and if their knight isn't in range when it's their turn to move, they will not talk to him, even if he is then in range due to one of the knight who blocked the way turning green. The only exception is if one of the NPC is low on health, in which case he will act first, but it's unlikely to happen.
+	$LF
+	"The seed I chose has 3 of the 5 knights closest to the NPCs with 6 MOV instead of 5. A multitude of tests were done, and, given that I could at best warped 3 people carrying NPCs in the central area, only this specific combinaison of base MOV, movement stars proc, and NPCs carrying led to all 8 knights turning green on turn 3.
+	$LF
+	"The ease side of the map was also very busy. Ilios sniped a thief and the 4 nearby soldiers were manipulated to always move out of range of the dancers, preventing them from moving and doing time consuming animations. Meanwhile, Deen and Fred went on a mission to capture a dark mage and steal his Rewarp Staff.
+	$LF
+]div
+[h4 id=Chapter19 
+	" Chapter 19
+	$LF
+]h4
+[div class=p 
+	"Thanks to his increased MOV from level-ups, Sleuf can warp someone and then talk to Amalda to recruit her in the first turn.
+	$LF
+]div
+[h4 id=Chapter20 
+	" Chapter 20
+	$LF
+]h4
+[div class=p 
+	"The left side Armor must have 6 MOV to be able to open the door one Turn 1 (7 seeds possible)
+	$LF
+	"It's faster here to prevent the reinforcements from appearing by blocking the squares where they spawn than using a strategy similar to chapter 14. I put 1 of the knight to sleep to help me in this task (since his starting position is close to the boss and his bodyguards, it is very inconveninent to block it with my own units), while the knights in the northeast cell are neutralized by stealing the weapon from one of them. The boss can't be killed in the first three turns, but I am not in a hurry because only some reinforcements from Turn 12 onward can be prevented by killing him.
+	$LF
+]div
+[h4 id=Chapter21 
+	" Chapter 21
+	$LF
+]h4
+[div class=p 
+	"Leif can't be warped next to the boss so Deen is sent first instead. Leif captured a priest and stole his Sleep Staff for chapter 24.
+	$LF
+]div
+[h4 id=Chapter21x 
+	" Chapter 21x
+	$LF
+]h4
+[div class=p 
+	"The prisonners from 3 of the cells are saved with 6 Rescue Staff uses, while Sleuf with a combinaison of Rewarp, Warp and high BLD took care of the 4th one. Any extra prisonner would mean another cell with 5 prisonners, which would cost a significant amount of extra time.
+	$LF
+]div
+[h4 id=Chapter22 
+	" Chapter 22
+	$LF
+]h4
+[div class=p 
+	"With 12 MOV, Deen can reach the boss without any extra help. Lifis also got a Warp Staff on his own from the village.
+	$LF
+]div
+[h4 id=Chapter23 
+	" Chapter 23
+	$LF
+]h4
+[div class=p 
+	"Warp Leif, kill boss, Seize. Ced can be recruited instead of Saias if I wait an extra turn, which is definitely not worth it.
+	$LF
+]div
+[h4 id=Chapter24 
+	" Chapter 24
+	$LF
+]h4
+[div class=p 
+	"The dark mage with a Silence Staff must have 6 MAG, the one with the Rescue Staff must have 7 or less MAG (1 seed possible).
+	$LF
+	"One of the NPC boy will be randomly chosen at the end of the enemy phase 5 to open the top room to get the Kia Staff. Tina used the Pure Water from chapter 7 as it allows her to steal the Rescue Staff on turn 2, and to not be a target of the Silence Staff dark mage. Other dark mages who could have used staves were silenced on turn 1.
+	$LF
+]div
+[h4 id=Chapter24x 
+	" Chapter 24x
+	$LF
+]h4
+[div class=p 
+	"One of the 2 dark mages with a Silence Staff must have 8 or less MAG, the boss must be weak enough (2 seeds possible).
+	$LF
+	"Sleuf must have 10 BLD to rescue Eyvel. The boss has a Berserk Staff, hence I killed him on turn 1.
+	$LF
+]div
+[h4 id=FinalChapter 
+	" Final chapter
+	$LF
+]h4
+[div class=p 
+	"The deployment was done in order to have at least 4 actions available and 1 bosskiller per group of 3 units, as well as having 1 Warp user for both Leif and Galzus.
+	$LF
+]div
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[div class=p 
+	"Better strategies, luck manipulation or items management. I ended up with 0 use left on my Warp, Rescue and Rewarp staves, so any extra use of any of them would require a change of strategy at some point.
+	$LF
+]div
+[h3 id=SuggestScreenshot 
+	" Suggest screenshot :
+	$LF
+]h3
+[div class=p 
+	"frame 207160
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Honest question, do you intentionally submit legitimate runs on April 1st, or does time just line up that way?
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Delaying. Our rules don't perfectly account for how this run uses SRAM, and there aren't any real minor tweaks we can make to the rules to push it through, it'd have to be some major, sweeping change. We've been meaning to look at those rules anyway, so this is a great opportunity to start.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Happy April, everyone! I'm accepting this run that definitely wasn't delayed for several months due to us needing a long overdue change to our rules! For more information on these changes that didn't take several months and how this run that is definitely being accepted in April falls under them, 
+	(__wikiLink|displaytext=I explained them in this news post|href=/Forum/Posts/516444)
+	".
+	$LF
+]div
+[div class=p 
+	"A few bits of housekeeping and explanation: I've added "new game +" to the branch to indicate the presence and particular usage of SRAM. A run of this category that does not use the SRAM enhanced movement can be published alongside this one. Given the goals of the run, I would consider this to be a full completion category, which is why it was delayed for standard as opposed to finding some other solution for it.
+	$LF
+]div
+[div class=p 
+	"Anyway, enjoy your April everyone! I hear it's showering out there! I wouldn't know, I haven't seen rain in years.
+	$LF
+]div
+[div class=p 
+	"Quick reminder to whoever publishes this, as this process was only implemented very recently: Please attach 
+	(__wikiLink|displaytext=the verification movie|href=/UserFiles/Info/637844587121772752)
+	" to the publication. Thank you! c:
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": New game+ goes first in the branch label, so the branch got changed accordingly.
+]div

@@ -1,0 +1,529 @@
+10
+[h3 id=EmulatorSyncSettings 
+	"Emulator/Sync Settings:
+	$LF
+]h3
+[ul 
+	[li 
+		"Emulator Used: Mupen 64 version 1.0.11 (
+		[a href=https://github.com/mkdasher/mupen64-rr-lua-/releases/tag/1.1.1 rel=noopener external nofollow 
+			"Syncs on version 1.1.1
+		]a
+		")
+		$LF
+	]li
+]ul
+[h3 id=GameObjectives 
+	"Game Objectives:
+	$LF
+]h3
+[ul 
+	[li 
+		"Treks over 400 miles on a road surrounded by desert
+		$LF
+	]li
+	[li 
+		"Takes damage to save time
+		$LF
+		[ul 
+			[li 
+				"Breaks speeding laws
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"Genre: Platform
+		$LF
+	]li
+	[li 
+		"Genre: ROM Hack
+		$LF
+	]li
+]ul
+[div class=p 
+	[a href=https://romhacking.com/hack/desert-mario-64 rel=noopener external nofollow 
+		"Desert Mario 64
+	]a
+	" is a ROM Hack of Super Mario 64, created by Kaze Emanuar in 2019. Much like the original Desert Bus game, you’re tasked with traveling across a very long road from Tucson, Arizona to Las Vegas, Nevada. Except it’s not by bus, because Mario overslept and the bus left without him. It’s by foot.
+	$LF
+]div
+[h3 id=GameplayMechanics 
+	"Gameplay Mechanics
+	$LF
+]h3
+[div class=p 
+	"While the core Super Mario 64 experience is unchanged in this hack, there are two specific additions that prevents one from mindlessly holding forward until the game is finished: The road temperature, and the speed limit.
+	$LF
+]div
+[div class=p 
+	"Because the road is right in the middle of a desert, it is naturally very hot. If Mario remains on the ground for too long (The “Heat Meter” reaching 100), it acts like lava, and Mario is burned. Additionally, there is also a speed limit in place (“Speed Limit 55” according to signs on the side of the road, 58 in-game units per frame to be exact), in which Mario starts to rapidly take damage if he travels above that limit. Fortunately, Mario also slowly regains health over time, which means mistakes (Intentional or otherwise) aren’t permanent.
+	$LF
+]div
+[div class=p 
+	"In the context of a TAS, the fastest method of movement on flat ground without any slopes is using slidekicks over and over. Because Mario is almost always in the air while using these, the Heat Meter can effectively be ignored. Unfortunately, the speed limit becomes the primary limiting factor, as 58 units per frame is easily reachable by chaining slidekicks, which means going fast requires a bit more thinking.
+	$LF
+]div
+[h3 id=PrimaryStrategy 
+	"The Primary Strategy
+	$LF
+]h3
+[div class=p 
+	"Because Mario regains health over time, the general strategy is to break the speed limit in one giant burst until Mario has a sliver of health remaining, then coast along just under the speed limit while Mario recovers until it fully replenishes, and then do another speed burst. To be exact, Mario’s HP (While alive) ranges from 256 to 2176; he takes 32 damage per frame while above the speed limit, and heals 1 HP every two frames at all times. Due to the amount of time the speed limit can be broken, a burst involves a series of slidekicks followed by one final jump kick (Which conserves more speed in the short term, due to not sliding on the ground for a frame) as Mario’s HP almost reaches zero.
+	$LF
+]div
+[div class=p 
+	"As is the case with any TAS involving long, monotonous sections of gameplay, a sequence of inputs that can be repeated over and over is crucial in reducing the amount of actual time spent working on it. And in spite of all the variables present to make this difficult - road position, speed, and HP - I managed to solve things down to the precision of exact floating point numbers.
+	$LF
+]div
+[h3 id=SidesOfTheRoad 
+	"The Sides of the Road
+	$LF
+]h3
+[div class=p 
+	"The road you travel on is 1600 units wide, centered on the origin, and is blocked off by invisible walls that prevent you from walking on the actual desert. Additionally, hitting these walls makes Mario lose all of his speed, which means it’s necessary for Mario to not veer in one direction too far.
+	$LF
+]div
+[div class=p 
+	"Unfortunately, holding straight up on the control stick is unoptimal for speed, which means sideways motion is needed. Even worse, left and right are just slightly asymmetrical, which means drift is functionally impossible to avoid. But fortunately, the actual amount of drift needed to prematurely bonk on the side of the road is relatively large, and is able to be kept in check with periodic corrections.
+	$LF
+]div
+[div class=p 
+	"Aside from the road boundaries, the playing field is effectively a flat, barren rectangle, 8000 units long. When Mario crosses X = 4000, he is warped back to X = 0, and a counter is incremented. When this counter reaches 10,053, the game ends.
+	$LF
+]div
+[h3 id=MaintainingSpeed 
+	"Maintaining Speed
+	$LF
+]h3
+[div class=p 
+	"Moving the control stick changes Mario’s speed (Citation Needed). The control stick has an X coordinate and a Y coordinate, with ranges of 
+	"[-128, +127]
+	" (X, left to right) and 
+	"[-127, +128]
+	" (Y, top to bottom); there are also deadzones present along the cardinal directions, where all values in the range 
+	"[-7, +7]
+	" act as a value of zero. A specific control stick value changes Mario’s speed differently depending on the angle of the camera relative to Mario’s own facing angle, which means specific camera angles are important in particular circumstances.
+	$LF
+]div
+[div class=p 
+	"With the camera at a diagonal angle relative to Mario, it happens that the control stick values of 40,-104 and 72,-29 change Mario’s speed by just +0.0000267029 per frame, which are used to hold Mario’s speed right below the limit. The diagonal camera also allows much greater precision in slight deviations from holding exactly forward in comparison to a front-facing camera (Which has deadzones as explained previously), at the level of being able to hit individual floating points, which ultimately allows Mario to start and end a slidekick cycle with the exact same speed.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-5208-0 
+					"Diagonal Control Stick Speed Changes
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-5208-1 
+					"Hide The List
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-5208-0 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Value (X Descending, Y Max)
+						]th
+						[th 
+							"Speed Change (Floating Point Units)
+						]th
+						[th 
+							"Value (X Max, Y Descending)
+						]th
+						[th 
+							"Speed Change (Floating Point Units)
+						]th
+					]tr
+					[tr 
+						[td 
+							"127, -127
+						]td
+						[td 
+							"+/-0 (0fpu), Max Speed
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"126, -127
+						]td
+						[td 
+							"-0.0000076294 (2fpu)
+						]td
+						[td 
+							"127, -126
+						]td
+						[td 
+							"-0.0000152588 (4fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"125, 127
+						]td
+						[td 
+							"-0.0000457764 (12fpu)
+						]td
+						[td 
+							"127, -125
+						]td
+						[td 
+							"-0.0000648499 (17fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"124, -127
+						]td
+						[td 
+							"-0.0001144409 (30fpu)
+						]td
+						[td 
+							"127, -124
+						]td
+						[td 
+							"-0.0001411438 (37fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"123, -127
+						]td
+						[td 
+							"-0.0002136230 (56fpu)
+						]td
+						[td 
+							"127, -123
+						]td
+						[td 
+							"-0.0002136230 (56fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"122, -127
+						]td
+						[td 
+							"-0.0002975464 (78fpu)
+						]td
+						[td 
+							"127, -122
+						]td
+						[td 
+							"-0.0003471375 (91fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"121, -127
+						]td
+						[td 
+							"-0.0004501343 (118fpu)
+						]td
+						[td 
+							"127, -121
+						]td
+						[td 
+							"-0.0005111695 (134fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"120, -127
+						]td
+						[td 
+							"-0.0006370545 (167fpu)
+						]td
+						[td 
+							"127, -120
+						]td
+						[td 
+							"-0.0007057190 (185fpu)
+						]td
+					]tr
+					[tr 
+						[td 
+							"119, -127
+						]td
+						[td 
+							"-0.0008544922 (224fpu)
+						]td
+						[td 
+							"127, -119
+						]td
+						[td 
+							"-0.0009346009 (245fpu)
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-5208-1 
+		]div
+	]div
+]div
+[div class=p 
+	"The previously mentioned asymmetry between left and right actually helps in this instance, as it allows for a wider range of floating points to be accessed.
+	$LF
+]div
+[div class=p 
+	"In conclusion, the perfect looping slidekick can be broken down into sections: Full control stick magnitude to get back to 58 speed (As sliding on the ground to start a slidekick drops Mario’s speed by a few units per frame), a few FPU corrections just before the limit is reached, one final strain frame to hit the limit, coasting at +0.0000267029 during the rollout, and then landing at 57.9999961853 speed to start another slidekick again.
+	$LF
+]div
+[h3 id=SpeedBursts 
+	"The Speed Bursts
+	$LF
+]h3
+[div class=p 
+	"With the slidekick perfected, it can now be looped over and over without Mario losing any HP from accidentally crossing over the speed limit (Or losing any speed from being unoptimal). When Mario’s HP becomes full (Or, nearly full), the speed limit is momentarily broken so Mario can cover more distance; the question becomes “How many slidekicks does it take for Mario’s HP to recover?” in order to now optimize this section.
+	$LF
+]div
+[div class=p 
+	"In prior TASes, I settled on exactly 100, for convenience and for repeatability (As any small losses were washed out due to healing slightly more than required). From my new research, this answer varies depending on Mario’s HP at the start of a given cycle; I found three distinct “sets” of boost cycles to use at different starting HP values:
+	$LF
+]div
+[ul 
+	[li 
+		"Cycle 01: 99 slidekicks, with one more slidekick to start the boost three frames before landing. 60 total frames of boosting, with one frame of straining right below the limit so Mario doesn’t die at the end of it. Mario’s HP at the end of the cycle is 25 higher than the HP at the cycle’s start, with the minimum value being +6 higher than the starting HP (No risk of accidental death).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Cycle 02: 98 slidekicks, with one more slidekick to start the boost three frames before landing. 61 total frames of boosting, with zero straining frames. Mario’s HP at the end of the cycle is 26 lower than the HP at the cycle’s start, with the minimum value being 45 lower than the starting HP (Cycle can only be done with better HP).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Cycle 03: The same as Cycle 01, but with 98 slidekicks instead of 99. Mario’s HP at the end is 6 higher than it is at the start, with a minimum value of -13 from starting HP (A middle ground option).
+		$LF
+	]li
+]ul
+[div class=p 
+	"All three cycles follow the same general speed burst trend as outlined earlier, in which slidekicks are performed at full control stick magnitude, finished by doing a jump kick to conserve short-term speed better. The camera angle is changed again, from diagonal to front-facing, as the control stick can hit a better jump kick magnitude to conserve more speed this way. It is changed back to diagonal while Mario is in the process of landing from the kick; fortunately, no issues arise from needed control stick precision in this section.
+	$LF
+]div
+[div class=p 
+	"While Mario does drift a large amount over the course of a cycle, the drift is corrected at the end of it so Mario’s Z position doesn’t deviate much. Despite the aforementioned asymmetry of the control stick, there are still multiple control stick values (40, -104 and 72, -29 for example) that hit the same exact speed with left or right bias, which means they can (almost) fully cancel each other out, making drift a non-issue.
+	$LF
+]div
+[div class=p 
+	"At the start of the game, after the initial speed burst before any cycles are done, Mario starts off with 19 HP (Technically 275HP, but remember that 255HP and below means Mario is dead). At minimum, Mario needs to start at 46HP in order to do the slightly faster Cycle 02 boost, which means one 01 (+25HP) cycle and one 03 (+6HP) cycle need to be done before that. This puts Mario at 50 HP, after which the 02 (-26HP) and 01 (+25HP) cycles can be repeated in sequence (With a net loss of 1HP after two cycles) until Mario hits 45HP. 03 is done again for Mario to hit 51HP, at which 02 and 01 can again be repeated until Mario hits 45HP. This is a repeating cycle, hooray!
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-9978-0 
+					"The Supercycle™
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-9978-1 
+					"Hide The Cycle
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-9978-0 
+			[table 
+				[tbody 
+					[tr 
+						[td 
+							"Cycle ID
+						]td
+						[td 
+							"03
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"03 Loop
+						]td
+					]tr
+					[tr 
+						[td 
+							"HP at Cycle End
+						]td
+						[td 
+							"51
+						]td
+						[td 
+							"25
+						]td
+						[td 
+							"50
+						]td
+						[td 
+							"24
+						]td
+						[td 
+							"49
+						]td
+						[td 
+							"23
+						]td
+						[td 
+							"48
+						]td
+						[td 
+							"22
+						]td
+						[td 
+							"47
+						]td
+						[td 
+							"21
+						]td
+						[td 
+							"46
+						]td
+						[td 
+							"20
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"51 Loop
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-9978-1 
+		]div
+	]div
+]div
+[div class=p 
+	"Using this supercycle, Mario does a grand total of 181 speed bursts and reaches the end about a third of the way into the next smaller cycle. I then found (After the initial submission) that by replacing this supercycle with another one that does more slidekicks, I was able to "push" the last speed burst forward in time to occur right at the end of the TAS, which ended up saving an extra two frames. The final tally: A timesave of 79 frames (By input count) over the TAS I made a few months ago.
+	$LF
+]div
+[div class=p 
+	"That’s an efficiency improvement of an earth shattering, mind blowing, utterly incomprehensible!
+	$LF
+]div
+[div class=p 
+	"0.011190%
+	$LF
+]div
+[div class=p 
+	"The file submitted also ends input early by a few extra frames, reaching the first frame of fadeout at the same time as continuing input.
+	$LF
+]div
+[h3 id=Improvements 
+	"Improvements
+	$LF
+]h3
+[div class=p 
+	"Unless there's actually another super-super secret cycle that lets me squeeze out even more time, I'm honestly clueless as to what else can be done.
+	$LF
+]div
+[h3 id=EncodingNotes 
+	"Encoding Notes
+	$LF
+]h3
+[div class=p 
+	"In this ROM Hack, Mario holds a radio that plays a number of copyright unsafe Boomer Tunes™; specifically, AC/DC’s Highway To Hell blocks a YouTube upload from being seen worldwide. By using the 
+	[a href=http://www.memoryhacking.com/download.php rel=noopener external nofollow 
+		"MHS
+	]a
+	" memory editing application, it’s possible to locate the address used for music volume (0x00935344 on Mupen 1.0.11 and 0x008EF00C on Mupen 1.1.1 from my tests, unknown for other versions) and lock the value to 0 so that no music plays.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Delayed waiting for author to provide information about the emulator plugins used
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Well, this is obviously Desert Bus ported to a Mario 64 form. In my opinion, the movie has nil entertainment value per se, but only in the fact that it reaches the end of this game-shaped punishment method in an arguably optimal and flawless manner. 
+	$LF
+]div
+[div class=p 
+	"The contrast between fascination and tedium manifests in the opinions of voters, 5 or which voted favourably and 3 negatively, and of comments left in the game topic. No doubt will we see such division in the Youtube comments when this gets uploaded (btw, I don't envy the encoder).
+	$LF
+]div
+[div class=p 
+	"Accepting to standard
+	$LF
+]div
+[div class=p 
+	"Encoder:  I was able to sync this movie using the set of plugins specified by the movie. 
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Oh boy
+]div

@@ -1,0 +1,135 @@
+5
+[div class=p 
+	"This movie is an improvement of 
+	(frames|amount=438|fps=59.9227510135505)
+	" over 
+	(__wikiLink|href=/4860M|implicitdisplaytext=4860M)
+	".
+	$LF
+]div
+[h4 id=Story 
+	" Story
+	$LF
+]h4
+[div class=p 
+	"After seeing Winslinator's movie, I got interested in finding out how an Othello AI got squished into a 2 kilobyte game. Eventually, as one could say, I got a little bit too obsessed with this game. I started out by rewriting the AI logic in a higher-level language. Once that was done, I was able to pit the Atari engine against an advanced Othello engine programatically. This is the approach that was also used by Winslinator, but I (presumably) had the advantage of a little silicon chip quickly making all the moves for both sides, as well as avoiding emulation. I searched the game tree for as many 64-0 games as possible, then used a BizHawk Lua script to measure the time in frames of each of those games when played out with optimal movement and appropriate RNG manipulation. Except the BizHawk + Lua combo was way too slow, so I instead wrote a barebones Atari 2600 emulator and ported the Lua script for over a tenfold improvement in both speed and my sanity, then spent the extra sanity on further 
+	$LF
+	"speed improvements. This left no sanity for any sort of rigorous testing, but somehow things seem to work okay. Finally, I measured all the sub-6000 frame games again, this time also taking into account their 3 symmetrical equivalents, and picked out the shortest game of those.
+	$LF
+]div
+[h4 id=AtariAi 
+	" Atari AI
+	$LF
+]h4
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/42XbiFd.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Understanding this part isn't actually relevant to the project, but I did find it quite interesting. The AI in the game does not perform any sort of deep game tree search, as might be expected of a modern solution. This is probably reasonable for a computer with 128 bytes of RAM. Instead, it gives an evaluation for every possible legal move based on some simple heuristics. These vary depending on which of 6 categories the corresponding tile is in (marked on the image to the right with colors). Some of these heuristics are extremely simple, such as just returning constant values (the light blue and dark blue tiles). Others may involve operations like checking nearby tiles, or, in the case of the yellow tiles, evaluating white's response of recapturing in the corner. On difficulties 1 and 2, some of these heuristics get short-circuited. Each evaluation score is also changed depending on the number of disks a move will turn. In the middlegame, turning more disks decreases the score, and otherwise it increases the score. Ties are broken by RNG. There are many more details (and quirks!) to this entire algorithm, but I have not explored all of them in full, nor would I find it reasonable to describe them all here. However, a recreation of the logic in code form is linked at the bottom of this page for any sufficiently interested parties.
+	$LF
+]div
+[h4 id=EngineDilemmas 
+	" Engine dilemmas
+	$LF
+]h4
+[div class=p 
+	"Being loosely familiar with the development of engines for chess and Go, I was rather disappointed with the state of computer Othello. Although there have been some fairly recent developments in Othello engines, most of the activity seems to have been about 20 years ago, with many of the engines having websites right out of a web design 101 class and engine tournaments having pretty much stopped since the 90s. Three of the strongest engines nowadays seem to be WZebra, Saio and Edax. I ended up using Edax due to it being free and having a convenient enough command-line interface to automate interacting with it right out of the box, but with no modern comparison of engines (that I could find), it's hard to rank these programs against each other anyway. In the end, it probably doesn't matter much, as all these programs vastly outperform the Atari game, but it was still upsetting to not be able to find good information on the topic.
+	$LF
+]div
+[div class=p 
+	"It's also worth noting that the engine with the best winning chances does not necessarily directly help with the problem at hand. It would be much better if any outcome other than 64-0 was valued like a loss, and, secondarily, that games with fewer disks turned and a smaller total distance for white's cursor to move were valued higher, but I am NOT willing to create an engine for this purpose. At least, not for 
+	[em 
+		"this
+	]em
+	" submission.
+	$LF
+]div
+[h4 id=Search 
+	" Search
+	$LF
+]h4
+[div class=p 
+	"The game tree search was not very complicated. For the most part, the program explored whichever node had the highest engine evaluation, with ties broken by the instrinsic randomness of the priority queue. Additionally, any game states with a black disk in any of the 4 corners could be discarded, since corners can't be recaptured. Since it would often get stuck far along a certain path, the search was repeated a few times to increase coverage. Along the way, I made some small changes here and there to try get better results, such as using disk count and total disk flips to help with tiebreaks, but nothing was particularly helpful, and the general formula stayed pretty much the same. There is definitely some room for optimization here if more work is put in, both in the approach and the implementation, but as is, the engine is the main powerhouse and bottleneck in this setup anyway. I think.
+	$LF
+]div
+[h4 id=Results 
+	" Results
+	$LF
+]h4
+[div class=p 
+	"I ended up finding 340488 64-0 games, disregarding symmetries. Here is a graph showing how long they all are (if you trust my emulator):
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/WDGLs0F.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The fastest game of these is 5877 frames long. It's such a massive outlier that it's not even visible on the above image (though this doesn't necessarily mean it is such an outlier in the space of 
+	[em 
+		"all
+	]em
+	" possible 64-0 games).
+	$LF
+]div
+[div class=p 
+	"With the addition of reflections, one initially 5883 frame long game got shortened to 5863 frames. This was the shortest game overall and the game presented in this submission.
+	$LF
+]div
+[h4 id=Code 
+	" Code
+	$LF
+]h4
+[div class=p 
+	"Here is a dump of all the code I used to help make this run: 
+	[a href=https://drive.google.com/drive/folders/16lpJ1KvIMwvnV0hdSFkgxGQwiu27h4H2?usp=sharing rel=noopener external nofollow 
+		"link
+	]a
+	".
+	$LF
+	"Note that it is in no way rigorously tested, made intuitive to use, fun to look at or anything of the sort. You're on your own here.
+	$LF
+]div
+[h4 id=ThanksTo 
+	" Thanks to
+	$LF
+]h4
+[ul 
+	[li 
+		" Winslinator, for their work on the previous submission, which inspired me to pick up this project in the first place. But also damn you for doing that.
+		$LF
+	]li
+	[li 
+		" rythin, for being the rubber ducky I vented all my frustrations with this project to until I was able to do it to the submission text field instead.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Mind blowing R&D! This is an even better proof that we've been shooting ourselves in the foot with the board games ban. Accepting over 
+	(__wikiLink|href=/4860M|implicitdisplaytext=4860M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

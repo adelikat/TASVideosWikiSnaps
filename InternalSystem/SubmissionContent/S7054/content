@@ -1,0 +1,1257 @@
+30
+[div class=p 
+	"I am Igor Guevara and if this TAS is not accepted I will eat TASVideos.
+	$LF
+]div
+[div class=p 
+	"This TAS has been console verified by TiKevin83 and commentated by both luckytyphlosion and CasualPokePlayer during the 2020 PSR Marathon:
+	$LF
+]div
+[div class=p 
+	(youtube|v=_u8GGlSuGEM)
+	$LF
+]div
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"This TAS is an improvement to the 
+	(__wikiLink|displaytext=previous Catch 'Em All TAS|href=/5910S)
+	". The primary improvements come from the use of a new farming method, called Faster Than LWA (or FTL for short) as well as an alternative way of acquiring the tools to set up this farming method involving Save Corruption.
+	$LF
+]div
+[h3 id=Categories 
+	" Categories
+	$LF
+]h3
+[ul 
+	[li 
+		" 100% completion
+		$LF
+	]li
+	[li 
+		" One luck manipulation
+		$LF
+	]li
+	[li 
+		" Uses save data corruption
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+]ul
+[h3 id=GameObjectives 
+	" Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.4.2, Gambatte core, CGB-GBA mode for console verification
+		$LF
+	]li
+	[li 
+		" Aims for fastest completion time.
+		$LF
+	]li
+	[li 
+		" 
+		[del 
+			"Catches
+		]del
+		" 
+		[del 
+			"Obtains
+		]del
+		" Registers all 151 Pokémon as quickly as possible.
+		$LF
+	]li
+	[li 
+		" ...even more quickly than the previous TAS!
+		$LF
+	]li
+	[li 
+		" Does not modify Pokédex flags for completion
+		$LF
+	]li
+	[li 
+		" Does not use arbitrary code execution, arbitrary ROM execution, nor arbitrary memory corruption.
+		$LF
+	]li
+]ul
+[h4 id=DescriptionNotes 
+	" Description Notes:
+	$LF
+]h4
+[ul 
+	[li 
+		" Party Swap indices mentioned are all 0-indexed, while Item Underflow slots mentioned are all 1-indexed.
+		$LF
+	]li
+	[li 
+		" Party Swaps will use the shorthand notation A <> B, which means the Pokémon in slot A is swapped with the Pokémon in slot B.
+		$LF
+	]li
+	[li 
+		" This explanation makes heavy use of WRAM labels from the 
+		[a href=https://github.com/pret/pokered/blob/bb8fdd7/wram.asm rel=noopener external nofollow 
+			"pokered disassembly
+		]a
+		" (
+		[a href=https://github.com/pret/pokered/blob/5650595/wram.asm rel=noopener external nofollow 
+			"old commit with addresses
+		]a
+		") which use Hungarian notation, prefixed with w. Some HRAM labels are used as well, found in (
+		[a href=https://github.com/pret/pokered/blob/bb8fdd7/hram.asm rel=noopener external nofollow 
+			"hram.asm
+		]a
+		"), and also some ROM labels, which can be searched using the GitHub search function.
+		$LF
+	]li
+]ul
+[h3 id=MajorTerminologyConcepts 
+	" Major Terminology/Concepts:
+	$LF
+]h3
+[div class=p 
+	"These explanations are partially copied from the previous 
+	(__wikiLink|displaytext=Catch 'Em All TAS|href=/5910S)
+	" and 
+	(__wikiLink|displaytext=MrWint's Save Corruption TAS|href=/4431S)
+	".
+	$LF
+]div
+[h4 id=EchoRam 
+	" Echo RAM:
+	$LF
+]h4
+[div class=p 
+	"The Game Boy has a region of memory called Work RAM, or WRAM, at $c000-dfff. The memory at $c000-ddff is mirrored to $e000-fdff, such that reading from $e000-fdff is equivalent to reading from $c000-ddff, and writes to $c000-ddff will appear in $e000-fdff and vice versa. Thus, whenever you see an address in the $e000-fdff range, it is implied that this really corresponds to the $c000-ddff memory range.
+	$LF
+]div
+[h4 id=Quantity255 
+	" Quantity 255
+	$LF
+]h4
+[div class=p 
+	"When the game has to completely remove an item from the inventory, it shifts the items below in order to fill up the empty item slot, until it reaches the end of list terminator (marked as CANCEL). If an item with a quantity of 255 is below the tossed item, then the game mistakes the quantity of 255 for the end of list terminator and stops shifting the remaining items upwards. This leads to interesting side effects such as duplicating the 255 quantity item, or having another item represent the cancel button (despite not actually being the 0xff item). While the former effect mildy helps in some ways, the latter effect is relevant in obtaining Item Underflow.
+	$LF
+]div
+[h4 id=ItemUnderflowDryUnderflow 
+	" Item Underflow/Dry Underflow
+	$LF
+]h4
+[div class=p 
+	"When the game merges two same items via swapping, it checks if the on-screen menu needs to be resized (note that this only refers to the current four items shown on screen). If the resulting list length is one, then the menu should be resized to 01 (only being able to use the first item). However, if a merge was somehow accomplished so that the resulting list length is zero (or any other value), then the menu is not resized. In normal gameplay, this does not matter as it is impossible to merge two items with only one item in the inventory. However, by having a non-CANCEL item act as the cancel button, we can merge two items together while having only one item in the inventory. By doing this twice, we can underflow the number of items in the inventory to 255.
+	$LF
+]div
+[div class=p 
+	"Item Underflow allows us to modify the memory in range [$d31e, $d41d]. The powerful part of Item Underflow is that we can manipulate memory on the individual byte level, and the memory which we can manipulate can produce useful effects.
+	$LF
+]div
+[h4 id=PartyOverflowSwaps 
+	" Party Overflow Swaps
+	$LF
+]h4
+[div class=p 
+	"Swapping Pokémon outside the first 6 slots is one of the memory manipulation techniques used. While not strictly necessary (it's actually possible to set up FTL with only Item and Box Underflow), Party Overflow greatly speeds up the setup. To see how, let us look at the actual mechanics of swapping Pokémon. When two Pokémon A and B are swapped, four things happen in this order:
+	$LF
+]div
+[ul 
+	[li 
+		" The species is swapped (1 byte): $d164 + A <-> $d164 + B
+		$LF
+	]li
+	[li 
+		" The Pokémon data is swapped (44 bytes): $d16b + 44*A <-> $d16b + 44*B
+		$LF
+	]li
+	[li 
+		" The Pokémon OT name is swapped (11 bytes): $d273 + 11* A <-> $d273 + 11*B
+		$LF
+	]li
+	[li 
+		" The Pokémon nickname is swapped (11 bytes): $d2b5 + 11*A <-> $d2b5 + 11*B
+		$LF
+	]li
+]ul
+[div class=p 
+	"Given that we can access slots from 0-255, we see that the range that we can modify with Party Overflow is $d164-fd6a. This actually encompasses all of WRAM (due to how Echo RAM works), which means that manipulating any memory in WRAM is as simple as performing a party swap. This does NOT violate Arbitrary Memory Corruption, as we are unable to modify HRAM, SRAM, or VRAM (as well as ROM), and needing to modify SRAM is actually vital to the setup.
+	$LF
+]div
+[div class=p 
+	"Combined with Item Underflow, we can perform very precise memory manipulation by tossing item slots, then swapping Pokémon whose memory regions correspond to said item slots.
+	$LF
+]div
+[div class=p 
+	"There are also some constraints we have to respect. Namely, in most cases we cannot perform any swaps which corrupt the following:
+	$LF
+]div
+[ul 
+	[li 
+		" Pokedex flags: Corrupting these flags do not count as completion as part of the 100% rules.
+		$LF
+	]li
+	[li 
+		" wMapScriptPtr: Every overworld frame, the game switches to a predefined ROM bank depending on wCurMap, and then calls the pointer stored in wMapScriptPtr. Manipulating this value is generally seen as arbitrary ROM execution.
+		$LF
+	]li
+	[li 
+		" wCurMap: While modifying wMapScriptPtr is generally seen as arbitrary ROM execution, it is a question whether modifying wCurMap where the map bank is different but keeping the value of wMapScriptPtr unchanged actually constitutes arbitrary ROM execution. This TAS assumes that modifications of wCurMap such that the map ROM Bank changes counts as arbitrary ROM execution.
+		$LF
+	]li
+]ul
+[div class=p 
+	"In addition, we need to warp to the Hall of Fame. The fastest way to do this is with a Connection Warp (a warp that happens when walking off the edge of the map), where we modify the connected map ID, then walk off the respective edge of the connection. There is also a base destination pointer associated with a connection and stored in memory, used to tell the game where to write the metatiles of the maps adjacent to the current map in the overworld map buffer in memory. The important part is that modifying this base destination pointer and then crossing a connection would constitute Arbitrary Memory Corruption. Thus, we must ensure that the destination pointer of the connection we choose stays untouched, which means we cannot perform any party swaps which modify this destination pointer.
+	$LF
+]div
+[div class=p 
+	"Within the actual routing, a Python script was made to determine the party slot which controlled a section of memory, and whether swapping the slot would cause Pokédex corruption. The script (as well as some other scripts used) can be found 
+	[a href=https://gist.github.com/luckytyphlosion/e101485c6e5d25f54db2f72c06bab27b rel=noopener external nofollow 
+		"here
+	]a
+	". Like MrWint's various scripts, these were never meant to be easily usable.
+	$LF
+]div
+[h4 id=LagReduction 
+	" Lag reduction:
+	$LF
+]h4
+[div class=p 
+	"Part of the route is optimized around reducing item name lag, most notably the glitch item []j. with ID $00. This item has the laggiest name in the game, requiring 410220 cycles or 6-7 frames (depending on when the lookup occurred in the current frame) to look up. If the entire menu is redrawn with all []j. items (which happens when scrolling past the bounds of the visible window), then the game takes 25 frames just to print item names to the screen. Thus, we generally want to avoid seeing []j. items, which is done in the route by manipulating what is seen in the Item View, and also by using Party Swaps to swap lagless items into regions of $00 which we scroll through.
+	$LF
+]div
+[h3 id=ExplanationOfFtl 
+	" Explanation of FTL:
+	$LF
+]h3
+[div class=p 
+	"Every map has a map text pointer (wMapTextPtr), which is a table that contains pointers to the possible texts that a map can display (excluding things like text predefs
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	"). To display a message in the overworld, the game calls DisplayTextID with the id of the text to display in hSpriteIndexOrTextID. This function may be called when talking to NPCs and signs, within map scripts (not covered here), and possibly other places. When talking to an NPC, hSpriteIndexOrTextID is loaded with the internal ID of the NPC's sprite, while with a sign, hSpriteIndexOrTextID is loaded with the sign specific text ID. Retrieving the individual text pointer associated with the Text ID is done by reading the (id-1)th pointer from the map text pointer table (i.e. [[wMapTextPtr] + (id - 1) * 2]). There are some reserved Text ID values (most notably, an ID of 0 corresponds to opening the start menu, which is why the -1 subtraction is necessary), but these aren't relevant.
+	$LF
+]div
+[div class=p 
+	"Once the individual text pointer is retrieved, the game checks the first byte of the text. If it corresponds to a specific text script ID, then the game performs some alternate behaviour such as bringing up the Pokémon Center heal dialogue, and otherwise will pass the text pointer to the text engine (PrintText_NoCreatingTextBox, PrintText is the general function). One of these specific text script IDs, with a value of $f7, brings up the game corner prize menu.
+	$LF
+]div
+[div class=p 
+	"In order to determine the prizes to display, the game uses hSpriteIndexOrTextID as an index to the prizes table. Ignoring TMs, the format of the Pokémon prizes table is as follows:
+	$LF
+]div
+[ul 
+	[li 
+		" Each entry (prize selection) of the prizes table consists of two pointers, a pointer to the Pokémon entries table, and a pointer to a table describing the price of each Pokémon entry.
+		$LF
+	]li
+	[li 
+		" The format of the prize selection table is a sentinel terminated list (terminated by a $50 byte, also the string end value), which is odd because the menu was designed to hold exactly three entries, and does not allow selecting past the 4 menu slots. The format of the prices table is just a fixed list of three elements.
+		$LF
+	]li
+	[li 
+		" The list element of the Pokémon entries table is the internal Pokémon ID, while the list element of the prices table is a 2 byte BCD number. Naturally, the nth element in the Pokémon entries table has the price described by the nth element in the prices table.
+		$LF
+	]li
+]ul
+[div class=p 
+	"In normal gameplay, reusing hSpriteIndexOrTextID poses no issue as the conversion from hSpriteIndexOrTextID to the prize table index is hardcoded around the prize vendors having sprite IDs 3, 4, and 5 (the conversion being text ID minus 3). However, if we were to use a custom map text pointer where the individual text pointer has an ID outside this range, then the game would read an out of bounds invalid prize selection pointer. Since the prize table is in ROM, there are only a finite number of prize selection entries. By sheer luck, one of the available price selections has a Pokémon entry table prize list which points to an item slot reachable within Item Underflow (a full list of invalid price selections can be found 
+	[a href=https://pastebin.com/raw/bbRJfFzz rel=noopener external nofollow 
+		"here
+	]a
+	"). More specifically, this entry has a text ID of 59, a Pokémon entries pointer of $d3fa (where the range of addresses reachable in Item Underflow is [$d31e, $d41d]), and a price pointer of $a7cc. It quickly becomes apparent that we can engineer a Pokédex registering machine similar to LWA, where we convert an item quantity to the Pokémon we want to register, by starting at the highest Pokémon ID, obtaining a Pokémon, tossing downwards to the next valid ID, and repeating until we get all Pokémon registered. This setup, known as FTL, is much Faster Than LWA (explaining the name etymology), as we skip the ball toss animation and Pokédex registration screen.
+	$LF
+]div
+[div class=p 
+	"A small note is that the way that Item Underflow maps addresses to item slots means that we'll be buying from the 2nd slot of the prize selection menu (instead of the first). This means that $d3fb will contain the quantity, and $a7ce-$a7cf will contain the prize price.
+	$LF
+]div
+[div class=p 
+	"So our initial route looks something like this:
+	$LF
+]div
+[ol 
+	[li 
+		" Acquire Item Underflow
+		$LF
+	]li
+	[li 
+		" Set up something which allows us to repeatedly pull up a textbox with a text ID of 59, such that the individual text pointer points to an $f7 byte
+		$LF
+	]li
+	[li 
+		" Set the price of the 2nd slot and the number of owned coins to values where we can buy all the Pokémon we don't have.
+		$LF
+	]li
+	[li 
+		" Acquire a Coin Case
+		$LF
+	]li
+	[li 
+		" Perform FTL
+		$LF
+	]li
+	[li 
+		" Warp to the Hall of Fame
+		$LF
+	]li
+]ol
+[div class=p 
+	"The old route which used LWA and the current RTA route which uses FTL obtain the 255 stack required by Item Underflow by catching Missingno. twice via the Cooltrainer glitch (explanation provided from the 
+	(__wikiLink|displaytext=previous TAS description|href=/5910S)
+	"). However, it turns out that it is possible to obtain Item Underflow almost immediately at the start of the game, by using Party Overflow obtained via Save Corruption. It was previously thought that getting Item Underflow via Party Overflow was impossible without corrupting Pokédex flags, because wPokedexOwned precedes wNumBagItems and the possible operations of Party Overflow Swaps mean that wPokedexOwned is corrupted if wNumBagItems is corrupted. However, we can instead corrupt wNumBoxItems and wBoxItems to obtain an item with a quantity of 0 or 255, which we can withdraw to perform standard Dry Underflow. The swaps required to corrupt box items do not corrupt wPokedexOwned. Note that the reason this isn't used in the current RTA route is because of legacy rules (mostly arbitrarily decided by me) which unconditionally disallow the type of save corruption at the start of the game.
+	$LF
+]div
+[div class=p 
+	"Updating our current route sketch, we get:
+	$LF
+]div
+[ol 
+	[li 
+		" Save corrupt
+		$LF
+	]li
+	[li 
+		" Corrupt box items to be able to withdraw a 0 or 255 quantity item
+		$LF
+	]li
+	[li 
+		" Perform Dry Underflow
+		$LF
+	]li
+	[li 
+		" Set up something which allows us to repeatedly pull up a textbox with a text ID of 59, such that the individual text pointer points to an $f7 byte
+		$LF
+	]li
+	[li 
+		" Set the price of the 2nd slot and the number of owned coins to values where we can buy all the Pokémon we don't have.
+		$LF
+	]li
+	[li 
+		" Acquire a Coin Case
+		$LF
+	]li
+	[li 
+		" Perform FTL
+		$LF
+	]li
+	[li 
+		" Warp to the Hall of Fame
+		$LF
+	]li
+]ol
+[div class=p 
+	"The next step is to address how Step 4 will be achieved. Recall that we mentioned that overworld messages are predominantly displayed through NPCs, signs, or map scripts. Map scripts aren't really an option for reasons not mentioned here, and to be able to interact with an NPC with a sprite ID of 59, the memory location of the sprite data used to determine if we can interact with the sprite is within wTileMap (20x18 buffer of screen tiles), a highly volatile memory region
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	". However, the sign data format enables it to be easily manipulated for our purposes. The format of sign data is as follows:
+	$LF
+]div
+[ul 
+	[li 
+		" wNumSigns: Number of signs in the current map, one byte. Must be set to a value greater than the sign entry we want the game to choose
+		$LF
+	]li
+	[li 
+		" wSignCoords: Y/X coordinates of each sign, two bytes per entry (16 entries total)
+		$LF
+	]li
+	[li 
+		" wSignTextIDs: Text ID of each sign, one byte per entry (16 entries total)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Thus, we can simply set wNumSigns to a non-zero value, and set the coordinates of a sign entry to coordinates reachable by the player and the sign text ID to 59
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	". This is assumed to be possible to do by manipulating some free space in Item Underflow, then using party swaps to swap the aformentioned space into sign data.
+	$LF
+]div
+[div class=p 
+	"As for wMapTextPtr itself, modifying it via party swaps is infeasible (and probably slower), because it would corrupt wCurMap and/or wMapScriptPtr, which could cause a crash, but more importantly would potentially violate arbitrary ROM execution. However, wMapTextPtr is accessible via Item Underflow, thus we can just swap an item into the memory corresponding to the pointer. To determine the new value of wMapTextPtr, we simply follow the map text pointer format discussed earlier. Firstly, we need an individual text pointer in memory (ROM or RAM) which points to an $f7 byte. Since we're using a text ID of 59, we must set the map text pointer to a value such that the 59th (1-indexed) entry is the aforementioned individual text pointer. A Python script (linked within the collection of scripts) was made to find all map text pointers which fit this criteria (such that only ROM locations are referenced). Out of the nine pointers generated, one of them, $10f3, can be generated completely with items derived from wRivalName (TM43 x??, later tossed down to TM43 x16), accessible via Item Underflow.
+	$LF
+]div
+[div class=p 
+	"Updating our current route sketch, we get:
+	$LF
+]div
+[ol 
+	[li 
+		" Save corrupt
+		$LF
+	]li
+	[li 
+		" Corrupt box items to be able to withdraw a 0 or 255 quantity item
+		$LF
+	]li
+	[li 
+		" Perform Dry Underflow
+		$LF
+	]li
+	[li 
+		" Stage some values in Item Underflow to be swapped into Sign Data
+		$LF
+	]li
+	[li 
+		" Set wMapTextPtr to TM43 x16, corresponding to $10f3 in little endian.
+		$LF
+	]li
+	[li 
+		" Set the price of the 2nd slot and the number of owned coins to values where we can buy all the Pokémon we don't have.
+		$LF
+	]li
+	[li 
+		" Acquire a Coin Case
+		$LF
+	]li
+	[li 
+		" Perform FTL
+		$LF
+	]li
+	[li 
+		" Warp to the Hall of Fame
+		$LF
+	]li
+]ol
+[div class=p 
+	"Next is resolving Step 6. What is interesting is that the coins table is within SRAM, which is normally disabled (no reads/writes) in well programmed games. However, when the game loads a pic (Battle sprites), it uses SRAM as a decompression buffer, and then leaves SRAM enabled. From here, SRAM will stay enabled until the game performs a process which disables SRAM, which only happens after the game saves, and when loading the player battle back pic. This is actually not the case in Pokémon Yellow; the game will properly disable SRAM after decompressing a pic. Anyway, the fastest way to load a pic (and thus enable SRAM) is by viewing the Trainer Card, as that loads the player front pic.
+	$LF
+]div
+[div class=p 
+	"Now, it seems like there isn't a way to corrupt $a7ce-$a7cf. Party Overflow, despite its far reaching powers, cannot actually corrupt any SRAM address. Given the circumstances, the only two reasonable options
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	" to corrupt this value are as follows:
+	$LF
+]div
+[ol 
+	[li 
+		" View glitch Pokémon pics with dimensions that exceed the allocated decompression buffer.
+		$LF
+	]li
+	[li 
+		" Crash the game while SRAM is open.
+		$LF
+	]li
+]ol
+[div class=p 
+	"During the initial routing, I immediately dismissed looking at glitch pics, as it seemed too complex. Upon writing the description, I decided to take a stab at it. My understanding of glitch pics is that certain glitch Pokémon have pic dimensions larger than what the game has reserved space for (i.e larger than a width/height of 7 tiles). When these glitch pics are loaded, a buffer overflow occurs in order to decompress the large sprite. The normal buffer ends at $a498, and we need to corrupt $a7ce-a7cf, so it is reasonable to assume that a slightly larger sprite would be able to reach that address. However, the results of loading every single glitch Pokémon's pic proved unfruitful: Out of all glitch Pokémon, only two are able to corrupt up to $a7cf (and both use the same input pointer, so it's really only one). Only the area allocated for pics with normal dimensions is cleared when a pic is loaded, and observation of the full buffer in BGB's memory viewer showed that viewing the pic multiple times caused different output in the out of bounds buffer, leading myself to conclude that a feedback process was occuring between the previous buffer and the resulting buffer. However, repeatedly loading the pic for multiple attempts did not produce a low enough price (needs to be somewhere under $0200), and I concluded that it was probably not worth it. A possibility would be to load multiple different glitch pics, which by observation cause diferent corruptions, but this would take far too long to test manually (recorrupting wPlayerCoins isn't an option as explained later).
+	$LF
+]div
+[div class=p 
+	"The second option is to crash the game while SRAM is open. More specifically, perform something for the game to call an rst vector. rst vectors are basically one-byte predefined calls, used to save space over traditional 3 byte calls. However, Game Freak opted not to use rst vectors, and left them as rst $38. This means that if any rst vector is called, the game will call rst $38, which calls rst $38, and so on infinitely. This will push the return address of the call onto the stack infinitely, eventually wiping all of memory. The important part about rst $38 is that:
+	$LF
+]div
+[ol 
+	[li 
+		" As it writes to every possible address, it will corrupt $a7ce-f (This is probably not AMC, as you can't choose a single address to write to)
+		$LF
+	]li
+	[li 
+		" The return addressed pushed onto the stack is $0039, which is a low enough value to be able to buy all Pokémon with a high coin count.
+		$LF
+	]li
+]ol
+[div class=p 
+	"However, it isn't as simple as using any glitch item which calls rst $38; this is because of the VBlank interrupt.
+	$LF
+]div
+[div class=p 
+	"Basically, VBlank is an event that occurs at the end of every frame, where the CPU is free to access video and sprite memory that would normally be disabled during the rest of the frame (except in HBlank/Mode 2, not relevant). GB games can enable a VBlank interrupt, where at the start of this VBlank period, the Game Boy will forcefully switch execution to a user defined segment of code. In the case of Pokémon Red/Blue, and presumably other games, this code will copy video related buffers to video memory, and also update per-frame events like audio and joypad.
+	$LF
+]div
+[div class=p 
+	"So, even though the game will hammer rst $38 ad infinitum, eventually the VBlank interrupt will kick in. This becomes a problem when the return address of rst $38 corrupts wAudioROMBank to $39. First, let us explain what a ROM Bank is. A ROM Bank is basically a $4000 byte swappable region of ROM (located at $4000-7fff), which allows the Game Boy to access more ROM than the address range of the Game Boy ($0000-ffff)
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	". To access data in a ROM Bank, the game must switch to the ROM Bank, by writing the ROM Bank number (also referred to as ROM Bank) to $2000-3fff. When the game needs to update audio, the game will first switch to the ROM Bank in wAudioROMBank, and then will call one of three routines depending on the value of wAudioROMBank. By default (if wAudioROMBank doesn't match the other two ROM Banks), it will call the function address for the third audio routine. This means that if wAudioROMBank is an invalid value, the game will use the function address ($5177) for the third routine, but with a ROM Bank not matching the ROM Bank of the audio routine, thus running completely garbage data as code. ROM Bank $39 is completely empty, so when the game calls 39:5177, it will fall through all the way to Video Memory, performing ACE. While some crashes will still manage to run into an rst $38 due to disabled Video Memory, others will just lock up by running into a Stop opcode (There is also a small period after each scanline where Video Memory is accessible), which is basically a hard lock in the context of Pokémon
+	[a id=r6 
+	]a
+	[sup 
+		"[
+		[a href=#6 
+			"6
+		]a
+		"]
+	]sup
+	". Regardless, as ACE is performed, we need to find alternate ways of crashing that don't involve wAudioROMBank corruption.
+	$LF
+]div
+[div class=p 
+	"Actually, the method used is a method of wAudioROMBank corruption. When the player gets off the bicycle, the game needs to play the default map music. When the game runs the routine to do so, it checks if [wAudioROMBank] equals [wMapMusicROMBank], and writes [wMapMusicROMBank] to [wAudioROMBank] if not. We can invoke a crash by modifying [wAudioROMBank] to a value such that within VBlank, the audio routine called will eventually execute an rst $38. While we said earlier that wAudioROMBank corruption was bad, setting up a crash like this is good, because interrupts are disabled while in an interrupt, so we do not have to worry about another VBlank interrupt happening.
+	$LF
+]div
+[div class=p 
+	"Note that the number of invalid ROM Banks which work is reduced because when switching back to the default map music, the game will call another routine to play the map music out of a set of three routines similar to the routines in VBlank, thus the requirements for the invalid ROM Bank are that it must not crash when running the play sound routine, and must crash when running the update music routine in VBlank.
+	$LF
+]div
+[div class=p 
+	"Out of all the invalid ROM Banks, only one, with a value of $1d, fits this criteria. wMapMusicROMBank is accessible within Item Underflow, so we can modify this value by swapping an item into the Item Underflow slot which corresponds to wMapMusicROMBank. We can use a value of $9d, generated from items accessible in wRivalName, as Red/Blue only use $40 ROM Banks, and ROM Banks >= $40 are truncated modulo $40. We achieve Item Underflow via Party Swaps. This corrupts dex flags temporarily, but the game will revert back to the previous save after the intentional crash (and dex flags are also corrupted via the rst $38 anyway).
+	$LF
+]div
+[div class=p 
+	"In order to be able to ride the bicycle, wCurMapTileset must be a value which allows bicycling. We simply modify this value while in Item Underflow.
+	$LF
+]div
+[div class=p 
+	"Note that when writing this, I realized that it would be simpler to just use Party Swaps to swap a value into wAudioROMBank, but it would require a near complete rewrite of the TAS (as we would skip getting $9d and would replace it with a less laggy item, thus timings when scrolling past the item would have to be adjusted)
+	$LF
+]div
+[div class=p 
+	"Updating our current route sketch, we get:
+	$LF
+]div
+[ol 
+	[li 
+		" Save corrupt
+		$LF
+	]li
+	[li 
+		" Acquire Item Underflow via Party Swaps
+		$LF
+	]li
+	[li 
+		" Swap $9d into wMapMusicROMBank
+		$LF
+	]li
+	[li 
+		" Acquire a Bicycle
+		$LF
+	]li
+	[li 
+		" Modify wCurMapTileset so we can ride the Bicycle
+		$LF
+	]li
+	[li 
+		" View the Trainer Card
+		$LF
+	]li
+	[li 
+		" Get on and off the Bicycle, crashing the game and setting [$a7ce-a7cf] to $0039. (We then reload the save)
+		$LF
+	]li
+	[li 
+		" Corrupt box items to be able to withdraw a 0 or 255 quantity item
+		$LF
+	]li
+	[li 
+		" Perform Dry Underflow
+		$LF
+	]li
+	[li 
+		" Stage some values in Item Underflow to be swapped into Sign Data
+		$LF
+	]li
+	[li 
+		" Set wMapTextPtr to TM43 x16, corresponding to $10f3 in little endian.
+		$LF
+	]li
+	[li 
+		" Set the number of owned coins to a value where we can buy all the Pokémon we don't have.
+		$LF
+	]li
+	[li 
+		" Acquire a Coin Case
+		$LF
+	]li
+	[li 
+		" Perform FTL
+		$LF
+	]li
+	[li 
+		" Warp to the Hall of Fame
+		$LF
+	]li
+]ol
+[div class=p 
+	"Step 12 can be achieved via a simple Party Swap. Step 14 will be explained in the upcoming section, while Steps 13 and 15 will be explained in the actual route explanation.
+	$LF
+]div
+[div class=p 
+	"Thus, we have a final route now. However, we can perform some additional optimizations to save some time.
+	$LF
+]div
+[div class=p 
+	"Optimization 1: Optimize FTL itself.
+	$LF
+	"First, a quick explanation of how the basic FTL loop works:
+	$LF
+]div
+[ol 
+	[li 
+		" Toss the item quantity to the ID of the Pokémon wanted
+		$LF
+	]li
+	[li 
+		" Exit the Item Menu and buy the Pokémon from the Game Corner menu
+		$LF
+	]li
+	[li 
+		" Open the Item Menu
+		$LF
+	]li
+	[li 
+		" Repeat until all Pokémon are acquired
+		$LF
+	]li
+]ol
+[div class=p 
+	"We can optimize this in two ways. First, let Repels be the item to be tossed, as using a Repel is faster than tossing an item. (in fact, using two Repels in succession is still faster than tossing two, by 4 frames). Secondly, make use of the glitch item "8 8" to quickly exit the menu. 8 8 is a special item. The short explanation
+	[a id=r7 
+	]a
+	[sup 
+		"[
+		[a href=#7 
+			"7
+		]a
+		"]
+	]sup
+	" is that 8 8 will return to the main overworld loop if used in the overworld, which is faster as we skip needing to exit the item and start menu.
+	$LF
+]div
+[div class=p 
+	"Optimization 2: Skip needing to deal with Pokémon boxes.
+	$LF
+	"Recall that the prize selection table of a prize selection entry is sentinel terminated by a $50 byte. When loading the prize menu, the game will copy the prize selection table to memory, starting at wPrize1. This means that if the terminator to the prizes table appears much later, then the game will happily copy data up until the terminator and overwrite whatever memory that is past the prize table in memory. It turns out that wPartyCount is not that far away from wPrize1 in memory, so we could intentionally set the terminator to be further than expected so that whenever we open the prize menu, wPartyCount is overwritten with zero. This means that Pokémon will never be sent to the box, thus the "sent to box" message will never be displayed, plus we do not need to worry about changing boxes either. As a side effect, once we start talking to the prize menu sign, we cannot perform any further out of bounds party swaps (since wPartyCount will be set to zero). This is the reason why we cannot use a larger prize price and use party swaps to refresh wPlayerCoins. Note that we can't set the terminator too late, as right after Party Data is Pokedex Flags, which we are not allowed to corrupt.
+	$LF
+]div
+[div class=p 
+	"Optimization 3: Faster Hall of Fame animation.
+	$LF
+	"Before warping to the Hall of Fame, we buy an additional glitch Pokémon with ID of $ff. $ff indicates the end of the party species list (wPartySpecies), so even though this $ff represents an actual Pokémon, the Hall of Fame animation code will interpret this $ff as the end of the party, thus skipping the Hall of Fame Pokémon animation.
+	$LF
+]div
+[div class=p 
+	"The final route sketch is now:
+	$LF
+]div
+[ol 
+	[li 
+		" Save corrupt
+		$LF
+	]li
+	[li 
+		" Acquire Item Underflow via Party Swaps
+		$LF
+	]li
+	[li 
+		" Swap $9d into wMapMusicROMBank
+		$LF
+	]li
+	[li 
+		" Acquire a Bicycle
+		$LF
+	]li
+	[li 
+		" Modify wCurMapTileset so we can ride the Bicycle
+		$LF
+	]li
+	[li 
+		" View the Trainer Card
+		$LF
+	]li
+	[li 
+		" Get on and off the Bicycle, crashing the game and setting [$a7ce-a7cf] to $0039.
+		$LF
+	]li
+	[li 
+		" Corrupt box items to be able to withdraw a 0 or 255 quantity item
+		$LF
+	]li
+	[li 
+		" Perform Dry Underflow
+		$LF
+	]li
+	[li 
+		" Stage some values in Item Underflow to be swapped into Sign Data
+		$LF
+	]li
+	[li 
+		" Set wMapTextPtr to TM43 x16, corresponding to $10f3 in little endian.
+		$LF
+	]li
+	[li 
+		" Set the number of owned coins to a value where we can buy all the Pokémon we don't have.
+		$LF
+	]li
+	[li 
+		" Set a $50 byte somewhere in memory such that wPartyCount is corrupted to zero upon opening the prize menu, but Pokedex flags remain uncorrupted.
+		$LF
+	]li
+	[li 
+		" Acquire a Repel based item and the glitch item 8 8, and swap these into the FTL item slots.
+		$LF
+	]li
+	[li 
+		" Acquire a Coin Case
+		$LF
+	]li
+	[li 
+		" Perform FTL
+		$LF
+	]li
+	[li 
+		" Buy the glitch Pokémon $ff.
+		$LF
+	]li
+	[li 
+		" Warp to the Hall of Fame
+		$LF
+	]li
+]ol
+[div class=p 
+	"With the ideas behind the route explained, let us go to the actual route. The actual route does some of these steps out of order, but still follows the genera idea of the route.
+	$LF
+]div
+[h3 id=RouteExplanation 
+	" Route Explanation
+	$LF
+]h3
+[h4 id=VersionChoice 
+	" Version choice
+	$LF
+]h4
+[div class=p 
+	"Red version is chosen over Blue because of a faster Trainer ID manipulation, the Charmander cry in the intro is faster than Squirtle's, and Red version has the shortest default player name (displayed only twice).
+	$LF
+]div
+[h4 id=Route 
+	" Route
+	$LF
+]h4
+[div class=p 
+	"As a reminder, $d31e-$d42d is the region of memory accessible by Item Underflow, so whenever a bullet point mentions addresses within that range without mentioning a pokered label, it is implied that the address will be scrolled through or accessed in some way.
+	$LF
+]div
+[h4 id=IntroToCrash 
+	" Intro to Crash
+	$LF
+]h4
+[ul 
+	[li 
+		" To my dismay, we are obligated not to clear save data, as per TASVideos decree, which to me is a sign of MORAL IMPURITY.
+		$LF
+	]li
+	[li 
+		" Options are not set as there is no need to. We never enter any battles and we can advance text to the fastest (intended) speed by holding A or B.
+		$LF
+	]li
+	[li 
+		" A Trainer ID of $7145 is manipulated. The $71 is not important, while the $45 corresponds to the internal ID of the Coin Case item, required to access the prize menu.
+		$LF
+	]li
+	[li 
+		" The player name is irrelevant and is named the default RED for speed.
+		$LF
+	]li
+	[li 
+		" The rival is named ?!♂;///. The ?!♂ portion is not explicitly required, but the internal IDs correspond to TMs which produce no lag in the item menu, and it is the fastest pattern of characters corresponding to TMs which can be typed in while moving the cursor to the ; character. The ; corresponds to $9d, which is the value decided earlier that will be swapped into wMapMusicROMBank. The 7th slash is used as the TM43 x16 to be swapped into wMapTextPtr. The remaining slashes are just lagless filler items.
+		$LF
+	]li
+	[li 
+		" Immediately, we save corrupt. This fills our entire party with $ff bytes, including wPartyCount. The first six Pokémon being filled with $ffs will become useful for item lag reduction.
+		$LF
+	]li
+	[li 
+		" Upon reloading, we walk to a specific part of the map. This sets wXCoord to $6, corresponding to the Bicycle item in Item Underflow, and wYBlockCoord to 0, corresponding to the Bicycle item's quantity.
+		$LF
+	]li
+	[li 
+		" We open the party menu and swap 0x1 with 0x9, and 0x9 with 0xa. This sets wNumBagItems to $ff, giving us Item Underflow, and also fills a large portion of item slots with $ff (as opposed to $00), which when rendering the item menu the game prints CANCEL and stops rendering any further items. These item slots would normally be filled with []j., thus saving time by not needing to lookup the []j. item name.
+		$LF
+	]li
+	[li 
+		" Q r 4 h i ($9d) is selected and swapped with wMapMusicROMBank (item) Ultra Ball x0. Q r 4 h i was swapped from wRivalName into an earlier portion of memory as a side effect of the above two swaps.
+		$LF
+	]li
+	[li 
+		" The Bicycle x0 in wXCoord (item) and wYBlockCoord (qty) (manipulated earlier) is swapped with []j. x4 in wCurMapTileset (qty). The quantity of the Bicycle is one which allows biking.
+		$LF
+	]li
+	[li 
+		" We get on the Bicycle, then view the Trainer Card to enable SRAM.
+		$LF
+	]li
+	[li 
+		" We get off the Bicycle, crashing the game and setting [$a7ce-a7cf] to $0039.
+		$LF
+	]li
+]ul
+[h4 id=PartySwaps1 
+	" Party Swaps 1
+	$LF
+]h4
+[ul 
+	[li 
+		" Upon reloading the game, we open the party menu to swap some Pokémon.
+		$LF
+	]li
+	[li 
+		" Swap 0x0 <> 0xb4. This has the effect of writing $ff to wLowHealthAlarm which will cause the game to skip waiting for sound effects that the game would normally wait for, thus saving time. 
+		$LF
+	]li
+	[li 
+		" Swap 0xc8 <> 0x1. This swaps $ffs from slot 0x1 into the region $f3cb-f3f6, which will be scrolled through in order to get to the slot corresponding to $d3fa for FTL.
+		$LF
+	]li
+	[li 
+		" Swap 0x2 <> 0xa. This just swaps $ffs into $d323-d34e (near the start of wBagItems) for lag reduction purposes.
+		$LF
+	]li
+	[li 
+		" Swap 0x3 <> 0x1b. This swaps $ffs into $d39c-d3a6 and $d3de-d3e8 (some connection/misc data that is mostly $00) for lag reduction purposes.  
+		$LF
+	]li
+	[li 
+		" Swap 0x39 <> 0x3a and 0x3a <> 0x44. The first swap modifies collision allowing us to walk off the north side, and the second swap corrupts the first three Box Items to items we can use to perform Dry Underflow (as well as allowing us to access these three items)
+		[a id=r8 
+		]a
+		[sup 
+			"[
+			[a href=#8 
+				"8
+			]a
+			"]
+		]sup
+		".
+		$LF
+	]li
+	[li 
+		" Swap 0x19 <> 0x4, swapping $ffs into $d386-d390 and $d3c8-d3d2 for lag reduction.
+		$LF
+	]li
+	[li 
+		" Swap 0x5 <> 0x18. This swaps $ffs into $d37b-d385 and $d3bd-d3c7 for lag reduction, AND modifies wPlayerCoins to $ffff, which is plenty enough to buy the 152 Pokémon we need.
+		$LF
+	]li
+]ul
+[h4 id=ItemManipulation 
+	" Item Manipulation
+	$LF
+]h4
+[div class=p 
+	"Due to the large amount of $ffs in the Item Underflow region, some items will not be visible as they're manipulated with, e.g. the TAS may toss TM43 x64 from TM43 x80 even though it isn't seen in the Item Menu View.
+	$LF
+]div
+[ul 
+	[li 
+		" The party menu is exited, and we make our way to the PC. Accessing the PC from the right is faster as wXCoord is 1 instead of 0 in this position, corresponding to a Master Ball (lagless) instead of a []j. in Item Underflow.
+		$LF
+	]li
+	[li 
+		" In the PC menu, the Withdraw Menu is accessed. Master Ball x1, []j. x176, and X Attack x255 are withdrawn in this specific order. The Master Ball and []j. are just items used to get to 3 items in the player inventory, as required for Dry Underflow. The quantity of Master Ball x1 is irrelevant, while withdrawing []j. x176 leaves []j. x80 in the PC, which the quantity is used as the $50 byte terminator required by the Prize Table. The X Attack x255 is used as the 255 stack required for Dry Underflow.
+		$LF
+	]li
+	[li 
+		" The PC is exited from, and the Item Menu is opened.
+		$LF
+	]li
+	[li 
+		" Dry Underflow is performed. []j. is tossed first to avoid displaying the name later, then Master Ball x1.
+		$LF
+	]li
+	[li 
+		" TM55 ($ff) x254 is tossed from TM55 x255 in slot 4 to get TM55 x1. The resulting quantity is used as the Y Coord of the sign used for the Prize Menu. The X Coord of the sign is the $ff byte right after slot 4 quantity, which is the west edge of the map.
+		$LF
+	]li
+	[li 
+		" X Attack x0 is swapped with the Coin Case in wPlayerID+1 (item). For the game to recognize that the player has a Coin Case, it must be placed before the first $ff item (TM55/CANCEL) in the player's bag. 
+		$LF
+	]li
+	[li 
+		" X Attack x0 is then swapped with []j. x3 in wOptions (quantity). This sets the bits responsible for text speed to 0, meaning that all subsequent text will print instantly.
+		$LF
+	]li
+	[li 
+		" TM55 x196 is tossed from TM55 x255 in slot 20 ($d344-5) to get TM55 x59, which will be swapped into the text ID of the Prize Menu sign.
+		$LF
+	]li
+	[li 
+		" TM43 x64 is tossed from TM43 x80 in wRivalName+6 (item+quantity) to get TM43 x16.
+		$LF
+	]li
+	[li 
+		" TM43 x16 is swapped into TM07 x64 in wMapTextPtr (item+quantity). This fulfills the requirement to set the map text pointer to TM43 x16
+		$LF
+	]li
+	[li 
+		" []j. x137 is tossed from []j. x255 in the slot (quantity) corresponding to the map ID of the north connection (quantity) to get []j. x118. 118 is the map ID of the Hall of Fame, so performing a north connection warp will cause the player to warp to the Hall of Fame.
+		$LF
+	]li
+	[li 
+		" Full Restore x64 is swapped with []j. x0 in the slot corresponding to the north connection coordinate alignments (Y: item, X: quantity). The coordinate alignments are values which are added to the player's X and Y coordinate upon performing a connection warp, in order to adjust the player's coordinates to the correct position in the new map, relative to the coordinates of the old map. Before the swap, these values were both zero. This is important for the Y coord alignment value, as upon entering the Hall of Fame, the player is scripted to automatically walk upwards. Without modifying the Y coord alignment, upon warping to the Hall of Fame, the player's y coord would stay at 0, and then after one step upwards, the game would try to perform another north connection warp. Since the Hall of Fame has no north connection, the north connection map ID has a default value of 255, so the game will try to load the invalid map 255, crashing the game. Swapping Full Restore x64 (the closest safe item to swap) sets the player's Y coord alignment to 16 (ID of Full Restore), which is more than enough room for the scripted movement to play out without loading another map.
+		$LF
+	]li
+	[li 
+		" TM55 x225 is tossed from TM55 x255 in slot 50 to get TM55 x30.
+		$LF
+	]li
+	[li 
+		" TM55 x124 is tossed from TM55 x255 in slot 51 to get TM55 x124. The resulting quantities of the above and this TM55 correspond to the IDs of Repel and 8 8. A party swap will be performed later which converts these quantities into items and places the Repel quantity into $d3fb, and the 8 8 item right below the Repel. Both items will have a quantity of 255, which is important for reasons explained later.
+		$LF
+	]li
+	[li 
+		" The cursor is scrolled to the item slot corresponding to $d3fa-d3fb.
+		$LF
+	]li
+]ul
+[h4 id=FinalPartySwapsAndFtl 
+	" Final Party Swaps and FTL
+	$LF
+]h4
+[ul 
+	[li 
+		" The party menu is opened one last time.
+		$LF
+	]li
+	[li 
+		" Swap 0x13 <> 0xa. This swaps the item memory manipulated earlier into the actual sign coordinates and sign text ID, and also swaps an $ff into wNumSigns.
+		$LF
+	]li
+	[li 
+		" Swap 0x12 <> 0x1d. This swaps the manipulated TM55 x30 into the first FTL item slot ($d3fa-d3fb) and TM55 x124 into the item under the first FTL slot ($d3fc). Due to how nicknames are aligned, this swap converts quantities into items, and vice versa, thus placing a Repel x255 and 8 8 x255 into the aforementioned item slots.
+		$LF
+	]li
+	[li 
+		" The party menu is exited, and the trainer card is viewed, enabling SRAM for the prize price.
+		$LF
+	]li
+	[li 
+		" The item menu is closed, and the player walks one to the left, in position to start FTL. Doing this after the following step would be faster, but it's something I missed in the original route.
+		$LF
+	]li
+	[li 
+		" The item menu is opened again, and Repel x65 is tossed from Repel x255 to get Repel x190. 190 is the ID of Victreebel, and is the Pokémon with the highest ID.
+		$LF
+	]li
+	[li 
+		" 8 8 is used to return us to the Overworld. From here on, farming commences. By coincidence, the IDs of Repel and 8 8 map to Pokémon we need (Tangela and Metapod), so we buy those from the first and third slots respectively, instead of the Repel quantity slot. 
+		$LF
+	]li
+	[li 
+		" Once all Pokémon are farmed, the Repel is used one last time. The last Pokémon obtained was Rhydon, which has an ID of 1, so using the Repel will remove it from the inventory, and all items below the Repel will be shifted up. Due to the mechanics of x255 quantities, an 8 8 x255 will take the place of the Repel x1. One final Pokémon is bought (known as 'M), which has an ID of $ff.
+		$LF
+	]li
+	[li 
+		" The player takes the shortest path to the north edge of the map allowed by the collision to warp to the Hall of Fame.
+		$LF
+	]li
+	[li 
+		" Because of the $ff Pokémon, no Pokémon are animated in the Hall of Fame.
+		$LF
+	]li
+]ul
+[h3 id=PossibleOptimizations 
+	" Possible optimizations
+	$LF
+]h3
+[ul 
+	[li 
+		" Faster rst $38 Crash: As mentioned in the route, it is possible to use party swaps to overwrite wAudioROMBank. This would save at most 10 seconds by my estimate.
+		$LF
+	]li
+	[li 
+		" Achieving Instant Text earlier: While this could speed up the interactions before Instant Text is achieved in the current route, it turns out that getting Instant Text via Party Swaps is not that trivial. In addition to setting the low 4 bits of wOptions to zero, bit 0 of wLetterPrintingDelayFlags must be 1, and bit 1 must be 0. Finding this combination in memory to swap into wOptions and wLetterPrintingDelayFlags turned out to be very difficult.
+		$LF
+	]li
+	[li 
+		" Faster Hall of Fame: There are other strategies to warp to the Hall of Fame such as a tile warp, or by using the glitch item 10F combined with modifying wCurMap. In addition, we could also set wHallOfFameCurScript to 2, which would basically skip to the Hall of Fame Oak Cutscene.
+		$LF
+	]li
+	[li 
+		" Better lag optimization: Much of the lag optimization in this route was not actually timed to be faster, mainly out of laziness but also because the amount of possible permutations of party swaps would be too exhausting to test by hand. 
+		$LF
+	]li
+	[li 
+		" Better setup in general: Glitch setups with Party Overflow in general have not been explored much. Perhaps there is a faster combination of party swaps that is yet to be discovered.
+		$LF
+	]li
+]ul
+[h3 id=FinalNotes 
+	" Final notes
+	$LF
+]h3
+[div class=p 
+	"As a fun aside, with the old TAS, at least you had all 151 Pokémon somewhere in the Box or Party. With this TAS, we achieve a whole new level of pointlessness:
+	$LF
+]div
+[ul 
+	[li 
+		" We don't actually get to keep the Pokémon we buy, since wPartyCount is cleared every time we buy a Pokémon, so the only purpose of this effort is just registering all 151 Pokémon.
+		$LF
+	]li
+	[li 
+		" To check if a save exists, the game checks if wPlayerName is terminated with a $50. When the prize entry table is copied to memory, it overwrites wPlayerName along the way to wPartyCount, meaning that wPlayerName is now unterminated. This means that the save won't even load after we beat the game!
+		$LF
+	]li
+]ul
+[div class=p 
+	"And despite the massive improvement due to the use of Save Corruption, I don't really enjoy the setup from an aesthetics point. The setup to set the prize prices to $0039 properly captures the magic of Gen 1 Glitch Runs, but this portion is short lived. The "Party Swaps 1" section is just too unidentifiable to the user, namely that the action of swapping out of bounds Party Pokémon produces very little visual feedback, which doesn't live up to the craziness factor of the Item Manipulation seen in other runs. The Item Underflow section is a bit better, but compared to other glitch runs there's a lot less substance in the item manipulation (a good portion of it is mostly scrolling), and a good chunk of the item manipulation is just tossing TM55 quantities to be swapped with Party Swaps, which is pretty uneventful and doesn't contain the craziness factor of more complex item manipulations required in other runs. Namely, if you look at the main setup portion of the 
+	[a href=https://youtu.be/ZFTXVDj3j14?t=696 rel=noopener external nofollow 
+		"RTA (Classic) Catch 'Em All run
+	]a
+	", the item manipulation and techniques required are much more visually striking to me compared to this route.
+	$LF
+]div
+[div class=p 
+	"The farming part of the run is actually pretty cool to look at, mainly because the farming loop requires precise menuing which would be very difficult for a human to accomplish, which looks even more impressive given the menuing speed. I might even say that it outranks the setup portion of the run, apart from the setup to set the prize prices to $0039 (which would be routed out in a future route anyway).
+	$LF
+]div
+[h3 id=Credits 
+	" Credits
+	$LF
+]h3
+[ul 
+	[li 
+		" CasualPokePlayer: Actually created the input file, based on the route, and also suggested minor improvements to the route.
+		$LF
+	]li
+	[li 
+		" luckytyphlosion: Coming up with the route for the TAS, creating the FTL strategy, and writing most of the description. Like the previous TAS, I did not touch a single bit of input.
+		$LF
+	]li
+	[li 
+		" MrWint: Took some of the description from his 
+		(__wikiLink|displaytext=Save Corruption TAS|href=/4431S)
+		" and used it here.
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://bgb.bircd.org/ rel=noopener external nofollow 
+			"BGB
+		]a
+		": Game Boy emulator with an amazing debugger that helped with routing out the TAS.
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://github.com/pret/pokered rel=noopener external nofollow 
+			"the pokered disassembly
+		]a
+		": General massive help in documenting the game's code allowing numerous tricks, including the FTL strategy, to be discovered.
+		$LF
+	]li
+	[li 
+		" Igor Guevara: The true creator of this TAS.
+		$LF
+	]li
+]ul
+[h3 id=SuggestedScreenshots 
+	" Suggested Screenshots
+	$LF
+]h3
+[div class=p 
+	"(Preview only, do not use these screenshots, since they were taken from the YouTube encode)
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/JLHVUys.png 
+	]img
+	" 
+	[img class=embed mw-100 src=https://i.imgur.com/PTMDfAi.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[h3 id=Footnotes 
+	" Footnotes
+	$LF
+]h3
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" - Text predefs are a global list of texts handled by alternative mechanisms such as hidden objects
+	[br 
+	]br
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" - Actually, my initial assumption is that only 15 NPCs are checked (thus only IDs from 1-15 could be used), but upon further investigation it turns out that the number of NPCs checked is equivalent to the value in wNumSprites.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" - Also, the coordinates of the sign entries before the entry slot we choose must be different than the coordinates of the chosen sign, otherwise the coordinates would match up with the previous sign. This turns out to be irrelevant since we just use the first sign entry.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" - Another option would be to load a battle with a glitch sprite, but this isn't feasible because the expanded party causes the battle to eventually crash.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	" - There's also the home bank, located at $0000-3fff and cannot be swapped, but this isn't relevant.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	" - The Stop opcode switches the Game Boy to "very low power standby mode", which can only be interrupted with a button press, however, button presses are only enabled for a very short time during VBlank, so under normal circumstances the game will never resume from a Stop opcode.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=7 
+	]a
+	[a href=#r7 
+		"7
+	]a
+	"]
+	" - The long explanation (which you may skip if you so desire), is that what 8 8 does depend on when it is used, as the exact location where it jumps is within the VBlank routine. What it does in the VBlank routine isn't so important, rather, it's what it does at the end which is important. Basically, the Game Boy has a stack, which operates similar to a real life stack of papers. You can add data to the top of the stack via the push opcode, and you can retrieve data from the top of the stack via the pop opcode. The call and rst opcodes will push where execution returns after a function call, and all return opcodes will return to the address stored onto the stack. Since the VBlank routine can happen at almost any time, we need to save the registers (internal "global" variables) onto the stack. At the end of VBlank, these registers are restored, and execution returns to the addressed pushed onto the stack (as part of how interrupts work). However, where 8 8 jumps to is in the middle of the VBlank routine, after the registers are pushed. So at the end of VBlank, the game will pop off values off the stack which were saved by other routines, and returns to whatever is at the top of the stack. When used in the overworld, by sheer chance the game will return to where the game resumes execution after closing the start menu (
+	[a href=https://github.com/pret/pokered/blob/bb8fdd7/home/overworld.asm#L109 rel=noopener external nofollow 
+		"location within the pokered disassembly here
+	]a
+	"), in essence returning back to the overworld.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=8 
+	]a
+	[a href=#r8 
+		"8
+	]a
+	"]
+	" - The 0x39 <> 0x3a swap was intended as an intermediate swap, removing $ffs so that tossing an item in Box Item Underflow would cause an item with a large value to shift into the item slot for wPlayerCoins. It turns out this is irrelevant because another Party Swap swaps $ffff into wPlayerCoins anyway. However, the 0x39 <> 0x3a swap also modifies collision such that it is possible to step off the map from the north side, required as part of the Hall of Fame warp. Initial tests suggest that this simple swap is faster than trying to manipulate collision in Item Underflow to allow warping to the Hall of Fame, so this swap still turns out to be faster.
+	[br 
+	]br
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": okay but what about that guy who's gonna eat tasvideos
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Aw, here it goes.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Y'know I should probably take this one back, honestly.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": This is actually surprisingly straightforward of a judgement. Although this run adds save corruption to the already massive pile of glitches that the published run happens to be, looking at them side-by-side more or less tells me that they're working under the same 
+	[em 
+		"general
+	]em
+	" principle, just using different methods. In layman's terms, the published run 
+	[em 
+		"catches
+	]em
+	" 'em all, while this run 
+	[em 
+		"buys
+	]em
+	" 'em all, which is a perfectly valid method of obtaining Pokemon. It's just used in an INCREDIBLY INVALID-LOOKING WAY. As far as the game is concerned, all 151 Pokemon are obtained. As far as we're concerned, they are all obtained through in-game methods and not ACE. ACE is not achieved at any point in this run, despite the memory/save corruption, which is similar in execution to the currently published run. The save ends up too corrupted to even load once the game returns to the title screen, but... Well, we've had 
+	(__wikiLink|displaytext=worse on the corrupted save front|href=/3795M)
+	", so that's not an issue either.
+	$LF
+]div
+[div class=p 
+	"All in all, accepting as an improvement to the 
+	(__wikiLink|displaytext=published run|href=/3687M)
+	" (remaining in Vault due to the middling feedback), and what the hell has happened to this game from my childhood.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Publishing.
+]div

@@ -1,0 +1,823 @@
+13
+[div class=p 
+	"Vampire Killer is the MSX2 version of Castlevania, released in Japan, Europe and Brazil. 
+	$LF
+	"Rather than a linear action-platformer like the NES version, Vampire Killer contains more elements of an adventure game, with collectible items strewn about the levels, some of them hidden in the walls. 
+	$LF
+	"In each stage, a white key needs to be found to proceed to the next stage.
+	$LF
+	"This movie saves a minute over the previous run through a number of significant new tricks.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: openMSX 20.0
+		$LF
+	]li
+	[li 
+		" BIOS used: Panasonic FS-A1WSX
+		$LF
+	]li
+	[li 
+		" Aims for fastest possible time
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Genre: Platform
+		$LF
+	]li
+]ul
+[div class=p 
+	[b 
+		"Note
+	]b
+	":  I accidentally used the [a2] ROM this time around. 
+	$LF
+	"This was unintentional, but I only realized I was using the wrong ROM a couple of minutes into the run.
+	$LF
+	"You'd think by now I would know to pay attention to such things.
+	$LF
+	"Whoops.
+	$LF
+	"It should make no practical difference for the TAS anyway.
+	$LF
+]div
+[div class=p 
+	"Welcome back to Vampire Killer.
+	$LF
+	"This game is somewhat of a mainstay of mine, considering this is my fourth submission of it, beating out any other game I've TASed on this site.
+	$LF
+]div
+[div class=p 
+	"This is a sister game to the original NES Castlevania that was released for the MSX2 at the same time.
+	$LF
+	"Unlike Castlevania, each stage requires you to find a white key to proceed to the next stage.
+	$LF
+	"The levels are different and often very non-linear and mazelike, frequently forcing you to find secrets to proceed.
+	$LF
+	"There's also a number of items strewn throughout the levels which you can pick up, which range from useless for the TAS to completely game-breaking.
+	$LF
+	"In this game, hearts act as both your subweapon ammo as well as currency to buy items from merchants with.
+	$LF
+	"This run needs quite a few hearts, which makes proper heart routing crucial for the run.
+	$LF
+]div
+[div class=p 
+	"This run uses a couple new major discoveries to save 3618 frames, or just over a minute, over the previous 2013 run.
+	$LF
+	"These new discoveries significantly change how the game is played.
+	$LF
+	"More detail is outlined in the comments below.
+	$LF
+]div
+[h4 id=TasingProcess 
+	" TASing Process
+	$LF
+]h4
+[div class=p 
+	"openMSX normally relies on a rewind-based system, where the emulator is configured by default to go back 1 frame if you hit Scroll Lock, and 60 frames if you hit PageUp, which I used in the past.
+	$LF
+	"For this TAS, I tried to emulate how typical emulators like BizHawk work, and bound loading and saving of different replay slots to the F1 - F8 keys (which in turn necessitated moving the F1 and F2 keys, which are used by the game, to somewhere else).
+	$LF
+	"This was hugely beneficial for TASing, as having the ability to easily and quickly jump to a precise moment in time is massively helpful.
+	$LF
+	"This allowed for a lot more precision in making the TAS, which is something I felt I was missing before.
+	$LF
+	"In particular, it made the process of the finding the first (or last) frame where an action is possible significantly easier, which was particularly troublesome before.
+	$LF
+]div
+[div class=p 
+	"One downside to this however is that the rerecord count is not accurate, since all saveloads are discarded.
+	$LF
+	"I do not have an estimate for the real rerecord count.
+	$LF
+	"Going purely by the amount of time spent on the TAS however, I spent about 2 - 3 weeks on routing, and another 3 weeks on the actual TAS, so make of that what you will.
+	$LF
+]div
+[div class=p 
+	"Like a lot of MSX games, the game generally runs at 30 FPS and will only accept input every other frame.
+	$LF
+	"For the most part, you can just get by with making sure to hold every button for two frames, and getting used to pushing Frame Advance twice each time.
+	$LF
+	"Sometimes, when the game is busy, you might need to hold a key for two or even more frames in a row to get the game to register it.
+	$LF
+	"Sometimes, it might also require holding unrelated buttons at the same time.
+	$LF
+	"I do not quite know why that is.
+	$LF
+	"This also means that Simon only ever moves by 2 pixels at a time.
+	$LF
+	"This can sometimes be a problem when precise positioning is important.
+	$LF
+]div
+[div class=p 
+	"Unlike the previous runs, this TAS was done almost entirely on the MSX joystick rather than the keyboard.
+	$LF
+	"The primary advantage of this is that you can hold Up on the joystick without Simon attempting to jump, which makes climbing up stairs significantly less problematic.
+	$LF
+	"The keyboard was however still used heavily for luck manipulation.
+	$LF
+	"Playing on joystick still doesn't fix some of the game's other strange controls, such as using subweapons with the directional inputs.
+	$LF
+	"You're stuck with that.
+	$LF
+]div
+[h4 id=StairGlitch 
+	" Stair Glitch
+	$LF
+]h4
+[div class=p 
+	"The stair glitch was discovered by AgentWyvern at the beginning of 2023.
+	$LF
+	"By walking on a staircase for exactly 32 steps, or 512 frames, you can walk beyond the intended end of a staircase and keep going.
+	$LF
+	"The reason for this is a counter in RAM that keeps track of how many frames Simon has walked on a staircase for.
+	$LF
+	"It is located at address 0xC42B.
+	$LF
+	"When the counter rolls over to 0 as you hit the final step of the staircase, the game will not realize that Simon is supposed to exit the staircase.
+	$LF
+	"I am not sure why the programmers decided they needed that counter, I haven't messed enough with Z80 assembly to find out.
+	$LF
+]div
+[div class=p 
+	"Once the stair glitch is active, you can keep going until you hit another solid floor.
+	$LF
+	"When you hit a vertical screen edge, it depends on the room what happens.
+	$LF
+	"If there is a valid screen transition defined for the ceiling or the floor of the room, you can walk into the next room as normal.
+	$LF
+	"If there is no screen transition defined for the bottom of the screen, Simon will die as if he fell into a bottomless pit.
+	$LF
+	"If there is no screen transition for the ceiling, Simon will also lose a life, but then respawn in the same room without any of his items.
+	$LF
+	"In a similar way, hitting a horizontal screen edge will send Simon into the next room when a screen transition is active, otherwise, Simon will simply wrap around the current room.
+	$LF
+	"Because of this, stair glitches are not always usable where it seems like they should be possible.
+	$LF
+	"It is also in theory possible to chain several stair glitches to go through multiple floors, but no applications have been found for this.
+	$LF
+]div
+[div class=p 
+	"You cannot carry a stair glitch through a vertical screen transition, as Simon's Y position will be offset from 1 pixel from where it should be when you go through a screen edge, which causes the stair glitch to fail once you attempt it.
+	$LF
+	"Because of this, you must set up a stair glitch on the same screen that you use it on, which limits some of the applications.
+	$LF
+]div
+[div class=p 
+	"Despite these limitations and the long setup time, it is still possible to perform a number of major shortcuts using the glitch, as the level design often forces you to backtrack for agonizingly long distances otherwise.
+	$LF
+	"All applications are noted below in the stage-by-stage comments.
+	$LF
+	"This glitch is ultimately the reason why I wanted to redo the run.
+	$LF
+]div
+[h4 id=StopwatchGlitch 
+	" Stopwatch Glitch
+	$LF
+]h4
+[div class=p 
+	"This glitch goes back to at least Jaguar King's 2014 SDA run of the game.
+	$LF
+	"Put simply, if you exit a stage while the stopwatch is active, the stopwatch will remain active indefinitely.
+	$LF
+	"This can be done either by letting a boss orb time out after beating a level, or by immediately using 
+	$LF
+	"the stopwatch before entering a door, although the second option is much faster.
+	$LF
+	"All enemies are frozen permanently then.
+	$LF
+	"If you beat a level, time will remain frozen until you find another stopwatch and use it again.
+	$LF
+	"Dying resets the stopwatch glitch.
+	$LF
+]div
+[div class=p 
+	"This glitch has huge application for real-time speedruns, as it makes the game much more bearable than it would be otherwise.
+	$LF
+	"It however comes with some serious downsides for the TAS, as it both locks you out of some damage boosts that would be possible otherwise, and also results in a much more boring TAS, as you basically end up just leisurely strolling throughout all the levels without any of the enemies bothering you.
+	$LF
+	"Despite this, some enemies are still placed in inconvenient locations, which means you're still forced to deal with them somehow.
+	$LF
+	"Due to this, I initially passed the glitch up and didn't give it much mind until I started this TAS.
+	$LF
+]div
+[div class=p 
+	"For this TAS, I actually went and did a proper route test first to see if the stopwatch glitch was actually faster or not.
+	$LF
+	"Ultimately it turns out that the stopwatch glitch ends up saving time due to a number of different reasons.
+	$LF
+	"In total, it comes out to saving between 10 - 13 seconds, which is why I decided I wanted to include it for this TAS.
+	$LF
+	"One unexpected benefit the stopwatch glitch provides is lag: the game just has so much less slowdown when the enemies aren't flailing about constantly.
+	$LF
+]div
+[div class=p 
+	"The most convenient place to grab a stopwatch is fairly early on, in Stage 4. 
+	$LF
+	"Once you exit the level though, there is no convenient place to grab a stopwatch in Level 3 and 5, and no stopwatch whatsoever in Level 4.
+	$LF
+	"This means that when you carry the stopwatch glitch out of Level 2, you're basically locked into it until the endgame.
+	$LF
+	"This ends up creating two radically different routes throughout the game, one where the game plays as normal, and one where time is frozen, which, as mentioned, basically turns the game into a sightseeing tour.
+	$LF
+	"It might seem lame that none of the enemies actually pose a challenge to me, but ultimately the timesave was just too large for me to leave on the table.
+	$LF
+	"The stopwatch glitch also introduces some unexpected new perks that are highlighted in the stage-by-stage comments below.
+	$LF
+]div
+[div class=p 
+	"Speaking of...
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage-by-Stage Comments
+	$LF
+]h3
+[h4 id=Stage1 
+	" Stage 1
+	$LF
+]h4
+[div class=p 
+	"Completely unchanged to the previous run.
+	$LF
+]div
+[h4 id=Stage2 
+	" Stage 2
+	$LF
+]h4
+[div class=p 
+	"I am more aggressive with grabbing hearts than last time, since I am gonna need pretty much every single heart I can get without losing time.
+	$LF
+	"Every enemy can randomly drop a big heart, although the drop chance is infuriatingly low.
+	$LF
+	"Thankfully, the RNG is influenced by the full MSX keyboard, and the drop is decided immediately on killing an enemy, so you can just try out random key combinations until one of them yields a big heart.
+	$LF
+	"I randomly lose 4 frames at the door to the next stage.
+	$LF
+	"I have no idea why.
+	$LF
+]div
+[h4 id=Stage3 
+	" Stage 3
+	$LF
+]h4
+[div class=p 
+	"This is where the stair glitch comes in.
+	$LF
+	"Using some strategic wiggling, I can exit the staircase and make it directly to the boss without having to get the white key.
+	$LF
+	"Not only is this much faster, but it also skips the door opening animation, which is also a nice bonus.
+	$LF
+	"The stair glitch here saves over 10 seconds.
+	$LF
+]div
+[h4 id=BossVampireBat 
+	" Boss: Vampire Bat
+	$LF
+]h4
+[div class=p 
+	"Better understanding of the boss's behavior allowed me to use a faster strategy against it.
+	$LF
+	"When the bat appears, it will wait for a certain amount of time and then fly down to a specific position that is determined by your own position on the screen.
+	$LF
+	"After that, the bat will wait between 64 and 128 frames, which is determined by RNG, and then swoop down towards you.
+	$LF
+	"I specifically manipulate the bat to wait as short as possible, so that it swoops down to me after just two jumps.
+	$LF
+	"When the bat begins to move, I make sure to move as close to it as possible so that its own horizontal speed is as slow as possible.
+	$LF
+	"This allows me to simply walk away from it and then leisurely whip it down while on the ground.
+	$LF
+	"It might seem slow to have to walk away first, but whipping from the ground is significantly faster than having to jump to reach it, and also avoids needing to jump over it to avoid the swoop, which results in a net gain of 27 frames against the boss.
+	$LF
+]div
+[div class=p 
+	"Overall, 672 frames were saved in Level 1.
+	$LF
+]div
+[h4 id=Stage4 
+	" Stage 4
+	$LF
+]h4
+[div class=p 
+	"Another stair glitch is used as a shortcut to get to the key, although the armor knight in this area is a real nuisance.
+	$LF
+	"This is the fastest way I found to deal with it.
+	$LF
+	"I grab the stopwatch in this level from a convenient treasure chest.
+	$LF
+	"There are two keys in the level that I could pick up to open the chest, but the second one is slightly faster.
+	$LF
+	"All in all, picking up the stopwatch here loses me 117 frames, but it more than makes up that time later.
+	$LF
+]div
+[h4 id=Stage5 
+	" Stage 5
+	$LF
+]h4
+[div class=p 
+	"I immediately use the stopwatch glitch to start the stage, but I actually cancel it again midway through to unstick an inconveniently placed armor knight, which saves a few frames.
+	$LF
+	"It would seem simpler to delay the stopwatch glitch until later, but even in just those few rooms, the lag saved is enough to make it worth it to keep time frozen throughout.
+	$LF
+	"Being very aggressive with your stopwatch like this is very beneficial, which is why I want so many hearts for the run.
+	$LF
+	"On the door to the next stage, the stopwatch glitch is finally activated for real.
+	$LF
+	"We keep it for almost the remainder of the game.
+	$LF
+]div
+[h4 id=Stage6 
+	" Stage 6
+	$LF
+]h4
+[div class=p 
+	"Using the stopwatch glitch prevents an inconvenient ghost from spawning, which allows me to take a more direct route to the key.
+	$LF
+	"The blobs do not activate and cannot hurt you if time is frozen.
+	$LF
+	"Otherwise, the stage is pretty much unchanged to before.
+	$LF
+]div
+[h4 id=BossMedusa 
+	" Boss: Medusa
+	$LF
+]h4
+[div class=p 
+	"Using the stopwatch allows me to whip her with no delay, saving 61 frames.
+	$LF
+	"The savings from the stopwatch glitch end up canceling out the time spent to get it exactly for this level.
+	$LF
+	"All in all, this leaves me with 214 frames gained in this level.
+	$LF
+]div
+[h4 id=Stage7 
+	" Stage 7
+	$LF
+]h4
+[div class=p 
+	"From this point on, time is permanently locked until I find another stopwatch, so enjoy the scenery.
+	$LF
+	"You might think I could use a stair glitch to immediately reach the door from where the key is, but there is no screen transition for the ceiling in this room, so we have to go the long way around.
+	$LF
+	"The skeletons are placed slightly inconveniently in this level, but I can jump over all but one of them.
+	$LF
+	"The real star here though is the lag.
+	$LF
+	"Keeping time frozen results in a whopping 119 frame gain here due to less slowdown.
+	$LF
+]div
+[h4 id=Stage8 
+	" Stage 8
+	$LF
+]h4
+[div class=p 
+	"When getting the white key, it is slightly faster to jump to the left than doing a neutral jump or a right jump.
+	$LF
+	"Unlike in the previous run, I cannot use a damage boost to reach the door early, so we have to go the long way around once again, which loses 158 frames.
+	$LF
+	"The stage is otherwise unchanged to before.
+	$LF
+]div
+[h4 id=Stage9 
+	" Stage 9
+	$LF
+]h4
+[div class=p 
+	"Picking up the invincibility orb in the fifth screen saves lag even though all the enemies are frozen.
+	$LF
+	"We once again pick up the holy water to make short work of the mummies.
+	$LF
+	"The holy water is activated by pushing Left or Right on the keyboard / joystick while you're in mid-air, which causes you to accidentally toss jugs constantly if you're not careful.
+	$LF
+	"It's as awful as it sounds.
+	$LF
+]div
+[h4 id=BossMummies 
+	" Boss: Mummies
+	$LF
+]h4
+[div class=p 
+	"I need to jump over the right mummy to get into a position where my holy water can reach it.
+	$LF
+	"The holy water does the same damage as your primary weapon, so I needed to pick up the chain whip earlier in the level.
+	$LF
+	"It however deals damage much faster than any of your other attacks.
+	$LF
+	"There is a new glitch here involving the holy water: it turns out that pausing can affect the damage cycle of the holy water, which allows it to do more damage per jug.
+	$LF
+	"Sometimes you can also whip through the damage of the holy water, sometimes your whip damage is simply ignored, which pausing can also affect.
+	$LF
+	"Pausing at the wrong time will reduce the damage of your holy water instead.
+	$LF
+	"I haven't quite figured out why exactly this happens, so the pausing that you see in the TAS was done by trial and error.
+	$LF
+	"This allowed to me to finish the fight with just one single holy water along with some judicious whipping, which is not only faster, but also convenient, since it saves a big heart that I don't need to pick up later.
+	$LF
+]div
+[div class=p 
+	"Taking less damage in this level also means I lose less time to the health recharge after the level.
+	$LF
+]div
+[div class=p 
+	"All in all, Level 3 is done 39 frames faster than before.
+	$LF
+]div
+[h4 id=Stage10 
+	" Stage 10
+	$LF
+]h4
+[div class=p 
+	"Once again, I miss out on a damage boost which loses around 130 frames.
+	$LF
+	"This damage boost has been there since my earliest 2010 testrun of the game, so I am quite sad to see it go.
+	$LF
+	"Other than this, this stage is a complete snoozefest now, since you don't even have the diving mermen anymore to amuse you.
+	$LF
+	"The only other thing to mention about this stage is that I make sure to stand as far right as possible on each platform so I can jump from them earlier.
+	$LF
+	"Since you only ever move by 2 pixels at a time, careful timing is required for this to land on the platform on the right pixel.
+	$LF
+]div
+[h4 id=Stage11 
+	" Stage 11
+	$LF
+]h4
+[div class=p 
+	"Nothing to mention about this level.
+	$LF
+]div
+[h4 id=Stage12 
+	" Stage 12
+	$LF
+]h4
+[div class=p 
+	"This stage features a significant new shortcut that is enabled by the stopwatch glitch.
+	$LF
+	"Instead of going the long way around, I damage boost off of a white dragon to get above the ceiling and reach Franky immediately, which saves around 368 frames.
+	$LF
+	"As far as I know, this boost is entirely stopwatch-glitch exclusive, since the dragon moves out of position before you can reach it otherwise, and there is no stopwatch in this level to freeze it.
+	$LF
+	"There is no way to do this boost with only a single damage, since you cannot get deep enough into the dragon's hitbox otherwise.
+	$LF
+]div
+[h4 id=BossFrankenstein 
+	" Boss: Frankenstein
+	$LF
+]h4
+[div class=p 
+	"Well, you might not actually be able to see him, but I assure you that's Frankenstein there.
+	$LF
+	"Once again, I use the holy water and pausing to efficiently dispatch him while he is completely helpless.
+	$LF
+	"I still end the fight slightly slower overall because the health recharge takes longer due to the earlier damage boost.
+	$LF
+	"Overall, 254 frames were saved in this level, and the stopwatch glitch ends up being faster up to this point by 293 frames.
+	$LF
+]div
+[h4 id=Stage13 
+	" Stage 13
+	$LF
+]h4
+[div class=p 
+	"Since I still have the stopwatch glitch active, I do not need to grab the stopwatch from the merchant in this level, which saves around 396 frames on its own.
+	$LF
+	"It also frees up a bunch of hearts for other uses.
+	$LF
+	"Instead, I grab the holy water from another merchant for 30 hearts, which will come in very handy for efficiently removing any axe armors in my way.
+	$LF
+	"I make sure to manipulate a heart drop from every single enemy I kill to offset the heart usage from the holy water.
+	$LF
+]div
+[h4 id=Stage14 
+	" Stage 14
+	$LF
+]h4
+[div class=p 
+	"Using the holy water allows me to grab the white key in a much slicker way, which saves around 24 frames.
+	$LF
+	"There is an alternative path in this level (dropping right after going down the staircase) which would allow me to grab the boots, but it's slower overall by 48 frames.
+	$LF
+	"I pretty much always need to jump over an axe knight to allow enough time for the holy water to kill it, which loses me 2 frames each time.
+	$LF
+	"It seems there is just barely not enough time for the water to kill a knight in time to just walk through it.
+	$LF
+	"It is still much better than having to use the whip against them.
+	$LF
+]div
+[h4 id=Stage15 
+	" Stage 15
+	$LF
+]h4
+[div class=p 
+	"Another stair glitch is used here to get to the key, which avoids a huge detour.
+	$LF
+	"Unfortunately, since I cannot carry a stair glitch through a screen transition, I first need to exit the staircase at the top before starting the stair glitch.
+	$LF
+	"It would save around 2 - 3 seconds if this wasn't necessary.
+	$LF
+	"I use the holy water to grab the invincibility ring, which allows me to kill an axe knight without losing any time.
+	$LF
+	"Overall, 806 frames were saved in this stage, mostly from the stair glitch.
+	$LF
+]div
+[h4 id=BossDeath 
+	" Boss: Death
+	$LF
+]h4
+[div class=p 
+	"Once again, Death is completely helpless when time is frozen.
+	$LF
+	"He alone makes getting the holy water worth it.
+	$LF
+	"Overall, 211 frames are saved on this fight, and the level is done 1329 frames faster overall.
+	$LF
+]div
+[h4 id=Stage16 
+	" Stage 16
+	$LF
+]h4
+[div class=p 
+	"Once again, completely unchanged to the previous run.
+	$LF
+	"I jump over a treasure chest to keep a key for later.
+	$LF
+]div
+[h4 id=Stage17 
+	" Stage 17
+	$LF
+]h4
+[div class=p 
+	"This stage has 2 keys.
+	$LF
+	"If you remember earlier TASes of this game, you might remember that you normally need to take a huge detour to get the white key, since there are blocks in the way that would trap you in this location otherwise.
+	$LF
+	"You first need to clear the blocks from the other side, or get a ranged weapon, since otherwise, you can only exit the area by dying.
+	$LF
+	"However, using the stair glitch allows me to leave without doing any of this crap.
+	$LF
+	"Somewhat miraculously, the screen transition is enabled in the room where I do the stair glitch, even though there are no stairs leading into the room above, allowing me to simply climb out.
+	$LF
+	"The stair glitch also conveniently dumps me near the stopwatch, which I need to unfreeze Dracula later.
+	$LF
+]div
+[div class=p 
+	"I unfreeze time immediately, since whipping the axe armors out of the way would be way too slow otherwise.
+	$LF
+	"Strategic usage of the stopwatch allows me to get past the next axe armors quicker.
+	$LF
+	"As mentioned earlier, since it's generally quite fast to get big hearts, it's almost always worth it to use the stopwatch even for very small things, like jumping over an axe armor without taking damage from it.
+	$LF
+]div
+[div class=p 
+	"Once again, I get the knife from the merchant in this level.
+	$LF
+	"For some reason, interacting with it causes a bunch of lag.
+	$LF
+	"I therefore kill the fleamen in this room first to avoid some of the lag.
+	$LF
+	"This also allows me to force 2 big heart drops from them.
+	$LF
+	"For some reason, getting the second heart to spawn is unreally difficult.
+	$LF
+	"Maybe one "slot" that could contain a heart drop is already occupied, I am not sure about this.,
+	$LF
+	"While the merchant is active, I avoid pressing Up on the joystick, as this causes lag.
+	$LF
+	"Not all lag can be avoided however.
+	$LF
+]div
+[div class=p 
+	"I do not need to get the white key in the upper part of the level, since I already grabbed the other key earlier.
+	$LF
+	"This saves only around 50 frames, give or take, but it's still an improvement.
+	$LF
+]div
+[div class=p 
+	"I avoid damage from the final fleaman on this level, which saves 2 frames.
+	$LF
+	"This was already present in the previous TAS, however, it turns out that this only works some of the time.
+	$LF
+	"The reason for this is that the fleaman will only become active a random amount of time after the screen loads, which is determined by RNG when you enter the screen.
+	$LF
+	"Depending on when he activates, some of his jumping patterns can simply be impossible to get past.
+	$LF
+	"I therefore deliberately manipulate him to wait for the right amount of time so that I could sneak past him undisturbed.
+	$LF
+]div
+[h4 id=Stage18 
+	" Stage 18
+	$LF
+]h4
+[div class=p 
+	"I take a different, more direct, route in this level than before.
+	$LF
+	"Using the knife generally always causes between 2 and 4 frames of lag, so I use the knife as sparingly as possible.
+	$LF
+	"The only exception to this is when time is frozen, which allows me to get a big heart without losing time.
+	$LF
+]div
+[div class=p 
+	"There's two damage boosts from fleamen on the way.
+	$LF
+	"The first fleaman has a wide range of patterns of how he can act.
+	$LF
+	"A fleaman will always attempt to jump towards your direction.
+	$LF
+	"He can either do a small jump or a large jump, which is influenced by RNG.
+	$LF
+	"It is necessary to manipulate the fleaman to be at the right position at the right time when you need to do the damage boost.
+	$LF
+	"For some reason, holding a diagonal direction on the arrow keys on the keyboard and pushing multiple buttons at the same time is very good at forcing him to do a large jump.
+	$LF
+	"I do not quite understand why.
+	$LF
+	"Manipulating the fleaman took some work, but ultimately I managed.
+	$LF
+]div
+[div class=p 
+	"For the next damage boost, I simply use the stopwatch to freeze the fleaman in place while it is already at the right position, and then casually jump towards him to boost over.
+	$LF
+	"I force him to use a jumping pattern that gets him to the right spot early, so I can use the stopwatch as soon as possible, as this avoids some lag.
+	$LF
+]div
+[div class=p 
+	"I pick up the boots in this stage again.
+	$LF
+	"I determined that they should save maybe some 13 frames throughout the remainder of the stage, as almost the entire rest is spent climbing stairs, but hey, it's still a timesave.
+	$LF
+]div
+[div class=p 
+	"I use a stair glitch to get from the key to the door quickly.
+	$LF
+	"I kill a hunchback with a knife to get a big heart from it.
+	$LF
+	"This is technically suboptimal, as it's not necessary to kill the hunchback, and the knife causes some lag, so I should've gotten the heart earlier, but I wasn't gonna go back to redo this stage and the previous one.
+	$LF
+	"All in all, this loses me between 4 - 6 frames.
+	$LF
+]div
+[div class=p 
+	"Overall, the new route still ends up saving a sweet 976 frames, so I'm not complaining too much.
+	$LF
+]div
+[h4 id=BossDracula 
+	" Boss: Dracula
+	$LF
+]h4
+[div class=p 
+	"Dracula's first phase is pretty much entirely unchanged to before.
+	$LF
+	"I need to unfreeze time at some point to get him to appear, but once his hurtbox is active, I can once again just stick him in place and spam knives into him in a way that would make Dio blush.
+	$LF
+]div
+[div class=p 
+	"It would be better if I could use the stopwatch just once, as I have to ride out the second use before his second phase appears, but I couldn't find a way to dispatch him in just 1 cycle.
+	$LF
+	"You're just 2 knives short.
+	$LF
+	"It seems Dracula's second form will only appear after all of his debris have left the screen, but there seems to be no way to manipulate them, so I'm stuck with this pattern.
+	$LF
+]div
+[div class=p 
+	"I took two additional big hearts with me for Dracula's second phase for 3 stopwatch uses total, so I don't have to deal with his bats at all, which saves another 60 frames.
+	$LF
+	"The game is just always better when it's not bothering you.
+	$LF
+	"With the final knife throw, input ends, and the game is over yet again.
+	$LF
+]div
+[h4 id=ClosingComments 
+	" Closing Comments
+	$LF
+]h4
+[div class=p 
+	"And that was the fourth iteration of Vampire Killer.
+	$LF
+	"I am quite happy with some of the new strategies I found, but I have to admit that the stopwatch glitch seriously dampens entertainment in a lot of places.
+	$LF
+	"As mentioned earlier, the stopwatch glitch basically creates two radically different versions of the run.
+	$LF
+	"However, I am against creating a separate branch for this movie, as you still go through the same levels in largely the same way as before.
+	$LF
+	"The previous publication is at this point also severely outdated now and should be obsoleted.
+	$LF
+	"I also don't have any new findings that would've been unique to the non-stopwatch glitch route, which means a new regular run would be largely unchanged to before, save for what you can see in this TAS.
+	$LF
+]div
+[div class=p 
+	"Despite this, there's still a bunch of loose ends that are worth investigating.
+	$LF
+	"I do not think this game is maxed out by a long shot.
+	$LF
+	"The stopwatch glitch saves "only" 13 seconds, so any new tech that would be exclusive to the regular route could put that back into the spotlight again.
+	$LF
+	"If you are interested in looking at this game, here is some potential areas that might turn out fruitful:
+	$LF
+]div
+[ul 
+	[li 
+		" General route and strategy improvements. E.g., you might possibly grab a shield in Stage 17 to block Dracula's fireballs, which could allow you to finish his first phase with only one stopwatch usage. I didn't try this out, but it might be worthwhile.
+		$LF
+	]li
+	[li 
+		" Find a faster way to activate the stair glitch
+		$LF
+	]li
+	[li 
+		" Find a way to carry a stair glitch through screen transitions
+		$LF
+	]li
+	[li 
+		" Find a shortcut to the door in Stage 8 while time is frozen
+		$LF
+	]li
+	[li 
+		" Find a shortcut to the key in Stage 10
+		$LF
+	]li
+	[li 
+		" Find a way to carry items through level changes
+		$LF
+	]li
+]ul
+[div class=p 
+	"Furthermore, if you try hard enough, you might still be able to save a few frames from better lag and optimization in various places. 
+	$LF
+	"As mentioned above, I also lose 6 frames from having to grab an extra big heart.
+	$LF
+	"I should've picked up more small hearts to max out my heart count before getting to the merchant in Stage 13, which would've allowed me to avoid this time loss.
+	$LF
+]div
+[div class=p 
+	"Still, I hope that you enjoy watching the run.
+	$LF
+	"It was unexpectedly enjoyable and energizing to make, and made me rethink if I am really as "retired" from this hobby as I thought I was.
+	$LF
+	"Special thanks naturally go out once again to the openMSX crew, in particular Quibus, Vampier and wouterv for answering my (sometimes dumb) questions.
+	$LF
+	"Their work on openMSX has been phenomenal.
+	$LF
+	"The emulator now features a GUI that made working with it a lot easier.
+	$LF
+	"I would also like to thank Burb and AgentWyvern for their findings on this game and their support.
+	$LF
+	"They did a huge part to (re-)vitalize the Vampire Killer speedrunning scene, and without them, I probably wouldn't have been making this run.
+	$LF
+	"I also cross-referenced their routes heavily while making this run to make sure I was on the right track.
+	$LF
+	"Another huge shoutout goes to 
+	[a href=http://msxsolutions.msxblue.com/ rel=noopener external nofollow 
+		"msxsolutions
+	]a
+	", who's 
+	[a href=http://msxsolutions.msxblue.com/vkiller.html rel=noopener external nofollow 
+		"map of the game
+	]a
+	" I've referenced for decades now for routing.
+	$LF
+	"Finally, thank you for making it this far, and, as usual, if you have any questions, I'll be happy to answer.
+	$LF
+]div
+[div class=p 
+	"-scrm
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Claiming for judging.  Basing judgement off encode and confirmed sync.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Accepting as an improvement to 
+	(__wikiLink|href=/2444M|implicitdisplaytext=2444M)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

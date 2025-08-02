@@ -1,0 +1,1192 @@
+14
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"On the 22nd June 2020, in the thread for Kaan's TAS 
+	(__wikiLink|displaytext=this was said|href=/Forum/Posts/496489)
+	":
+	$LF
+]div
+[figure 
+	[figcaption class=author 
+		"Quoting McBobX
+	]figcaption
+	[div class=p 
+		"Imagine another TAS improving this one by a lot of time, haha!!! Good job though!!
+		$LF
+	]div
+]figure
+[div class=p 
+	"Well, imagine no more.
+	$LF
+]div
+[div class=p 
+	"Sonic 3 & Knuckles has been able to skip Acts for many years. Now thanks to a series of new discoveries along with existing knowledge we are now able to entirely skip 3 of the Zones, saving over 6 minutes (~21,853 frames) compared to the previous TAS. The main new star of this TAS is the "break of the lock-on technology" that defines Sonic 3 & Knuckles. We do this by exploiting buffer overflow errors in Angel Island 2 and Hydrocity 2 that combined let us temporarily trick the game into thinking it is Sonic & Knuckles without changing or adjusting cartridges. The game will revert to being Sonic 3 & Knuckles again after a soft reset or power cycle, so we exploit the fact that a game over doesn't recheck the lock-on status, allowing us to skip the remaining stages in the Sonic 3 half.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=MovieObjectives 
+	" Movie objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Aims for fastest real-time ignoring time bonuses
+		$LF
+	]li
+	[li 
+		" Retain inputs from 
+		(__wikiLink|displaytext=the previous TAS|href=/6655S)
+		" where possible.
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Abuses deaths to save time
+		$LF
+	]li
+	[li 
+		" Abuses a Game over to save time
+		$LF
+	]li
+	[li 
+		" Abuses programming errors and glitches
+		$LF
+	]li
+	[li 
+		" Manipulates luck and enemy positions
+		$LF
+	]li
+	[li 
+		" Corrupts Memory
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=TermsUsed 
+	" Terms used
+	$LF
+]h3
+[h1 
+	" Timing - RTA-TB
+	$LF
+]h1
+[div class=p 
+	"RTA-TB (RTA Minus Time Bonuses) is the timing method used for Sonic 3 & Knuckles single segment speedruns. It is timed from file selection up until the fade out, and the timer pauses for any frames where the time bonus is counting down. For this TAS, we use this same timing method. See the Differences to existing TAS section for more information.
+	$LF
+]div
+[div class=p 
+	"Using RTA-TB timing this run is: 20:54
+	[small 
+		".449
+	]small
+	$LF
+]div
+[h1 
+	" Angel Island 2.2 (AI2.2 for short)
+	$LF
+]h1
+[div class=p 
+	"We use this to refer to the partial Angel Island 2 stage that we play after the death at the end of the first run-through of Angel Island 2.
+	$LF
+]div
+[h1 
+	" O Zone
+	$LF
+]h1
+[div class=p 
+	"Affectionately called O Zone by the RTA community (due to the title card that appears after the Hydrocity 2 boss), is a strat where by drowning to during the score screen during the Hydrocity Act 1 boss, will cause the game to think Act 2 is Act 1, so after completing Act 2, it will show the title card for Act 2, but due to the geyser the graphics get messed up.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=EmulatorNotes 
+	" Emulator Notes
+	$LF
+]h3
+[div class=p 
+	"Bizhawk/GPGX is required for precisely 1 frame - a soft reset (which isn't TASable in Gens) to prevent the buffer overflow in Angel Island 2.2 from overwriting the checksum present at the end of memory, which if changed causes the game to hard reset.
+	$LF
+]div
+[div class=p 
+	"The gmv from Kaan's TAS was converted to BizHawk and used as a base, so a lot of his TAS still remains here. I think this also causes the "Warning: Movie hash does not match the ROM" message.
+	$LF
+]div
+[div class=p 
+	"GPGX loses an estimated 20-30 frames from the switch due to more accuracy with how lag frames are handled (Typically 1 per zone and 1 per death). Due to the Sky Sanctuary boss RNG being governed by the power on frame timer, this means Kaan's TAS was only adapted up to that point, so we don't have an exact figure on frames lost due to porting.
+	$LF
+]div
+[div class=p 
+	"Emulators and Tools used:
+	$LF
+]div
+[ul 
+	[li 
+		" Bizhawk 2.9.1.
+		$LF
+	]li
+	[li 
+		" Gens ReRecording 11b + TAS Tools.
+		$LF
+	]li
+	[li 
+		" Minerva (Chrezm's overlay and scripting framework that works in both Bizhawk and Gens).
+		$LF
+	]li
+	[li 
+		" Basic Bot + a custom Minerva script to stop emulation once a good crash in AI2.2 had been found.
+		$LF
+	]li
+	[li 
+		" A custom script I wrote to convert inputs from TAStudio back to Gens so we could use camhack to diagnose issues with level wraps, etc.
+		$LF
+	]li
+	[li 
+		" With jumping back and forth between emulators (and ROMs - Mushroom Hill was originally TAS'd on the Sonic & Knuckles ROM), re-records will likely be inaccurate. Basic Bot may have thrown more into the mix than was used (e.g. left the bot running for 8 hours with no results for the crash and sticking to the existing inputs).
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=GameImposedRestrictions 
+	" Game imposed restrictions
+	$LF
+]h3
+[div class=p 
+	"A few things may seem sub-optimal but are required to be done in a certain way to have this set-up work.
+	$LF
+]div
+[ul 
+	[li 
+		" We need to reach the end of Angel Island 2 with the Score Tally countdown occurring for the Save File to be updated to Hydrocity, allowing us to soft reset in AI2.2 to progress.
+		$LF
+	]li
+	[li 
+		" For us to be able to do "bridge skip" and die at the end of AI2, we need to complete the whole of Angel Island without dying, nor enter a bonus or special stage at any point in Angel Island.
+		$LF
+	]li
+	[li 
+		" For the AI2.2 crash to happen, we need to get rejected in the Tunnel at the end of AI2, and then hit the checkpoint so bad values get saved to RAM by the checkpoint, hitting the checkpoint first will cause the level to be as normal.
+		$LF
+	]li
+	[li 
+		" To get the game to think Hydrocity 2 is Hydrocity 1, we have to complete Hydrocity 1 without hitting any checkpoints and we need to die during the score tally - See level specific notes for more information.
+		$LF
+	]li
+	[li 
+		" We need to enter and exit a blue sphere stage at some point between the start of AI2.2 and the end of HC2 so the flags in memory for it are set. HC1 is best placed for this.
+		$LF
+	]li
+	[li 
+		" Once the game thinks Sonic 3 is no longer locked on, a game over is required, soft resetting at any point will cause the game to re-check for whether Sonic 3 is locked on or not. As a result, we deliberately avoid hitting any 1-up monitors and we also take intentional deaths whose sole purpose is to decrease the lives counter (2 in Hydrocity 2, 2 in Marble Garden 1). The number of lives is saved to SRAM only once a zone is completed, so even though dying in AI2.2 might be quicker, it won't update the amount of lives going into Hydrocity as we soft reset before making it to that save point a second time.
+		$LF
+	]li
+	[li 
+		" Also once the game thinks Sonic 3 is no longer locked on, (regardless of game over or not), it will prevent the save file from being updated further, so we cannot soft reset to skip the Mushroom Hill, Flying Battery or Sky Sanctuary cutscenes.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=DifferencesToExistingTas 
+	" Differences to existing TAS
+	$LF
+]h3
+[h1 
+	" Timing
+	$LF
+]h1
+[div class=p 
+	"In Game Time has a few issues - time after the last hits on the bosses aren't counted. This means that any time spent in that period of time doing any actions that may be meaningful for the TAS would not be counted. For example, getting a shield in Act 1 or hitting the capsule in Act 2 doesn't count towards the total time.  The Final Escape sequence also doesn't have the in-game timer running.  
+	$LF
+]div
+[div class=p 
+	"Real Time also has one massive issue - the time bonuses at the end of an act. At the end of an act, you are awarded a time bonus depending on how fast you finish a stage, the faster you finish it the more points you get, and those points count down at a rate of 100 points every frame. These bonuses can be large enough that occasionally, it may be faster to wait to clear an act at a moment where the awarded time bonuses would be smaller. As an example, finishing a stage with an in game time of 
+	[code 
+		"01:29::59
+	]code
+	" will give 
+	[code 
+		"10,000
+	]code
+	" in time bonuses, which would take 
+	[code 
+		"100
+	]code
+	" frames to count down; whereas finishing that same stage one frame later at 
+	[code 
+		"01:30::00
+	]code
+	" will give 
+	[code 
+		"5,000
+	]code
+	" in time bonuses, which would take only 
+	[code 
+		"50
+	]code
+	" frames to count down, netting an apparent gain of 
+	[code 
+		"100-(50+1)=49
+	]code
+	" frames. Since deliberately slowing down for the sole purpose of minimizing a time bonus seems antithetical to a speedrun, we do not use Real Time either. In this TAS the only flat Real Time strategy would have been in Death Egg 1, where allowing the time to tick over to 1:00 would yield a 10K time bonus instead of a 50K time bonus. 
+	$LF
+]div
+[div class=p 
+	"RTA-TB combines the best of both worlds by considering not only all of the in game timers without the penalties for finishing too fast, but also counting all of the time spent outside stages as well.  This means  we can still aim for the fastest stage time, but we can opt for strategies that will save Real Time when the IGT isn't counting. We make use of this change specifically in Angel Island 2, and Lava Reef 1, where the existing TAS has to wait out for something to happen before proceeding.
+	$LF
+]div
+[h1 
+	" Pre game
+	$LF
+]h1
+[div class=p 
+	"Using a Save File is necessary, which conveniently saves us 13 frames.
+	$LF
+]div
+[h1 
+	"Angel Island 1
+	$LF
+]h1
+[div class=p 
+	"Mostly identical. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:10
+	]b
+	" We have to take the normal path here, as the original TAS breaks a life monitor, which will waste time losing it later. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:12
+	]b
+	" we need to delay progression for about 13 frames here, otherwise the optimal crash found doesn't happen in Angel Island 2.2.  We also need to get Y and X subpixels to match the original TAS so the rest of the stage and Angel Island 2 can play out the same.
+	$LF
+]div
+[h1 
+	" Angel Island 2
+	$LF
+]h1
+[div class=p 
+	"Identical up until near the last checkpoint where we lose time to set up for the crash. We also keep the lightning shield for hitting the capsule as this is faster than the fire shield waiting for the capsule saving 276 frames.
+	$LF
+]div
+[h1 
+	" Angel Island 2.2
+	$LF
+]h1
+[div class=p 
+	"The optimal crash here was found by us using a bot with random inputs after the spindash just before the crash, I've tidied up the inputs to only those required, so it looks cleaner.
+	$LF
+]div
+[h1 
+	" Hydrocity 1
+	$LF
+]h1
+[div class=p 
+	"Mostly identical. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:27
+	]b
+	" We jump over the extra life to avoid an additional death (250+ frame saving).
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:32
+	]b
+	" Need to divert to enter a blue spheres stage to fill in a portion of the memory.
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:38
+	]b
+	" Drowning is on a timer from entering the water, so we can't do anything to speed up this section, so we mess around with the boss and the signpost whilst that timer counts down.
+	$LF
+]div
+[h1 
+	" Hydrocity 2
+	$LF
+]h1
+[div class=p 
+	"This is the best place to get us down to 1 life, so we have a small diversion to do so, and then we re-sync up with the existing TAS for the rest of the stage.
+	$LF
+]div
+[h1 
+	" Marble Garden 1
+	$LF
+]h1
+[div class=p 
+	"Hydro 2's Time Bonus gives us an extra life that we need to lose, and then repeat to game over. Avoiding rings here is the fastest way to die.
+	$LF
+]div
+[h1 
+	" Carnival Night and Ice Cap
+	$LF
+]h1
+[div class=p 
+	"It was nice knowing you?
+	$LF
+]div
+[h1 
+	" Launch Base
+	$LF
+]h1
+[div class=p 
+	"It's worth noting that switching to Bizhawk this stage would have changed a lot due to being able to entirely skip Act 2 and its cutscene by using a soft reset to enter Mushroom Hill.
+	$LF
+]div
+[h1 
+	" Mushroom Hill 1
+	$LF
+]h1
+[div class=p 
+	"Now we're using Sonic and Knuckles' Mushroom Hill 1 so the level wrap isn't possible (Left boundary is set further in the level). eandis replaces the Bubble Shield shenanigans from Carnival Night 2 with what you see here, picking up the lightning shield on the way so the boss can be zero-cycled, making the stage a couple of seconds faster than its S3K's counterpart.
+	$LF
+]div
+[h1 
+	" Mushroom Hill 2
+	$LF
+]h1
+[div class=p 
+	"As we have the lightning shield, the routing here is slightly different, and we need to lose the shield before the boss. However, we still managed to save 8 frames over the existing TAS.
+	$LF
+]div
+[h1 
+	" Flying Battery 1
+	$LF
+]h1
+[div class=p 
+	"Two new things here, A new strat was discovered for Sonic to do the same level wrap that Knuckles does, saving time. I also investigated the 2-frame save that the 100% TAS contained, and found that a further 42 frames could be saved by deferring more hits from the boss.
+	$LF
+]div
+[h1 
+	" Flying Battery 2
+	$LF
+]h1
+[div class=p 
+	"Y-Subpixels were needed to be manipulated in Act 1 to resync this, but happy to say this is identical.
+	$LF
+]div
+[h1 
+	" Sandopolis 1 
+	$LF
+]h1
+[div class=p 
+	"Identical
+	$LF
+]div
+[h1 
+	" Sandopolis 2
+	$LF
+]h1
+[div class=p 
+	"Identical
+	$LF
+]div
+[h1 
+	" Lava Reef 1
+	$LF
+]h1
+[div class=p 
+	[b 
+		"0:05
+	]b
+	" A new floor clip was discovered by cubbycubbycat, which eandis found a consistent set up for.
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:12
+	]b
+	" Minor wait here is required for the right screen lock to get further through the level, otherwise when we wrap we end up part way through the level rather than at the boss.
+	$LF
+]div
+[div class=p 
+	[b 
+		"0:46
+	]b
+	" New boss floor clip found by eandis means the monitor clip isn't needed, doesn't save any IGT time, but saves 86 frames from not having to have the monitor bounce and us clip underneath.
+	$LF
+]div
+[h1 
+	" Lava Reef 2
+	$LF
+]h1
+[div class=p 
+	"Unfortunately, due to the lack of fire shield, we eat about 75 of the 86 frames saved from the boss clip, giving us an overall saving of 11 frames.
+	$LF
+]div
+[h1 
+	" Hidden Palace
+	$LF
+]h1
+[div class=p 
+	"Identical
+	$LF
+]div
+[h1 
+	" Sky Sanctuary
+	$LF
+]h1
+[div class=p 
+	"Identical - except we change which boss pattern is used and correct for that, we also don't need to pause anymore for RedEye's platforms.
+	$LF
+]div
+[h1 
+	" Death Egg 1
+	$LF
+]h1
+[div class=p 
+	"Identical - except for Red Eye's platforms had to be redone, this is on par with Kaan's so no different timewise.
+	$LF
+]div
+[h1 
+	" Death Egg 2
+	$LF
+]h1
+[div class=p 
+	"Identical - except for UwUBall (first boss of the level, thank Argick for popularising this name for it) needed some adjustments to work.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=GlitchSpecificInformation 
+	" Glitch Specific information
+	$LF
+]h3
+[h2 id=BridgeSkip 
+	" Bridge Skip
+	$LF
+]h2
+[div class=p 
+	"Bridge Skip is not entirely new, but for reference, it is Sonic (Solo or with Tails) exclusive due to the cutscene at the start of his campaign. However, it is now used for an entirely different purpose: get a deliberate death after the savefile is updated. We need to die after the Act 2 tally is completed so that the savefile is updated to Hydrocity 1, thus allowing us to make progress in the TAS once we soft reset. We ultimately use this death to execute the Angel Island 2.2 crash, described later. An independently prepared write-up explaining Bridge Skip (done in the context of aiding single segment speedrunners achieve the memory manipulation needed to follow the TAS at the time) is available 
+	[a href=https://pastebin.com/kFtuzMSE rel=noopener external nofollow 
+		"here
+	]a
+	" for reference.
+	$LF
+]div
+[h2 id=HowWeCanBreakLockOn 
+	" How we can break "Lock-on"
+	$LF
+]h2
+[div class=p 
+	"The way we trick the game Sonic 3 & Knuckles into thinking it is the game Sonic & Knuckles is by taking the way the game internally decides whether it is locked on to Sonic 3 or not, which originally is set up by game code to think it is locked on to Sonic 3, and then exploiting that to trick the game into temporarily thinking it is not locked on to Sonic 3.
+	$LF
+]div
+[div class=p 
+	"On Sonic 3 & Knuckles startup, Sonic & Knuckles code is run, and part of it is what is referred to the "lock-on determination routine". This routine attempts to read the contents of ROM that would exist if a cartridge were to be locked on (in particular it is trying to read the header of a locked-on ROM). If it is convinced that such a locked-on ROM exists and that it seems to be a Sonic 3 cartridge, Sonic & Knuckles will be convinced it is running alongside Sonic 3, so it must behave as if it were Sonic 3 & Knuckles and thus sets the value at address 
+	[code 
+		"$FFAE-FFAF
+	]code
+	" to 
+	[code 
+		"0
+	]code
+	". If it is convinced that there is no such locked-on ROM, Sonic & Knuckles will be convinced it is running on its own and thus sets the value to 
+	[code 
+		"1
+	]code
+	" instead. The game will then refer to this value and this value only in order to make any decisions regarding whether to behave using a special Sonic 3 & Knuckles rule or a Sonic & Knuckles rule. In particular, it will assume that, if the value at that address is 
+	[code 
+		"0
+	]code
+	", it must mean that previously it had decided that a Sonic 3 cartridge was locked on; and if it is anything other than that, then it must mean that it previously decided that there is no Sonic 3 cartridge locked on. Crucially, this decision is made not by acting differently if the value is 
+	[code 
+		"0
+	]code
+	" or 
+	[code 
+		"1
+	]code
+	", but whether it is 
+	[code 
+		"0
+	]code
+	" or anything other than 
+	[code 
+		"0
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"A few examples of such acting differently decisions include:
+	$LF
+]div
+[ul 
+	[li 
+		" On an act start, when showing the title card, whether to show a "Sonic 3 & Knuckles" text or a "Sonic & Knuckles" text on the red banner that appears.
+		$LF
+	]li
+	[li 
+		" Whether to attempt to save to SRAM or not.
+		$LF
+	]li
+	[li 
+		" Whether super emeralds are a thing or not.
+		$LF
+	]li
+	[li 
+		" Whether you can access the Sonic 3 stages, special stages and bonus stages; or not.
+		$LF
+	]li
+	[li 
+		" Critically for this TAS, whether to display the Sonic 3 & Knuckles title screen or the Sonic & Knuckles title screen.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The TAS will start with Sonic 3 & Knuckles behaving as normal, setting 
+	[code 
+		"$FFAE-FFAF
+	]code
+	" to 
+	[code 
+		"0
+	]code
+	" and thus thinking it is Sonic & Knuckles locked on to Sonic 3. The buffer overflow from Angel Island 2.2 - described in the next section - gets us most of the way there by writing garbage to 
+	[code 
+		"$FF7E-$FFAB
+	]code
+	".  Entering a blue sphere stage and causing the buffer overflow in Hydrocity - described in the section after - gets us the rest of the way there and fills in 
+	[code 
+		"$FFAE-FFAF
+	]code
+	" with some non-zero value (in the TAS that is 
+	[code 
+		"beda
+	]code
+	"). 
+	[b 
+		"As that value is not 
+		[code 
+			"0
+		]code
+		", at any further point where the game needs to act differently depending on whether it is locked on to Sonic 3 or not, the game will think it is not and thus think it is Sonic & Knuckles.
+	]b
+	$LF
+]div
+[div class=p 
+	"That means that this point, if we can make it to the title screen, the Sonic & Knuckles title screen will appear. Since we cannot soft reset (as that reruns the lock-on determination routine), we use the next fastest known way of making it to a title screen, which is getting a game over. Getting a game over, while at first glance seemingly restarting the game, does not actually rerun that routine. Therefore, once the game needs to decide it shows a Sonic 3 & Knuckles title screen or a Sonic & Knuckles title screen, since the value at 
+	[code 
+		"FFAE-FFAF
+	]code
+	" is non-zero (
+	[code 
+		"beda
+	]code
+	" in the TAS), it will think it is Sonic & Knuckles and thus show that title screen. 
+	$LF
+]div
+[h2 id=AngelIsland22BufferOverflowAndCrash 
+	" The Angel Island 2.2 buffer overflow and "crash"
+	$LF
+]h2
+[div class=p 
+	"This abuses a bug in the Object Load Manager, the bug itself (but not this particular instance of it) is explained 
+	[a href=https://www.youtube.com/watch?v=_K6FCOzECXU rel=noopener external nofollow 
+		"in this video
+	]a
+	". We cause the OLM to write garbage to memory by getting the horizontal camera coordinates to underflow, which eventually causes the game to attempt to garbage load as many objects as possible onto RAM. We use this overflowing behavior in a specific way that allows us to set up memory properly for the S&K corruption, as generally this overwriting just causes a hard reset.
+	$LF
+]div
+[div class=p 
+	"For some stages including Angel Island 2, Sonic 3 & Knuckles uses an event manager internally called screen resize routines. This event manager is used to determine any actions that rely on the camera being at some specific set of coordinates. For example, in Angel Island 1, once the camera is at a specific set of coordinates, these are the first few events that trigger as you progress through the level:
+	$LF
+]div
+[ul 
+	[li 
+		" load the Knuckles cutscene (emerald theft),
+		$LF
+	]li
+	[li 
+		" lower the screen lock once you progress through the level a bit, 
+		$LF
+	]li
+	[li 
+		" load the first AIZ1 miniboss, etc. 
+		$LF
+	]li
+]ul
+[div class=p 
+	"This manager uses a routine counter to decide what the next event to trigger is if the camera approaches some given coordinates. Once the game triggers an event, it will then increase the routine counter by 2 so that it will now wait to see when the next event is ready to trigger. Crucially, this routine counter generally does not go backwards (so events don't happen twice), and it is a value that is saved whenever you hit a checkpoint and loaded once you respawn, which makes you able to view events that may have happened after you hit the checkpoint but before you died.
+	$LF
+]div
+[div class=p 
+	"The setup in this TAS relies on getting "rejected" in the tube at the end of Angel Island 2 (that is, "randomly" start going to the left), at a particular point and then and only then hitting the checkpoint before the boss. That particular point is after screen resize event 8 happens, which triggers when the camera reaches x-coordinate 
+	[code 
+		"0x3C00
+	]code
+	". Event 8 is used to load the art for the airship that will be played in the cutscene coming up immediately after, but also to set up the value at address 
+	[code 
+		"$EED4
+	]code
+	" to 
+	[code 
+		"0x4440
+	]code
+	". This value is used for the airship cutscene as follows: once the camera exceeds the value at 
+	[code 
+		"$EED4
+	]code
+	", the game will subtract 
+	[code 
+		"0x200
+	]code
+	" from the position of the camera and all objects on screen. This is done to give the illusion of a never ending field for the airship cutscene. 
+	$LF
+]div
+[div class=p 
+	"This value at 
+	[code 
+		"$EED4
+	]code
+	" is only set to that value when event 8 happens, and it is cleared once the stage restarts. As a result, for it to be set properly once you die, it must be the case that the event 8 happens. However, given that we touched the checkpoint after triggering that event, the game saves that we triggered it so it will not fire again; in fact, it will now be waiting to trigger the next event, 8+2=10.
+	$LF
+]div
+[div class=p 
+	"Therefore, once we approach the airship cutscene again, the value at 
+	[code 
+		"$EED4
+	]code
+	" will not be 
+	[code 
+		"0x4440
+	]code
+	" but instead just 
+	[code 
+		"0x0
+	]code
+	", which will continuously be higher than the camera x-coordinate at the airship cutscene. As a result, the game will continuously attempt to subtract 
+	[code 
+		"0x200
+	]code
+	" from the camera x-coordinate until it underflows. This makes the OLM start writing garbage to the ring status table and beyond, which if left unchecked eventually causes the checksum (a string right at the end of RAM) to be overwritten, and briefly afterwards invalid 68K code to be executed. This in turn causes a hard reset that wipes the entire memory clean due to the broken checksum string.
+	$LF
+]div
+[div class=p 
+	"The tricky part for us is to get the memory overwritten in such a way that we are able to soft reset at an instant such that memory is setup for the O Zone step described in the next section, but before the checksum is overwritten. Whilst we don't completely understand how to manipulate how the memory gets overwritten, we believe there are two possibly related components to this:
+	$LF
+]div
+[ul 
+	[li 
+		" A sub-frame component, or the amount of code run in a particular frame - so sometimes the checksum will get overwritten on the same frame as the areas in memory that we are interested in getting overwritten, 
+		$LF
+	]li
+	[li 
+		" An input component - so slight variations in input leading to the crash will lead to the checksum being overwritten.
+		$LF
+	]li
+]ul
+[h2 id=OZoneBufferOverflow 
+	" O Zone Buffer Overflow
+	$LF
+]h2
+[div class=p 
+	"In order to be able to do the level wrap in Hydrocity Act 2, it must be the case that you are playing from a fully reloaded act and not straight from an Act 1 transition. This is because there is a level wrap strategy that requires the left stage screen lock to be 
+	[code 
+		"0
+	]code
+	" in order to work. That screen lock is set to 
+	[code 
+		"0
+	]code
+	" from a fully reloaded act, but it is set to some non-zero value otherwise. In order to get a fully reloaded act, it is enough to die as soon as the game is comfortable enough that it is in Act 2. Single segment runners historically achieved this after a transition from Act 1 by getting a quick death at the start of the big wall section. However, in order to take advantage of the biggest time save possible, for the Act 1 boss fight, they had to get the majority of hits off screen, which is very hard to achieve consistently. 
+	$LF
+]div
+[div class=p 
+	"O Zone originally was a strategy designed for single segment runners that involved doing the following instead: drown during a very specific period of the Act 1-2 transition period. To do that, you stay in the water the entirety of the Act 1 boss fight, juggle the falling sign post a few times, and let the score tally appear in a small window of time where the end of stage tally appears but before your air is refreshed. As the tally started before you drowned, the game is now comfortable enough to think it is in Act 2, even if not all addresses updated in a standard transition from one act to the other are set properly (most notably the visible act number). This effectively achieved the same goal of starting Act 2 from a fully reloaded act and allowed them to go for the level wrap strategy immediately instead of having to take an extra death. This turned out to be generally faster for the average case of a single segment runner, but still slower than getting all of the Act 1 hits offscreeen and then dying in some other way.
+	$LF
+]div
+[div class=p 
+	"However, it turns out this strategy had a side effect. Once the tally for Hydrocity Act 2 finishes, a small cutscene involving a geyser starts, which is used to transition to the next zone Marble Garden. However, because of the unusual death at the end of Act 1, the game will also attempt to show an Act 2 title card once this cutscene starts. Both the geyser and title cards have art that need to be processed by the game using the KosinskiM decompression and DMA queue buffer. This buffer at 
+	[code 
+		"$FF64-$FF7B
+	]code
+	" can hold up to 4 concurrent pieces, each taking one buffer slot of 6 bytes in length. However, the geyser when loaded takes up 1 piece and the title card takes 4 pieces. The game is not able to concurrently deal with 1+4=5 pieces in the buffer, leading to pieces being written past the buffer. In particular, it will write pieces to the next section of 6 bytes of memory that looks like a buffer slot and whose first 4 bytes are clear. For example, it will first check if 
+	[code 
+		"$FF7C-FF7F
+	]code
+	" is empty, if so it will write a piece to 
+	[code 
+		"$FF7C-FF81
+	]code
+	"; otherwise it will check if the next "buffer slot" at 
+	[code 
+		"$FF82-FF85
+	]code
+	" is empty, if so it will write a piece to 
+	[code 
+		"$FF82-FF87
+	]code
+	"; otherwise it will check the next one and so and so on until it finds an appropriate section of memory. Critically, the game code does not, as part of the KosinskiM decompression and DMA queue buffer code, clear pieces that were written outside of it; so if nothing else in memory touches what was written outside that buffer, it will remain there.
+	$LF
+]div
+[div class=p 
+	"This was discovered when single segment speedrunner Teeejj was doing Knuckles runs using the O Zone strat, and noticed that occasionally the game would have "Competition" selected on the main menu screen. It took us a while to figure out that this was never caused on the first attempt, but subsequent attempts done that also did O Zone without power cycling in between would cause the title menu to be changed, because its address 
+	[code 
+		"$FF86
+	]code
+	" looked to the game as part of a buffer slot 
+	[code 
+		"$FF82-FF87
+	]code
+	". It was then discovered that stacking multiple O Zones without power cycling in between would continue to cause more and more data to be overwritten in memory. One such address that could eventually be overwritten is 
+	[code 
+		"$FFAC-FFB1
+	]code
+	", which contains the range 
+	[code 
+		"$FFAE-FFAF
+	]code
+	", which as described before is what the game internally uses to decide whether it is locked on to Sonic 3 or not. 
+	$LF
+]div
+[div class=p 
+	"The Angel Island 2.2 buffer overflow crash fills in the memory on the way from the address KosinskiM decompression and DMA queue buffer up to the address of the locked-on flag. As a result, it is mostly sufficient to execute an O Zone once for the purpose of filling in the locked-on flag address with garbage, and thus making the game believe it is Sonic & Knuckles. Skipping the zones is still possible just by using O Zone by itself - do the glitch, reset at the Marble Garden title card, and repeat 5 more times.  This does mean that other characters can skip from Marble Garden to Mushroom Hill, but it would probably make for a less entertaining run.
+	$LF
+]div
+[div class=p 
+	"There are ways of reducing the amount of O Zones required that aren't performed in this TAS due to the Angel Island 2.2 crash filling in the memory as needed. For example:
+	$LF
+]div
+[div class=p 
+	"1. if, in competition mode, you select the "No Monitor" option, enter the Grand prix menu, then go back twice to the main title screen menu.
+	$LF
+]div
+[div class=p 
+	"2. when the title card at the start of Hydro 2 starts fading to reveal the stage, you hold some 2P input.
+	$LF
+]div
+[h2 id=SpecialStageDetour 
+	" Special Stage detour
+	$LF
+]h2
+[div class=p 
+	"We need to enter a Special Stage in Hydrocity Act 1. This is because part of the memory that would look like a buffer slot on the way between 
+	[code 
+		"$FF7E
+	]code
+	" and 
+	[code 
+		"$FFAC
+	]code
+	" is actively written to when entering a savefile, That is the range 
+	[code 
+		"$FF94-FF99
+	]code
+	". 
+	[code 
+		"$FF94-$FF95
+	]code
+	" contains a partial list of special stage rings entered in the current zone, 
+	[code 
+		"$FF96
+	]code
+	" the shield you had when entering the last special stage ring, and 
+	[code 
+		"$FF97
+	]code
+	" a flag related to the respawn table used when reentering a stage from a special stage or a bonus stage. Even if the Angel Island 2.2 corruption would see these values overwritten with garbage, once you enter Hydrocity from the savefile, these values are all zeroed out following their intended meaning (e.g. 
+	[code 
+		"$FF92-$FF95
+	]code
+	" is cleared because we have not entered any special stage rings in Hydrocity yet). Since 
+	[code 
+		"$FF94-FF99
+	]code
+	" is also a slot that the O Zone buffer overflow would consider and it is currently all zeroes, if we take no further action, the buffer overflow would fill in 
+	[code 
+		"$FF94-FF99
+	]code
+	" instead of the expected 
+	[code 
+		"$FFAC-FFB1
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"As a result, we must find a way of setting any of the bytes in that range to something other than zero so that the O Zone overflow skips over this slot and goes on to write to 
+	[code 
+		"$FFAC-FFB1
+	]code
+	" instead. We found the quickest way of achieving this is entering and exiting the last Special Stage ring in Hydrocity Act 1, as that updates 
+	[code 
+		"$FF94-$FF95
+	]code
+	" to remember that we entered that Special Stage ring with some non-zero value. 
+	$LF
+]div
+[hr 
+]hr
+[h3 id=IgtReferenceTimes 
+	" IGT reference times
+	$LF
+]h3
+[div class=p 
+	"Whilst not our target, for comparison with IGT timings here are the end of act timings. All times are in m:ss::frame format.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Act
+			]th
+			[th 
+				"In Game Time
+			]th
+		]tr
+		[tr 
+			[td 
+				"Angel Island 1
+			]td
+			[td 
+				"0:43::07
+			]td
+		]tr
+		[tr 
+			[td 
+				"Angel Island 2
+			]td
+			[td 
+				"1:23::21
+			]td
+		]tr
+		[tr 
+			[td 
+				"Angel Island 2.2
+			]td
+			[td 
+				"0:06::16 (before the time in memory is overwritten)
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hydrocity 1
+			]td
+			[td 
+				"0:55::33
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hydrocity 2
+			]td
+			[td 
+				"0:22::08 (+0:06::43 in deaths)
+			]td
+		]tr
+		[tr 
+			[td 
+				"O Zone Act 2
+			]td
+			[td 
+				"0:02::46 - technically wouldn't be counted as IGT normally
+			]td
+		]tr
+		[tr 
+			[td 
+				"Marble Garden
+			]td
+			[td 
+				"0:20::06 in deaths
+			]td
+		]tr
+		[tr 
+			[td 
+				"Carnival Night 1
+			]td
+			[td 
+				"N/A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Carnival Night 2
+			]td
+			[td 
+				"N/A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ice Cap 1
+			]td
+			[td 
+				"N/A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ice Cap 2
+			]td
+			[td 
+				"N/A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Launch Base1
+			]td
+			[td 
+				"N/A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Launch Base2
+			]td
+			[td 
+				"N/A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mushroom Hill 1
+			]td
+			[td 
+				"0:31::17
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mushroom Hill 2
+			]td
+			[td 
+				"0:40::26
+			]td
+		]tr
+		[tr 
+			[td 
+				"Flying Battery 1
+			]td
+			[td 
+				"0:43::03
+			]td
+		]tr
+		[tr 
+			[td 
+				"Flying Battery 2
+			]td
+			[td 
+				"1:05::43
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sandopolis 1
+			]td
+			[td 
+				"1:04::51
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sandopolis 2
+			]td
+			[td 
+				"0:48::47
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lava Reef 1
+			]td
+			[td 
+				"0:46::14
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lava Reef 2
+			]td
+			[td 
+				"0:22::06
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hidden Palace
+			]td
+			[td 
+				"0:26::40
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sky Sanctuary
+			]td
+			[td 
+				"0:52::17
+			]td
+		]tr
+		[tr 
+			[td 
+				"Death Egg 1
+			]td
+			[td 
+				"0:58::56
+			]td
+		]tr
+		[tr 
+			[td 
+				"Death Egg 2
+			]td
+			[td 
+				"1:36::23 (+0:04::29 death)
+			]td
+		]tr
+		[tr 
+			[td 
+				"Total
+			]td
+			[td 
+				"14:02::10
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[ul 
+	[li 
+		" If we were able to fully understand the AI2.2 buffer overflow and not have to rely on a bot to find a viable corruption, it could be potentially faster, and we likely wouldn't need the short delay in AI1.
+		$LF
+	]li
+	[li 
+		" LR1 has 3 frames potential to save before the digger (removing the last right press frame on the stairs, 1 frame after and one once clipped into the floor).  However, this messes up the arms part of the boss.  It also might end up that Red Eye's RNG would eat into that saving as well.
+		$LF
+	]li
+	[li 
+		" LR2, if a method is found to do what the fire shield does during the wrap (clips into a wall, and allows a zip) we would be able to harness most of the saving from the boss floor clip in LR1..
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=CreditsSpecialThanks 
+	" Credits/Special Thanks
+	$LF
+]h3
+[div class=p 
+	[b 
+		"kaan55
+	]b
+	" - We tried keeping as much of kaan's TAS here as possible with only changing where it was necessary, so the vast majority of this is made up of the work he did on the previous TAS.
+	$LF
+]div
+[div class=p 
+	[b 
+		"eandis
+	]b
+	" - Mushroom Hill 1 is all his work, the 2nd phase of the Lava Reef 1 boss is adapted from his inputs. Huge help with getting Hydrocity 2 sorted and synced up. And Originally discovered the Flying Battery 1 wrap along with the boss floor clip in Lava Reef 1.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chrezm
+	]b
+	" - Aside from providing the inputs for the ringless strategy in Marble Garden, and general improvements, a lot (if not all) of the setup for this TAS to work wouldn't have been possible without Chrezm's knowledge and valuable input.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Ctrl
+	]b
+	" - gave the (in hindsight obvious) idea to avoid the 1up boxes in Angel Island and Hydrocity, which whilst it meant lots of stages desynced, it was worth it for the time save.
+	$LF
+]div
+[div class=p 
+	[b 
+		"The Classic Sonic Speedrunning Community
+	]b
+	" - You're awesome.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=SuggestedFramesForScreenshot 
+	" Suggested Frames for Screenshot
+	$LF
+]h3
+[div class=p 
+	"12209 (or any other frame around the crash)
+	$LF
+]div
+[div class=p 
+	"17732
+	$LF
+]div
+[div class=p 
+	"21441
+	$LF
+]div
+[div class=p 
+	"23043
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Replacing with the improvement by the author.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Well, I had a bit of a headache on this one. While I"m not knowledgeable about any Sonic games, I can certainly appreciate what I've seen.
+	$LF
+]div
+[div class=p 
+	"Here is what I've decided. The 
+	(__wikiLink|displaytext=previous submission|href=/4266M)
+	" attempts the same task of unlocking the gaming...so why not continue? While I was concerned at first, about the slow start, I finally caught the answer in the submission notes. If that's what it takes, then it lines up like other games I've seen...some sacrifice for the overall good. In this case, the ending time does beat the game and will now obsolete the aforementioned publication. Congratulations on the work!
+	$LF
+]div
+[div class=p 
+	"Accepting over 
+	(__wikiLink|href=/4266M|implicitdisplaytext=4266M)
+	". (I'm forced to select "Standard". Our senior staff will handle the rest, which should carry "Stars".)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

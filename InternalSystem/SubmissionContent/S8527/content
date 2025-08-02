@@ -1,0 +1,185 @@
+7
+[div class=p 
+	"In Meong, you are tasked with navigating a minefield that you can't actually see unless you sit still and wait for the mine tiles to flip over and shimmer. Except not all of them do it, and if you sit still for too long, you blow up. Screw this game.
+	$LF
+]div
+[div class=p 
+	"I did not find or create a map of the levels. Instead, I played by trial and error to find the perfect route, and this movie is the final result.    
+	$LF
+]div
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"The TAS strat is to mash up at 15 Hz (the game runs at 30 fps) and sprinkle in some left and right presses in between, like [up, wait, up, left, up, wait, up, wait...] As such, it is possible to dodge all obstacles without slowing down. However, certain tiles function as walls, so it's possible to press up and not go anywhere. It would be incredibly tedious to verify that this hasn't happened in my run by hand, so instead I wrote a 
+	[a class=intlink href=/UserFiles/Info/638273167943803772 
+		"script
+	]a
+	" to detect it by watching $0664. Instead of checking my run, I invite you to do a code review!
+	$LF
+]div
+[div class=p 
+	"Now, these $0664 values get a bit anomalous at the very end of each level. Somehow you need to crawl through the coordinate 06 twice... Seems like there was some sort of fencepost error and they had to nudge your position to fix it. This is the ultimate beginner entry-level reverse engineering task for kids, and Action 52 managed to make it a nightmare. I can't 
+	[em 
+		"imagine
+	]em
+	" what other horrors lurk within this code. But, by removing any up presses near these anomalies, we can confirm that they are all strictly necessary. I've included this value in the temp encode so you can see what I mean.
+	$LF
+]div
+[div class=p 
+	"My script proved to me that my paths are optimal. It also picked up on some autofire mishaps that lost 2 frames in levels 1 and 2. So this is just 4 frames faster than the beta I included in 
+	[a class=intlink href=/UserFiles/Info/638256808684726895 
+		"that one userfile
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Note that in levels 3 and 4, you can't press up right away because there is a mine directly above you.
+	$LF
+]div
+[h4 id=RamAddresses 
+	" RAM Addresses
+	$LF
+]h4
+[dl 
+	[dt 
+		" $0667
+	]dt
+	[dd 
+		" Facing direction. Interesting...  
+		$LF
+		[dt 
+			" $06D7
+		]dt
+		[dd 
+			" Screen tile value. Not quite useful to tell if we're constantly moving up.  
+			$LF
+			[dt 
+				" $06D5
+			]dt
+			[dd 
+				" World pixel value. Watching this tick down seems good enough.  
+				$LF
+				[dt 
+					" $0663
+				]dt
+				[dd 
+					" Tile X. Ranges from 2 to D. But if you're on the edge of the screen and try to move further, it'll increment to 1 or E without moving you...  
+					$LF
+					[dt 
+						" $0664
+					]dt
+					[dd 
+						" Screen number and Tile Y (use hexadecimal to make sense of this). Top of the level is screen 0, top of each page is y=0.  
+						$LF
+					]dd
+				]dd
+			]dd
+		]dd
+	]dd
+]dl
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"Shoutouts to LogansGamingRoom (aka the Action Gamemaster). We happened to be working on this game at the same time, and my route won out by exactly 5 seconds. Because this happened during the judging process, 
+	(__wikiLink|displaytext=his run|href=/8503S)
+	" was never published
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": I'm setting to "Delayed", pending a response to my last post.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": This has been one heck of a ride...starting back with the original submission from LogansGamingRoom. I figured this game had a definite solution, without any improvements...but 
+	[a class=intlink href=/Users/Profile/warmCabin 
+		"warmCabin
+	]a
+	" turned that around. To add even more shock to this, 
+	[a class=intlink href=/Users/Profile/OtakuTAS 
+		"OtakuTAS
+	]a
+	" comes along with improvements but unfortunately, the last improvement is going to have to be omitted from this submission for a couple of reasons.
+	$LF
+]div
+[div class=p 
+	"I've awaited a response from 
+	[a class=intlink href=/Users/Profile/warmCabin 
+		"warmCabin
+	]a
+	" but I haven't heard anything to date. I've checked a few site details and it appears that post was made 7 days ago. So I'm going to move on my judgement finally.
+	$LF
+]div
+[div class=p 
+	"First, thanks to 
+	[a class=intlink href=/Users/Profile/LoganGamingRoom 
+		"LoganGamingRoom
+	]a
+	" for the exposure on this game. After the first submission from LGR, I was convinced that this was a simple game and didn't have a better solution for a couple of reasons:
+	$LF
+]div
+[ul 
+	[li 
+		"Author created a TAS, based on a seemingly optimal solution from a community site; however, I can't refer back to it...since it was deleted from that submission. 
+		$LF
+	]li
+	[li 
+		"After reviewing the game myself, I was perplexed as some of the anomalies that were occurring. I chalk it up as just the same junk we see in the other 51 games. LOL
+		$LF
+	]li
+]ul
+[div class=p 
+	"Second, 
+	[a class=intlink href=/Users/Profile/warmCabin 
+		"warmCabin
+	]a
+	" takes a completely different approach and scripts out a method to determine even better optimization. Basically, this BOT found some things that are not obvious at all for us to explore. So I don't fault LGR at all on his efforts; however, warmCabin has shown us that it was necessary in order to get around the horrible coding that is hindering to manual efforts.
+	$LF
+]div
+[div class=p 
+	"Lastly, 
+	[a class=intlink href=/Users/Profile/OtakuTAS 
+		"OtakuTAS
+	]a
+	" jumps on the scene and talks of some improvements, but this is where I got confused. I first want to apologize for not understanding what was going on in the first place. The scenario was discussed that emulation could be the reason for some of the frame cuts discovered; however, I thought it was within the use of FCEUX. The improvements were uploaded, via the WIP area, but for bizhawk. Even then...Otaku's TAS was done on "Action 52 (USA) (Rev A) (Unl).nes", while 
+	[a class=intlink href=/Users/Profile/warmCabin 
+		"warmCabin
+	]a
+	" used "Action 52 (USA) (Unl).nes".  So  "Revision A" was the reason for all the frame cuts. Now that I understand what is going on...this is not really an improvement in game play, but just a loading difference.
+	$LF
+]div
+[div class=p 
+	"Turns out that these Action 52 games may have many horrible mechanics and coding details, but they have ended up being a fascinating venture in the world of TASing. 
+	$LF
+]div
+[div class=p 
+	"Accepting for publication.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

@@ -1,0 +1,195 @@
+4
+[h2 id=PhantasyStarIiiGenerationsOfDoom 
+	"Phantasy Star III: Generations of Doom
+	$LF
+]h2
+[div class=p 
+	"from the GameBoy Advance cartridge, "Phantasy Star Collection"
+	$LF
+]div
+[h4 id=CompletedIn11247401 
+	"Completed in 1:12'47"401
+	$LF
+]h4
+[div class=p 
+	"This is my run of the GBA port of Phantasy Star III. This version was chosen specifically because it has access to a glitch that crashes every other version of the game. This was discovered and explored by Jiseed back in 2017, and it led to a new speedrun category being made to take advantage of its unique benefits. To understand what is going on with the game itself, check out the Genesis run first: 
+	[a href=https://tasvideos.org/9326S rel=noopener external nofollow 
+		"here.
+	]a
+	" This run ends up following the exact same path as the original game, so to know why what's happening happens, read the submission text there.
+	$LF
+]div
+[h3 id=InventoryUnderflowGlitch 
+	"THE INVENTORY UNDERFLOW GLITCH
+	$LF
+]h3
+[div class=p 
+	"Empty out a character's inventory, and make sure the final item given or discarded is one that can be spent in battle, most easily a healing item like a Monomate or Dimate. Then, go into battle, and have that character use the first item in their empty inventory. The game forgets to prevent this from happening for some reason. That character's inventory is now glitched out.
+	$LF
+]div
+[div class=p 
+	"What happens is that there is a two-byte point in memory, one for each character, that keeps track of the number of items they are holding, multiplied by two. Each item in the inventory uses two bytes, so the doubled total makes sense. When a character's inventory is empty, that location reads 0000, and when the game uses that character's discarded item, it subtracts 2 from that index, bringing it to FFFE. Now the game thinks that character has 32,767 items in their inventory, and will happily dig into memory up to 32,767 two-byte units deep any time it is asked.
+	$LF
+]div
+[div class=p 
+	"From here, we can leave the battle and go into the menu to influence some parts of memory directly. Unfortunately, we've found no way to go ABOVE the inventory. The inventory for Rhys and his descendants start at memory location 00217C in the GBA's EWRAM, and we can manipulate anything from there down to 000000. Unfortunately, the only stuff down there that I can find is the rest of the characters' inventories, their Technique (magic) selection and the strengths of their spells, and some on-screen graphics and junk.
+	$LF
+]div
+[div class=p 
+	"So we can only do two things, really:
+	$LF
+]div
+[div class=p 
+	"1. Glitch out our spells. Misaligning the bytes for the spells can give us access to spells but with a strength of 0. This seems to underflow when used in battle, because the damage a glitched battle spell can do can be basically any random number from 1 to 32,768. Now you can't have all four spells glitched at the same time, usually only Tsu or Tsu and Gra, but that's fine because those are the ones we'd use anyway. Gra hits all enemies on the field, and this strategy is used on this run's second bossfight, our first run-in with King Cille, to defeat all 7 opponents in one blow, with glitched damage totals well into the thousands.
+	$LF
+]div
+[div class=p 
+	"2. Pull items out of nowhere into our usable inventory, whenever we want. Now, unfortunately, a reminder from the main run's submission text: The game's events don't care what's in your inventory. Key items do absolutely nothing. So glitching the Twins Ruby into your inventory does not give you access to the bridge between Landen and Aridia, for example. Glitching the five sacred weapons into your inventory does not get the Sages to tell you the secret word, and glitching the five Nei-weapons into your inventory does not get Rulakir to invite the party to battle. So while we are limited in what makes sense to manifest into our bags, we can still use this to save a lot of time. In this run, we re-locate Lena's equipped Knife into Lyle's index location, and Discard enough items to change his index from matching the Item ID of an equipped Knife into an equipped Neisword. Since Rhys is glitched at that time, he is considered as being equipped with that Neisword during the first bossfight, a one-on-one battle with Lyle. With the Neisword being the strongest weapon in the game, even a level 1 Rhys has a chance to do enough damage to defeat Lyle in a single swing!
+	$LF
+]div
+[div class=p 
+	"2b. For the rest of the run's bossfights, we use another variation of that second trick. If you were there in the tasvideos.org Discord when I discovered one of my characters mysteriously one-shotting the final boss, this is what I eventually realized was the cause. Okay, so: Item IDs of AE or higher are considered 'Bad Items' and if used in battle, they will either crash the game or innocently mess up screen graphics, and nothing else. If you pull up a character's inventory in the menu when they have a Bad Item in hand, the game crashes. But what I finally realized that no one ever tested before is what happens if you attack with a Bad Item equipped! My glitched character, on a completely random frame, had somehow been considered as having a particular Bad Item equipped, from somewhere deep deep into memory where some bytes that randomly change every single frame happened to line up perfectly, and that was what caused the one-shot on Dark Force. Since you can't go into the menu and equip Bad Items by hand, since they crash the game, it seems pointless, but I actually worked out a workaround.
+	$LF
+]div
+[div class=p 
+	"Underflowing a character's inventory sets their inventory index location to FFFE. The two middle half-bytes are the Item ID, the first half-byte is 8 (or higher) if the item is equipped, and the final half-byte is where on the body that item is equipped--2 for right hand, 4 for left hand, C for both hands, and any other even number below C is one of the various armor locations that don't matter here. So by having that character Discard one item, their index becomes FFFC, and if another character with a glitched inventory comes before them in party order and they don't have a weapon equipped in both hands, they will use the Bad Item FF as their weapon in battle, and glitch effects occur when they attack! Now, of the 83 or so possible Bad Items, the vast majority act the same as if they were used as an item, and either crash the game or mess with the screen graphics and do nothing else. But thanks to that completely random glitched Para killing Dark Force in one turn, I investigated equipping Bad Items thoroughly and found that fewer than a small handful of Bad Items actually glitch out positively and end the battle early when swung as a weapon! Some of them provide the XP and Meseta in much the same way as the Genesis run's Surprise glitch functions, but it turns out that it's also possible to get a Bad Item that ends the battle even faster, bypassing the whole XP and Meseta step entirely! Bad Item FB behaves in exactly this way, and with it being so close to FF, it doesn't even take very long Discarding 33 items to manipulate Lyle's Index into something that Wren can use to end every bossfight immediately. For some reason I haven't figured out yet, though, glitched items seem to act differently depending on what Generation you're in, so Bad Item FB has to wait until the Second Generation and the Third Generation to function how I want. If I wanted to use this glitch in the First Generation, I would have to discard all the way down to Bad Item F3, which would take much more time than it would save. Once the Pron glitch is activated on Wren, though, this glitch is used in every single random battle of the final dungeon also, since the glitch here guarantees Wren is faster than every monster and he will always swing first, activating the glitch instantly and ending the battle a couple frames faster than if we had run away instead.
+	$LF
+]div
+[h3 id=Walkthrough 
+	"WALKTHROUGH
+	$LF
+]h3
+[div class=p 
+	"I won't explain anything unchanged from the other run, so read its submission notes to understand what's going on.
+	$LF
+]div
+[ul 
+	[li 
+		"Note that this version requires 1304 frames of startup just to get to the SEGA intro animation. We get all that time back, and much more.
+		$LF
+	]li
+	[li 
+		"Five minutes in to the run, note that the GBA port requires you to talk to a different person in Ilan to get Mieu to appear at the lake. I do not know why they changed this.
+		$LF
+	]li
+	[li 
+		"I cannot start glitching until I pick up Mieu. Rhys alone cannot empty his inventory, because to leave the prison, you have to pick up the Monitor. It's considered a Key Item, so you're not allowed to discard it. So we wait...
+		$LF
+	]li
+	[li 
+		"In order to get a "usable in battle" item into our inventory quickly, we pick up a Dimate in the Island Cave. Before the last battle in the cave, we pop into our inventory to discard all of Mieu's items, then hand her the Dimate and the Monitor. This sets her up to glitch later, but we'll glitch Rhys first, even though it gets undone after we switch to the Second Generation and Nial replaces him.
+		$LF
+	]li
+	[li 
+		"Then we initiate the battle, and make it a Surprise to keep the bad guys from wasting our time fighting back. Tell Rhys to use the second item in his inventory, and she'll use the ghost Dimate on himself. The underflow glitch is now active. We run from the fight, our mission accomplished. Normally, this misaligns the inventory of everyone following Rhys in line, but we gave Mieu a Dimate. The code for Dimate, 0010, is within healthy range for a characters inventory index (which goes up to 001E, meaning 15 two-byte items is all a character can carry), so Mieu does not actually get broken by underflowing Rhys here. Instead, her Dimate is effectively split into six Monomates.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Now, we have the first block of major item menu manipulations, so I'll group these together:
+	$LF
+]div
+[ul 
+	[li 
+		"After we talk to Lyle and accept the Sapphire, we pop back into Rhys's now-glitched inventory. If you go into a glitched character's inventory and press Up, instead of shortcutting you to the last item, it thrusts you dozens of items deep. By having Rhys give this Up item to Mieu twice, he can add two ghost items to her inventory without disrupting her index and glitching her out. (One of them is a Monomate, but the other ends up being a powerful gun for Wren! We will immediately be discarding it.)
+		$LF
+	]li
+	[li 
+		"Go into Rhys again and press Down 31 times and Give what you find to Mieu. This lines up with the Escapipe that Wren is holding when we recruit him! Rhys pulls it right out of his inventory and gives it to Mieu even though we haven't met him yet.
+		$LF
+	]li
+	[li 
+		"Now we manipulate a programming oversight to clone Escapipes. If we tell Mieu to Discard an item, it will shuffle the other items forward in the code. But whatever the last item was doesn't get deleted, so the code for Escapipe is cloned into memory just beyond where her un-glitched inventory can reach. Normally this isn't a problem, since adding a new item to her bag will just overwrite what was there, but as we just showed, we have ways of grabbing ghost items. Having Mieu discard eight items clones that Escapipe until we have almost enough of them to get through the whole rest of the game without once stepping into a General Store.
+		$LF
+	]li
+	[li 
+		"Next, Rhys deletes the second item from his inventory. The game tries to shuffle forward 32k+ two-byte inventory units, effectively misaligning all four other characters by one slot. The Monitor he gave to Mieu ends up becoming her inventory index now, replacing the Dimate from earlier. This glitches out Mieu, giving her access to the ghost Escapipes we just cloned. She uses one, and it takes us out to the entrance of the cave. However! This also removes two from her index, since the game thinks it refers to the number of items in her inventory, and she just used one up. The Monitor's item ID is 07, meaning her index is 0070, and subtracting 2 turns that into 006E. That 06 matches the item ID of an Escapipe, meaning that later on, a glitched Rhys can "Use" Mieu's index bytes as the missing tenth Escapipe, which along with her cloned ghosts is enough for the entire rest of the game.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Things otherwise stay pretty normal until we pick up Wren and Lyle. Except that note that Wren's graphics are already slightly glitched before we even talk to him! Anyway, we don't need meseta or xp with this glitch in our hands, so all random battles are run from. Once we pick up Lyle, though, we need to do more inventory manipulations:
+	$LF
+]div
+[ul 
+	[li 
+		"First, Rhys gives an item to Wren. This ends up being a ghost of his old Monitor. Then, Mieu Discards the first item in her inventory that's not an Escapipe. This misaligns Wren's inventory, glitching him.
+		$LF
+	]li
+	[li 
+		"We then have him Discard 8 items, have Mieu Discard 2 non-Escapipes, then have Wren Discard 2 items. This first gets rid of Lyle's equipped Staff which could get in the way later, and second misaligns Lyle's inventory so much that Lena's Knife that she has equipped by default is placed into Lyle's inventory index location.
+		$LF
+	]li
+	[li 
+		"Now, Lyle Discards 3 items, turning the Knife's 8132 into a powerful 812C Neisword, which glitched Rhys will use to kill Lyle later. Thanks, Lyle! A Wren Discard pulls the sword out of Lyle's index, resetting him to 0000, for later glitching. 
+		$LF
+	]li
+]ul
+[div class=p 
+	"At this point, the game just continues as normal. We defeat Lyle and recruit Lena. During our second trip to the Weather Control Center, however, we use the third and last battle there to underflow Lyle, and begin more inventory manipulations.
+	$LF
+]div
+[ul 
+	[li 
+		"Lyle Discards exactly 33 items, transforming his inventory index into FFBC, a glitched equipped Bad Item that we will use extensively starting in the Second Generation.
+		$LF
+	]li
+	[li 
+		"Then we turn to Mieu's inventory, and pressing Down exactly 29 times brings us to the glitched Neisword from earlier. Since you're not allowed to Discard plot items, we have Mieu Give it to Lena instead. Her inventory is still considered empty after all the misalignments from earlier since she's in the final party member slot, and all there is passed that point is 0000s for awhile. So the game allows this item transfer, and marks the Neisword as unequipped. From now on, if a glitched Rhys, Mieu, or Wren attack, the game will read that FFBC as their weapon and activate its glitch effects. Next, Mieu uses an Escapipe, and this also misaligns the bytes, pulling the FFBC out of Lyle's index and into the location of what normally should be the last spot in Wren's inventory if it were full. When we move to the next Generations, the game alters the inventories of the fourth and fifth characters to prepare whoever they end up being for recruitment later in the storyline, so pulling the Bad Item into Wren's inventory keeps it safe from being altered or replaced.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"So we're set until the endgame now. At 31 minutes in, we challenge King Cille, and due to the precise amount of misalignments we performed earlier, a glitched Wren wipes his entire team with a single casting of Gra, dealing an average of 12,056 damage to his whole party in one swoop. Then, at 35 minutes in, Nial also gets to face King Cille, but this time, Bad Item FB works properly, and Mieu can use it to end the battle immediately. Wren cannot yet, as his inventory index needs to read 0000 to activate the Pron glitch later. Therefore, nothing new happens in this run until after the Pron glitch is activated--I make sure both Kara and Laya both have a non-empty inventory so the glitch doesn't activate on them and waste ~100 frames each locking up the game when they don't need the changes it would grant. (I tested out what would happen if I didn't activate the Pron glitch at all, and while it would save a further ~100 frames to skip, not being able to outspeed endgame monsters with level 1 stats and having to try to run from random battles instead would guarantee me being behind by the time the Rulakir battle is over, let alone Dark Force as well.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Once the Pron glitch activates, however, I use the one unskippable random encounter in Frigidia to use the standard Underflow glitch to break Wren, so that he can reach the Bad Item held in his otherwise ghost inventory. Two boss fights later, and we good!
+		$LF
+	]li
+]ul
+[h4 id=SoNowWhat 
+	"SO NOW WHAT
+	$LF
+]h4
+[div class=p 
+	"Again, someone with the ability to make a thorough Bot could very likely find a 70-minute-long sequence of button presses that finishes this game faster, but I don't have the experience or the motivation to find it worthwhile. And if anyone wants to explore the Inventory Underflow Glitch further to see if they can somehow influence the Event flags between 004000 and 00435F, go for it! Setting the right ones to FF (or at least non-00?) would be the only way to finish this game faster. Setting the "Laya's Pendant works" flag, the "Sacred Weapons upgraded" flag, and the "Aero-Parts work" flag are all you need to get to Dark Force and glitch yourself to victory in less than ten minutes, and yeesh if you can get that far, who's to say you can't get byte-manipulation powers strong enough to go pseudo-ACE even? But I also failed to find a way and am calling it a day. Thanks for reading!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Well, it seems like I just did this with another submission, but it was with Mario Party 8. Stil...the same kind of difference of controlling RNG; however, to eliminate random fights that come up during your travels. I compared your run to the 
+	[a href=https://www.speedrun.com/ps3/runs/z03deqez rel=noopener external nofollow 
+		"WR
+	]a
+	" and you are certainly pushing towards my ultimate "50% faster than a human". It's close, but it sure was strong a run. I'm always a fun of "Underflow" glitches, as I'm actively trying to find one in my own games. So...I congratulate you on a great piece of work here!
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing. 
+	[a class=intlink href=/Users/Profile/Dimon12321 
+		"Dimon12321
+	]a
+	" is handling the encodes for this one.
+]div

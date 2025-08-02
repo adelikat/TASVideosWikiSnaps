@@ -1,0 +1,350 @@
+9
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"So, there have been two Pokemon Crystal save glitch movies so far. Both of which abuse the laughable checksum system and use checksum collision to corrupt the main save data. It was thought that this technique would ultimately be just slower in Gold/Silver due to the classic save glitch ACE exploit, type 0xD0, required a third Pokemon in the party. However, I've recently discovered that this requirement is really only needed for Gold. Silver happens to have some slight differences with type 0xD0 ACE, that being a usable pointer was in the middle of box names! This eliminated the need for a third Pokemon, making save glitch far better in Silver than Crystal. Now Silver is the fastest gen 2 game!
+	$LF
+]div
+[h4 id=EmulatorUsedBizhawk251 
+	" Emulator used: Bizhawk 2.5.1
+	$LF
+]h4
+[ul 
+	[li 
+		"SubGBHawk was again used due to the need of a precise subframe reset.
+		$LF
+	]li
+]ul
+[h4 id=Categories 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		"Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		"Minor luck manipulation
+		$LF
+	]li
+	[li 
+		"Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Corrupts memory 
+		$LF
+	]li
+]ul
+[h3 id=Objectives 
+	" Objectives
+	$LF
+]h3
+[h4 id=SaveCorruption 
+	" Save corruption
+	$LF
+]h4
+[div class=p 
+	"Read the previous 2 save glitch submissions for the details, but essentially we want to corrupt Cyndaquil so it has no moves, while also making sure the checksum passes. 
+	$LF
+]div
+[h4 id=Type0xd0 
+	" Type 0xD0
+	$LF
+]h4
+[div class=p 
+	"Type 0xD0 is the type move 0x00 has on the move summary screen. This type sources itself from VRAM, which is subject to locking, so the corruption done is variable and dependent on timing. This timing can be manipulated slightly using PrintLetterDelay, just like RNG. Anyways, this corruption can overflow the tile map, and the corruption happens to reach some data regarding animations. Particularly, the animation ID can be corrupted, and this animation ID happens to use a jump table that has some interesting values past its valid entries. For 0x91, the pointer is 0xD8CD, which is in the middle of box 2. 0x91 can be corrupted in using the player's name (R is character 0x91).
+	$LF
+]div
+[h4 id=ArbitraryCodeExecution 
+	" Arbitrary Code Execution
+	$LF
+]h4
+[div class=p 
+	"This uses yet again MrWint's box code for input to opcode. There were some minor modifications done to work around character limitations.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 4
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"aa
+			]td
+			[td 
+				"xor d
+			]td
+			[td 
+				"d stores last joypad input: find out differences to current input
+			]td
+		]tr
+		[tr 
+			[td 
+				"ea e2 f8
+			]td
+			[td 
+				"ld (f8e2),a
+			]td
+			[td 
+				"Write difference; will be executed as opcode later in the next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"aa
+			]td
+			[td 
+				"xor d
+			]td
+			[td 
+				"Restore current joypad input value
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"Copy current joypad input from a...
+			]td
+		]tr
+		[tr 
+			[td 
+				"d1
+			]td
+			[td 
+				"pop de
+			]td
+			[td 
+				"... to d (store it as last joypad input)
+			]td
+		]tr
+		[tr 
+			[td 
+				"f1
+			]td
+			[td 
+				"pop af
+			]td
+			[td 
+				"Restore a and f from the previous cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"(f8e2)
+			]td
+			[td 
+				"(any)
+			]td
+			[td 
+				"Execute opcode written earlier this cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 5
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"Save a and f for next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"b6
+			]td
+			[td 
+				"or (hl)
+			]td
+			[td 
+				"Clears carry flag, needed for the jump
+			]td
+		]tr
+		[tr 
+			[td 
+				"fa a6 ff
+			]td
+			[td 
+				"ld a,(ffa6)
+			]td
+			[td 
+				"Reads current joypad inputs into a
+			]td
+		]tr
+		[tr 
+			[td 
+				"d2 d6 f8
+			]td
+			[td 
+				"jp nc, f8d6
+			]td
+			[td 
+				"Loop back to right before Box 4; carry will never be set
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Here is a paste of the tracelog and the values set from the input to opcode payload: 
+	[a href=https://pastebin.com/raw/B7R0Cmf1 rel=noopener external nofollow 
+		"https://pastebin.com/raw/B7R0Cmf1
+	]a
+	$LF
+]div
+[div class=p 
+	"To note, movie does something a bit differently to get to Mt. Silver. Instead of creating a warp, I just change the map connection so it goes to Mt. Silver (and in front of Red) and I move myself next to the map connection, so taking 1 step down triggers it. This also happens to make autoinput taken from 00:0000 to work, so all I need to do is enable autoinput and it'll just work.
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[h3 id=Intro 
+	" Intro
+	$LF
+]h3
+[ul 
+	[li 
+		"Save data is cleared for morality reasons.
+		$LF
+	]li
+	[li 
+		"Options are not set as text can print at the fast speed when A or B is held anyway.
+		$LF
+	]li
+	[li 
+		"The trainer ID is not manipulated, as it's not relevant for ACE nor collision.
+		$LF
+	]li
+	[li 
+		"The player is named "R". This is needed for type 0xD0 ACE to work.
+		$LF
+	]li
+]ul
+[h3 id=NewBarkTown 
+	" New Bark Town
+	$LF
+]h3
+[ul 
+	[li 
+		"The game is saved before obtaining Cyndaquil to setup later collision.
+		$LF
+	]li
+	[li 
+		"Save corruption happens right before entering Route 29. Upon reloading the game, Cyndaquil now has no moves.
+		$LF
+	]li
+]ul
+[h3 id=Route29 
+	" Route 29
+	$LF
+]h3
+[ul 
+	[li 
+		"No encounters are manipulated. This is the only luck manipulation within the run.
+		$LF
+	]li
+]ul
+[h3 id=CherrygroveCity 
+	" Cherrygrove City
+	$LF
+]h3
+[ul 
+	[li 
+		"Boxes 4 and 5 are named for the initial ACE payload.
+		$LF
+	]li
+	[li 
+		"Type 0xD0 is viewed and manipulated to place the player's name at the right spot for ACE to happen.
+		$LF
+	]li
+	[li 
+		"Auto input takes over after ACE, going down and pressing A through Red's textboxes.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": All right, the movie looks optimized and it correctly beats the game.
+	$LF
+]div
+[div class=p 
+	"There is just one special note I need to make. After some discussion with the other judges, as well as the precedent set with 
+	(__wikiLink|displaytext=this submission|href=/6863S)
+	", we decided that using glitches that are affected by uninitialized SRAM bytes is considered fair. For this reason, it shouldn't be considered as a requirement to wipe the save data by using in-game functionalities, like this movie does. Additionally, this movie does also write a proper save file once, before performing the save glitch, so there wouldn't be much of controversial even if we wanted to see it that way. However, the time lost is not considered as suboptimal play, but rather as a personal choice from the author. Additionally, the previous publications are also making use of this in-game feature, so it's understandable that the author decided to follow the trend set by movies that have been accepted in the past, in order to make sure that the new submission would comply with the rules. Though, this isn't always the case, as rules may change and judgement precedents may not always reflect them; when in doubt, always 
+	(__wikiLink|displaytext=ask directly to the judges|href=/Forum/Topics/19741)
+	". Anyway, please remember to avoid wiping the save data for future submissions, unless that is required for performing a faster glitch.
+	$LF
+]div
+[div class=p 
+	"Since the movie contents are very similar to the published Pokémon Crystal movie, this movie is going to obsolete it. It does also pretty much reflect the same audience reaction, so it's also going to inherit the Moons tier. Accepting over 
+	(__wikiLink|href=/4285M|implicitdisplaytext=4285M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Publishing. 
+]div

@@ -1,0 +1,800 @@
+7
+[h2 id=Summary 
+	" Summary
+	$LF
+]h2
+[div class=p 
+	"This is an improved version of "#7049: AmaizumiUni's NES Final Fantasy II in 11:26.49". It's used the glitch of the spellbook of Blink.
+	$LF
+	"The change is to use the joypad input for the script pointer, which allows you to see the ending more quickly.
+	$LF
+]div
+[div class=p 
+	"My TAS makes 1 byte the script data by the joypad input. Ths script data is not 6502 instruction. It's not ACE.
+	$LF
+]div
+[h2 id=Configuration 
+	" Configuration
+	$LF
+]h2
+[ul 
+	[li 
+		" RAM init: default
+		$LF
+	]li
+	[li 
+		" ROM CRC32: D29DB3C7
+		$LF
+	]li
+	[li 
+		" Allow Left+Right / Up+Down
+		$LF
+	]li
+]ul
+[h2 id=GlitchOfTheSpellbookOfBlink 
+	" The glitch of the spellbook of Blink
+	$LF
+]h2
+[div class=p 
+	"The system updates CPU address $62ba and $62bb when a woman equip a spellbook of Blink (ブリンクのほん) as a weapon. CPU address $62ba is assigned an event ID in the temple, CPU address $62bb is assigned at the inn.
+	$LF
+]div
+[div class=p 
+	"The system initials 0x15 and 0x14, and assigned 0x00-0x19 for these addresses. These values are used for an index of a pointer table $bfc0 for address $0072 in PC $C6FB. The system runs the epilogue if the pointer reference data is 0xe7. (see Appendix)
+	$LF
+]div
+[div class=p 
+	"The illegal value can store a RAM address into the pointer. The useful values are following:
+	$LF
+]div
+[pre 
+	"event pointer
+	$LF
+	"ID    address description
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	$LF
+	"0x0f  $8531   Final Battle (original script)
+	$LF
+	"0x43  $0020   Joypad Data Buffer
+	$LF
+	"0x5c  $6011   Player Overworld Position Y (for saving)
+	$LF
+]pre
+[h3 id=FinalBattle 
+	" The Final Battle
+	$LF
+]h3
+[div class=p 
+	"This is a normal value for the system. If the player kills the Emperor and releases Nelly, the system can display "THE END".
+	$LF
+]div
+[h3 id=JoypadDataBuffer 
+	" Joypad Data Buffer
+	$LF
+]h3
+[div class=p 
+	"We can make any value by Joypad input. Press left, right, down, select, B and A, the value becomes 0xe7.
+	$LF
+]div
+[h3 id=PlayerOverworldPositionY 
+	" Player Overworld Position Y
+	$LF
+]h3
+[div class=p 
+	"The position Y 0xe7 is placed near the second battleship hoabor.
+	$LF
+	"Go there, save the game, go to the inn without saving.
+	$LF
+]div
+[h2 id=HowToUpdateAndUseTheseAddresses 
+	" How to update and use these addresses
+	$LF
+]h2
+[div class=p 
+	"It is required to equip the spellbook as a weapon before the end of the battle. However the system is freezed when the character attacks with the spellbook. Another character must finish the battle before her attack.
+	$LF
+]div
+[div class=p 
+	"These two values are included in the save data.
+	$LF
+]div
+[h3 id=CpuAddress62ba 
+	" CPU address $62ba
+	$LF
+]h3
+[div class=p 
+	"The system updates CPU address $62ba as level up when the second battle is finished in TAS #7049. (I haven't investigated the reason for 'twice'.) 
+	$LF
+	"The initial value is 0x15, the system assigns the maximum value is 0x0f, the system stores data 0x0f into CPU address $62ba.
+	$LF
+]div
+[div class=p 
+	"If the party has dead character(s), the event ID is loaded in the temple.
+	$LF
+]div
+[h3 id=CpuAddress62bb 
+	" CPU address $62bb
+	$LF
+]h3
+[div class=p 
+	"The player repeats, selects and cancels 'attack' up to the specified number of times.
+	$LF
+]div
+[div class=p 
+	"The system doesn't use the initial value 0x14 if the specified number is bigger than 0x20(?). To store data 0x43 or 0x5c, repeat up to the specified number of times.
+	$LF
+]div
+[div class=p 
+	"When the party finds a berth at the inn, the event ID is loaded.
+	$LF
+]div
+[h2 id=StepsOfTheSpeedrun 
+	" The steps of the speedrun
+	$LF
+]h2
+[div class=p 
+	"I used the joypad data buffer for the script data.
+	$LF
+]div
+[div class=p 
+	"The most important point is getting a spellbook of Blink quickly. The following are candidates.
+	$LF
+]div
+[ul 
+	[li 
+		" Get a canoe, buy the spellbook in the town of Poft (ポフト).
+		$LF
+	]li
+	[li 
+		" Make a roundabout trip by walking and riding chocobo, buy the spellbook in the town of Palm (or Poft).
+		$LF
+	]li
+	[li 
+		" Pickup the spellbook, Ogre Mage (オーガメイジ) drops it.
+		$LF
+	]li
+]ul
+[div class=p 
+	"After getting the spellbook do the following
+	$LF
+]div
+[ul 
+	[li 
+		" Start the battle with anyone
+		$LF
+	]li
+	[li 
+		" Select 'たたかう'(attack) 67 times for a woman (second character) . Equip the spellbook as weapon in the 'もちもの' (item) command.
+		$LF
+	]li
+	[li 
+		" Finish and win the battle.
+		$LF
+	]li
+	[li 
+		" Go to the inn, choose 'はい' and press left, right, down, select, B and A at the same time.
+		$LF
+	]li
+]ul
+[h3 id=RouteCanoeAndRoundaboutTrip 
+	" route 'canoe' and 'roundabout trip'
+	$LF
+]h3
+[div class=p 
+	"The roundabout trip is faster than getting a canoe by about 1 min 20 sec.
+	$LF
+]div
+[h3 id=RouteOgreMage 
+	" route 'Ogre Mage'
+	$LF
+]h3
+[div class=p 
+	"The encounter places Ogre Mage in the north of Fin castle.
+	$LF
+	"It's too difficult for me to manipulate the random seed and win the battle with the initial skills.
+	$LF
+	"If you picked up the spellbook luckily, the Gadea inn is the best place.
+	$LF
+]div
+[h3 id=ButtonOperationsAtTheInn 
+	" Button operations at the inn
+	$LF
+]h3
+[div class=p 
+	"To pass the condition:
+	$LF
+]div
+[ol 
+	[li 
+		" moving: press B 
+		$LF
+	]li
+	[li 
+		" started the chat: press A, keep hold B
+		$LF
+	]li
+	[li 
+		" press left, down, right and select
+		$LF
+	]li
+	[li 
+		" release A
+		$LF
+	]li
+	[li 
+		" displayed the choice: press A
+		$LF
+	]li
+]ol
+[ul 
+	[li 
+		" If the joypad is disabled both left and right in same time, use joypad #3 like a Joy Card. (Famicom games can use joypad #3 as an alternate joypad #1. NES cannot use it due to the difference of hardware design.)
+		$LF
+	]li
+	[li 
+		" To train the operation, save the game after the battle.
+		$LF
+	]li
+]ul
+[h2 id=AboutMakingATas 
+	" About making a TAS
+	$LF
+]h2
+[h3 id=RandomSeedManipulationForBattle 
+	" Random seed manipulation for battle
+	$LF
+]h3
+[div class=p 
+	"The system makes a random seed and stores it into address $0042 before the battle. It's a sum in zeropage (address $0000-$00ff) and carry flag of ADC instruction. It depended on the character order and the enemy behavior.
+	$LF
+]div
+[div class=p 
+	"In normal battle, versus Sprinter, the random seed is manipulated by frame counter, uninitialized values and the joypad buffer. To affect the start or select button, close the menu and keep holding these buttons at the same time.
+	$LF
+]div
+[div class=p 
+	"In the first battle, verus Black Knight (くろきし), the system clears a lot of zeropage area before the battle. I used a frame counter for the manipulation, I had to wait 27 frames...
+	$LF
+]div
+[h2 id= 
+	" 概要
+	$LF
+]h2
+[div class=p 
+	"これは "#7049: AmaizumiUni's NES Final Fantasy II in 11:26.49" の改善版です. ブリンクのほんのバグを利用しています.
+	$LF
+	"変更点はスクリプトのポインタをジョイパッドの入力データにして、エンディングを早く見られるようにしました.
+	$LF
+]div
+[div class=p 
+	"スクリプトには任意の 1 byte のデータを読み込ませていますが、スクリプトは 6502 の命令ではないので、任意コード実行ではありません.
+	$LF
+]div
+[h2 id=_2 
+	" ブリンクのほんの動作の原理
+	$LF
+]h2
+[div class=p 
+	"女性キャラがブリンクのほんを武器として装備したときに更新されるメモリアドレスは $62ba と $62bb です. address $62ba は聖堂での蘇生イベントのID、address  $62bb は宿屋での宿泊イベントのIDです.
+	$LF
+]div
+[div class=p 
+	"この2つのIDの初期値は 0x15 と 0x14 です. この変数は PC $C6FB で参照される値で正常値は 0x00 から 0x19 です. この値をポインタテーブル $BFC0 の index と利用して, スクリプトポインタ $0072 に書き込みます. ポインタ参照先データに 0xe7 があるとエンディングとなります.
+	$LF
+]div
+[div class=p 
+	"CPU address $62ba or $62bb の data 0x1a 以降の不正な値で RAM を参照するものがあり、ユーザーが操作しやすいものは下記です.
+	$LF
+]div
+[pre 
+	"event pointer
+	$LF
+	"ID    address description
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	$LF
+	"0x0f  $8531   Final Battle (original script)
+	$LF
+	"0x43  $0020   Joypad Data Buffer
+	$LF
+	"0x5c  $6011   Player Overworld Position Y (for saving)
+	$LF
+]pre
+[h3 id=FinalBattle_2 
+	" Final Battle
+	$LF
+]h3
+[div class=p 
+	"ROM に入っている想定内の値です. 皇帝を倒し、ネリーを救出していると THE END までいけます.
+	$LF
+]div
+[h3 id=JoypadDataBuffer_2 
+	" Joypad Data Buffer
+	$LF
+]h3
+[div class=p 
+	"ボタンの組み合わせで任意の data を作れます.
+	$LF
+	"左右下セレクトBAを同時に押すと data 0xe7 が作成できます.
+	$LF
+]div
+[h3 id=PlayerOverworldPositionY_2 
+	" Player Overworld Position Y
+	$LF
+]h3
+[div class=p 
+	"Position Y 0xe7 は2番目の大戦艦停泊地付近にあります.
+	$LF
+	"ここにいきセーブしてその後はセーブせず宿屋に向かう必要があります.
+	$LF
+]div
+[h2 id=_3 
+	" メモリ更新と利用
+	$LF
+]h2
+[div class=p 
+	"2つのアドレスは戦闘終了までに武器としてブリンクの本を所持する必要があります. ただしブリンクの本で攻撃を実行するとゲームが止まりますので、それよりも早く終了する必要があります.
+	$LF
+]div
+[div class=p 
+	"この2つの値はセーブデータに含まれます.
+	$LF
+]div
+[h3 id=CpuAddress62ba_2 
+	" CPU address $62ba
+	$LF
+]h3
+[div class=p 
+	"既出の TAS の通りこの本を武器として所持し戦闘を2度(2度の理由は未調査)終了すると、熟練度レベルとして address $62ba が更新されます. 初期値は 0x15 ですが、熟練度レベルとしては最大値 0x0f なので address $62ba へ data 0x0f が書き込まれます.
+	$LF
+]div
+[div class=p 
+	"利用方法は仲間のうち誰かを死亡させ、聖堂で蘇生させるとイベントが起きます.
+	$LF
+]div
+[h3 id=CpuAdddress62bb 
+	" CPU adddress $62bb
+	$LF
+]h3
+[div class=p 
+	"たたかうを選択してキャンセルを繰り返し指定回数まで繰り返します.
+	$LF
+]div
+[div class=p 
+	"熟練度経験値としても計算するのですが大きい回数を指定すると初期値 0x14 は加算されませんでした. data 0x43, 0x5c を書き込みたい場合はその回数たたかうを選びます.
+	$LF
+]div
+[div class=p 
+	"利用方法は宿屋で宿泊するだけです.
+	$LF
+]div
+[h2 id=_4 
+	" 攻略チャート
+	$LF
+]h2
+[div class=p 
+	"Joypad Data Buffer を利用します.
+	$LF
+]div
+[div class=p 
+	"ブリンクのほんを早く取得することが重要です. 下記が候補です.
+	$LF
+]div
+[ul 
+	[li 
+		" カヌーを取り、パルムの町で買う
+		$LF
+	]li
+	[li 
+		" 徒歩とチョコボで遠回りし、ポフトの町(もしくはパルムの町)で買う
+		$LF
+	]li
+	[li 
+		" オーガメイジから拾う
+		$LF
+	]li
+]ul
+[div class=p 
+	"ブリンクのほんを取得後は下記となります.
+	$LF
+]div
+[ul 
+	[li 
+		" 相手は誰でもいいので戦闘開始
+		$LF
+	]li
+	[li 
+		" 2人目がたたかうを 67 回選び、ブリンクのほんを武器として装備して戦闘を勝利で終了させます.
+		$LF
+	]li
+	[li 
+		" 宿屋に行き、左右下セレクトBAを押しながら「はい」選びます.
+		$LF
+	]li
+]ul
+[h3 id=_5 
+	" 遠回りルートとカヌールート
+	$LF
+]h3
+[div class=p 
+	"遠回りのほうがカヌーより1分20秒程度早いです.
+	$LF
+]div
+[h3 id=_6 
+	" オーガメイジルート
+	$LF
+]h3
+[div class=p 
+	"フィン城北にオーガメイジが出現します.
+	$LF
+	"初期状態でオーガメイジに勝つのは乱数操作が難しく、私にはできませんでした.
+	$LF
+	"運良くブリンクのほんを手に入れられたのなら、ガテアの村の宿屋が便利でしょう.
+	$LF
+]div
+[h3 id=_7 
+	" 宿屋でのボタン操作
+	$LF
+]h3
+[div class=p 
+	"下記の順番にボタンを押せば条件を満たせます.
+	$LF
+]div
+[ol 
+	[li 
+		" 移動中: B を押す
+		$LF
+	]li
+	[li 
+		" 会話開始: A を押す, B は押したまま
+		$LF
+	]li
+	[li 
+		" B に加えて 左、右、下、セレクトを押す
+		$LF
+	]li
+	[li 
+		" A を離す
+		$LF
+	]li
+	[li 
+		" 選択肢表示: A を押す
+		$LF
+	]li
+]ol
+[ul 
+	[li 
+		" 左と右の同時入力が禁止されている場合はジョイカードなどの外部コントローラで代用可能です.
+		$LF
+	]li
+	[li 
+		" 操作に自信がない場合は戦闘後にセーブしておけば簡単にやり直せます.
+		$LF
+	]li
+]ul
+[h2 id=Tas 
+	" TAS に関して
+	$LF
+]h2
+[h3 id=_8 
+	" 戦闘での乱数調整
+	$LF
+]h3
+[div class=p 
+	"戦闘の最初に zeropage (address $0000-$00ff) の carry 込みの総和が乱数になり、行動順番や敵の行動内容がこれに依存します.
+	$LF
+]div
+[div class=p 
+	"通常の戦闘ではフレームカウンタや joypad bufferで総和を操作でき移動しないボタンも利用できます. スタートボタンやセレクトボタンを反映するにはメニューを出してから押したままにすれば移動も可能です.
+	$LF
+]div
+[div class=p 
+	"くろきし戦前は joypad buffer を含めて zeropage の大半は 0 で埋められるため乱数調整はフレームカウンタのみのため、27 frame も待機しています.
+	$LF
+]div
+[h2 id=Appendix 
+	" Appendix
+	$LF
+]h2
+[h3 id=RoutineForTempleInnAndTheScriptSystem 
+	" routine for temple, inn and the script system
+	$LF
+]h3
+[div class=p 
+	"(in the temple)
+	$LF
+]div
+[pre 
+	"8CF6: lda $62ba
+	$LF
+	"8CF9: sta <$6c
+	$LF
+	"8CFB: jmp $91b8
+	$LF
+]pre
+[div class=p 
+	"(at the inn)
+	$LF
+]div
+[pre 
+	"8DCA: lda $62bb
+	$LF
+	"8DCD: sta <$6c
+	$LF
+	"8DCF: jmp $91b8
+	$LF
+]pre
+[div class=p 
+	"(load <$6c, store script pointer <$72)
+	$LF
+]div
+[pre 
+	"CBF4: lda <$6c
+	$LF
+	"CBF6: beq $cbfb
+	$LF
+	"CBF8: jmp $c6f4
+	$LF
+	"C6F4: asl a
+	$LF
+	"C6F5: tax
+	$LF
+	"C6F6: lda #$0d
+	$LF
+	"C6F8: jsr $fe03 (switch a bank)
+	$LF
+	"C6FB: lda $bfc0,x
+	$LF
+	"C6FE: sta <$72
+	$LF
+	"C700: lda $bfc1,x
+	$LF
+	"C703: sta <$73
+	$LF
+	"C705: lda #$01
+	$LF
+	"C707: sta <$6c
+	$LF
+	"C709: lda #$00
+	$LF
+	"C70B: sta <$17
+	$LF
+	"C70D: rts
+	$LF
+]pre
+[div class=p 
+	"(random seed calculation)
+	$LF
+]div
+[pre 
+	"97D5: ldx #$00
+	$LF
+	"97D7: adc <$00,x
+	$LF
+	"97D9: inx
+	$LF
+	"97DA: bne $97d7
+	$LF
+	"97DC: sta $0042
+	$LF
+]pre
+[h3 id=ProficiencyAddressCalculation 
+	" proficiency address calculation
+	$LF
+]h3
+[pre 
+	"address = 0x6200 + c * 0x40 + ( (index << 1) & 0xff)
+	$LF
+]pre
+[ul 
+	[li 
+		" c: character #, 0 to 3
+		$LF
+	]li
+	[li 
+		" index: weapon #, the system assigns 0 to 7
+		$LF
+	]li
+]ul
+[h4 id=IndexListForTheSpellbooksAsWeapon 
+	" index list for the spellbooks as weapon
+	$LF
+]h4
+[pre 
+	"item idx  name           | item idx  name
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+		"-
+		$LF
+		"0x98 0x28 ファイアのほん | 0xac 0x1a ケアルのほん
+		$LF
+		"0x99 0x00 サンダーのほん | 0xad 0x00 レイズのほん
+		$LF
+		"0x9a 0x01 ブリザドのほん | 0xae 0x01 バスナのほん
+		$LF
+		"0x9b 0x64 クラウダのほん | 0xaf 0x46 エスナのほん
+		$LF
+		"0x9c 0x0c ドレインのほん | 0xb0 0x01 バリアのほん
+		$LF
+		"0x9d 0x15 アスピルのほん | 0xb1 0x3d ブリンクのほん
+		$LF
+		"0x9e 0x00 フレアーのほん | 0xb2 0x00 プロテスのほん
+		$LF
+		"0x9f 0x02 スリプルのほん | 0xb3 0x02 シェルのほん
+		$LF
+		"0xa0 0x28 スタンのほん   | 0xb4 0x64 ウォールのほん
+		$LF
+		"0xa1 0x10 ストップのほん | 0xb5 0x10 デスペルのほん
+		$LF
+		"0xa2 0x09 コンフュのほん | 0xb6 0x39 ミニマムのほん
+		$LF
+		"0xa3 0x00 ブラインのほん | 0xb7 0x00 サイレスのほん
+		$LF
+		"0xa4 0x02 カーズのほん   | 0xb8 0x01 アンチのほん
+		$LF
+		"0xa5 0x28 トードのほん   | 0xb9 0x64 フォーグのほん
+		$LF
+		"0xa6 0x0a ブレイクのほん | 0xba 0x4a スロウのほん
+		$LF
+		"0xa7 0x10 デスのほん     | 0xbb 0x01 チェンジのほん
+		$LF
+		"0xa8 0x00 デジョンのほん | 0xbc 0x0a フィアーのほん
+		$LF
+		"0xa9 0x02 バーサクのほん | 0xbd 0x00 ホーリーのほん
+		$LF
+		"0xaa 0x64 ヘイストのほん | 0xbe 0x03 テレポのほん
+		$LF
+		"0xab 0x03 オーラのほん   | 0xbf 0x00 アルテマのほん
+		$LF
+	]del
+]pre
+[ul 
+	[li 
+		" idx: index
+		$LF
+	]li
+	[li 
+		" item: item #
+		$LF
+	]li
+]ul
+[h4 id=AddressListForNonProficiency 
+	" address list for non-proficiency 
+	$LF
+]h4
+[pre 
+	"c item addr  | c item addr
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	[del 
+	]del
+	$LF
+	"0 0xac $6234 | 2 0xba $6314
+	$LF
+	"1 0xac $6274 | 3 0xb6 $6332
+	$LF
+	"0 0xb1 $627a | 3 0xb1 $633a
+	$LF
+	"2 0xac $62b4 | 2 0x9b $6348
+	$LF
+	"1 0xb1 $62ba | 2 0xaa $6348
+	$LF
+	"3 0xac $62f4 | 2 0xb4 $6348
+	$LF
+	"2 0xb1 $62fa | 2 0xb9 $6348
+	$LF
+	"1 0x9b $6308 | 3 0xaf $634c
+	$LF
+	"1 0xaa $6308 | 3 0xba $6354
+	$LF
+	"1 0xb4 $6308 | 3 0x9b $6388
+	$LF
+	"1 0xb9 $6308 | 3 0xaa $6388
+	$LF
+	"2 0xaf $630c | 3 0xb4 $6388
+	$LF
+	"3 0x98 $6310 | 3 0xb9 $6388
+	$LF
+	"3 0xa0 $6310
+	$LF
+	"3 0xa5 $6310
+	$LF
+]pre
+[div class=p 
+	"note: address $6300-$65ff is save slot #1. The system updates the values of level and experience without checksum after the battle. If the save slot has a bad checksum, the system will detect it as an empty slot.
+	$LF
+]div
+[div class=p 
+	"note: address $6044 data bit 2 is a flag of release Nelly 
+	$LF
+]div
+[h2 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h2
+[div class=p 
+	"Cheap and Pirohiko
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Last weekend (at the time of writing this judgement), 
+	[a href=https://www.twitch.tv/videos/1054392809 rel=noopener external nofollow 
+		"a better route for this run was shown
+	]a
+	" by Pirohiko. Since that is a Twitch VOD, the link may be dead in the near future, so I'll explain the new route. The new route uses Cure to manipulate the RNG of a fight with an Ogre Mage, and attacks it with a Fire spellbook to kill it in one turn, getting the Blink book much faster. This was performed on a Famicom console, proving its legitimacy. 
+	(__wikiLink|displaytext=AmaizumiUni has completed a test TAS of this route|href=/Forum/Posts/506612)
+	" and is continuing to look into it for improvements. Pirohiko will 
+	[a href=https://twitter.com/pirohiko/status/1404122771152506880 rel=noopener external nofollow 
+		"also be looking into improving the new route in the future
+	]a
+	". Machine translation of the tweet courtesy of 
+	[a href=https://www.deepl.com/en/translator#ja/en/FF2%E3%81%AF%E3%82%A8%E3%83%B3%E3%82%AB%E3%82%AD%E3%83%A3%E3%83%B3%E3%82%BB%E3%83%AB%E3%81%99%E3%82%8B%E3%83%81%E3%83%A3%E3%83%BC%E3%83%88%E3%81%A8%E3%81%BE%E3%81%A0%E8%AA%BF%E3%81%B9%E3%81%A6%E3%81%AA%E3%81%84%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3%E3%81%8C%E6%9C%89%E3%82%8B%E3%81%8B%E3%82%89%E3%81%A8%E3%82%8A%E3%81%82%E3%81%88%E3%81%9A%E3%83%89%E3%82%AF%E3%82%BF%E3%83%BC%E3%83%9E%E3%83%AA%E3%82%AA%E4%BD%9C%E3%81%A3%E3%81%A6%E3%81%8B%E3%82%89%E3%81%9D%E3%81%A3%E3%81%A1%E3%82%82%E8%AA%BF%E6%9F%BB%E3%81%97%E3%81%AA%E3%81%84%E3%81%A8%E3%81%AA%E3%83%BB%E3%83%BB%E3%83%BB rel=noopener external nofollow 
+		"DeepL
+	]a
+	": 
+	[em 
+		""FF2 has a chart that cancels the encumbrance and a pattern that I haven't checked yet, so I'll have to check that out after I make Dr. Mario..."
+	]em
+	$LF
+]div
+[div class=p 
+	"Even though the test TAS is not linked, there is more than enough proof in the Twitch VOD to show me that it is both legit and the fastest known TAS for this game. For that, I have to reject this run, as it has been provably bested.
+]div

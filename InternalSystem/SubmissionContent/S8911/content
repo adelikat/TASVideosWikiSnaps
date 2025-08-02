@@ -1,0 +1,121 @@
+8
+[div class=p 
+	"・Emulator Dolphin5.0 lua core(
+	[a href=https://github.com/SwareJonge/Dolphin-Lua-Core/releases/tag/v3.5.1 rel=noopener external nofollow 
+		"https://github.com/SwareJonge/Dolphin-Lua-Core/releases/tag/v3.5.1
+	]a
+	")
+	$LF
+]div
+[div class=p 
+	"・Dual core off
+	$LF
+]div
+[div class=p 
+	"・idol skip off
+	$LF
+]div
+[div class=p 
+	"・DSP LLE recompiler
+	$LF
+]div
+[div class=p 
+	"・no memory card
+	$LF
+]div
+[div class=p 
+	"・Direct 3D11
+	$LF
+]div
+[div class=p 
+	"・intel(R) HD Graphics family
+	$LF
+]div
+[div class=p 
+	"・
+	[b 
+		"Uses 4 gamecube controllers
+	]b
+	$LF
+]div
+[div class=p 
+	"・MD5 checksum 3b07a4bb22db926b177e207f9d7f0d87
+	$LF
+]div
+[div class=p 
+	"Uses credit warp by arbitrary code execution.
+	$LF
+]div
+[div class=p 
+	"cutscene underflow glich causes it.
+	$LF
+]div
+[div class=p 
+	"explanation of cutscene underflow glich(quote from noki doki)
+	$LF
+	""The game has 8 “slots” to store active cutscenes, numbered 0 to 7. It also keeps track of the slot number of the last cutscene that started and the slot number of the last cutscene that ended. When a cutscene starts, the last started cutscene slot number increases, cycles back to 0 if it would go past 7, and the new cutscene gets loaded into that slot. Once the cutscene ends, the last ended cutscene slot number increases in turn, becoming equal to the last started cutscene slot number. Since both slot numbers are equal, the game knows it ended as many cutscenes as it started, so there are no more cutscenes to process.
+	$LF
+]div
+[div class=p 
+	"Since there’s usually no way to end more cutscenes than you start, and the slot numbers are being used in a cycle, any time the last started and ended slot numbers don’t match up, that must mean there are cutscenes left to process, even if the last ended cutscene seems to be ahead of the last started cutscene. But when a Shine Get cutscene starts during another cutscene, for some reason, it ends twice, leaving the game with -1 cutscenes left to play, which it sees as 8-1=7.
+	$LF
+]div
+[div class=p 
+	"hat if you replay a cutscene in a different area than it was originally played? For most cutscenes, nothing interesting happens: either they play normally, or they end instantly, depending on whether the associated camera movement filename was overwritten in the transition or not. But some cutscenes retain a callback to execute before and after the cutscene (even if the camera movement couldn’t be found), and a pointer to a relevant object to be passed to the callback. Most notably, Shine spawns keep a pointer to the Shine being spawned.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	"At the beginning of a Shine spawn cutscene, its callback will lead to one of the Shine’s virtual functions, TMapObjBase::makeObjAppeared, being called. When replaying the cutscene with cross-area cutscene underflow, its Shine pointer will be stale and the virtual call can be redirected to arbitrary code. Let S be the Shine pointer; *S will be read as a pointer to the Shine’s virtual table, and *(*S + 0x100) will be set as the instruction pointer. "
+	$LF
+]div
+[div class=p 
+	"setting right bell cutscene on slot4 while peach is kidnapped.
+	$LF
+	"the game has some delfino plaza status, each plazas objects have different memory address.
+	$LF
+	"so the value of right bell cutscene(8134A65C) while peach is kidnapped will be related turbo gate address while poluted piranha appearances on ricco harbor.
+	$LF
+]div
+[div class=p 
+	"By looking turbo gate on screen, the value of (8134A65C) can be changed.
+	$LF
+	"so setting the value to be related to controller address.(this part was made by su)
+	$LF
+]div
+[div class=p 
+	"at the last, get a shine while blue coin cutscene is playing. then input codes by 4 controlles for credit warp.(this part was made by su)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Excellent job! Accepting for publication as a new branch.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+	$LF
+]div
+[div class=p 
+	"Also changed the branch to "game end glitch" to be consistent with 
+	(__wikiLink|displaytext=other|href=/3989M)
+	" 
+	(__wikiLink|displaytext=TASes|href=/4567M)
+	" of this kind.
+]div

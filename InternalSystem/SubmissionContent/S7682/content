@@ -1,0 +1,749 @@
+9
+[div class=p 
+	"DEADBOLT is a 2D side-scrolling stealth-action game developed by Hopoo Games, the creators of the Risk of Rain series. It follows the Grim Reaper, who is given instructions from a voice in his fireplace, with the goal to stop the undead uprising.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=270|v=nuKIatYN50U|w=480)
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS v1.4.3
+		$LF
+	]li
+	[li 
+		" Aims for fastest real time
+		$LF
+	]li
+	[li 
+		" Uses death to save time 
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Exploits glitches
+		$LF
+	]li
+]ul
+[h3 id=SetupAndSync 
+	"Setup and Sync
+	$LF
+]h3
+[ul 
+	[li 
+		" This TAS is done on the latest Steam version of DEADBOLT (v1.0.2), but works with the GOG version as well according to the judges. Synced on Ubuntu 20.04 LTS
+		$LF
+	]li
+	[li 
+		" DEADBOLT is made in Gamemaker, the most convenient way to invoke the necessary libraries would be to paste 
+		[code 
+			"~/.steam/bin/steam-runtime/run.sh libTAS
+		]code
+		" or 
+		[code 
+			"runner
+		]code
+		" into the terminal.
+		$LF
+	]li
+	[li 
+		" It's required the launch the game natively first and configure the game through the Options menu. 
+		[b 
+			"Here's the options that the movie uses:
+		]b
+		$LF
+	]li
+	[li 
+		" Graphics:
+		$LF
+		[ul 
+			[li 
+				" VSync: On
+				$LF
+			]li
+			[li 
+				" Graphics: High
+				$LF
+			]li
+			[li 
+				" Flashing Lights: Off
+				$LF
+			]li
+			[li 
+				"Gore/Blood: On
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Controls are set to default
+		$LF
+	]li
+	[li 
+		" Audio: Values that are too high cause audio clipping, which thankfully libTAS reflects in the terminal. Set the Master volume to about 50% or so. Diegetic Music muffles the music when outdoors, purely an aesthetic choice, would recommend leaving it On.
+		$LF
+	]li
+	[li 
+		" This TAS only syncs at the 1920x1080 resolution, so if the game's window doesn't fit on your monitor, it's highly suggested to use fractional scaling in the display settings. 
+		$LF
+	]li
+	[li 
+		" Set "Video > Virtual screen resolution" to 1920x1080
+		$LF
+	]li
+	[li 
+		" Make sure "Runtime > Time tracking > clock_gettime()" is checked.
+		$LF
+	]li
+]ul
+[h3 id=MechanicsOverview 
+	" Mechanics overview
+	$LF
+]h3
+[h4 id=PreMissionBriefing 
+	"Pre-mission briefing
+	$LF
+]h4
+[div class=p 
+	"Before every mission, Reaper must sit in his armchair and talk to the fireplace to receive a mission briefing. While individually quick to go through, only requiring one or two clicks per briefing, these sections take up a good chunk of the run (3 minutes 52 seconds)!
+	$LF
+]div
+[h4 id=Shooting 
+	" Shooting
+	$LF
+]h4
+[div class=p 
+	"You can't run & gun in DEADBOLT - Reaper must stand still when aiming his weapon, meaning that making as few shots as possible is a must for optimal movement, as well as choosing the weapons that have the least amount of "recovery" frames (i.e. how soon Reaper can move again after shooting. These are usually throwable weapons, pistols and SMGs).
+	$LF
+]div
+[div class=p 
+	"Another variable of the shooting mechanic is weapon spread, represented by the circle around the reticle - the bigger the circle, the further off-centre your shots will go. This is where the majority of RNG manipulation (or the closest thing to it) comes in - since we know at what angle the bullets will travel, we can simply adjust our reticle accordingly frame-by-frame to achieve perfect headshots.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://cdn.discordapp.com/attachments/904710577966968937/1016999487186673794/shooty.gif 
+	]img
+	$LF
+]div
+[h4 id=WallPiercing 
+	" Wall piercing
+	$LF
+]h4
+[div class=p 
+	"Certain weapons in DEADBOLT have the ability to pierce walls and enemies, with each weapon having a set amount of surfaces that its bullets are allowed to go through.
+	$LF
+]div
+[div class=p 
+	"For example, a 10mm Pistol can shoot through one wall...
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://cdn.discordapp.com/attachments/904710577966968937/1017000830815186954/10mmshooty.gif 
+	]img
+	$LF
+]div
+[div class=p 
+	"While the Revenant - the main weapon of the run - a whopping four!
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://cdn.discordapp.com/attachments/904710577966968937/1017000831993786398/revshooty.gif 
+	]img
+	$LF
+]div
+[div class=p 
+	"Naturally, with each surface pierced, the bullets' damage drops off dramatically - however, this doesn't diminish the mechanic's usefulness in AI abuse and taking out lesser, weaker enemies (or taking out multiple enemies with a single well-lined shot).
+	$LF
+]div
+[h4 id=Vents 
+	" Vents
+	$LF
+]h4
+[div class=p 
+	"Reaper can flick his lighter to become a cloud of smoke, allowing him to move through the buildings’ ventilation systems, opening up opportunities for flanking and generally fast movement. Why are air ducts directly connected to sewer grates and toilets? Beats me.
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=TutorialNoisyNeighbors 
+	" Tutorial + Noisy Neighbors
+	$LF
+]h4
+[div class=p 
+	"We start by instantly skipping the tutorial stage, done by pausing and clicking "Quit Mission". While that function is available on every stage, this is the only part of the TAS where it's actually useful (one can also use it to circumvent the "complete the game deathless" achievement).
+	$LF
+]div
+[div class=p 
+	"After a short briefing, we're onto our first proper level - Noisy Neighbors. It serves as a good introduction to the general gameplay structure, with lots of lightswitches to flick, cover to hide behind, vents to traverse, and relatively non-threatening Bullies (melee) and Punks (guns) to kill. It's also a showcase of the kind of movement and pace that one can expect from this TAS going forward - lightning-quick shots, instant snapping to targets, perfect accuracy, all that good stuff.
+	$LF
+]div
+[div class=p 
+	"This is also where you get to see the first (almost) TAS-only trick - cover warping! The player can take cover on both sides of an object, with the game subtly teleporting Reaper to the appropriate position. By walking slightly past the middle of the object and interacting with it at the right time, we can snap to the opposite side and instantly leave it with one more input. While it’s doable by a human player on larger objects, like cars, long sofas, and tables, smaller objects provide almost no benefit or may actually be detrimental to the run. Not so much in a TAS, as every warp saves at least a couple frames, which adds up over the course of a 20 minute run.
+	$LF
+]div
+[h4 id=NewHigh 
+	" New High
+	$LF
+]h4
+[div class=p 
+	"This next level introduces us to Ash, the game's primary MacGuffin. Although, as far as we're concerned, it's just a thing to burn or inspect. A new type of enemy appears as well - Bouncers. Tankier enemies with Sawn-Off shotguns, and the first kind of enemy that we’ve encountered to actually drop a weapon on death.
+	$LF
+]div
+[div class=p 
+	"This is the first level with an intro cutscene, which plays only on the first attempt of the level. Instead of just sitting through it, we immediately pause and click “Restart Mission” to skip the cutscene. You’re gonna be seeing that one a lot throughout the run, and if you’ll ever wonder why the stats screen shows one death - that’s what caused it.
+	$LF
+]div
+[div class=p 
+	"Near the end of the level, we shoot once to attract the pair of zombies outside to our position, along with grabbing the attention of the Bouncer sitting near the objective. After inspecting it, we’ve got a ton of frames to spare before the zombies will open the door, so we use that to open the bathroom door in advance, kill the remaining Bouncer, and set up a one bullet + hammer combo.
+	$LF
+]div
+[h4 id=SmokeSignals 
+	" Smoke Signals
+	$LF
+]h4
+[div class=p 
+	"Not all levels require the player to kill every single enemy! More often than not we just have a specific objective to complete, after which we're free to head back to our car and leave, dodging bullets and confusing enemies along the way. This is one such case, as you can see with Reaper only killing whoever’s in his path.
+	$LF
+]div
+[div class=p 
+	"Right before burning the last ash cache, we make a quick detour to clear the path of a singular Punk, and bait a Bouncer to go upstairs. After that, all that’s left is to complete the objective and go back to the car, avoiding bullets along the way with some careful positioning.
+	$LF
+]div
+[h4 id=Puff 
+	" Puff
+	$LF
+]h4
+[div class=p 
+	"The first level with only a single enemy as the target! Not much to comment on here, just some clean routing and shooting. Once we get to Puff’s table, we have to search it for documents, which we naturally do in a couple of clicks. However, after clicking the correct button, the game locks us out of exiting the menu for about a second, so we admire that menu for a bit before heading to the car.
+	$LF
+]div
+[h4 id=FollowTheHounds 
+	" Follow The Hounds
+	$LF
+]h4
+[div class=p 
+	"Dogs, doggos, pupperinos. Don’t worry though, we’re sending them to a lovely farm they can be happy in.
+	$LF
+	"Pressing the Aim Down Sights button right after a melee swing cancels its recovery animation, saving a couple frames. This level also features a cool trick where the player can enter the car mid-air, avoiding the landing animation.
+	$LF
+]div
+[h4 id=Bogeyman 
+	" The Bogeyman
+	$LF
+]h4
+[div class=p 
+	"The first and only true stealth mission! We're even given a silenced pistol and everything. Alas, sneaky and speedy don’t exactly compliment one another.
+	$LF
+	"One of the more impressive use cases of cover warping can be found here, as we dodge a bullet in the process, before swiftly disappearing into the shadows (and stairwells).
+	$LF
+]div
+[h4 id=DocksNoVacancy 
+	" The Docks + No Vacancy
+	$LF
+]h4
+[div class=p 
+	"Remember that Silenced 9mm Pistol we were given at The Bogeyman? It actually overrides whichever weapon you had equipped prior to starting the level, and after completion the player is automatically switched back to the .32 Revolver. This makes equipping weapons before The Bogeyman a huge waste of time - we don't get much use out of them early on in such easy levels, and we'd also be interacting with the car more than necessary. As such, only *now* do we go to The Docks through the door in our apartment, and buy us some guns from our friendly mythical ferryman, Charon.
+	$LF
+]div
+[div class=p 
+	[b 
+		"The Tools Of The Trade
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Revenant - an incredibly loud revolver that holds 5 rounds, can pierce up to 4 walls, has the second highest damage per shot (after the sniper rifle), and is incredibly inaccurate, which we can disregard thanks to RNG manipulation. Invaluable in completely breaking the game.
+		$LF
+	]li
+	[li 
+		" Knife - a low-damage melee that doesn't stun enemies as much as a hammer - however, it can be thrown much further than the hammer, and deals a decent chunk of damage as a throwable. Good for quickly dispatching low-health enemies without wasting a bullet. As other throwables in the game, it becomes unusable once spent on an enemy, but it can be used again if thrown into anything else, be it a dead body, a camera, a landmine, or just plain nothing.
+		$LF
+	]li
+]ul
+[div class=p 
+	"And so, we move onto No Vacancy...
+	$LF
+]div
+[div class=p 
+	"This level introduces the player to Shamblers - zombies whose heads have been severed and placed elsewhere in the level, usually not very far from their bodies. We begin by dispatching a Bouncer with a single shot, and closing the door behind us - that last bit’s very important. After bouncing our knife from a Shambler head directly into a Bully and clearing the room, we immediately put the Revenant to use by destroying all the remaining Shamblers and Punks with accurate wall-piercing headshots. The ragdoll positioning here is crucial, as the game’s hit registration can cause even a single limb to just absorb all 5 “pierces”, so it took a while to find a setup where no shots are blocked by bodies.
+	$LF
+]div
+[div class=p 
+	"The next important trick in our arsenal is backup skipping. Killing the backup that arrives via cars is a separate, mandatory objective. When enemies spawn in, they’re given Reaper’s coordinates to path towards - however, “player” and “player in vent” are considered to be two separate entities by the game, and the backup objective doesn’t account for the latter. The player doesn’t exist, the enemies have no variables to work with, and due to what I can only assume is a safeguard to prevent the game from crashing, the objective is skipped entirely, allowing us to move on.
+	$LF
+]div
+[div class=p 
+	"After some very satisfying lockpicking, we vent all the way down towards the car. This is where the door we closed earlier comes in. As mentioned, the enemies have no coordinates to work with, so they’re just stood at their initial spawn point. Had we not closed the door, Reaper would’ve been spotted as soon as he came out of the vent, and shot before he had the chance to get to the car. Fortunately for us, the distance from the closed door to the car is just enough to make it out safely.
+	$LF
+]div
+[h4 id=SupplyAndDemand 
+	" Supply and Demand
+	$LF
+]h4
+[div class=p 
+	"The first appearance of the vampires! Don’t worry though, we’ll see plenty more later, as they have a whole chapter dedicated to them.
+	$LF
+	"The two types we see here are Incubi and Succubi - males with guns and fast-moving females with knives respectively, both able to walk on ceilings in an undisturbed state.
+	$LF
+]div
+[div class=p 
+	"We start the level off by shooting an Incubus through the wall - making him fall to the ground and allowing a Bully to open the door for us - after which we throw the knife into a camera and clear the rest of the warehouse with well-placed headshots from the 10mm pistol. All that’s left is to run around burning ash.
+	$LF
+]div
+[div class=p 
+	"On the way back we flicker the light to make the Bouncer investigate the lightswitch, and intentionally get seen by the camera to manipulate the AI a bit (it also wouldn’t make much sense to waste valuable frames shooting them anyway).
+	$LF
+]div
+[h4 id=Roland 
+	" Roland
+	$LF
+]h4
+[div class=p 
+	"At last, we arrive at the final level of the “Zombie Kingz” chapter. That means we’re a third of the way through the game now. This is a relatively straightforward single-target elimination.
+	$LF
+]div
+[div class=p 
+	"There’s a trick that will be used a couple times more in the run - normally before the initial cutscene the player can’t interact with anything, that includes selecting weapons or being in a vent while the cutscene is playing out. By pausing and unpausing, however, we reset that behaviour, allowing us to enter a vent and go through the intro cutscene while traversing further down into the building. This ends up actually being faster than just restarting the level. The only caveat is that we’re forced to navigate through the vent blindly, so the inputs were a bit tricky to plan out.
+	$LF
+]div
+[div class=p 
+	"One gang leader put six feet under, and we’re on to Chapter 2 - “1000 Year Royals”.
+	$LF
+]div
+[h4 id=NightOut 
+	" Night Out
+	$LF
+]h4
+[div class=p 
+	"The first level in the vampire chapter, Night Out puts a spin on things by introducing keycards - objects that the player has to collect off of their carriers in order to unlock a safe. As such, the routing here largely revolves around either getting over to them, or getting them over to us, as quickly as possible.
+	$LF
+]div
+[div class=p 
+	"We start off with the aforementioned pause-unpause trick, letting the cutscene play out while heading towards a keycard carrier positioned on the opposite side of the map. Having attracted him to the ground floor with some considerably loud gunshots, we start heading towards the safe, all the while picking off the keycard carriers and any other vampires standing in our way. Once that’s done, we’re free to escape, and leave the remaining vampires to their drinkin’ and dancin’.
+	$LF
+]div
+[h4 id=LuxInTenebris 
+	" Lux in Tenebris
+	$LF
+]h4
+[div class=p 
+	"As the objectives reveal later on, you do have to kill every enemy on the level! With that knowledge, starting from the opposite side and heading towards the car, we do just that.
+	$LF
+]div
+[div class=p 
+	"After conserving precious ammo with well-timed double kills, we head to the ground floor and make a precise Revenant shot that kills the Incubus next to us, slightly damages the Incubus in the restroom, and baits the Succubus on the floor above to run to a more favourable position.
+	$LF
+]div
+[div class=p 
+	"You may have noticed the dancing vampires here, as well as on the level before. Fortunately for us, they’re too busy dancing to care much about anything happening, unless they take damage. That’s where the sledgehammer comes in - it’s a melee weapon that can one-shot any enemy and can hit groups of three at once, perfect for just such an occasion. Like with hammers and knives, right-clicking still works to mitigate endlag, despite the sledgehammer not being throwable.
+	$LF
+]div
+[div class=p 
+	"Having cleared one side of the building, we proceed towards the other side through the top floor, making a kill with a shotgun at precisely the distance where no one from the restroom would be alerted. We then head to the restroom, do a triple kill with a sledgehammer (there’s four Incubi stacked in that one corner due to earlier shenanigans), and clear the rest of the building.
+	$LF
+]div
+[h4 id=BloodyMary 
+	" The Bloody Mary
+	$LF
+]h4
+[div class=p 
+	"This level introduces Bartenders, vampires with shotguns. Their gimmick is that they’ve got soul vessels - phylacteries - attached to them, and those bottles have to be destroyed in order to make sure that the Bartenders stay dead.
+	$LF
+]div
+[div class=p 
+	"This is also the first one in a streak of levels that get broken with wall piercing. We’re gonna need some diagrams for this one.
+	$LF
+]div
+[div class=p 
+	"We start off with two Revenant shots that attract a Bartender on the top left and destroy a phylactery on the top right. We then immediately head for the 10mm pistol, which can still pierce one wall whilst having a far faster firing rate. Killing a Succubus and destroying a phylactery with a knife throw, we make several 10mm shots. Those destroy the remaining phylacteries and shoot out the two lightbulbs present on this floor, hiding us from the enemies' line of sight:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://cdn.discordapp.com/attachments/904710577966968937/1017000831133945926/bloodymary_with_lines_cropped.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Some more Revenant shots to kill all the keycard-carrying Bartenders (along with one double-kill), and the objective is complete. Make sure not to get shanked on your way out.
+	$LF
+]div
+[h4 id=BottleService 
+	" Bottle Service
+	$LF
+]h4
+[div class=p 
+	"The challenge of this level usually lies in the hard-to-reach phylacteries that are connected to Bartenders situated right at the entrance, so that the player would have to go all the way round and kill them last. While we still have to navigate through the entire level for the objective, we can pretty much kill the Bartenders instantly thanks to the power of Revenant.
+	$LF
+]div
+[div class=p 
+	"Having dealt with the Bartenders, as well as a ceiling-walking Incubus on the far right that would have made the path forward significantly harder, we proceed through the level as normal, burning ash caches and placing headshots along the way.
+	$LF
+]div
+[h4 id=AmberEvelyn 
+	" Amber & Evelyn
+	$LF
+]h4
+[div class=p 
+	"A particularly memorable level for any casual player, A&E features two towers, where the player has to climb up both in order to reach the two sisters at the top. As it turns out, they’re each other’s phylactery, so they both have to be killed in quick succession.
+	$LF
+]div
+[div class=p 
+	"The first and only instance of a weapon dupe in this run. This is a trick executed by switching to a secondary and then unequipping it via our car, replacing it with whichever primary we held at the time.
+	$LF
+]div
+[div class=p 
+	"The double Revenant is required here, as 10 bullets have just enough damage to go through three walls on each side and kill the bosses with perfectly placed headshots right from the spawn point, without having to set foot inside even once.
+	$LF
+]div
+[h4 id=LotToGive 
+	" A Lot To Give
+	$LF
+]h4
+[div class=p 
+	"A drawback of doing a weapon dupe is that, since we did actually unequip our secondary, it won’t be present once we die/quit/restart. As such, we can say goodbye to our beloved Knife for the next few levels, but don’t worry, we’ll get it back soon enough.
+	$LF
+]div
+[div class=p 
+	"A Lot To Give introduces the player to Nightcrawlers - bat-looking enemies equipped with PDWs. Appropriately, they can see perfectly in the dark, although annoyingly enough they’re also some of the most flinch-resistant enemies in the game, so you should kill them fast if you want to survive. Thankfully, they can only shoot once they get close enough to you, so keeping your distance is key when fighting them.
+	$LF
+]div
+[div class=p 
+	"There’s also some spooky story-related shenanigans, what with all the frozen vampires, but we don’t have the time for that.
+	$LF
+]div
+[div class=p 
+	"Two notable things on this level:
+	$LF
+]div
+[ol 
+	[li 
+		" A Revenant shot that kills a Nightcrawler, destroys a phylactery, and damages a Bartender a bit, who we finish off with some shots from a PDW.
+		$LF
+	]li
+	[li 
+		" Just like on No Vacancy, backup arrives, and just like on that level, we skip it. What makes this particularly impressive is that the escape is frame-perfect. The last remaining Revenant shot provides just enough hitstun for the closest enemies, and had the interaction key been pressed a frame later or sooner, we wouldn’t have made it. What I wouldn’t give to make this RTA viable.
+		$LF
+	]li
+]ol
+[h4 id=SirStela 
+	" Sir Stela
+	$LF
+]h4
+[div class=p 
+	"Much like Supply & Demand, Sir Stela introduces a new faction three levels before their actual chapter - the Dredged! Grunts carry automatic rifles, while Sergeants are bulky lads that can run around at lightning speed, swinging their sledgehammers all over the place. We even see the main big bad during the intro cutscene. Or we would’ve, if we didn’t immediately skip it.
+	$LF
+]div
+[div class=p 
+	"Our objective is located on the top floor and is guarded by three skeletons, so first and foremost we ought to get rid of them. We do so by firing a single Revenant shot that pierces all the way to the top floor - thanks to us being positioned in the rightmost corner of the room, the enemies will try to pathfind to us there, getting stuck in the rightmost corner of their own room.
+	$LF
+]div
+[div class=p 
+	"After that, it’s a matter of navigating to the elevator, which is faster to call from the third floor, thanks to the vents and the elevator’s travel time. Waiting for the elevator, we clear the room and grab the Old World Rifle for further wall piercing shenanigans.
+	$LF
+]div
+[div class=p 
+	"While riding the elevator, we shoot out the lightbulbs on the top floor - that’ll aid us in our escape later on. For now though, this floor’s only line of defence is too busy examining the drywall, so we can just walk over to the safe, lockpick it, and start heading back. Completing this objective spawns a bunch more enemies throughout the level, including one Grunt right next to the elevator. Killing him would be a waste of frames, so we run right past him, get into the elevator, and then keep interrupting his reload animation with spaced out shots until we’re no longer in range. After a couple close calls with enemy sledgehammers, we’re home free.
+	$LF
+]div
+[h4 id=ForcedConversion 
+	" Forced Conversion
+	$LF
+]h4
+[div class=p 
+	"This level’s gimmick is a time limit! Being pressured to complete a level as quickly as you can, imagine that. If you’re unprepared, it’s sure to cause some panic during a casual playthrough.
+	$LF
+]div
+[div class=p 
+	"The player has to burn all ash totems present on the level, lest the mission’s name lines up with what’s going to unfold. Thankfully, the level itself is quite compact, allowing for fast movement.
+	$LF
+]div
+[div class=p 
+	"Shooting the two Grunts at the entrance would hurt the dancing vampires next door, and we don’t need that kind of attention right now. Now’s the time to get our trusty knife back from the dupe dimension our car’s trunk, only to immediately embed it in the skull of the Grunt furthest from us. The totem at the entrance is going to remain intentionally intact.
+	$LF
+]div
+[div class=p 
+	"We continue navigating to all the other totems, shooting anyone who stands in our way, dropping down from the roof, venting back to the entrance, and burning the last totem. This is where the backup arrives, but since we completed the main objective right next to our car, we’re able to escape before the backup even spawns, no vents required.
+	$LF
+]div
+[h4 id=MadamStela 
+	" Madam Stela
+	$LF
+]h4
+[div class=p 
+	"The final boss of the vampire chapter, Madam Stela, is like a buffed up Bartender. Wielding a shotgun with infinite ammo, she has a whopping 7 big phylacteries (with more hp than regular ones) protecting her! Naturally, we have to destroy all of those to make sure she’ll never rise again.
+	$LF
+]div
+[div class=p 
+	"We destroy the first phylactery with a knife throw, then vent down to shoot another four through walls with the Revenant. One stray bullet also hits a lightbulb in the boss room, making the entire room go dark. After going back up to that very room, we spend the last remaining Revenant bullet on a phylactery located in a closed-off room on the far right, grab a Tommy Gun, and let it rip, abusing the darkness in order not to be seen by the Succubi hunting for us. Madam Stela is down, and we make a swift exit, entering the car mid-air.
+	$LF
+]div
+[h4 id=OvernightShipping 
+	" Overnight Shipping
+	$LF
+]h4
+[div class=p 
+	"The first proper skeleton level, although the enemy roster so far remains the same. There is a single Grunt hidden in the shipping container, but we’re gonna intentionally save him for later, similarly to what we did on Forced Conversion with the totem. Completing the objectives - namely, reading the note and killing all undead - spawns more enemies. By leaving that first Grunt until the very end, we can complete the latter objective after we're past all the spawn points, bypassing them entirely.
+	$LF
+]div
+[div class=p 
+	"And so, we start heading to the right. We could normally drop right off the ledge, since DEADBOLT doesn’t have fall damage, but we climb a bit down the stairs to line up three Revenant shots that kill most of the off-screen enemies with headshots, along with one bullet wasted on a Grunt right below us.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://cdn.discordapp.com/attachments/904710577966968937/1017000831708561478/overnightshipping2_with_lines.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Now out of Revenant ammo, we head to the building in the middle to grab a 9mm SMG and climb up the crane, as that’s the only way to reach the container we need. We run a bit further before spraying down three enemies that are now in our line of sight, in order to minimise the frames wasted on shooting. All that’s left is to inspect the note in the container, grab a rifle and head back to our car. By stopping a bit mid-air, we land on a nearby ledge and avoid the landing animation. 
+	$LF
+]div
+[div class=p 
+	"While we could kill that last Grunt through the container, wall piercing damage reduction makes it so that it would be faster to just open the container and kill him normally.
+	$LF
+]div
+[h4 id=StructurallySound 
+	" Structurally Sound
+	$LF
+]h4
+[div class=p 
+	"This mission introduces Technicians - enemies that are equipped with single-shot grenade launchers, who can also plant an infinite amount of landmines once disturbed. And I do mean infinite. While the landmines can be used strategically against them, as shooting a stack of mines can take out a lot of enemies at once, they’ll also block our path unless we’re willing to waste a bullet on them.
+	$LF
+]div
+[div class=p 
+	"The beginning of this level teaches the player exactly that, challenging us with a single patrolling Sergeant and a landmine right beneath him. To get past, the player has to learn how these entities interact. Armed with knowledge, though, we can just throw our knife at the landmine and pick it back up, since it isn’t considered to be “spent” unless it hits an enemy.
+	$LF
+]div
+[div class=p 
+	"We go straight to the top floor and shoot a Technician on the roof, ridding ourselves of one mine-placing menace and attracting the rest of the enemies to our position. We then wait for them to congregate in the middle, opening doors, walking into landmines, and placing themselves into our line of sight for swift executions all around. Finish off with one more mid-air car interaction.
+	$LF
+]div
+[h4 id=BarHopping 
+	" Bar Hopping
+	$LF
+]h4
+[div class=p 
+	"The first multi-stage level in the campaign! Well, the first we haven’t skipped, anyway. Once the player kills all the enemies, they have to touch a level transition trigger to go to a different screen, instead of just completing the mission like that.
+	$LF
+]div
+[div class=p 
+	"There’s two pairs of Grunts standing next to each other, each of which can be cleared with a single shot from the Revenant. Thanks to that, we have the perfect amount of ammo needed to clear this first screen, spending our last two bullets on a Sergeant and a landmine, then throwing our knife at the last Grunt.
+	$LF
+]div
+[div class=p 
+	"A quirk of screen transitions in this game is that the player is restocked on ammo for whatever weapon they’re currently holding, but the weapon that isn’t being held is just going to disappear into the shadow realm. As such, we’ve got our 5 Revenant bullets to use again, but even if we kept the knife, the transition would have cruelly taken it from us regardless.
+	$LF
+]div
+[div class=p 
+	"Fortunately for us, though, someone left a hammer just lying there on the ground. Civic-minded citizen that we are, we pick up the litter and properly dispose of it in the Technician’s skull. We then use that Technician’s grenade launcher on the two Grunts in the middle, waiting just enough frames for us to be spotted, which alerts the three Sergeants in the other room. We then fire four shots at max possible fire rate (hence the delay), taking out the Sergeants and triggering the landmines as soon as they’re activated.
+	$LF
+	"Heading back, we’re introduced to a new type of enemy - Generals! Appropriately referred to as “Liches” in the mission briefing, they fit the label with their spooky appearance and their ability to resurrect dead enemies with skeleton magic. Killing the first one with two wall-piercing shots, we repeatedly interrupt the second one’s revival animation, until we can get up-close and finish him off.
+	$LF
+]div
+[h4 id=HorrorShow 
+	" Horror Show
+	$LF
+]h4
+[div class=p 
+	"The linearity of this level is both a blessing and a curse - the only path to the objective is a single, heavily-guarded stairwell, which makes the routing straightforward, but also makes dealing with enemies rather annoying if luck isn’t on your side.
+	$LF
+]div
+[div class=p 
+	"We eliminate a General and a light source, then vent straight to that stairwell, leaving all other enemies undisturbed (although, noticing the lack of light with the eye sockets in the back of his skull, a Technician is alerted). We dodge everyone else, only dispatching the two Grunts next to the container once out of range of anyone’s hearing. After revealing its grisly contents, we can head back, clearing the mines through the floor and venting straight to the car.
+	$LF
+]div
+[h4 id=TimurTheTinkerer 
+	" Timur the Tinkerer
+	$LF
+]h4
+[div class=p 
+	"A definite highlight of the game and a fan-favourite level, Timur is all about traps! Shotguns tied to doors, pressure plates that drop grenades, landmines, all that good stuff. The safe we need to open is located in Timur’s room, which itself is also full of those traps thanks to Timur’s paranoia. And we’re headed right in. 
+	$LF
+]div
+[div class=p 
+	"Running right by the first trap, we steal the shotgun and use it on the mine. Upon entering the next room, we line up a shot, taking out the landmines on the second and the third floor, making the path forward significantly safer and clearing Timur’s room, allowing us to just vent right in there instead of doing a puzzle. We run right past falling grenades, make a Sergeant run into shotguns’ line of fire, clear a room full of Grunts, and evade a couple more shotguns (some mines would’ve normally been here had we not shot them), grabbing the last one in order not to get blasted.
+	$LF
+]div
+[div class=p 
+	"Since all the landmines in Timur’s room are gone, we can just drop in, inspect the safe, and vent out, dropping down from the roof.
+	$LF
+]div
+[h4 id=DriveThru 
+	" Drive Thru
+	$LF
+]h4
+[div class=p 
+	"Now that we’ve learned a little about what the Dredged are planning, we need to track down their leader. Thankfully, he’s getting his car serviced by some demon mercenaries from across the river, which should help us find out his address. We’re immediately presented with all three types: Cardinals, who run around with fiery bats; Maidens, who are armed with Burst Rifles and have almost fullscreen shooting range; and Patriarchs, who carry miniguns that take time to wind up once you’re spotted.
+	$LF
+]div
+[div class=p 
+	"Heading towards the objective, we kill the first couple of demons, shoot at the exact range to attract another demon behind a locked door, and get spotted by a camera to attract the rest of the level to our position. Flanking everyone via vents, we use our positional advantage to kill a bunch of enemies in quick succession before going up and inspecting the main big bad’s car.
+	$LF
+]div
+[div class=p 
+	"Heading back, we meet with two Cardinals and two overlapping dogs, whom we eliminate in a quick burst of gunfire after a cover warp. 
+	$LF
+]div
+[h4 id=AsAGlass 
+	" As A Glass
+	$LF
+]h4
+[div class=p 
+	"Now, you may have noticed that every single level so far has had some sort of gimmick, whether that be introducing a new enemy or putting some new twist on the gameplay loop. Although slightly underwhelming, As A Glass also does that by giving us an exclusive weapon - an Automatic Grenade Launcher, with 6 grenades to make use of. While our dominant loadout would have just barely been able to deal with the crowd in the lobby, the AGL clears it with ease, and with a couple grenades left to spare! 
+	$LF
+]div
+[div class=p 
+	"We stick with the Burst Rifle for the second floor, then fire it on the third floor to attract enemies on the other side of the door. We clear the rest of the third floor with a grenade multikill and a burst from a 9mm smg, before using the last grenade and a 10mm pistol on the two remaining Patriarchs. With the level cleared, all that’s left is to inspect the safe on the top and endure the slow walk all the way back down, admiring the mayhem we’ve caused along the way.
+	$LF
+]div
+[h4 id=Vall 
+	" Vall
+	$LF
+]h4
+[div class=p 
+	"One of the more unique boss fights in the game, in that we don’t see the boss until the very end of the level. What we do see, though, is her laser sight - our objective is to take down Vall, the sniper demon, as the last step in preparation for the grand finale.
+	$LF
+]div
+[div class=p 
+	"Similarly to The Bogeyman’s silenced pistol, the grenade launcher we were given earlier overrides whichever weapon we had, and defaults to the .32 Revolver afterwards, so we need to get our trusty Revenant back into our hands. In order to do that, we rely on the long-unused pause-unpause trick, interacting with the car, selecting the gun, and venting inside, all while the cutscene is playing out.
+	$LF
+]div
+[div class=p 
+	"Vall will be targeting us whenever we’re not under the cover of darkness, trying to intercept our movements throughout the level. If you stand still, Vall just fires at that spot; if you’re on the move, Vall will predict the exact point where her bullet will collide with your skull if you don’t stop moving. As such, the best strategy is to constantly be on the move, occasionally stopping for a couple frames to make her shot miss, or otherwise relying on cover warping. 
+	$LF
+]div
+[div class=p 
+	"After getting inside, our main priority is calling the elevator down, alongside clearing the current screen of any threats. We kill a Maiden and promptly bait the Patriarch to the stairwell for later, then eliminate everyone on the upper floor. Having baited the rightmost Cardinals with some gunfire, we head for the elevator, making another Revenant shot along the way to bait the Patriarch upstairs. While the elevator’s on its way, we head back down, kill everyone else, and start heading up. Don’t forget to switch to the Revenant so it’s not lost to the level transition!
+	$LF
+]div
+[div class=p 
+	"The second floor is rather linear and abundant with light sources that are just begging to be shot out - alas, that would waste precious frames, and our movement and lockpicking speed allow us to ignore the need to stay out of sight anyway. All that’s left is to get to the sniper rifle and take the shot.
+	$LF
+]div
+[div class=p 
+	"There’s no RNG involved here - Vall always spawns in the same spot. However, I did encounter an interesting quirk when trying to make a shot within the first frame of this screen being loaded. The sniper scope doesn’t inherit the reticle’s coordinates, instead defaulting to somewhere in top centre and then trying to sync up with the reticle position as fast as possible. As such, it took a lot of fiddling with the coordinates and essentially firing blindly, hoping that somewhere along the way the bullet would land somewhere between those two spots, and right on Vall. Ultimately, the perfect first frame shot was not achieved, so there’s a place for future TASes to improve on!
+	$LF
+]div
+[div class=p 
+	"With that taken care of, we’re greeted by two Candles, lesser minions of our mutual employer, and we take the elevator down to…
+	$LF
+]div
+[h4 id=Ibzan 
+	" Ibzan
+	$LF
+]h4
+[div class=p 
+	"The main big bad of the game, Ibzan, has constructed a portal, and whatever it’s for, we’ve gotta stop him.
+	$LF
+]div
+[div class=p 
+	"Contrary to the given objective, we don’t actually have to kill anyone on this map, especially the demons marked as targets. Instead, we can walk right up to the portal, activate it, and head into the next stage. It’s best to get rid of the enemies surrounding it, though.
+	$LF
+]div
+[div class=p 
+	"This level’s extra special gimmick is Sniper Support - upon placing your reticle over an enemy or light source and pressing Q, the candles we met earlier will perfectly track it and shoot it, headshots naturally being deadly. We first dispose of the Patriarch right next to us. Instead of skipping the cutscene, we use its camera and present enemies to our advantage. Killing the Patriarch in the rightmost corner of the room causes the Technicians to start placing landmines before they despawn, and baits anyone who’s seen the body to the roof of the building. Don’t ask why, because I have absolutely no idea. A couple bullets were also spent on the lights above the teleporter, just in case, but it ultimately wasn’t necessary.
+	$LF
+]div
+[div class=p 
+	"After running all the way to the right and blowing everyone up, we activate the portal and head inside. This is actually where I lose a couple frames due to the lack of foresight, as the last remaining bullet of sniper support could’ve been used on the Maiden without hindering the movement, but instead I opted to spend a knife on her, losing approximately 5 frames. Guess I was just really eager to get rid of it.
+	$LF
+]div
+[h4 id=HomeSweetHome 
+	" Home Sweet Home
+	$LF
+]h4
+[div class=p 
+	"The grand finale, the toughest boss fight in the game, with the most melancholic of tracks… hold on, something’s wrong.
+	$LF
+]div
+[div class=p 
+	"Oh, darn, the native Linux port uses the wrong background! It’s supposed to be all otherworldly and mystical! Here, just have this screenshot to get the idea:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://cdn.discordapp.com/attachments/904710577966968937/1017000831444332594/db_sc9_6_2022_29.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Regardless, after a bit of walking, we arrive at the final screen of the game. Normally, the player is supposed to vent down the well, perhaps after exploring the mansion for a bit, and have a lengthy conversation with the one who has been giving us these missions all along. We, however, can just restart the level (and thus, die) as soon as we’re loaded in.
+	$LF
+]div
+[div class=p 
+	"You see, in order to avoid going through the talking section over and over, the devs made two separate levels: 
+	[code 
+		"lv4_2
+	]code
+	" and 
+	[code 
+		"lv4_2_load
+	]code
+	", with the “load” version being used when you respawn, omitting that initial objective and skipping straight to the boss fight. And we’re more than happy to take advantage of that fact.
+	$LF
+]div
+[div class=p 
+	"We’re once again given the .32 Revolver, and with no car in sight, we have to rely on weapons scattered around the mansion. Ibzan himself can die just like any other enemy, but that would make for a rather boring boss fight. He’s armed with a Revenant, has extremely fast reaction time, doesn’t flinch, and he spawns extra enemies that get tougher with his every death. Oh yeah, Ibzan can respawn, and we have to take him down a total of 5 times before he exhausts his last bit of strength. 
+	$LF
+]div
+[div class=p 
+	"Ibzan’s respawn positions themselves are somewhat deterministic. While dictated by RNG, he’s always set to spawn a certain amount of units away from the player. As such, depending on where and when we kill him, we can roughly predict his next spawn point and route around that, shooting him in the head precisely when he appears there, not giving the poor guy even a frame to react. Several high-calibre bullets to the head, and Ibzan is defeated.
+	$LF
+]div
+[div class=p 
+	"Heading back to the well, we see him kneeling in the snow. Shooting him at perfect distance in order to get into the well a frame before the cutscene appears, we let it play out while heading down. Sitting down, we’re congratulated on a job well done, and the screen fades to black.
+	$LF
+]div
+[h4 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h4
+[div class=p 
+	"Special thanks to the DEADBOLT community for their support in this endeavour, and advice/feedback given throughout.
+	$LF
+]div
+[div class=p 
+	"Shoutouts to Square_Rabbit for proofreading this description, and Cilian from the DEADBOLT Discord for the No Vacancy route.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Updated movie file with an earlier ending point.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Insane shooting, and you beat your own WR by quite a bit. Accepting!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Processing...
+]div

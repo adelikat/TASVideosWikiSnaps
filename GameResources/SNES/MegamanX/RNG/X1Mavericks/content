@@ -1,0 +1,631 @@
+1
+[div class=p 
+	"(back to 
+	[a href=https://tasvideos.org/GameResources/SNES/MegamanX/RNG rel=noopener external nofollow 
+		"https://tasvideos.org/GameResources/SNES/MegamanX/RNG
+	]a
+	" )
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#ChillPenguin 
+					" Chill Penguin
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#StormEagle 
+					" Storm Eagle
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ArmoredArmadillo 
+					" Armored Armadillo
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#StingChameleon 
+					" Sting Chameleon
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SparkMandrill 
+					" Spark Mandrill
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#LaunchOctopus 
+					" Launch Octopus
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#FlameMammoth 
+					" Flame Mammoth
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#BoomerKuwanger 
+					" Boomer Kuwanger
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h4 id=ChillPenguin 
+	" Chill Penguin
+	$LF
+]h4
+[div class=p 
+	"There are 6 Chill Penguin actions:
+	$LF
+]div
+[pre 
+	"0 (cubes) - shoot four ice cubes (Penguin always starts with this)
+	$LF
+	"2 (blizzard) - jump to center and create a blizzard
+	$LF
+	"4 (slide) - slide on the ground (invincible)
+	$LF
+	"6 (jump at) - jump at player
+	$LF
+	"8 (penguins) - create ice penguins
+	$LF
+	"A (stun) - stunned from an attack
+	$LF
+]pre
+[div class=p 
+	"The next action is determined from the previous action and RNG value mod 16, based on a table at 0x86C45E in Rockman X (J) ROM:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"There is one exception: If there are already ice penguins on the field (not destroyed), action 8 (penguins) becomes action 0 (cubes) instead.
+	$LF
+]div
+[div class=p 
+	"Note that action A (stun) is treated the same as previous action being 0 (cubes). Normally there is only 1/16 chance of going from action 0 to action 0, but if Chill Penguin is made to create ice penguins, the probability of action 0 -> action 0 goes up to 5/16.
+	$LF
+]div
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 0 (cubes) - Whether cubes fall to ground or fly horizontally in air
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Determined right before Penguin shoots each ice cube.
+	$LF
+]div
+[pre 
+	"0 to 9 (mod 16): Cube flies horizontally in air
+	$LF
+	"10 to 15 (mod 16): Cube falls and slides along the ground
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=StormEagle 
+	" Storm Eagle
+	$LF
+]h4
+[div class=p 
+	"Storm Eagle's possible actions are:
+	$LF
+]div
+[pre 
+	"0 (wind) - blow wind (Storm Eagle always starts with this)
+	$LF
+	"2 (dive) - dive at player
+	$LF
+	"4 (tornado) - shoot a storm tornado
+	$LF
+	"6 (egg) - spit an egg
+	$LF
+]pre
+[div class=p 
+	"The next action is determined from the previous action and RNG value mod 32, based on a table at 0x86D41E (RMX-J). Note: It is not possible to do 4 (tornado) twice in a row:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Two other things are determined by RNG:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 0 (wind) - Duration
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after deciding action 0 (wind), the RNG value mod 4 is used to determine the duration of wind (RAM address 0xE9C):
+	$LF
+]div
+[pre 
+	"0 (mod 4): 120 frames of wind
+	$LF
+	"1 or 3 (mod 4): 240 frames of wind
+	$LF
+	"2 (mod 4): 360 frames of wind
+	$LF
+]pre
+[div class=p 
+	"In addition, a number of RNG values are called during action 0 (wind) to determine dust sprite positions.
+	$LF
+]div
+[dl 
+	[dt 
+		"2) Action 2 (dive) - Number and direction of dives
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after deciding action 2 (dive), one or two RNG values are called to determine the number of times Storm Eagle dives at the player (RAM address 0xE9E):
+	$LF
+]div
+[div class=p 
+	"The 1st RNG value mod 16 determines whether the dive count is 1, or 6-9:
+	$LF
+]div
+[pre 
+	"0 to 3 (mod 16): dive count = 1
+	$LF
+	"4 to 15 (mod 16): dive count = 6 to 9
+	$LF
+]pre
+[div class=p 
+	"If the dive count is 6 to 9, a 2nd RNG value is called to determine the dive count:
+	$LF
+]div
+[pre 
+	"dive count = (RNG mod 4) + 6
+	$LF
+]pre
+[div class=p 
+	"Right before each dive occurs, RNG value mod 2 is used to determine the direction:
+	$LF
+]div
+[pre 
+	"0 (mod 2): Top right to bottom left
+	$LF
+	"1 (mod 2): Top left to bottom right
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=ArmoredArmadillo 
+	" Armored Armadillo
+	$LF
+]h4
+[div class=p 
+	"Armored Armadillo only has two main actions: 
+	$LF
+]div
+[pre 
+	"0 (roll) - roll around (Armadillo always starts with this)
+	$LF
+	"2 (shot) - shoot energy shots
+	$LF
+]pre
+[div class=p 
+	"The next action is distance-based as follows, based on a table at 0x86C983 (RMX-J):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"However, Armadillo is programmed never to do an action three times in a row. If Armadillo has already done an action twice in a row, Armadillo will always do the other action next (and no RNG value is called).
+	$LF
+]div
+[div class=p 
+	"Three other things are affected by RNG:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 0 (roll) - Whether to stop rolling after hitting a surface
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Each time Armadillo hits a surface, at least 9 RNG values are consumed. However, on the first hit on the wall, as well as on any hit on the ground, an extra RNG value is called to determine (mod 16) whether to stop rolling. For the first hit on a wall, this RNG call is the last of 10 RNG calls. For all hits on the ground, this RNG call is the first of 10 RNG calls:
+	$LF
+]div
+[pre 
+	"0 to 5 (mod 16): Stop rolling
+	$LF
+	"6 to 15 (mod 16): Continue rolling
+	$LF
+]pre
+[dl 
+	[dt 
+		"2) Action 2 (shot) - How many energy shots
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after action 2 (shot) is decided, RNG value mod 16 is used to determine the number of energy shots (address 0xE9E), based on a table at 0x86c973 (RMX-J):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[dl 
+	[dt 
+		"3) Whether Armadillo blocks player's shots
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Whenever Armadillo has his armor and is on the ground, he can block the player's shots. When a shot is close enough, the game calls an RNG value to determine whether or not Armadillo goes into block mode:
+	$LF
+]div
+[pre 
+	"0 to 3 (mod 16): Don't go into block mode.
+	$LF
+	"4 to 15 (mod 16): Go into block mode.
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=StingChameleon 
+	" Sting Chameleon
+	$LF
+]h4
+[div class=p 
+	"Sting Chameleon has the following actions:
+	$LF
+]div
+[pre 
+	"0 (ground) - drop down to the ground (by default, Chameleon starts with this)
+	$LF
+	"2 (camo) - go into camouflage
+	$LF
+	"6 (shake) - attach to the ceiling and shake the room
+	$LF
+	"8 (shoot) - jump or move on wall to perform tail shooting attack
+	$LF
+	"A (tongue) - move on wall to attack with tongue
+	$LF
+	"C (stun) - stunned by boomerang
+	$LF
+]pre
+[div class=p 
+	"The next action is determined by the previous action and RNG value mod 16. Unlike other bosses, there are multiple separate routines to determine the next action. For convenience, they are compiled into a single table as follows:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Whether Chameleon actually attacks with the tongue after moving on the wall, or attacks with the tongue on the ground, is determined only by whether the player is close to Chameleon, not by RNG.
+	$LF
+]div
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 6 (shake) - How long Chameleon shakes the room
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Before Chameleon shakes the room, RNG value mod 128 is used to determine the duration of shaking:
+	$LF
+]div
+[pre 
+	"Duration of room shaking in frames: (RNG mod 128) + 60
+	$LF
+]pre
+[div class=p 
+	"In addition, a number of RNG values are called during action 6 (shake) to determine falling spike positions.
+	$LF
+]div
+[dl 
+	[dt 
+		"3) Action 8 (shoot) - Whether to continue the tail shooting attack
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"After each tail shooting attack, RNG value mod 128 is called to determine whether to continue the attack, or to stop:
+	$LF
+]div
+[pre 
+	"0 to 11 (mod 16): Continue the attack
+	$LF
+	"12 to 15 (mod 16): Stop the attack
+	$LF
+]pre
+[div class=p 
+	"However, Chameleon will always stop after the third attack, even though the RNG value is still called. When Chameleon stops action 8 (shoot), the RNG value determining the next action is called immediately afterward.
+	$LF
+]div
+[hr 
+]hr
+[h4 id=SparkMandrill 
+	" Spark Mandrill
+	$LF
+]h4
+[div class=p 
+	"Spark Mandrill has the following actions:
+	$LF
+]div
+[pre 
+	"0 (ball) - electric ball attack
+	$LF
+	"2 (ceiling) - hang on ceiling and drop on player
+	$LF
+	"4 (punch) - charge at player with punch
+	$LF
+	"6 (jump) - jump at player
+	$LF
+	"A (frozen) - frozen by shotgun ice
+	$LF
+]pre
+[div class=p 
+	"Spark Mandrill's next action is determined from its previous action and RNG value mod 32, based on the table at 0x86cfde (RMX-J). Mandrill's initial action is determined through a different random subroutine, but is included in this table:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[hr 
+]hr
+[h4 id=LaunchOctopus 
+	" Launch Octopus
+	$LF
+]h4
+[div class=p 
+	"Launch Octopus has the following four actions:
+	$LF
+]div
+[pre 
+	"0 (jump) - jump and shoot torpedoes (Octopus always starts with this action)
+	$LF
+	"2 (whirlpool) - create a whirlpool
+	$LF
+	"4 (fish) - release homing fishes
+	$LF
+	"6 (torpedo) - shoot torpedoes (no jump)
+	$LF
+]pre
+[div class=p 
+	"Launch Octopus's next action is distance-based. The table is based on data from address 0x86c628 (RMX-J) and "*" indicates the case when Octopus's arms are cut off with Boomerang Cutter:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 0 (jump) - Jump velocity/height
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When Launch Octopus jumps due to action 0, RNG value mod 4 is used to determine his initial upward jump velocity, in subunits (1/256 px) per frame. The values are from address 0x86c6f8:
+	$LF
+]div
+[pre 
+	"0 (mod 4): 1222 subunits per frame (lowest)
+	$LF
+	"1 (mod 4): 1365 subunits per frame
+	$LF
+	"2 (mod 4): 1493 subunits per frame
+	$LF
+	"3 (mod 4): 1611 subunits per frame (highest)
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=FlameMammoth 
+	" Flame Mammoth
+	$LF
+]h4
+[div class=p 
+	"Flame Mammoth has the following four actions:
+	$LF
+]div
+[pre 
+	"0 (jump) - jump at player (Flame Mammoth always starts with this)
+	$LF
+	"2 (oil) - throw oil from trunk
+	$LF
+	"4 (flame) - throw flame
+	$LF
+	"6 (switch) - switch direction of conveyor belt
+	$LF
+]pre
+[div class=p 
+	"Flame Mammoth's next action is distance-based. The table is based on data from address 0x86c846 (RMX-J) and "*" indicates the case when Mammoth's trunk is cut off with Boomerang Cutter:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Exception: If the player is within 0-111 pixels of the top of the screen, Flame Mammoth will always be coded to jump (and no RNG value is called).
+	$LF
+]div
+[div class=p 
+	"The RNG also determines the following two actions:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Number of flames in action 4 (flame attack)
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Flame Mammoth can throw anywhere from 3 to 5 flames. Determined by RNG value as follows:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[dl 
+	[dt 
+		"2) Horizontal speed of oil in action 2
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"If Flame Mammoth throws oil, its horizontal speed, in subunits (1/256px) per frame, is determined by:
+	$LF
+]div
+[pre 
+	"If throwing to the right: 640 + (RNG mod 128) subunits per frame
+	$LF
+	"If throwing to the left: 768 - (RNG mod 128) subunits per frame
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=BoomerKuwanger 
+	" Boomer Kuwanger
+	$LF
+]h4
+[div class=p 
+	"Boomer Kuwanger has the following actions:
+	$LF
+]div
+[pre 
+	"0 (dash) - dash toward the player
+	$LF
+	"2 (boomer) - throw boomerang
+	$LF
+	"4 (warp) - teleport
+	$LF
+]pre
+[div class=p 
+	"Kuwanger's next action is determined based on whether the previous action is a short (<9 frame) or long (>=9 frame) dash, or whether the previous action is a teleport and the player is near (<128px) or far from (>=128px) Kuwanger. The table is based on data from address 0x86c5a6:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"After throwing boomerang, Kuwanger will always do action 0 (dash) until he retrieves the boomerang.
+	$LF
+]div
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 0 (dash) - Whether dash is short or long
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after action 0 (dash) is determined, an RNG value is called to determine whether the dash is short (only dash for 8 frames) or long (dash towards player position):
+	$LF
+]div
+[pre 
+	"0 to 5 (mod 16): Short dash
+	$LF
+	"6 to 15 (mod 16): Long dash
+	$LF
+]pre
+[dl 
+	[dt 
+		"2) Action 4 (warp) - Where to reappear after teleporting
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after action 4 (warp) is determined, an RNG value is called called to determine where Kuwanger should reappear, horizontally relative to player position:
+	$LF
+]div
+[pre 
+	"0 (mod 4): Reappear 28px from player
+	$LF
+	"1 (mod 4): Reappear 48px from player
+	$LF
+	"2 (mod 4): Reappear 80px from player
+	$LF
+	"3 (mod 4): Reappear on the very left or right side
+	$LF
+]pre
+[div class=p 
+	"When reappearing 28/48/80px from player, Kuwanger always appears to the right of the player if the player is on the left half of the screen, and vice versa. When appearing on the very left or right, Kuwanger appears on the left side if Kuwanger was to the right of the player when starting the teleportation, and vice versa.
+]div

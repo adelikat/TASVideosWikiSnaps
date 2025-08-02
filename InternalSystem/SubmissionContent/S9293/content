@@ -1,0 +1,400 @@
+11
+[div class=p 
+	"Another improvement to Gen 2 save glitch.
+	$LF
+]div
+[div class=p 
+	"The strategy for this run is to get out of bounds to map 0xFF00, similar to my previous 
+	(__wikiLink|displaytext=Crystal save glitch TAS|href=/6746S)
+	". This is done by resetting right after the player's coordinates are written but before the visible map cache is saved, resulting in a desynchronized map state, allowing for the map to be exited in unintentional ways. Map 0xFF00's corruption gives us access to a highly corrupted inventory and thus a seemingly easy vector for ACE.
+	$LF
+]div
+[div class=p 
+	"However, this run opts to do this very early, before even talking to Mom. This poses a grave problem: you can't use wrong pocket TMs/HMs without a Pokemon in the party (as the game prevents item effects for items needing a Pokemon. Granted this is strange for wrong pocket TMs/HMs since separate code handles the correct TMs/HMs pocket). There is also the minor problem of not being able to actually use Mail to setup an ACE payload.
+	$LF
+]div
+[div class=p 
+	"So without a Pokemon, it seems like this route is impossible. However, I discovered a saving grace: registered items. Registered items are not subject to the Pokemon in a party limitation (as Game Freak didn't add such code to registered item handling). So we can freely use a wrong pocket TM/HM by "registering" a wrong pocket TM/HM. An extra saving grace is HM03, which runs the daycare withdraw code, thus allowing us to get a Pokemon!
+	$LF
+]div
+[div class=p 
+	"Another change here is a different wrong pocket TM is now used. TM33 is used, which has its effect pointer at 
+	[code 
+		"F418
+	]code
+	". This ends up sliding down 
+	[code 
+		"wReceiveCallDelay_StartTime
+	]code
+	" (which appears to just be a copy of the current time, and eventually our trainer ID. This gives us enough tools to jump to the temp Mail buffer.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				"3a
+			]td
+			[td 
+				"ld a,(hl-)
+			]td
+			[td 
+				"Current minute, a = 0
+			]td
+		]tr
+		[tr 
+			[td 
+				"62
+			]td
+			[td 
+				"ld h,d
+			]td
+			[td 
+				"High byte of TID, h = d0
+			]td
+		]tr
+		[tr 
+			[td 
+				"f7
+			]td
+			[td 
+				"rst $30
+			]td
+			[td 
+				"Low byte of TID, acts as 
+				[code 
+					"jp ha
+				]code
+				", jump to d000 (a little before temp mail buffer)
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The mail payload has also changed, it now is able to handle subframe inputs, allowing for a much faster final ACE section.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				"97
+			]td
+			[td 
+				"sub a,a
+			]td
+			[td 
+				"a is variable at this point, so 0 it out
+			]td
+		]tr
+		[tr 
+			[td 
+				"f6 f0
+			]td
+			[td 
+				"or a,$F0
+			]td
+			[td 
+				"a = $F0, f = $00
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"push $F000 (a little before temp mail buffer)
+			]td
+		]tr
+		[tr 
+			[td 
+				"d6 f6
+			]td
+			[td 
+				"sub a,$F6
+			]td
+		]tr
+		[tr 
+			[td 
+				"d6 f1
+			]td
+			[td 
+				"sub a,$F1
+			]td
+			[td 
+				"a = $09, f = $40
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"push $0940 (middle of UpdateJoypad, the latest before it doesn't poll input correctly)
+			]td
+		]tr
+		[tr 
+			[td 
+				"f6 d0
+			]td
+			[td 
+				"or a,$D0
+			]td
+			[td 
+				"a = $D9
+			]td
+		]tr
+		[tr 
+			[td 
+				"e0 a5
+			]td
+			[td 
+				"ldh ($FFA5),a
+			]td
+			[td 
+				"write a 
+				[code 
+					"reti
+				]code
+				" to hJoypadSum
+			]td
+		]tr
+		[tr 
+			[td 
+				"d2 a4 ff
+			]td
+			[td 
+				"jp nc,$FFA4
+			]td
+			[td 
+				"jump to hJoypadDown
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The general idea in this routine is it pushes af values to act as return addresses, first to UpdateJoypad (to update joypad variables), then back to the mail payload (effectively acting as a loop). hJoypadDown is jump to to execute what was pressed down, then the planted 
+	[code 
+		"reti
+	]code
+	" lets the payload loop. UpdateJoypad trashes most registers, except HL, so HL is purely used for the input opcode payload.
+	$LF
+]div
+[div class=p 
+	"The input opcode payload performs the following operations.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Memory change
+			]th
+		]tr
+		[tr 
+			[td 
+				"wPlayerLastMapY ($d4e9)
+			]td
+			[td 
+				"$0A -> $49
+			]td
+		]tr
+		[tr 
+			[td 
+				"wPartyCount ($dcd7)
+			]td
+			[td 
+				"$01 -> $00
+			]td
+		]tr
+		[tr 
+			[td 
+				"wSouthConnectionStripXOffset ($d1be)
+			]td
+			[td 
+				"$cf -> $06
+			]td
+		]tr
+		[tr 
+			[td 
+				"wSouthConnectionStripYOffset ($d1bd)
+			]td
+			[td 
+				"$94 -> $09
+			]td
+		]tr
+		[tr 
+			[td 
+				"wSouthConnectedMapNumber ($d1b6)
+			]td
+			[td 
+				"$10 -> $4c
+			]td
+		]tr
+		[tr 
+			[td 
+				"wSouthConnectedMapGroup ($d1b5)
+			]td
+			[td 
+				"$78 -> $03
+			]td
+		]tr
+		[tr 
+			[td 
+				"Red event flag ($db5e)
+			]td
+			[td 
+				"$44 -> $43
+			]td
+		]tr
+		[tr 
+			[td 
+				"wInputType ($e2c7)
+			]td
+			[td 
+				"$00 -> $ff
+			]td
+		]tr
+		[tr 
+			[td 
+				"Corrupted stack ($e0f0)
+			]td
+			[td 
+				"$ff -> $5e
+			]td
+		]tr
+		[tr 
+			[td 
+				"Corrupted stack ($e0ef)
+			]td
+			[td 
+				"$00 -> $76
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The stack pointer is set to $e0df in the end, finishing the payload.
+	$LF
+]div
+[div class=p 
+	"So with these in place, the plan is follows:
+	$LF
+]div
+[ol 
+	[li 
+		" Perform save corruption to misalign the visible map cache and the player's Y coord.
+		$LF
+	]li
+	[li 
+		" Step down to get OOB.
+		$LF
+	]li
+	[li 
+		" Create Mail.
+		$LF
+	]li
+	[li 
+		" Create TM33.
+		$LF
+	]li
+	[li 
+		" Fake "register" HM03.
+		$LF
+	]li
+	[li 
+		" Use Select in the overworld to use "HM03" and thus get a Pokemon.
+		$LF
+	]li
+	[li 
+		" Use Mail to write payload.
+		$LF
+	]li
+	[li 
+		" Use TM33.
+		$LF
+	]li
+	[li 
+		" Win!
+		$LF
+	]li
+]ol
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Obviously a well planned and executed run.  
+	$LF
+	"Since the method of performing the save glitch is different than it is in the Gold/Silver versions, Accepting as a kinda new branch.
+	$LF
+]div
+[div class=p 
+	"NOTE TO PUBLISHER:  Once this is published we need to update the obsoletion chains to separate the Gold and Crystal runs of the "save glitch" branch.  I don't mind doing it if you don't want to.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Updating movie file with 
+	(__wikiLink|displaytext=improvement|href=/UserFiles/Info/638627273997305585)
+	".  No change to judgement.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Again, updating movie file with 
+	(__wikiLink|displaytext=an improvement|href=/UserFiles/Info/638639542167036814)
+	".
+]div

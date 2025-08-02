@@ -1,0 +1,452 @@
+4
+[div class=p 
+	"Dance Dance Revolution is a rhythm game where you have to press foot panels (or controller buttons, if you don't own a dance pad) in time with music. This is a TAS of PSX Dance Dance Revolution 3rdMIX's Endless mode, aiming to complete the mode by reaching the maximum score of 999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999 points.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1 (BIOS: Version 3.0 J; filename: ps-30j.bin)
+		$LF
+	]li
+	[li 
+		" Beats Endless Mode as fast as possible
+		$LF
+	]li
+	[li 
+		" Reaches 999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999 points
+		$LF
+	]li
+	[li 
+		" Shows the Congratulations screen
+		$LF
+	]li
+	[li 
+		" Doesn’t end input early
+		$LF
+	]li
+	[li 
+		" Starts from SRAM (
+		[a href=https://tasvideos.org/UserFiles/Info/638340863405955948 rel=noopener external nofollow 
+			"verification movie
+		]a
+		")
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=Why 
+	" Why?
+	$LF
+]h4
+[div class=p 
+	"Because big numbers.
+	$LF
+]div
+[div class=p 
+	"More seriously, TASes of rhythm games have the problem that songs are fixed in length and hitting every note perfectly is trivial. Special modes, however, introduce some scope for strategy; this Endless mode is an example, where routing isn’t immediately obvious.
+	$LF
+]div
+[h4 id=HowEndlessWorks 
+	" How Endless Works
+	$LF
+]h4
+[div class=p 
+	"As the name suggests, Endless Mode is a mode where you keep playing songs until you lose. However, in 3rdMIX if you reach the maximum score and clear the stage then you get a Congratulations screen.
+	$LF
+]div
+[div class=p 
+	"Unlocking Endless in 3rdMIX is a bit annoying. In 2ndReMIX and 4thMIX you can take advantage of the System Data feature: create empty save data, then load up a later game and use that to unlock everything (3rdMIX to unlock 2ndReMIX, 5thMIX to unlock 4thMIX). Unfortunately, you can't do that for 3rdMIX, so we have to do this the long way; 
+	[a href=https://tasvideos.org/UserFiles/Info/638340863405955948 rel=noopener external nofollow 
+		"here's the verification movie, see description for details
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Once we've unlocked Endless, we have a few options before we start. The one we're most interested in is Music Order:
+	$LF
+]div
+[ul 
+	[li 
+		" Off: Play a random song each stage.
+		$LF
+	]li
+	[li 
+		" On: Choose a set of charts that the game will pick from. This can be of any difficulty.
+		$LF
+	]li
+	[li 
+		" Course: Plays all the songs in the game once, then finishes.
+		$LF
+	]li
+]ul
+[div class=p 
+	"We want Music Order On, so that we can pick the song that lets us finish the mode the quickest.
+	$LF
+]div
+[div class=p 
+	"Also of note is Break Stage. If turned on you get the option to take a break after the selected number of stages. Here we turn it off, which allows for truly nonstop play (you can't do this in 2nd or 4th, incidentally).
+	$LF
+]div
+[h4 id=EndlessScoring 
+	" Endless Scoring
+	$LF
+]h4
+[div class=p 
+	"For whatever reason, the developers of DDR were fond of changing up the scoring system in almost every game in the early days. Already 3rdMIX had a scoring system change from 2ndMIX, and 4thMIX would have yet another scoring system. Evidently whoever designed the 3rdMIX Endless Mode scoring system decided to get really fancy. Here's the formula for the score for one step:
+	$LF
+]div
+[div class=p 
+	"Step Score = J * (floor(C'/4)^E + 1) * L_1 * L_2
+	$LF
+]div
+[div class=p 
+	"where
+	$LF
+]div
+[ul 
+	[li 
+		" C' = Combo or "temporary combo" after step (explanation omitted since we never break combo)
+		$LF
+	]li
+	[li 
+		" J = 300 if Perfect, 100 if Great, 0 otherwise
+		$LF
+	]li
+	[li 
+		" E = min(6, floor(1 + (S - 1) / 8))
+		$LF
+	]li
+	[li 
+		" L_1 = 1 + floor(N / 256)^floor(1 + (S - 1) / 32)
+		$LF
+	]li
+	[li 
+		" L_2 = S^min(9, floor(1 + (S + 15)/32)) * (S - max(0, S - mod(S + 15, 32) - 1))
+		$LF
+	]li
+	[li 
+		" N = cumulative step count across all stages preceding the current stage
+		$LF
+	]li
+	[li 
+		" S = current stage number
+		$LF
+	]li
+]ul
+[div class=p 
+	"The score maxes out at 10^72 - 1 points (that's one less than one trevigintillion). The game gives different colours (out of six) to each group of 4 digits after the first 8. As a nice touch, once you pass 100,000,000 points the game shows 
+	[a href=https://en.wikipedia.org/wiki/Japanese_numerals#Large_numbers rel=noopener external nofollow 
+		"the Japanese unit name of the score
+	]a
+	", so you don't have to count 5 pixel tall digits (if they were bigger they wouldn't be able to fit 72 of them on the screen).
+	$LF
+]div
+[h4 id=Routing 
+	" Routing
+	$LF
+]h4
+[div class=p 
+	"So we have a complex scoring system, with loads of exponents. Without going into detail, we can boil it down into two key observations:
+	$LF
+]div
+[ul 
+	[li 
+		" More steps = more score. Lots more score.
+		$LF
+	]li
+	[li 
+		" There are stages where the score multiplier will increase dramatically, usually those that are 1 mod 32.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Therefore, if we play songs that have fewer steps, it will take more stages to reach the maximum score, but not that many more.
+	$LF
+]div
+[div class=p 
+	"So, how can we work out what song will let us beat the mode the fastest? Luckily for us, spreadsheets exist. I ran some calculations on a few songs:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Song
+			]th
+			[th 
+				"Steps
+			]th
+			[th 
+				"Length
+			]th
+			[th 
+				"Stages needed (estimate)
+			]th
+			[th 
+				"Total time (estimate)
+				$LF
+			]th
+		]tr
+		[tr 
+			[td 
+				"DEAD END (Double)
+			]td
+			[td 
+				"455
+			]td
+			[td 
+				"1:40
+			]td
+			[td 
+				"225
+			]td
+			[td 
+				"6:15:00
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"PARANOiA Rebirth
+			]td
+			[td 
+				"433
+			]td
+			[td 
+				"1:40
+			]td
+			[td 
+				"225
+			]td
+			[td 
+				"6:15:00
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"DYNAMITE RAVE
+			]td
+			[td 
+				"398
+			]td
+			[td 
+				"1:37
+			]td
+			[td 
+				"227
+			]td
+			[td 
+				"6:06:19
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"AFRONOVA
+			]td
+			[td 
+				"370
+			]td
+			[td 
+				"1:29
+			]td
+			[td 
+				"231
+			]td
+			[td 
+				"5:42:39
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"BOOM BOOM DOLLAR (K.O.G G3 MIX)
+			]td
+			[td 
+				"298
+			]td
+			[td 
+				"1:23
+			]td
+			[td 
+				"242
+			]td
+			[td 
+				"5:34:46
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOL.4
+			]td
+			[td 
+				"258
+			]td
+			[td 
+				"1:19
+			]td
+			[td 
+				"246
+			]td
+			[td 
+				"5:23:54
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"KEEP ON MOVIN'
+			]td
+			[td 
+				"183
+			]td
+			[td 
+				"1:10
+			]td
+			[td 
+				"257
+			]td
+			[td 
+				"4:59:50
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"20,november (DDR Version)
+			]td
+			[td 
+				"175
+			]td
+			[td 
+				"1:10
+			]td
+			[td 
+				"257
+			]td
+			[td 
+				"4:59:50
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"More detailed testing showed that KEEP ON MOVIN' was shorter than 20,november by nearly 1 second, and so we end up playing the shortest song in the game 257 times.
+	$LF
+]div
+[h4 id=Playing 
+	" Playing
+	$LF
+]h4
+[div class=p 
+	"I generated the steps for the song using a Python script to convert steps from the .sm file to a BizHawk input log, then pasted that in. Since the game only reads input once every two frames, the script outputs 2-frame long button presses (this has no effect on the movie length except the very last input which I tuned manually).
+	$LF
+]div
+[div class=p 
+	"Once we have inputs to play the chart perfectly, it's just a matter of aligning the first step every time. There is one subtlety here: the time between each song lengthens a little bit as the stages go on. This is because the game waits for the rolling numbers in the score to finish moving before starting the next stage, which understandably takes a bit longer when you're earning a few unvigintillion points per step.
+	$LF
+]div
+[div class=p 
+	"I choose to hit all the steps in the 257th stage. You don’t get the Congratulations screen if you fail, so we have to clear the stage; the option is there to end input early and take a few misses (alternate input file 
+	[a href=https://tasvideos.org/UserFiles/Info/638346883549607247 rel=noopener external nofollow 
+		"here
+	]a
+	"), but I prefer keeping the play perfect. Call it a speed-entertainment tradeoff, it only saves 2 seconds anyway.
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"I’ll end by commenting on other potential DDR PSX TASes (hopefully someday we’ll have an approved PS2 emulator). I have no plans for any of these.
+	$LF
+]div
+[ul 
+	[li 
+		" Music Order Course has a bit of merit since it plays every song, but has the problem of being a fixed length - not that that matters anymore in this era where Desert Bus is published.
+		$LF
+	]li
+	[li 
+		" 2ndReMIX has Endless, but it takes a lot longer to max out. It may have a killscreen around Stage 256 but I haven’t confirmed if it’s legitimate or an emulator artifact.
+		$LF
+	]li
+	[li 
+		" 4thMIX has Endless, but the game just keeps going once you reach the maximum score (10^32 - 1). It also takes a long time - over 800 stages.
+		$LF
+	]li
+	[li 
+		" 4thMIX and Extra Mix also have a Challenge Mode, which is basically a mission mode where the player has to complete various challenges. This might be worth looking at, but will likely be fixed length as well.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The mission modes in the various PS2 games seem more interesting but that'll have to wait until we have an approved emulator.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ViGadeomes 
+		"ViGadeomes
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ViGadeomes 
+		"ViGadeomes
+	]a
+	": Hello 
+	[a class=intlink href=/Users/Profile/Arcorann 
+		"Arcorann
+	]a
+	" and Welcome to TASvideos !
+	$LF
+	"Sorry for the delay of my judgement here...
+	$LF
+]div
+[div class=p 
+	"A very long movie for a first submission that is, this movie seems well planned and I have nothing more than a well done to tell you !
+	$LF
+	"Hoping to see more from you in the future !
+	$LF
+]div
+[div class=p 
+	"Seeing how long the mode is and how little the time is between both versions, we will keep this fully completed one as the only TAS for this mode/branch.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": 
+	[em 
+		"ＤＡＮＣＥ ＤＡＮＣＥ ＤＡＮＣＥ ＤＡＮＣＥ ＤＡＮＣＥ ＤＡＮＣＥ ＤＡＮＣＥ
+	]em
+	[br 
+	]br
+	$LF
+	"Ah crud, disk has scratches on it.
+	[br 
+	]br
+	$LF
+	[em 
+		"ＤＡＮＣＥ ＤＡＮＣＥ ＲＥＶＯＬＵＴＩＯＮ
+	]em
+]div

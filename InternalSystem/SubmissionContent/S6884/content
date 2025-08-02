@@ -1,0 +1,2444 @@
+8
+[div class=p 
+	"Ninja Five-O aka Ninja Cop aka Ninja Bastard is a gba video game by Konami.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.4.2 - mGBA core
+		$LF
+	]li
+	[li 
+		" Forgoes time-saving damage
+		$LF
+	]li
+	[li 
+		" Memory what the heck, you always take damage to save time
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"I started considering this game when Jules mentioned in discord that Cardboard had an improvement wip. While I started this project without a very in depth understanding of the mechanics, I left it with a much greater understanding than what was had before.
+	$LF
+]div
+[h4 id=TricksAndMechanics 
+	" Tricks and mechanics
+	$LF
+]h4
+[ul 
+	[li 
+		" If you shoot out the grappling hook prior to landing on the ground, you will cancel any landing animations.
+		$LF
+	]li
+	[li 
+		" The throwing animation can be cancelled by jumping out of a grapple state.
+		$LF
+	]li
+	[li 
+		" Upon pressing up in front of a door, you walk to the center before entering. If you're already at the center, you won't have to walk as far. Therefore it's typically faster to use faster movement to get the center of the door before you hit up.
+		$LF
+	]li
+	[li 
+		" Holding the opposite direction when you're grappling will slow you down, causing your jump speed to decrease when you jump off the grappling hook. This is often used to get the maximum distance when doing the next hook by decreasing height.
+		$LF
+	]li
+	[li 
+		" Jump slashing can sort of freeze your vertical speed, allowing for higher jumps. Alternatively if the goal is to fall fast, you typically want to delay your jump slash such that you just barely have time to shoot out a grapple to cancel the landing animation.
+		$LF
+	]li
+	[li 
+		" If you hit an enemy with a spin slash and then a shuriken hits the enemy, the sword will hit the enemy again one frame later. If you do this with two shurikens, they need to spaced two frames apart.
+		$LF
+	]li
+	[li 
+		" Crouch collision maintenance: If you slide or crawl off a ledge, you keep the vertical collision box of your crouch state for a couple frames until you fall below a certain amount. If you prevent falling below that amount by grappling, you can keep that box and use it to squeeze into 1 tile high tunnels without doing an incredibly slow animation. This can also allow for clips.
+		$LF
+	]li
+]ul
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=TableOfTimeComparisons 
+	" Table of time comparisons
+	$LF
+]h4
+[div class=p 
+	"Note for sake of simplicity I removed all lag frames from the calculations. VBA has more lag during gameplay but less during loading screens. My timing either starts when the Stage text goes off-screen or when the screen is fully visible. My timing ends either when the screen is totally black or the Stage end appears, with the exception of the very last stage where I end on last input. Positive numbers are frames saved and negative numbers are frames lost.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Screen
+			]th
+			[th 
+				"Publication
+			]th
+			[th 
+				"Cardboard's WIP
+			]th
+		]tr
+		[tr 
+			[th 
+				"Bank 1-1
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 1-2
+			]th
+			[td 
+				"9
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 1-3
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-1
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-2
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-3
+			]th
+			[td 
+				"26
+			]td
+			[td 
+				"15
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-4
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-5
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-6
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 2-7
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-1
+			]th
+			[td 
+				"32
+			]td
+			[td 
+				"25
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-2
+			]th
+			[td 
+				"7
+			]td
+			[td 
+				"-1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-3
+			]th
+			[td 
+				"12
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-4
+			]th
+			[td 
+				"10
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-5
+			]th
+			[td 
+				"14
+			]td
+			[td 
+				"13
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-6
+			]th
+			[td 
+				"17
+			]td
+			[td 
+				"-6
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 3-7
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Bank 4
+			]th
+			[td 
+				"7
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-1
+			]th
+			[td 
+				"11
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-2
+			]th
+			[td 
+				"33
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-3
+			]th
+			[td 
+				"13
+			]td
+			[td 
+				"10
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-4
+			]th
+			[td 
+				"5
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-5
+			]th
+			[td 
+				"16
+			]td
+			[td 
+				"9
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-6
+			]th
+			[td 
+				"22
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-7
+			]th
+			[td 
+				"6
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-8
+			]th
+			[td 
+				"18
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-9
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-10
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 1-11
+			]th
+			[td 
+				"6
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-1
+			]th
+			[td 
+				"11
+			]td
+			[td 
+				"10
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-2
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-3
+			]th
+			[td 
+				"20
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-4
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-5
+			]th
+			[td 
+				"24
+			]td
+			[td 
+				"15
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-6
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 2-7
+			]th
+			[td 
+				"6
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-1
+			]th
+			[td 
+				"5
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-2
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-3
+			]th
+			[td 
+				"10
+			]td
+			[td 
+				"9
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-4
+			]th
+			[td 
+				"19
+			]td
+			[td 
+				"7
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-5
+			]th
+			[td 
+				"13
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-6
+			]th
+			[td 
+				"70
+			]td
+			[td 
+				"5
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-7
+			]th
+			[td 
+				"14
+			]td
+			[td 
+				"5
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-8
+			]th
+			[td 
+				"30
+			]td
+			[td 
+				"9
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 3-9
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[th 
+				"Ware 4
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 1-1
+			]th
+			[td 
+				"79
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 1-2
+			]th
+			[td 
+				"12
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 1-3
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 1-4
+			]th
+			[td 
+				"49
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 1-5
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-1
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-2
+			]th
+			[td 
+				"9
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-3
+			]th
+			[td 
+				"17
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-4
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-5
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-6
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-7
+			]th
+			[td 
+				"5
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-8
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-9
+			]th
+			[td 
+				"7
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-10
+			]th
+			[td 
+				"9
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-11
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-12
+			]th
+			[td 
+				"6
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-13
+			]th
+			[td 
+				"14
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-14
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-15
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-16
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-17
+			]th
+			[td 
+				"10
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 2-18
+			]th
+			[td 
+				"36
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-1
+			]th
+			[td 
+				"10
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-2
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-3
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-4
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-5
+			]th
+			[td 
+				"8
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-6
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-7
+			]th
+			[td 
+				"9
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-8
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-9
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-10
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-11
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-12
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 3-13
+			]th
+			[td 
+				"10
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Airport 4
+			]th
+			[td 
+				"11
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-1
+			]th
+			[td 
+				"6
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-2
+			]th
+			[td 
+				"7
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-3
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-4
+			]th
+			[td 
+				"12
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-5
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-6
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 1-7
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-1
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-2
+			]th
+			[td 
+				"26
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-3
+			]th
+			[td 
+				"10
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-4
+			]th
+			[td 
+				"15
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-5
+			]th
+			[td 
+				"12
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-6
+			]th
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-7
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-8
+			]th
+			[td 
+				"5
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-9
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-10
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 2-11
+			]th
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-1
+			]th
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-2
+			]th
+			[td 
+				"24
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-3
+			]th
+			[td 
+				"14
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-4
+			]th
+			[td 
+				"160
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-5
+			]th
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-6
+			]th
+			[td 
+				"433
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-7
+			]th
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 3-8
+			]th
+			[td 
+				"32
+			]td
+		]tr
+		[tr 
+			[th 
+				"Cave 4
+			]th
+			[td 
+				"12
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Base 1
+			]th
+			[td 
+				"133
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Base 2
+			]th
+			[td 
+				"23
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Base 3
+			]th
+			[td 
+				"601
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Base 4
+			]th
+			[td 
+				"279
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				"Total
+			]th
+			[td 
+				"2719
+			]td
+			[td 
+				"191
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=Bank11 
+	" Bank 1-1
+	$LF
+]h4
+[div class=p 
+	"Managed to save a frame off the wip by sneaking in a couple extra slides. Due to the wall after the last enemy before the grapple, the key optimization concern is to get past that enemy as soon as possible to jump as early as possible.
+	$LF
+]div
+[h4 id=Bank12 
+	" Bank 1-2
+	$LF
+]h4
+[div class=p 
+	"I combined strategies of the publication and the wip to save a small amount of time here. I also slid closer to the center of the door than the wip.
+	$LF
+]div
+[h4 id=Bank13 
+	" Bank 1-3
+	$LF
+]h4
+[div class=p 
+	"I mostly used the wip's strategy but instead of doing a neutral direction grapple at the end, I did it to the left to push me farther forward.
+	$LF
+]div
+[h4 id=Bank21 
+	" Bank 2-1
+	$LF
+]h4
+[div class=p 
+	"Slid closer to the center of the door than the wip.
+	$LF
+]div
+[h4 id=Bank22 
+	" Bank 2-2
+	$LF
+]h4
+[div class=p 
+	"Hit down before jumping off the grapple.
+	$LF
+]div
+[h4 id=Bank23 
+	" Bank 2-3
+	$LF
+]h4
+[div class=p 
+	"Different set of grappling patterns and better movement overall.
+	$LF
+]div
+[h4 id=Bank24 
+	" Bank 2-4
+	$LF
+]h4
+[div class=p 
+	"End up closer to the center of the door after grappling back up
+	$LF
+]div
+[h4 id=Bank25 
+	" Bank 2-5
+	$LF
+]h4
+[div class=p 
+	"Ended up identical to wip once you factor out lag.
+	$LF
+]div
+[h4 id=Bank26 
+	" Bank 2-6
+	$LF
+]h4
+[div class=p 
+	"...I forget how I saved time here. I think it was from trying to stay as far left as possible when grabbing the key?
+	$LF
+]div
+[h4 id=Bank27 
+	" Bank 2-7
+	$LF
+]h4
+[div class=p 
+	"Saved a frame by throwing the fireballs sooner, leaving the enemy alive but I get enough meter off the next screen anyway.
+	$LF
+]div
+[h4 id=Bank31 
+	" Bank 3-1
+	$LF
+]h4
+[div class=p 
+	"Different strategy to take down the big guy and holding back while swinging helped save a good chunk of time
+	$LF
+]div
+[h4 id=Bank32 
+	" Bank 3-2
+	$LF
+]h4
+[div class=p 
+	"The direction the silhouette of the ninja bounces is random, you want it to end up as close to the starting location as possible to minimize travel distance at the very end before you regain control.
+	$LF
+]div
+[h4 id=Bank33 
+	" Bank 3-3
+	$LF
+]h4
+[div class=p 
+	"It's possible to save an additional frame here I think but it doesn't matter because it'd cause bad rng on the next screen.
+	$LF
+]div
+[h4 id=Bank34 
+	" Bank 3-4
+	$LF
+]h4
+[div class=p 
+	"Subtle movement differences between wip and here.
+	$LF
+]div
+[h4 id=Bank35 
+	" Bank 3-5
+	$LF
+]h4
+[div class=p 
+	"I changed the strategy coming back up because horizontal movement after rounding a corner while grappling tends to be really fast. Also I go under the last chandelier because grapple fast.
+	$LF
+]div
+[h4 id=Bank36 
+	" Bank 3-6
+	$LF
+]h4
+[div class=p 
+	"So this was before I timed things while removing all lag frames. Not sure if I actually had worse execution here or if the comparison method was just screwy here.
+	$LF
+]div
+[h4 id=Bank37 
+	" Bank 3-7
+	$LF
+]h4
+[div class=p 
+	"Nearly identical to wip, I just held back on the grapple at the end.
+	$LF
+]div
+[h4 id=Bank4 
+	" Bank 4
+	$LF
+]h4
+[div class=p 
+	"I'm not sure how I saved a frame here, maybe I reduced height off my initial jump off the grapple so I could land sooner.
+	$LF
+]div
+[h4 id=Warehouse11 
+	" Warehouse 1-1
+	$LF
+]h4
+[div class=p 
+	"Strategy here is largely based off the WIP but with improved movement. I managed to get a little further to the right on the moving platform at the top in such a way that when I jumped down I end up landing on the lowest box near the door.
+	$LF
+]div
+[h4 id=Ware12 
+	" Ware 1-2
+	$LF
+]h4
+[div class=p 
+	"Strategy is mostly the same here as the wip though I did slightly improve movement on the way up. Grappling vs sliding off the ledge below the key is identical in time, so I chose grappling because it's cooler.
+	$LF
+]div
+[h4 id=Ware13 
+	" Ware 1-3
+	$LF
+]h4
+[div class=p 
+	"Here you see my preferred grapple movement pattern for horizontal distance. Rather than swinging all the way up and having to wait to fall back down to initiate another grapple, I cancel the swing early and hold back slightly in order to decrease jump height. This tends to save a little bit of time over Cardboard's movement patterns.
+	$LF
+]div
+[h4 id=Ware14 
+	" Ware 1-4
+	$LF
+]h4
+[div class=p 
+	"Identical in time to WIP, I tried a bunch of things but wasn't able to save time here.
+	$LF
+]div
+[h4 id=Ware15 
+	" Ware 1-5
+	$LF
+]h4
+[div class=p 
+	"1-3 but in the opposite direction!
+	$LF
+]div
+[h4 id=Ware16 
+	" Ware 1-6
+	$LF
+]h4
+[div class=p 
+	"Pretty much identical to the wip.
+	$LF
+]div
+[h4 id=Ware17 
+	" Ware 1-7
+	$LF
+]h4
+[div class=p 
+	"Walking on a platform moving in the same direction as you are will speed you up slightly. As such I try to walk on it long enough to prevent any time spent normally walking before the enemy but to not reduce any amount of time sliding after the jump slash.
+	$LF
+]div
+[div class=p 
+	"Since I don't need the meter at the start of the next room, I was able to slide in the spikes below the second moving platform and grapple the ledge which is slightly faster than jumping there.
+	$LF
+]div
+[h4 id=Ware18 
+	" Ware 1-8
+	$LF
+]h4
+[div class=p 
+	"Identical to wip, but I had to rely just on the meter from the one enemy I kill to get through the flames.
+	$LF
+]div
+[h4 id=Ware19 
+	" Ware 1-9
+	$LF
+]h4
+[div class=p 
+	"Basically the same as 1-7, but I don't have any meter meaning I can't slide through spikes on the bottom.
+	$LF
+]div
+[h4 id=Ware110 
+	" Ware 1-10
+	$LF
+]h4
+[div class=p 
+	"Grappling at the very bottom brings me to the center of the door slightly faster without having to worry about the long slide ending animation.
+	$LF
+]div
+[h4 id=Ware111 
+	" Ware 1-11
+	$LF
+]h4
+[div class=p 
+	"Mostly similar to the WIP but I do hold back slightly to reduce jump height off the first grapple.
+	$LF
+]div
+[h4 id=Ware21 
+	" Ware 2-1
+	$LF
+]h4
+[div class=p 
+	"Different movement strategies in various places and slightly improved movement in others. I haven't managed to get the shuriken trick to work on the large enemy here yet, if somebody found a good setup it could save a decent chunk of time.
+	$LF
+]div
+[h4 id=Ware22 
+	" Ware 2-2
+	$LF
+]h4
+[div class=p 
+	"I ended up redoing the previous room at some point and that resulted in the frog on the right getting in the way when I had to come back to the door due to rng. I had to kill it on the way up with a shuriken (if anybody noticed I'll be impressed) which gave me slightly more meter for the next room that I didn't really need but ended up saving a lag frame thanks to it.
+	$LF
+]div
+[div class=p 
+	"I initially did this room before finding the shuriken trick, but it ended up being slower when I timed it. Improvement here was through slightly better optimization.
+	$LF
+]div
+[h4 id=Ware23 
+	" Ware 2-3
+	$LF
+]h4
+[div class=p 
+	"I didn't know at the time how to trigger invincibility while sliding so 1 frame of improvement is probably possible here. I did save a lag frame thanks the additional meter though. You need it to run out before killing the enemy though in order to ensure you have meter for the fires ahead.
+	$LF
+]div
+[div class=p 
+	"Again, haven't managed to get the shuriken trick to work on this enemy, could save a decent amount of time if it worked. Otherwise, similarly to 2-1, different movement strategies and better optimization.
+	$LF
+]div
+[h4 id=Ware24 
+	" Ware 2-4
+	$LF
+]h4
+[div class=p 
+	"It essentially came down to two different strategies that were identical in time, one was more similar to what cardboard did in his wip and the other is what you see here. I chose this one because it looked cooler.
+	$LF
+]div
+[h4 id=Ware25 
+	" Ware 2-5
+	$LF
+]h4
+[div class=p 
+	"Kicking off a wall while grappling is extremely finicky.
+	$LF
+]div
+[div class=p 
+	"The published run and the wip both attack the samurai at the top to get it to turn around, however this ultimately forces it into a less favorable position than simply leaving it alone.
+	$LF
+]div
+[div class=p 
+	"Time is likely able to be saved in this room with backwards grapple spamming, which I discovered at the end of the game.
+	$LF
+]div
+[div class=p 
+	"Activating invincibility to get through the fire would save a small amount of time as I could land on the center of the door, however I need the invincibility for 2-7.
+	$LF
+]div
+[h4 id=Ware26 
+	" Ware 2-6
+	$LF
+]h4
+[div class=p 
+	"Very simple screen.
+	$LF
+]div
+[h4 id=Ware27 
+	" Ware 2-7
+	$LF
+]h4
+[div class=p 
+	"Slightly better movement strategies once again.
+	$LF
+]div
+[h4 id=Ware31 
+	" Ware 3-1
+	$LF
+]h4
+[div class=p 
+	"Saved time by rounding corners while grappling.
+	$LF
+]div
+[h4 id=Ware32 
+	" Ware 3-2
+	$LF
+]h4
+[div class=p 
+	"Managed to almost beat the flame cycle through faster movement. If I beat it, I could have saved my meter for leaving the area with the key rather than spend it entering, as I had to wait a frame or two before I could uncrouch safely.
+	$LF
+]div
+[h4 id=Ware33 
+	" Ware 3-3
+	$LF
+]h4
+[div class=p 
+	"Slightly better optimization was implemented here over the wip.
+	$LF
+]div
+[h4 id=Ware34 
+	" Ware 3-4
+	$LF
+]h4
+[div class=p 
+	"Extremely difficult room to optimize. You need to minimize height of the jump off the swing at the start so you just barely can hit the hostage taker, then getting out of the room is a task as well.
+	$LF
+]div
+[h4 id=Ware35 
+	" Ware 3-5
+	$LF
+]h4
+[div class=p 
+	"Majority of optimization here was figuring out how long to hold back on a swing.
+	$LF
+]div
+[h4 id=Ware36 
+	" Ware 3-6
+	$LF
+]h4
+[div class=p 
+	"It isn't exactly clear how much time I saved over the wip here since this room is quite laggy and I'm sure I removed a fair amount of lag. Otherwise I mostly followed the wip's route through the room.
+	$LF
+]div
+[div class=p 
+	"Additional time could likely be saved here by abusing the crouch collision trick to squeeze into the tunnel at the top.
+	$LF
+]div
+[h4 id=Ware37 
+	" Ware 3-7
+	$LF
+]h4
+[div class=p 
+	"Mostly uses the same strategy as the wip, but optimized a bit better.
+	$LF
+]div
+[h4 id=Ware38 
+	" Ware 3-8
+	$LF
+]h4
+[div class=p 
+	"I mostly followed cardboard's beginning but I did throw in a quick backwards grapple.
+	$LF
+]div
+[div class=p 
+	"I believe I prevented lag on the samurai and then quickly rounded the corner, and used better grapple movement to get back to the door.
+	$LF
+]div
+[h4 id=Ware39 
+	" Ware 3-9
+	$LF
+]h4
+[div class=p 
+	"No matter what I did I seemed to end up with the same time as cardboard so I threw in a jump slash because why not.
+	$LF
+]div
+[h4 id=Ware4 
+	" Ware 4
+	$LF
+]h4
+[div class=p 
+	"This boss was kinda insane. If you hit the boss while he's on the toad with a jump slash, he falls off. However he always falls off the frog on the third hit so I hit him with a jump slash anyway since you can perform it by pressing r on the same frame as A if you're swinging and it comes out faster than the projectile.
+	$LF
+]div
+[div class=p 
+	"Cancelling the throwing animation and minimizing time needed to regrapple the pegs was key to optimizing the end bit.
+	$LF
+]div
+[div class=p 
+	"Previous TASes were either unable to get on top of the roof blind or just didn't try. I grabbed the heart while I was up there but conveniently the noise was cancelled by another sound effect playing. You can tell I grabbed it because the score goes up and it's not there after the fight.
+	$LF
+]div
+[h4 id=Airport11 
+	" Airport 1-1
+	$LF
+]h4
+[div class=p 
+	"This room had a lot of room for optimization. Getting to the top quickly was an interesting task in and of itself.
+	$LF
+]div
+[div class=p 
+	"The published run performs the shuriken trick here on the green samurai but doesn't explain it in the submission notes (thanks). However, it only manages to get 1 extra jump slash hit out of it despite throwing two shurikens. I throw two shurikens and manage to get 2 extra jump slash hits, killing it in 1 slash total, but it can be hard to notice that I even threw them since I'm moving quickly.
+	$LF
+]div
+[div class=p 
+	"I use my preferred grapple movement pattern to quickly traverse to the other side of the room.
+	$LF
+]div
+[h4 id=Airport12 
+	" Airport 1-2
+	$LF
+]h4
+[div class=p 
+	"Slightly better movement here over the published run.
+	$LF
+]div
+[h4 id=Airport13 
+	" Airport 1-3
+	$LF
+]h4
+[div class=p 
+	"Mostly identical movement but I still managed to save a little time when factoring out lag.
+	$LF
+]div
+[h4 id=Airport14 
+	" Airport 1-4
+	$LF
+]h4
+[div class=p 
+	"Slightly better movement at the start.
+	$LF
+]div
+[div class=p 
+	"I again use my preferred grapple pattern to traverse the top of the room but I throw two shuriken before reaching the samurai. This time it's a little more noticeable and I kill this one in 1 jump slash whereas the publication did it in three.
+	$LF
+]div
+[div class=p 
+	"I also save some time on the way back to the door by throwing in some grapples that are immediately cancelled.
+	$LF
+]div
+[h4 id=Airport15 
+	" Airport 1-5
+	$LF
+]h4
+[div class=p 
+	"Slightly better movement here.
+	$LF
+]div
+[h4 id=Airport21 
+	" Airport 2-1
+	$LF
+]h4
+[div class=p 
+	"Airport 2 is by far the longest stage.
+	$LF
+]div
+[div class=p 
+	"Slightly better movement is present here but I wonder if backwards grapple spam can save time here.
+	$LF
+]div
+[h4 id=Airport22 
+	" Airport 2-2
+	$LF
+]h4
+[div class=p 
+	"I skipped a grapple step here and latched onto the bottom of the platform with the door at the top sooner.
+	$LF
+]div
+[h4 id=Airport23 
+	" Airport 2-3
+	$LF
+]h4
+[div class=p 
+	"Significantly better movement here. I land on the ground after the first jump slash to jump off the ground to start the next grapple from higher up, rather than starting it fairly close to the ground. Additionally the height off the jump to get the top hostage taker was minimized.
+	$LF
+]div
+[h4 id=Airport24 
+	" Airport 2-4
+	$LF
+]h4
+[div class=p 
+	"Extremely simple screen.
+	$LF
+]div
+[h4 id=Airport25 
+	" Airport 2-5
+	$LF
+]h4
+[div class=p 
+	"I need to walk slightly before sliding to ensure I don't need to perform any extra slides that cost time.
+	$LF
+]div
+[div class=p 
+	"Grappling makes it so I get back past the box and onto the floor a little quicker.
+	$LF
+]div
+[h4 id=Airport26 
+	" Airport 2-6
+	$LF
+]h4
+[div class=p 
+	"Another simple screen.
+	$LF
+]div
+[h4 id=Airport27 
+	" Airport 2-7
+	$LF
+]h4
+[div class=p 
+	"Better optimization at the start and a faster strategy at the end.
+	$LF
+]div
+[h4 id=Airport28 
+	" Airport 2-8
+	$LF
+]h4
+[div class=p 
+	"The swing strat I came up with at the start was the majority of the timesave here. Swinging after picking up the key is identical in time to sliding.
+	$LF
+]div
+[h4 id=Airport29 
+	" Airport 2-9
+	$LF
+]h4
+[div class=p 
+	"More optimizations with reducing jump height.
+	$LF
+]div
+[h4 id=Airport210 
+	" Airport 2-10
+	$LF
+]h4
+[div class=p 
+	"Similar optimizations as 2-2 but only going part of the way up.
+	$LF
+]div
+[h4 id=Airport211 
+	" Airport 2-11
+	$LF
+]h4
+[div class=p 
+	"The weird grapple I do after jumping off the ledge was the only time save here.
+	$LF
+]div
+[h4 id=Airport212 
+	" Airport 2-12
+	$LF
+]h4
+[div class=p 
+	"Grappling to the ledge after the samurai saved a frame or two, the rest of the time save was from movement down below.
+	$LF
+]div
+[h4 id=Airport213 
+	" Airport 2-13
+	$LF
+]h4
+[div class=p 
+	"Better grapple patterns here.
+	$LF
+]div
+[h4 id=Airport214 
+	" Airport 2-14
+	$LF
+]h4
+[div class=p 
+	"I put a lot of work into this screen... to save 1 frame.
+	$LF
+]div
+[h4 id=Airport215And216 
+	" Airport 2-15 and 2-16
+	$LF
+]h4
+[div class=p 
+	"Simple screens
+	$LF
+]div
+[h4 id=Airport217 
+	" Airport 2-17
+	$LF
+]h4
+[div class=p 
+	"Way cleaner movement.
+	$LF
+]div
+[h4 id=Airport218 
+	" Airport 2-18
+	$LF
+]h4
+[div class=p 
+	"I minimized the time it took to get into a crouch position a bit better than cardboard here. Additionally my faster grapple patterns led me to nearly outpace the camera, and required me to use invincibility to get past the samurai at the end.
+	$LF
+]div
+[h4 id=Airport31 
+	" Airport 3-1
+	$LF
+]h4
+[div class=p 
+	"Better movement was performed throughout. Rather than throwing the second projectile on the ground, I slowed down a bit and threw it while still grappling such that I could cancel the last part of the throwing animation.
+	$LF
+]div
+[h4 id=Airport32 
+	" Airport 3-2
+	$LF
+]h4
+[div class=p 
+	"Slightly better movement than cardboard here. This may be a spot where backwards grapple spamming can be fast but I'm not sure.
+	$LF
+]div
+[h4 id=Airport33 
+	" Airport 3-3
+	$LF
+]h4
+[div class=p 
+	"Saved a frame by throwing a projectile rather than jump slashing.
+	$LF
+]div
+[h4 id=Airport34 
+	" Airport 3-4
+	$LF
+]h4
+[div class=p 
+	"Slightly different movement pattern. I would want to look into backwards grapple spamming here as well.
+	$LF
+]div
+[h4 id=Airport35 
+	" Airport 3-5
+	$LF
+]h4
+[div class=p 
+	"Again my way of grappling wins out.
+	$LF
+]div
+[h4 id=Airport36 
+	" Airport 3-6
+	$LF
+]h4
+[div class=p 
+	"I kick off the wall to move up and to the right slightly faster.
+	$LF
+]div
+[h4 id=Airport37 
+	" Airport 3-7
+	$LF
+]h4
+[div class=p 
+	"More grappling across the room.
+	$LF
+]div
+[h4 id=Airport38 
+	" Airport 3-8
+	$LF
+]h4
+[div class=p 
+	"Slightly modified version of 3-2, since the ninjas aren't there anymore.
+	$LF
+]div
+[h4 id=Airport39 
+	" Airport 3-9
+	$LF
+]h4
+[div class=p 
+	"Actually just copied 3-4 inputs here since the layout is the same aside from locations of electricity.
+	$LF
+]div
+[h4 id=Airport310 
+	" Airport 3-10
+	$LF
+]h4
+[div class=p 
+	"Slightly faster movement here, and throwing a projectile as the last hit was again faster.
+	$LF
+]div
+[h4 id=Airport311 
+	" Airport 3-11
+	$LF
+]h4
+[div class=p 
+	"Copied 3-8 inputs
+	$LF
+]div
+[h4 id=Airport312 
+	" Airport 3-12
+	$LF
+]h4
+[div class=p 
+	"Copied 3-9 inputs which copied 3-4 inputs.
+	$LF
+]div
+[h4 id=Airport313 
+	" Airport 3-13
+	$LF
+]h4
+[div class=p 
+	"Significantly cleaner movement.
+	$LF
+]div
+[h4 id=Airport4 
+	" Airport 4
+	$LF
+]h4
+[div class=p 
+	"I ended up not getting the same flame dragon pattern as cardboard for whatever reason but I still saved time here with a faster opening strategy and optimized throw animation cancelling.
+	$LF
+]div
+[h4 id=Cave11 
+	" Cave 1-1
+	$LF
+]h4
+[div class=p 
+	"I got rid of the jump slash on the way up since there was really no need for it.
+	$LF
+]div
+[h4 id=Cave12 
+	" Cave 1-2
+	$LF
+]h4
+[div class=p 
+	"I killed the spider at the start to prevent lag. Otherwise improvements were related to the climb up and getting back to the door.
+	$LF
+]div
+[h4 id=Cave13 
+	" Cave 1-3
+	$LF
+]h4
+[div class=p 
+	"You can FEEL the frames saved over cardboard here.
+	$LF
+]div
+[h4 id=Cave14 
+	" Cave 1-4
+	$LF
+]h4
+[div class=p 
+	"I came up with a different strategy for killing the samurai here. Rather than cancel 1 jump slash by grabbing the ledge, I cancelled two. After the first jump slash I fell down, grappled to the wall, jump slashed out of it and grabbed the ledge, allowing me to jump slash one more time without getting stuck in the animation on the ground.
+	$LF
+]div
+[h4 id=Cave15 
+	" Cave 1-5
+	$LF
+]h4
+[div class=p 
+	"Slightly better movement here.
+	$LF
+]div
+[h4 id=Cave16 
+	" Cave 1-6
+	$LF
+]h4
+[div class=p 
+	"Different RNG here led to the top spider spitting webs at me, this forced me to dodge it after grabbing the bottom cage while still aiming for better movement.
+	$LF
+]div
+[h4 id=Cave17 
+	" Cave 1-7
+	$LF
+]h4
+[div class=p 
+	"Frames you can feel
+	$LF
+]div
+[h4 id=Cave21 
+	" Cave 2-1
+	$LF
+]h4
+[div class=p 
+	"Did you notice a pattern with the majority of the rooms where I don't save time?
+	$LF
+]div
+[h4 id=Cave22 
+	" Cave 2-2
+	$LF
+]h4
+[div class=p 
+	"This is a complicated screen. I diverged quite a bit from cardboard here.
+	$LF
+]div
+[div class=p 
+	"Backwards grapple spamming might save time here.
+	$LF
+]div
+[h4 id=Cave23 
+	" Cave 2-3
+	$LF
+]h4
+[div class=p 
+	"Fair amount of divergence from cardboard at the start with 2 grapple swings rather than 1.
+	$LF
+]div
+[h4 id=Cave24 
+	" Cave 2-4
+	$LF
+]h4
+[div class=p 
+	"This screen is significantly less laggy on mGBA than VBA and it still lags a fair amount. Reducing lag was one of the highest priorities, but killing the samurais quickly was also important.
+	$LF
+]div
+[h4 id=Cave25 
+	" Cave 2-5
+	$LF
+]h4
+[div class=p 
+	"...I forget how exactly I saved time here, I know it was from better movement, but I forget the details.
+	$LF
+]div
+[h4 id=Cave26 
+	" Cave 2-6
+	$LF
+]h4
+[div class=p 
+	"Slightly better grapple movement to get on top of the ledge.
+	$LF
+]div
+[h4 id=Cave27 
+	" Cave 2-7
+	$LF
+]h4
+[div class=p 
+	"Extremely easy screen
+	$LF
+]div
+[h4 id=Cave28 
+	" Cave 2-8
+	$LF
+]h4
+[div class=p 
+	"I used movement closer to my first time passing through the room to save time here.
+	$LF
+]div
+[h4 id=Cave29 
+	" Cave 2-9
+	$LF
+]h4
+[div class=p 
+	"Slightly faster movement is still faster.
+	$LF
+]div
+[h4 id=Cave210And211 
+	" Cave 2-10 and 2-11
+	$LF
+]h4
+[div class=p 
+	"Simple screens, nothing to save
+	$LF
+]div
+[h4 id=Cave31 
+	" Cave 3-1
+	$LF
+]h4
+[div class=p 
+	"Reducing jump heights off swings helps so much.
+	$LF
+]div
+[h4 id=Cave32 
+	" Cave 3-2
+	$LF
+]h4
+[div class=p 
+	"Way better climb up and better projectile spam against the samurai.
+	$LF
+]div
+[h4 id=Cave33 
+	" Cave 3-3
+	$LF
+]h4
+[div class=p 
+	"More of the better grapple movement pattern.
+	$LF
+]div
+[h4 id=Cave34 
+	" Cave 3-4
+	$LF
+]h4
+[div class=p 
+	"This is where I discovered crouch collision box maintenance. Before I only knew about damage warping, which is a related side effect of the trick but that ended up useless. This however allows me to totally change the route for this room. I go bottom first and then activate the crouch collision box to get into the 1 tile high tunnel. Then I jump through the block partially and grapple so I land inside it and slide off that block so I can trigger crouch collision again. Then I grapple to the tunnel leading to the key, skipping slow ledge climb animations. Afterwards, I get into the tunnel to the right and immediately slide back out in order to trigger crouch collision a third time in order to get into the tunnel in a standing state to allow me to clip through the ceiling/floor and go straight to the door.
+	$LF
+]div
+[h4 id=Cave35 
+	" Cave 3-5
+	$LF
+]h4
+[div class=p 
+	"More slightly faster movements thanks to the better grapple pattern.
+	$LF
+]div
+[h4 id=Cave36 
+	" Cave 3-6
+	$LF
+]h4
+[div class=p 
+	"This screen is even more impacted by crouch collision maintenance. I do the left cage first, then get crouch collision to get into the tunnel quickly and then go to the bottom right cage. After that I get crouch collision again so I can clip up to the upper right cage. I end up with less meter so I delay a frame in order to kill some enemies to get enough meter for the boss.
+	$LF
+]div
+[h4 id=Cave37 
+	" Cave 3-7
+	$LF
+]h4
+[div class=p 
+	"Not too complicated a screen but I still saved some time here.
+	$LF
+]div
+[h4 id=Cave38 
+	" Cave 3-8
+	$LF
+]h4
+[div class=p 
+	"I changed up quite a bit of the movement here to save nearly half a second.
+	$LF
+]div
+[h4 id=Cave4 
+	" Cave 4
+	$LF
+]h4
+[div class=p 
+	"This boss is an incredible pain. When he starts making the circular slashes to the sides it becomes an incredible pain to actually hit the boss. You kinda need to hit it up top.
+	$LF
+]div
+[h4 id=Base1 
+	" Base 1
+	$LF
+]h4
+[div class=p 
+	"I discovered backwards grapple spamming here, frustrating me significantly because I could have looked into this throughout the whole tas.
+	$LF
+]div
+[div class=p 
+	"I skipped the second powerup the publication grabs here because I got to it at a different point in the cycle and that one was rather slow.
+	$LF
+]div
+[h4 id=Base2 
+	" Base 2
+	$LF
+]h4
+[div class=p 
+	"Killing the first robot here for the powerup allowed me to have extra meter, allowing me to get through some cycles a little faster. This allowed me to reach the central robot before the last laser beam. I killed it to get a little extra meter to fall to the bottom slightly faster.
+	$LF
+]div
+[div class=p 
+	"The ninjas are all on a timer once you get to the bottom so it's important to kill them with jump slashes because that gives you extra meter compared to projectiles. This is extremely key for the final boss.
+	$LF
+]div
+[h4 id=Base3 
+	" Base 3
+	$LF
+]h4
+[div class=p 
+	"Hey I wonder how you're going to playaround during the flame dragon attac... oh
+	$LF
+]div
+[div class=p 
+	"I really wish Cardboard explained how abusing the screen clearing move affected the boss because it's extremely important.
+	$LF
+]div
+[div class=p 
+	"First I used projectile animation cancelling to get in an extra hit compared to the publication. This allowed me to get full meter. Then I move to the right and trigger the screen clearing move on a specific frame after jumping. The screen clearing move prevents the boss from activating its fire dragon attack and the clone attack. With my positioning and timing, the boss gets hit once, teleports to the left and starts to perform a swing. This provides just enough time to finish him off without having to sit through a flame dragon, saving a whopping 10 seconds.
+	$LF
+]div
+[h4 id=Base4 
+	" Base 4
+	$LF
+]h4
+[div class=p 
+	"This clip is a bit annoying to setup compared to some others. I have to wait for the electricity to go away because it will hit me otherwise. Then, making it up before the beam cycle at the first open section is rather tight. After that though, it's not too complicated, I prepare the last spin slash long in advance by pressing r extremely early, which buffers it, allowing for early end of input.
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[h4 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h4
+[ul 
+	[li 
+		" Stella aka fsvgm777 for her love and support these past months. I love you a lot too!
+		$LF
+	]li
+	[li 
+		" Sonia aka Samsara for her initial inspiration to me all those years ago when I made my first submission. You continue to inspire me to this very day.
+		$LF
+	]li
+	[li 
+		" Jules for mentioning Cardboard's unfinished wip in the discord. I might have never tried this game if it weren't for that.
+		$LF
+	]li
+	[li 
+		" Cardboard for writing incredibly weird stuff in his previous run's movie file's comments. That motivated me to beat it so nobody would ever have to see them ever again.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Judging a Memory GBA run feels really familiar...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Ladies, gentlemen, everybody outside, in-between, and all-encompassing, it's time to get sappy.
+	$LF
+]div
+[div class=p 
+	"When I judged 
+	(__wikiLink|displaytext=Bionicle|href=/3039M)
+	" way the heck back in the day, I treated it pretty much like any other judgement, just with a little hint of extra "Aw heck yeah, Bionicle was my jam back in the day." My life is really just a series of "back in the days" when you think about it. I had no idea that one judgement would someday turn into... Well, all of this, really. Not just this run, which, spoilers, I'm accepting to inherit the current run's Star, but everything else you've done both as a TASer and as site staff.
+	$LF
+]div
+[div class=p 
+	"Like... Honestly, I'm kinda speechless over it after having looked back at what I've missed in the time I've been away, and 
+	[em 
+		"Samsara
+	]em
+	" being 
+	[em 
+		"speechless
+	]em
+	" is an achievement in and of itself. I spent three years feeling unappreciated and overused, like a well-used hammer that just gets lazily and haphazardly thrown to the back of the tool shed after use, and honestly I get really tired of nailing broads if I'm not getting anything out of it. Boards. I meant boards. But here I am now, staring down an 
+	(__wikiLink|displaytext=incredibly sappy previous judgement|href=/6828S)
+	" and a current special thanks section that validates what I wanted to do for the site during my previous time working there. You became the success I wanted to be. I've never been more proud of someone I only 
+	[em 
+		"really
+	]em
+	" started talking to less than three months ago, or... Hell, pretty much everyone else I've ever talked to, really, and I've never felt more... I dunno, good? About myself? Sorry, I'm not used to thinking positively about my previous run on the site.
+	$LF
+]div
+[div class=p 
+	"If this were some kind of movie, this is where I would step down and pass the torch, as it were, but... Man, I just came back. That'd be weird. Instead, it's your turn to inspire me, because it's clear I still have a long way to go to reach the new bar that you set using me as your inspiration. There's a metaphor in here somewhere, probably. I've never been good at those.
+	$LF
+]div
+[div class=p 
+	"Oh, heck, I should talk about the dang run, shouldn't I? I've been watching the creation of this run from the beginning, with the thought at the back of my mind always being that this was a game I wanted to look at myself, and I'm simultaneously humbled by the quality of the final product (which is far better than I could've hoped for if I'd done it myself) and motivated to go hard on some other high-complexity run I had on my mind a few years back. Perhaps several of them. Perhaps I'm working on them right now. Hmmmmmmmm.
+	$LF
+]div
+[div class=p 
+	"Nah, that would imply I'm working.
+	$LF
+]div
+[div class=p 
+	"As far as optimization is concerned, well... I said it in the thread, but the tightening of the movement makes nearly every room flow so much faster over both the published run and the improvement WIP, even if you're only a frame or two faster. That's a weird, but incredible rarity, giving a run that already felt ridiculously fast the illusion of being 
+	[em 
+		"way the hell faster
+	]em
+	". Needless to say, yeah, excellent work on both entertainment and tech. We've already spoken about the known improvements, and after watching the run a few times over, I see fairly limited usage for them in the earlier stages of the run, definitely not enough to warrant a rejection or a sternly worded "But what if... Redo months of work immediately?" We both know you're coming back someday. You know this because you're you, and I know this because you told me, and also I'm you. I don't think that Judge change glitch wore off yet.
+	$LF
+]div
+[div class=p 
+	"I've started calling back to my previous judgements, I think it's time to wrap up.
+	$LF
+]div
+[div class=p 
+	"In short, this run's sick as hell, and I'm accepting it as an improvement to the 
+	(__wikiLink|displaytext=published run|href=/1257M)
+	", hopefully inheriting the Star as well. I can do that, right? I think that's something Judges can do now? 
+	[em 
+		"Changes
+	]em
+	", man! Dang!
+	$LF
+]div
+[div class=p 
+	"Aight, time to say something that's never been said on TASvideos before: I'm turning this over to your girlfriend for publication.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": On it, sweetheart~ ❤
+]div

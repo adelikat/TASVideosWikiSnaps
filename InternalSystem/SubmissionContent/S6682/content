@@ -1,0 +1,699 @@
+4
+[div class=p 
+	"First, the impatient can find a quick YouTube encode 
+	[a href=https://www.youtube.com/watch?v=hjWz86aA6dY rel=noopener external nofollow 
+		"here
+	]a
+	".  Everyone else may keep reading and watch the encode at the end.
+	$LF
+]div
+[div class=p 
+	[em 
+		"Rampage
+	]em
+	" is a game in which George the Ape, Lizzie the Lizard, or both of them go on a rampage throughout the United States.  At least, that's what the fake news propagandists would have you believe.  The truth is that Elizabeth and George are pacifists who were kidnapped by an evil organization.  After suffering through experiments that turned them into giant creatures, they managed to escape.  Now they're on the run.  They're not quite used to their giant forms, however, so they're somewhat slow and clumsy.  They're still pacifists, though.  Unfortunately, the United States has descended into panic and violence--including a mad bomber strolling around everywhere--and giants make for easy targets.
+	$LF
+]div
+[h2 id=RunInfo 
+	" Run info
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator: BizHawk 2.3.2
+		$LF
+		[ul 
+			[li 
+				" Core: NesHawk
+				$LF
+			]li
+			[li 
+				" All other settings should be default
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Goals and categories
+		$LF
+		[ul 
+			[li 
+				" Survive for five days in California while taking no damage
+				$LF
+			]li
+			[li 
+				" Playaround
+				$LF
+			]li
+			[li 
+				" Pacifist
+				$LF
+			]li
+			[li 
+				" One player in multiplayer game
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"This run was inspired by 
+	(__wikiLink|displaytext=alden's "One Button" run|href=/Forum/Topics/5400)
+	" (so was 
+	(__wikiLink|displaytext=this|href=/2211S)
+	", apparently).  It attempts to provide more entertainment than that run by moving the player character around.  It attempts to make the challenge more difficult by taking no damage.  Consequently, it is important to know that player 1's health is at RAM address 
+	[code 
+		"0x012B
+	]code
+	" and player 2's at 
+	[code 
+		"0x0157
+	]code
+	".  The accompanying encode uses a Lua script to display the HP, partly because it seems like the HP bar on screen sometimes does not update even when you take a lot of damage.  These are some of the things that you will not see in this run because they cause damage:
+	$LF
+]div
+[ul 
+	[li 
+		" Getting hit by projectiles, lightning, and certain vehicles
+		$LF
+	]li
+	[li 
+		" Falling off the top of a building
+		$LF
+	]li
+	[li 
+		" Being on a building when it crumbles
+		$LF
+	]li
+	[li 
+		" Being underwater
+		$LF
+	]li
+]ul
+[h3 id=Movement 
+	" Movement
+	$LF
+]h3
+[div class=p 
+	"The player characters can walk, jump, and climb.  The horizontal and vertical distances of jumps can be modified by pressing a direction on the D-pad.  Climbing requires the PC to be in the correct position near the side of a building.  The PC can also grab onto a building while jumping toward it.  The game's manual seems to suggest that George and Lizzie have different speeds, but my (admittedly brief) testing did not find differences.  Must be more propaganda.  These RAM addresses are relevant:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Player 1 X position
+			]td
+			[td 
+				[code 
+					"0x0102
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player 1 Y position
+			]td
+			[td 
+				[code 
+					"0x0103
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player 2 X position
+			]td
+			[td 
+				[code 
+					"0x012E
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player 2 Y position
+			]td
+			[td 
+				[code 
+					"0x012F
+				]code
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=Buildings 
+	" Buildings
+	$LF
+]h3
+[div class=p 
+	"AFAICT, each day/level has a predetermined, rather than RNG-dependent, number of buildings.  I've seen up to six buildings per day.  The day is over when all of its buildings have crumbled to the ground.  Each building can sustain a certain amount of damage before it crumbles; the damage threshold usually is in the range 
+	[code 
+		"0x20
+	]code
+	" to 
+	[code 
+		"0x30
+	]code
+	".  Buildings take damage from the player character and from the mad bomber.  When the damage threshold is reached, the damage value jumps to somewhere above 
+	[code 
+		"0xF0
+	]code
+	", and the building crumbles to the ground.  But only one building can be crumbling at a time; any other buildings that surpass the damage threshold just stand there waiting for their turn.  The following RAM addresses are relevant:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Current day/level
+			]td
+			[td 
+				[code 
+					"0x00B4
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Number of buildings
+			]td
+			[td 
+				[code 
+					"0x0471
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Building 1 damage
+			]td
+			[td 
+				[code 
+					"0x0473
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Building 2 damage
+			]td
+			[td 
+				[code 
+					"0x047A
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Building 3 damage
+			]td
+			[td 
+				[code 
+					"0x0481
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Building 4 damage
+			]td
+			[td 
+				[code 
+					"0x0488
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Building 5 damage
+			]td
+			[td 
+				[code 
+					"0x048F
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Building 6 damage
+			]td
+			[td 
+				[code 
+					"0x0496
+				]code
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"As you can see, the damage addresses are seven bytes apart.  The other addresses in that range likely contain other properties of the buildings, but I did not investigate them in detail.  It does not appear that the order of the buildings in RAM follows some clear pattern (e.g., ordered from left to right on the screen), but I also did not look into that very much.
+	$LF
+]div
+[div class=p 
+	"The encode displays the damage values for the buildings in order to verify that the PCs did not cause any of it.
+	$LF
+]div
+[h3 id=MadBomber 
+	" The mad bomber
+	$LF
+]h3
+[div class=p 
+	"This guy (or is it a gal? hard to tell) goes around bombing the buildings.  First, some relevant RAM addresses:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"General timer
+			]td
+			[td 
+				[code 
+					"0x00A3
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bomber timer
+			]td
+			[td 
+				[code 
+					"0x024A
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bomber sub-timer
+			]td
+			[td 
+				[code 
+					"0x024B
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Target building
+			]td
+			[td 
+				[code 
+					"0x024C
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bomber status
+			]td
+			[td 
+				[code 
+					"0x024D
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bomber X position
+			]td
+			[td 
+				[code 
+					"0x024E
+				]code
+			]td
+		]tr
+		[tr 
+			[td 
+				"Target X position
+			]td
+			[td 
+				[code 
+					"0x0252
+				]code
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The bomber timer appears to be set based on the day number rather than RNG.  The sub-timer starts at zero.  The initial bomber status is 
+	[code 
+		"0xFF
+	]code
+	", which I call inactive/dead.  This is how the bomber timing works:
+	$LF
+]div
+[ul 
+	[li 
+		" The general timer increases by 1 every frame during the day.  It is paused between days.
+		$LF
+	]li
+	[li 
+		" While the bomber is inactive/dead, its sub-timer increases by 1 whenever only bit 1 (counting the least significant bit as 0) is set of the general timer's three least significant bits.  In other words, every 8 frames.
+		$LF
+	]li
+	[li 
+		" When the sub-timer reaches 8, it resets to 0, and the value of the bomber timer decreases by 1.  Thus, the bomber time decreases by 1 every 64 frames.
+		$LF
+	]li
+	[li 
+		" When the bomber timer reaches 0, the bomber becomes active.
+		$LF
+	]li
+]ul
+[div class=p 
+	"When the bomber is active, he strolls across the screen to place the bomb at the bottom of the target building, then keeps strolling.  He alternates his starting point between the left and right sides of the screen.  He appears to be impervious to damage from anything other than the PCs.  After it has been placed, the bomb explodes when the bomber status changes back to inactive/dead; this usually occurs when the bomber moves off the screen but also when a PC kills the bomber.  The target building is the one with the lowest number that is still standing.  For example, if the day has five buildings, they are numbered 0 through 4.  If buildings 0, 1, and 4 have already crumbled, the next target will be building 2.
+	$LF
+]div
+[div class=p 
+	"The encode displays the bomber timer for your hexadecimal counting pleasure.
+	$LF
+]div
+[h2 id=AnticipatedFaqs 
+	" Anticipated FAQs
+	$LF
+]h2
+[div class=p 
+	[b 
+		"This game is about destroying things.  Why do a pacifist run?
+	]b
+	$LF
+]div
+[div class=p 
+	"A pacifist run seems like the perfect type of playaround for such a game.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Why only one player?
+	]b
+	$LF
+]div
+[div class=p 
+	"To increase the difficulty by making all of the enemies concentrate their attacks on one target.
+	$LF
+]div
+[div class=p 
+	[b 
+		"It's because you couldn't figure out how to add the second player, isn't it?
+	]b
+	$LF
+]div
+[div class=p 
+	[del 
+		"I can neither confirm nor deny
+	]del
+	" The propaganda is getting to you.  Resist!
+	$LF
+]div
+[div class=p 
+	[b 
+		"Why George instead of Lizzie?
+	]b
+	$LF
+]div
+[div class=p 
+	"The only difference between them seems to be the graphics, and selecting Lizzie would lose some time.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Why stop after California?
+	]b
+	$LF
+]div
+[div class=p 
+	"It's a logical stopping point.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Why not start somewhere else?
+	]b
+	$LF
+]div
+[div class=p 
+	"The location order is fixed.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Is this a serious submission?
+	]b
+	$LF
+]div
+[div class=p 
+	"Sure.  It's up to the judges and community to decide if this type of playaround of 
+	[em 
+		"Rampage
+	]em
+	" is entertaining enough to publish, though.  
+	[small 
+		[small 
+			[small 
+				[small 
+					[small 
+						"Please vote yes.  I haven't had a run published in years.  I could use some more player points.
+					]small
+				]small
+			]small
+		]small
+	]small
+	$LF
+]div
+[div class=p 
+	[b 
+		"Why are your answers to these questions so brief?
+	]b
+	$LF
+]div
+[div class=p 
+	"If you prefer long answers, try to find the error in the Lua script used to display the stats:
+	$LF
+]div
+[pre 
+	"gui.defaultPixelFont("fceux")
+	$LF
+	"gui.defaultTextBackground(0x00000000)
+	$LF
+]pre
+[pre 
+	"local addr_p1_hp = 0x012B
+	$LF
+	"local addr_bomb_timer = 0x024A
+	$LF
+	"local addr_num_buildings = 0x0471
+	$LF
+	"local addr_damage_start = 0x0473
+	$LF
+	"local addr_day_timer_started = 0xF3D2
+	$LF
+	"local addr_day_timer_ended = 0xF44F
+	$LF
+	"local num_buildings_loaded = false
+	$LF
+	"local day_timer_started = false
+	$LF
+	"local day_timer_ended = false
+	$LF
+]pre
+[pre 
+	"local function start_day_timer()
+	$LF
+	"  num_buildings_loaded = false
+	$LF
+	"  day_timer_started = true
+	$LF
+	"  day_timer_ended = false
+	$LF
+	"end 
+	$LF
+]pre
+[pre 
+	"local function end_day_timer()
+	$LF
+	"  num_buildings_loaded = false
+	$LF
+	"  day_timer_started = false
+	$LF
+	"  day_timer_ended = true
+	$LF
+	"end
+	$LF
+]pre
+[pre 
+	"local function update_num_buildings()
+	$LF
+	"  if day_timer_ended then
+	$LF
+	"    num_buildings_loaded = true
+	$LF
+	"    day_timer_started = false
+	$LF
+	"    day_timer_ended = false
+	$LF
+	"  end
+	$LF
+	"end
+	$LF
+]pre
+[pre 
+	"event.onmemoryexecute(start_day_timer, addr_day_timer_started)
+	$LF
+	"event.onmemoryexecute(end_day_timer, addr_day_timer_ended)
+	$LF
+	"event.onmemorywrite(update_num_buildings, addr_num_buildings)
+	$LF
+]pre
+[pre 
+	"local function display_p1_hp(addr)
+	$LF
+	"  p1_hp = memory.readbyte(addr)
+	$LF
+	"  gui.pixelText(23, 15, "HP:" .. string.format("%02X", p1_hp))
+	$LF
+	"end
+	$LF
+]pre
+[pre 
+	"local function display_damage(addr_dmg, addr_bld)
+	$LF
+	"  max_buildings = memory.readbyte(addr_bld) - 1
+	$LF
+	"  for i = 0, max_buildings do
+	$LF
+	"    x_text = 0x60 + 0x34 * (i % 3)
+	$LF
+	"    y_text = 0x0F + 0x08 * math.floor(i / 3)
+	$LF
+	"    damage = memory.readbyte(addr_dmg + i * 7)
+	$LF
+	"    display_text = "Dmg" .. i+1 .. ":" .. string.format("%02X", damage)
+	$LF
+	"    gui.pixelText(x_text, y_text, display_text)
+	$LF
+	"  end
+	$LF
+	"end
+	$LF
+]pre
+[pre 
+	"local function display_bomb_timer(addr)
+	$LF
+	"  x_text = 0x60 + 0x34 * 2
+	$LF
+	"  y_text = 0x0F + 0x08
+	$LF
+	"  bomb_timer = memory.readbyte(addr)
+	$LF
+	"  display_text = "Bomb:" .. string.format("%02X", bomb_timer)
+	$LF
+	"  gui.pixelText(x_text, y_text, display_text)
+	$LF
+	"end
+	$LF
+]pre
+[pre 
+	"while true do
+	$LF
+	"  if num_buildings_loaded and emu.framecount() < 48351 then
+	$LF
+	"    display_p1_hp(addr_p1_hp)
+	$LF
+	"    display_damage(addr_damage_start, addr_num_buildings)
+	$LF
+	"    display_bomb_timer(addr_bomb_timer)
+	$LF
+	"  end
+	$LF
+	"  emu.frameadvance()
+	$LF
+	"end
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Aren't you forgetting something?
+	]b
+	$LF
+]div
+[div class=p 
+	"Right.  Possible screenshot frames: 1337, 13582, 20751, 25467, 31337, 41027.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Something else?
+	]b
+	$LF
+]div
+[div class=p 
+	"Indeed.  Possible publication description:
+	$LF
+]div
+[figure 
+	[div class=p 
+		[em 
+			"Rampage
+		]em
+		" is a game in which one or two monsters go on a violent journey through the United States.  The goal is to tear down buildings, eat people, and destroy vehicles while surviving the attacks of law enforcement.
+		$LF
+	]div
+	[div class=p 
+		"In this run, however, 
+		[a class=intlink href=/Users/Profile/Dacicus 
+			"Dacicus
+		]a
+		" takes a pacifist approach, choosing to keep only the survival goal while causing no damage.  Instead, he allows the people of California to destroy their own homes... eventually.
+		$LF
+	]div
+]figure
+[div class=p 
+	[b 
+		"... Something that you mentioned at the beginning?
+	]b
+	$LF
+]div
+[div class=p 
+	"It has been a pleasure to work with the TASVideos staff.  I have learned a lot from you all.  Thank you for your patience with all of my questions.
+	$LF
+]div
+[div class=p 
+	"Oh, maybe you meant
+	$LF
+]div
+[h2 id=EncodeAtTheEnd 
+	" The encode at the end
+	$LF
+]h2
+[div class=p 
+	(youtube|v=6PYlcGAZf-c)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Noxxa 
+		"Noxxa
+	]a
+	": A quite interesting idea for a goal given the game in question. However, there are a few issues with it:
+	$LF
+]div
+[ul 
+	[li 
+		" It's plain boring and uneventful. Hardly anything changes to the overall action in all 13 minutes.
+		$LF
+	]li
+	[li 
+		" It is simply waiting for in-game timers to run out; therefore, there is nothing to speedrun.
+		$LF
+	]li
+	[li 
+		" This movie does not beat the game. California is an arbitrary stopping point - the game has 128 days in total, and only 5 are run here.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Due to these reasons, rejecting.
+]div

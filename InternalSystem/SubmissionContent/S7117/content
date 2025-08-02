@@ -1,0 +1,608 @@
+18
+[h2 id=Introduction 
+	"Introduction
+	$LF
+]h2
+[div class=p 
+	"This TAS aims to complete the Round 2 category of Pokémon FireRed/LeafGreen. For this category, the runner must obtain 60 Pokémon caught while simultaneously completing the main storyline of the game. Meeting both of these objectives unlocks the postgame storyline, which in turn unlocks the second round of the Elite Four, with improved teams and higher levels.
+	$LF
+]div
+[div class=p 
+	"This run:
+	$LF
+]div
+[ul 
+	[li 
+		"Aims for fastest time
+		$LF
+	]li
+	[li 
+		"Uses heavy luck manipulation
+		$LF
+	]li
+	[li 
+		"Takes damage to save time
+		$LF
+	]li
+	[li 
+		"Uses a game restart sequence
+		$LF
+	]li
+]ul
+[h2 id=SpecialThanks 
+	"Special Thanks
+	$LF
+]h2
+[div class=p 
+	"Many thanks go to 
+	[a class=intlink href=/Users/Profile/MKDasher 
+		"MKDasher
+	]a
+	", whose 
+	(__wikiLink|displaytext=Clefable Any% TAS|href=/2520M)
+	" served as the inspiration for this run. I also used their RNG Manipulation Lua scripts as the starting point for my own Lua scripts.
+	$LF
+]div
+[div class=p 
+	"Additional thanks go out to 
+	[a class=intlink href=/Users/Profile/TIKevin83 
+		"TIKevin83
+	]a
+	" and 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	", who provided invaluable tech support and guidance throughout this process, and to JP_Xinnam, who humored my endless questions about some of the nuances of this game.
+	$LF
+]div
+[h2 id=LuckManipulation 
+	"Luck Manipulation
+	$LF
+]h2
+[div class=p 
+	"Pokémon FireRed/LeafGreen features two RNGs: one value which is used to determine almost every luck-based event in the game, and a second RNG (sometimes called “encounter RNG” or “RNG2”) which is used only to determine when wild encounters will happen. Unlike many other Pokémon games, neither of these RNGs can be influenced by performing additional button inputs during gameplay. They are entirely mathematically derived: each value is calculated directly from the previous one.
+	$LF
+]div
+[h3 id=EncounterRngRng2 
+	"Encounter RNG (RNG2)
+	$LF
+]h3
+[div class=p 
+	"This RNG only advances when taking steps through areas where Pokémon can be encountered, such as grass and caves. Since I cannot use extra inputs to influence this RNG during gameplay, the only opportunity to have a say in when encounters happen in the early game is by manipulating a specific seed for this RNG2 value. This encounter RNG is seeded at the very start of the TAS, when clearing the title screen with Venusaur on it. Unlike the in-game RNG2 advancement, this initial seeding can be influenced by button presses at specific times, although not in a transparent way.
+	$LF
+]div
+[div class=p 
+	"Needing to avoid encounters on the first trips up and down Route 1, I ran a brute-force solver to check each of the 65536 possible RNG2 seeds to see which would go encounterless for those first 20 or so advances of the RNG2. My search yielded 512 possibilities. I then identified a couple of points in the title screens where I could provide button inputs or delays to influence what the seed value would be. Not trusting my botting skills for this, I started a manual brute-force search to find inputs which would set this RNG2 seed to one of these 512 values. After about 3000 rerecords, I was able to find a combination of inputs which achieved one of these values with only two frames of delay versus optimal button pressing. Fortunately, this RNG2 seed yielded acceptable early encounter densities: one encounter on Route 1, and four in Viridian Forest.
+	$LF
+]div
+[div class=p 
+	"Later on, I discovered a trick which would enable me to have some ongoing degree of influence over the encounter RNG: bike-spinning. Starting from a stationary position on the bicycle, I provide a single-frame D-pad input in a direction other than the one in which I am facing. I then continue to provide single-frame directional inputs, changing directions each time. This causes the encounter RNG to very rapidly advance, and causes the player to look like they are spinning in place. Also, this notably does not cause the step counter to advance while a Repel is active. This trick is used throughout the run, both to advance the RNG2 quickly to an encounter, and to advance it freely while a Repel is active, in order to set up later events.
+	$LF
+]div
+[h3 id=PrimaryRng 
+	"Primary RNG
+	$LF
+]h3
+[div class=p 
+	"Pretty much all of the rest of the game’s luck-based events, from NPC movement to damage ranges to which Pokémon are spawned when an encounter is generated, are determined off of the same RNG. This RNG is seeded when the player selects their name, and is identical to the Trainer ID. Like the Encounter RNG seed, this RNG seed can be manipulated in not-very-transparent ways by providing inputs and delays at a couple of key points during the name selection.
+	$LF
+]div
+[div class=p 
+	"This seed will determine, among other things, the stats of the available Squirtles and Clefairys, as well as when those Pokémon would be available to be obtained (more on the Squirtle and Clefairy requirements later).
+	$LF
+]div
+[h4 id=SeedManipulation 
+	" Seed Manipulation
+	$LF
+]h4
+[div class=p 
+	"In order to see which seeds were acceptable, I first determined that I needed to find a good Clefairy around RNG frame 93000-101000. Next, I ran a brute-force solver to determine which of the 65536 possible seeds yielded an acceptable Clefairy around the time when I could be in place to get it. Then I identified two places in the name selection process where I could introduce delays in order to make large changes to the Trainer ID/initial seed. From any of these input rolls, I could finally perform extra inputs to fine-tune the initial seeds approximately 16-32 values in either direction. After identifying which acceptable Clefairy seeds were gettable, I checked each of those seeds to see which yielded an acceptable Squirtle in a reasonable amount of time. The seed that I eventually decided on takes 34 frames of delay to manipulate, and gets a completely optimal Squirtle (a rare feat, as I will explain later) with 70 frames of delay. These optimal Pokémon more than make up for these delays over the course of the run.
+	$LF
+]div
+[h4 id=MoveMenuRngManipulation 
+	" Move Menu RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"During gameplay, the only way to manipulate RNG to influence events is by introducing delays prior to inputs. This is why the run will sometimes seem to wait at certain times: I am manipulating events which are about to happen. During battle, the TAS will sometimes move the cursor between moves. This is to perform finer-grained RNG manipulation. Normally, during battle, RNG advances three times per frame (after the first entry into a Pokémon Center, which MKDasher’s 
+	(__wikiLink|displaytext=Any% writeup|href=/4143S)
+	" explains quite well). However, when switching between move slots, RNG advances only twice per frame. By moving back and forth between move slots, I can manipulate RNG with another level of precision.
+	$LF
+]div
+[h4 id=HelpMenuRngManipulation 
+	" Help Menu RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"The TAS will also sometimes visit the help menu. The help menu is a valuable tool for RNG manipulation, as while in this menu, the RNG advances even though the game events do not. For example, suppose a fight requires a max-roll critical hit. Normally, each of these two occurrences is 1 in 16, so both of them occurring is 1 in 256. The game checks for a critical hit by looking at the RNG value ten cycles after it finishes printing “C used MOVE NAME!” If the RNG value at that time has a 0 in the fourth digit from the left (e.g. 0x17A
+	[b 
+		"0
+	]b
+	"9668), the move will be a critical hit. After this check, the game looks at the RNG value another ten cycles later to determine the damage roll, again checking the fourth digit. Without help menu manipulation, getting a max-roll crit to occur would involve waiting until a stretch where there are two RNG values ten frames apart which both have that 0 in the fourth digit. However, with this tool, the TAS can manipulate the crit check with more traditional delays, then visit the help menu during the brief window before the damage roll check. By leaving the help menu at a specific time, I can get the damage roll check to land wherever in the RNG I want it to. The downside to this manipulation is that it takes a minimum of 20 frames to perform, so it will be used only when a faster option is not available.
+	$LF
+]div
+[h2 id=RunInfo 
+	"Run Info
+	$LF
+]h2
+[h3 id=Routing 
+	"Routing
+	$LF
+]h3
+[div class=p 
+	"The starting point for the battle, PP, and item routing was MKDasher’s Any% TAS, although I made several changes to it as I went along to account for the different demands of the two categories.
+	$LF
+]div
+[div class=p 
+	"The other major thing which needed to be routed was the obtaining of the 60 Pokémon. I found that, in general, catching was faster than evolution (with one exception), and gift Pokémon were faster than catching, as long as I didn’t have to go too far out of the way for them. Therefore, to minimize time, I would fill out the Pokédex by getting as many of the gift Pokémon as I could get quickly (which would end up being two), get the one fast evolution, and then get the rest of my Pokémon by catching.
+	$LF
+]div
+[div class=p 
+	"In order to determine which catches to aim for, I analyzed which Pokémon were available in areas that needed to be walked through in order to progress the plot. I determined that I could get 63 Pokémon without any major sidetracking, which meant that I had some flexibility to adapt my routing to the specifics of the RNG.
+	$LF
+]div
+[div class=p 
+	"I also determined that a catch in the Safari Zone was around 200 frames faster than a catch anywhere else, so I decided that if anything was obtainable both in and out of the Safari Zone, I would opt for the Safari Zone catch.
+	$LF
+]div
+[h3 id=Squirtle 
+	"Squirtle
+	$LF
+]h3
+[div class=p 
+	"The IVs and Nature for an optimal Squirtle in the early game are as follows:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"31 Special Attack and a +SPA Nature
+			]td
+			[td 
+				"Required for many ranges, notably to avoid one crit against Bug Catcher James’ Metapod
+			]td
+		]tr
+		[tr 
+			[td 
+				"31 Speed and a neutral Nature
+			]td
+			[td 
+				"Required to speedtie Lass Sally’s Rattata, avoiding the need to proc a speedfall with Bubble
+			]td
+		]tr
+		[tr 
+			[td 
+				"4+ Attack and a neutral nature
+			]td
+			[td 
+				"Required to three-shot Bug Catcher Sammy’s Weedle
+			]td
+		]tr
+		[tr 
+			[td 
+				"0-11 HP, 0-25 Defense and a -DEF Nature
+			]td
+			[td 
+				"Required to make Torrent setup as easy as possible against Sammy and Brock
+			]td
+		]tr
+		[tr 
+			[td 
+				"Special Defense is irrelevant
+			]td
+			[td 
+				"Squirtle won’t get hit by any Special attacks anyway
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Assuming uniform distribution, the odds of a Squirtle having all of these IVs and specific nature are .00108%. Luckily, I was able to get an RNG seed (0xC866) which had not only the required Clefairy, but also a quick, optimal Squirtle.
+	$LF
+]div
+[div class=p 
+	"My Squirtle’s stats are: 5 HP, 5 ATK, 5 DEF, 31 SPA, 26 SPD, 31 SPE, Mild nature (+SPA/-DEF)
+	$LF
+]div
+[h3 id=Clefairy 
+	"Clefairy
+	$LF
+]h3
+[div class=p 
+	"The thresholds for Clefairy IVs and Natures were as follows:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"30+ Attack and a +ATK Nature
+			]td
+			[td 
+				"Required to one-shot Misty’s Starmie. 31 obviously makes some ranges more forgiving than 30 throughout the run
+			]td
+		]tr
+		[tr 
+			[td 
+				"30+ Special Attack and a neutral Nature
+			]td
+			[td 
+				"Required to one-shot Bruno 2’s Steelix and Agatha 2’s Gengar without slower Metronome moves. 31 obviously makes some ranges more forgiving than 30 throughout the run
+			]td
+		]tr
+		[tr 
+			[td 
+				"30+ Speed and a neutral Nature
+			]td
+			[td 
+				"Required to speedtie the first Rocket Grunt’s Rattata. 31 also speedties Lance 1’s Dragonite and outspeeds Bruno 2’s Hitmonlee, making for faster manipulation
+			]td
+		]tr
+		[tr 
+			[td 
+				"HP, Defense and Special Defense IVs don’t matter very much
+			]td
+			[td 
+				"The other requirements force the Nature to either be -DEF or -SPD. Certain combinations of IVs and Natures can AI-lock Bridge Rival into Quick Attack
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"My Clefable’s stats are: 8 HP, 31 ATK, 9 DEF, 31 SPA, 20 SPD, 31 SPE, Naughty nature (+ATK/-SPD)
+	$LF
+]div
+[h3 id=PalletTownAndViridianCity 
+	"Pallet Town and Viridian City
+	$LF
+]h3
+[div class=p 
+	"Rival 1’s Bulbasaur can be three-shot with one critical hit. In this tutorial fight, turn one cannot be a critical. A non-critical Tackle does 4-5 and a critical Tackle does 8-10, meaning that there are 6 possible ways to permute the different damage values across three turns in order to deal the necessary 19 HP of damage. When TASing, this fight serves as a nice primer to optimization, branch usage, and Pokémon RNG, since there are only six possible sequences of events, and which sequence is fastest is entirely RNG-dependent.
+	$LF
+]div
+[div class=p 
+	"For the first round trip on Route 1, I get no encounters due to the encounter RNG which I manipulated at the start of the TAS. On the third pass on Route 1, I get a Pidgey, which will be my flyer for the run. I opt not to stall for Rattata here, since I can get it later on, and faster, in a couple other areas.
+	$LF
+]div
+[h3 id=ViridianForest 
+	"Viridian Forest
+	$LF
+]h3
+[div class=p 
+	"Based on the manipulated encounter RNG, I get 4 encounters in the Forest. There are five possible catches here, and other than Pikachu, all of them are also available on Route 25. Therefore, I go with the fastest permutation of 4 catches which includes Pikachu. This leaves Weedle to be caught later.
+	$LF
+]div
+[div class=p 
+	"Before leaving the Forest, I have to battle Bug Catcher Sammy. His Weedle has 26 HP, and my critical Tackles deal 8-10 each, so I need to manipulate crits and ranges, as well as manipulate him into using Poison Sting on all three turns and not poisoning me. I manipulate for Poison Sting because String Shot takes many more frames, and I need to take the damage anyway in order to set up Torrent for later
+	$LF
+]div
+[h3 id=PewterCityRoute3 
+	"Pewter City & Route 3
+	$LF
+]h3
+[div class=p 
+	"Brock’s Geodude and Onix both die in one hit to critical Bubble. Onix outspeeds Squirtle, which is beneficial since I also need to take a critical Tackle in order to finish setting up Torrent for all of Route 3.
+	$LF
+]div
+[div class=p 
+	"While in Pewter, I stop at the Mart and buy 15 Poké Balls and 4 Repels. This will be enough to just barely last until I can make it to Lavender, where I will shop for the final time in the run
+	$LF
+]div
+[div class=p 
+	"In Squirtle’s final battle, I rearrange his moves so that the two with the shortest names are in slots 1 and 2. This will save a couple frames later on when teaching HMs
+	$LF
+]div
+[div class=p 
+	"Since I need to kill time before the frame when my Clefairy will appear, I stop to catch Spearow, Jigglypuff and Mankey on Route 3. The other options on this route are Pidgey, which I already have, and the male and female Nidorans, which I will get in Safari Zone where they are faster.
+	$LF
+]div
+[div class=p 
+	"Before going into Mt. Moon, I stop at the Pokémon Center, buy Magikarp, deposit most of my party, and withdraw the Jigglypuff. Jigglypuff is noteworthy because it is the only other evolution that I will do besides the Clefairy. This evolution is faster than a catch because I have a party spot free, I have to pick up the Moon Stone in Game Corner anyway, and I don’t have to sit through level-up text boxes.
+	$LF
+]div
+[h3 id=MtMoonRoute4 
+	"Mt. Moon & Route 4
+	$LF
+]h3
+[div class=p 
+	"In Mt. Moon, I catch my Clefairy and immediately evolve her into Clefable. It is worth mentioning that, after Miguel’s Koffing, Clefable will one-shot every Pokémon for the remainder of the run.
+	$LF
+]div
+[div class=p 
+	"I also route my repel usage in Mt. Moon around the encounter RNG so that I can make it out of the cave using only two repels. This will enable me to get through Rock Tunnel safely later on.
+	$LF
+]div
+[div class=p 
+	"Once outside of Mt. Moon, I teach Mega Punch and Mega Kick to Clefable. These will be leaned on heavily throughout the run, since they are powerful attacks for this early stage of the game, and have STAB (same-type attack bonus) when Clefable uses them.
+	$LF
+]div
+[div class=p 
+	"Before entering Cerulean, I catch a Sandshrew to use Cut and Strength. By catching a Sandshrew below level 11, I am able to teach it both HMs without the extra textboxes required to forget a move. Additionally, since this Sandshrew will be used for HMs so often, I give it a one-character nickname to save time. Normally, utility Pokémon are not used often enough to make it worth it the 104 frames it takes to nickname them. However, since Sandshrew is used for two different moves, it is worth the investment in this one case. The version-exclusivity of Sandshrew is why I am doing this run on LeafGreen instead of FireRed (the accepted version for RTA runs of this category)
+	$LF
+]div
+[h3 id=CeruleanCityRoute25 
+	"Cerulean City & Route 25
+	$LF
+]h3
+[div class=p 
+	"The first thing I do in town is beat Misty. It is noteworthy that her Staryu is one of only two opponents that I do not manipulate into using a damaging move. In general, it is fastest for opponents to hit a damaging move. However, although Clefable can tank consecutive Water Pulses from Staryu and Starmie, that would put her into a low-enough HP that Bridge Rival’s AI would lock onto using Quick Attack. Therefore, I manip Staryu into using the slower Harden
+	$LF
+]div
+[div class=p 
+	"Upon beating Misty, I immediately teach Clefable the Water Pulse TM that she just gave me. This will be the coverage move for everything that can’t be beaten with Normal-type attacks. Then I enter and exit Cerulean’s Pokémon Center, to set the Teleport point for later on.
+	$LF
+]div
+[div class=p 
+	"After clearing out Nugget Bridge, I stop in the grass on Route 25. Here, I fill up my party by first catching an Abra, which will be used for Teleport. Then, I catch the Weedle that I didn’t get in Viridian Forest
+	$LF
+]div
+[div class=p 
+	"After getting the SS Ticket from Bill, I use my new Abra to Teleport back to Cerulean
+	$LF
+]div
+[h3 id=Vermilion 
+	"Vermilion
+	$LF
+]h3
+[div class=p 
+	"Before leaving the SS Anne, I heal up in the bed. Not only does this restore the empty Mega Kick PP, it also restores HP, so that I can tank Surge’s damaging moves instead of needing to manipulate him into using slower non-damaging moves. This is an improvement from the routing of the Any% TAS, which does not take this heal, and therefore has to use and take some suboptimal moves both before this spot and prior to the next heal
+	$LF
+]div
+[div class=p 
+	"By changing the frame on which I enter Surge’s gym, I can change the location of the switches. Doing this, I manipulate them into being along the most direct path to Surge.
+	$LF
+]div
+[div class=p 
+	"After finishing up all of my business in Vermilion, I Teleport back to Cerulean again and get the Bicycle
+	$LF
+]div
+[h3 id=Route9RockTunnel 
+	"Route 9 & Rock Tunnel
+	$LF
+]h3
+[div class=p 
+	"Now that I have the Bike, I can bike-spin to manipulate encounter RNG. On Route 9, I do this trick for the first time, advancing through a large encounterless section of RNG2 in order to get my Voltorb.
+	$LF
+]div
+[div class=p 
+	"In Rock Tunnel, there are four Pokémon to catch. Although each of these four Pokémon are also available later on, I would not be able to make it through the cave on two repels if I don’t get all four encounters here.
+	$LF
+]div
+[div class=p 
+	"While in Rock Tunnel, I pick up one Escape Rope. This will enable me to delay shopping until after I get the Poké Flute, which winds up saving around 80 frames due to more efficient movement and not needing to sell items.
+	$LF
+]div
+[div class=p 
+	"On my way out of the cave, I bike-spin again to set up the encounter RNG for the next catches in Pokémon Tower.
+	$LF
+]div
+[h3 id=LavenderTownCeladonCityCyclingRoad 
+	"Lavender Town, Celadon City & Cycling Road
+	$LF
+]h3
+[div class=p 
+	"Giovanni’s Kangaskhan is the last Pokémon which will get to move first against me. For now, Clefable is still faster than most of her opponents, and I will soon get an item which will, with the help of some RNG manipulation, make her faster than everyone.
+	$LF
+]div
+[div class=p 
+	"When getting HM02, I manipulate the girl’s movement in a similar fashion to the way that I manipulated the switches in Surge’s gym. Getting her to take the step downwards can save up to 32 frames of movement, depending on how long the manipulation takes
+	$LF
+]div
+[div class=p 
+	"In the Pokémon Tower, I use the healing pad, which is the last complete heal that I will get for the rest of the run.
+	$LF
+]div
+[div class=p 
+	"While in the Tower, I catch Haunter, Cubone and Gastly. If I hadn’t done the bike-spinning prior to leaving Rock Tunnel, I would not have gotten all three encounters here.
+	$LF
+]div
+[div class=p 
+	"After getting the Poké Flute, I shop at the Lavender Mart to stock up on Great Balls, Super Repels and Escape Ropes for the rest of the run. Due to the way the Mart menu works, it is faster to buy 11 of an item than 3 to 10 of an item, so I buy more than I need. Being able to overbuy items is another small benefit of delaying the shopping trip.
+	$LF
+]div
+[div class=p 
+	"On the way to Fuchsia, I catch Snorlax and Fearow. Everything on Cycling Road is also available elsewhere, but Fearow is the most scarce.
+	$LF
+]div
+[h3 id=FuchsiaCity 
+	"Fuchsia City
+	$LF
+]h3
+[div class=p 
+	"There are four things to do in Safari Zone: get HM03, pick up the Gold Teeth, pick up the Quick Claw, and CATCH ALL OF THE POKÉMON!!! Well, 15 Pokémon, but still. A quarter of the Pokémon obtained in the entire run will be caught in this 7 minute and 34 second stretch. Of all of the catches here, the worst is Tauros, which is only available in one of the three areas that I hunt, and is only a 1% encounter in that area. Although I have used delays of a couple frames throughout the run to manipulate which Pokémon is encountered, I need a 27-frame delay to advance the game RNG to a Tauros encounter.
+	$LF
+]div
+[div class=p 
+	"After Flying out of Safari Zone and beating Koga, I get HM04, and then have the biggest menu of the game so far: I teach Surf to Squirtle and Strength to Sandshrew, give the Quick Claw to Clefable, use a Super Repel, and Fly back to Pallet
+	$LF
+]div
+[div class=p 
+	"The Quick Claw is an important item to equip because it will enable Clefable to continue to move first, even as opponents become stronger and faster. Quick Claw has a 20% chance of forcing Clefable to move first, regardless of her and her opponents' Speed stats. This proc is calculated just before entering the FIGHT/BAG/POKÉMON/RUN menu, so I will introduce delays during the following screens in order to manipulate it: “TRAINER NAME would like to battle!”, “C gained XXX Exp. Points!”, and the final screen after a level up. Additionally, TIKevin83 and I discovered that, in the case of Quick Claw+speedtie, Clefable will go first 60% of the time, since the QC proc is calculated before the speedtie.
+	$LF
+]div
+[h3 id=CinnabarIsland 
+	"Cinnabar Island
+	$LF
+]h3
+[div class=p 
+	"The Repel used during the post-Koga menu means that I won’t be able to catch Tentacool on my way to Cinnabar. This is the first of the three encounters that I skip in the run. If it were not for the Repel, I would get multiple encounters on this route, all of them Tentacool, and it would take too much time to do an extra menu mid-route to Repel
+	$LF
+]div
+[div class=p 
+	"The Repel doesn’t run out until I am midway through the Pokémon Mansion. This means that I am unable to get two of the possible encounters here as well. I elect to skip Koffing (which is a rare encounter anyway) and Rattata (which I can still get later)
+	$LF
+]div
+[div class=p 
+	"While in the Mansion, I pick up TM14 (Blizzard). This will be a vital move for Round 2 of the Elite Four.
+	$LF
+]div
+[div class=p 
+	"Although I have Water Pulse, which can kill two of Blaine’s team members, I opt instead for critical neutral-effectiveness moves. This is because the Super Effective text box takes longer than the Critical Hit text box. Therefore, in this and in other fights, I only use a super effective move when I have no other options.
+	$LF
+]div
+[div class=p 
+	"Blaine’s Arcanine and Rapidash are the first of many Quick Claw procs throughout the rest of the run.
+	$LF
+]div
+[div class=p 
+	"After Blaine, I use the first of my 8 PP healing items. Their usage is routed specifically around the PP of Mega Kick. Since Mega Kick is our most powerful move and has only 5 PP, it is deployed primarily when it is absolutely necessary
+	$LF
+]div
+[h3 id=SeviiIslands 
+	"Sevii Islands
+	$LF
+]h3
+[div class=p 
+	"On Sevii, I catch eight more Pokémon. Meowth and Persian are only available on Bond Bridge, whereas Pidgeotto, Slowpoke and the Bellsprout line can also be found in Berry Forest, along with Drowzee and the Hypno that is terrorizing poor Lostelle. Within the Forest, the RNG2 yields exactly as many encounters as I need without any need for manipulation.
+	$LF
+]div
+[div class=p 
+	"After completing all of the battles in Sevii, I use my Max Elixir to fully heal all PP. Due to the extra fights, Clefable is running low on Mega Punch PP now as well as Mega Kick, so this is an opportune moment to use the only Max Elixir I will get for the entire game.
+	$LF
+]div
+[div class=p 
+	"After returning from Sevii, I teach Metronome over Pound. Pound has been valuable to take care of weaker opponents throughout the run, but it has outlived its usefulness. On the other hand, Metronome will be invaluable during the two trips through the Elite Four as an all-purpose (albeit slow) killshot.
+	$LF
+]div
+[h3 id=SaffronCityViridianCityVictoryRoad 
+	"Saffron City, Viridian City & Victory Road
+	$LF
+]h3
+[div class=p 
+	"Silph and the gyms are battle-heavy sections without a lot of interesting stuff to talk about. There is a little bit of room for routing differences in a couple of fights depending on how the RNG plays out. For example, both Sabrina’s Venomoth and Takashi’s Machoke can be killed with either a Mega Kick or a crit Mega Punch, so the move choice is dictated by how hard it is to find the crit in those fights.
+	$LF
+]div
+[div class=p 
+	"While in Silph, I get the gift Lapras. After defeating Viridian Rival, I bike-spin to encounter Rattata. These two Pokémon put me at 56 as I enter my final catching opportunities
+	$LF
+]div
+[div class=p 
+	"Entering Route 23 and Victory Road, there are five Pokémon available to catch: Sandslash, Primeape, Golbat, Machoke and Marowak. I need four of them, so I take the four that appear fastest. In this case, this means that I don’t catch Primeape. After completing all of the catches, I repel through the rest of Victory Road
+	$LF
+]div
+[h3 id=EliteFourRoundOne 
+	"Elite Four Round One
+	$LF
+]h3
+[div class=p 
+	"After a lot of fights which were not especially interesting to discuss, I have come to the Elite Four, and one of the more notorious parts of Clefable TASing: Metronome manipulation. Metronome uses the primary RNG to randomly select one of 339 moves. The good news is that it allows me to find kills on things that I otherwise cannot one-shot. The bad news is that it is SSSLLLLOOOOWWW. In addition to the time required to manipulate crits and damage ranges, which must frequently be done with help menu manips, Metronome waits for 94 frames on the “C used Metronome!” text box. Therefore, like Water Pulse before it, Metronome is only used when absolutely necessary.
+	$LF
+]div
+[div class=p 
+	"But oh boy, against Lorelei, Metronome sure is necessary. Since Cloyster’s Shell Armor ability prevents it from being crit, it can only be defeated by one of three electric moves or one of four OHKO moves (which I prefer not to use here since they produce an extra text box, and because their accuracy check doesn’t seem to be manipulable). Slowbro requires a crit from the same three electric moves. Lapras, because it is so bulky, requires exactly one move: a crit, high-roll Low Kick. The odds of this happening naturally are .014%, which is why there is such a lengthy delay and help menu manip on Lapras.
+	$LF
+]div
+[div class=p 
+	"Bruno is very straightforward. His Hitmonchan can be killed by a max-roll crit Mega Punch. If for some reason I couldn’t manip this quickly enough, I would have switched to crit Mega Punching Lorelei’s Jynx, and used a crit Mega Kick on Hitmonchan instead. Fortunately, I find the Mega Punch Plan A without too much delay.
+	$LF
+]div
+[div class=p 
+	"Agatha requires more Metronome manipulation, although the options are a little bit more forgiving. I have nine outs for the first Gengar. Of these, Sheer Cold, crit Water Spout and crit Eruption are preferred because they don’t yield the extremely slow Super Effective text box.  The options are similar for the second Gengar, and then much more friendly for the Haunter.
+	$LF
+]div
+[div class=p 
+	"Against Lance, Metronome is required for his Aerodactyl and Dragonite. Finally, against the Champion, I have to find Metronome kills against his Gyarados and Arcanine.
+	$LF
+]div
+[div class=p 
+	"The Elite Four also requires manipulating a lot of 20% Quick Claw procs. Lance’s Dragonite is a 60% speedtie, and Clefable is outsped by: Lorelei’s Jynx, Bruno’s Hitmonlee, Agatha’s entire team, Lance’s Gyarados and Aerodactyl, and Champion’s entire team save for Rhydon. 
+	$LF
+]div
+[h3 id=SeviiPostgame 
+	"Sevii Postgame
+	$LF
+]h3
+[div class=p 
+	"Now that I’ve defeated the Elite Four and caught all of the Pokémon, I can go back to Sevii to clean up the remains of Team Rocket. With no more catching to do, this is a straightforward battle-heavy section where most of the opponents are underleveled compared to Clefable. Here, Mega Punch serves the purpose that Pound once served: clearing out all of the low-level, weaker opposition.
+	$LF
+]div
+[div class=p 
+	"During the menu when I teach Waterfall to Squirtle, I also take the opportunity to teach Clefable Blizzard over Water Pulse. Although it has been a helpful coverage move thus far, Water Pulse is too weak to continue being effective, and so its usefulness is at an end.  On the other hand, Blizzard will be necessary to avoid multiple Metronomes against Round 2 of the Elite Four.
+	$LF
+]div
+[div class=p 
+	"During the postgame, I bike-spin before the first Repel wears out, in order to advance the RNG2 safely through some rough patches. Without doing this, I would need to spend precious time using an extra Repel
+	$LF
+]div
+[div class=p 
+	"Manipulation-wise, the trickiest part of the postgame is the spinner passing. This manipulation is done, like so many other NPC manips, by introducing delays prior to movement. In Rocket Warehouse, there are two spinners who can be particularly annoying because they each have to be passed twice. Conservatively, I would estimate 1500 rerecords were spent on this thirty seconds of Warehouse movement alone.
+	$LF
+]div
+[div class=p 
+	"Against Gideon, I have to live with Not Very Effective text boxes when using Blizzard on his Magnemite and Magneton. Despite these textboxes, it saved 357 frames to teach Blizzard early rather than waiting until after this fight. After clearing out the postgame, I heal up Mega Kick PP again and head back to the Elite Four
+	$LF
+]div
+[h3 id=EliteFourRoundTwo 
+	"Elite Four Round Two
+	$LF
+]h3
+[div class=p 
+	"Prior to entering Lorelei’s chamber, I stop at the PC to deposit the rest of my team. This costs approximately 700 frames upfront, but saves around 840 frames during the Hall of Fame sequence when displaying all of the extra party members.
+	$LF
+]div
+[div class=p 
+	"During this second trip through the Elite Four, one of Clefable’s hidden strengths shines through: its experience curve. Clefable is in the Fast Experience group, which means that it can level up pretty quickly compared to most other Pokémon. Due to this fast experience curve, Clefable is actually able to gain seven levels over the course of Round 2 of the Elite Four.
+	$LF
+]div
+[div class=p 
+	"The Lorelei 2 fight goes amazingly well, thanks to the RNG. I am able to find very quick Metronome kills on Cloyster, Piloswine and Lapras, with Piloswine even eating a YOLO Fissure for maximum swag. It should be noted that Metronoming this Lapras is a bit more forgiving than the first one, since a couple of the strongest electric moves are now powerful enough to get the job done.
+	$LF
+]div
+[div class=p 
+	"Although Bruno 2’s fighting types are straightforward, his Steelix are a bit more interesting. The first Steelix can only be killed via a Metronomed Super Effective move. However, because Clefable levels up right before the second Steelix, she is now strong enough to take it out with a high roll crit Blizzard, skipping the Super Effective text box
+	$LF
+]div
+[div class=p 
+	"Agatha 2 is very similar to Agatha 1. Although her first Gengar is taken out with a high-roll crit Blizzard for neutral effectiveness, her stronger ghosts need Metronomes to go down. Against Misdreavus, I find a kill with crit Aeroblast, which saves another Super Effective text box.
+	$LF
+]div
+[div class=p 
+	"Now that Clefable knows Blizzard, Lance 2 is much easier than Lance 1. His Gyarados, Kingdra and first Dragonite die to crit Mega Kick, so I have an easy choice there. His second Dragonite actually dies to a non-crit Blizzard, marking the final time in the run when I won’t need to manipulate a critical hit. It is worth noting that, due to Kingdra’s Water/Dragon typing, the only kill option besides crit Mega Kick would have been to Metronome a crit Mega Kick.
+	$LF
+]div
+[div class=p 
+	"Champion 2 is fairly straightforward. Right before the fight, I heal Mega Kick PP one last time, then use them all to crit-Kick Heracross, Alakazam, Gyarados, Arcanine and Venusaur. Meanwhile, Tyranitar dies to a variety of Metronomed crit moves. Notably, Tyranitar’s Sand Stream winds up being slow but helpful, because it damages the Champion’s final three Pokémon, making the ranges for each of them much more forgiving.
+	$LF
+]div
+[div class=p 
+	"And with that, Clefable and I are the Pokémon League Champions! Again!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Replaced movie file with one that trims 196 frames of blank input at the end.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Replaced movie file again, this time with a 98 frame improvement.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Ever since I saw speedruns of this category years ago, I've always wondered what a fully optimized run would look like, and now I finally know. As always with long RPGs, there are minor alternate routing options that may or may not pan out, but everything here seems deliberate and well thought-out. The RNG was abused to its absolute fullest extent with IV manipulation, constant one-shots, absurd encounter luck, and of course the Metronome showcase around the end. Well done.
+	$LF
+]div
+[div class=p 
+	"The branch is certainly acceptable. The goal is very clear: unlock and beat the harder rematch of the Elite Four and Champion.
+	$LF
+]div
+[div class=p 
+	"Feedback was overwhelmingly positive. I was very entertained by the constant domination and the interesting optimization challenge of catching 60 Pokemon. Accepting to Moons.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Publishing.
+]div

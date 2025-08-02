@@ -1,0 +1,972 @@
+3
+[div class=p 
+	"Dragon Warrior Monsters 2 is a monster capture and breeding game that involves a farm boy/girl on a quest to obtain a spare plug to stop their home from sinking. With the use of save bugs, our hero retrieves the plug in half an hour. This is an improvement of 3433 frames, or 57:22 over the 
+	(__wikiLink|displaytext=previous run|href=/4556M)
+	".
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1
+		$LF
+	]li
+	[li 
+		" Plays on gameboy player mode in hopes of console verification of the bug
+		$LF
+	]li
+	[li 
+		" Any%
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"CasualPokePlayer mentioned that the current run desyncs due to a timing error, along with 3 spots I missed using the up/down bug that was done in the 58 minute run. I initially tried to resync it, but my lack of understanding of the game's RNG made it very difficult to test and resync things. 
+	$LF
+]div
+[div class=p 
+	"Unrelated to that, the game has an ACE entry point from the glitched NPCs. Simply looking at their stats will cause the game to jump to C9D6. There was no information on the game's RAM, so I had to find a bunch of addresses myself. While attempting to do so, I found out that ID 109 and 110's name corresponds to item in storage 7-9, and 90-92 (Addresses E642-E646, E6E7-E6EB). I was going to change my name to get items to make a payload, but then I realized those values won't get saved. I could however, try to use stat boosting items to increase my stats to make those a payload. Unfortunately, the Japanese character set does not have any values that correspond to stat boosting items. Only the english version does. 
+	$LF
+]div
+[div class=p 
+	"So I made a test run, trying to replicate the current run, using the (U) ROM. The well bug used does not work in (U), so I had to think of a different way to Beavern. I decided to use save/reset to get rid of the guard blocking the well in the 1st village, so I can reach the 1st boss early. Unfortunately, it appears the (U) version does not give me ID 117 when depositing Beavern to the farm, so I was not able to get the ACE entry point (yet). This test run however, made me realize that the tricks I found on (U) could be applied to (J). So I started this run.
+	$LF
+]div
+[h4 id=Criticals 
+	" Criticals
+	$LF
+]h4
+[div class=p 
+	"The important thing to figure out first is how to get critical damage during the first 4 fights. To be exact:
+	$LF
+]div
+[ol 
+	[li 
+		" CactiBall/SpotSlime - Need 1 critical to OHKO them
+		$LF
+	]li
+	[li 
+		" MadCandle/GiantWorm - Need 1 critical to 2 turn KO them
+		$LF
+	]li
+	[li 
+		" Beavern - Need 9 criticals to 3 turn KO them
+		$LF
+	]li
+	[li 
+		" CurseLamp - Need 9 criticals to 3 turn KO them
+		$LF
+	]li
+]ol
+[div class=p 
+	"To find out how criticals were determined, first I just simply got 1 to appear. Specifically, the critical hit message box. Then I searched on RAM on an address that changes if I get a critical. I got C5E8, D80E, D820.
+	$LF
+]div
+[div class=p 
+	"C5E8 seems to be a timer that goes from 0 to 127, forever. On specific values that vary by the monster fighting, it seems to always give a critical or a miss. If you get a critical, D80E or D820 will be 128. So I recorded every single instance of getting a critical and displayed it using a lua script to make testing and resyncing events much easier. This also means that criticals (or miss) will be guaranteed to appear every 128 frames, or ~2 seconds. 
+	$LF
+]div
+[h4 id=VersionChoice 
+	" Version choice
+	$LF
+]h4
+[div class=p 
+	"In this particular case, I chose Tara because the 58 minute long run was using Tara. In that run, she does not need the Change Rod in the Sky World to obtain a treasure, unlike Cobi. In this run however, she completely skips the Sky World, so I'm not sure if there's any difference using Cobi. Both Cobi and Tara versions have the same monsters in Oasis except for TailEater which I don't recruit, and I recruit nothing in Pirate, so there shouldn't be a difference.
+	$LF
+]div
+[h4 id=MonsterChoice 
+	" Monster choice
+	$LF
+]h4
+[div class=p 
+	"The current run uses MadCandle rather than GiantWorm. This is because it's skill, "Blaze", for Beavern acts like a critical hit in terms of damage dealt. While the animation is slow, if the critical timer is "wrong" (ie. right after Beavern attacks, it just passed the point a critical will appear), it may be worth using Blaze rather than wait 128 frames for a critical normal attack. 
+	$LF
+]div
+[div class=p 
+	"Spooky has no skill, and their attack starts at 11, compared to 14 with MadCandle and 15 with GiantWorm, making it useless in the run. 
+	$LF
+]div
+[div class=p 
+	"Both GiantWorm and MadCandle can 3 turn KO Beavern and CurseLamp. There are some differences:
+	$LF
+]div
+[ul 
+	[li 
+		" MadCandle's Blaze skill can substitute a normal hit during Beavern fight. GiantWorm's BeastCut skill, despite it's description (Inflicts severe damage on the beast family.) only deals 7 damage max, so you must wait 2 seconds for a critical in the worst case.
+		$LF
+	]li
+	[li 
+		" MadCandle would level up 4 times from level 2 to level 6. GiantWorm levels up 3 times from level 5 to level 8.
+		$LF
+	]li
+	[li 
+		" MadCandle can be recruited from level 2 to level 6. GiantWorm recruits at level 1 to 5. 
+		$LF
+	]li
+	[li 
+		" MadCandle does not appear if you use the cloakroom bug. The only NPC possible to recruit would be GiantWorm or Spooky.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Every single level up message takes ~150 frames. From this table, it is best to obtain MadCandle as level 4, so it will only level up 3 times, while still be able to 3 turn KO CurseLamp. On testing, using a level 5 GiantWorm ended up slower by 55 frames compared to MadCandle. Most of the frames lost seems to be due to a slower fight with Beavern using GiantWorm. It may potentially tie, or even be better in the case the Beavern fight improves using GiantWorm.
+	$LF
+]div
+[div class=p 
+	"The stats for MadCandle (and also GiantWorm), including both level and attack, are determined when you press A to get XP. You can view their level at C9B9 (J) or C9DC (U). MadCandle must have 14 attack at level 4, or else it won't have enough to 3 turn KO CurseLamp after it levels. MadCandle can have 13 attack and still beat CurseLamp in 3 turns if it were recruited at level 2. GiantWorm always has the ability to 3 turn KO CurseLamp regardless of stats.
+	$LF
+]div
+[div class=p 
+	"GiantWorm:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Attack before Beavern
+			]th
+			[th 
+				"INT before Beavern
+			]th
+			[th 
+				"Level after Beavern
+			]th
+			[th 
+				"Attack after Beavern
+			]th
+			[th 
+				"INT after Beavern
+			]th
+			[th 
+				"BeastCut damage done to CurseLamp
+			]th
+			[th 
+				"Normal Crit done to CurseLamp
+			]th
+			[th 
+				"Max Damage per turn
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"42
+			]td
+			[td 
+				"46
+			]td
+			[td 
+				"?
+			]td
+			[td 
+				"45
+			]td
+			[td 
+				"108
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"35
+			]td
+			[td 
+				"41
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"36
+			]td
+			[td 
+				"90
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"32
+			]td
+			[td 
+				"37
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"33
+			]td
+			[td 
+				"84
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"33
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"31
+			]td
+			[td 
+				"80
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"32
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"29
+			]td
+			[td 
+				"76
+			]td
+		]tr
+	]tbody
+]table
+[ul 
+	[li 
+		" Note: BeastCut damage done to CurseLamp critical is same as Normal critical.
+		$LF
+	]li
+]ul
+[div class=p 
+	"MadCandle:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Attack before Beavern
+			]th
+			[th 
+				"INT before Beavern
+			]th
+			[th 
+				"Level after Beavern
+			]th
+			[th 
+				"Attack after Beavern
+			]th
+			[th 
+				"INT after Beavern
+			]th
+			[th 
+				"Blaze damage done to CurseLamp
+			]th
+			[th 
+				"Normal Crit done to CurseLamp
+			]th
+			[th 
+				"Max Damage per turn
+			]th
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"74
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"68
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"28
+			]td
+			[td 
+				"74
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"23
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"62
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"19
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"19
+			]td
+			[td 
+				"56
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The stats are inconsistent (ranges 13-15 for GiantWorm, 13-14 for MadCandle) because I was getting them one by one, delaying frames before the XP screen. The level up gives the same amount of attack anyways, so just adjust them by +/-1; outside the case where a level 4 MadCandle with 13 Attack cannot 3 turn KO CurseLamp, it doesn't affect the run.
+	$LF
+]div
+[h4 id=SaveReset 
+	" Save/Reset
+	$LF
+]h4
+[div class=p 
+	"On 3 occassions, the run saves/resets to skip parts of the story. They are:
+	$LF
+]div
+[ol 
+	[li 
+		" Guard blocking the well in Oasis
+		$LF
+	]li
+	[li 
+		" Guard blocking the castle in Oasis
+		$LF
+	]li
+	[li 
+		" Guard blocking the castle in Limbo
+		$LF
+	]li
+]ol
+[div class=p 
+	"The first guard can be avoided like the previous run by using "cloakroom bug" to talk to the woman there to make the map fail to load properly. Moving left, followed by right 1 screen puts you at Beavern. This turned out slower than the current route of using first village to enter the well, then going down by 111 frames. 
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=Greatlog 
+	" GreatLog
+	$LF
+]h4
+[div class=p 
+	"The cloakroom bug allows you to get the pie a bit faster by pressing A as soon as you walk on the door tile to the storage room. 
+	$LF
+]div
+[div class=p 
+	"Pressing Up/Down when you return to your house saves you around 2 seconds. This was missed from the previous run, so I added back here.
+	$LF
+]div
+[div class=p 
+	"Using the same cloakroom bug, it is possible to enter the egg shrine area early before you get a monster. Talking to the old man that breeds monsters would've resulted in every subsequent dialogue be empty, and automatically closed. This would've saved time, if not for the fact it goes away after save/reset. Since I save/reset at the first village before most of the talking gets skipped, it ends up losing time.
+	$LF
+]div
+[div class=p 
+	"Talking to the old man twice would've also allowed the game to jump to WRAM, but due to being so early in the game, there wasn't anything I was able to exploit.
+	$LF
+]div
+[h4 id=Oasis 
+	" Oasis
+	$LF
+]h4
+[div class=p 
+	"The layout of items is determined when you leave the shrine. The address CC47 (U), CC24 (J) determines how much items appear in the overworld. The items uses 1 byte for ID, 1 byte for Map X/Y, and 1 byte for Tile X/Y.
+	$LF
+	"For instance, 01 00 00 30 45 would mean item id is 1 (Herb), at Map screen 3, 0, at tiles 4,5 within that screen.
+	$LF
+]div
+[div class=p 
+	"It is possible to manipulate both Warp Wand, and Warp Wing to appear on the map. The Warp Wand warps you to the front of the shrine, while the Warp Wing warps you to GreatLog directly. It took me over 300 frames to get a Warp Wing in an out of place location, while the Warp Wand appears while you walk to the 2nd village. 
+	$LF
+]div
+[div class=p 
+	"Testing out both timing, the Warp Wing takes 251 frames to buy from the store. Warp Wand took 525 frames to get back to GreatLog. In this case, it made more sense to buy Warp Wing from the desert merchant rather than have one appear to pick up.
+	$LF
+]div
+[div class=p 
+	"I save the game before leaving the shrine, because you are not able to save in the overworld, and I need a file with only 1 follower to get the npc glitch.
+	$LF
+]div
+[div class=p 
+	"Your encounter timer starts at 0, so you almost immediately get an encounter at start. A Cacitball is recruited to set up a glitch.
+	$LF
+]div
+[div class=p 
+	"Unlike the previous run, rather than walking back to the shrine to save/reset, I enter the 1st village, then save/reset at the well house. This allows me to get the glitched npc and remove the guard in 1 reset. If I did not save before this, the glitch won't work. I would be presented with a new game screen rather than a continue. Because the last time I saved I had only 1 follower, the reset made the 2nd follower fail to load correctly, while saving the fact I now had 2 followers. This gives me a glitched follower. 
+	$LF
+]div
+[div class=p 
+	"On file load, the number of steps for the next encounter is determined. I manipulate it so that I get an encounter shortly before Beavern. 
+	$LF
+]div
+[h4 id=Well 
+	" Well
+	$LF
+]h4
+[div class=p 
+	"If I used the cloakroom bug to get to Beavern, only GiantWorm and Spooky appear. If I went there "normally" like in this run, GiantWorm, MadCandle and Spooky all appear. Because of this, I have access to the skill "Blaze", which as explained above, allows me to beat Beavern faster. The glitched follower from the save bug confuses the game, causing it to duplicate MadCandle into both followers 2 and 3. This is essential, since it effectively allows me to deal at minimum 30 damage using just the 2 MadCandles. 
+	$LF
+]div
+[div class=p 
+	"I 2 criticals to defeat MadCandle. It is actually possible to manipulate a MadCandle encounter to have 13 hp rather than 15, but it appeared slower than just getting 2 criticals. I have MadCandle defeat my 2nd follower to prevent their turn, along with their level up message.
+	$LF
+]div
+[div class=p 
+	"I used Up/Down to get to Beavern quicker. After the fight, I would also need to pause once to get below the screen to walk to the exit. The encounter timer must be 80+ when the fight with Beavern starts, or else you won't be able to leave the well without an encounter.
+	$LF
+]div
+[h4 id=Beavern 
+	" Beavern
+	$LF
+]h4
+[div class=p 
+	"Beavern has 98 HP, 16 MP, 20 Attack, 8 Defence, 36 Agility, 120 Intelligence. They have the skill "ChargeUp", that costs 0 MP to use. If Beavern uses "ChargeUp" on the current turn, they will not use it on the next turn. The optimal strategy is therefore to get Beavern to use "ChargeUp" on the 1st and 3rd turn.
+	$LF
+]div
+[div class=p 
+	"When you press "A" to fight, the following gets determined during the time before you can press A again, the skill in which you and the npc uses, along with their target, and their status. It is the following addresses:
+	$LF
+]div
+[ul 
+	[li 
+		" Skills for followers 1, 2, 3: DA1C, DA1E,  DA20
+		$LF
+	]li
+	[li 
+		" Target for followers 1, 2, 3: DA1D, DA1F, DA21
+		$LF
+	]li
+	[li 
+		" Bonus status for followers 1, 2, 3: D854, D856, D858
+		$LF
+	]li
+	[li 
+		" Skills for NPCs 1, 2, 3: DA24, DA26, DA28
+		$LF
+	]li
+	[li 
+		" Target for NPCs 1, 2, 3: DA25, DA27, DA29
+		$LF
+	]li
+	[li 
+		" Bonus status for NPCs 1, 2, 3: D85C, D85E, D860
+		$LF
+	]li
+]ul
+[div class=p 
+	"What are "bonus status"? When the address for it is 64, you get the message "<Name> pumped itself up!" This causes your attack to deal more damage. For instance, Blaze would now deal 19 damage rather than 15. This occurs for both MadCandle and GiantWorm. For Slime, they instead get the value of 1, which will result in the message "<Name struck at full power!">. This means the hit will always be a critical hit, regardless of the critical timer. I have not tested exhaustively, but it seems only 1 follower can have this condition in a turn. If it were possible however, and I could hit 20+ using pumped up "Blaze", I could potentially 2 turn KO Beavern.
+	$LF
+]div
+[div class=p 
+	"Slime does 2 - 4 damage per turn. With critical, I can make it up to 10 damage. 
+	$LF
+]div
+[div class=p 
+	"MadCandle can deal 12-15 damage using Blaze. They can deal 4-6 damage using their normal attack, and 12-15 if critical.
+	$LF
+]div
+[div class=p 
+	"On the first turn, I get Beavern to use ChargeUp. Unfortunately, MadCandle attacks next, and unlike Slime, they had 1 less oppurtunity to critical; their chance only occurs when C5E8 is at 74. I made them use Blaze instead. This allowed me to reduce the wait for this attack, and the next attack's critical, which also needed a value of 74. 
+	$LF
+]div
+[div class=p 
+	"On the 2nd turn, the timing was also very bad for critical. I made both MadCandles use Blaze, with the 2nd MadCandle pumped up to deal 19 damage. This was enough to allow Slime to avoid waiting for a critical. Beavern is now down to less than 25 health, so 2 criticals can defeat them next turn.
+	$LF
+]div
+[div class=p 
+	"On the 3rd turn, I had Beavern use ChargeUp again, while everyone uses their default attack. This dealt 14 + 10 damage, allowing me to KO Beavern.
+	$LF
+]div
+[div class=p 
+	"If I had used GiantWorm, I would've dealt 5-7 damage using BeastCut. I am unsure if it would critical, but even if it did, it meant waiting for the critical timer, with no way to have a different attack substitute the wait.
+	$LF
+]div
+[h4 id=Castle 
+	" Castle
+	$LF
+]h4
+[div class=p 
+	"The current run talks to the circus manager to enter the castle. This time, we simply save first, to preserve the flag for beating Beavern, then save/reset again in front of the castle to get rid of the guards. From leaving the well, to talking to the king, the previous method took 2850 frames. The current method took 1824 frames, even taking account into buying the Warp Wing.
+	$LF
+]div
+[div class=p 
+	"The amount of steps for the next encounter was also manipulated to be 84+ on file load to allow walking to the Oasis without an encounter. It is actually fine to start recruiting for the main bug after Beavern, but I didn't want to manipulate both an encounter and the lamp fight if I needed to resync things.
+	$LF
+]div
+[div class=p 
+	"This time, I did the Up/Down route as the 58 minute run to enter the Oasis, saving another couple seconds.
+	$LF
+]div
+[h4 id=Oasis_2 
+	" Oasis
+	$LF
+]h4
+[div class=p 
+	"The only thing relevant is the fight against CurseLamp. Even if you save/reset away the guard, the game's story won't progress until you beat the CurseLamp.
+	$LF
+]div
+[h4 id=Curselamp 
+	" CurseLamp
+	$LF
+]h4
+[div class=p 
+	"CurseLamp has 220 HP, 8 MP, 27 Attack, 10 Defence, 44 Agility, 65 Intelligence. They have the skill "Upper" that costs 2 MP to use, raising their own defence. While it is possible to have them use Upper multiple times, the animation for that is slow, so it is better for them to attack you 3 times.
+	$LF
+]div
+[div class=p 
+	"The critical timer was near 74, so I manipulate both MadCandles to attack first. In this fight, Blaze only hits 12-15, compared to 27 with normal critical attack, so it must be avoided. CurseLamp is made to attack right after the 2 MadCandles, so Slime could use the critical of 25 right after.
+	$LF
+]div
+[div class=p 
+	"The 2nd turn had CurseLamp attack first to prevent waiting as long, then everyone else attacks using critical value of 74.
+	$LF
+]div
+[div class=p 
+	"The 3rd turn was awful. Slime had to attack right after CurseLamp, but it took over a second of delay for that to occur. The other frames that did occur it had MadCandles use Blaze, or CurseLamp use Upper. I tried using command directly to get the MadCandles to not use their skill, but half the time it said they ignored orders. I did make a (U) test run that didn't had this occur, so something must have affected them. This still ended up faster than waiting 2 seconds to get a critical after CurseLamp attacks, so I end up waiting 54 frames at the fight.
+	$LF
+]div
+[h4 id=SettingUp 
+	" Setting Up
+	$LF
+]h4
+[div class=p 
+	"We now have Beavern unlocked. We now need to recruit them, along with 4 more monsters, to set up the main glitch.
+	$LF
+]div
+[div class=p 
+	"1 Cacitball, 2 SpotSlime, 1 Catapila was recruited on the way to Beavern. CactiBall/SpotSlime gave me trouble, since it appears after getting the 1st Cacitball to follow you, it becomes a lot harder to get a 2nd one to follow me. I was able to get 2 SpotSlime, but I had to delay a bit to get the encounter step count low enough for 1 final fight before Beavern, or else I won't have enough monsters. I used Warp Wing as soon as I get Beavern.
+	$LF
+]div
+[div class=p 
+	"I go back to the farm to get a glitch follower index. The game tracks your follows by 3 indices: C6FE, C6FF, C700. Normally, this points to the follower's data structure in A000-BFFF. When you deposit the duplicate follower, the index gets bugged, and becomes a high value. It was discovered by others (I do not know who; it was already a thing since 2015 at least with 
+	[a href=https://www.speedrun.com/dqm2/runs/7ylko7xz.) rel=noopener external nofollow 
+		"https://www.speedrun.com/dqm2/runs/7ylko7xz.)
+	]a
+	" Depositing Beavern in the Japanese version of the game results in an index of 117. This treats the region from EB69-EC0D as part of the follower's data structure, which still isn't useful. However, when you release monsters from your farm, the game decrements your index to reflect CartRAM being cleared. Since I was at index 117, the game decrements to 116, which is still in WRAM. By releasing 7 monsters, I can get the game to treat E6E6-E78A as their data.
+	$LF
+]div
+[div class=p 
+	"Bytes 0x58, 0x59, 0x5A in the monster's data structure is their experience gained. E6E6 + 0x58, 0x59, 0x5A is the address for Key 14 NPC Level, Key 15 Type, and Key 15 Prefix. The ID for the Limbo key is 6. To get Key 15 Type to be 6, I need to get experience. Experience is 3 bytes little endian, so I need 0x600, or 1536 experience to obtain the Limbo key.
+	$LF
+]div
+[h4 id=Tournament 
+	" Tournament
+	$LF
+]h4
+[div class=p 
+	"I need to beat 3 monster tamers in the tournament for the Pirate Key. 
+	$LF
+]div
+[div class=p 
+	"My monster is now dead, but I can revive them by either going to the tournament and dying, or use a key to go to GreatLog. Dying at the tournament ended up ~55 frames slower due to the fact I cannot attack. The NPC uses heal on their first turn, before I immediately die. The animation made it slower than just using GreatLog to heal, then walk back to the tournament.
+	$LF
+]div
+[div class=p 
+	"The first fight consist of 2 Babbles, and 1 PearlGel. Their stats do not matter, because I deal thousands of damage every turn. My high agility means their attacks misses often. I manipulate all 3 monsters to miss me, since it is faster, while avoid using their skills. I did test using the fastest text speed in game, but all it does is auto press A at the earliest time in battle. I decided to keep with text speed of 8 to control RNG events. I noticed that I get pumped up more often than when using Slime/MadCandle. That had to be avoided as well due to an extra dialogue box.
+	$LF
+]div
+[div class=p 
+	"The 2nd fight has a SpikyBoy, Pixy, and Eggplaton. The 3rd fight is 2 MadRaven, and a SkullRoo. Their fights are identical to the first. The only thing to note is that on the 3rd fight, I manipulate the encounter steps to 70, so that I can get to the Pirate World village, buy a Journal, then go back to the ocean before an encounter.
+	$LF
+]div
+[h4 id=PirateWorld 
+	" Pirate World
+	$LF
+]h4
+[div class=p 
+	"I searched up what NPCs appear in the 1st screen of Pirate World. I found out the water gives much higher experience than on land. On water:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"ID
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"XP
+			]th
+		]tr
+		[tr 
+			[td 
+				"316
+			]td
+			[td 
+				"Petiteel
+			]td
+			[td 
+				"148
+			]td
+		]tr
+		[tr 
+			[td 
+				"322
+			]td
+			[td 
+				"Merman
+			]td
+			[td 
+				"155
+			]td
+		]tr
+		[tr 
+			[td 
+				"323
+			]td
+			[td 
+				"Octokid
+			]td
+			[td 
+				"93
+			]td
+		]tr
+		[tr 
+			[td 
+				"325
+			]td
+			[td 
+				"Octoreach
+			]td
+			[td 
+				"102
+			]td
+		]tr
+		[tr 
+			[td 
+				"332
+			]td
+			[td 
+				"RougeWave
+			]td
+			[td 
+				"111
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"On land:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"ID
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"XP
+			]th
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"Slime
+			]td
+			[td 
+				"9
+			]td
+		]tr
+		[tr 
+			[td 
+				"80
+			]td
+			[td 
+				"Anteater
+			]td
+			[td 
+				"27
+			]td
+		]tr
+		[tr 
+			[td 
+				"147
+			]td
+			[td 
+				"Toadstool
+			]td
+			[td 
+				"28
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Since I needed 1536 XP, I tested a bunch of fights. I found out it is possible to obtain over 400 XP per encounter in the water. 1536/4 is 384XP, so it is possible to get Limbo Key in 4 fights. 
+	$LF
+]div
+[div class=p 
+	"I quickly bought a Bookmark in the Village. I turned left at the start to prevent the NPC from blocking my way on the way out. I need the next 4 encounters to have the following: 
+	$LF
+]div
+[ol 
+	[li 
+		" A combination of NPCs that gives at least 384 XP
+		$LF
+	]li
+	[li 
+		" A step counter of 20, the lowest possible, every fight
+		$LF
+	]li
+]ol
+[div class=p 
+	"I tested the following:
+	$LF
+]div
+[ul 
+	[li 
+		" Going on land, which uses multiple steps, as oppose to water, which reduces encounter by 1. This turned out to be 1 frame slower, due to getting on and off land animation.
+		$LF
+	]li
+	[li 
+		" Rather than waiting to get the 2 conditions, relax the step a bit to the next best thing of 40, moving on land. This turned out far slower than just waiting until the 2 conditions were fine. 
+		$LF
+	]li
+]ul
+[div class=p 
+	"From resyncing my run, I know that while encounter step is based on RNG, something else can manipulate the NPCs in the fight. I have a file of an earlier run where I encountered different NPCs despite same RNG.
+	$LF
+]div
+[div class=p 
+	"The last encounter doesn't need a step count of 20, so it was far easier to obtain. I did get the step encounter to be 96 to avoid encounters on the way to the Limbo Castle, but even if it were lower it won't matter.
+	$LF
+]div
+[h4 id=Limbo 
+	" Limbo
+	$LF
+]h4
+[div class=p 
+	"I have enough steps to walk to the castle without an encounter. I used the journal to save/reset away the guard, then had my encounter manipulated to be 84. 
+	$LF
+]div
+[div class=p 
+	"There is no way I can walk all the way to the final boss without an encounter normally. However, by pausing the frame before I walk onto a tile with an encounter, I can reset the encounter timer, while avoiding a battle. This means I avoid every random fight here unlike the previous run. I did need a step counter of 92 to make it to Darck.
+	$LF
+]div
+[div class=p 
+	"I OHKO Darck, and warp back to GreatLog. The chest behind them is not interactable outside of the cutscene. Even if I saved/reset away Darck, I still won't get the spare plug. I am unsure why the dam looks bugged.
+	$LF
+]div
+[div class=p 
+	"I did one final Up/Down move to get to the tree top 32 frames faster than walking normally. Then the next 9 minutes of the run is the credits, before I'm allowed 1 more dialogue and the ability to save.
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"Last time the run was not able to sync on console due to timing. I hope this time it can.
+	$LF
+]div
+[div class=p 
+	"I actually want to make an improvement to a somewhat glitchless run, but I have no idea if a save glitch minus glitch npc run would be allowed. I need to investigate more about the route however.
+	$LF
+]div
+[h4 id=PossibleImprovements 
+	" Possible Improvements
+	$LF
+]h4
+[div class=p 
+	"You can obtain the pirate key early by save/resetting away the npc guarding the tournament. If you recruit Toadstool, you can deposit them to the farm to obtain 117. Since you cannot swim however, I do not know how the XP route would be like.
+	$LF
+]div
+[div class=p 
+	"This game doesn't check for save corruption, so there's probably some subframe reset improvement possible.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"jlun2: Canceling due to a 20k frame improvement. Going to rewrite everything.
+]div

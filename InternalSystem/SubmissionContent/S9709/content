@@ -1,0 +1,499 @@
+5
+[div class=p 
+	"In my last submission: 
+	[em 
+		(__wikiLink|href=/9661S|implicitdisplaytext=9661S)
+	]em
+	" I only completed the first of the 6 levels which 
+	[small 
+		"Escape from the Mindmaster (1982) (Starpath
+	]small
+	") provides But this .BK2 beats the whole game in just over a minute.
+	$LF
+]div
+[div class=p 
+	"I've already explained how this game functions on my previous submission so ill just quote what I said then:
+	$LF
+]div
+[figure 
+	[figcaption class=author 
+		"Quoting Submission #9661: Katistrofic2's A2600 Escape from the Mindmaster "Level 1" in 00:13.02
+	]figcaption
+	[div class=p 
+		"In the Atari 2600 game: Escape from the Mindmaster from (1982) there are 6 levels of mazes of shapes, sometimes obstacles and enemies. The goal of all of these levels is to put all of the shapes into their corresponding holes and then reach the exit!
+		$LF
+	]div
+]figure
+[div class=p 
+	"also this seems necessary for an understanding of how the RNG in the game works:
+	$LF
+]div
+[figure 
+	[figcaption class=author 
+		"Quoting Submission #9661: Katistrofic2's A2600 Escape from the Mindmaster "Level 1" in 00:13.02
+	]figcaption
+	[div class=p 
+		"The positions of the shapes are dependent on RAM ADRESS 0x20 which is responsible for the RNG and there are 256 Different values for the RNG. Hence that means there are 256 different organizations for the positions of the shapes
+		$LF
+	]div
+]figure
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-1131-0 
+					"Script explanation
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-1131-0 
+			[div class=p 
+				"to put all of the shapes into there 
+				[b 
+					""corresponding holes"
+				]b
+				" as I've called them, I needed to use a script, last time I think I gave a pretty vague description of how this script works.
+				$LF
+			]div
+			[div class=p 
+				"So this time ill explain it and try to give actual code lines to really make a good understanding for any publishers seeing this
+				$LF
+			]div
+			[div class=p 
+				"SO what exactly should this script do? 
+				$LF
+				"It needs to:
+				$LF
+			]div
+			[ul 
+				[li 
+					" Enter a seed (
+					[em 
+						"RAM ADRESS 0x20
+					]em
+					")
+					$LF
+					[ul 
+						[li 
+							"Read through Mainmemory all the positions of the shapes and their holes
+							$LF
+							[ul 
+								[li 
+									"Calculate how long it would take (How many movements and rotations need to be done) to start at the beginning of a level, put all the shapes in and then get to the end
+									$LF
+									[ul 
+										[li 
+											"Print in the LUA Console output the result of the seed
+											$LF
+											[ul 
+												[li 
+													"Next seed
+													$LF
+												]li
+											]ul
+										]li
+									]ul
+								]li
+							]ul
+						]li
+					]ul
+				]li
+			]ul
+			[div class=p 
+				"Now how did I do this? first we need to learn how we can "Enter a seed". The value of 0x20 on the frame the RESET button is pressed is the seed that you are inputing, so all I had to do was edit 0x20 with code and we can start at 0 and go up until 255:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"this code is very simple and it gives a very easy solution to this problem
+				$LF
+			]div
+			[div class=p 
+				"now onto step 2 which is ALOT MORE COMPLEX. The way my code finds the best route for the seed goes as so:
+				$LF
+				"I have a function which can find the fastest route from 1 square to another
+				[del 
+				]del
+				[del 
+				]del
+				"ill explain how this function works later
+				$LF
+				"using this function the script starts at the players starting location for the level to a shape, then that shapes hole then the next shape
+				$LF
+				"too find the best order of which shape to go to I do this:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"this code bruteforses gets the movements for every order of shape collection. And with this code I can very easily pick the best one. here's the full code for the 
+				[code 
+					"findbestrouteforseed()
+				]code
+				" function just incase you don't understand how the rest is done:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"so now that thats explained I need to talk about how 
+				[code 
+					"pathfind()
+				]code
+				" works which gets the shortest amount of moves from 1 point to another
+				$LF
+				"so the function obviously needs to have the parameters of a block to start at then a block to end at so:
+				$LF
+			]div
+			[div class=p 
+				"local pathfind(start,end,exact)
+				[del 
+					"-exact parameter determines if it should go directly to the block or to just face its direction, this is needed because to get a shape you just need to be facing it not go to its exact location
+					$LF
+				]del
+			]div
+			[div class=p 
+				"now how does this function actually do the task ahead of it?
+				$LF
+			]div
+			[ul 
+				[li 
+					"It starts at its start block which was set in the parameters and moves forward until it finds a wall ahead of it.
+					$LF
+					[ul 
+						[li 
+							"For every block it moves it looks to the square at the left and right of it to see if theirs a possible turn it could make, If there is its added to its paths table.
+							$LF
+							[ul 
+								[li 
+									"after the end of the process of moving forward until it cant, it looks through the paths table and starts the process over but from those points
+									$LF
+								]li
+							]ul
+						]li
+					]ul
+				]li
+			]ul
+			[div class=p 
+				"also for every step it eliminates the block behind it so the pathfinding system cant go back on its old path and make a infinite loop
+				$LF
+			]div
+			[div class=p 
+				"lets show how i did this in code!
+				$LF
+			]div
+			[div class=p 
+				"so first i used a table to define where all the walls are for the level and it looks like this:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"this was my map table for level 5. It can look pretty confusing at first glance but I put comments so that it can be easier.
+				$LF
+			]div
+			[div class=p 
+				"1 means there are no walls around that square and as it says 10 would mean that there are walls in every direction except down and etc..
+				$LF
+			]div
+			[div class=p 
+				"I also had to make a map for the doors that can be entered through 1 side but once you go through you cant go back. Basically the same concept though:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"so now that we have a representation of what the map is we need to define some other things to make this possible too
+				$LF
+			]div
+			[div class=p 
+				"heres a list of those things:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"now I use a 
+				[code 
+					"GoStright()
+				]code
+				" function inside of the 
+				[code 
+					"pathfind()
+				]code
+				" function to make the part I said before. It needs to go straight until it finds a wall then look make at all the turns it could have made and do the same thing
+				$LF
+			]div
+			[div class=p 
+				"now the 
+				[code 
+					"GoStright()
+				]code
+				" function has these parameters:
+				$LF
+			]div
+			[div class=p 
+				"local function GoStright(startpos,eliminated_blocks,moves,Rotations,lookback)
+				$LF
+			]div
+			[div class=p 
+				"startpos is self explanatory
+				$LF
+			]div
+			[div class=p 
+				"eliminated_blocks is a table of all the blocks it already went through  as I've said before to eliminate the inability of an infinite loop
+				$LF
+			]div
+			[div class=p 
+				"moves and rotations is the amount of moves and rotations the player has executed from its starting point to where it is now
+				$LF
+			]div
+			[div class=p 
+				"lookback is a bool. if its set to true it looks behind the player on the first block that was set for the gostraight function and if that block doesn't have a wall it puts it into paths table. its only the first block because every other time the check would find a wall due to the eliminated_blocks always putting a new wall behind after every move
+				$LF
+			]div
+			[div class=p 
+				"now to significantly speed up the process of explaining the rest of the GoStright code ill just paste it here with comments that explains what everything does
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"then I use for loops inside of for loops to look through all the paths. then make paths for those paths, and paths for those paths.. so on
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"and i think that's just about everything in terms of explaining my script. if you would like to look at the full script go to this pastebin link : 
+				[a href=https://pastebin.com/1WAyExgP rel=noopener external nofollow 
+					"https://pastebin.com/1WAyExgP
+				]a
+				" if you cant see the whole script through that link and you would like to just ask me for it, I because don't have like a GitHub or anything and I don't feel like making one
+				$LF
+			]div
+		]div
+	]div
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-21019-0 
+					"Tactics and talking about the games mechanics
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-21019-0 
+			[div class=p 
+				"so first I would like to talk about the RNG manipulation:
+				$LF
+				"I've learned that every frame the RNG changes cording to some sort of pattern called a ("
+				[em 
+					"Linear Feedback Shift Register (LFSR)
+				]em
+				" to generate pseudo-random numbers"). which is used by a lot of A2600 games. I learned this from Chat GBT. i just made a script that printed the RNG values through every frame, pasted it into chat gbt and it told me what it was. Now unfortunately I couldn't figure out exactly how the pattern works for this pacific Atari game. but that's not necessary. However what is important is the ways I found that it can be afflicted and manipulated:
+				$LF
+			]div
+			[div class=p 
+				"you can actually speed up the RNG by pressing reset. This is why in my TAS to get the seed i want as fast as I can I spam reset. pressing reset puts the Rng ahead about 20-30 frames but this also means that if you press the reset button too close to the seed you want it will be jumped over. HOWEVER doing a forward movement advances the RNG by 1 frame. This is how I always got to just press reset like 2 or 3 times with perfect mashing and still get the best seed. also this is the reason why in my Tas I sometimes move backwards or forwards its either RNG manipulation or optimization and ill get into optimally moving right now
+				$LF
+			]div
+			[div class=p 
+				"optimal movement and turns functionality:
+				$LF
+				"the player can move once every 16 frames and if he turns he needs to wait 4 frames before doing another movement. most of the time if he wants to turn twice he needs to turn and wait 8 frames until making the next turn. however if the direction he turns is left and then right he can in most cases do these both consecutively. But one exception to this could be:
+				$LF
+			]div
+			[div class=p 
+				"if there was one of those squares that need to be passed with timing or the "obstacles" I refrenced at the beginning was recently on the screen.
+				$LF
+				"or if your unlucky ¯\_(ツ)_/¯
+				$LF
+			]div
+			[div class=p 
+				"I think (could be wrong) that in very rare cases you can get a right then left in just 4 frames. But anyway this is why in most cases(whenever possible) I put in or obtain the shapes with a left and then right to get optimal turns.
+				$LF
+			]div
+			[div class=p 
+				"anyway id like to talk about how to get through the "obstacles" ASAP. if you go into the obstacle without facing it (move backwards) you can get through it significantly faster then if you went through moving straight. I have 0 CLUE as to WHY? but I don't need to :) 
+				$LF
+			]div
+			[div class=p 
+				"also if you press left and right at same time the colors invert which is done for da memes
+				$LF
+			]div
+			[div class=p 
+				"in the discussions page on my last submission I stated:
+				$LF
+			]div
+			[figure 
+				[figcaption class=author 
+					"Quoting KATISTROFIC2
+				]figcaption
+				[div class=p 
+					"the seed you applied is actually the layout for the next 2 levels.
+					$LF
+					"Meaning that the best seed for level 1 isn't the best seed for 1 and 2 together and the same applies to 3 4 and 5 and 6.
+					$LF
+				]div
+			]figure
+			[div class=p 
+				"this explains how the rng works. and how if you had the best seed for 1 level it might not be the best seed for the 2 levels combined
+				$LF
+			]div
+			[div class=p 
+				"as for the seeds that were used. here they are:
+				$LF
+			]div
+			[div class=p 
+				"level 1 & 2:
+				$LF
+			]div
+			[div class=p 
+				"seed 157:
+				$LF
+			]div
+			[div class=p 
+				"Movements:71, Rotations: 57
+				$LF
+			]div
+			[hr 
+			]hr
+			[div class=p 
+				"note (the next best seed is a whole 8 movement's higher meaning that My TAS is SURELY perfect from level 1 to 2)
+				$LF
+			]div
+			[div class=p 
+				"level 3 & 4
+				$LF
+			]div
+			[div class=p 
+				"seed 158:
+				$LF
+			]div
+			[div class=p 
+				"M: 90
+				$LF
+				"R: 64
+				$LF
+			]div
+			[div class=p 
+				"coincidently the best seed I recorded for being the best for 3 and 4 is just 1 off the best for level 1 and 2. which is CRAZY! The next best seed is 4 movements off.
+				$LF
+			]div
+			[div class=p 
+				"level 5:
+				[del 
+				]del
+				[del 
+				]del
+				"--level 6 isn't affected by RNG it's just a big maze with no shapes. making my job a lot easier. also there are 3 seeds which I think are basically the same for level 5 so i'll just list them all here. in the TAS I used seed 189 because it was the easiest accessible seed.
+				$LF
+			]div
+			[div class=p 
+				"The 3 seeds:
+				$LF
+			]div
+			[div class=p 
+				"177:
+				$LF
+				""M": "77"
+				$LF
+				""R": "42"
+				$LF
+			]div
+			[div class=p 
+				"248:
+				$LF
+				""M": "77"
+				$LF
+				""R": "43"
+				$LF
+			]div
+			[div class=p 
+				"189:
+				$LF
+				""M": "77"
+				$LF
+				""R": "43"
+				$LF
+			]div
+			[div class=p 
+				"It's also worth saying that my script can't account for the "obstacles" and they actually make a HUGE difference in the time it takes to pass a seed. We actually lose around 2 seconds in the combined time lost through level 3 and 4 from obstacles and even more in level 5. So to make sure my seeds where optimal I used the second best seed for 3 and 4 and then was able to confirm that seed 158 for 3 and 4 is still the best. also I did the same thing for level 5. the top 3 seeds where all considered but where either worse or equal to using seed 189
+				$LF
+			]div
+			[div class=p 
+				"The only possible way I think this TAS could be improved is if someone has a better understanding of the obstacles and how to get through them faster
+				$LF
+			]div
+		]div
+	]div
+]div
+[div class=p 
+	"I think that's just about everything that went behind this TAS's creation and everything I've learned about the game. I tried my best and put like 4 hours into writing this long submission to put as much detail as possible and I hope nobody will mind my lengthy submission.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Removing the branch since it's not needed for this game.
+	$LF
+]div
+[div class=p 
+	"The Lua script's effectiveness speaks for itself with the resulting input file looking optimized in its routing and movement. Good work!
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing. 
+	[a class=intlink href=/Users/Profile/r3gamerz 
+		"r3gamerz
+	]a
+	" is handling the encodes for this one.
+]div

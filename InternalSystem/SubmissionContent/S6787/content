@@ -1,0 +1,302 @@
+7
+[div class=p 
+	"FTL: Faster Than Light is a strategy roguelike game released in 2012. This TAS completes a single run with the starting ship (Kestrel A) with the advanced edition and hard mode.
+	$LF
+]div
+[div class=p 
+	(youtube|v=azvrn1eulRs)
+	$LF
+]div
+[div class=p 
+	"The above video contains commentaries as subtitles.
+	$LF
+]div
+[div class=p 
+	"To be able to follow the map, inventory and upgrades, you can watch the video below:
+	$LF
+]div
+[div class=p 
+	(youtube|v=AyPS2ZRXvv0)
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS v1.4.0
+		$LF
+	]li
+	[li 
+		" Finish the game with the starting ship from a clean savefile
+		$LF
+	]li
+	[li 
+		" Uses hardest difficulty
+		$LF
+	]li
+	[li 
+		" Aims for fastest real time
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Ends inputs early
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Genre: Strategy
+		$LF
+	]li
+]ul
+[h3 id=GameVersion 
+	" Game version
+	$LF
+]h3
+[div class=p 
+	"This TAS was performed on a former version (1.5.13) of the game. The first reason is that libTAS does not support later versions of the game. The second reason is that starting 1.6 version, the game uses its own PRNG. Before that, the game uses the system's native PRNG ("rand()/srand()" in the case of Linux version). This was much more easy to track these calls in libTAS for making the TAS.
+	$LF
+]div
+[div class=p 
+	"There are only minor differences between these versions, none of which were abused in the present TAS.
+	$LF
+]div
+[h3 id=RetroEngineering 
+	" Retro-engineering
+	$LF
+]h3
+[div class=p 
+	"About 95% of the work was the retro-engineering of the whole sector generation. I used the savefile editor work from ComaToes and Vhati as a framework, and implemented the sector generation 
+	[a href=https://github.com/clementgallet/ftl-profile-editor rel=noopener external nofollow 
+		"inside it
+	]a
+	". All game data are stored inside a package that can be decompressed. Data files are xml files, so they can be read and parsed easily.
+	$LF
+]div
+[div class=p 
+	"At the beginning of a run, the sector tree and sector 1 map are generated. Then, each subsequent sector map is generated when entering it.
+	$LF
+]div
+[div class=p 
+	"So, the entire sector map is generated at once. It consists on:
+	$LF
+]div
+[ul 
+	[li 
+		" sector layout. There are maximum 24 beacons on a grid of 4 rows and 6 columns. Some beacons may be randomly be skipped, making a minimum of 16 beacons. Each beacon is shifted from its grid position by a random horizontal and vertical offset
+		$LF
+	]li
+	[li 
+		" starting and ending beacons. The starting beacon is randomly chosen from the first beacon column. The ending beacon is randomly chosen from the two last columns, except for the last sector.
+		$LF
+	]li
+	[li 
+		" each beacon event. All random parameters of an event are resolved (random events from a list, reward type and quantity, crew race, name and stats, etc.). If the event involves a fight, the game does not generate all the random parameters of the hostile ship layout, but stores a random number that will be used as a seed for when we will enter this beacon.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The only thing that is generated when entering a beacon is the content of stores.
+	$LF
+]div
+[h4 id=LuckManipulation 
+	" Luck manipulation
+	$LF
+]h4
+[div class=p 
+	"The game uses the system time at startup to seed the PRNG, so we can easily manipulate the sector 1 map. For the other sectors, the game pulls random numbers during idle time (20 numbers every 15 frames). To get a finer precision, we can use the crew stances. When a crew is manning an active system (weapons, engine, pilot, doors, camera or shields), it switches from one stance to a random one about 4 times per second. So, by moving crew, activating or deactivating systems, we can make the game pull more or less random numbers.
+	$LF
+]div
+[h3 id=Routing 
+	" Routing
+	$LF
+]h3
+[h4 id=SectorLayout 
+	" Sector layout
+	$LF
+]h4
+[div class=p 
+	"The goal of the game is to go through seven sectors, and fight the flagship in the eighth sector. The minimum number of jumps to go through a sector is four. The reason is that you can only jump between two beacons if they are from consecutive rows or columns. Because the starting beacon is on column 0, and ending beacon is on columns 4 or 5, it makes a minimum of four jumps.
+	$LF
+]div
+[div class=p 
+	"For the first seven sectors, the strict minimum is to manipulate the layout so that we can reach the ending beacon in four jumps, without any fight or boarders.
+	$LF
+]div
+[div class=p 
+	"The last sector is more complex: the starting beacon is on column 0, the federation base is on column 3 or 4 (hard only, 2 or 3 on normal and easy) and the flagship is on column 4 or 5. Moreover, it must take the flagship between 3 and 5 jumps to reach the federation base. It takes the flagship two turns to jump from one beacon to another.
+	$LF
+]div
+[div class=p 
+	"In the optimal layout, it takes only 3 jumps to each the flagship:
+	$LF
+]div
+[ul 
+	[li 
+		" turn 1: we jump to column 1, flagship prepares to jump
+		$LF
+	]li
+	[li 
+		" turn 2: we jump to column 2, flagship jumps to column 3
+		$LF
+	]li
+	[li 
+		" turn 3: we jump to column 3
+		$LF
+	]li
+]ul
+[div class=p 
+	"To reach that layout, the optimal path for the flagship to the federation base must start with a jump to column 3, which is rather rare. So there are much more constraints on optimal sector 8 compared to other sectors.
+	$LF
+]div
+[h4 id=FlagshipFight 
+	" Flagship fight
+	$LF
+]h4
+[div class=p 
+	"The last fight consists of three phases. The ship has 4 shields. The relevant differences between the phases are:
+	$LF
+]div
+[ul 
+	[li 
+		" phase 1 starts with a clocking, that cannot be skipped. Ship has 20 hp
+		$LF
+	]li
+	[li 
+		" phase 2 has 22 hp
+		$LF
+	]li
+	[li 
+		" phase 3 starts with a Zoltan shield of 12 hp, and the ship has 20 hp
+		$LF
+	]li
+]ul
+[div class=p 
+	"The most damaging weapons in this game are the beams. When all the shields are down, the most damage you can deal against this ship are:
+	$LF
+]div
+[ul 
+	[li 
+		" Glaive Beam: 15 damage, and requires 4 power bars
+		$LF
+	]li
+	[li 
+		" Halberd Beam: 10 damage, and requires 3 power bars
+		$LF
+	]li
+	[li 
+		" Hull Beam: 8-9 damage, and requires 2 power bars
+		$LF
+	]li
+]ul
+[div class=p 
+	"We need a weapon to take out the shields. The best weapons to take out shields are the flaks. Flak 2 fires seven projectiles and only requires 3 power bars. The chosen weapons are Flak 2 and two Hull Beam, for a total of 7 power bars (saving the cost of an eighth bar).
+	$LF
+]div
+[div class=p 
+	"Moreover, we need the Weapon Pre-igniter augment that charges all weapons at the beginning of every fight. No other augment offered by the game would save any time in the run.
+	$LF
+]div
+[div class=p 
+	"Because the credits start after the last phase, without any additional input, we can end inputs early by using the auto-fire feature. I move around crew at the end of phase 2 to manipulate randomness, then I deactivate and reactivate the Flak 2 at the beginning of phase 3 to synchronize the weapons when the Zoltan shield is taken down.
+	$LF
+]div
+[h4 id=RewardManipulation 
+	" Reward manipulation
+	$LF
+]h4
+[div class=p 
+	"Because the first sector can be manipulated by tweaking the system time, I could get a very lucky layout with no time cost. The two rarest items are the Weapon Pre-igniter (5/5) and the Flak 2 (4/5), I built a script to check every seed value for these two drops (in addition to the four jumps/no fight constraint). There was about 10 matching seeds in the first 1 billion I tested (there are 2147483648 possible seeds). I chose the one with a crew reward, so that I had a higher range for manipulating randomness for the next sectors.
+	$LF
+]div
+[div class=p 
+	"There are much less possible seeds for the other sectors (with loosing much time), so the remaining weapons were obtained in shops. Because shop content is generated when entering the beacon, and the Hull Beam has a rarity of 3/5, it was rather easy to manipulate its presence in a shop.
+	$LF
+]div
+[div class=p 
+	"The rest of the manipulation was for scraps and fuel. I also needed one Drone System and a combat drone for one hit on the second phase of Flagship.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": 
+	[em 
+		"jumps into existence
+	]em
+	$LF
+]div
+[div class=p 
+	"OK so first off thanks to fsvgm for confirming sync.
+	$LF
+]div
+[div class=p 
+	[em 
+		"jumps into talking about optimization
+	]em
+	$LF
+]div
+[div class=p 
+	"Optimization here appears fairly good even though it can be hard to tell what's going on.
+	$LF
+]div
+[div class=p 
+	[em 
+		"jumps into talking about entertainment
+	]em
+	$LF
+]div
+[div class=p 
+	"Speaking of not being able to tell what is going on, that was kind of a huge detriment, for the most part all you see is jumping from one place to the next and then suddenly the final boss. While to some that could be kinda funny, for others it was just boring.
+	$LF
+]div
+[div class=p 
+	[em 
+		"jumps into talking about the ending input early
+	]em
+	$LF
+]div
+[div class=p 
+	"Ending input early results in a long drawn out last phase of the fight but given that there wasn't much entertainment prior, changing it wouldn't change the reception a ton. The double kill was kinda fun though
+	$LF
+]div
+[div class=p 
+	[em 
+		"jumps into verdict
+	]em
+	$LF
+]div
+[div class=p 
+	"Accepting for Vault.
+	$LF
+]div
+[div class=p 
+	[em 
+		"gets destroyed at the same time along with this game
+	]em
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

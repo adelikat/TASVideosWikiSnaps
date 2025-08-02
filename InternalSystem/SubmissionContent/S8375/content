@@ -1,0 +1,466 @@
+7
+[div class=p 
+	"This is a TAS of 'Mighty Bomb Jack' for the NES that completes the game as quickly as possible with "Any Ending" (aka any%). The "Best Ending" requires collecting special items hidden in a pyramid's labyrinth so that all three members of a royal family can be saved at the game's end. But for "Any Ending", no items are required and only the King is rescued. The entirety of the labyrinth is bypassed thanks to a built-in game mechanic that allows you to warp from one "Palace Room" to another in a sequence, if you complete them under certain conditions.
+	$LF
+]div
+[div class=p 
+	"All inputs in this TAS were manually input by myself, no inputs were copy/pasted from other TASes, although other TASes were reviewed for routes and tactics.
+	$LF
+]div
+[div class=p 
+	"In these notes I will describe various game mechanics and TAS tactics to help with understanding the run, as well as a breakdown of which tactics were used in each stage.
+	$LF
+]div
+[div class=p 
+	[b 
+		"SPECIAL THANKS
+	]b
+	$LF
+	"Before continuing, I wanted to give a special shoutout to two people who have been instrumental in helping me optimize this TAS.
+	$LF
+]div
+[div class=p 
+	"Firstly, Ktwo has helped guide me towards a number of resources that improved my understanding of the game, and also came up with some route improvements that will be specified in the stage breakdowns. The first version of the TAS I submitted was already faster than a previous submission for this category/branch by Guybrush, so I figured I was on the right track and didn't need to analyze his TAS. But under Ktwo's recommendation I took a look at that TAS as well as Hisatoki's 'Best Ending' TAS for routing and helpful tactics.
+	$LF
+]div
+[div class=p 
+	"Secondly, Threecreepio figured out some details about the game's movement mechanics that allowed me to optimize the TAS even further with sub-pixel manipulation. He also discovered a pause-jumping trick that made opening chests and breaking blocks in the end game area a little faster.
+	$LF
+]div
+[div class=p 
+	[b 
+		"IMPORTANT MEMORY LOCATIONS
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		"3D1 - Sub-X Pixel, 3D3 - X Pixel
+		$LF
+	]li
+	[li 
+		"3D7 - Sub-Y Pixel, 3D9 - Y Pixel
+		$LF
+	]li
+	[li 
+		"3E6 - Sub-Gravity, 3E7 - Gravity
+		$LF
+	]li
+	[li 
+		"3C1/3C2 - SubX/X when the screen in moving (used during Beginning Screen)
+		$LF
+	]li
+	[li 
+		"3C3/3C4 - SubY/Y when the screen is moving (used during End Screen 1 and 3)
+		$LF
+	]li
+	[li 
+		"FA - Jump/Hover Counter
+		$LF
+	]li
+]ul
+[div class=p 
+	[b 
+		"MOVEMENT MECHANICS & SUB-PIXEL MANIPULATION
+	]b
+	$LF
+	"Jack's movement along the X-axis is fairly consistent, alternating between 1 pixel and 2 pixels because the sub-X pixel movement is 1.5 pixels per frame. But Y-axis movement is very different. Just like with the X-axis, movement along the Y-axis has sub-pixels, but how quickly those sub-pixels change depends on your current “Gravity”, which changes based on “Sub-Gravity”. When sub-G reaches 256 it wraps around to 0 and adds 1 to your G. Your current G determines how quickly your sub-Y changes, according to a table. For G values less than 64 the change to sub-Y is negative (rising up the screen), becoming 0 around 64 (hovering), then beginning to become positive when beyond 64 (falling down the screen). G caps out at 127 (aka “terminal velocity”). Whenever Jack jumps, both G and sub-G set to 0, while hovering causes G to set to 64 and sub-G to 0. Each frame during jump/hover (including the frame of the jump/hover input) will cause sub-G to grow by 240 unless there are up/down inputs. Up inputs make is grow only 160, while down inputs make it grow 352 (aka 1 G + 96 sub-G). Whenever Jack lands on a surface, the main Y value “snaps” to a number determined by the surface, but the sub-Y when landing can be different. With careful input control this can be used to set up for faster jumps/falls. Sub-Y and Sub-G carry over from the end of one stage to the beginning of the next, so you can manipulate inputs when approaching an exit to set up for an ideal start on the next stage.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM WARPING
+	]b
+	$LF
+	"There are 16 Palace Rooms in MBJ, each with a different configuration of 24 bombs and thin columns/platforms. When the first bomb is collected, another bomb becomes lit determined by a bomb sequence. To warp to the next Palace Room and bypass the labyrinth areas between them, the lit bomb must be collected last. If the lit bomb is collected early, another bomb becomes lit and the warp will fail. The routes used in each of these stages selects a first/last bomb set that allows for a faster overall path through the room. Ideally we want to collect a bomb near the entrance that will light a bomb near the exit, but the bomb sequence usually doesn't allow this.
+	$LF
+]div
+[div class=p 
+	[b 
+		"SPAWN TYPE MANIPULATION
+	]b
+	$LF
+	"Every time Jack jumps or hovers, a counter goes up. When a mummy hits the floor of a room, it will transform into one of six different types of creature. The type of creature is determined by the jump counter's value (mod 6). Usually this doesn't matter in the TAS, but there are a few places where the wrong type of spawn would get in the way.
+	$LF
+]div
+[div class=p 
+	[b 
+		"LAG REDUCTION
+	]b
+	$LF
+	"When too much stuff is on screen and/or happening at once, it's possible for a lag frame to occur which essentially causes the game to freeze for a frame. This is more common on later stages because the mummies spawn faster so you're more likely to have 4 mummies/creatures on screen at once. Also, every time you hit a 5000 point threshold during a stage, a Bonus Coin appears adding another sprite to the mix. If collected you get 1000 points and all bombs collected in the room afterwards are double points. The presence of this Bonus Coin is the cause of more than half of the lag remaining in the TAS. It would be great if points could be manipulated so that those 5k thresholds only occur during the stage clear screens and we never get any Bonus Coins. Unfortunately, options for manipulating points are limited given the fact that our primary goal is in this TAS is speed. During stages the only way to adjust points is collecting the Bonus Coin for more points, collecting the Power Ball to turn enemies into coins and collecting the coins, or jumping off a surface which earns a mere 10 points. There is one place in the TAS where I adjusted when I jumped to control points just enough to avoid a Bonus Coin and reduce 1 lag frame. There is one place in the TAS where a Bonus Coin could be collected that would result in an overall increase of 1700 points, but the long term consequences of that change added as many lag frames as it removed. It's much easier to adjust points during the beginning screen by collecting more/less balloons and jumping off surfaces more/less, but I never found a set-up that resulted in an overall reduction in lag.
+	$LF
+]div
+[div class=p 
+	[b 
+		"MUMMY PHASING
+	]b
+	$LF
+	"Sometimes mummies can pass throw a platform or wall that is supposed to stop them. There's one stage in the TAS where this happens on accident: in Palace Room 8 a mummy walks through a wall. There are two places in the TAS where I do this on purpose: in Palace Rooms 9 & 10 I force mummies to fall through platforms so they won't be in my way later. I don't understand the mechanics of how this is possible, but Jack's X position is clearly an important factor. In both cases I had to “wiggle” Jack while he was in midair to get the mummies to fall completely through the floor. It seems to be a multi-frame process because there can be situations where the mummies look like their starting to phase through the platform, but snap back up to the surface unless you do the wiggle.
+	$LF
+]div
+[div class=p 
+	[b 
+		"GENERAL TACTICS
+	]b
+	$LF
+	"Below is a list of tactics that I will reference in my stage breakdowns.
+	$LF
+]div
+[ul 
+	[li 
+		"Corner Clipping: At the right speed/angle, it's possible to make Jack clip into the side of a platform. This can be useful in situations where a platform is in the way of a desired horizontal movement, effectively shortening the length of the platform.
+		$LF
+	]li
+	[li 
+		"Clip-Up: When corner clipping upwards, a jump input can be used to make Jack's sprite shift up to get on top of the platform faster than letting him rise normally.
+		$LF
+	]li
+	[li 
+		"Jump Boosting: Stopping at a platform during an ascent to jump off it for an overall faster ascent. This is often after a Clip-up. Clip-ups and jump boosts can be done with simultaneous inputs in Palace Rooms because both A and B do the same thing. In other types of rooms B is used to activate Mighty Coins.
+		$LF
+	]li
+	[li 
+		"First Frame Jump: On the first frame that inputs can affect Jack in a stage, a jump input will cause him to jump mid-air from his starting position. After that frame you can only hover when in mid-air.
+		$LF
+	]li
+	[li 
+		"Edge Bumping: When Jack is falling/rising past a platform, there is a particular frame where pressing into the platform will result in on overall sooner horizontal movement, even though the sprite looks like it's facing the wrong direction for a frame.
+		$LF
+	]li
+	[li 
+		"Hisatoki Leap: Developed by Hisatoki in their “Best Ending” TAS, this involves jumping off a platform in order to to fall past its edge faster than hovering over the platform would have been.
+		$LF
+	]li
+	[li 
+		"Pause Jumping: Developed by Threecreepio, this is useful in stages other than Place Rooms. There are a few places in the end game areas where we must jump off something to break/reveal/open it, then land again as quickly as possible, probably to do it again. Without pause jumping, this would require an A press, a gap frame, and then another A press. But Threecreepio discovered that you can do an A press, start on the next frame, gap frame, then press A and start on the same frame. It would seem that this wouldn't be faster since it takes 4 frames instead of 3, but the pause stops Jack's sprite from getting higher up before the hover.
+		$LF
+	]li
+]ul
+[h2 id=StageBreakdowns 
+	"STAGE BREAKDOWNS
+	$LF
+]h2
+[div class=p 
+	"ROUTE ORIGIN: My stage breakdowns will start with me giving credit to the first usage of the routes. This credit won't necessarily reflect where I myself learned the routing from (I based my early work on Msm_smtn's WR before looking at pre-existing TASes and former WRs), but is intended to give credit to the first person who developed the routing. In the interest of saving time I will only take into consideration 5 sources: Guybrush's canceled 'Any Ending' TAS, Hisatoki's accepted 'Best Ending' TAS, Ktwo's former WR, Msm_smtn's current WR, and my own developments. If I give credit to one of these 5 sources, but evidence can be produced that a route was first developed by a different person, I am willing to edit these notes to more accurately reflect that history. Routes are evaluated on three general elements: the first/last bomb choice, the order the bombs are collected, and the path followed to collect the bombs. If all three elements were developed by the same source, I consider that the same route overall, otherwise I'll specify when the individual elements were developed.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: In this section I will describe the various TAS tactics used during the route and try to explain why things are done in a certain way. It will not be a full explanation of the route, just the TAS tactics that made the route faster. I will also try to give possible explanations for any lag frames remaining, but I forgot exactly where all the lag frames I was able to avoid are. I won't bother going into detail about the sub-pixel manipulations because almost every jump and up/down input are part of that. The general explanation of sub-pixels given above should be enough to understand those decisions.
+	$LF
+]div
+[div class=p 
+	[b 
+		"BEGINNING STAGE
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Used the No Coin strategy by Guybrush.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: In terms of speed the only thing that matters on this screen is to keep moving right without stopping or hitting any objects. The TAS reaches the exit as quickly as is possible because Jack does not stop to collect any of the Mighty Coins, even though I do reveal the location of 5 Mighty Coins for the benefit of RTA runners watching the TAS. The only other thing of significance that happens during this stage is points. During the Palace Room stages, an object called the Bonus Coin appears when a 5000 point threshold is reached and has the potential to cause lag. Bombs can be worth 100 or 200 points in this stage and each jump (not hovers) is worth 10 points. The collected bombs and jumps in this TAS were programmed in before I appreciated the possible impact they could have on later stages. I experimented with alternative amounts of points in an effort to reduce lag on later stages, but have not found a solution that resulted is a net reduction of frames.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 1
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last and bomb order as Ktwo, but Msm_smtn jumped onto the lower left platform after collecting the first three bombs and my path to the first bomb is different.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: We start by falling down and to the right. Right movement has to be delayed a bit to avoid hitting the upper left platform. As Jack approaches the lower left platform we move left to corner clip into it and collect the first bomb. Without the corner clip we would either collect the bomb to the right first, or be forced to hover to make sure we get the correct first bomb. As we collect the last bomb in the left column we move right to corner clip into the upper left platform, then clip-up and jump boost off it. Another clip-up and jump boost is used near the end of the room as well.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 2
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last and bomb order as Hisatoki, but my path to the first bomb is different.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: We start off with a first frame jump to go over the bombs to the right before dropping down to collect the intended first bomb. Without the FFJ we would have to tap left to avoid grabbing the bomb right next to us at the start, then hover below the bombs while moving right, which would get us to the first bomb 5 frames slower. After collecting the bottom left set of bombs we jump up and clip into the next platform. A single right input is needed to collect the right bomb of the set before clipping up and collecting the rest of the set. Then we jump up to get to the next set, but this time we don't have the space need to clip (unless we move further right first but that would have taken more time). Instead we do an edge bump while rising past the platform to get us to the left bomb sooner and start dropping down to the platform. The right movement as we're falling has to be delayed a frame or else we would miss the platform. Nothing particularly special after that as far as TAS tech is concerned.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 3
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last as Hisatoki, but I collect one bomb early.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: After collecting the first bomb, we jump up to the left and clip into the lower left platform, clip up, and move left a little to collect a bomb before continuing up to the left column of bombs. This may seem slower then just jumping up for the column first, but when we come back down to get the other two bombs we're able to jump up sooner than if we had to walk across the whole platform for all three bombs. When jumping to the right side, there seems to be a mummy in our way, but the timing and hitboxes are just right for us to land and jump over it to collect the two bombs on that platform then jump again for the top right bombs. To get from the last platform to the last two bombs, we perform a Hisatoki Leap. This gets us to the floor faster than dropping off the platform or hovering over it.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 4
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last as Guybrush, but Hisatoki collected one bomb later and I collect one bomb earlier.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: After collecting the bombs on the left floor, we clip into the lower left platform a little bit, clip-up, and jump boost off. The jump boost is performed a little slower than is possible so that we can collect the left bomb on the platform a little early. Like in the last stage, this makes is so that we don't have to walk across the platform as much later and can jump up earlier. We clip into the upper left platform, but have to make a single input move to the left to collect a bomb before clipping up and collecting the rest. Just like in the last stage, a mummy looks like it will be in our way but we have just enough room to land and jump over its hitbox while collecting the bombs on the upper right platform. This ends up being a Hisatoki Leap since we don't have ceiling bombs to grab before going down like in the last stage. Another Hisatoki Leap is performed on the lower right platform.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 5
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Developed by me.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: In older routes the lowest bomb closest to the door was collected first, which made the top bomb of the third column from the left our last bomb. My first/last puts the last bomb closer to the door. Since there are no platforms in this stage there isn't much to talk about in terms of special tactics. It looks like we should hit the creature on the floor near the end, but its hitbox isn't active yet so we can safely land and jump up for the last bombs.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 6
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same route at Ktwo.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: When we clip up into the right platform, we don't need to move right for one frame to collect the bomb hanging off the platform like we normally would have to. The hitboxes seem to line up in just a way for us to not need to do that here. When falling past the upper left platform, it looks like that mummy is going to get us but we get there just fast enough to pass it. We do a little edge bumping on the platform, but after that nothing special.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 7
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same route as Guybrush.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: We clip into the left tunnel as we're falling, but need one frame of left input to collect a bomb before fully entering the tunnel. Nothing special after that.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 8
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last as Guybrush, but bomb order and pathing developed by Msm_smtn.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: When going down to collect the second set of bombs, we have to stop our leftwards movement for a few frames to make sure we don't bump into the wall. The jump up off the next platform is delayed a bit to make sure we don't bump our heads on the upper left platform. Slight clip into the upper left platform, then clip-up and jump boost to the top bomb. We clip in to the lower left platform on the way down and clip in to the lower right platform and clip up, but didn't need a right input to collect the bomb. When approaching the last bomb, a mummy walks through the wall, which is weird, but doesn't get in our way.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 9
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last as Guybrush, but bomb order and pathing developed by me.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: The key difference between my route and previous routes is that I hover to get the bomb under the intended last bomb so that we don't have to fall down and jump back up when we come back around for it. Other than those differences the rote is pretty much the same. One of the cool things in the TAS here is that we were able to make the third mummy fall through the floor on purpose so it wouldn't be in our way when we land on that platform later. This stage has the first lag frames I was unable to get rid of when we collect the bombs on the ceiling. They're not caused by a Bonus Coin, although the first one seems to be linked to the Power Ball appearing when there are already four mummies on screen. A jump was removed somewhere (don't remember exactly where) to avoid hitting 70k points during that stage. Doing so would have caused a Bonus Coin to spawn which would create more lag.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 10
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last as Guybrush, but bomb order and pathing developed by Hisatoki.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: For collecting the first bomb, it's faster to go past it while falling and then turn back left a little to grab it. At the top left we clip into the platform, left one frame for a bomb grab, clip-up, and jump boost into a Hisatoki Leap (what a combo!). As we fall down and right to the lower right corner we never land and only skip one frame of rightward movement to make sure we collect a bomb. We jump from the floor into a clip, right one frame for a bomb grab, and clip up. During that jump we made a mummy fall through the floor on purpose again so it wouldn't be in our way later. After the clip up we get another lag frame. The only thing special happening at that time is the 4th mummy is spawning. Even if we stopped Jack from collecting bombs around that time the lag frame is till there. Lastly, we clip-up into the last platform.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 11
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same first/last as Ktwo's former WR, but bomb order and pathing were developed by Ktwo recently for use in this TAS.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: The first jump up is technically a clip, but only by necessity since we don't have the space to collect the third bomb and move over to the top of the wall. Hovering over would be slower. We clip in and up at the upper left platform. We don't need the single left input to collect the bomb we miss because we're going back that way again later. We sort of do a mini Hisatoki Leap off the top platform. The ceiling prevents a full leap. Edge bump at the bottom left. Lag frame because a Bonus Coin is on screen when the third mummy spawns? Another when the fourth mummy spawns. Jump boost on the center right wall, then clip in and up to the upper right platform. Then another mini Hisatoki Leap to head down to the last bomb.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 12
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same route as Hisatoki. Guybrush's route was very similar, but had a different first/last.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: Not much here in terms of special TAS tech. We start off with a First Frame Jump in order to get over the upper left bombs and get some of the upper right bombs first. Hisatoki Leap off the left side. Lag frame caused by the appearance of a Bonus Coin.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 13
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Developed by me in 2020 for RTA spawn manipulation purposes, turned out to be good for TAS as well.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: As far as TAS tech is concerned, there's a clip when going down the right side, then and edge bump near the bottom. Clipping up the left side too, and a clip-up at the top. Likely was some jump/hovers control for spawn type manipulation in there somewhere.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 14
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same route as Hisatoki.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: No special TAS tech to point out. There's a lag frame from when the third mummy spawns probably because there's a Bonus Coin on screen, and another when the fourth spawns.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 15
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: Same route as Hisatoki.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: Jump boost off the right wall. Lag frame caused by appearance of a Bonus Coin. Two other lag frames, one of which is connected to collecting the Power Ball. Deliberately no Jump boost off the left wall at the end because it would be 1 frame slower.
+	$LF
+]div
+[div class=p 
+	[b 
+		"PALACE ROOM 16
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: First/last is mostly irrelevant here since we aren't warping, but pathing was developed by Msm_smtn. I collect one bomb earlier than Msm_smtn, although they may have skipped it by mistake.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: We do a First Frame Jump so we can get the top left bomb and immediately hover so we get the second too (in hindsight this isn't necessary since collecting them at the end wouldn't slow down our approach to the exit, but it's a helpful thing to do in RTA since it makes it easier to hit the exit). Clip in and up when entering the bottom hole. Also clip on the way out. Lag frame when we grab the first bomb on the bottom left. Not sure why. Delaying the bomb grab to another frame only moves the lag.
+	$LF
+]div
+[div class=p 
+	[b 
+		"END STAGE 1
+	]b
+	$LF
+	[br 
+	]br
+	"EXPLANATION: We start with a first frame jump up to the platform. Edge bump on the way up. Pause Jumping to break the blocks. Didn't need pause jump when opening the chest, doing the regular double jump was just as fast for some reason (does need different sub-pixel manips afterwards though). Rightward movement to the exit needed to be stopped for one frame to avoid hitting the platform.
+	$LF
+]div
+[div class=p 
+	[b 
+		"END STAGE 2
+	]b
+	$LF
+	[br 
+	]br
+	"ROUTE ORIGIN: No coin strategy from Guybrush.
+	$LF
+	[br 
+	]br
+	"EXPLANATION: There is technically a clip-up to get on top of the invisible chest. Pause jumps to reveal chest and open it. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"END STAGE 3
+	]b
+	$LF
+	[br 
+	]br
+	"EXPLANATION: Edge bump and jump boost to get to the exit faster.
+	$LF
+]div
+[div class=p 
+	[b 
+		"END STAGE 4
+	]b
+	$LF
+	[br 
+	]br
+	"EXPLANATION: First frame jump to get up faster. Hisatoki Leap to get down faster. Pause jumping to break blocks faster. Edge bump and jump boost to the exit.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I had a joke in mind for my judgement claim message, but then I spent a solid several minutes wondering when our last Mighty Bomb Jack submission was. 2007! Holy h*ck in a h*ndbasket! I wasn't even Samsara back then, let alone everything else I am now!!!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": File replaced with a version that's, overall, 970 frames faster than the original submission.
+	$LF
+]div
+[div class=p 
+	"Regarding my claim message, there is something else I am now: Impressed at just how far this has come even since the original submission. MBJ may not look like the most complicated game, but it's clear that there are a lot of underlying things one can do to really cut down the time as much as possible. Mad respect for going as far as subpixel manipulation in the latest improvement, especially since it ended up saving a pretty hefty chunk of frames by itself. All the routing looks super clean as well.
+	$LF
+]div
+[div class=p 
+	"Accepting as a new branch! 
+	[del 
+		"But also delaying at the author's request while a more detailed submission text is being written.
+	]del
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

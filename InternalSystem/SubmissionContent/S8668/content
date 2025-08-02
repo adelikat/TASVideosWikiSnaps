@@ -1,0 +1,1039 @@
+7
+[div class=p 
+	"TAS originally completed June 24, 2023. Also, 
+	[b 
+		"epileptic seizure warning!
+	]b
+	$LF
+]div
+[div class=p 
+	"Vectorman 2 is a somewhat darker sequel to the original game involving Vectorman, an "orbot" (robot made of orbs). In this game, Vectorman's sludge barge suddenly gets blasted by a missile. He escapes and ends up in a place infested by mutant insects led by the horrendous Black Widow Queen, whose plan is to take over the Earth and kill all humans, as expected.
+	$LF
+]div
+[ul 
+	[li 
+		" Uses hardest difficulty
+		$LF
+	]li
+	[li 
+		" Takes intentional damage
+		$LF
+	]li
+	[li 
+		" Genre: Platformer
+		$LF
+	]li
+]ul
+[h4 id=2303Frame3843SecondImprovement 
+	"2303-frame (38.43-second) improvement
+	$LF
+]h4
+[div class=p 
+	"I wanted to improve this TAS to showcase two tricks found since the last publication that save large chunks of time. These are new skips involving the tornado morph in Scene 18 and the tick punch morph in Scene 21. Perhaps the most shocking part about this is that I found two ADDITIONAL skips along the way (in Scenes 2 and 19), and many other optimizations!
+	$LF
+]div
+[h4 id=VectormanSStandardMovementStats 
+	"Vectorman's Standard Movement Stats
+	$LF
+]h4
+[div class=p 
+	"These values assume 1 pixel = 256 subpixels and 1 frame = ~1/60th of a second
+	$LF
+]div
+[ul 
+	[li 
+		" Horizontal speed cap on ground: 4 pixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed cap in air: Uncapped
+		$LF
+	]li
+	[li 
+		" Horizontal speed loss from jump initiation:
+		$LF
+		[ul 
+			[li 
+				" If horizontal speed > 2 pixels/frame: 72 subpixels/frame
+				$LF
+			]li
+			[li 
+				" If horizontal speed ≤ 2 pixels/frame: 0
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Horizontal acceleration on ground: 32 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration on ground: 128 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration in air: 8 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration in air:
+		$LF
+		[ul 
+			[li 
+				" If horizontal speed > 2 pixels/frame: 88 subpixels/frame^2
+				$LF
+			]li
+			[li 
+				" If horizontal speed ≤ 2 pixels/frame: 16 subpixels/frame^2
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Vertical speed cap (downwards): 16 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (upwards) from jump: -8 pixels, 128 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (upwards) from jet boost: Uncapped
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump: -8 pixels, 128 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jet boost: -4 pixels, 96 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Gravitational acceleration: 96 subpixels/frame^2
+		$LF
+	]li
+]ul
+[div class=p 
+	"The most important takeaways from the above are:
+	$LF
+]div
+[ol 
+	[li 
+		" Vectorman's X-acceleration on the ground is 24 units faster compared to in the air
+		$LF
+	]li
+	[li 
+		" Vectorman has no speed cap in the air, while ground speed is capped at only 4 pixels/frame
+		$LF
+	]li
+]ol
+[div class=p 
+	"In general therefore, Vectorman should ideally run along the ground while speed is less than 4 pixels/frame, then stay in the air as much as possible at speeds beyond this.
+	$LF
+]div
+[h4 id=ShootingPhotons 
+	"Shooting Photons
+	$LF
+]h4
+[div class=p 
+	"Up to 3 photons can be on-screen at once (there is no limit in bonus levels, although we don't visit any in this TAS). Normally, Vectorman can shoot one photon every 7-8 frames. However, you can shoot photons at a faster rate by changing state during the cooldown interval. These state changes can include anything from stopping running, starting running, turning around, jumping, landing, ducking, and unducking. However, we often won't shoot faster than once every four frames as that is the length of the enemy invulnerability period and the faster you shoot, the more lag frames you'll generate.
+	$LF
+]div
+[div class=p 
+	"Shooting a photon diagonally forwards within 10 frames after landing from a jump will grant Vectorman a 160-subpixel ground acceleration for one frame instead of the standard 32-subpixel ground acceleration. It would seem beneficial to do this after landing from every jump, so why don't I do that? Because shooting photons often generates lag. Sometimes, the time that would be lost due to lag outweighs the time that would be gained due to a diagonal-forward shot, hence why some jump landings don't have them.
+	$LF
+]div
+[div class=p 
+	"Shooting a photon in the air before the peak of your jump will cause Vectorman to land on the ground about 3 frames faster than otherwise. I have no idea why. It's not like this arrests any vertical momentum or anything, Vectorman's feet just seem to magnetize to the ground sooner. This will not work if the photon is shot after the jet boost is engaged. On the other hand, shooting a photon down or diagonally down after the peak of your jump will decrease both your descent and horizontal speeds, limiting this maneuver to be optimal only in special situations.
+	$LF
+]div
+[h4 id=TripleQuadrupleAndQuintupleJumps 
+	"Triple, Quadruple, and Quintuple Jumps
+	$LF
+]h4
+[div class=p 
+	"If you jump within the first 5 frames after running off a ledge, you actually have a 1-5 frame window (depending on how early your first jump was) to jump a second time without engaging the jet boost! This is used to gain a little bit of extra height to reach certain places which would otherwise be slower or impossible to reach with the regular double jump.
+	$LF
+]div
+[div class=p 
+	"Well OK, it's a bit more complicated than that. An alternate way of describing this is you have a 7-frame window after running off a ledge to jump as many times as you want. So, by doing the inputs jump, let go, jump, let go, jump, let go, jump (there's your 7-frame window), you can now engage the jet boost for a grand quintuple (5x) jump! However, recall from the movement stats above that each jump loses up to 72 subpixel speed horizontally. Therefore, any extra jumps are typically not faster in places where horizontal gain is important. IIRC, quadruple and quintuple jumps are only performed in Scene 3, where rate of vertical gain is more important than horizontal gain in many places.
+	$LF
+]div
+[h4 id=DamagingEnemies 
+	"Damaging Enemies
+	$LF
+]h4
+[div class=p 
+	"The damage Vectorman inflicts on enemies varies depending on the attack type and enemy classification. The damages inflicted are as follows:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"              
+			]th
+			[th 
+				"Enemy
+			]th
+			[th 
+				"Boss
+			]th
+		]tr
+		[tr 
+			[th 
+				"Direct Contact
+			]th
+			[td 
+				"1     
+			]td
+			[td 
+				"0
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Photon        
+			]th
+			[td 
+				"2     
+			]td
+			[td 
+				"1    
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Jet-Boost     
+			]th
+			[td 
+				"5     
+			]td
+			[td 
+				"4    
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Tank Missile  
+			]th
+			[td 
+				"4     
+			]td
+			[td 
+				"-    
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The jet boost has a special property unlike other means of attack. Since the jet appears active on-screen for 14 frames, it can chain multiple hits to enemies across this interval. Unfortunately, all enemies and bosses benefit from 3 invulnerability frames after any attack, meaning they can only receive damage every 4 frames. Therefore, enemies and bosses can only be hit up to four times by each jet boost, totaling to 20 damage on a regular enemy, and up to 16 damage on a boss. The lone exception to this is the Scene 4 boss heads which have more invulnerability frames and can only be damaged every 24 frames.
+	$LF
+]div
+[div class=p 
+	"Sometimes it's hard to fit all four jet-boost hits into the 14-frame window due to various constraints. I would've had to settle for many 3x jet boost hits if it weren't for discovering that firing a photon in midair sometimes forces the 4th hit to register. I'm not 
+	[em 
+		"exactly
+	]em
+	" sure why this works. Does it increase the duration the jet is active? Does it make the jet's hitbox bigger? In any case, I used this trick to defeat some of the bosses quicker.
+	$LF
+]div
+[h4 id=MovieResyncFromGens11bToBizhawk2913Frames 
+	[b 
+		"Movie resync from Gens11b to BizHawk 2.9.1
+	]b
+	" -3 frames
+	$LF
+]h4
+[h4 id=Scene1Geronimo1Frame 
+	[b 
+		"Scene 1: Geronimo
+	]b
+	" -1 frame
+	$LF
+]h4
+[div class=p 
+	"Taking damage from the snakefly cancels the one and only lag frame in this level from the previous TAS for reasons I can't even begin to explain. It is OK to take this hit as we have plenty of opportunities to regain it in the coming levels from an enemy HP drop.
+	$LF
+]div
+[h4 id=Scene2NightInTheSwamp559Frames 
+	[b 
+		"Scene 2: Night in the Swamp
+	]b
+	" -559 frames
+	$LF
+]h4
+[div class=p 
+	"The huge time cut in this level is largely thanks to a new skip where we triple jump over the final wall, skipping the second underground section completely. It's unbelievable it took 27 years after the game's release for me to just come along and find such a skip in just the 2nd level. And yes, this skip is without a doubt RTA viable (
+	[a href=https://www.youtube.com/watch?v=sWF3ny7ABNo rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=sWF3ny7ABNo
+	]a
+	"), although difficult due to the triple jump requirement. Other than this insane find, the level had some other small optimizations regarding diagonal shots on landing and increasing airtime.
+	$LF
+]div
+[h4 id=Scene3BogJam22Frames 
+	[b 
+		"Scene 3: Bog Jam
+	]b
+	" -22 frames
+	$LF
+]h4
+[div class=p 
+	"This is one of the few levels where vertical gain takes precedence over horizontal gain. Optimizations over the previous TAS include midair photon shots and various multi-jumps used to land and initiate subsequent jumps faster. The largest time save came shortly after the shieldbug damage boost, where there is a set of tree branches that have a solid ceiling which we must jump around. The previous publication jumps around the right side while this time we jump around the left. This saves a couple of frames due to the branches after this section being more conveniently placed for efficient jumping, and it avoids busting open two powersacks which would come with unavoidable lag. This route does miss out on collecting a +1 max health powerup but is okay because we don't actually need it!
+	$LF
+]div
+[h4 id=Scene4InBlackestNight12Frames 
+	[b 
+		"Scene 4: In Blackest Night
+	]b
+	" -12 frames
+	$LF
+]h4
+[ul 
+	[li 
+		" Boss HP: 25 (each head)
+		$LF
+	]li
+]ul
+[div class=p 
+	"As mentioned earlier, this boss has a long invulnerability period after being hit and can only be damaged every 24 frames, so the fight must be carefully planned. There is significant downtime between jet boost hits when Vectorman ascends to the boss and subsequently falls to the ground. This is just the right amount of time to squeeze in a photon shot to each head to maximize the damage output. 5 photons and 5 jet boosts in an alternating pattern get the job done. We save 12 frames over the previous TAS due to greater horizontal control over Vectorman, spacing all our attacks out more efficiently, and better lag reduction. The previous TAS had to shoot diagonal shots upon landing to attain the horizontal speed required to sweep the jet boost over and damage both heads which was cut out here. And to top it all off, we got this hectic boss fight down to just 1 lag frame for the entire level!
+	$LF
+]div
+[h4 id=Scene5Fired4Frames 
+	[b 
+		"Scene 5: Fired
+	]b
+	" -4 frames
+	$LF
+]h4
+[div class=p 
+	"Jumping on the same frame as landing on the lava will avoid any knockback and damage, so there is no time for diagonal shots when landing on the lava. Most of the saved frames were from getting past the Big Maw enemy under the low ceiling more efficiently.
+	$LF
+]div
+[h4 id=Scene6MagmaPI10Frames 
+	[b 
+		"Scene 6: Magma P.I.
+	]b
+	" -10 frames
+	$LF
+]h4
+[div class=p 
+	"The saved frames here come from numerous, dispersed micro-optimizations with the bulk coming from a larger horizontal speed during the 4th jump of the level, crossing the big gap.
+	$LF
+]div
+[h4 id=Scene7TurnUpTheHeat13Frames 
+	[b 
+		"Scene 7: Turn up the Heat
+	]b
+	" -13 frames
+	$LF
+]h4
+[ul 
+	[li 
+		" Boss HP: 100
+		$LF
+	]li
+]ul
+[div class=p 
+	"8 photon hits and 23 jet boost hits make quick work out of this guy, showcasing just how overpowered the jet boost attack is. Some frames were saved through lag reduction but the greatest quantity was saved by taking a death at the end of the level. Yeah! You didn't notice? By walking into the lava right as the boss explodes, for some reason we can press Start to skip to the next level 11 frames sooner than otherwise. Since Vectorman's death animation doesn't finish, we aren't penalized with a loss of a life, but we do start the next level with zero HP which is kind of funny. Only 2 lag frames remain in this boss fight, both happening at the very end as we take a death, so they are probably unsavable.
+	$LF
+]div
+[h4 id=Scene8OrbotExpress14Frames 
+	[b 
+		"Scene 8: Orbot Express
+	]b
+	" -14 frames
+	$LF
+]h4
+[div class=p 
+	"The frames saved come from reducing all lag through the level and horizontal speed management via numerous methods, all explained below.
+	$LF
+]div
+[div class=p 
+	"Vectorman's skate morph has different stats from his standard form:
+	$LF
+]div
+[ul 
+	[li 
+		" Horizontal speed cap: 5 pixels, 248 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed change when shooting a photon neutrally or up on an upwards incline: none for 16 frames
+		$LF
+	]li
+	[li 
+		" Horizontal speed change when shooting a photon neutrally or up on flat ground or in air: none for 30 frames
+		$LF
+	]li
+	[li 
+		" Horizontal speed change when shooting a photon holding left/right on ground: none for 30 frames
+		$LF
+	]li
+	[li 
+		" Horizontal speed change when shooting a photon holding left/right in air: 64 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed loss when shooting a photon forward after jet boost: 48 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed loss when shooting a photon neutrally after jet boost: 128 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed loss when shooting a photon backwards after jet boost: 64 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration on ground, holding left/right: 80 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration on ground, holding nothing: 8 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration in air: 16 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (downwards): 16 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump: -10 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jet boost:
+		$LF
+		[ul 
+			[li 
+				" If vertical speed > -7 pixels/frame: -10 pixels/frame
+				$LF
+			]li
+			[li 
+				" If vertical speed ≤ -7 pixels/frame: -3 pixels/frame
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Gravitational acceleration: 80 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" In addition, you can shoot photons at whatever rate you want—the normal 8-frame delay between shots is absent with the skate morph
+		$LF
+	]li
+]ul
+[div class=p 
+	"Yeah I know the above is a lot but let's first answer the question on everyone's mind—is it really faster to progress through the level facing backwards? Actually yes!-although indirectly. You see, once we accelerate to top speed, notice how our "shooting a photon holding left/right on ground" does not cause a change in speed. This allows us to face left when at full rightwards speed without incurring any time loss, although we must continually shoot photons in intervals of at most 30 frames or else we will begin to decelerate. Now, the reason facing backwards is indirectly faster is due to lag management. You see, lag frames occur sporadically throughout the three skate levels. For some reason, precisely timed photon shots can cancel these lag frames. Since the camera in the skate levels maintains Vectorman at the left screen margin, any photons fired to the left will despwan very quicly, greatly minimizing the chance any of these photons will generate lag of their own.
+	$LF
+]div
+[div class=p 
+	"In the previous paragraph I briefly mentioned accelerating to top speed. However, getting to the speed cap of 5 pixels, 248 subpixels is not so simple. Notice how "horizontal acceleration/deceleration on ground, holding left/right" occurs in intervals of 80 subpixels/frame^2. This means we will accelerate at this rate until we reach 5 pixels, 240 subpixels/frame at which point we cannot accelerate further as the speed cap would be exceeded. The only way to squeeze out the extra 8 subpixels/frame of speed is to hold nothing and begin to decelerate at a rate of 8 subpixels/frame^2. Once we reach a speed of 5 pixels, 168 subpixels/frame, we can now accelerate once again to add 80 subpixels/frame speed and attain the maximum speed of 5 pixels, 248 subpixels/frame. So, the optimal acceleration regime from a stop is to accelerate for 19 frames, decelerate for 9 frames and then accelerate for 1: (80*19)-9*8+80=1528 subpixels=5 pixels, 248 subpixels
+	$LF
+]div
+[div class=p 
+	"Now, what is the best way to maintain our top speed during a jump? We often need to jump to avoid enemies as our HP is too low to damage-boost through and killing enemies often generates a ton of lag. Whenever we jump, we immediately lose 16 subpixels/frame^2 of speed due to "deceleration in air". Conveniently, "shooting a photon holding left/right in air" incurs an additional loss of 64 subpixels/frame, and now we can accelerate at the standard 80 subpixels/frame^2 rate to get back to top speed. Thus, each jump incurs a total loss of only 96 subpixels (~1/16 of a frame) per jump!
+	$LF
+]div
+[h4 id=Scene9DirtyJob30Frames 
+	[b 
+		"Scene 9: Dirty Job
+	]b
+	" -30 frames
+	$LF
+]h4
+[div class=p 
+	"Cpadolf optimized the first half of this stage very well as I don't recall finding any improvements to his work until it came to having to shoot through the two layers of trash cubes to progress. In the previous TAS, ducking and unducking was done very quickly to shoot the two layers with minimal horizontal speed loss. Here, I reduce the horizontal speed loss even further by ducking for 1 frame followed by jumping (it's the only way to jump under a ceiling this low) and shooting diagonally down at the lower trash cube. When landing, I shoot diagonally up at the upper trash cube while simultaneously getting the 160-subpixel/frame speed boost from the diagonal shot upon landing, resulting in an even higher net speed than the old method.
+	$LF
+]div
+[h4 id=Scene10Vectorman1238Frames 
+	[b 
+		"Scene 10: Vectorman 1 2 3
+	]b
+	" -8 frames
+	$LF
+]h4
+[div class=p 
+	"Only four lag frames occurred in this level, and all happened when the two snake flies were jet-boosted. This was unfortunately our only option as we still have zero HP from the Scene 7 boss death and can't damage-boost through them. Also, there was one lag frame near the start of this level that was a particular nuisance in getting rid of. After trying everything, I eventually got frustrated and just spammed shooting photons from the beginning of the level all the way to the point where the lag frame was happening, and would you believe that I SAVED the frame!? Yes, for some reason that cacophony of photons produced less lag than what would've happened otherwise which makes no sense and it's kind of a funny sound, so I'll gladly take it.
+	$LF
+]div
+[div class=p 
+	"Unfortunately, there are times where we must 
+	[em 
+		"jet boost
+	]em
+	" to get past certain enemies which come with a whole new set of factors to consider. Just like regular jumping, engaging the jet boost also immediately loses 16 subpixels/frame^2 of speed due to "deceleration in air"; there are also efficient methods of quickly regaining the speed cap:
+	$LF
+]div
+[ul 
+	[li 
+		"If it is OK to go from facing left to facing right after the jet boost, we can decelerate for 4 frames and shoot backwards to face right and regain back all our speed:
+		$LF
+	]li
+]ul
+[div class=p 
+	"(256*5+248)-16*4+64=1528 subpixels=5 pixels, 248 subpixels
+	$LF
+]div
+[ul 
+	[li 
+		"If we need to stay facing left after the jet boost, we can face right before the jump, decelerate for 3 frames, shoot backwards to face left, then shoot forwards facing left, and finally accelerate by holding right for two frames to reclaim the speed cap:
+		$LF
+	]li
+]ul
+[div class=p 
+	"(256*5+248)-16*3-64-48+80*2=1528 subpixels=5 pixels, 248 subpixels
+	$LF
+]div
+[h4 id=Scene11ICanDigIt17Frames 
+	[b 
+		"Scene 11: I Can Dig It
+	]b
+	" -17 frames
+	$LF
+]h4
+[div class=p 
+	"The duck-jump-diagonal-shot method for shooting the trash cubes is not faster in this level thanks to LAG! There are so many collectible photons spawned near the beginning of the level that the game will lag horribly if you're not careful with planning your shots. It appears Cpadolf's ducking method works the best, although we take a different approach. At the start of the level, we break as many blocks as we can before even beginning to move as there are fewer collectible photons spawned here. As we run down the corridor, we only shoot two photons at a time to keep the lag down. By the time we must shoot the last three columns of trash cubes, the lag spikes like crazy and I just empirically tested a whole bunch of scenarios to see which could get through the fastest. The result doesn't look optimal, but it gets the job done fastest as it reduces a lot of lag and even despawns a couple collectible photons.
+	$LF
+]div
+[div class=p 
+	"When dropping to the bottom of the next room, rather than busting through the bottom two rows of the next trash cube column, we instead throw some diagonal shots into some trash cubes higher up the column which gives us a cubby-hole to jump into and blast through instead. This increased our total airtime progressing through this section, so it shaved off a couple frames.
+	$LF
+]div
+[h4 id=Scene12Rollerderby7Frames 
+	[b 
+		"Scene 12: Rollerderby
+	]b
+	" -7 frames
+	$LF
+]h4
+[div class=p 
+	"Same as scenes 8 and 10.
+	$LF
+]div
+[h4 id=Scene13MistChances3Frames 
+	[b 
+		"Scene 13: Mist Chances
+	]b
+	" -3 frames
+	$LF
+]h4
+[div class=p 
+	"This stage preserves almost all of Cpadolf's original input, as it was very well optimized. The last few jumps were modified slightly for the slight time gain.
+	$LF
+]div
+[h4 id=Scene14CaveFear22Frames 
+	[b 
+		"Scene 14: Cave Fear
+	]b
+	" -22 frames
+	$LF
+]h4
+[div class=p 
+	"There are many places in this level where you must drop down beneath a low ceiling. Jet boosting into each of these ceilings (except one, where doing so would have generated too much lag) allowed us to drop faster at each and save a few frames.
+	$LF
+]div
+[div class=p 
+	"One of the beneficial side-effects of these time saves was giving us better RNG on two of the crabby-hermit enemies. The one after the first ceiling drop started walking to the right sooner this time compared to the old TAS, allowing us to jump out of the low corridor sooner (their shell is impervious to damage so we cannot simply shoot it). And the last crabby-hermit in the level started walking left when it spawned which allowed it to avoid being rhinocharged, saving some lag frames.
+	$LF
+]div
+[div class=p 
+	"The rhinoceros beetle has 35 HP, and it was found to be most efficient to kill with 18 photons hits and no jet-boosts. This is because the strategy would otherwise have been to run towards the rhinoceros beetle while shooting photons, and once we're close enough to it, deliver a swift 4x jet-boost hit. However, by the time we get close enough, we will have already delivered so many hits via photon shots that it's faster to just finish it off with photons. And then for the next peculiar thing: why do we jump right as we grab the rhino charge morph? To answer that, I'll first present Rhinocharge's movement stats:
+	$LF
+]div
+[ul 
+	[li 
+		" Horizontal speed cap while charging: 6 pixels, 248 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed cap while walking: 3 pixels, 248 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed cap in air: 2 pixels, 248 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration while charging: 128 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration while walking, holding left/right: 64 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration while walking, holding nothing: 128 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration in air: 64 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (downwards): 16 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump: -8 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jet boost:
+		$LF
+		[ul 
+			[li 
+				" If vertical speed > -7 pixels/frame: -10 pixels/frame
+				$LF
+			]li
+			[li 
+				" If vertical speed ≤ -7 pixels/frame: -3 pixels/frame
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Gravitational acceleration: 96 subpixels/frame^2
+		$LF
+	]li
+]ul
+[div class=p 
+	"Notice how while horizontal charging speed caps out at 6 pixels and 248 subpixels/frame, the finest "resolution" we have to accelerate to that point is 64 subpixels/frame^2, so the closest we can get to the speed cap with just Rhinocharge's stats is 6 pixels and 192 subpixels/frame, after which would come 7 pixels/frame, which is 8 subpixels/frame too high for the speed cap. Recall however, that standard Vectorman's horizontal speed loss when initiating a jump (if > 2 pixels/frame) is 72 subpixels/frame, which is 8 subpixels higher than the 64 subpixels/frame^2 acceleration referenced earlier—which is just the speed adjustment we need! None of standard Vectorman's other movement properties have this type of value, which is why we must jump when collecting the morph. Therefore, if we jump at standard Vectorman's top running speed of 4 pixels/frame, our speed would immediately decrease to 3 pixels and 184 subpixels/frame. Collecting the morph now and accelerating at Rhinocharge's 128 subpixels/frame^2 ground acceleration (the game assumes to immediately apply ground stats whenever you collect a morph; this is why I am clearly running in midair after collecting the morph) will now snap us to the coveted 6 pixels, 248 subpixels speed cap.
+	$LF
+]div
+[div class=p 
+	"Only one problem: that'll get us to the speed cap when we're charging 
+	[em 
+		"to the right
+	]em
+	". However, if we were to turn around in the air, accelerating/decelerating at 64 subpixels/frame^2 intervals means our leftwards speed can get no higher than 6 pixels, 200 subpixels/frame. This suboptimal-seeming speed is one we unfortunately must accept, as Rhinocharge's acceleration stats leave us with nothing better to work with. But it is still most optimal to have our speed synced in this manner (maximized to the right) as we charge a greater distance to the right than to the left in this level.
+	$LF
+]div
+[h4 id=Scene15Dreamsnake4Frames 
+	[b 
+		"Scene 15: Dreamsnake
+	]b
+	" +4 frames
+	$LF
+]h4
+[ul 
+	[li 
+		" Boss HP: 75 (each snake)
+		$LF
+	]li
+]ul
+[div class=p 
+	"This is the only stage that did not experience a time gain as I could not for the life of me figure out how Cpadolf got such a fast pattern. I tried everything: beating the previous level at different times, firing photons in midair to force extra jet hits, I combed out every lag frame, you name it. But in the end, Cpadolf's second snake always appears to emerge from the ground at least 4 frames sooner than mine.
+	$LF
+]div
+[h4 id=Scene16RecycleOrDie9Frames 
+	[b 
+		"Scene 16: Recycle or Die
+	]b
+	" -9 frames
+	$LF
+]h4
+[div class=p 
+	"Just more of your standard lag reduction and horizontal speed optimization.
+	$LF
+]div
+[h4 id=Scene17TheShadowNose24Frames 
+	[b 
+		"Scene 17: The Shadow Nose
+	]b
+	" -24 frames
+	$LF
+]h4
+[div class=p 
+	"If you finish Scene 16 in the air, you're able to jump infinitely during the first two seconds of Scene 17, which is why we just absolutely fly up that first corridor. While this is certainly a weird exploit, one curious thing about this level is that Vectorman's position, speed, and I wouldn't doubt many other parameters, are tracked at different RAM addresses from the other 21 levels. I have no doubt this switch in RAM addresses when loading Scene 17 has something to do with the jumping exploit because, as we'll see later, when Scene 18 starts and the RAM addresses switch back to where they normally are for the rest of the game, the infinite jumping glitch is activated during the first two seconds of that level as well.
+	$LF
+]div
+[div class=p 
+	"The first half of Scene 17 is quite a project to optimize. These particular breakable blocks have different properties from the trash cubes found in Scenes 9 and 11. Whenever you shoot one of 
+	[em 
+		"these
+	]em
+	" blocks, a somewhat random chain-reaction will occur that busts open other adjacent blocks, and you better bet this creates a lot of lag. The chain reaction can either be to your benefit, as convenient cubbies for you to jump into on your ascent can be created; or to your detriment, as the floor you were planning to stand on could break away! IIRC, 22 of the 24 saved frames in this level were from optimizing this crazy climbing sequence.
+	$LF
+]div
+[ul 
+	[li 
+		" Boss HP: 100
+		$LF
+	]li
+]ul
+[div class=p 
+	"Cpadolf optimized the route for this boss fight really well, so no new novel strategies were used to subdue this guy faster besides cutting out some lag frames. 
+	$LF
+]div
+[h4 id=Scene18ShoutAndTwist774Frames 
+	[b 
+		"Scene 18: Shout and Twist
+	]b
+	" -774 frames
+	$LF
+]h4
+[div class=p 
+	"In this level, due to the tornado in the background, there is a "wind" effect which constantly pushes Vectorman to the left by a value which oscillates between 64 subpixels/frame and 1 pixel, 64 subpixels/frame over the course of 256 frames. I have not found the RAM address which tracks this parameter, so I know neither how to manipulate wind nor keep track of it in a convenient manner, so all of Vectorman's speeds I reference through the remainder of this level description will neglect the effects of wind for simplicity.
+	$LF
+]div
+[div class=p 
+	"Just like Scene 17, you can also infinitely jump for the first two seconds of this level, but this time regardless of whether you beat Scene 17 on the ground or in the air. Conveniently, the infinite jumps time out right about where you need to jet-boost the powersack containing the tornado morph. This tornado thing is essential to beating the level fast. Let's look at some of this morph's stats:
+	$LF
+]div
+[ul 
+	[li 
+		" Horizontal speed cap on ground: 6 pixels, 248 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed cap in air: 5 pixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration on ground, holding left/right: 128 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration on ground, holding nothing: 64 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration in air, holding left/right:
+		$LF
+		[ul 
+			[li 
+				" If horizontal speed ≥ 5 pixels, 96 subpixels/frame: 32 subpixels/frame^2
+				$LF
+			]li
+			[li 
+				" If horizontal speed < 5 pixels, 96 subpixels/frame: 96 subpixels/frame^2
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Horizontal deceleration in air if holding nothing:
+		$LF
+		[ul 
+			[li 
+				" If horizontal speed > 5 pixels/frame: 32 subpixels/frame^2
+				$LF
+			]li
+			[li 
+				" If horizontal speed ≤ 5 pixels/frame: 0
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Vertical speed cap (downwards): 8 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (upwards): Uncapped
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump button on ground: -6 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump button in air:
+		$LF
+	]li
+	[li 
+		" Gravitational acceleration: 48 subpixels/frame^2
+		$LF
+	]li
+]ul
+[div class=p 
+	"Notice how the ground horizontal speed cap runs into a similar problem as I explained for the Rhinocharge morph. Once again, this requires a similar precise manipulation of standard Vectorman's speed before collecting the morph for the horizontal speed to eventually "snap" to the speed cap.
+	$LF
+]div
+[div class=p 
+	"The breakable walls in this level have the same random breaking behavior as the Scene 17 blocks, plus the additional challenge that the tornado morph's interactions with them are also random. For instance, running into a breakable wall at full ground speed is guaranteed to stop all our momentum. However, jumping into the wall only has 
+	[em 
+		"a chance
+	]em
+	" of stopping our vertical and/or our horizontal momentum, depending on the way the wall decides to break. This is why we do a small jump into each wall (except the first one), despite the stats list above showing horizontal speed is slower in the air versus on ground. We must precisely jump such that the tornado breaks ONLY the second block from the floor while also not getting its horizontal momentum arrested. We can't break the first and third blocks from the floor because we want the bottom of the third block to serve as a ceiling to arrest our 
+	[em 
+		"vertical
+	]em
+	" momentum, where we will then land on top of the first block. This ensures we have the absolute smallest jump possible, which minimizes airtime and therefore time loss. We did not have to do any of this for the first wall because I found an amazing-looking oblique diagonal shot right into the base of the first wall. It's probably my favorite single shot in the TAS.
+	$LF
+]div
+[div class=p 
+	"OK now it's time to talk about how I saved so much freaking time in this level. The new strat here is using the two tornado morph powerups to traverse along the top of the level only, something I discovered for real-time runs back in May of 2016. You can essentially gain unlimited height as the tornado morph if you can tap the jump button fast enough—something a TAS will have no problem with. The issue is that the tornado morph only lasts for 600 frames. Now, it would be nice if we could chain the two powerups together; that is, collect the second tornado morph before the first runs out. This would preserve all the tornado's momentum and we wouldn't have to slow down by transforming back to standard Vectorman and the tornado again. 
+	[em 
+		"BUT
+	]em
+	" there's a catch: doing so will only give you an extra 240 frames on the timer for the second powerup unless you collect it frame perfectly... 
+	[em 
+		"for some reason??
+	]em
+	" lol... and 
+	[em 
+		"only then
+	]em
+	" will you get the normal 600 frames, which is just enough to close out the level. Lastly, since collecting the second morph throttles your speed stats a bit, a jump is required to "snap" it back to the speed cap; AND, since we're collecting the morph in midair, ground stats will be immediately assumed (same as what I explained for the Rhinocharge morph collection), so minimal time loss is incurred.
+	$LF
+]div
+[div class=p 
+	"If the tornado morph ends with horizonal and/or vertical momentum in the air, Vectorman will adopt those stats and be sent flying. This is why I jump near the end of the level right as the  tornado runs out, as Vectorman is sent at the perfect arc towards the finish without touching the ground and losing momentum.
+	$LF
+]div
+[h4 id=Scene19TankYou148Frames 
+	[b 
+		"Scene 19: Tank You
+	]b
+	" -148 frames
+	$LF
+]h4
+[div class=p 
+	"This is one energetic tank! It must jump at every opportunity it gets because it travels through the air faster than on the ground (you know, like real tanks?? lmao). Other than this basic observation, there is some real trickery going on with the tank's horizontal movement speeds so let's delve into that first:
+	$LF
+]div
+[ul 
+	[li 
+		" Rolling on ground: 2 pixels, 96 to 144 subpixels/frame (average)
+		$LF
+	]li
+	[li 
+		" Rolling on an incline: 2 pixels, 104 to 131.2 subpixels/frame (average)
+		$LF
+	]li
+	[li 
+		" Horizontal air speed caps:
+		$LF
+		[ul 
+			[li 
+				" Before having touched an incline: 2 pixels, 224 subpixels/frame
+				$LF
+			]li
+			[li 
+				" After having touched an incline: 2 pixels, 240 subpixels/frame
+				$LF
+			]li
+			[li 
+				" When damage boosting from an enemy: 3 pixels/frame
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Horizontal acceleration on ground: 64 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration on ground, holding nothing: 64 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration on ground, holding left/right: 192 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration in air, holding left/right: 32 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration in air, holding nothing: 0
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (downwards): 8 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump: -9 pixels/frame
+		$LF
+	]li
+	[li 
+		" Gravitational acceleration: 96 subpixels/frame^2
+		$LF
+	]li
+]ul
+[div class=p 
+	"The ground rolling speeds above are highly oscillatory and as such, are a bit of a mystery on how to consistently manipulate. In any case, whenever the tank was rolling on the ground (which is almost never) I made sure to try everything so the tank speed would hover around the upper end of the above rolling speeds. Now the air speeds are where things get interesting. I've listed three scenarios, each of which differ by only 16 subpixels/frame from the next. From just the numbers, it might look like we should do as many damage boosts as possible to get through the level fastest. However, 
+	[b 
+		"the 2 pixels, 240 subpixels/frame speed will last indefinitely for every jump we make after touching an incline, but the 3 pixels/frame speed will only last until you touch the ground. Once you jump again after a damage boost, it's back to 2 pixels, 224 subpixels/frame regardless of touching an incline beforehand.
+	]b
+	" This turns the level into an interesting optimization problem: do we gamble and do a lot of damage boosts or play it safe and do none? After redoing this entire level a bunch of times, I think I got the procedure down optimally in that you can see with every damage boost I do, there's 
+	[em 
+		"almost always
+	]em
+	" an incline shortly thereafter to immediately restore 2 pixel, 240 subpixel/frame speed. Note coming to a complete stop will also reset our "incline touched" status, which is why it's okay for me to do damage boosts just before the elevator sections.
+	$LF
+]div
+[div class=p 
+	"WAIT!! Speaking of those elevator sections—I FOUND 2 NEW ZIPS IN THIS LEVEL!! I stumbled upon this discovery in May 2023 while making this TAS and is the source of this level's huge time save over the previous TAS. Basically, right as the elevator platform starts moving up, you need to drive precisely into the adjacent ceiling corner such that you get pushed up into the wall. Each jump you make from here will push you 1 block height higher up the wall until you fly out the top and continue on your way. Unless you're the tank morph and being pushed into a ceiling, I haven't been able to get this to work anywhere else in the game—I looked hard. And it's really precise, appearing to be frame-perfect and 1/16th-pixel perfect. As such, the RTA viability for this trick looks 
+	[em 
+		"very
+	]em
+	" grim.
+	$LF
+]div
+[div class=p 
+	"Paint-bug enemies: these always spawn at whatever screen margin the player is facing. This is why the tank was faced backwards throughout Scenes 19 and 20 in the previous TAS; so any paint-bug enemies would spawn at the left margin, and immediately despawn. We instead face forward and charge valiantly into them this time because 1) it doesn't lose any time through lag or anything 2) damage boosting off of them can even give a slight speed increase 3) they can give health drops which will be useful with all the damage boosting, and 4) it's WAY more entertaining.
+	$LF
+]div
+[div class=p 
+	"Missiles: only four missiles can be on-screen at once. Exact missile trajectories are somewhat random. What is not random about them is the amount thrust given to each when fired. Each missile fires in an alternating pattern with high thrust, then low thrust, then high thrust again, and so forth. The constant hopping of the tank makes it harder to hit enemies. Imagine hitting a close-range ground enemy with a high-thrust missile at the peak of your jump. Yeah, it's not gonna happen—you'll need a low-thrust missile. This is why you'll often see me intentionally throw away or just flat-out waste missiles when firing at enemies to get the missile properties I need at that moment.
+	$LF
+]div
+[div class=p 
+	"And finally, despite all the zany missile and explosion action in this level, we did not incur a single frame of lag!
+	$LF
+]div
+[h4 id=Scene20TankPatrol31Frames 
+	[b 
+		"Scene 20: Tank Patrol
+	]b
+	" -31 frames
+	$LF
+]h4
+[div class=p 
+	"The movement speed and missile optimizations described in the previous tank level were also implemented here. It looks so sick just pummeling enemy after enemy in this level's onslaught without making speed sacrifices. I especially love the diagonal missiles we shot which rained down on that one Mantid near the end of the level... so satisfying. We also collected this level's hidden +1 max health powerup this time... I'm not sure why the previous TAS opted to not get it. And we completed this tank level once again without generating a single lag frame!
+	$LF
+]div
+[h4 id=Scene21BadEggs536Frames 
+	[b 
+		"Scene 21: Bad Eggs
+	]b
+	" -536 frames
+	$LF
+]h4
+[div class=p 
+	"OK this one is really funny. Basically, infinite jumping and jet boosting is possible with the scorpion tail and tick punch morphs. By attacking in the air, your jump state is reset and you'll be able to jump and jet boost again. Repeat as many times as you'd like; it's that simple! This was found by New Mister Fox around May of 2019 (seems like everything was found in the month of May LOL), and is the reason for the big time gain here over the previous TAS. Here are the speed stats of the tick punch morph:
+	$LF
+]div
+[ul 
+	[li 
+		" Horizontal speed cap: 3 pixels, 248 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal speed loss from jump initiation: 3 pixels, 128 subpixels/frame
+		$LF
+	]li
+	[li 
+		" Horizontal acceleration/deceleration, holding left/right: 64 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration on ground, holding nothing: 128 subpixels/frame^2
+		$LF
+	]li
+	[li 
+		" Horizontal deceleration in air, holding nothing: 0
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (downwards): 16 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed cap (upwards): Uncapped
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jump: -8 pixels/frame
+		$LF
+	]li
+	[li 
+		" Vertical speed impulse from jet boost:
+		$LF
+		[ul 
+			[li 
+				" If vertical speed > -7 pixels/frame: -10 pixels/frame
+				$LF
+			]li
+			[li 
+				" If vertical speed ≤ -7 pixels/frame: -3 pixels/frame
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Gravitational acceleration: 96 subpixels/frame^2
+		$LF
+	]li
+]ul
+[div class=p 
+	"Now, you'll notice the horizontal speeds of the tick punch morph are dreadfully slow compared to standard Vectorman. Like, why does jumping as the tick punch incur an immediate loss of 
+	[em 
+		"at least
+	]em
+	" 88% of your horizontal speed? This is why I manipulate a tick spawn as close to the right level margin as I can, so that most of the level's horizontal progression is invested in standard Vectorman's godly uncapped horizontal air speed, and as little as possible in the tick punch's abysmal horizontal gain... and then we just blast off vertically to the finish. Manipulating an egg to spawn this far to the right in the level was actually quite hard. It required prior firing of photons, jumping, and jet-boosting at specific times and also damage boosting off another egg spawn earlier in the level—all to get that RNG just right. I know that egg damage boost looks slow, but trust me that it's fast... I tried everything.
+	$LF
+]div
+[div class=p 
+	"Colliding with an egg while it is touching the ground will cause the enemy to emerge from it instantly, skipping the series of explosions that normally occur first. This makes it even harder to manipulate the right scenario, as remember I said jumping and jet-boosting were part of the manipulation process. Both affect your vertical position, and hence the ability to touch the egg at the right time.
+	$LF
+]div
+[div class=p 
+	"The tick enemy emerging from the egg has 30 HP, where it is killed as efficiently as possible with 2 photons, followed by a 4x jet boost hit, then 3 more photons. 
+	$LF
+]div
+[h4 id=Scene22QueenForADay60Frames 
+	[b 
+		"Scene 22: Queen for a Day
+	]b
+	" -60 frames
+	$LF
+]h4
+[ul 
+	[li 
+		" Boss HP: 120
+		$LF
+	]li
+]ul
+[div class=p 
+	"I had to redo most of this fight from Cpadolf's TAS as the spider queen's legs and spit-bombs are random and deal damage with knockback if they hit. The fastest way to deal damage to the exposed brain (the boss's weak point) is still to do jet boosts, depite it being sort of out-of-the-way. Anywhere you see me opt for a photon volley instead means we either would've otherwise gotten hit by a boss attack or one of the platforms wasn't in an optimal spot. Overall, the main source of time save over the previous TAS comes from firing a photon during some of the jet boosts to get the fourth jet hit to register (originally explained in the "Damaging Enemies" section).
+	$LF
+]div
+[h4 id=SpecialThanks 
+	[b 
+		"Special Thanks
+	]b
+	$LF
+]h4
+[div class=p 
+	"To Cpadolf for their amazing efforts on the previous TAS way back in 2012. I was in high school at the time and was awestruck at how polished the TAS was and how cleanly Vectorman just flew through the game. It was a big piece of the groundwork for this effort, and made it much easier for me to dive into the game and make this improvement.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Fixing the hash in the movie and accepting.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

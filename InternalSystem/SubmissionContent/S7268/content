@@ -1,0 +1,271 @@
+14
+[div class=p 
+	"VVVVVV is a game where you flip so hard that you warp to the credits even after the devs patched it out.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses death to save time
+		$LF
+	]li
+	[li 
+		" Skips the Gravitron OoB which skipped Gravitron Skip from the previous movies
+		$LF
+	]li
+	[li 
+		" It's actually optimal to not skip Space Station 1 lmao
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"This run saves almost 3 minutes (again) over the 
+	(__wikiLink|displaytext=previous run|href=/4009M)
+	" by using Terry Cavanagh's state machine. It also improves the previous movie by being able to be played back at higher framerates.
+	$LF
+]div
+[h4 id=NewCreditsWarp 
+	" New credits warp
+	$LF
+]h4
+[div class=p 
+	"It was known that in 2.0, by getting the 
+	[code 
+		"- Press ACTION to advance text -
+	]code
+	" prompt and interrupting any code that might remove it (e.g. by quitting, which resets the scripting engine), you can increment the gamestate freely. It was also known that this was patched in 2.1 (a beta which was never officially released; the 2.2 release built on top of it and thus ships with this patch).
+	$LF
+]div
+[div class=p 
+	"But despite the patch being around for at least 7 years, no one knew you could still use it to warp to the credits until very recently. So basically, the patch made it so that you could not increment the gamestate more than once per gamestate delay. So if you tried to increment during a gamestate delay, or induced a delay by killing yourself (pressing R), then you simply could not increment it more than once. This was needed because the gamestate incrementing still needed to be used for advancing text in certain gamestate-based cutscenes (e.g. collecting a trinket).
+	$LF
+]div
+[div class=p 
+	"What was recently discovered was that this nerfed increment can still be used to warp to the credits. Now, to be fair, it might have only taken so long to discover because it requires you to do...
+	$LF
+]div
+[h4 id=CommsRelay 
+	" Comms Relay
+	$LF
+]h4
+[div class=p 
+	"Comms Relay is a room in Space Station 1 that receives Violet's distress signals. It does this by using, you guessed it, the gamestate system.
+	$LF
+]div
+[div class=p 
+	"The way the distress signals are triggered are as follows: Every time a room is loaded, check that we're not in a time trial or a custom level or in Outside Dimension VVVVVV, or that flag 5 is on (which marks that the Comms Relay cutscene has started). If any of those are true, then do nothing and quit this routine. Otherwise, set the gamestate to 0. If we are in Comms Relay, set the state to 50 (which starts the loop of distress signal text boxes).
+	$LF
+]div
+[div class=p 
+	"The catch here is that this check executes for 
+	[em 
+		"every
+	]em
+	" room load, 
+	[em 
+		"every
+	]em
+	" single time. (Presumably this is to stop the distress signals if you leave the room. Which is pretty lazy.) So if the Comms Relay cutscene has never been ran, then the gamestate will be set to 0 every single time. This is actually pretty useful; it allows you to skip 
+	[code 
+		"You have found a shiny trinket!
+	]code
+	" cutscenes by frame-perfectly pressing R on the trinket if your checkpoint is in another room. In essence, it interrupts the current gamestate every time a room is loaded. However, for this credits warp to work, we need to be able to keep a gamestate while going across rooms, and thus we actually need to do Comms Relay.
+	$LF
+]div
+[div class=p 
+	"But it was quite the norm for some time for runners to actually skip Space Station 1 entirely by pressing R in the beginning cutscene. This is doubly useful since it lets you skip intermissions, too (by rescuing Violet when an intermission would happen, canceling the intermission). So it could be understandable why this credits warp wasn't discovered until now. Especially since you need to get...
+	$LF
+]div
+[h4 id=TextStorage 
+	" Text Storage
+	$LF
+]h4
+[div class=p 
+	"This is when you have the 
+	[code 
+		"- Press ACTION to advance text -
+	]code
+	" prompt, but pressing ACTION doesn't make the prompt go away, letting you increment the gamestate. A run on 2.0 would have gained this state by simply quitting to the menu, resetting the scripting engine, and then interrupting the fadeout too. But quitting isn't allowed in this branch, as per the 
+	(__wikiLink|displaytext=previous run|href=/6429S)
+	"'s judging.
+	$LF
+]div
+[div class=p 
+	"The way it's done in this run is fairly non-obvious without hindsight and was discovered entirely by accident. It was known that you could gain control of the player during teleport animations by pressing R. It was even used a lot to clip into walls, which was dubbed "telejumping".
+	$LF
+]div
+[div class=p 
+	"But this time, we use a Level Complete cutscene and a trinket (or a terminal too, but it's fastest to rescue Verdigris and the Warp Zone maze area in the Overworld only has a trinket available). We grab the trinket at a precise time (a 2-frame window!) after the Level Complete gamestate sequence is done, but before the script that the sequence loads starts executing. Then the script calls another gamestate (to teleport you out of the Ship teleporter), which interrupts the trinket text box gamestate, and thus we can increment freely.
+	$LF
+]div
+[div class=p 
+	"Then just like in 2.0, all the teleporter animation gamestates are adjacent to each other (4010-4019, 4020-4029, 4030-4039, 4040-4049, 4050-4059, 4060-4069, 4070-4079, 4080-4089, 4090-4099), so we simply increment our way up the state machine until we reach 4080 (which starts the ending cutscene).
+	$LF
+]div
+[div class=p 
+	"And this is why we need Comms Relay; in order to reach the trinket, we have to travel across rooms, and not having Comms Relay would interrupt the Level Complete gamestate sequence.
+	$LF
+]div
+[h3 id=MiscellaneousConsiderations 
+	" Miscellaneous considerations
+	$LF
+]h3
+[div class=p 
+	"This run is played on the latest stable release, which is 2.3. 2.3 patches the quit fadeout so it can never be interrupted. (Source: I patched it.) Additionally, 2.3 also adds a glitchrunner mode; you can select between either 2.0 or 2.2 to emulate the specific bugs that were in that release. (Source: I added it.) 2.1 has the same bugs as 2.2, so there's no 2.1 option.
+	$LF
+]div
+[div class=p 
+	"Even though the quit fadeout can't be interrupted, it's still possible to save and quit to skip certain things. In this run, I skip Violet's post-Space Station 1 cutscene by pressing R. Instead of doing that, I could have simply saved, quit, and loaded back in at the earliest possible frame; it would save over a second, even when counting menu frames in the final time.
+	$LF
+]div
+[div class=p 
+	"I decided to not allow saving and quitting because the 
+	(__wikiLink|displaytext=previous movie|href=/4009M)
+	" didn't allow it either. Also, it's more entertaining to have Viridian kill themselves right in front of Violet's eyes as she speaks. And having the Level Complete text boxes up on screen is kind of hilarious.
+	$LF
+]div
+[div class=p 
+	"2.3 also patches the Alt+Enter Glitch, which among letting you flip during cutscenes, also interrupts any scripted walking; this can be re-enabled with 2.2 or 2.0 glitchrunner mode. (Source: I patched it.) This can be used to save maybe a frame or so by preventing Viridian from walking entirely to the left during the opening cutscene. I decided not to do this either because enabling either glitchrunner mode also re-enables the glitchy quit fadeout, and anyways it wouldn't save any time as you'd have to navigate through the menus to enable it (and you're not allowed to have dirty SRAM that affects gameplay here on TASVideos).
+	$LF
+]div
+[div class=p 
+	"2.3 does save some minor time here and there in certain places. It lets you press ACTION to skip the fake loading screen. (Source: I added it.) Previously, your only alternative was to modify the binary or source code to remove it, which is obviously not allowed here on TASVideos. It also fixes a bug where the game would freeze if it started playing an audio track while an existing track was already fading out, like when you load in to the game. (Source: I fixed it.) And it lets you press R, Enter, or Esc during cutscenes where you couldn't previously without needing to first gain control by killing yourself. (Source: I added it.) However, these differences shouldn't matter because this route is still possible to perform on 2.1 and 2.2. In other words, this credits warp does not inherently rely on anything added in 2.3.
+	$LF
+]div
+[div class=p 
+	"2.3 adds a translucent room name option; it is off by default. (Source: I added it.) My encode has them on, because I like the look of them. Maybe you could have them on, too?
+	$LF
+]div
+[div class=p 
+	"(Did I mention you can see my name in the credits, separate from everyone else?)
+	$LF
+]div
+[h3 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" Elomavi for accidentally discovering the text storage and gamestate incrementing to skip The Final Level
+		$LF
+	]li
+	[li 
+		" Olivier Moreau for finding that you can use text storage to increment to the credits instead of skipping Final Level
+		$LF
+	]li
+	[li 
+		" Elomavi again for the Verdigris+trinket route
+		$LF
+	]li
+	[li 
+		" tzann for checking my TAS was optimal
+		$LF
+	]li
+	[li 
+		" Everyone on the VVVVVV speedrunning Discord server who participated in discussion
+		$LF
+	]li
+]ul
+[h3 id=SuggestedScreenshots 
+	" Suggested screenshots
+	$LF
+]h3
+[div class=p 
+	[a href=https://i.imgur.com/trjLQ3o.png  rel=noopener external nofollow 
+		"2369
+	]a
+	", 
+	[a href=https://i.imgur.com/c3a2phI.png  rel=noopener external nofollow 
+		"4031
+	]a
+	", 
+	[a href=https://i.imgur.com/jPiTFoW.png  rel=noopener external nofollow 
+		"4984
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": File replaced with a new version that updates the game and adds a 9 frame improvement.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Setting to Delayed for now. This should be accepted eventually, it's just waiting on a UI tweak to handle different versions.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Now that the game versions are displayed on publications, this can be handled properly.
+	$LF
+]div
+[div class=p 
+	"This run was originally pitched as a branchless run to obsolete 
+	(__wikiLink|displaytext=4009M|href=/4009M)
+	", but there is a problem with this classification. The current "game end glitch" run, 
+	(__wikiLink|displaytext=2611M|href=/2611M)
+	", uses a "save + quit" glitch to manipulate the game state and skip directly to the credits. While this run does not use the "save + quit" glitch, it still modifies the game state to skip to the credits, albeit in a more roundabout way. Therefore, this run would qualify as a "game end glitch" run, not branchless.
+	$LF
+]div
+[div class=p 
+	"However, this does not mean the run is without merit. The goal is actually not arbitrary; this run uses a newer version of the game in which the old "game end glitch" method has been patched and is impossible to replicate without using a special glitchrunner mode. This run finds the fastest way to warp to the credits in the current version (without using any save + quit skips).
+	$LF
+]div
+[div class=p 
+	"The run was also very well received. Voting and commentary on the movie was overwhelmingly positive. Comparing this run to other VVVVVV movies on the site, the route is completely different from any other movie and there is some new glitchy content showcased as well. Nobody has objected to having this movie coexist with the other "game end glitch" run, so we'll allow it.
+	$LF
+]div
+[div class=p 
+	"Accepting to Moons as an additional "game end glitch" branch under a different game version.
+	$LF
+]div
+[div class=p 
+	[del 
+		[a class=intlink href=/Users/Profile/fsvgm777 
+			"fsvgm777
+		]a
+		": Processing (after Star Wars).
+	]del
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Replaced movie file with 60 FPS version.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing (for real).
+]div

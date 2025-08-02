@@ -1,0 +1,236 @@
+5
+[h2 id=Summary 
+	"Summary
+	$LF
+]h2
+[div class=p 
+	"This is a TAS of the classic Donkey Kong game on the Game Boy (also known as Donkey Kong '94 / DK94), using save corruption in order to beat it in record time.
+	$LF
+]div
+[div class=p 
+	"The 
+	(__wikiLink|displaytext=current branchless TAS|href=/6825S)
+	" can be referred to for much of the non-save glitch portion of the TAS.
+	$LF
+]div
+[h2 id=SaveGlitch 
+	"Save glitch
+	$LF
+]h2
+[div class=p 
+	"The original makings of the save glitch used here go back to late May of 2021, when I was looking at various GB games to see if their save systems were exploitable. This is where I noticed a very peculiar quirk in DK94: selecting different "checkpoints" (i.e. 1-1, 1-5, etc.) in the file select caused writes to SRAM (i.e., the save file). This even included pressing Up at the "limit" of current progress, which would first write the next checkpoint index to SRAM, then it would see that that much progress has not yet been made, and subsequently zero out the checkpoint index. Since this is happening in SRAM and the actual save file, this means a well timed reset can let the next checkpoint index through without it being reset, thus skipping stages one checkpoint at a time.
+	$LF
+]div
+[div class=p 
+	"Of course, the game has protections against save corruption, primarily with the use of a checksum. Since doing this reset blindly without any setup would just result in the calculated checksum being +1 off the stored checksum, the game will try to load the backup save, and when it's finished with that it will re-calculate the checksums and store those new checksums.
+	$LF
+]div
+[div class=p 
+	"The checkpoint index is very early in the save, and so on restoring the backup checksum it will be overwritten very quickly. There was in fact only 1 variable which seemed to come before the checkpoint index: the lives counter.
+	$LF
+]div
+[div class=p 
+	"This seemed to be perfect here, as we can abuse this fact in order to maintain the correct checksum like so:
+	$LF
+]div
+[ol 
+	[li 
+		" Play until 1-1, at which point the game allows for doing a full save.
+		$LF
+	]li
+	[li 
+		" Play 1-1, and collect 1 extra life while there (possibly from the bonus stage from collecting all the items in the stage).
+		$LF
+	]li
+	[li 
+		" Save the game again, but reset the game before the backup save is written, so it is still the backup save from before 1-1 is played.
+		$LF
+	]li
+	[li 
+		" Press Up on file 1, so the next checkpoint (1-5) is selected, but reset the game before it is zeroed out.
+		$LF
+	]li
+	[li 
+		" The game will see the checksum is wrong and try to restore the backup save. Let it do this for the lives counter, but reset before it can write the checkpoint index.
+		$LF
+	]li
+]ol
+[div class=p 
+	"Since the lives counter in the backup save is 1 less than the lives counter in the main save, this results in the calculate checksum changing by -1. 1 - 1 = 0, and thus the stored checksum matches the calculated checksum. On loading the save, the game will accept the main save and give us access to 1-5.
+	$LF
+]div
+[div class=p 
+	"This process can be repeated, and so allows us to skip stages 1 checkpoint at a time. However, once 6-5 is reached, things get slightly tricky, due to the way the game seemed to store save data. The game appears to split bytes into nybbles and stores them in separate bytes. So 1 byte takes 2 bytes to store instead of 1. A nybble only has a range of 0 to 15, and 6-5 has a checkpoint index of 15. So when it goes to the next checkpoint, it has to go to change the next byte from 0 to 1, and will subsequently change the lower nybble to 0.
+	$LF
+]div
+[div class=p 
+	"However, this ends up working to our advantage. We can simply let the backup save restore the lower nybble to 15. The lower nybble is stored before the upper nybble here, so we can hard reset before the upper nybble is set to 0. With this, the checkpoint index will end up becoming 31, which ends up just being a glitched checkpoint. The game allows at this point to press Down until we end up reaching the last non-glitch checkpoint, 9-5, at which point the rest of the game can be completed in a more or less glitchless manner.
+	$LF
+]div
+[div class=p 
+	"At some point in figuring all this out, I made a test TAS and posted it in the TASVideos discord, which had DrD2k9, the maker of the current branchless TAS, contact me and asked what was going on. After explaining what I knew, I asked him to collaborate here to mainly do the non-save glitch portions of the TAS (as I more or less just half baked strung together the branchless TAS to test the save glitch out while having my own probably bad input to do 1-1 that collected all the items).
+	$LF
+]div
+[div class=p 
+	"That was the status of the save glitch TAS, and while DrD2k9 agreed to collaborate, for a long while nothing happened as we were both busy with other things.
+	$LF
+]div
+[div class=p 
+	"Fast forward to mid August of 2023, and I decided to look back through the save glitch here and see if I missed any detail which can improve the glitch portion. At this point I couldn't find wherever I stored my notes for save file addresses and such, so I had to re-reverse engineer them, and this time I decided to do it fully so I would fully understand the relevant save format.
+	$LF
+]div
+[pre 
+	"BFBE-BFD9 : Main Save
+	$LF
+	"BFDA-BFDB : Main Save Checksum
+	$LF
+	"BFDC-BFF7 : Backup Save
+	$LF
+	"BFF8-BFF9 : Backup Save Checksum
+	$LF
+	"BFFA-BFFF : Sentinel values 090400020008
+	$LF
+	$LF
+	"Save file struct:
+	$LF
+	$LF
+	"Each variable is 1 byte large
+	$LF
+	"The variable is stored as two bytes, the second byte just being the first byte nybble swapped
+	$LF
+	"The upper nybbles appear to be ignored when the bytes are used, so this is more just effectively splits the low and high nybbles of the variable into 2 bytes?
+	$LF
+	$LF
+	"Lives Counter
+	$LF
+	"File Select Checkpoint Index
+	$LF
+	"Unknown / Padding?
+	$LF
+	$LF
+	"Save struct:
+	$LF
+	$LF
+	"BFBE: Current file selected in menu, 0 indexed
+	$LF
+	"BFBF: Bitfield for active files (bit 0 = file 1, bit 1 = file 2, bit 2 = file 3)
+	$LF
+	"BFC0-BFC7: Save file 1
+	$LF
+	"BFC8-BFCF: Save file 2
+	$LF
+	"BFD0-BFD7: Save file 3
+	$LF
+	"BFD8-BFD9: Sentinel values 0207
+	$LF
+	$LF
+	"(repeat for BFDC-BFF7 for backup save)
+	$LF
+	$LF
+	"Checksum:
+	$LF
+	$LF
+	"The lower nybble of all bytes of the save files (BFC0-BFD7) at added together into one byte, split into nybbles like save file variables
+	$LF
+]pre
+[div class=p 
+	"Now, a very interesting detail emerges here: the checksum comprises of all 3 save files, not just a single save file. This means data from another save can influence the checksum. Such as the checkpoint index in another save.
+	$LF
+]div
+[div class=p 
+	"Using this, I realized the save corruption could be simplified like so:
+	$LF
+]div
+[ol 
+	[li 
+		" On file 1, play until 1-1, at which point the game allows for doing a full save. Soft reset after saving.
+		$LF
+	]li
+	[li 
+		" On file 2, play until 1-1, at which point the game allows for doing a full save. Soft reset after saving.
+		$LF
+	]li
+	[li 
+		" Lower the checkpoint index on file 2 (1-1 to 0-1). This decreases the calculated checksum by 1.
+		$LF
+	]li
+	[li 
+		" Increase the checkpoint index on file 1 (1-1 to 1-5), and hard reset before it is reset to 0. This increases the calculated checksum by 1.
+		$LF
+	]li
+]ol
+[div class=p 
+	"At this point, the calculated checksum will end up matching the stored checksum (as -1 + 1 = 0), so the game will let file 1 be at 1-5. For repeating this, we simply have to raise the checkpoint index on file 2 back to 1-1, then go in the game, enter 1-1, then we can save the game in the pause menu then soft reset, then you can repeat the lower checkpoint index on file 2 with the increase checkpoint index on file 1 to skip another checkpoint, as so on.
+	$LF
+]div
+[div class=p 
+	"Of course, going in game, entering 1-1, pausing, saving, and soft resetting takes time. This is when I discovered a way to avoid ever going in game for the glitching process: deleting a save file will result in the stored checksum being updated (kind of duh, as all save files are part of the checksum). What's more interesting here is the game allows for deleting already deleted save files, and doing so will still update the stored checksum!
+	$LF
+]div
+[div class=p 
+	"So for repeating the glitch, all we have to do is:
+	$LF
+]div
+[ol 
+	[li 
+		" Increase the checkpoint index on file 2 (0-1 to 1-1).
+		$LF
+	]li
+	[li 
+		" Delete file 3. This will update the stored checksum so it will now match the calculated checksum.
+		$LF
+	]li
+	[li 
+		" Lower the checkpoint index on file 2 (1-1 to 0-1). This decreases the calculated checksum by 1.
+		$LF
+	]li
+	[li 
+		" Increase the checkpoint index on file 1, and hard reset before it is reset to 0. This increases the calculated checksum by 1.
+		$LF
+	]li
+]ol
+[div class=p 
+	"This can be repeated until 6-5, where we again run into the complicated of the split nybbles. This luckily doesn't actually mean much in practice, we can continue doing the same 4 steps as always but we have to add an extra step. As the stored checksum won't actually match the calculated checksum, we'll end up having the backup save being restored. We can simply now hard reset after the lower nybble of the checkpoint index is restored from the backup save, but before the upper nybble is set to 0, and so we get the glitched checkpoint index 31. Lower it down to 9-5 and the rest of the game can be played in a more or less glitchless manner.
+	$LF
+]div
+[h2 id=NonSaveGlitchPortions 
+	"Non-save glitch portions
+	$LF
+]h2
+[div class=p 
+	"Done by DrD2k9, with the beginning portion being more or less just me pulling in the branchless TAS input and re-adjusting it.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Excellent job. Accepting as a new branch.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ViGadeomes 
+		"ViGadeomes
+	]a
+	": replacing 
+	(__wikiLink|displaytext=the movie|href=/Forum/Posts/525203)
+	" fixing the platform.
+]div

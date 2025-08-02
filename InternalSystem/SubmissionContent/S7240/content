@@ -1,0 +1,328 @@
+9
+[div class=p 
+	"Undertale is a 2D role-playing video game created by indie developer Toby Fox. Undertale has three main endings: Neutral, True Pacifist, and Genocide. This TAS achieves the Neutral ending, which is the shortest of the main endings and is considered the standard ending to the game. In this ending, the player must defeat Photoshop Flowey and leave the underground. The TAS is optimized for Z/Enter presses and then time.
+	$LF
+]div
+[div class=p 
+	"For the TAS to sync, you must uncheck Runtime > Prevent writing to disk and check Runtime > Time tracking > clock_gettime(). You may also need to install extra dependencies by entering this command into a terminal:
+	$LF
+]div
+[div class=p 
+	"sudo apt-get install libopenal1:i386 libssl1.0.0:i386 libglu1-mesa:i386
+	$LF
+]div
+[div class=p 
+	"In addition, libTAS 1.4.1 has an audio bug where music files may not play at the correct speed. 
+	[a href=https://github.com/clementgallet/libTAS/commit/818b78dad5f335c85cd4011247609d8865117f51 rel=noopener external nofollow 
+		"This commit
+	]a
+	" fixes the issue and is what I used to encode the TAS.
+	$LF
+]div
+[h3 id=GameObjectives 
+	"Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		"Emulator used: libTAS v1.4.1 (32-bit)
+		$LF
+	]li
+	[li 
+		"Plays on version v1.001
+		$LF
+	]li
+	[li 
+		"Reaches the Neutral ending
+		$LF
+	]li
+	[li 
+		"Avoids taking damage, unless it saves Z/Enter presses or time
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	"Comments
+	$LF
+]h3
+[div class=p 
+	"The idea behind the Z Button Challenge may be familiar to many due to Super Mario 64's infamous "A Button Challenge". These kinds of challenges simply involve completing the game while avoiding using a certain controller element as much as possible. In the case of this TAS, said controller element is the Z/Enter buttons. These 2 buttons have the same function, which is moving forwards in menus and advancing textboxes. Because the 2 buttons do the same thing, they will henceforth be referred to as just the Z button or Z press. The Z button is the most important button in the game, along with the arrow keys.
+	$LF
+]div
+[div class=p 
+	"First, it's important to accurately define a Z press and the concept of half Z presses. A Z press has three parts to it: when Z is pressed, when Z is held, and when Z is released, and together, this forms one complete Z press. Usually, it's the pressing that's useful, because that's the only part that advances textboxes and menus. However, sometimes it's sufficient to just use the holding part (the "half Z press"), which allows us to close the "You Won" or "But nobody came" text at the end of battles. Now if we map out the required Z presses to kill a one-hit enemy, it would look like this: We need to press Z to advance to the monster select menu, we need to press Z again to start the attack, we need to press Z again to attack, and we merely need to hold Z to close the "You Won" text. So, how many Z presses is that total? The naïve answer would be four, three to kill the enemy and one to close the "You Won" text. However, we can do better. We can actually do it in three by simply holding out the third Z press to be used for the half Z press, because the half Z press only requires Z to be held, not actually pressed. In this fashion, closing the "You Won" text doesn't add any additional Z presses to the run, since the final Z press just leeches off of a previous Z press. So in conclusion, since that last Z press counts in some contexts but adds no additional Z presses in other contexts, we refer to it as a half Z press.
+	$LF
+]div
+[div class=p 
+	"This TAS features heavy usage of RNG manipulation and some glitches. The run involves following the Genocide Route for most of the run, killing a certain number of enemies in each area and afterwards killing the final boss. Then Genocide gets aborted in Hotland by not fulfilling the kill requirements and thus a Neutral ending follows instead of the Genocide ending. 
+	$LF
+]div
+[h3 id=TricksUsed 
+	"Tricks Used
+	$LF
+]h3
+[h4 id=WallHumping 
+	" Wall Humping
+	$LF
+]h4
+[div class=p 
+	"Wall humping is a movement technique where the player oscillates between facing up and facing down each frame. This technique is performed by holding Up and Down simultaneously while against the bottom side of a wall. This can be useful in certain circumstances such as when you are moving left or right but need to be facing up or down. In rooms where the player is in contact with and between two horizontal walls, this technique will cause the player to move at double speed, as the two walls both move the player simultaneously.
+	$LF
+]div
+[h4 id=MenuBuffering 
+	" Menu Buffering
+	$LF
+]h4
+[div class=p 
+	"Menu buffering is a movement technique where the player opens the menu and presses an arrow key on the same frame. This type of movement does not count as a step for random encounters and is not considered movement by blue lasers. Although menu buffering causes the player to move at half speed (alternating between the menu buffer and closing the menu), this technique can save time in certain circumstances where additional steps are not desirable.
+	$LF
+]div
+[h4 id=WrongWarp 
+	" Wrong Warp
+	$LF
+]h4
+[div class=p 
+	"In Undertale speedrunning, wrong warping refers to entering a room and being placed at the default location in that room rather than the door the player entered from. When the player touches a room transition, the variable global.interact is normally set to 3. Then once the player reaches the next room, the game checks if global.interact is set to 3 and if it is, the game runs the code that places the player at the appropriate door marker. However, if global.interact is not 3, the player is not moved from the default location in the room. This default location is manually assigned per room by the game developer and is often closer to the middle of the room than the door marker is. There are several methods of triggering a wrong warp, all of which achieve the same result: setting global.interact to 0 (the value for full player control) while transitioning to the next room.
+	$LF
+]div
+[h4 id=TextCorruption 
+	" Text Corruption
+	$LF
+]h4
+[div class=p 
+	"Text corruption is a glitch which allows changing cutscene text in some, but not all cutscenes that have multiple sets of textboxes. Certain text boxes, such as dropping an item, use a variable called global.msc. When a textbox is created, the object creating the textbox assigns a value to global.msc, which is then used to lookup which set of text to display. By creating such a textbox between the cutscene's sets of textboxes, global.msc is changed to something unexpected, and so the following sets of textboxes will display the textbox that corresponds to the current global.msc value instead of the cutscene text that is meant to play. This glitch is used in the lab cutscene to shorten Mettaton's second set of text.
+	$LF
+]div
+[h4 id=RngManipulation 
+	" RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"Undertale's RNG is determined by a seed that advances each time RNG is called. By calling RNG a different number of times, different outcomes can be achieved. Text calls RNG twice per character per frame and so changing how many frames text is displayed is the most common method of RNG manipulation. RNG is manipulated for various reasons such as getting particular monsters in random encounters and determining which step count random encounters will occur on. One thing to note is that the function randomize() is called upon loading into the game and this function sets the RNG seed based on the system time. However, after this initial seed, RNG is no longer affected by system time until the save file is reloaded or the game is restarted. RNG manipulation is used throughout the run and for the most part this is accomplished by delaying clearing text by anywhere between 1 and about 25 frames. Usually, the unlikelier an event is, the more frames it costs to manipulate RNG. While this does lose a small amount of time each time it's done, the various timesaves afforded by manipulating RNG more than make up for the few frames lost in the process. 
+	$LF
+]div
+[h3 id=AreaComments 
+	"Area comments
+	$LF
+]h3
+[div class=p 
+	"We start the game by sitting through the entire intro, because it automatically progresses to the Undertale logo screen afterwards. This saves 1 Z press over skipping the intro with Z.
+	$LF
+]div
+[h4 id=Ruins 
+	" Ruins
+	$LF
+]h4
+[div class=p 
+	"Ruins is the first section of the game. We begin with the first Flowey encounter where the speed of the friendliness pellet is RNG manipulated to be as fast as possible. A few rooms later, the first glitch in the run is performed. By interacting with the sign next to the door and entering the door at the same time, global.interact is set to 3 by the door, then to 1 by the sign, causing a wrongwarp. Doing so allows hitting the second switch without hitting the first switch, saving a Z press. Additionally, doing the room in the wrong order this way messes with the cutscene since Toriel is still waiting for you to hit the first switch, meaning you're unable to progress. Fortunately, hitting the switch updates the game's plot value, which tracks how far you've progressed through the game. Most cutscenes destroy themselves upon entering the room if the plot value is too high, so leaving and reentering the room will cause the cutscene to despawn. This also skips the extra dialogue at the end of the room, saving more Z presses. A few more rooms later, we run into First Froggit. It allows you to get LV 2 and increase your ATK/HP/EXP stats, but there is an issue. The game doesn't consider this a kill for the purpose of the Ruins kill counter, which means that you can choose to flee instead. Killing costs 1 extra Z press over fleeing, but the extra EXP gained from killing it is useful later, so First Froggit dies despite not counting as a kill.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for the Ruins is 20, so we kill 20 Whimsuns, as it is the only 1-shot enemy in the Ruins. 1-shot enemies are good because they can be killed in 3 Z presses each, which is the minimum. Switching rooms after every kill causes the step count required to get an encounter to be much lower. Reading a sign in the room with the 20th kill skips the third phone call event. After 20 kills, we advance through the rest of the Ruins, holding Z for long periods of time to avoid additional Z presses exiting "But nobody came" encounters. For some of the "But nobody came" encounters, skipping it via menu-buffering is slightly faster than sitting through it.
+	$LF
+]div
+[div class=p 
+	"Near the end we pick up the Toy Knife, a stronger weapon used during a large chunk of the run. The toy knife is barely seen during normal speedruns due to it being quite out of the way, but it is very good in the context of the Z button challenge due to it being a single-hit weapon, meaning it requires only 1 Z press to perform the attack.
+	$LF
+]div
+[div class=p 
+	"Napstablook disappears after 20 kills, and Toriel is a 1-shot. Before killing Toriel, we equip the Toy Knife during the battle, since it only takes 3 Z presses in battle as opposed to 4 Z presses in the overworld.
+	$LF
+]div
+[h4 id=Snowdin 
+	" Snowdin
+	$LF
+]h4
+[div class=p 
+	"Near the start of Snowdin, there's a movement optimization known as "gamer pixel" where you slide across the wall collision on the top or bottom side of the small bridge to stop a pixel further to the left than normal. This causes Sans to stop his walking animation earlier, saving 4 frames. 
+	$LF
+]div
+[div class=p 
+	"The kill requirement for Snowdin is 16, but there are also 4 enemies that are required to keep Genocide mode active even though the game doesn’t track them for the kill count; Doggo, Greater Dog and Dogi (Dogamy + Dogaressa). Snowdrake is also a required kill, but the game counts him. Lesser Dog is technically not a required kill, but sparing or fleeing from him will set a flag that aborts Genocide. If however Lesser Dog is never encountered, Genocide is not aborted. This detail is abused near the beginning of the grind, where by leaving the room on the frame the exclamation mark appears over the player's head, the encounter is skipped entirely. This saves 3 Z presses because Lesser Dog takes two turns to kill instead of one. 
+	$LF
+]div
+[div class=p 
+	"It's worth noting that most monster dialogue that appears before the monster's turn starts will automatically close after a certain period of time. This can be seen during Snowdrake's attack and later during the Waterfall grind.
+	$LF
+]div
+[div class=p 
+	"Directly after Lesser Dog Skip, we trigger the second Sans/Papyrus cutscene on the same frame as an encounter, causing both to start at the same time. Doing this allows the player to skip some text and retain movement during the cutscene after killing Ice Cap. An invisible wall blocks you from getting close to Sans and Papyrus, whilst going back to the previous room resets the cutscene, so the best strategy is to progress the step counter to get more kills, even though grinding in this manner without switching rooms is usually sub-optimal. By getting an encounter while the second set of text is starting, you can regain movement afterwards again, since that set of text usually locks movement.
+	$LF
+]div
+[div class=p 
+	"The rest of the grind is spent in the first few rooms, killing Ice Cap every time due to being the only 1-shot enemy. Once we get to 9 kills, switching rooms to reduce the step count becomes slower with best-case RNG, so we stay in the room after Box Road. For the 16th kill, switching rooms is faster again, so we move to the ice room after killing Doggo. After the 16th kill, we get to LV 8, which allows killing Dogamy and Greater Dog in 2 turns instead of 3 later.
+	$LF
+]div
+[div class=p 
+	"It’s faster to take intentional damage on Doggo in order to make his turn faster. Killing Dogaressa first saves a turn due to reducing Dogamy’s defense, this does not occur if you kill Dogamy first. For Greater Dog we can manipulate an attack that can be cancelled early. Papyrus is another 1-shot.
+	$LF
+]div
+[h4 id=Waterfall 
+	" Waterfall
+	$LF
+]h4
+[div class=p 
+	"Near the beginning of Waterfall, we execute a glitch called Sea-Grass Skip (SGS). This skip is performed by using an item after triggering the cutscene where Undyne sees the player moving in the grass. Then by closing this text, we regain movement. This saves Z presses because it also skips Monster Kid's dialogue at the end of the cutscene.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for Waterfall is 18, with the only required enemies being Shyren and Glad Dummy (both count for the kill counter).
+	$LF
+]div
+[div class=p 
+	"The base steps counter is extremely high in the first possible room (340), but is only 20 upon entering for the first time (This changes after the first encounter, Aaron). Since Aaron requires at least two turns to kill, we skip this fight by triggering a room transition on the same frame as the encounter. The same is done with Woshua for the same reason in the next room. Afterwards, we kill 16 Moldsmals due to Moldsmal being a 1-shot. Temmie is also a 1-shot, but due to only appearing randomly after several scripted encounters later (which would need to be skipped) and due to Moldsmal appearing as a double encounter, killing Moldsmals is fastest.
+	$LF
+]div
+[div class=p 
+	"After walking through all of Waterfall and killing Shyren and Glad Dummy in the process, we get to Undyne the Undying. Fighting her with the Toy Knife takes multiple extra turns over fighting her with the Ballet Shoes, but since the Toy Knife is a single hit weapon and the Ballet Shoes a triple-hit weapon and picking up and equipping the Ballet Shoes also costs 7 extra Z presses, the Toy Knife is still better. 
+	$LF
+]div
+[h4 id=HotlandAndCore 
+	" Hotland and Core
+	$LF
+]h4
+[div class=p 
+	"Alphys’s Lab features a glitch known as dogfood storage. By using the bag of dog food and the north wall, it is possible to stand on top of the trigger for the Mettaton cutscene without triggering it until the movement keys are released. By opening and closing the menu and then interacting with the dog bag, closing the dogfood text gives movement during the cutscene. We use the Z presses used to progress Mettaton's first textbox to close the dogfood text and to drop the stick, which triggers text corruption, shortening Mettaton's second set of text to item drop text. This saves Z presses overall by reducing the number of textboxes to mash away. Watching the entire cutscene is required as this sets flags to enable the Genocide version of Hotland and Core, with disabled puzzles and no phone calls from Alphys.
+	$LF
+]div
+[div class=p 
+	"Since we abort Genocide in this area, the rest of Hotland and Core is mostly a walking simulator. Killing the Royal Guards and Muffet save Z presses over sparing them. We steal the Empty Gun from the shop next to the hotel, as it's a better weapon than the Toy Knife. Picking up the Burnt Pan instead would save 1 Z press here, but since the Empty Gun saves a turn on Asgore later it's worth it anyways. Walking all the way through Core and menu-buffering the encounter on the bridge saves the Z press used to go through the Core elevator. Finally, we enter the Mettaton NEO fight. Here we equip the Empty Gun, as it saves 1 Z presses to equip items in battle vs in the overworld, and then kill Mettaton NEO, missing 3 of the 4 cursors since NEO is a 1-shot and we only need one of the cursors to kill him.
+	$LF
+]div
+[h4 id=NewHome 
+	" New Home
+	$LF
+]h4
+[div class=p 
+	"This area just involves unlocking the chain leading to the basement and sitting through the story, Sans's unskippable dialogue and the Asgore cutscenes. Note that usually only the last speech bubble in the story encounters requires a Z press to clear.
+	$LF
+]div
+[h4 id=Asgore 
+	" Asgore
+	$LF
+]h4
+[div class=p 
+	"We need to deal 3000 HP of damage to Asgore, and this is the reason we picked up the Empty Gun. By hitting all 4 cursors frame-perfectly in the middle (known as a quad), the damage done is massively increased to 507-509 damage, more than making up for the 3 extra cursors the Toy Knife doesn't have. This allows us to kill Asgore in 6 turns. The other weapon option would have been the Burnt Pan, which has a similar quad system; however the pan's attack bonus is lower than the gun's, meaning it only does around 496 damage and thus can't kill Asgore in 6 turns. At the end of the battle, Asgore has a long set of dialogue that can be skipped twice as fast as most of the other text in this game. Following this text, we select "FIGHT" and kill Asgore. Flowey then appears, finishes off Asgore's soul, and steals the six human souls. Normally, Flowey would close the game here. However, it is slightly faster to close the game manually rather than wait for Flowey to close it, since the autosave happens before the window actually closes.
+	$LF
+]div
+[h4 id=PhotoshopFlowey 
+	" Photoshop Flowey
+	$LF
+]h4
+[div class=p 
+	"The Photoshop Flowey fight has a few phases with RNG but is otherwise mostly just a matter of waiting for the turns to end. The fight is divided into six "soul" phases followed by a final phase. The first three phases have nothing particularly noteworthy. After the third phase, however, we begin taking damage. This is because we need to manipulate RNG for the fourth phase (the book phase) and getting hit by Flowey's attacks shakes the screen randomly, which advances RNG.
+	$LF
+]div
+[div class=p 
+	"In the book phase, the ACT button is always the fourth word to spawn in the second row. Each row has an alarm (a timer that ticks down each frame) that's set at a fixed value for the first word and then randomly for each one afterwards. Additionally, each time that one of the alarms is triggered (when a word spawns), 5 frames are added to all alarms. So the strategy for minimizing the amount of time this phase takes is to minimize the number of words that spawn while also minimizing the time it takes for the words in the second row to spawn. Effectively, this means that we should RNG manipulate the second row alarms to be as low as possible and RNG manipulate all other row alarms to be high enough that no extra words spawn.
+	$LF
+]div
+[div class=p 
+	"In total, 18 words spawned before the ACT button, which is one more than the minimum possible amount. The row 2 alarms were RNG manipulated to about 2-3 frames slower than perfect. Additionally, the ACT button was RNG manipulated to spawn from the right side, which is 2 frames faster than the left side.
+	$LF
+]div
+[div class=p 
+	"The pan phase isn't notable in terms of saving time, but there is an invisible hitbox that we dodge in order to not get hit during this phase. This hitbox was due to an unused second frame for the pan sprite that is tilted upwards. The sprite was unused, but the hitbox still exists.
+	$LF
+]div
+[div class=p 
+	"In the next section, we're taking damage to RNG manipulate the gun phase, which involves getting damaged at different points in the fight and in different amounts. In the gun phase, there are targets that spawn in waves of three. The first two targets of each wave spawn based on your position plus or minus a random amount horizontally and vertically and the third target is the same with an extra fixed amount of distance added in the horizontal and vertical directions the player is moving, with no component added if the player is not moving in that direction. The fastest way to complete this section is to ensure that the gun doesn't turn past a certain small angle range. Within this range, the gun takes the shortest amount of time to point towards the next target. Outside of this range, the gun takes an increasingly large amount of time to point towards the next target based on the size of the angle. RNG manipulation is a major part of this phase, but so is planning and positioning the soul in exactly the right spot. This phase was performed almost perfectly, with about 2-3 frames lost.
+	$LF
+]div
+[div class=p 
+	"In the final phase, each FIGHT button always spawns at the same time interval and stays on the screen for a fixed amount of time. Due to this, the only time it's necessary to hit the FIGHT button as soon as possible is on the final hit. We take advantage of this for RNG manipulating the damage rolls by simply waiting to hit the FIGHT button. Additionally, there are several points where the player's attack power increases. We take advantage of this by just waiting out the fight until the damage dealt becomes much higher. With a combination of RNG manipulation and waiting for higher damage, we are able to complete the fight while pressing the FIGHT button just 9 times (instead of the normal 35 Fight buttons).
+	$LF
+]div
+[div class=p 
+	"Following the final attack, we wait through the cutscene up until the point where Flowey tries to kill us with the friendliness pellets. By staying on top of the pellets' hitboxes, we're able to get hit on the first possible frame. We then reload as soon as we hit the next autosave point, saving us from having to wait through the screen fading from white to black. On the final choice screen, we're able to move the soul before we can actually see it, so we move on top of the FIGHT button spawning location so we can hit it as soon as possible. We reload one last time and touch the exit door to end the run with 1144 Z presses.
+	$LF
+]div
+[h3 id=OtherComments 
+	"Other comments
+	$LF
+]h3
+[h4 id=Routing 
+	" Routing
+	$LF
+]h4
+[div class=p 
+	"Multiple routes were routed out before and during the creation of this TAS. In the end, this route saves about 5-10 Z presses over a more conventional route that more closely follows glitched Neutral speedruns. Said route would have aborted Genocide in Snowdin instead of Hotland, gotten the Punch Card, and used the Punch Card Exploit to skip cutscenes. The route used in the TAS saves and loses Z presses over a non-Aborted-Genocide route as follows: It saves a few Z presses during Asgore due to being at a higher LV and thus having a higher attack stat, and many many Z presses in Snowdin and Hotland due to disabled puzzles and disabled or shorter cutscenes with less text to mash away. At the same time, it loses a few Z presses in Ruins, and a lot of Z presses in Waterfall (due to fighting Undyne the Undying) and in New Home (due to being unable to skip cutscenes with the Punch Card). 
+	$LF
+]div
+[h4 id=UnoptimalParts 
+	" Unoptimal parts
+	$LF
+]h4
+[div class=p 
+	"Since the completion of the TAS 4 Z presses have been saved. One of them can be saved in the Three Rocks Room after the pitfall maze by using a complex combination of glitches (Rock Skip, persistence glitch, and phasing storage) to walk out of bounds in the Three Rocks Room and skip talking to the bottom rock. The other 3 Z presses can be saved by equipping the Toy Knife at the same time as mashing the text during the Sans/Papyrus cutscene glitch, similarly to how the stick was dropped during the glitch in Alphys's Lab. Additionally, the Snowdin grind can be done faster in the ice room after Doggo instead of the room before Doggo, because a glitch with the ice can be used to begin grinding out the next encounter during the exclamation mark and battle transition.
+	$LF
+]div
+[h4 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h4
+[div class=p 
+	"Special thanks goes to RichConnerGMN, who inspired me to make the TAS and helped with routing.
+	$LF
+]div
+[h4 id=Screenshots 
+	" Screenshots
+	$LF
+]h4
+[div class=p 
+	[a href=https://i.imgur.com/L2XtzzR.jpg  rel=noopener external nofollow 
+		"https://i.imgur.com/L2XtzzR.jpg 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/wLeLwEk.jpg  rel=noopener external nofollow 
+		"https://i.imgur.com/wLeLwEk.jpg 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/mRBGple.jpg  rel=noopener external nofollow 
+		"https://i.imgur.com/mRBGple.jpg 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/sBbbB48.jpg  rel=noopener external nofollow 
+		"https://i.imgur.com/sBbbB48.jpg 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/nPIFn9c.jpg  rel=noopener external nofollow 
+		"https://i.imgur.com/nPIFn9c.jpg 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/atLHVQQ.jpg  rel=noopener external nofollow 
+		"https://i.imgur.com/atLHVQQ.jpg 
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Unembedded the massive screenshot suggestions. Also, judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I think it's safe to say that after several weeks of no interaction, and with the current thread feedback summing up to "this isn't really unique enough for publication", that this Moons-oriented category is not meeting the standards required for Moons. There is also 
+	(__wikiLink|displaytext=a Genocide version of this restriction|href=/7242S)
+	" that seems to be slightly better received (although it is also severely lacking in feedback at the time of this judgement), and I do not feel like we would have multiple different published branches with this same restriction.
+	$LF
+]div
+[div class=p 
+	"The site is still changing, so there is a possibility this could be back on the workbench in the future for consideration under a different system, but with our current system, we cannot accept this right now.
+]div

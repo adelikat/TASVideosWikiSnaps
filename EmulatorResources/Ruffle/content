@@ -1,0 +1,565 @@
+66
+[div class=p 
+	[a href=https://github.com/ruffle-rs/ruffle rel=noopener external nofollow 
+		"Ruffle
+	]a
+	" is an Adobe Flash Player emulator written in the Rust programming language. The Linux version can be used in conjunction with 
+	[a href=https://github.com/clementgallet/libTAS rel=noopener external nofollow 
+		"libTAS
+	]a
+	" to make tool-assisted speedruns of Flash games.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#WhatYouLlNeed 
+					" What you'll need
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#UsingWithLibtas 
+					" Using with libTAS
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#IfLibtasFailsToHookWithRuffle 
+							" If libTAS fails to hook with Ruffle
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Framerate 
+							" Framerate
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#DomainLocking 
+							" Domain locking
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#NvidiaDrivers 
+							" Nvidia drivers
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Opengl 
+							" OpenGL
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#MovieSubmissions 
+					" Movie submissions
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Tools 
+					" Tools
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h2 id=WhatYouLlNeed 
+	" What you'll need
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[a href=https://github.com/clementgallet/libTAS/releases rel=noopener external nofollow 
+			"libTAS
+		]a
+		" (1.4.3 or newer).
+		$LF
+		[ul 
+			[li 
+				" Remember that the run must sync on an 
+				(__wikiLink|displaytext=official emulator version|href=/MovieRules#UseAnOfficialEmulatorVersion)
+				" or it will not be accepted.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 
+		[a href=https://github.com/ruffle-rs/ruffle/releases rel=noopener external nofollow 
+			"A nightly build of Ruffle
+		]a
+		". Currently there are no official releases of Ruffle.
+		$LF
+		[ul 
+			[li 
+				" Builds since 2024-01-17 fail to be properly hooked by libTAS 1.4.5 or older. Use the latest version of libTAS.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Your Flash game! This will be in the 
+		[code 
+			".swf
+		]code
+		" format.
+		$LF
+		[ul 
+			[li 
+				" A lot of official game sources are listed at the bottom of 
+				[a href=https://ruffle.rs/ rel=noopener external nofollow 
+					"https://ruffle.rs/
+				]a
+				" as Diamond Sponsors.
+				$LF
+			]li
+			[li 
+				" If the game is embedded in a website and there is no download link, you may have to look at the page's source code to find the link to it. If it's run via Ruffle, you can 
+				[em 
+					"Copy Debug Info
+				]em
+				" via rightclick and find SWF URL there.
+				$LF
+			]li
+			[li 
+				" Thousands of Flash games are archived in 
+				[a href=https://bluemaxima.org/flashpoint/ rel=noopener external nofollow 
+					"BlueMaxima's Flashpoint project
+				]a
+				".
+				$LF
+				[ul 
+					[li 
+						" SWFs will usually be located in 
+						[code 
+							"Flashpoint/Data/Games
+						]code
+						" or 
+						[code 
+							"Flashpoint/Legacy/htdocs
+						]code
+						$LF
+					]li
+					[li 
+						" Flashpoint versions of games should ideally be checked against an original source in case of any modifications that have been made.
+						$LF
+					]li
+				]ul
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	[b 
+		"Test your game natively in Ruffle before you try TASing it!
+	]b
+	" Ruffle is a work in progress and some games are incompatible. If you get a popup message about unsupported features, the game won't work yet and you'll have to try Ruffle again later. If your game runs but has some glitches that don't occur in the regular Adobe Flash Player, post a 
+	[a href=https://github.com/ruffle-rs/ruffle/issues rel=noopener external nofollow 
+		"well-written, detailed issue
+	]a
+	" on how to reproduce it and hope for the best.
+	$LF
+]div
+[h2 id=UsingWithLibtas 
+	" Using with libTAS
+	$LF
+]h2
+[div class=p 
+	"Thankfully, setting it up with libTAS is not very complicated.
+	$LF
+]div
+[ul 
+	[li 
+		" Set the executable path to the Ruffle build you downloaded.
+		$LF
+	]li
+	[li 
+		" Set the command line options to 
+		[code 
+			"/path/to/yourgame.swf
+		]code
+		", substituting the path of your game. This will default to Vulkan graphics. Optionally add 
+		[code 
+			"-g gl
+		]code
+		" to use OpenGL.
+		$LF
+	]li
+	[li 
+		" If you are using build 
+		[a href=https://github.com/ruffle-rs/ruffle/releases/tag/nightly-2025-02-03 rel=noopener external nofollow 
+			"2025-02-03
+		]a
+		" or newer, 
+		[code 
+			"clock_gettime() monotonic
+		]code
+		" must be enabled in Runtime->Time tracking for Ruffle to work in libTAS.
+		$LF
+	]li
+	[li 
+		" If you are using build 
+		[a href=https://github.com/ruffle-rs/ruffle/releases/tag/nightly-2023-08-03 rel=noopener external nofollow 
+			"2023-08-03
+		]a
+		" or newer, you can add 
+		[code 
+			"--no-gui
+		]code
+		" to remove the menu bar.
+		$LF
+	]li
+	[li 
+		" If you have an AS3 game and are using 
+		[a href=https://github.com/ruffle-rs/ruffle/releases/tag/nightly-2023-07-22 rel=noopener external nofollow 
+			"2023-07-22
+		]a
+		" or older, add 
+		[code 
+			"--dont-warn-on-unsupported-content
+		]code
+		".
+		$LF
+	]li
+	[li 
+		" If you are using build 
+		[a href=https://github.com/ruffle-rs/ruffle/releases/tag/nightly-2024-05-31 rel=noopener external nofollow 
+			"2024-05-31
+		]a
+		" or newer, it's best to open Ruffle outside of libTAS first so it can download libopenh264, as this reduces the chance of desyncs.
+		$LF
+	]li
+]ul
+[h3 id=IfLibtasFailsToHookWithRuffle 
+	" If libTAS fails to hook with Ruffle
+	$LF
+]h3
+[div class=p 
+	"If you are using GNOME or similar GUI and libTAS fails to hook to Ruffle, you may have a problem with your 
+	[code 
+		"Wayland
+	]code
+	" display protocol (e.g., you only have X11 installed). A possible error message you might see is:
+	$LF
+]div
+[div class=p 
+	[code 
+		"Warning: Ignoring XDG_SESSION_TYPE=wayland on Gnome. Use QT_QPA_PLATFORM=wayland to run on Wayland anyway.
+	]code
+	$LF
+]div
+[div class=p 
+	"To fix this problem, you may edit your GNOME config file 
+	[code 
+		"/etc/gdm3/custom.conf
+	]code
+	" and set 
+	[code 
+		"WaylandEnable=false
+	]code
+	" and restart. Another possible solution is to disable Wayland in the environment variables: 
+	[code 
+		"export WAYLAND_DISPLAY=""
+	]code
+	$LF
+]div
+[h3 id=Framerate 
+	" Framerate
+	$LF
+]h3
+[div class=p 
+	[b 
+		"Set the frames per second to the proper frame rate for your Flash game.
+	]b
+	$LF
+]div
+[div class=p 
+	"Setting it too low will incorrectly speed up the game, squander viable input frames, and reduce the encode quality. And setting it too high will cause Ruffle to freeze - although if for some reason you need the higher framerate, Ruffle may still work with 
+	[em 
+		"Runtime -> Time tracking -> clock_gettime()
+	]em
+	" checked.
+	$LF
+]div
+[div class=p 
+	"Since 
+	[a href=https://github.com/ruffle-rs/ruffle/releases/tag/nightly-2023-02-25 rel=noopener external nofollow 
+		"Nightly 2023-02-25
+	]a
+	", Ruffle can print SWF info to the terminal if you launch libTAS with the following command:
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"For ealier Ruffle releases (though the new releases are mostly sync compatible with the old ones), you can open up a terminal and install 
+	[code 
+		"exiftool
+	]code
+	" first with this command:
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"And then use this command:
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"This will list information about the 
+	[code 
+		".swf
+	]code
+	", including the frame rate.
+	$LF
+]div
+[div class=p 
+	"Yet another way to see the game's internal framerate is 
+	[a class=intlink href=#Tools 
+		"opening it in JPEXS
+	]a
+	".
+	$LF
+]div
+[h3 id=DomainLocking 
+	" Domain locking
+	$LF
+]h3
+[div class=p 
+	"Some Flash games are domain locked, meaning that you can only run them on specific websites. To get these games to work on the desktop version of Ruffle, you can trick the game into thinking it's on the correct website. As of 
+	[a href=https://github.com/ruffle-rs/ruffle/releases/tag/nightly-2022-10-23 rel=noopener external nofollow 
+		"nightly-2022-10-23
+	]a
+	", you can use the command-line parameter 
+	[code 
+		"--spoof-url 
+		[a href=http://example.yoururlhere rel=noopener external nofollow 
+			"http://example.yoururlhere
+		]a
+	]code
+	" to feed the game any URL you want.
+	$LF
+]div
+[h3 id=NvidiaDrivers 
+	" Nvidia drivers
+	$LF
+]h3
+[div class=p 
+	"If Ruffle is not working with Nvidia drivers, run the following commands and reboot your PC:
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[ul 
+	[li 
+		" 
+		[b 
+			"NOTE:
+		]b
+		" 
+		[code 
+			"xxx
+		]code
+		" is used in place of the driver revision, as that's always being updated, just remember higher number is always better.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Now Ruffle should run under libTAS, just make sure to have the 
+	[em 
+		"Force software rendering
+	]em
+	" option checked.
+	$LF
+]div
+[div class=p 
+	"If Ruffle fails to launch natively when using OpenGL, run 
+	[code 
+		"export LIBGL_ALWAYS_SOFTWARE=1
+	]code
+	" and then run it in the same terminal window.
+	$LF
+]div
+[h3 id=Opengl 
+	" OpenGL
+	$LF
+]h3
+[div class=p 
+	"If Ruffle does not work with 
+	[code 
+		"-g gl
+	]code
+	" you can try the following command in the terminal:
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[h2 id=MovieSubmissions 
+	" Movie submissions
+	$LF
+]h2
+[div class=p 
+	"We allow submissions using Ruffle with libTAS. Please follow these guidelines to ensure your movie is acceptable and can be synced:
+	$LF
+]div
+[ul 
+	[li 
+		" Follow all rules already in place for 
+		(__wikiLink|displaytext=submitting libTAS movies|href=/EmulatorResources/LibTAS#MovieSubmissions)
+		".
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Keep in mind our 
+		(__wikiLink|displaytext=rules on emulation accuracy|href=/MovieRules#GameplayMustBeAccurateToHardware)
+		". Ruffle is incomplete and may not run games perfectly. If your movie has severe emulation problems or uses glitches not present in Adobe Flash Player, your submission may be rejected.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" 
+		[b 
+			"Make sure your movie starts with no save data!
+		]b
+		" Having your own save data present may cause desyncs when other people try to run your movie. To delete your save data, go to 
+		[code 
+			"~/.local/share/ruffle/SharedObjects/localhost/
+		]code
+		" followed by the path of your 
+		[code 
+			".swf
+		]code
+		" - e.g. if your 
+		[code 
+			".swf
+		]code
+		" is in 
+		[code 
+			"/path/to/yourgame.swf
+		]code
+		", the save data will be in 
+		[code 
+			"~/.local/share/ruffle/SharedObjects/localhost/path/to/yourgame.swf/
+		]code
+		". Delete any 
+		[code 
+			".sol
+		]code
+		" files in this folder (if this folder does not even exist, you're already all set).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" It is recommended (though not mandatory) to use the 
+		[code 
+			"--no-gui
+		]code
+		" argument when launching Ruffle, to prevent the top menu bar from showing. This alleviates the need to trim it out during the publishing process.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" When making a libTAS movie that you plan to submit to TASVideos or upload it to userfiles, put 
+		[code 
+			"Platform: Flash
+		]code
+		" at the very start of the 
+		[code 
+			".ltm
+		]code
+		" annotations, that way the site will recognize your platform properly.
+		$LF
+		[ul 
+			[li 
+				" This can be done within libTAS by opening 
+				[em 
+					"Movie -> Annotations
+				]em
+				" while recording a movie.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		" In the submission or movie annotations, please provide the following:
+		$LF
+		[ul 
+			[li 
+				" libTAS version
+				$LF
+			]li
+			[li 
+				" The nightly Ruffle build you used
+				$LF
+			]li
+			[li 
+				" Filename and MD5 hash of your 
+				[code 
+					".swf
+				]code
+				" (use 
+				[code 
+					"md5sum yourgame.swf
+				]code
+				" in a terminal)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h2 id=Tools 
+	" Tools
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[a href=https://github.com/jindrapetrik/jpexs-decompiler rel=noopener external nofollow 
+			"JPEXS Free Flash Decompiler
+		]a
+		" - You can use this to look at the code for any 
+		[code 
+			".swf
+		]code
+		". Extremely useful for figuring out how your game works as well as exploiting game environments and restrictions.
+	]li
+]ul

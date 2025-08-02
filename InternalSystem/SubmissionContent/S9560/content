@@ -1,0 +1,221 @@
+11
+[h4 id=Introduction 
+	"Introduction
+	$LF
+]h4
+[div class=p 
+	"This is my first TAS.
+	$LF
+]div
+[div class=p 
+	"I've been working on Alone in the Dark for several years (since late 2015) with LotBlind and NHG. There's an 
+	[a href=https://forum.speeddemosarchive.com/post/alone_in_the_dark_1992_dos.html rel=noopener external nofollow 
+		"official topic
+	]a
+	" and 
+	[a href=https://kb.speeddemosarchive.com/Alone_in_the_Dark_(1-3)/Game_Mechanics_and_Glitches rel=noopener external nofollow 
+		"guide
+	]a
+	" on Speed Demo Archive if you want more information.
+	$LF
+	"After NHG published its run (2016), some of us continued to discuss the game privately (for many years).
+	$LF
+]div
+[h4 id=GameObjectives 
+	"Game objectives
+	$LF
+]h4
+[div class=p 
+	"Trigger the end as quickly as possible (by beating Pregzt and getting out of the mansion).
+	$LF
+]div
+[h4 id=Routing 
+	"Routing
+	$LF
+]h4
+[div class=p 
+	"Based on the 
+	[a href=https://youtu.be/HD2Dq75Kzro rel=noopener external nofollow 
+		"NHG run (6:21)
+	]a
+	". Here are a few improvements: 
+	$LF
+]div
+[ul 
+	[li 
+		" The crack on the 3rd floor can be skipped by entering the inventory and introducing a lag. This causes a 
+		[em 
+			"snap
+		]em
+		" (e.g. a move by a large offset), allowing to pass over the crack.
+		$LF
+	]li
+	[li 
+		" Similarly, the 
+		[em 
+			"space snap
+		]em
+		" can be used to rotate the player suddenly, in a single frame (up to a maximum of 90 degrees).
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Fast rotation
+		]em
+		" allows the player to turn twice as fast when running (can only be used for the first 90 degrees).
+		$LF
+	]li
+	[li 
+		" Instead of opening the doors to exit the library, it's possible to clip against the doors.
+		$LF
+	]li
+]ul
+[h4 id=GlitchesUsed 
+	"Glitches used
+	$LF
+]h4
+[ul 
+	[li 
+		" It is possible to run through certain walls due to a glitch in the collision engine.
+		$LF
+	]li
+	[li 
+		" Nightgaunts on the 3rd floor can be avoided by touching the triggers leading to the 2nd floor when the camera is not focused on the player.
+		$LF
+	]li
+	[li 
+		" Gravity can be deactivated by interrupting the jumping action (e.g. by dropping an object on the ground). 
+		$LF
+	]li
+]ul
+[h4 id=ThingsMoreDifficultThanExpected 
+	"Things more difficult than expected
+	$LF
+]h4
+[ul 
+	[li 
+		" The lantern cannot be picked up at the beginning because the game hasn't been running for more than 5 seconds. There's a mechanism that prevents an object from being picked up if it's been found recently. Most players and speed runners will never experience this mechanism as it only occurs after a cold start and timers are not reset when a new game is started.
+		$LF
+	]li
+	[li 
+		" After taking the stairs or tunnels (in the attic or cave), the player sometimes immediately returns to the previous room/floor. This is due to the game running faster than it should. One way to alleviate this issue is to optimize/delay things a little (as this is related to FPS periodically going up and down) or to enter the trigger from a slightly different angle (this works for the cave entrance). If you're unlucky, you'll need dozens of tries to get it right.
+		$LF
+	]li
+	[li 
+		" It is not possible to edit a previous segment as the slightest change (even if it has no direct impact on gameplay) will 
+		[em 
+			"always
+		]em
+		" result in desync. This is because libTAS / PCem are not in sync (more on that later).
+		$LF
+	]li
+	[li 
+		" Similarly, optimizing interaction with inventory is difficult because the number of frames to do something varies (e.g. moving the current item down may take 2 or 5 frames).
+		$LF
+	]li
+]ul
+[h4 id=PcemLibtasSynchronization 
+	"PCem / libTAS synchronization
+	$LF
+]h4
+[div class=p 
+	"Some of the problems reported above are due to the fact that the game is not synchronized with libTAS.
+	$LF
+	"One frame in libTAS will translate into 2 or 3 frames in AITD. Additionally, a new frame in libTAS will almost always starts in the middle of a frame in AITD (not at the beginning).
+	$LF
+	"This is because libTAS runs at 100 FPS to match PCem's 10 ms increments, whereas the game runs at 70 FPS. The game uses vertical synchronization, but this is a kind of spin-wait that cannot be detected by libTAS. On top of this, there's a bug in the game that causes FPS to exceed 70 FPS every 2 seconds (e.g.: 70, 292, 69, 287,...). The game should cap at 70 FPS.
+	$LF
+]div
+[div class=p 
+	[code 
+		"PCem v17+st-2
+	]code
+	" can be used to improve this. This is a special version that allows a specific framerate to be used in libTAS (to match the game's framerate). Using this version and a patched game executable (to cap it at 70 FPS), make game frames to be 1:1 with libTAS. This makes everything much easier to control (and in finer gradients). 
+	$LF
+	"At the time of writing, 
+	[code 
+		"PCem v17+st-2
+	]code
+	" is not authorized by tasvideos. Moreover, this patch is not official (it may not be approved).
+	$LF
+]div
+[h4 id=Configuration 
+	"Configuration
+	$LF
+]h4
+[div class=p 
+	[code 
+		"Early 90s
+	]code
+	" is used as it seems to be the best configuration for this run. Using a slower CPU (eg: 
+	[code 
+		"Late 80s
+	]code
+	") slows down the run considerably as 2D backgrounds take longer to load. Using a faster CPU (eg: 
+	[code 
+		"Late 90s
+	]code
+	") causes FPS to go really high every 2 seconds and prevents the player from running (even with frame advance). 
+	[code 
+		"PCem v17+st-2
+	]code
+	" and the right patch (as explained above) should make it possible to use such a fast configuration.
+	$LF
+]div
+[h4 id=SpecialThanks 
+	"Special thanks
+	$LF
+]h4
+[div class=p 
+	"LotBlind on SDA (this run wouldn't have been possible without him, many of the tips came from our internal discussions) and the tasvideos Discord community (the guys there were very helpful).
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Asking the author for more info because of desync 
+	(__wikiLink|href=/Forum/Posts/535065|implicitdisplaytext=Forum/Posts/535065)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Those of us who played this game back in the day know how uniquely terrifying it can be. They would also remember how hard it is to make it out alive; many different things are there to kill you mercilessly. But above all things, how long the game takes to solve. You can play it for weeks until you beat it without assistance. And even with a walkthrough it might take you a few hours to get it done.
+	$LF
+]div
+[div class=p 
+	"Well forget all I've said above. Here the author exploits all kinds of skips, glitches, sequence breaks, and clever shortcuts to go straight to the sewers and set the evil thing on fire. Only to flee in style thereafter. You can tell many of years of an active community have been poured into making all these discoveries. Nevertheless, the execution itself as provided by the author here is flawless.
+	$LF
+]div
+[div class=p 
+	"The movie has received great feedback from the community and I personally loved every second of it. I have a candidate for Rookie Taser and DOS movie of the year.
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Processing...
+]div

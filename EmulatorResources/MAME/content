@@ -1,0 +1,634 @@
+36
+[div class=p 
+	[a href=https://www.mamedev.org/ rel=noopener external nofollow 
+		"MAME
+	]a
+	" doesn't have rerecording, but you can TAS it by running it in 
+	[a href=https://github.com/clementgallet/libTAS rel=noopener external nofollow 
+		"libTAS
+	]a
+	".
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#WhatYouLlNeed 
+					" What you'll need
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#UsingWithLibtas 
+					" Using with libTAS
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#InputKeys 
+							" Input keys
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Framerate 
+							" Framerate
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MameReplayFile 
+							" MAME replay file 
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#MovieSubmissions 
+					" Movie submissions
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=WhatYouLlNeed 
+	" What you'll need
+	$LF
+]h3
+[ul 
+	[li 
+		" Some decently new 
+		[a href=https://github.com/clementgallet/libTAS/releases rel=noopener external nofollow 
+			"libTAS
+		]a
+		" release.
+		$LF
+	]li
+	[li 
+		" A versioned release of MAME, ideally pre-compiled.
+		$LF
+		[ul 
+			[li 
+				" For Ubuntu, just grab something from 
+				[a href=https://launchpad.net/ubuntu/+source/mame rel=noopener external nofollow 
+					"Canonical Launchpad
+				]a
+				". 
+				[code 
+					"current stable release
+				]code
+				" is fine unless you need something newer. You only need the 
+				[code 
+					"mame-data
+				]code
+				" and 
+				[code 
+					"mame
+				]code
+				" 
+				[code 
+					".deb
+				]code
+				" packages, and make sure you get the right build for your architecture (usually it's 
+				[code 
+					"amd64
+				]code
+				").
+				$LF
+			]li
+			[li 
+				" There's also 
+				[a href=https://launchpad.net/~c.falco/+archive/ubuntu/mame rel=noopener external nofollow 
+					"this unofficial repository
+				]a
+				" that hosts builds of latest MAME release for several Ubuntu releases, but previous builds get wiped regularly.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Your game that runs on MAME.
+		$LF
+		[ul 
+			[li 
+				" MAME ROMs are usually packed into 
+				[code 
+					".zip
+				]code
+				" archives, but MAME can launch them from 
+				[code 
+					".7z
+				]code
+				" or even a regular folder, as long as its called after the right ROM set.
+				$LF
+			]li
+			[li 
+				" If you want to TAS a version (clone) of the game, you still need its base (parent) ROMs to be there too. Merged ROM sets have everything in the parent package, but MAME User Interface only detects games if they are packaged separately, so you won't be able to run the clone from MAME menus. But you can still launch it from terminal.
+				$LF
+			]li
+			[li 
+				" If your game requires a BIOS (put it in the same folder as your ROM), and there are several compatible BIOS files in your set, you need to select the one you want to use. The easiest way is to do it in MAME menus: 
+				[em 
+					"Configure Machine
+				]em
+				" in main menu or the 
+				[em 
+					"Tab
+				]em
+				" hotkey when the game is loaded. You can also specify it via the 
+				[code 
+					"-bios
+				]code
+				" command-line argument, but to know what the right option is called you need to run mame with your game and 
+				[code 
+					"-listxml
+				]code
+				" argument, and the 
+				[code 
+					"biosset name
+				]code
+				" entries in the output will be what you need.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=UsingWithLibtas 
+	" Using with libTAS
+	$LF
+]h3
+[ol 
+	[li 
+		" MAME usually installs itself into 
+		[code 
+			"/usr/games/mame
+		]code
+		" so use that path for the 
+		[em 
+			"Game executable
+		]em
+		" field.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Command-line options
+		]em
+		" should be 
+		[code 
+			"yourrom -window -nokeepaspect -skip_gameinfo -nomaximize -nounevenstretch -nonvram_save
+		]code
+		" where 
+		[code 
+			"yourrom
+		]code
+		" is actually the name of your game's ROM set package. 
+		[a href=https://docs.mamedev.org/commandline/commandline-all.html rel=noopener external nofollow 
+			"Full list
+		]a
+		" of options MAME supports.
+		$LF
+	]li
+	[li 
+		" If you don't know which folders MAME looks for ROMs in and where to put your ROM, put it anywhere and add 
+		[code 
+			"-rompath folder/containing/your/rom
+		]code
+		" to 
+		[em 
+			"Command-line options
+		]em
+		", with actual path to your ROM, but without the filename.
+		$LF
+	]li
+	[li 
+		" Make sure 
+		[em 
+			"Runtime -> Prevent writing to disk
+		]em
+		" is enabled, or MAME will dump files onto your disk, messing with game state and movie sync.
+		$LF
+	]li
+	[li 
+		" If you've already launched your game outside libTAS, or if you've launched it in libTAS with 
+		[em 
+			"Runtime -> Prevent writing to disk
+		]em
+		" disabled, you may have 
+		[code 
+			"nvram
+		]code
+		" (
+		[a href=https://en.wikipedia.org/wiki/Non-volatile_random-access_memory rel=noopener external nofollow 
+			"non-volatile RAM
+		]a
+		") contents dumped to your disk, which will mess with game state and movie sync. In Ubuntu, go to 
+		[code 
+			"~/.mame
+		]code
+		" and delete everything (usually it's 
+		[code 
+			"cfg
+		]code
+		", 
+		[code 
+			"nvram
+		]code
+		", and 
+		[code 
+			".ini
+		]code
+		"s).
+		$LF
+	]li
+	[li 
+		" You can skip imperfect emulation warnings that appear before the game starts if there are emulation issues with it, but there's no command-line argument for it.
+		$LF
+		[ul 
+			[li 
+				" The easiest way to do it is by doing what it asks for: pressing any key to continue, right inside your movie recording.
+				$LF
+			]li
+			[li 
+				" A more elaborate way requires using MAME's UI menu: 
+				[em 
+					"Configure Options -> Miscellaneous Options -> Skip imperfect emulation warnings
+				]em
+				", but it also involves launching MAME normally and making it save 
+				[code 
+					"ui.ini
+				]code
+				" with this setting. Which means whoever will try to sync your movie will have to have that setting enabled as well.
+				$LF
+			]li
+		]ul
+	]li
+]ol
+[h4 id=InputKeys 
+	" Input keys
+	$LF
+]h4
+[div class=p 
+	"To know which input keys MAME expects as in-game controls, you can look them up in MAME menu. If mouse cursor is not working (you may need to run MAME in windowed mode by using the 
+	[code 
+		"-w
+	]code
+	" commandline switch), just use 
+	[em 
+		"Tab
+	]em
+	", 
+	[em 
+		"Enter
+	]em
+	", and arrow keys. Fullscreen hotkey is 
+	[em 
+		"left Alt
+	]em
+	" + 
+	[em 
+		"Enter
+	]em
+	".
+	$LF
+]div
+[ul 
+	[li 
+		" Launch MAME normally.
+		$LF
+		[ul 
+			[li 
+				" If you're running MAME without a game loaded, use 
+				[em 
+					"Tab
+				]em
+				" to get to 
+				[em 
+					"General Settings
+				]em
+				", and then go to 
+				[em 
+					"Input Assignments
+				]em
+				".
+				$LF
+			]li
+			[li 
+				" If you're running it with your game, hit 
+				[em 
+					"Tab
+				]em
+				" and go to 
+				[em 
+					"Input Settings -> Input Assignments (this system)
+				]em
+				" or 
+				[em 
+					"Input Assignments (general)
+				]em
+				". The former is probably more convenient because you don't have to assign keys you won't need for that game.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Run MAME from libTAS.
+		$LF
+		[ul 
+			[li 
+				" In order to access its menu you need to disable hotkey binding for 
+				[em 
+					"Tab
+				]em
+				" in libTAS 
+				[em 
+					"Input -> Configure mapping
+				]em
+				" menu (bound to 
+				[em 
+					"Fast-forward
+				]em
+				" by default).
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"libTAS may also have MAME's in-game control keys bound to something unrelated, unbind them too or reassign them in MAME.
+	$LF
+]div
+[div class=p 
+	"Note that your run must sync on MAME with all UI hotkeys disabled! Using MAME User Interface within the movie is not allowed.
+	$LF
+]div
+[ul 
+	[li 
+		" UI hotkeys can be disabled by going to 
+		[em 
+			"General Settings -> Input Assignments -> User Interface
+		]em
+		" from the main MAME menu, or to 
+		[em 
+			"Input Settings -> Input Assignments (general) -> User Interface
+		]em
+		" while running a game. 
+		[br 
+		]br
+		" Note: don't clear 
+		[em 
+			"UI Up/Down/Select/Cancel
+		]em
+		" hotkeys if you don't have mouse pointer working in MAME, otherwise you won't be able to navigate through menus.
+		$LF
+	]li
+	[li 
+		" Download 
+		(__wikiLink|displaytext=this file|href=/UserFiles/Info/638183663654045700)
+		" and put it into 
+		[code 
+			"~/.mame/cfg
+		]code
+		". Alternatively, you can put it into any folder and then send that path to MAME via the 
+		[code 
+			"-cfg_directory
+		]code
+		" command-line argument.
+		$LF
+	]li
+]ul
+[h4 id=Framerate 
+	" Framerate
+	$LF
+]h4
+[div class=p 
+	"MAME emulates lots of machines with different framerates. It shows framerate in the information screen before the game (unless you disable it in the menu or via the 
+	[code 
+		"-skip_gameinfo
+	]code
+	" argument). But that value can't be used in libTAS since it expects framerate represented as numerator / denominator. To obtain those, we need to utilize 
+	[a href=https://docs.mamedev.org/techspecs/luareference.html rel=noopener external nofollow 
+		"MAME's Lua scripting
+	]a
+	" abilities.
+	$LF
+]div
+[div class=p 
+	"Download 
+	(__wikiLink|displaytext=this Lua script|href=/UserFiles/Info/638183669502074999)
+	", put it anywhere, and add 
+	[code 
+		"-script full/path/to/your/file/mame-framerate.lua
+	]code
+	" to 
+	[em 
+		"Command-line options
+	]em
+	" (specifying its actual full path). That way in terminal you'll be able to see what numerator and denominator you need to set in libTAS's 
+	[em 
+		"Frames per second
+	]em
+	" fields for that game (and only that game). It also prints intended aspect ratio for encoding.
+	$LF
+]div
+[ul 
+	[li 
+		" MAME stores framerate as frame duration in attoseconds, but signed 32-bit integers needed for numerator and denominator (according to AVI specification) are too small for all this information, so we have to reduce it. But due to some other complications described in 
+		[a href=https://github.com/mamedev/mame/pull/11030 rel=noopener external nofollow 
+			"this pull request
+		]a
+		", we have to reduce it to some arbitrary value that is 
+		[em 
+			"mostly
+		]em
+		" accurate from a human perspective. At least the value we use here matches MAME's AVI framerate since version 0.254 (and BizHawk since 2.9.1).
+		$LF
+	]li
+]ul
+[h4 id=MameReplayFile 
+	" MAME replay file 
+	$LF
+]h4
+[div class=p 
+	"When your run is ready, you can make MAME create its internal replay file from it. This is not required, but it may help people who don't have libTAS and Linux or WSL2 set up, but still want to watch the movie in the emulator.
+	$LF
+]div
+[ul 
+	[li 
+		" Disable 
+		[em 
+			"Runtime -> Prevent writing to disk
+		]em
+		$LF
+	]li
+	[li 
+		" Add 
+		[code 
+			"-record somefilename.inp
+		]code
+		" to libTAS's 
+		[em 
+			"Command-line options
+		]em
+		$LF
+	]li
+	[li 
+		" Replay your 
+		[code 
+			".ltm
+		]code
+		" movie and stop when needed
+		$LF
+	]li
+	[li 
+		" The resulting file will appear in 
+		[code 
+			"~/.mame/inp
+		]code
+		$LF
+	]li
+	[li 
+		" Replay it in standalone MAME via 
+		[code 
+			"-playback somefilename.inp
+		]code
+		" and 
+		[a href=https://docs.mamedev.org/commandline/commandline-all.html rel=noopener external nofollow 
+			"other arguments of your choice
+		]a
+		$LF
+	]li
+]ul
+[h3 id=MovieSubmissions 
+	" Movie submissions
+	$LF
+]h3
+[div class=p 
+	[em 
+		"We allow submissions using MAME with libTAS. Please follow these guidelines to ensure your movie is acceptable and can be synced:
+	]em
+	$LF
+]div
+[div class=p 
+	"Follow all rules already in place for 
+	(__wikiLink|displaytext=submitting libTAS movies|href=/EmulatorResources/LibTAS#MovieSubmissions)
+	".
+	$LF
+]div
+[div class=p 
+	"Keep in mind our 
+	(__wikiLink|displaytext=rules on emulation accuracy|href=/MovieRules#GameplayMustBeAccurateToHardware)
+	". If the game has emulation problems, MAME tells that in its User Interface when you select that game in the list, and when you launch it.
+	$LF
+]div
+[ul 
+	[li 
+		" There should be no 
+		[em 
+			(__wikiLink|displaytext=significant glitches|href=/MovieRules#1)
+		]em
+		" caused by poor emulation (look out for machines marked by MAME as 
+		[code 
+			"Overall: NOT WORKING
+		]code
+		" or with something 
+		[code 
+			"Unimplemented
+		]code
+		").
+		$LF
+	]li
+	[li 
+		" Non-arcade machines are only allowed if:
+		$LF
+		[ul 
+			[li 
+				" TASVideos doesn't have an approved rerecording emulator for that system
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Configuring MAME before running the game (for example, presetting DIP switches) is allowed, as long as that configuration is 
+	[b 
+		"intended for playing that game normally
+	]b
+	". Aside from that, your run must sync on default MAME config.
+	$LF
+]div
+[div class=p 
+	"Using MAME User Interface within the movie is 
+	[b 
+		"not allowed for publication
+	]b
+	". You run must sync on MAME with all 
+	(__wikiLink|displaytext=UI hotkeys|href=/EmulatorResources/MAME#InputKeys)
+	" disabled!
+	$LF
+]div
+[div class=p 
+	[b 
+		"Make sure your movie starts with no save data!
+	]b
+	" Having your own save data present may cause desyncs when other people try to run your movie. To delete your save data in Ubuntu, go to 
+	[code 
+		"~/.mame
+	]code
+	" and delete everything (usually it's 
+	[code 
+		"cfg
+	]code
+	", 
+	[code 
+		"nvram
+	]code
+	", and 
+	[code 
+		".ini
+	]code
+	"s).
+	$LF
+]div
+[div class=p 
+	"When making a libTAS movie that you plan to submit to TASVideos or upload it to userfiles, put 
+	[code 
+		"Platform: Arcade
+	]code
+	" at the very start of the movie annotations, that way the site will recognize your platform properly. Other systems that MAME can emulate can be supported in the future, if the system is emulated well (see above).
+	$LF
+]div
+[div class=p 
+	"In your description or movie annotations, please provide the following:
+	$LF
+]div
+[ul 
+	[li 
+		" libTAS version
+		$LF
+	]li
+	[li 
+		" MAME version (ideally with a link to the release build package)
+		$LF
+	]li
+	[li 
+		" Additional MAME configuration steps if they are necessary for your movie.
+		$LF
+	]li
+	[li 
+		" Filename and MD5 hash of your ROM set (use 
+		[code 
+			"md5sum yourgame.zip
+		]code
+		" in a terminal)
+	]li
+]ul

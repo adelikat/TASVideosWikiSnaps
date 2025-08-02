@@ -1,0 +1,264 @@
+7
+[div class=p 
+	"Improvement over 
+	(__wikiLink|href=/1639M|implicitdisplaytext=1639M)
+	" and 
+	(__wikiLink|href=/9444S|implicitdisplaytext=9444S)
+	". This submission is intended to have Japanese non-save corruption runs be a separate branch.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Completes the game as fast as possible without save data corruption
+		$LF
+	]li
+]ul
+[h3 id=AceSetup 
+	" ACE setup
+	$LF
+]h3
+[div class=p 
+	"Instead of using 
+	[a href=https://glitchcity.wiki/wiki/Select_glitch rel=noopener external nofollow 
+		"the select glitch
+	]a
+	" and 
+	[a href=https://glitchcity.wiki/wiki/Dokokashira_door_glitch rel=noopener external nofollow 
+		"Dokokashira door glitch
+	]a
+	" to simply perform a series of warps to get to the Hall Of Fame room, run opts to ultimately trigger ACE to trigger the Hall Of Fame sequence.
+	$LF
+]div
+[div class=p 
+	"The select glitch ultimately sets up a case where the game will look for "Pokemon" outside of the actual party to decrease HP for "poisoned" ""Pokemon"". In some cases, this decreases the map ID in some of the warp entries, leading to the 
+	[a href=https://glitchcity.wiki/wiki/Dokokashira_door_glitch rel=noopener external nofollow 
+		"Dokokashira door glitch
+	]a
+	". However, it can possibly decrease another particularly useful value, the current map ID. This map ID is used by the game to determine which bank the current map script should be ran under. With a different bank being used than expected, the game will most likely "crash" in some way.
+	$LF
+]div
+[div class=p 
+	"This "crash" could be an invalid opcode or stop, which ends execution immediately. It can however be one of the rst opcodes, which will eventually trigger rst $38. In Japanese Gen 1 games (along with some other unrelated games), rst $38 contains 
+	[code 
+		"jp 0xF080
+	]code
+	". This was changed to be another rst $38 in Japanese Yellow 1.1, and subsequently all later versions of Gen 1 have rst $38 in rst $38. It's presumed that this jump was intended as some sort of leftover debug code, but in the case of the actual released game, it just gives easy access to ACE.
+	$LF
+]div
+[div class=p 
+	"0xF080 contains data about the last sprite decompressed. A lot of it is junk, but it happens the beginning of this data is the sprite width and height. These have some variation, but they ultimately end up being some form of one of the 
+	[code 
+		"jr
+	]code
+	" opcodes, which allow for jumping forward, past most of this data. After that data, however, is a buffer of move strings. These move strings will end up having invalid opcodes in them, completely stopping execution. This buffer can be cleared by save and quitting, so a save and quit is required.
+	$LF
+]div
+[div class=p 
+	"Eventually, more controllable bytes are reached. 
+	[code 
+		"wIgnoreInputCounter
+	]code
+	", 
+	[code 
+		"wStepCounter
+	]code
+	", 
+	[code 
+		"wPlayerName
+	]code
+	", 
+	[code 
+		"wPartyMon2OTID
+	]code
+	", 
+	[code 
+		"wPartyMon2DVs
+	]code
+	". All of these are used to ultimately redirect execution to the Hall Of Fame sequence.
+	$LF
+]div
+[div class=p 
+	[code 
+		"wIgnoreInputCounter
+	]code
+	" is just a counter that just ticks down every frame. For the payload, the run ensures it is 0xF8. 
+	[code 
+		"wStepCounter
+	]code
+	" is made to be 0xFC (note that the step counter ticks downwards, not upwards, and resets upon a save and quit). The player is named "ギホゴ". The trainer ID is manipulated to be 0x0616. Multiple other TIDs could have been used, but this was the fastest one to manipulate. The starter DVs are manipulated to be 0xC4AA (0xC2AA also would work, but 0xC4AA is what I ended up getting). This results in the following payload:
+	$LF
+]div
+[pre 
+	"; wIgnoreInputCounter + wStepCounter
+	$LF
+	"ld hl,sp-4 ; hl = 0xDFF1
+	$LF
+	"; player name
+	$LF
+	"ld b,0x9C ; bc = 0x9C00
+	$LF
+	"add hl,bc ; hl = 0x7BF1
+	$LF
+	"; starter pokemon
+	$LF
+	"; catch rate
+	$LF
+	"dec l ; hl = 0x7BF0
+	$LF
+	"; growl
+	$LF
+	"dec l ; hl = 0x7BEF
+	$LF
+	"; tid
+	$LF
+	"ld b,0x16
+	$LF
+	"; dvs and pp
+	$LF
+	"call nz,0x23AA
+	$LF
+]pre
+[div class=p 
+	"The end of the payload does a jump to 
+	[code 
+		"0x23AA
+	]code
+	". This is a ROM address, within a far jump into some 
+	[a href=https://github.com/pret/pokered/blob/f023c68417ff0b14db1ab28ecff67f8d123ede44/home/overworld.asm#L802 rel=noopener external nofollow 
+		"map code
+	]a
+	". This ends up calling the 
+	[code 
+		"Bankswitch
+	]code
+	" function in the game, which switches the ROM bank over to whatever 
+	[code 
+		"b
+	]code
+	" has and jumps to whatever 
+	[code 
+		"hl
+	]code
+	" has. This means the game bankswitches to bank 0x16 (keep in mind the game only has 0x20 ROM banks, so any 
+	[code 
+		"b
+	]code
+	" value higher than 0x1F effectively gets moduloed by 0x20, so 0x16, 0x36, 0x56, etc all work), and jumps to 
+	[code 
+		"0x7BEF
+	]code
+	". 
+	[code 
+		"0x7BEF
+	]code
+	" in bank 0x16 is the middle of the 
+	[a href=https://github.com/pret/pokered/blob/9a2f1b2170dab77a88d0230fe479e31e8356ce04/scripts/HallOfFame.asm#L29 rel=noopener external nofollow 
+		"Hall of Fame script
+	]a
+	".
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[ul 
+	[li 
+		" The trainer ID is manipulated to be 0x0616. 0x0636, 0x0656, 0x0676, 0x0696, 0x06B6, 0x06D6, and 0x06F6 also work, but 0x0616 ended up being the fastest to manipulate.
+		$LF
+	]li
+	[li 
+		" The player is named "ギホゴ" and the Rival is set to the first preset option.
+		$LF
+	]li
+	[li 
+		" Charmander is picked as the starter, with 0xC4AA DVs. 0xC2AA would also work for this TAS. In theory, a ton of other DVs would work for the ACE payload, but 0xC2AA and 0xC4AA are the best in this case, as they are the only ones which give Charmander 0 HP DVs, and thus gives Charmander 18 HP (even 1 HP DV would bump Charmander's HP to 19). It is not nicknamed, as the name is not shown enough to save time nicknaming. Squirtle and Bulbasaur cannot be used, as they have Tackle, which ruins the payload used.
+		$LF
+	]li
+	[li 
+		" The Rival fight is purposefully lost, as it does not need to be won and it is fastest to lose. This is done in 3 turns, each comprising of a 1/256 miss with Growl, and a 1/39 crit with Tackle. A 1/39 Tackle crit does 6 damage to Charmander, so having 18 HP allows for a 3 turn fight. Who doesn't love a 1/1178114537369 Rival fight.
+		$LF
+	]li
+	[li 
+		" Options are not set for the Rival fight. Keeping animations on during the Rival fight saves a bit of time due to Tackle being faster with animations on rather than off. It also saves time as it avoids ever going into the options menu, which is completely unneeded for this run.
+		$LF
+	]li
+	[li 
+		" A Pidgey is encountered at the end of Route 1. This has the shortest cry of the Pokemon in Route 1. Its encounter location is also manipulated to allow for the earliest poison tick to occur on entering Pallet Town.
+		$LF
+	]li
+	[li 
+		" A warp is done near the southern entrance to Fuschia City.
+		$LF
+	]li
+	[li 
+		" A save+quit is done once two poison ticks are done, as to ensure the next one after the save+quit triggers the ACE payload.
+		$LF
+	]li
+	[li 
+		" The Hall of Fame still needs input to clear some textboxes to advance to the credits, so input doesn't end until those textboxes are cleared.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	":  This situation is similar to how 
+	(__wikiLink|displaytext=Gold/Silver|href=/4465M)
+	" vs 
+	(__wikiLink|displaytext=Crystal|href=/6237M)
+	" require different setups in order to perform similar glitches and to how 
+	(__wikiLink|displaytext=Red/Blue|href=/6251M)
+	" warrant separate publication vs 
+	(__wikiLink|displaytext=Yellow|href=/3901M)
+	"; because the setups required to achieve the "game end glitches" are unique as the fastest way to reach the game end in those releases.  The Japanese versions of gen 1 Pokémon also have unique "game end glitch" setup (the Select Glitch, which iteslf has various uses) compared to the North American releases and thus warrant a separate publication to recognize the method reuqired for fastest non save corruption "game end glitch" use in Japanese releases.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[div class=p 
+	"NOTE TO PUBLISHER: Once this is published we should probably update the obsoletion chains to separate the Green Version runs of the "game end glitch" branch from the others. I don't mind doing it if you don't want to.  The last published Green Version for this branch is 
+	(__wikiLink|href=/1639M|implicitdisplaytext=1639M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Due to Spike being removed from staff, this submission is now open for anyone to claim for publication.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

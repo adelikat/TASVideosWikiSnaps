@@ -1,0 +1,168 @@
+7
+[div class=p 
+	"Mari0 is 
+	[em 
+		"Super Mario Bros.
+	]em
+	" but with portals. We trigger a glitch within the level editor that allows us to warp to the final level of the game. Oh, and we do it at speeds of upwards of a billion inputs per second.
+	$LF
+]div
+[div class=p 
+	"This TAS obsoletes 
+	(__wikiLink|href=/8188S|implicitdisplaytext=8188S)
+	". Kinda. It's complicated. We'll get into it.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS 1.4.5
+		$LF
+	]li
+	[li 
+		" Optimizes for encoding time
+		$LF
+	]li
+	[li 
+		" Contains speed/entertainment tradeoff
+		$LF
+	]li
+	[li 
+		" Utilizes glitches
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=HowTheHellIsThisMovieLessThanATenthOfASecondLong 
+	" How the hell is this movie less than a tenth of a second long
+	$LF
+]h4
+[div class=p 
+	"Like the previous TAS, this movie runs far above 60 FPS. Specifically, it varies between running at 1,000 FPS and 1,000,000,000 "FPS". I say "FPS" because the game actually has a limit of 1,000 FPS, meaning if you set libTAS to run faster than that, you will get "frames" that do not actually involve any rendering. I've actually figured out exactly what is happening here since the prior submission through my work on an arbitrary FPS cap mod for RTA speedrunning. The 1,000 FPS limit comes from the default LÖVE2D function 
+	[a href=https://love2d.org/wiki/love.run rel=noopener external nofollow 
+		"love.run
+	]a
+	" which sleeps for 0.001s after it finishes its loop of polling events (i.e. keyboard presses, mouse clicks), ticking the physics, and rendering the screen. What this means is that every non-render "frame" is one that was captured while the game was still sleeping, hence the lack of physics or graphics update. However, you can still emit input events during these "frames" to get queued up and run all at once, in order, on the next real frame. These inputs must be instantaneous, like menuing, instead of continuous, like walking, as the latter inputs are only polled when actually updating the frame, and thus the queued inputs are ignored.
+	$LF
+]div
+[div class=p 
+	"Basically, you can think of running the game at 1,000,000,000 FPS a little like writing sub-frame inputs in 
+	(__wikiLink|href=/4567M|implicitdisplaytext=4567M)
+	".
+	$LF
+]div
+[div class=p 
+	"The choice of 1,000,000,000 FPS to queue up inputs is an arbitrary one. Theoretically you could increase this as high as the signed 32-bit integer limit but that complicates the math and produces a functionally identical movie. Ideally libTAS would have some proper method of doing sub-frame inputs built in so we wouldn't have to worry about this but it's no big deal.
+	$LF
+]div
+[div class=p 
+	"One last note is that, at the end of a movie, libTAS keeps whatever the frame rate was at the last input, so there is a technically useless 1,000 FPS input at the very end just for the sake of encoding. Again, ideally libTAS would have a better solution for this, but it's no big deal. I'll be ignoring this final FPS input in some of my later math.
+	$LF
+]div
+[h4 id=WhatExactlyAreYouDoingWithThoseButtonPresses 
+	" What exactly are you doing with those button presses
+	$LF
+]h4
+[div class=p 
+	"So, here's where the fun differences come in from the last run. Yes, this run is still using the game's level editor, but to a much more creative effect. We're using a glitch called "level editor storage." To perform level editor storage, you must go into the level editor, select the level you want to edit, enter the level test mode, then tab out of the game. This will trigger the game to open the pause menu, which normally is supposed to be inaccessible from the level editor (as pressing the pause key, Escape, instead merely exits the test mode). From here you can create a suspension point (like the save balloons in NSMBW). This will return us to the title screen, but in a broken state. Pressing any* menu option will load whatever level we were just in onto the title screen, and then again pressing any* option will return us to editing level 1-1 in the level editor. From here we can exit the level editor and then load the suspension point that we created, which brings us into a completely normal game starting in the level that we performed level editor storage in.
+	$LF
+]div
+[div class=p 
+	"\*Any option that would normally load a level- so "continue game", "new game", or "level editor." Additionally, selecting "continue game" in this broken state removes the suspension point, so it should be avoided.
+	$LF
+]div
+[div class=p 
+	"Additionally, this TAS slightly edits 8-4 to allow it to be completed without pressing any buttons, which allows ending input early. Admittedly it does feel pretty cheap/cheaty compared to the neat trick that is level editor storage and part of me wonders if this submission would be better without it? I do find the level editor gimmick amusing though, and without it this TAS would kinda just be a diet any%, so ¯\_(ツ)_/¯
+	$LF
+]div
+[div class=p 
+	"Anyway. The route of the TAS is as follows. We start the game, enter the level editor, and go to the 4th sublevel of 8-4 (the Bowser room). We click on the level editor minimap to drag the camera to the right, then place down a spawnpoint tile on top of the ax. From there, we save the level, then move over to the 0th sublevel where we place down a warp tile and set its destination to the 4th sublevel. Then, we turn on the sublevel's "intermission" flag, which makes Mario slowly walk forward until he finds a pipe (think the opening of underground levels like 1-2). Then, we save the sublevel. Finally, we select "test level" and perform level editor storage as described above. We close out by exiting the level editor and spend our final input selecting the "continue game" option to resume our suspension point. This starts the game in 8-4 and, from here, Mario completes the level and rescues the princess without a single button press.
+	$LF
+]div
+[h4 id=RealRenderFrames 
+	" Real/Render Frames
+	$LF
+]h4
+[div class=p 
+	"This movie has 9 necessary/real/rendering frames (or, 9 frames at 1,000 FPS, and the rest (24) at 1,000,000,000 "FPS"). They are required to run code in the game tick which is not processed until after input events are processed, and thus cannot be reached with queued/subframe inputs alone. Thus, this movie has a runtime of approximately 0.009s.
+	$LF
+]div
+[h4 id=OptimizesForEncodingTime 
+	" "Optimizes for encoding time"?
+	$LF
+]h4
+[div class=p 
+	"Basically, the TAS this somewhat obsoletes is faster. Well, depending on how you measure it. While this TAS is technically only 33 frames long compared to the prior's 290, this TAS actually has 2 more real/render frames- 9 vs 7. So, this TAS is 0.002s slower. However, this movie's encode is roughly 7m13s faster than the previous' as we skip having to travel through the 31 prior levels just to get to 8-4. You could also just consider this a speed/entertainment tradeoff.
+	$LF
+]div
+[h4 id=WhyNow 
+	" Why now?
+	$LF
+]h4
+[div class=p 
+	"Some might say that this submission is a better fit for 
+	(__wikiLink|displaytext=AFD|href=/HomePages/Noxxa/AprilFoolsHistory)
+	" just like the previous submission. And I would understand that sentiment. However I think level editor storage is a really neat glitch that can stand on its own outside of the yearly silly day. Besides, I already have AFD plans and don't want to do the same joke two years in a row.
+	$LF
+]div
+[div class=p 
+	"Oh, and the reason I didn't submit this TAS for AFD 2023 is because libTAS 1.4.5 only just released with the ability to send a window (un)focus event to the game, which as you'll recall is necessary to perform level editor storage.
+	$LF
+]div
+[h3 id=Credits 
+	" Credits
+	$LF
+]h3
+[dl 
+	[dt 
+		"lexikiq
+	]dt
+	[dd 
+		" Pressed the buttons and wrangled the libTAS.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"WilliamFrog
+	]dt
+	[dd 
+		" Suggested the glitch to me and created a TAS of his own using AutoHotKey.
+		$LF
+	]dd
+]dl
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/InfoTeddy 
+		"InfoTeddy
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/InfoTeddy 
+		"InfoTeddy
+	]a
+	": I don't have much to add beyond what 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	" said in the 
+	(__wikiLink|displaytext=previous submission|href=/8188S)
+	". This is quite amusing and made me laugh but unfortunately it wasn't entertaining enough for Alternative according to the forum thread poll. So it will have to go to Playground.
+	$LF
+]div
+[div class=p 
+	"In the interest of not having two submissions named "level editor" I've disambiguated this one by making it "level editor storage".
+	$LF
+]div
+[div class=p 
+	"Note: In order to get this to sync, I needed to uncheck "Prevent writing to disk" in Settings -> Runtime.
+]div

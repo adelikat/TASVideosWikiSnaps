@@ -1,0 +1,553 @@
+17
+[div class=p 
+	"Kero Kero Keroppi 2 is a game released in Japan only. It features a frog who seems to have a really bad day: not only all his friends were kidnapped by some Wizard, but his dream of becoming a singer will never come true as he discovered that his singing skill kills. Literally. Thankfully he realised he can combine both of these problems into a single adventure by defeating Wizard's minions with his bad voice, saving his friends and becoming a local hero.
+	$LF
+]div
+[ul 
+	[li 
+		"Genre: Platform
+		$LF
+	]li
+	[li 
+		"Minor glitch abuse
+		$LF
+	]li
+	[li 
+		"Aims for the fastest time
+		$LF
+	]li
+	[li 
+		"Aims to obsolete 
+		(__wikiLink|displaytext=currently published TAS|href=/2201M)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Made in FCEUX 2.2.3. This movie beats current publication by 2723 frames.
+	$LF
+]div
+[div class=p 
+	"FCEUX was used instead of BizHawk due to much better performance of FCEUX in general and TASeditor in particular. While emulation accuracy is usually the main criteria when choosing an emulator, this game behaves almost the same on both emulators. BizHawk adds 3 lag frames on one of the loading screens and also times movie length on the frame next to the one with last input, while FCEUX counts the last frame the frame with the last input. This allows the run to be portable between emulators so the one with much better performance was chosen.
+	$LF
+]div
+[div class=p 
+	"EZGames69 kindly provided BizHawk version 15 seconds after the movie was submitted. It can be found 
+	[a class=intlink href=/Userfiles/Info/64162581020056144 
+		"here
+	]a
+	".
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#Tricks 
+					" Tricks
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Boosting 
+							" Boosting
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#ImpossibleJumps 
+							" Impossible jumps
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#CardGamesLuck 
+							" Card games luck
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#ImprovementComparison 
+					" Improvement comparison
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#FutureImprovements 
+					" Future improvements
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SpecialThanksAndMentions 
+					" Special thanks and mentions:
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=Tricks 
+	" Tricks
+	$LF
+]h3
+[h4 id=Boosting 
+	" Boosting
+	$LF
+]h4
+[div class=p 
+	"The character starts to accelerate when you press right or left and reaches a peak speed of 1.5 pixels per frames. The game tracks your position in both pixel position and subpixel fraction. There are 3 bytes total: 2 for position and 1 for fraction. When the button is released, the character decelerates and comes to a halt.
+	$LF
+]div
+[div class=p 
+	"The sole reason this TAS was made is the bug with deceleration midair: when move button is released midair, it sometimes causes you to move for a speed of 2 pixels per frame for a short time. In casual play, this results in many frustrating deaths because the game has many small platforms which are hard to land on and it is natural to let go of the button to avoid overshooting... and overshoot only more.
+	$LF
+]div
+[div class=p 
+	"Under TASing condition this is however easily overlooked since in a TAS you usually never let go of movement buttons.
+	$LF
+]div
+[div class=p 
+	"Now, I said that releasing the button _sometimes_ increases your speed. This is where things get funny... or messy, depends on how you look at it. The boost can only happen if the lesser byte of your position has value that is between 0x00 and 0x7F. When jumping and releasing movement button, the subpixel byte gets messed up and is assigned some strange values. Furthermore, the speed has absolutely nothing to do with the boost. You can have the speed of 0.5 pixels per second but move 2 pixel per second anyway. Between the aforementioned values subpixel byte is assigned a value below 0x7F and it then ticks down by 4 every frame. When it underflows, the boost ends.
+	$LF
+]div
+[div class=p 
+	"When the underflow happens, you can tap right for a frame to reset this byte above zero again and keep boosting. When the button is pressed, you move 1 pixel for that frame since 1.5 pixels per second is moving 1-2-1-2 pixels on consecutive frames.
+	$LF
+]div
+[div class=p 
+	"Logically you would want to perform the boost on the earliest frame - the one with 0x00 X byte value. But the subpixel is assigned in some odd way. On my tests, it turned out that starting the boost too early causes the byte to misalign next button presses and the totaly amount of right being pressed will negate the gain of early start since frame with R pressed is at speed of 1. Of course you cannot start way too late too since you want the boost to be long.
+	$LF
+]div
+[div class=p 
+	"The optimal starting frames seems to be around when X byte is 0x20. Since the boost is not set in stone, it is possible to slightly delay or start the boost earlier without losing frames, but that does not always works.
+	$LF
+]div
+[div class=p 
+	"Another thing to mind is that the game is not just about boosting - we still have platforms to jump on. but since the boost is limited to airtime, we want to time the presses in such a way, so that when we can't make the boost for the duration of a single jump, we should time any landings on a frame before we underflow fraction byte and apply right button 2 frames before and a jump button on 1 frame before. That causes us to lose no frames at all.
+	$LF
+]div
+[div class=p 
+	"The same is also possible to do with jumping on enemies, though one must carefully monitor the speed: when it sharply drops, it should be considered as landing and the same technique must be applied.
+	$LF
+]div
+[h4 id=ImpossibleJumps 
+	" Impossible jumps
+	$LF
+]h4
+[div class=p 
+	"Now that we can move a bit faster for a lot of places, certain jumps that would need some waiting for platforms or enemies to jump onto can be made without waiting at all. This saves even more time.
+	$LF
+]div
+[h4 id=CardGamesLuck 
+	" Card games luck
+	$LF
+]h4
+[div class=p 
+	"The card games (which are basically boss stages) are challenges of pure luck during casual play. Of course since we are TASing this is something we can control.
+	$LF
+]div
+[div class=p 
+	"The cards are generated when the level is started and do not change after that. So luck manipulation allows one to change layout of cards but only before the card level is actually reached.
+	$LF
+]div
+[div class=p 
+	"Card games have 4 tasks:
+	$LF
+]div
+[div class=p 
+	"First one requires you to find 5 chicken cards. No luck is involved since the few layouts that are present can be all cleared within minimal time.
+	$LF
+]div
+[div class=p 
+	"Second one is Lucky Seven. You must find pairs of cards that are greater than the pair of cards the opponent finds. If your pair equals seven, you immediately win and get not 1, but 2 points. This is cleared really quick. This is also the only level in the game that is not faster that the current publication, although it is equally fast, not slower.
+	$LF
+]div
+[div class=p 
+	"Third one is Rock-Paper-Scissors game. The cards always flip for fixed amount of flips and this amount increases by one every round. The only thing to manipulate is that if you need to select the lower card to win, it is slower by 2 frames than by selecting upper or middle one.
+	$LF
+]div
+[div class=p 
+	"Fourth and final game is pair matching. You take turns with computer matching pairs. If the pair is matched, the winner keeps matching. Of course we match perfectly and never see the computer playing. This game is managed noticeably better than x2poet's publication due to much better layout with pairs being located right next to each other, allowing me to move the cursor and flip a card within a single frame.
+	$LF
+]div
+[h3 id=ImprovementComparison 
+	" Improvement comparison
+	$LF
+]h3
+[div class=p 
+	"Here is the table that compares my TAS to the current publication, x2poet's TAS. Note that x2poet's publication was done on a different version of emulator and does not syncs naturally due to different loading time in the beginning. About a hundred of empty frames in the beginning however is all it takes to sync. Other than that, I did not noticed any other differences.
+	$LF
+]div
+[div class=p 
+	"The frame numbers represent the first frame after the level end when the screen totally fades to black, except the last level where the ending frame is the one with last input.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"x2poet's TAS
+			]th
+			[th 
+				"dart193
+			]th
+			[th 
+				"Section
+			]th
+			[th 
+				"Total
+			]th
+		]tr
+		[tr 
+			[td 
+				"1-1
+			]td
+			[td 
+				"3232
+			]td
+			[td 
+				"2989
+			]td
+			[td 
+				"-243
+			]td
+			[td 
+				"-243
+			]td
+		]tr
+		[tr 
+			[td 
+				"1-2
+			]td
+			[td 
+				"6127
+			]td
+			[td 
+				"5668
+			]td
+			[td 
+				"-216
+			]td
+			[td 
+				"-459
+			]td
+		]tr
+		[tr 
+			[td 
+				"1-3
+			]td
+			[td 
+				"9023
+			]td
+			[td 
+				"8347
+			]td
+			[td 
+				"-217
+			]td
+			[td 
+				"-676
+			]td
+		]tr
+		[tr 
+			[td 
+				"1-B
+			]td
+			[td 
+				"11490
+			]td
+			[td 
+				"10782
+			]td
+			[td 
+				"-32
+			]td
+			[td 
+				"-708
+			]td
+		]tr
+		[tr 
+			[td 
+				"2-1
+			]td
+			[td 
+				"14397
+			]td
+			[td 
+				"13461
+			]td
+			[td 
+				"-228
+			]td
+			[td 
+				"-936
+			]td
+		]tr
+		[tr 
+			[td 
+				"2-2
+			]td
+			[td 
+				"17292
+			]td
+			[td 
+				"16144
+			]td
+			[td 
+				"-212
+			]td
+			[td 
+				"-1148
+			]td
+		]tr
+		[tr 
+			[td 
+				"2-3
+			]td
+			[td 
+				"20200
+			]td
+			[td 
+				"18823
+			]td
+			[td 
+				"-229
+			]td
+			[td 
+				"-1377
+			]td
+		]tr
+		[tr 
+			[td 
+				"2-B
+			]td
+			[td 
+				"22406
+			]td
+			[td 
+				"21029
+			]td
+			[td 
+				" 0
+			]td
+			[td 
+				"-1377
+			]td
+		]tr
+		[tr 
+			[td 
+				"3-1
+			]td
+			[td 
+				"25313
+			]td
+			[td 
+				"23724
+			]td
+			[td 
+				"-212
+			]td
+			[td 
+				"-1589
+			]td
+		]tr
+		[tr 
+			[td 
+				"3-2
+			]td
+			[td 
+				"28210
+			]td
+			[td 
+				"26419
+			]td
+			[td 
+				"-202
+			]td
+			[td 
+				"-1791
+			]td
+		]tr
+		[tr 
+			[td 
+				"3-3
+			]td
+			[td 
+				"31119
+			]td
+			[td 
+				"29102
+			]td
+			[td 
+				"-226
+			]td
+			[td 
+				"-2017
+			]td
+		]tr
+		[tr 
+			[td 
+				"3-B
+			]td
+			[td 
+				"35845
+			]td
+			[td 
+				"33821
+			]td
+			[td 
+				"-7
+			]td
+			[td 
+				"-2024
+			]td
+		]tr
+		[tr 
+			[td 
+				"4-1
+			]td
+			[td 
+				"38760
+			]td
+			[td 
+				"36500
+			]td
+			[td 
+				"-236
+			]td
+			[td 
+				"-2260
+			]td
+		]tr
+		[tr 
+			[td 
+				"4-2
+			]td
+			[td 
+				"41656
+			]td
+			[td 
+				"39179
+			]td
+			[td 
+				"-217
+			]td
+			[td 
+				"-2477
+			]td
+		]tr
+		[tr 
+			[td 
+				"4-3
+			]td
+			[td 
+				"44667
+			]td
+			[td 
+				"41958
+			]td
+			[td 
+				"-232
+			]td
+			[td 
+				"-2709
+			]td
+		]tr
+		[tr 
+			[td 
+				"4-B
+			]td
+			[td 
+				"45720
+			]td
+			[td 
+				"42997
+			]td
+			[td 
+				"-14
+			]td
+			[td 
+				"-2723
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"I used a small LUA script that helped me to boost at appropriate times for enough frames. It is located in my 
+	[a class=intlink href=/Userfiles/Info/64162014237573211 
+		"user files
+	]a
+	$LF
+]div
+[h3 id=FutureImprovements 
+	" Future improvements
+	$LF
+]h3
+[div class=p 
+	"I was pointed out by Blazephlozard that if subpixels are carefully managed, it is possible to boost earlier and save much more time. He did a playthrough of the first level and managed to save about 45 frames but found the task to be far from trivial. I, on the other hand, was not able so understand what exactly happens there: all my tries steal a frame or two instead of gaining any.
+	$LF
+]div
+[div class=p 
+	"With a lot of free time and a huge patience it is possible to manually improve every level but only with a better understanding of boost mechanics. Furthermore, LUA scripting assistance is needed and even then a careful analysis is needed.
+	$LF
+]div
+[h3 id=SpecialThanksAndMentions 
+	" Special thanks and mentions:
+	$LF
+]h3
+[ul 
+	[li 
+		"Thanks to Spikestuff for temporary encode.
+		$LF
+	]li
+	[li 
+		"Thanks to EZGames69 for BizHawk conversion.
+		$LF
+	]li
+	[li 
+		"Thanks to Blazephlozard for pointing out possible improvements.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": This is the kind of game that appears bland, but actually has a lot going on under the hood regarding its mechanics.
+	$LF
+]div
+[div class=p 
+	"Some new improvements have been found, however this won't be an issue for this movie for two reasons: first, because those were found after that this movie was already submitted, and second, because those improvements didn't prove this submission to be suboptimal anyhow. Additionally, I want to note that this submission aims to improve an already published movie, which was up to date with the known game knowledge available at the time.
+	$LF
+]div
+[div class=p 
+	"The audience response wasn't very enthusiastic, so it's going in Vault like its precedessor. Accepting for obsoleting the 
+	(__wikiLink|displaytext=previous movie|href=/2201M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing. Zinfidel is handling the encodes for this one.
+]div

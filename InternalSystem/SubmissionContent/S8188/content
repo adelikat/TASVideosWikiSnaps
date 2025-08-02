@@ -1,0 +1,256 @@
+21
+[div class=p 
+	"Mari0 is 
+	[em 
+		"Super Mario Bros.
+	]em
+	" but with portals. Using incredibly precise tricks, we are able to press millions of buttons per second to edit every level in the game in less than a hundredth of a second to allow Mario to complete the entire game without so much as a single jump.
+	$LF
+]div
+[div class=p 
+	[em 
+		"This TAS was submitted on April Fools' Day under the "warpless" branch. The branch and some parts of these notes have since been revised to be a little more serious because I think this TAS is fun and it would please me to see it accepted.
+	]em
+	$LF
+]div
+[div class=p 
+	[del 
+		"Obsoletes 
+		[a href=https://youtu.be/89ibtJ_fT5g rel=noopener external nofollow 
+			"[XXXX] Linux Mari0 "warpless" by Masterjun in 12:00.55
+		]a
+		" by 12:00.543 (an improvement of 102,931x) and 
+		(__wikiLink|href=/3998M|implicitdisplaytext=3998M)
+		" by 1:06.926 (an improvement of 9,561x)
+	]del
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS 1.4.4
+		$LF
+	]li
+	[li 
+		" (Incidentally) completes every level in the game
+		$LF
+	]li
+	[li 
+		" Minimizes time spent pressing buttons
+		$LF
+	]li
+	[li 
+		" Secondarily minimizes time spent rescuing peach
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=HowTheHellIsThisMovieLessThanATenthOfASecondLong 
+	" How the hell is this movie less than a tenth of a second long
+	$LF
+]h4
+[div class=p 
+	"Ah, funny you ask. Alright, I'll come clean, there are some frame rate shenanigans afoot. So, Mari0 is written in the LÖVE game framework (v11, specifically), which by default has a maximum frame rate of 1,000 FPS. However, its input handling is not aligned with rendered frames, meaning you can press buttons at near infinitely high speeds per second, so long as you're not trying to accomplish something that first requires a frame to be drawn. For the most part, this TAS does not require frames to be drawn, so we set the frame rate just about as high as we could. Specifically, libTAS accepts any signed 32-bit integer value for the frame rate, but we settled on the largest power of ten that was less than that (1,000,000,000 FPS) to simplify the math of calculating the true length of the TAS. We also make heavy use of the fact that, per TASVideos rules, timing ends on the last button press.
+	$LF
+]div
+[div class=p 
+	"Here is where I should note that perhaps the notation of "FPS" and "frame rate" is a little misleading here... my one billion FPS inputs would probably be better described as "sub-frame inputs" but since libTAS doesn't have such a notation I'll just keep on using the notation that libTAS 
+	[em 
+		"does
+	]em
+	" use.
+	$LF
+]div
+[h4 id=WhatExactlyAreYouDoingWithAllTheseButtonPresses 
+	" What exactly are you doing with all these button presses
+	$LF
+]h4
+[div class=p 
+	"Unfortunately, we're not actually achieving ACE by mashing buttons quickly like 
+	(__wikiLink|href=/4567M|implicitdisplaytext=4567M)
+	". I'm sorry to say we're just 
+	[a class=intlink href=/MovieTagGuidelines#UsesAnInGameCode 
+		"using the game's built-in level editor
+	]a
+	" to turn every level into an auto Mario. But hold on! Optimizing all these levels was actually non-trivial, so just stick with us for a little bit!
+	$LF
+]div
+[h3 id=StageComments 
+	" Stage comments
+	$LF
+]h3
+[div class=p 
+	"Okay, first I should say that this TAS is not 
+	[em 
+		"intentionally
+	]em
+	" a warpless TAS. Our completion of every level is just a byproduct of the fact that it's not possible to get Mario to hold down automatically to enter a warp world pipe tile, nor is there a warp world pipe tile that can be placed on a horizontal pipe (which we could make Mario automatically enter by configuring it similar to the overworld part of underground stages like 1-2). Well, there is actually a glitch we could use in a future TAS, but that's described later. Instead, we settle for just making each individual level completable without any inputs.
+	$LF
+]div
+[h4 id=OverworldStages 
+	" Overworld stages
+	$LF
+]h4
+[div class=p 
+	"For the sake of this submission, "overworld stages" is any stage that ends with a flag pole. One would expect that using the level editor we'd simply place down a new flag pole on top of Mario's spawn and call it a day. And, well, you'd be right! If we were CHUMPS. You think we have the time to sit around and wait for our remaining time to get added to the score?? We don't have all day!!!
+	$LF
+]div
+[div class=p 
+	"So, what's our best option? The only other level clear object of course- an axe! Since the axe skips the countdown animation entirely, all we had to do was place an axe on top of Mario in every lev- oh. So it turns out Mario is like, super vulnerable after he grabs an axe. No problem, we'll just use the flag pole on those levels. It's not like it matters for the TAS time either way- both routes take the same number of frames, we're just talking about a couple seconds difference (for each stage) in the encode here.
+	$LF
+]div
+[h4 id=CastleStages 
+	" Castle stages
+	$LF
+]h4
+[div class=p 
+	"So this is where things get complicated. On my initial pass through the game I incredibly naïvely placed a flag pole in every level assuming Mario would meander his way to the end and discovered the hard way that this would not suffice for castle levels. It turns out the vertical position of the flag is hardcoded, meaning that Mario would spawn in, grab the flag, then slide down it all the way to the bottom inside of a brick wall and softlock there, forever walking but not quite able to reach the invisible castle.
+	$LF
+]div
+[div class=p 
+	"Well, placing a flag in a castle didn't make sense anyway, the obvious answer was to place an axe. Except, it turns out you can only have one axe per stage, and the game loads objects from bottom to top. Unfortunately, in every castle level, an axe is quite inconveniently placed well below Mario's spawning position vertically, so if we tried to spawn Mario on top of a second axe, it just wouldn't spawn. One solution that WilliamFrog proposed was to place down a faith plate which would launch Mario into a second axe that we placed below the first, which actually did work! But he found an even faster solution in ~the intermission zone.~
+	$LF
+]div
+[div class=p 
+	"In looking through obscure game mechanics to squeeze frames out of this horribly slow TAS (a whole tenth of a second?? c'mon), a setting named "Intermission" caught William's eye. In the normal game, this setting is used for certain bonus areas, perhaps most notably in 4-2 which speedrunners skip by loading the subarea through a pipe instead. It turns out that the vine dumps Mario out just below the vertical position of the normal axe in the castle levels, allowing us to place our own without it getting overwritten. It also turns out that this saves a frame over the faith plate strategy due to menuing reasons™. And with this perfect strategy, we could finally move on from the castle le-
+	$LF
+]div
+[h4 id=LavaBubbles 
+	" Lava bubbles
+	$LF
+]h4
+[div class=p 
+	"So, when Mario grabs the axe, he is inside of a wall. The game does not like when you are in walls so it slowly pushes you in the direction opposite the way you're facing. In our case, Mario moves to face right after he grabs the axe, so the game pushes him to the left and back on to the vine, which triggers him to face left, which causes him to now start getting pushed to the right in a frozen grabbing state. In this state, like Mario always is after he grabs the axe, he is totally vulnerable to taking damage. For most castle levels this is no big deal as there's not an enemy in sight threatening to damage Mario.
+	$LF
+]div
+[div class=p 
+	"Except, of course, for the castles with lava bubbles conveniently placed on the exact tile that Mario awkwardly hovers in place on. How convenient. So, the lava bubbles' delay is actually decided by a random number generator which could theoretically be manipulated by changing the system clock before the start of the TAS, however in this case we opted to waste a few real-time seconds instead of going through all that effort. Improvements are welcome in this regard.
+	$LF
+]div
+[div class=p 
+	"Our first alternative idea was to simply place the axe at the same vertical position as Mario but on the horizontal position of the lava bubble. This would have Mario spawn into the level facing left as he dismounts the vine, causing him to get pushed to the right into the axe. Mario would thus start facing to the right which would cause him to start getting pushed to the left at which point he would grab the vine and move to the right in the frozen state described earlier, but now with a couple precious seconds of level loading cut off. This wouldn't completely remove the need to manipulate RNG but it would reduce how much needed to be manipulated.
+	$LF
+]div
+[div class=p 
+	"However, quite a bit after implementing this, I realized that Mario is for whatever reason totally invulnerable to death by falling off the stage after he grabs the axe, and that if we just lowered the axe from the previous description by one tile then he would actually be able to escape the grasp of the angry wall and gracefully fall beneath the stage until the celebratory music finally cut to black. While this is technically a few (fake meaningless real-time) frames slower, I felt the trade-off of not having to do a ton of RNG manipulation for an April Fo-- er, TAS was worth the tradeoff.
+	$LF
+]div
+[h4 id=World8 
+	" World 8
+	$LF
+]h4
+[div class=p 
+	"You might notice that we didn't place any axes in world 8. We avoided doing so because collecting an axe at any part in world 8 spawns peach at the end of the level which just feels wrong. Which is kinda a shame, because IIRC Mario survives the barrage of enemies at the start of 8-2 without taking any damage and it looks sick. Ah well.
+	$LF
+]div
+[h4 id=Stage84 
+	" Stage 8-4
+	$LF
+]h4
+[div class=p 
+	"See previous paragraph for why we didn't spawn an axe in the first room. Instead, we marked the level as a warpzone which triggers the automatic walking normally seen just before all the underground levels. We then placed a castle block in front of Mario, using middle click to pick block one of the ground tiles which IIRC saved a frame over grabbing a tile out of the menu, and then placed a warp tile on it and set it to send Mario to the fourth sublevel- the final fight.
+	$LF
+]div
+[div class=p 
+	"From there we switched over to editing that sublevel to move Mario's spawnpoint onto the real axe. To scroll the screen over, we actually needed to force the game to render for a few frames so we could click on the minimap to pan over to the end of the level, which we accomplished by briefly limiting the frame rate to 1000 FPS. Once all was said and done we saved our changes, returned to the title screen, and used our final input to start our adventure.
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"At the very start of the movie, we keep the game at 1000 FPS for a few frames to get past the intro animation and force level editor to render for a frame before using it to ensure all its variables are properly initialized (as the game would crash otherwise).
+	$LF
+]div
+[div class=p 
+	"For the encode, at the very end of the TAS, we inserted one more "frame" which just resets the frame rate to 60 FPS so that the encode would finish before the heat death of the universe.
+	$LF
+]div
+[div class=p 
+	"With 7 mandatory render frames at 1000 FPS, the minimum duration for this TAS is 0.007s. Adding ~283 non-render frames (not sure if the zeroth frame in libTAS counts?) at 1000000000 FPS gives us a duration of 0.007000283s. If we absolutely maxed out the frame rate, our final duration would've been 0.007000131782144... seconds. This is all assuming I know how to do math correctly, anyway, which I might not, because libTAS embeds a different number in the movie file, and TASvideos displays a totally wrong (overflowed? averaged?) frame rate count, so who really knows.
+	$LF
+]div
+[h3 id=PossibleImprovements 
+	" Possible Improvements
+	$LF
+]h3
+[div class=p 
+	"To start, there's the obvious improvement of increasing the frame rate to libTAS's maximum for a "faster" TAS but I find that quite boring. I'd much rather be able to tell a YouTube commenter the TAS is exactly 0.007000283 seconds long rather than 0.007000131782144... seconds long.
+	$LF
+]div
+[div class=p 
+	[del 
+		"More interestingly, there is a glitch called "level editor storage" that allows you to start the game in any level which is not currently possible in libT-- oh, the feature I needed was 
+		[a href=https://github.com/clementgallet/libTAS/commit/d2e426813a9058c111840cf8df51110d7c871677 rel=noopener external nofollow 
+			"added in February
+		]a
+		" and I didn't notice... well it's not officially released yet so I guess my point still stands. With this glitch, assuming it doesn't require any draw frames (I've not gotten a chance to test yet), it would cut out most of the non-draw frames but none of the draw frames. So, the TAS would be slightly faster, and the encode would be significantly faster as Mario would now only play 8-4.
+	]del
+	" Well, I just tried it out, and unfortunately this route requires two extra draw frames (one to initialize the pause menu and one to load the level editor a second time to cancel the storage), which means that, although a TAS using this strat would certainly be the fastest Princess Peach has ever been rescued in real time, and although the TAS would be 257 input frames faster, it would sadly be nearly 0.002s slower which is truly unacceptable. Well, in a literal sense, it probably would be acceptable as an entertainment/speed trade-off, but I kinda think it's funnier like this? Dunno, feedback from viewers/judges is welcome on that front I suppose :P although again it is worth noting that this alternate route would not currently be publishable as it depends on an as yet unreleased build of libTAS.
+	$LF
+]div
+[div class=p 
+	"Another "improvement" is that the final input that resets the frame rate back to 1000 isn't technically necessary, but, well, it would not actually be possible to finish watching Mario's journey through to the end of 8-4 at a billion frames a second, even with the vast performance upgrades in libTAS development builds, and I can't prove that RNG doesn't change at different frame rates which could cause Mario to gameover in the castle levels (it's been months since I created this TAS, I genuinely forget if this is true but I think it is), so for everyone's sake I think it's best to keep the 1000FPS reset.
+	$LF
+]div
+[div class=p 
+	"Another interpretation of "improvement" is that maybe the TAS should pull a 
+	(__wikiLink|displaytext=brain age|href=/1734M)
+	" and put art/memes/etc in all the levels, but that would probably be a better fit for a separate playaround branch... but then for a playaround branch I'd want to sprinkle in a little bit of the 
+	(__wikiLink|displaytext=four-player TAS|href=/3894M)
+	" and showcase some glitches we couldn't fit in to the other TASs (i.e. wall clips) and maybe finally press button B to play as Steve and... well, maybe next year :)
+	$LF
+]div
+[h3 id=Credits 
+	" Credits
+	$LF
+]h3
+[dl 
+	[dt 
+		"lexikiq
+	]dt
+	[dd 
+		" Pressed the buttons and wrangled the libTAS. Did the basic overworld routing and some of the castle routing.
+		$LF
+		[dt 
+			"WilliamFrog
+		]dt
+		[dd 
+			" Provided a lot of clever routing ideas for the castle levels and suggested the unfortunately unused level editor storage glitch.
+			$LF
+		]dd
+	]dd
+]dl
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": In terms of "winning April Fools Day", something that probably started being discussed two whole months ago because boy howdy am I good at timely judging, I think this has to be my personal winner. There's just something about Mario and insanely technical joke TASes that tickles me in the right way, and I absolutely adore the concept of editing the entirety of a game in a fraction of a fraction of a fraction of a fraction of a frame even if Mario wasn't involved. I think what impresses me the most is that it wasn't just "slap down a flagpole over Mario and call it a day" on every stage, actually making the run strangely compelling to watch. It turned into a guessing game, almost: What levels would use axe finishes and what levels would use flagpole finishes? Tune in to find out!
+	$LF
+]div
+[div class=p 
+	"It's a novel concept and it's optimized far beyond the peak of human comprehension, but all the... everything... in it... pushes it firmly into Playground's pure technical showcase territory.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Haha, oops, whoops, forgot to replace the file with an improvement + fixed annotations. Whoops. Haha. Oops. I am great at my job.
+]div

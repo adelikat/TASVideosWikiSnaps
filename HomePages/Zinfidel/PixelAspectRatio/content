@@ -1,0 +1,1885 @@
+19
+[div class=p 
+	"Notes on pixel aspect ratios of consoles as it applies to encoding videos.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#Definitions 
+					"Definitions
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#RecommendedReading 
+					"Recommended Reading
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ExtraReading 
+					"Extra Reading
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#OutputFormatting 
+					"Output Formatting
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#MaximumFit 
+							"Maximum Fit
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#IntegerScaling 
+							"Integer Scaling
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#ActiveArea 
+							"Active Area
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Examples 
+							"Examples
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#ConsoleData 
+					"Console Data
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Atari2600 
+							"Atari 2600
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#NtscMaximumFitIntegerScaling 
+									" NTSC Maximum Fit / Integer Scaling
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#Commodore64 
+							"Commodore 64
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#PalIntegerScaling 
+									" PAL Integer Scaling
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#Intellivision 
+							"Intellivision
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#MaximumFitIntegerScaling 
+									" Maximum Fit / Integer Scaling
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#Nes 
+							"NES
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#NtscMaximumFit 
+									" NTSC Maximum Fit
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#NtscIntegerScalingActiveArea 
+									" NTSC Integer Scaling / Active Area
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#PalMaximumFit 
+									" PAL Maximum Fit
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#PalIntegerScaling_2 
+									" PAL Integer Scaling
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#PalActiveArea 
+									" PAL Active Area
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#Snes 
+							"SNES
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#NoteOnHiResModes 
+									" A note on "Hi-Res" modes
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Ntsc 
+									" NTSC
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#NtscHiRes 
+									" NTSC Hi-Res
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Pal 
+									" PAL
+									$LF
+								]a
+							]li
+						]ul
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#References 
+					"References
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h2 id=Definitions 
+	"Definitions
+	$LF
+]h2
+[dl 
+	[dt 
+		"Active Area
+	]dt
+	[dd 
+		" The maximum portion of a signal that can actually be used to display dots on a television, whereas the rest of the signal is consumed by operations like resetting the TV's electron guns or generating syncing pulses. Defining a signal's active area requires a number of parameters: number of lines, time spent on each line, number of lines consumed by non-display functions, time for each display line consumed by non-display functions, and finally update frequency. The number of visible lines and (scanline period * update frequency) define the vertical and horizontal resolutions of the active area, respectively. NTSC on a 
+		[a href=https://en.wikipedia.org/wiki/CCIR_System_M rel=noopener external nofollow 
+			"System M
+		]a
+		" television, or PAL on a 
+		[a href=https://en.wikipedia.org/wiki/CCIR_System_B rel=noopener external nofollow 
+			"System B
+		]a
+		" television defines all but frequency for these signals, so generally Rec. 601 is used to define an active area for these signals. For consoles, the active area will use the characteristics of the underlying system the console was designed for (NTSC/PAL), but the console will be using its own update frequency, which affects its horizontal resolution (and PAR).
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"DAR
+	]dt
+	[dd 
+		" 
+		[b 
+			"D
+		]b
+		"isplay 
+		[b 
+			"A
+		]b
+		"spect 
+		[b 
+			"R
+		]b
+		"atio. The width/height ratio of the displayed image on the screen. Note that the DAR of TV sets is 4:3, however the DAR of the output signal can be different - there will just be black letter-/pillar-boxing on the screen where the aspect ratio difference causes blank areas.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Dot
+	]dt
+	[dd 
+		" Section of glowing TV phosphors, as produced by the output hardware's smallest discrete output period. Output hardware may produce one dot per cycle, or one dot per many cycles. The shape of the "dot" is more often rectangular than square, and is determined by how fast the TV's electron gun is moving horizontally and how fast the output hardware is changing its signal. Most calculations on this page regarding dots assumes 
+		[a href=https://en.wikipedia.org/wiki/CCIR_System_M rel=noopener external nofollow 
+			"System M
+		]a
+		"-compliant television sets, which spend 52.148
+		[sup 
+			"[
+			[a id=1 
+			]a
+			[a href=#r1 
+				"1
+			]a
+			"]
+		]sup
+		" microseconds on the 
+		[em 
+			"active
+		]em
+		" portion of a scanline.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Framebuffer
+	]dt
+	[dd 
+		" An array of pixels in a console's memory that represents the image of a game that is to be displayed on the television. This is the image that a console's CPU and GPU construct before being sent to a digital video to analog (DAC) chip that converts the image into a standards-compliant output signal (NTSC/PAL/SECAM) for display on a television. The most important distinctions between the framebuffer and the output signal for the purposes of correcting and encoding video is that the framebuffer is comprised of square pixels whereas the output signal will probably be comprised of non-square dots, and the framebuffer consists only of the "game part" of the resulting image while the full output signal 
+		[em 
+			"might
+		]em
+		" include blank border area where the console does not supply data.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"(Scan)Line
+	]dt
+	[dd 
+		" Horizontal line of dots drawn to the TV screen. The height of these lines is generally fixed with respect to the television set's construction (see 
+		[a href=https://en.wikipedia.org/wiki/CCIR_System_M rel=noopener external nofollow 
+			"System M
+		]a
+		").
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"PAR
+	]dt
+	[dd 
+		" 
+		[b 
+			"P
+		]b
+		"ixel 
+		[b 
+			"A
+		]b
+		"spect 
+		[b 
+			"R
+		]b
+		"atio. The width/height ratio of a dot drawn to a screen. This number is also the number of square pixels needed to approximate one of these dots.
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"Rec. 601 (BT.601)
+	]dt
+	[dd 
+		" Also known as BT.601, Rec. 601 defines a standard for converting analog video into digital video. The standard defines a number of capture lines and and a sampling frequency for both NTSC and PAL to get an active area. For NTSC, the active area is 704 samples over 52.666µs, by 480 lines, with a PAR of 10:11. For PAL, the active area is is 702 samples over 52µs and, by 576 lines, with a PAR of 59:54. These values are actually for the clean-aperture portion of the picture that is important for encoding, see 
+		[a href=https://www.provideocoalition.com/par-for-the-course/ rel=noopener external nofollow 
+			"PAR for the Course
+		]a
+		" for much more detail. 
+		[b 
+			"NOTE:
+		]b
+		" A very important facet of Rec. 601 with regards to encoding videos is that Rec. 601 defines a way of 
+		[em 
+			"capturing analog video for conversion into digital video
+		]em
+		", it does 
+		[b 
+			"not
+		]b
+		" define 
+		[em 
+			"how analog video is displayed or actually looks.
+		]em
+		" It's a one-way process. This distinction is important because a Rec. 601 capture of an SD console's output (via any number of capture devices) will use a certain PAR regardless of the console's actual PAR, and there will be some amount of border around the image since most consoles do not actually output to the full active area, but a Rec. 601 device will still record the entire active area even if there isn't anything there. More about the origin of this standard and details about its values can be read about in 
+		[a href=https://tech.ebu.ch/docs/techreview/trev_304-rec601_wood.pdf rel=noopener external nofollow 
+			"Rec. 601 - The origins of the 4:2:2 DTV Standard
+		]a
+		".
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"SAR
+	]dt
+	[dd 
+		" 
+		[b 
+			"S
+		]b
+		"ource 
+		[b 
+			"A
+		]b
+		"spect 
+		[b 
+			"R
+		]b
+		"atio: The width/height ratio of the internal or original image before it hits the TV. This is often the size of the hardware's framebuffer but not always.
+		$LF
+	]dd
+]dl
+[h2 id=RecommendedReading 
+	"Recommended Reading
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[a href=https://www.provideocoalition.com/par-for-the-course/ rel=noopener external nofollow 
+			"PAR for the Course by Chris and Trish Meyer
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://lurkertech.com/lg/pixelaspect/ rel=noopener external nofollow 
+			"the lurker's guide to video: Square and non-square pixels
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://pineight.com/mw/?title=Dot_clock_rates rel=noopener external nofollow 
+			"Dot Clock Rates by pin eight
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://pineight.com/mw/index.php?title=50_Hz_dot_clock_rates rel=noopener external nofollow 
+			"50hz Dot Clock Rates by pin eight
+		]a
+		$LF
+	]li
+]ul
+[h2 id=ExtraReading 
+	"Extra Reading
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[a href=https://tech.ebu.ch/docs/techreview/trev_304-rec601_wood.pdf rel=noopener external nofollow 
+			"Rec. 601 - The origins of the 4:2:2 DTV Standard
+		]a
+		$LF
+	]li
+]ul
+[h2 id=OutputFormatting 
+	"Output Formatting
+	$LF
+]h2
+[div class=p 
+	"Outside of ensuring that PAR is correct, there is no one "correct" way of formatting output video for an SD console, due to the differences between the part of a console's signal that it is actually outputting an image to, and the huge variability of how televisions can present the signal. Whether there is a border around the resultant image at all, and if so, the size of that border, is determined entirely by if you consider the entire active area of a console's signal as important, if you want a 4:3 DAR for your output to match that of a TV, and whether you consider non-integer scaling of lines (vertical resolution) acceptable. For consoles where it makes sense, multiple options for formatting output are presented to account for the prior decisions, except for the 4:3 DAR output frame, which is assumed for all options.
+	$LF
+]div
+[h3 id=MaximumFit 
+	"Maximum Fit
+	$LF
+]h3
+[div class=p 
+	"This type of scaling simply fits the PAR-corrected output video to one of the 4:3 frame's edges. This is generally just scaling the longer dimension to 4K width or height and keeping the either dimension proportional, then adding black border to the empty space. This generally looks good and fits as much of the actual game into the frame as possible, but can result in non-integer scaling of the vertical dimension. Note that for early PAL consoles, this will usually result in letterboxing, which is actually accurate to TV display for early Japanese PAL consoles. Since the consoles were designed for the shorter NTSC system that could at most do 240 lines, and almost all PAL TVs would generally show at least 260 lines, there would be borders at the top and bottom of the image
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	".
+	$LF
+]div
+[h3 id=IntegerScaling 
+	"Integer Scaling
+	$LF
+]h3
+[div class=p 
+	"This is scaling the PAR-corrected image's vertical dimension to as large an integer-scaling factor as possible that still fits within the target 4:3 frame, which for 4k is 2880x2160. Since scanlines are a defined, quantized parameter of consoles' output, having uneven lines due to uneven scaling can be undesirable. Horizontal resolution, defined by dots, is by contrast a continuous value that will almost always be defined by non-integer values, so it is not as important to preserve integer scaling for the horizontal dimension. This type of scaling can result in wasted space if the original image being scaled does not scale nicely to some size that is near the final frame size. A fringe bonus of this type of scaling is that it 
+	[em 
+		"might
+	]em
+	" represent actual output on a television better than the other methods since most TVs would not be adjusted to fit every image perfectly, or show the entire active area (impossible for most consumer sets).
+	$LF
+]div
+[h3 id=ActiveArea 
+	"Active Area
+	$LF
+]h3
+[div class=p 
+	"This format amounts to padding the PAR-corrected framebuffer image out to the console's active area, then scaling. Consoles' active area will be a 4:3 frame that scales nicely to the target resolution, but may or may not maintain integer scaling of the vertical dimension, and will almost certainly result in a lot of wasted space. This is not a realistic output mode as no consumer television would have been adjustable to show this much of the signal.
+	$LF
+]div
+[h3 id=Examples 
+	"Examples
+	$LF
+]h3
+[div class=p 
+	"Note that these are 
+	[b 
+		"simulated
+	]b
+	" images designed only to show off the relative proportions of the image to the frame.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" 
+			]th
+			[th 
+				"Maximum Fit
+			]th
+			[th 
+				"Integer Scaling
+			]th
+			[th 
+				"Active Area
+			]th
+		]tr
+		[tr 
+			[th 
+				"NTSC
+			]th
+			[th 
+				[img class=embed mw-100 src=https://i.imgur.com/nU6tcxk.png 
+				]img
+			]th
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/Tcu7z4H.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/Tcu7z4H.png 
+				]img
+			]td
+		]tr
+		[tr 
+			[th 
+				"PAL 
+			]th
+			[th 
+				[img class=embed mw-100 src=https://i.imgur.com/7mkT2vx.png 
+				]img
+			]th
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/GSlS8LQ.png 
+				]img
+			]td
+			[td 
+				[img class=embed mw-100 src=https://i.imgur.com/w4bAWfl.png 
+				]img
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=ConsoleData 
+	"Console Data
+	$LF
+]h2
+[div class=p 
+	"Output formatting instructions for each console are designed assuming the TASVideos official publishing script workflow. This means specifically for these instructions that the video is scaled to a 4:3 aspect ratio as a final step in processing. The steps presented here will modify a video dump from a specified emulator such that scaling to a 4:3 aspect ratio at the end will yield the correct PAR.
+	$LF
+]div
+[h3 id=Atari2600 
+	"Atari 2600
+	$LF
+]h3
+[ul 
+	[li 
+		" NTSC
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: 160x224
+				$LF
+			]li
+			[li 
+				" Framebuffer size: 160x192 
+				[sup 
+					"[
+					[a id=9 
+					]a
+					[a href=#r9 
+						"9
+					]a
+					"]
+				]sup
+				[sup 
+					"[
+					[a id=10 
+					]a
+					[a href=#r10 
+						"10
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Output signal: 160 dots horizontal, 192 lines 
+				[sup 
+					"[
+					[a id=9 
+					]a
+					[a href=#r9 
+						"9
+					]a
+					"]
+				]sup
+				[sup 
+					"[
+					[a id=10 
+					]a
+					[a href=#r10 
+						"10
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" PAR: 12:7 = 1.71 (3.58MHz) 
+				[sup 
+					"[
+					[a id=1 
+					]a
+					[a href=#r1 
+						"1
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Corrected framebuffer: 274.29x192
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" PAL
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: ???
+				$LF
+			]li
+			[li 
+				" Framebuffer size: 160x228 
+				[sup 
+					"[
+					[a id=9 
+					]a
+					[a href=#r9 
+						"9
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" PAR: 83/50 = 1.66 (7.375MHz
+				[sup 
+					"[
+					[a id=7 
+					]a
+					[a href=#r7 
+						"7
+					]a
+					"]
+				]sup
+				" / 4.43MHz
+				[sup 
+					"[
+					[a id=11 
+					]a
+					[a href=#r11 
+						"11
+					]a
+					"]
+				]sup
+				")
+				$LF
+			]li
+			[li 
+				" Corrected framebuffer: 266.24x228
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 id=NtscMaximumFitIntegerScaling 
+	" NTSC Maximum Fit / Integer Scaling
+	$LF
+]h4
+[pre 
+	"AviSource("seaquest.avi")
+	$LF
+	"Crop(0, 4, 0, -4)
+	$LF
+	"AddBorders(4, 0, 4, 0)
+	$LF
+]pre
+[div class=p 
+	"The 2600 does not actually have a fixed vertical resolution, and will display as many lines as the programmer tells it to display
+	[sup 
+		"[
+		[a id=10 
+		]a
+		[a href=#r10 
+			"10
+		]a
+		"]
+	]sup
+	". However, a common number of lines used is 192 since they will all reside in the "safe" area of an NTSC television, and so that figure will be assumed. Crop 4 pixels of border from left and right, add 4 pixels of border to top and bottom for 168x216 resolution. Correcting this resolution for PAR yields exactly 288x216 pixels, which has a DAR of 4:3 and is conveniently exactly 1/10th of the 4k resolution 2880x2160. When the script stretches the source video to 4:3, 12:7 PAR will be achieved. Note that borders for 2600 games vary quite a bit and there may be border on only one side of the frame, or several sides. The amount of cropping on the top/bottom and the amount of padding on the left/right sides can be moved around, as the borders basically represent an amount of overscan allowance or picture centering.
+	$LF
+]div
+[h3 id=Commodore64 
+	"Commodore 64
+	$LF
+]h3
+[ul 
+	[li 
+		" Framebuffer size: 320x200
+		$LF
+	]li
+	[li 
+		" NTSC
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" PAL-B
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: 504x312 (full borders)
+				$LF
+			]li
+			[li 
+				" Output signal: 402 dots horizontal, 292 lines 
+				[sup 
+					"[
+					[a id=5 
+					]a
+					[a href=#r5 
+						"5
+					]a
+					"]
+				]sup
+				[sup 
+					"[
+					[a id=6 
+					]a
+					[a href=#r6 
+						"6
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Borders (given above signal): (46, 43, 36, 49) 
+				[sup 
+					"[
+					[a id=5 
+					]a
+					[a href=#r5 
+						"5
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" PAR: 7375:7882 = 0.936 (7.882MHz) 
+				[sup 
+					"[
+					[a id=5 
+					]a
+					[a href=#r5 
+						"5
+					]a
+					"]
+				]sup
+				[sup 
+					"[
+					[a id=7 
+					]a
+					[a href=#r7 
+						"7
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Corrected Framebuffer: 299.42 x 200 pixels
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 id=PalIntegerScaling 
+	" PAL Integer Scaling
+	$LF
+]h4
+[pre 
+	"AviSource("astro.avi")
+	$LF
+	"crop(112, 18, -8, -24) # For a *full borders* dump
+	$LF
+]pre
+[div class=p 
+	"The borders in the signal are not generated by the C64 - the listed border size is the maximum possible displayable border given the output characteristics, thus any amount of border around the framebuffer is technically correct. Nevertheless, this crop attempts to retain their relative proportions. The method used to derive these numbers assumes a 4K target resolution but that's just for convenience. To prepare our image, we cut the full border image down to the 402x292, using the border sizes listed.
+	$LF
+]div
+[div class=p 
+	"2880/PAR = 3077.98 pixels, so we want to scale an image such that it gets very close to this size before applying PAR. Integer scaling our image by 8x yields 402 * 8 = 3216, so we're off by 3216 - 3077.98 = 138.01 pixels. Converting back to the original size, we have 138.01 / 8 = 17.25 pixels to remove from the sides. To preserve the proportions of the borders, we remove 17.25 * (46 / (46 + 36) ) = 10 pixels from the left, and 17.25 - 10 = 7.25 pixels from the right, however, that leaves us with a non mod 2 size which can mess up AviSynth, so instead we take off 8 pixels from the right side.
+	$LF
+]div
+[div class=p 
+	"2160/8 = 270, so that is our target number of lines to keep. 292 - 270 = 22 lines to remove. We proportion the borders the same way as we did horizontally. We remove 22 * (43 / (43 + 49) ) = 10 pixels from the top, and 22 - 10 = 12 pixels from the bottom.
+	$LF
+]div
+[div class=p 
+	"The resulting image is 384x270. Scaled 8x (or scaling vertical resolution to 2160, equivalently), we get 3072x2160. Correcting for PAR gives 2874x2160, with the corrected framebuffer occupying ~2395x1600 pixels. The encode script will expand 384x270 to 2880x2160, which gives us 6 pixels (0.2%) error in horizontal scaling. 
+	$LF
+]div
+[h3 id=Intellivision 
+	"Intellivision
+	$LF
+]h3
+[ul 
+	[li 
+		" BizHawk output: 176x208 pixels
+		$LF
+	]li
+	[li 
+		" Framebuffer size: 159x96
+		[sup 
+			"[
+			[a id=2 
+			]a
+			[a href=#r2 
+				"2
+			]a
+			"]
+		]sup
+		" but practically 159x192
+		[sup 
+			"[
+			[a id=3 
+			]a
+			[a href=#r3 
+				"3
+			]a
+			"]
+		]sup
+		$LF
+	]li
+	[li 
+		" Output signal: 160 dots horizontal, 192 lines 
+		[sup 
+			"[
+			[a id=2 
+			]a
+			[a href=#r2 
+				"2
+			]a
+			"]
+		]sup
+		[sup 
+			"[
+			[a id=3 
+			]a
+			[a href=#r3 
+				"3
+			]a
+			"]
+		]sup
+		$LF
+	]li
+	[li 
+		" PAR: 12:7 = 1.71 (3.58MHz) 
+		[sup 
+			"[
+			[a id=1 
+			]a
+			[a href=#r1 
+				"1
+			]a
+			"]
+		]sup
+		$LF
+	]li
+	[li 
+		" Corrected Framebuffer: 274.26 x 192 pixels
+		$LF
+	]li
+]ul
+[h4 id=MaximumFitIntegerScaling 
+	" Maximum Fit / Integer Scaling
+	$LF
+]h4
+[pre 
+	"AviSource("tower.avi")
+	$LF
+	"crop(4,0,-4,0)
+	$LF
+	"horizBorder = last.crop(0,0,last.width, 4)
+	$LF
+	"last = stackvertical(stackvertical(horizBorder, last), horizBorder)
+	$LF
+]pre
+[div class=p 
+	"Intellivision is handled nearly identically to how the Atari 2600 is (they have very similar hardware). Crop 4 pixels of border from left and right, add 4 pixels of border to top and bottom for 168x216 resolution. Correcting this resolution for PAR yields exactly 288x216 pixels, which has a DAR of 4:3 and is conveniently exactly 1/10th of the 4k resolution 2880x2160. When the script stretches the source video to 4:3, 12:7 PAR will be achieved. A note on the borders: BizHawk output contains 8 pixels of border on each side of the image. The Intellivision does not actually output a border - the borders from BizHawk are there as allowance for internal framebuffer space the core uses to hold sprites
+	[sup 
+		"[
+		[a id=4 
+		]a
+		[a href=#r4 
+			"4
+		]a
+		"]
+	]sup
+	", so the actual relative sizes of borders on a TV would vary based on the TV's tuning. The Intellivision however can set the color of the unused portion on the screen, so line doubling needs to be used for adding the vertical border to the source.
+	$LF
+]div
+[h3 id=Nes 
+	"NES
+	$LF
+]h3
+[ul 
+	[li 
+		" NTSC
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: 256x224 pixels with standard cropping applied, 256x240 otherwise
+				$LF
+			]li
+			[li 
+				" Framebuffer size: 256x240 pixels 
+				[sup 
+					"[
+					[a id=8 
+					]a
+					[a href=#r8 
+						"8
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Output signal: 280 dots horizontal, 240 lines 
+				[sup 
+					"[
+					[a id=8 
+					]a
+					[a href=#r8 
+						"8
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" PAR: 8:7 = 1.143 (5.37MHz) 
+				[sup 
+					"[
+					[a id=1 
+					]a
+					[a href=#r1 
+						"1
+					]a
+					"]
+				]sup
+				[sup 
+					"[
+					[a id=8 
+					]a
+					[a href=#r8 
+						"8
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Corrected Framebuffer: 292.57 x 224/240 pixels
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" PAL
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: 256x240 pixels
+				$LF
+			]li
+			[li 
+				" Framebuffer size: 256x240 pixels 
+				[sup 
+					"[
+					[a id=8 
+					]a
+					[a href=#r8 
+						"8
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Output signal: 277 dots horizontal, 288 lines 
+				[sup 
+					"[
+					[a id=8 
+					]a
+					[a href=#r8 
+						"8
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" PAR: 7375000:5320342.5 = 1.3862 (4.43MHz) 
+				[sup 
+					"[
+					[a id=7 
+					]a
+					[a href=#r7 
+						"7
+					]a
+					"]
+				]sup
+				[sup 
+					"[
+					[a id=8 
+					]a
+					[a href=#r8 
+						"8
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Corrected Framebuffer: 354.87 x 240 pixels
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 id=NtscMaximumFit 
+	" NTSC Maximum Fit
+	$LF
+]h4
+[pre 
+	"AviSource("mario.avi")
+	$LF
+	"AddBorders(3, 0, 2, 0)
+	$LF
+]pre
+[div class=p 
+	"This formatting is noteworthy for NTSC NES because just scaling the footage directly to a 4:3 DAR gets very, very close to accurate PAR. Note that this scaling assumes that the captured video is 256x224 pixels, not 256x240 pixels. We see that the corrected framebuffer is 292.57 pixels wide. Multiplying 224 by 4/3 we get 298.67 dots, a difference of 6.097 dots. Converting back to pixels by multiplying by (7/8), we get 5.33 pixels. The NES outputs an image that is 1.5 pixels shifted to the right
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	", so the border is 1 pixel thicker on the left.
+	$LF
+]div
+[h4 id=NtscIntegerScalingActiveArea 
+	" NTSC Integer Scaling / Active Area
+	$LF
+]h4
+[pre 
+	"AviSource("mario.avi")
+	$LF
+	"AddBorders(12, 8, 12, 8)
+	$LF
+]pre
+[div class=p 
+	"NOTE: Coincidentally, for NTSC NES, both integer scaling and active area formats are identical. There is also an important caveat for these formats: the NTSC NES actually outputs 240 lines
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	", but BizHawk (and other emulators) will only output 224 of these lines by default. This is because TVs of the era would uniformly be unable to display more than 224 of these lines. For this reason, floating a 256x224 frame in borders may be inaccurate since there are actually 240 lines, though the 16 lines not shown may have garbage in them.
+	$LF
+]div
+[div class=p 
+	"We know from the maximum fit derivation that the output image will be constrained by height. Dividing our target resolution of 2160 by 224, we get 9.6, so our scale factor is 9x. Corrected width then becomes 256 * (8/7) * 9 = 2633.14 dots, and scaled height becomes 224 * 9 = 2016 pixels. Our width difference is 2880 - 2633.14 = 247 dots, and our height difference is 2160 - 2016 = 144 pixels. Scaling back to native to get borders, we have for width (247 * (7/8)) / 9 = 24 pixels, and for height we have 144 / 9 = 16 pixels.
+	$LF
+]div
+[div class=p 
+	"The active area derivation is simply to set the width and height to 280x240 (the NES's active area) and scale to 4:3.
+	$LF
+]div
+[h4 id=PalMaximumFit 
+	" PAL Maximum Fit
+	$LF
+]h4
+[pre 
+	"AviSource("mario.avi")
+	$LF
+	"AddBorders(0, 13, 0, 13)
+	$LF
+]pre
+[div class=p 
+	"Dividing our target resolution by the corrected framebuffer width, we have 2880 / (256 * 1.3862) = 8.116 scale factor. Scaling height we get 240 * 8.116 = 1947.8. Finding our height difference and scaling back to native scale, we have (2160 - 1947.84) / 8.116 = 26.15 pixels. 
+	$LF
+]div
+[h4 id=PalIntegerScaling_2 
+	" PAL Integer Scaling
+	$LF
+]h4
+[pre 
+	"AviSource("mario.avi")
+	$LF
+	"AddBorders(2, 15, 2, 15)
+	$LF
+]pre
+[div class=p 
+	"Determine our scaling factor assuming width defines it by 2880 / (256 * 1.3862) = 8.115, so an 8x scale factor. Find width and height differences by 2880 - (256 * 1.3862 * 8) = 41 dots, and 2160 - (240 * 8) = 240 pixels. Converting our differences back to native scale, we have (41 / 8) / 1.3862 = 3.7 pixels, and 240 / 8 = 30 pixels.
+	$LF
+]div
+[h4 id=PalActiveArea 
+	" PAL Active Area
+	$LF
+]h4
+[pre 
+	"AviSource("mario.avi")
+	$LF
+	"AddBorders(11, 24, 10, 24)
+	$LF
+]pre
+[div class=p 
+	"Add borders to the image to get a 277x288 pixel resolution per the active area of a PAL NES
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	", favoring the left side since the NES places the image 1.5 pixels right of center
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	", then scale to 4:3. Note that PAL TVs would draw at least 260 lines (20 before and 20 after the NES image)
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	", so this output format may actually be closest to representing the top and bottom borders accurately for a PAL system.
+	$LF
+]div
+[h3 id=Snes 
+	"SNES
+	$LF
+]h3
+[ul 
+	[li 
+		"NTSC / PAL
+		$LF
+		[ul 
+			[li 
+				" Same as 
+				(__wikiLink|displaytext=NES|href=/HomePages/Zinfidel/PixelAspectRatio#Nes)
+				".
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"NTSC Hi-Res
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: (1) 256x448, (2) 512x224, (3) 512x448 pixels
+				$LF
+			]li
+			[li 
+				" Framebuffer size: (1) 256x448, (2) 512x224, (3) 512x448 pixels 
+				[sup 
+					"[
+					[a id=12 
+					]a
+					[a href=#r12 
+						"12
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Output signal
+				$LF
+				[ol 
+					[li 
+						" 280 dots horizontal, 480 lines 
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 560 dots horizontal, 240 lines 
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=12 
+							]a
+							[a href=#r12 
+								"12
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 560 dots horizontal, 480 lines 
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=12 
+							]a
+							[a href=#r12 
+								"12
+							]a
+							"]
+						]sup
+						$LF
+					]li
+				]ol
+			]li
+			[li 
+				" PAR
+				$LF
+				[ol 
+					[li 
+						" 16:7 = 1.143 (5.37MHz interlaced) 
+						[sup 
+							"[
+							[a id=1 
+							]a
+							[a href=#r1 
+								"1
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 4:7 = 0.571 (10.74MHz) 
+						[sup 
+							"[
+							[a id=1 
+							]a
+							[a href=#r1 
+								"1
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 8:7 = 1.143 (10.74MHz interlaced) 
+						[sup 
+							"[
+							[a id=1 
+							]a
+							[a href=#r1 
+								"1
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						$LF
+					]li
+				]ol
+			]li
+			[li 
+				" Corrected Framebuffer:
+				$LF
+				[ol 
+					[li 
+						" 585.14 x 448 pixels
+						$LF
+					]li
+					[li 
+						" 292.57 x 224 pixels
+						[sup 
+							"†
+						]sup
+						$LF
+					]li
+					[li 
+						" 585.14 x 448 pixels
+						$LF
+					]li
+				]ol
+			]li
+		]ul
+	]li
+	[li 
+		"PAL Hi-Res
+		$LF
+		[ul 
+			[li 
+				" BizHawk output: ??
+				$LF
+			]li
+			[li 
+				" Framebuffer size: (1) 256x480, (2) 512x240, (3) 512x480 pixels 
+				[sup 
+					"[
+					[a id=12 
+					]a
+					[a href=#r12 
+						"12
+					]a
+					"]
+				]sup
+				$LF
+			]li
+			[li 
+				" Output signal
+				$LF
+				[ol 
+					[li 
+						" 277 dots horizontal, 576 lines 
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 554 dots horizontal, 288 lines 
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=12 
+							]a
+							[a href=#r12 
+								"12
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 554 dots horizontal, 576 lines 
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=12 
+							]a
+							[a href=#r12 
+								"12
+							]a
+							"]
+						]sup
+						$LF
+					]li
+				]ol
+			]li
+			[li 
+				" PAR
+				$LF
+				[ol 
+					[li 
+						" 14750000:5320342.5 = 2.7724 (4.43MHz interlaced) 
+						[sup 
+							"[
+							[a id=7 
+							]a
+							[a href=#r7 
+								"7
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 3687500:5320342.5 = 0.6931 (2.22MHz) 
+						[sup 
+							"[
+							[a id=7 
+							]a
+							[a href=#r7 
+								"7
+							]a
+							"]
+						]sup
+						$LF
+					]li
+					[li 
+						" 7375000:5320342.5 = 1.3862 (4.43MHz interlaced) 
+						[sup 
+							"[
+							[a id=7 
+							]a
+							[a href=#r7 
+								"7
+							]a
+							"]
+						]sup
+						[sup 
+							"[
+							[a id=8 
+							]a
+							[a href=#r8 
+								"8
+							]a
+							"]
+						]sup
+						$LF
+					]li
+				]ol
+			]li
+			[li 
+				" Corrected Framebuffer:
+				$LF
+				[ol 
+					[li 
+						" 709.73 x 480 pixels
+						$LF
+					]li
+					[li 
+						" 354.87 x 240 pixels
+						[sup 
+							"†
+						]sup
+						$LF
+					]li
+					[li 
+						" 709.73 x 480 pixels
+						$LF
+					]li
+				]ol
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"†: These framebuffers need to be at least doubled prior to correcting for PAR in order to preserve high-definition detail.
+	$LF
+]div
+[h4 id=NoteOnHiResModes 
+	" A note on "Hi-Res" modes
+	$LF
+]h4
+[div class=p 
+	"The SNES's Hi-Res Mode 5 and Mode 6 achieve a higher resolution by setting bits in the SETINI register.
+	[sup 
+		"[
+		[a id=12 
+		]a
+		[a href=#r12 
+			"12
+		]a
+		"]
+	]sup
+	" Both modes set the pseudo-hires mode bit which makes the SNES use a 512 pixel-wide resolution. The screen interlace bit can also be set in these modes, which will increase the vertical resolution to 448 (or 477 for PAL) pixels/lines.
+	[sup 
+		"[
+		[a id=13 
+		]a
+		[a href=#r13 
+			"13
+		]a
+		"]
+	]sup
+	" Games can also set the interlace bit without using Mode 5 or 6 (resolution 1), and while this is not technically a "hi-res" mode, it is included here and treated like one. The only game I've seen that uses this resolution is 
+	[em 
+		"Top Gear 2
+	]em
+	", which uses it for its ending credit sequence.
+	$LF
+]div
+[h4 id=Ntsc 
+	" NTSC
+	$LF
+]h4
+[div class=p 
+	"Same as 
+	(__wikiLink|displaytext=NES|href=/HomePages/Zinfidel/PixelAspectRatio#Nes)
+	".
+	$LF
+]div
+[h4 id=NtscHiRes 
+	" NTSC Hi-Res
+	$LF
+]h4
+[div class=p 
+	[b 
+		"Maximum Fit
+	]b
+	[br 
+	]br
+	$LF
+]div
+[pre 
+	"# Resolutions 1/2/3
+	$LF
+	"AviSource("secretofmana.avi")
+	$LF
+	"AddBorders(6, 0, 5, 0)
+	$LF
+]pre
+[div class=p 
+	"We see that the corrected framebuffer is 585.14 pixels wide. Multiplying 448 by 4/3 we get 597.33 dots, a difference of 12.19 dots. Converting back to pixels by multiplying by (7/8), we get 10.67 pixels. The NES outputs an image that is 1.5 pixels shifted to the right
+	[sup 
+		"[
+		[a id=8 
+		]a
+		[a href=#r8 
+			"8
+		]a
+		"]
+	]sup
+	", so the border is 1 pixel thicker on the left.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Integer Scaling
+	]b
+	[br 
+	]br
+	$LF
+]div
+[pre 
+	"# Resolutions 1/3
+	$LF
+	"AviSource("secretofmana.avi")
+	$LF
+	"AddBorders(59, 46, 59, 46)
+	$LF
+]pre
+[div class=p 
+	"We know from the maximum fit derivation that the output image will be constrained by height. Dividing our target resolution of 2160 by 448, we get 4.8, so our scale factor is 4x. Corrected width then becomes 512 * (8/7) * 4 = 2340.57 dots, and scaled height becomes 448 * 4 = 1792 pixels. Our width difference is 2880 - 2340.57 = 539.43 dots, and our height difference is 2160 - 1792 = 368 pixels. Scaling back to native to get borders, we have for width (539.43 * (7/8)) / 4 = 118 pixels, and for height we have 368 / 4 = 92 pixels.
+	$LF
+]div
+[pre 
+	"# Resolution 2
+	$LF
+	"AviSource("secretofmana.avi")
+	$LF
+	"AddBorders(12, 8, 12, 8)
+	$LF
+]pre
+[div class=p 
+	"We know from the maximum fit derivation that the output image will be constrained by height. Dividing our target resolution of 2160 by 224, we get 9.6, so our scale factor is 9x. Corrected width then becomes 512 * (4/7) * 9 = 2633.14 dots, and scaled height becomes 224 * 9 = 2016 pixels. Our width difference is 2880 - 2633.14 = 246.86 dots, and our height difference is 2160 - 2016 = 144 pixels. Scaling back to native to get borders, we have for width (246.86 * (7/8)) / 9 = 24 pixels, and for height we have 144 / 4 = 16 pixels.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Active Area
+	]b
+	[br 
+	]br
+	$LF
+]div
+[pre 
+	"# Resolution 1
+	$LF
+	"AviSource("secretofmana.avi")
+	$LF
+	"AddBorders(12, 16, 12, 16)
+	$LF
+]pre
+[div class=p 
+	"Active area width is 280 pixels by 480 lines. Stretching to 4:3 achieves a correct PAR.
+	$LF
+]div
+[pre 
+	"# Resolutions 2/3
+	$LF
+	"AviSource("secretofmana.avi")
+	$LF
+	"AddBorders(24, 16, 24, 16)
+	$LF
+]pre
+[div class=p 
+	"Active area width is 10.74Mhz * 52.148μs ~= 560 pixels
+	[sup 
+		"[
+		[a id=1 
+		]a
+		[a href=#r1 
+			"1
+		]a
+		"]
+	]sup
+	", by 480 lines. Stretching to 4:3 achieves a correct PAR.
+	$LF
+]div
+[h4 id=Pal 
+	" PAL
+	$LF
+]h4
+[div class=p 
+	"Same as 
+	(__wikiLink|displaytext=NES|href=/HomePages/Zinfidel/PixelAspectRatio#Nes)
+	".
+	$LF
+]div
+[h2 id=References 
+	"References
+	$LF
+]h2
+[div class=p 
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://pineight.com/mw/?title=Dot_clock_rates rel=noopener external nofollow 
+		"https://pineight.com/mw/?title=Dot_clock_rates
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://console5.com/techwiki/images/a/ad/AY-3-8900.pdf rel=noopener external nofollow 
+		"https://console5.com/techwiki/images/a/ad/AY-3-8900.pdf
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://atariage.com/forums/topic/240543-what-can-an-intellivision-do/?tab=comments#comment-3278143 rel=noopener external nofollow 
+		"https://atariage.com/forums/topic/240543-what-can-an-intellivision-do/?tab=comments#comment-3278143
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://github.com/TASEmulators/BizHawk/issues/2670 rel=noopener external nofollow 
+		"https://github.com/TASEmulators/BizHawk/issues/2670
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	" 
+	[a href=http://hitmen.c02.at/temp/palstuff/ rel=noopener external nofollow 
+		"http://hitmen.c02.at/temp/palstuff
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r6 
+	]a
+	[sup 
+		"[
+		[a href=#6 
+			"6
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://retrocomputing.stackexchange.com/questions/7128/visible-resolution-of-c64-video-output-including-borders rel=noopener external nofollow 
+		"https://retrocomputing.stackexchange.com/questions/7128/visible-resolution-of-c64-video-output-including-borders
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r7 
+	]a
+	[sup 
+		"[
+		[a href=#7 
+			"7
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://pineight.com/mw/index.php?title=50_Hz_dot_clock_rates rel=noopener external nofollow 
+		"https://pineight.com/mw/index.php?title=50_Hz_dot_clock_rates
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r8 
+	]a
+	[sup 
+		"[
+		[a href=#8 
+			"8
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://wiki.nesdev.com/w/index.php/Overscan rel=noopener external nofollow 
+		"https://wiki.nesdev.com/w/index.php/Overscan
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r9 
+	]a
+	[sup 
+		"[
+		[a href=#9 
+			"9
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://problemkaputt.de/2k6specs.htm rel=noopener external nofollow 
+		"https://problemkaputt.de/2k6specs.htm
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r10 
+	]a
+	[sup 
+		"[
+		[a href=#10 
+			"10
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://atariage.com/forums/topic/169128-what-is-the-atari-2600-screen-resolution/ rel=noopener external nofollow 
+		"https://atariage.com/forums/topic/169128-what-is-the-atari-2600-screen-resolution
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r11 
+	]a
+	[sup 
+		"[
+		[a href=#11 
+			"11
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://dustlayer.com/c64-architecture/2013/5/7/hardware-basics-part-1-tick-tock-know-your-clock rel=noopener external nofollow 
+		"https://dustlayer.com/c64-architecture/2013/5/7/hardware-basics-part-1-tick-tock-know-your-clock
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r12 
+	]a
+	[sup 
+		"[
+		[a href=#12 
+			"12
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://wiki.superfamicom.org/registers#setini-screen-modevideo-select-638 rel=noopener external nofollow 
+		"https://wiki.superfamicom.org/registers#setini-screen-modevideo-select-638
+	]a
+	$LF
+	[br 
+	]br
+	[a id=r13 
+	]a
+	[sup 
+		"[
+		[a href=#13 
+			"13
+		]a
+		"]
+	]sup
+	" 
+	[a href=https://wiki.superfamicom.org/backgrounds#mode-5-216 rel=noopener external nofollow 
+		"https://wiki.superfamicom.org/backgrounds#mode-5-216
+	]a
+]div

@@ -1,0 +1,238 @@
+7
+[div class=p 
+	"Look at me here again, destroying Super Mario World once again :)
+	$LF
+]div
+[div class=p 
+	(youtube|v=-XjKSpYruSw)
+	$LF
+]div
+[h3 id=GameObjectives 
+	[b 
+		"Game Objectives ⭐
+		$LF
+	]b
+]h3
+[ul 
+	[li 
+		"Emulator used: BizHawk 2.9.1
+		$LF
+	]li
+	[li 
+		"Allow Left+Right / Up+Down
+		$LF
+	]li
+	[li 
+		"Core subBSNESv115+
+		$LF
+	]li
+	[li 
+		"Abuses programming errors
+		$LF
+	]li
+	[li 
+		"Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		"Corrupts memory
+		$LF
+	]li
+	[li 
+		"Take hit and use death to show funny things
+		$LF
+	]li
+]ul
+[h3 id=AboutTheRun 
+	[b 
+		"About The Run ⭐
+		$LF
+	]b
+]h3
+[div class=p 
+	"This TAS is a glitchfest that uses arbitrary code execution. I don't know which branch would be better between "glitchfest" or "arbitrary code execution", so I chose the second one, taking into consideration that this is not a "normal" glitchfest. The ideal would be "glitchfest with arbitrary code execution", but it's a bit long.
+	$LF
+]div
+[div class=p 
+	"The process until writing the code is the same as Masterjun. It's all explained 
+	(__wikiLink|displaytext=here|href=/4315S)
+	". I just did some cool stuff before writing the code instead of going straight to eating the chuck :)
+	$LF
+]div
+[h3 id=AboutTheCode 
+	[b 
+		"About The Code ⭐
+		$LF
+	]b
+]h3
+[div class=p 
+	"Briefly, I wrote code in the game's subroutine ($7F8000) that allowed me, through controls 1 and 5, to change some addresses in the game's memory whenever I wanted. The code is as follows:
+	$LF
+]div
+[pre 
+	"Pressing L on controller 1 = increments slot 7 sprite ID ($A5)
+	$LF
+	"Pressing R on controller 1 = increments slot 6 sprite ID ($A6)
+	$LF
+	"Pressing L on controller 5 = increments the item box ($0DC2)
+	$LF
+	"Pressing R on controller 5 = changes Mario's powerup ($19)
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Note: The code was written to use control 2, however, BizHawk 2.9.1 has 8 controls and, I believe, for this reason the buttons ended up being on control 5.
+	]b
+	$LF
+]div
+[div class=p 
+	[b 
+		"Note 2: I was unable to use the L/R of controller 5 with Luigi to change the powerup and item box because, I believe, there was a conflict since controller 5 is used to control Luigi. Therefore, playing with Luigi, I could only increase slots 6 and 7 and I was unable to use the benefits of having all the powerups and items in the item box.
+	]b
+	$LF
+]div
+[div class=p 
+	"The code is this:
+	$LF
+]div
+[pre 
+	[code class=language-asm6502 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Now the code in hexadecimal:
+	$LF
+]div
+[pre 
+	"A5 18 29 10 D0 1C A5 18
+	$LF
+	"29 20 D0 1A AD A9 0D 29
+	$LF
+	"18 D0 17 AD A9 0D 29 20
+	$LF
+	"D0 14 AD 19 00 C9 04 F0
+	$LF
+	"11 6B EE A4 00 6B EE A5 
+	$LF
+	"00 6B EE 19 00 6B EE C2
+	$LF
+	"0D 6B 9C 19 00 6B
+	$LF
+]pre
+[div class=p 
+	"So basically I wrote this hex code at address $7F8182 through the inputs. It is not possible to write to $7F directly from the inputs due to the lack of bytes in the controls. 
+	$LF
+]div
+[div class=p 
+	"Because of this, I was forced to write a different code in $0A85 (a rarely used place in memory) just to be able to write the desired code in $7F8182. The code written in $0A85 was code that wrote the desired code in $7F8182. In short, I wrote the code in $0A85, made the game read this code and return to the main routine. After that, the desired code is automatically written to $7F8182. If you look at the memory at $0A85 at the time of the crash, you will see the code being written. 
+	$LF
+]div
+[div class=p 
+	"I'm not going to leave the code that was written in $0A85 here because it's a huge code. And maybe there are much easier and faster ways to write a code in $7F8182, but I didn't care about that, since this is a glitchfest and time has no relevance.
+	$LF
+]div
+[div class=p 
+	"I won't leave the inputs here either, because, after all, there are more than 300 lines of inputs and I don't think anyone is interested, right? :)
+	$LF
+]div
+[h3 id=MoreAboutTheCode 
+	[b 
+		"More About The Code ⭐
+		$LF
+	]b
+]h3
+[div class=p 
+	"Along with the code written in $7F8182, I also changed other addresses during the crash, they are:
+	$LF
+]div
+[ul 
+	[li 
+		"$1F11, $1F17, $1F19 and $1F1A = All about Mario's Position on the map
+		$LF
+	]li
+	[li 
+		"$1F12, $1F1B, $1F1C, $1F1D and $1F1E = All about Luigi's Position on the map
+		$LF
+	]li
+	[li 
+		"$19C7 = Pipe exit at YI2
+		$LF
+	]li
+]ul
+[div class=p 
+	"In other words, during the crash, in addition to writing code in the subroutine, I also changed the position on the map of Luigi and Mario and the exit of the blue pipe in YI2. You will obviously notice this in the video hehe.
+	$LF
+]div
+[h3 id=LevelByLevelComments 
+	[b 
+		"Level by Level Comments? ⭐
+		$LF
+	]b
+]h3
+[div class=p 
+	"Oh man, I don't think I need to comment level by level here, right? So much happened on the levels that it's difficult to explain. If anyone understands anything, feel free to explain it to me. 🥴
+	$LF
+]div
+[div class=p 
+	"But basically, after writing the code, I was able to use it at all levels. You will see very strange things happening, random sprites coming out of the item box, Mario changing powerups out of nowhere, sprites transforming into other sprites and so on... Maybe someday I'll explain level by level, but I'm too lazy today :|
+	$LF
+]div
+[h3 id=SpecialThanks 
+	[b 
+		"Special Thanks ⭐
+		$LF
+	]b
+]h3
+[ul 
+	[li 
+		"Noise de Gole for helping me with ACE and for the code ideas (the code for changing sprite IDs is his idea).
+		$LF
+	]li
+	[li 
+		"Bruno Valads for helping me with extremely useful scripts.
+		$LF
+	]li
+	[li 
+		"Masterjun for the fabulous explanation in your submission that helped me write the codes and inputs.
+		$LF
+	]li
+	[li 
+		"You for watching :)
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Great work as always!
+	$LF
+]div
+[div class=p 
+	"We historically label ACE playarounds/glitchfests as just ACE, so this movie's current branch is fine. And we already have a non-ACE glitchfest, which I don't think should be obsoleted by this run.  Because as I've said before, we want to encourage more creativity, which means we need to show that through out judging decisions about co-existing branches. Inclusivity invites creativity, and in the end we will have more cool movies. When some Alternative branches start looking way too similar, we can obsolete some.
+	$LF
+]div
+[div class=p 
+	"Accepting over the legendary 
+	(__wikiLink|href=/2513M|implicitdisplaytext=2513M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Processing...
+]div

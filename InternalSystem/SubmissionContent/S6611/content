@@ -1,0 +1,337 @@
+17
+[div class=p 
+	"Isn't the tutorial 8 minutes?
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.4
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+]ul
+[h2 id=GifvexSComments 
+	" gifvex's comments
+	$LF
+]h2
+[div class=p 
+	"Pokémon Speedruns user entrpntr & I tried to replay 
+	(__wikiLink|href=/5597S|implicitdisplaytext=5597S)
+	" on console this month. The movie wasn't supposed to sync through the end, and it didn't, but observing how it desyncs is a step in identifying differences between console and emulator. The movie wasn't supposed to sync through even the tutorial, and it didn't, but after 20 minutes the player had exited the duel and was about to choose a starter deck.
+	$LF
+]div
+[div class=p 
+	"entrpntr's pet theory was the tutorial may have a time limit, which I didn't think about until the next desync suggested a different "time limit" (that's not a thing). The desynced inputs found a button combination to escape the tutorial duel, later confirmed to work in all duels and count as a victory. This glitch inspired a bit of fun for 
+	[a href=https://www.speedrun.com/pkmntcg#Any rel=noopener external nofollow 
+		"RTA speedrunners
+	]a
+	" and is documented 
+	[a href=https://pastebin.com/QnYGzNey rel=noopener external nofollow 
+		"on Pastebin
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Sometimes the down+A glitch will not escape the duel, but instead send the player into an "infinite party screen." There are other, far less likely effects too. They depend on the timer interrupt handler as the documentation linked above details. Precise alignment of the timer interrupt can lead the invalid code path into player-affected memory, and that territory is where this movie has its fun.
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[h4 id=Outline 
+	" Outline
+	$LF
+]h4
+[ul 
+	[li 
+		" The player is named "No" (1 character). It's a little more interesting than "A" and the inputs to enter it happen to align the timer interrupt nicely
+		$LF
+	]li
+	[li 
+		" 
+		[del 
+			"Choose HAND from the menu. Select a Water Energy card.
+		]del
+		[br 
+		]br
+		[del 
+			"Attach a Water Energy card to your active Pokémon, Goldeen.
+		]del
+		[br 
+		]br
+		[del 
+			"Choose ATTACK from the menu and select Horn Attack.
+		]del
+		$LF
+	]li
+	[li 
+		" The tutorial is escaped as soon as possible instead of following Dr. Mason's instructions
+		$LF
+	]li
+	[li 
+		" Squirtle & Friends is chosen as the starter deck. The deck has the shortest name and contains good card IDs for the arbitrary code execution setup
+		$LF
+	]li
+	[li 
+		" Options are set to 5 (instant) text speed and skippable shuffle/draw animations
+		$LF
+	]li
+	[li 
+		" A deck edit is done (see below) before the duel with Aaron is started, where the down+A glitch is performed with the goal to jump to memory
+		$LF
+	]li
+]ul
+[h4 id=Inputs 
+	" Inputs
+	$LF
+]h4
+[div class=p 
+	"As an improvement over the full-game movie, which introduced directional+A/B to save input frames, this movie also includes a technique similar to other Pokémon movies. In many menus, directional inputs can be reapplied by adding a different directional after. For example, a down 2 sequence can be done with (down, down+left) instead of (down, none, down).
+	$LF
+]div
+[h4 id=RngDeckEdit 
+	" RNG & deck edit
+	$LF
+]h4
+[div class=p 
+	"The deck shuffle before the arbitrary code execution is very important as the shuffled indices are executed as opcodes. A few opcodes will stop the CPU or divert the code flow. The positions of cards (active, hand, etc.) are executed as opcodes as well. An active card's position value is the 
+	[code 
+		"stop
+	]code
+	" instruction, but this can be avoided by having another instruction precede it which interprets the value as data. The general idea is to play an active card that is 1 or 2 indices in the deck after any cards in the hand or prizes. Both the player and the opponent must meet these conditions, and a lot of testing is required to identify the shuffles that are safe to execute.
+	$LF
+]div
+[div class=p 
+	"The deck shuffle RNG frame this movie aims for is 
+	[code 
+		"C1 A8 CB
+	]code
+	", against Aaron's second deck. There are 3 frames of delay to advance to there before the duel with Aaron. The deck needs to be edited to not contain any basic Pokémon at the 7 indices drawn to the hand, because this RNG frame requires the player to reshuffle the deck to meet the conditions above. A deck edit consists of removing cards or appending cards to the end of the deck. The card IDs in the deck are what will be executed as the arbitrary code, in order from beginning to end, and per the rules of the trading card game the deck must contain 60 cards.
+	$LF
+]div
+[ul 
+	[li 
+		" +Grass Energy
+		$LF
+	]li
+	[li 
+		" +Weedle
+		$LF
+	]li
+	[li 
+		" +Arcanine
+		$LF
+		[ul 
+			[li 
+				" These three card IDs are interpreted as 
+				[code 
+					"ld bc, $380F
+				]code
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" -Water Energy, +Water Energy, -Water Energy, +Water Energy, +Lightning Energy
+		$LF
+		[ul 
+			[li 
+				" Water Energy is interpreted as 
+				[code 
+					"inc bc
+				]code
+				" (twice)
+				$LF
+			]li
+			[li 
+				" Lightning Energy is interpreted as 
+				[code 
+					"inc b
+				]code
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" -Professor Oak, -Bill, +Bill, -Switch, +Switch, -Poke Ball
+		$LF
+		[ul 
+			[li 
+				" Professor Oak and Poke Ball are removed to not be executed
+				$LF
+			]li
+			[li 
+				" Bill is interpreted as 
+				[code 
+					"push bc
+				]code
+				$LF
+			]li
+			[li 
+				" Switch, as the last card, is interpreted as 
+				[code 
+					"jp nc, $0000
+				]code
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" -Abra
+		$LF
+	]li
+	[li 
+		" -Machop
+		$LF
+		[ul 
+			[li 
+				" These two cards are only removed to shift down certain other cards
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"The card shifting is to have no basic Pokémon at indices 10, 26, 31, 33, 39, 40, and 50 (the first 7 drawn) to cause a reshuffle, and to have a basic Pokémon at index 37 to play after, as index 36 will be in the hand. The instructions appended to the end of the deck make up this sequence:
+	$LF
+]div
+[pre 
+	" ld bc, $380f ; bc   = $380f
+	$LF
+	" inc bc       ; bc   = $3810
+	$LF
+	" inc bc       ; bc   = $3811
+	$LF
+	" inc b        ; bc   = $3911
+	$LF
+	" push bc      ; [sp] = $3911
+	$LF
+	" jp nc, $0000 ; pc   = $0000
+	$LF
+	" ; @0000
+	$LF
+	" ret          ; pc   = $3911 (GameEvent_Credits)
+	$LF
+]pre
+[h2 id=AnonymousUserSComments 
+	" anonymous user's comments
+	$LF
+]h2
+[div class=p 
+	"While gifvex came up with the idea, the timer interrupt manipulating, and final instruction sequence, I worked on optimizing which RNG the run uses. I've always been a huge fan of ACEs that turn game elements into editable code (
+	(__wikiLink|displaytext=the old Super Mario Land 2|href=/1886M)
+	" is my favorite), and I had a lot of fun learning assembly basics so I could wrap my head around the criteria going into a usable RNG frame for this.
+	$LF
+]div
+[div class=p 
+	"Here's the script I ended up with: 
+	[a href=https://pastebin.com/MgnXQ7Dt rel=noopener external nofollow 
+		"https://pastebin.com/MgnXQ7Dt
+	]a
+	$LF
+]div
+[div class=p 
+	"It prints all the possible usable frames it can find for each of Aaron's 3 deck choices (including many false positives, mostly due to the unpredictable nature of the relative jumps relying on Carry/Zero flags). It had a lot more restrictions, but I gradually turned them off in order to check as many possibilities as possible (and as our knowledge of what was needed improved).
+	$LF
+]div
+[div class=p 
+	"The ACE execution we get starts at C000, which slides to C200, the start of duel information. C200-C300 is our board state and shuffled deck info, C300-C400 is the opponent's, and then C400 starts our raw deck contents (which is what we can edit before the duel). So, we just need to safely reach C400. Unfortunately, active Pokemon freeze the game, card 16 freezes the game, and after each shuffled deck are up to 6 0xFF opcodes (for each player's bench) that will ruin the ACE if our stack pointer got disrupted. So the main requirements for the deck shuffle are getting a Heads coin flip, both players having an Active Pokemon 1-2 slots after a hand/prize card, card 16 being jumped over or used by another instruction, and jumping over opcode 0x31 (set stack pointer), or jump over the FFs.
+	$LF
+]div
+[div class=p 
+	"gifvex came up with a great way to test these frames for if they actually work before committing: 0xCAD0 is a jump command that gets ran between frames. So, you can set 0xCAD1 to C000 to jump there. Here's a code snippet to easily do it.
+	$LF
+]div
+[pre 
+	"--Wipe your active Pokemon's 0x10
+	$LF
+	"for h=0,59 do
+	$LF
+	"	if (memory.readbyte(0xC200 + h) == 0x10) then
+	$LF
+	"		memory.writebyte(0xC200 + h, 1)
+	$LF
+	"	end
+	$LF
+	"end
+	$LF
+	"--Jump to C000
+	$LF
+	"memory.writebyte(0xCAD1, 0)
+	$LF
+	"memory.writebyte(0xCAD2, 0xC0)
+	$LF
+]pre
+[div class=p 
+	"It would be a bit sad if this movie obsoletes the glitchless run, as I'm incredibly proud still of its routing and execution (beating the game in only 3 deck edits should not have been possible). But I think this would have to be in Moons for that to not happen, and, well, technically, this movie has a higher intro percentage than the full run... But at least it's a good replacement. When the duel escape glitch was discovered, I was worried it'd lead to a horribly dull TAS that's just a slightly faster executed real time any%. But then gifvex came in with ACE, and I can be proud of the effort put into this run in the end.
+	$LF
+]div
+[div class=p 
+	"There may be an ACE TAS for the sequel, as well!
+	$LF
+]div
+[div class=p 
+	"Oh, and please don't use the Gambatte palette! "VBA Accurate" was agreed upon for TCG1. Gambatte palette is really bad, orange turns into pink...
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"It's possible the RNG frame used is not the best because it includes performing a reshuffle, despite the low delay for the frame itself. All other options tested for this movie did not work or were slower but the possibility is there.
+	$LF
+]div
+[div class=p 
+	"This movie calls the credits routine and it plays in full, but there are no flags set in the save file, so it may be unsatisfactory for game completion. The current branchless publication for this game is tiered in vault and consideration will need to be given if this movie would obsolete it.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": This is a groundbreaking submission. Not only it introduced a long sought method for skipping the tutorial, but it also opened up a way to skip straight to the credits, so I can understand the positive reaction to this submission. It's also very optimized.
+	$LF
+]div
+[div class=p 
+	"The currently published movie is in Vault tier, so it's unavoidably going to be obsoleted by this movie. This means that future glitchless submissions would be unlikely to be accepted, unless they somehow manage to introduce entertaining contents, or if the community for some reason will begin to be entertained with glichless movies of this game. But I personally don't see either of these scenarios happening anytime soon, so if anyone decides to submit new glitchless movies, they should acknowledge the low chances of accepting.
+	$LF
+]div
+[div class=p 
+	"Regardless, accepting this submission for Moons and obsoleting the 
+	(__wikiLink|displaytext=current publication|href=/3485M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Pubing.
+]div

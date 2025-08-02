@@ -1,0 +1,505 @@
+7
+[ul 
+	[li 
+		" 
+		[b 
+			"Emulator used:
+		]b
+		" BizHawk 2.9.1
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Goal:
+		]b
+		" Complete the game as fast as possible
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"Elevator Action Returns is an interesting speed game that 
+	[b 
+		"doesn't
+	]b
+	" always benefit from moving as fast as possible. The game runs heavily on cycles with the elevators and can be affected by enemies who will ride the elevator and screen/camera positioning. Navigating how to get through the game as fast as possible means taking certain sections 
+	[em 
+		"slower
+	]em
+	" so that the remaining elevators synchronize. I'm looking to optimize that in this run while hiding (most; will explain) wait times with additional actions.
+	$LF
+]div
+[h4 id=TechniquesPrimer 
+	" Techniques Primer
+	$LF
+]h4
+[div class=p 
+	"A quick rundown of the common things you'll see in this run that requires a bit more explaining. More in-depth information of RTA techniques can be found in the Elevator Action Returns Speedrun Guide (
+	[a href=https://docs.google.com/document/d/19UJTUujoteVZLQGktvoOwKtQJUmKRvK6FSQrOby5t-I/edit?usp=sharing). rel=noopener external nofollow 
+		"https://docs.google.com/document/d/19UJTUujoteVZLQGktvoOwKtQJUmKRvK6FSQrOby5t-I/edit?usp=sharing).
+	]a
+	$LF
+]div
+[div class=p 
+	[b 
+		"Player 2
+	]b
+	": The reason I use Player 2 is because it starts further to the right when the stage begins. This likely does not matter for a TAS (compared to RTA), but this allows a specifically timed set up before the building explodes in Stage 1. This will also affect Stage 3. This doesn’t affect other stages because most elevator cycles will prevent going any faster regardless of Player 1 or Player 2 starting point.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Death Warps
+	]b
+	": In Elevator Actions Returns, the goal is to reach the next red door. The game assists with this by warping the player closer to the door after dying. It’s not always a perfect science but can skip certain sections or cycles.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Invincibility
+	]b
+	": Invincibility is unique. You gain normal invincibility after taking damage or exiting a door. You gain extra-long invincibility when reviving from a death.
+	$LF
+]div
+[div class=p 
+	"Regardless of invincibility length, you can not fall more than a single story before dying i.e if you fall 1.1 stories, you’ll die! If you fall .90 stories, you’ll live! Falling any more than a single story will also override invincibility, but extra-long invincibility lasts long enough to skip multiple floors if you land after the first story fall, then fall again quickly afterward. This is used on Stage 2.
+	$LF
+]div
+[div class=p 
+	"Most invincibility will be used to drop down a single floor or to ignore stage hazards.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Jump Starts
+	]b
+	": Elevators can receive an “Up” input to begin going to the next floor while the player either jumps or runs off of it, allowing the elevator to go up without a passenger. This is mostly used to cut down on elevator return times, but can also scroll the screen, leading to…
+	$LF
+]div
+[div class=p 
+	[b 
+		"Real Fake Floor/Ceiling
+	]b
+	": If an elevator is at the top or bottom of the screen, it will consider that as the top/bottom floor *regardless* if it actually has more elevator shaft to travel off-screen. This means an elevator will reverse direction instead of going off-screen. This is used to manipulate an elevator coming back sooner and sets up specific elevator positions for smoother and faster travel. 
+	$LF
+]div
+[div class=p 
+	"Combined with 
+	[b 
+		"Jump Starts
+	]b
+	", which shifts the screen position, this becomes a valuable tool.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Air-Runs
+	]b
+	": You can run in mid-air! This allows some specific angling and momentum to get past certain hazards or to get a running start on momentum before landing. This is a required trick for *Stage 5*.
+	$LF
+]div
+[div class=p 
+	[b 
+		"RNG
+	]b
+	": Being an arcade game, there’s a number of RNG elements:
+	$LF
+]div
+[ul 
+	[li 
+		"Enemy spawns
+		$LF
+	]li
+	[li 
+		"Sub-boss (Jet Pack swarms) positions
+		$LF
+	]li
+	[li 
+		"The directions from Jad’s Bomb Explosion 
+		$LF
+	]li
+	[li 
+		"Elevator positions (barely)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Standing, moving, and acting in certain positions can force enemies to spawn so they can take an elevator down to the player soon.
+	$LF
+]div
+[div class=p 
+	"Jet Pack swarm sub-bosses seem to land in different spots depending on actions taken, even from other stages, but follow a very general pattern.
+	$LF
+]div
+[div class=p 
+	"Facing left, right, and crouching can alter the trajectory of the fragments from Jad’s Proximity Bomb. You’ll see Jad dance around or stand still after throwing a bomb to optimize the spread.
+	$LF
+]div
+[div class=p 
+	"I hesitate to call it RNG for the elevators, but sometimes they’re just in unexpected positions when I change an input elsewhere. It may be the one or two frames changing everything, but I’m of the firm belief the game is fairly consistent when it comes to most cycles. But until I can *prove* it one way or the other: I’ll consider that there’s some RNG at play.
+	$LF
+]div
+[div class=p 
+	[em 
+		"Onto the run!
+	]em
+	$LF
+]div
+[h4 id=Stage1RedAfterImage 
+	" Stage 1: Red After Image
+	$LF
+]h4
+[div class=p 
+	[b 
+		"First + Second Door
+	]b
+	$LF
+]div
+[div class=p 
+	"There's a slight delay at the start of the game to implement the Player 2 setup explained before. As we get out of the first red door, the elevator to the bottom-left of the screen will move while the elevator at the bottom-right of the screen will 
+	[b 
+		"not
+	]b
+	" move. If you get here as fast as possible, the bottom-right elevator will move at the same time and you'll have to wait for an additional cycle for it to return instead of barely catching it on the way down.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Third Door
+	]b
+	$LF
+]div
+[div class=p 
+	"After the building explodes, the run goes down and jumps through a hole in the wall. There’s a no-button-press delay here for two reasons.
+	$LF
+	"1) If you go too fast, the last elevator in the stage will be at its top level, which is about .3s slower as you have to wait for it to arrive.
+	$LF
+	"2) If any buttons are pressed here, it makes specific enemies spawn and makes Stage 2's midboss a bit more uncomfortable.
+	$LF
+]div
+[h4 id=Stage2CrossTheBreeze 
+	" Stage 2: Cross The Breeze
+	$LF
+]h4
+[div class=p 
+	[b 
+		"Sub-Boss: Jet Pack swarm
+	]b
+	$LF
+]div
+[div class=p 
+	"A small note that the Jet Pack enemies from the ground will die in one hit if they’re shot out of mid-air. Most shots here are optimized for hitting them before they touch the ground over the purely airborne ones.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Airplane
+	]b
+	$LF
+]div
+[div class=p 
+	"Enemies will despawn themselves if you’re in a specific position in the airplane. 
+	$LF
+]div
+[div class=p 
+	"After the Red Jet Pack is killed, they drop a grenade which gives you some invincibility, but it’s only enough to make it to the second floor (the RTA uses this). In this TAS: Jad dies, revives, and uses the extra-long invincibility to drop down a floor, land, and drop down another floor before it runs out. This is effectively a TAS-only trick (I personally attempted this 100+ times with 2 successes).
+	$LF
+]div
+[div class=p 
+	[b 
+		"Exit
+	]b
+	$LF
+]div
+[div class=p 
+	"On the second elevator after the final red door, some RNG is manipulated to get an enemy spawn on the floor above to take the elevator down.
+	$LF
+]div
+[div class=p 
+	[b 
+		$LF
+	]b
+]div
+[h4 id=Stage3ColorsOfNight 
+	" Stage 3: Colors of Night
+	$LF
+]h4
+[div class=p 
+	[b 
+		"First door
+	]b
+	$LF
+]div
+[div class=p 
+	"If the door is approached too quickly, the third elevator from the door will be missed (leaves early). Some frames are killed with jumps to slow down the run so the aforementioned elevator can be grabbed as soon as possible. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"Second Door
+	]b
+	$LF
+]div
+[div class=p 
+	"After the long elevator down, some movement in place is done to get the trenchcoat enemy to take the elevator down. If you move too quickly, he will not take the elevator down. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"Third Door
+	]b
+	$LF
+]div
+[div class=p 
+	"More movement is done under the camera to get an enemy to spawn near the top of the screen so that he takes the elevator down after exiting the third door.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Fourth Door
+	]b
+	$LF
+]div
+[div class=p 
+	"An elevator needs to be held down here to make elevator cycles sync up for the remainder of the stage. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"Jetpack Swarm Boss
+	]b
+	$LF
+]div
+[div class=p 
+	"The red jetpacks will gain invincibility after a hit, but lose invincibility the moment they set up to take a shot at the player. By turning your back to the enemy after a hit, they’re much more likely to attempt to shoot if they’re still a certain distance away. I look to manipulate this as much as possible before they go flying off.
+	$LF
+]div
+[h4 id=Stage4UnderTheCrack 
+	" Stage 4: Under The Crack
+	$LF
+]h4
+[div class=p 
+	"One of the few stages you can take as fast as possible. Not much to add here honestly! I tried to see if I could do it damageless while still keeping the cycles up; the RTA speedrun takes damage at the hovercraft enemy elevator.
+	$LF
+]div
+[h4 id=Stage5CrimsonLine 
+	" Stage 5: Crimson Line
+	$LF
+]h4
+[div class=p 
+	[b 
+		"First Door
+	]b
+	$LF
+]div
+[div class=p 
+	"There’s a lot of micromanagement of elevators and cameras on this stage.
+	$LF
+	"Second elevator: Must air-run off the elevator so it scrolls the camera. Not doing this requires you to take an elevator up and back down so the screen unlocks and lets you proceed.
+	$LF
+	"Fourth elevator: Can land on the elevator slightly before it hits the full 1-story length, which would kill the player.
+	$LF
+	"Fifth elevator: Doing an i-drop here prevents the screen from scrolling which sets up for the upcoming row of elevators. 
+	$LF
+	"Row of elevators: Because the screen scrolls later than it’s supposed to, the elevators believe they’re on the bottom floor for an extra cycle, giving enough time to take control of the furthest elevator. This also makes it so that the rest of the elevators move, creating a Real Fake Floor for them. Meaning that they’ll go up, which clears the way to do a death warp after the first door.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Fifth Door + Exit
+	]b
+	$LF
+]div
+[div class=p 
+	"Jumpstarting the elevator before the door gets the screen to scroll upward. This sets up real fake floors for most of the remaining stage. Opposite to the start of the stage, you must avoid doing any air-runs. Otherwise, the screen will scroll, which is seen near the end because the last second is forced to scroll due to the end of the stage. 
+	$LF
+]div
+[div class=p 
+	"The timing to land on the final elevator and still run through the gap is effectively TAS-only.
+	$LF
+]div
+[h4 id=Stage6VermilionSun 
+	" Stage 6: Vermilion Sun
+	$LF
+]h4
+[div class=p 
+	[b 
+		"Fourth Door
+	]b
+	$LF
+]div
+[div class=p 
+	"A death is taken here to get an extra life on the continue for a skip in the final segment.
+	$LF
+]div
+[div class=p 
+	"The elevator is held down here to create a real fake ceiling for the elevator at the top of the screen, letting the elevator return down without waiting. Some RNG manipulation to get the brown suit enemy to take the elevator before that down.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Fifth Door
+	]b
+	$LF
+]div
+[div class=p 
+	"We wait some frames at the top of the computer and crates to get the enemy to shoot before being scrolled off-screen. This allows for an i-drop.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Final Boss
+	]b
+	$LF
+]div
+[div class=p 
+	"The elevator after the fifth door is held down to force the next elevator to wait long enough to take control of it. 
+	$LF
+]div
+[div class=p 
+	"Then that elevator is held down to allow the next elevator to go down an additional floor. This allows a player to gain control of it faster after using invincibility from a death to reach it. 
+	$LF
+]div
+[div class=p 
+	"The following elevator needs to be held to create a real fake ceiling again for the next elevator.
+	$LF
+]div
+[div class=p 
+	"The red suit can be shot through the bottom of the floor with the Launcher weapon.
+	$LF
+]div
+[div class=p 
+	[b 
+		$LF
+	]b
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	[b 
+		"Takeaways
+	]b
+	$LF
+]div
+[div class=p 
+	"The main reason I wanted to do this was so I could potentially learn more for the RTA speedrun.
+	$LF
+]div
+[ul 
+	[li 
+		"Stage 3 – Second Door: Usually, the RTA hopes to spawn an enemy with RNG, which always takes the elevator down. This is the first time over 1000+ runs I’ve seen that guy take the elevator down. I didn’t think it was possible!
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Stage 3 – Jetpack Swarm: I’ve had a number of theories about how the Red Jetpacks take damage, but this solidified thjem. They’ll lose invincibility when they try shooting you and they seem to aim for when you’re “vulnerable”, e.g not shooting at them, when your back is turned to them, possibly other things.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Stage 5 – First Door: Learned you could land on the elevator just before it touches the ground. The RTA waits for an enemy to ride it up and you can drop on it while it’s coming upward. Not sure how plausible this is since I barely made it with the TAS.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Final Boss: The Red Suit can either stand on the platform woozily if you’re facing him up close, or fall off the platform if you’re facing away from him. The difference of having to do one more hit or not. Not exactly useful to the RTA now, but good to know in case of implementing old strats (running up and throwing grenades against the wall next to him).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Jad’s bombs: How the  bomb’s explosion can depend on the way you’re facing and if you’re crouching or not crouching. Doesn’t make the bomb controllable, but just something to play around with if bombs become more important throughout the run. 
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"The TAS is about 42 seconds faster than the current RTA world record
+		$LF
+	]li
+]ul
+[div class=p 
+	[b 
+		"TAS improvements & Closing
+	]b
+	$LF
+]div
+[div class=p 
+	"This was my first TAS ever. There’s a lot of things learned here!
+	$LF
+]div
+[div class=p 
+	"With some of the takeaways above, I learned a number of new setups and techniques that I know I can intentionally go for. I can likely save some frames/movement as a result of this.
+	$LF
+]div
+[div class=p 
+	"There would be times I tried to adjust seemingly small things that’d cascade into breaking RNG or cycles for the rest of the run. So I was conservative with re-recording. 
+	$LF
+]div
+[div class=p 
+	"I had a 
+	[em 
+		"really cool
+	]em
+	" Stage 6 Final Boss segment that I lost because there was an error in recording/save states loading incorrectly. I wish I had saved it separately, but a lesson learned there. It’s not faster, but it’d make for a more entertaining run away from the RTA.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Hope you enjoyed. Feel free to ask any questions!
+	]b
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": I've loosely been following the RTA developments for Elevator Action Returns and watched a few runs myself during that time. It's been pretty exciting how far strats have gone and this TAS is a fantastic culmination of that. Everything is well considered and planned, especially handling the dang jetpack enemies. Nice work!
+	$LF
+]div
+[div class=p 
+	"Something I have to bring up is the use of continues in this. Continues in this case allow for more death warping to speed up sections significantly as well as eliminate the need to find and refill on bombs. As a one credit clear run would be significantly different in terms of level movement and resource planning, I would say that the use of continues or not would be separate branches for Standard. Now if I was asked what the branches would be my gut instinct is that this submission wouldn't need a branch name and a theoretical 1CC TAS would be labeled as such, but that's not a concern for discussion until such a TAS exists.
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Replacing the input file with one that removes blank inputs and extra inputs after the final one needed to reach the ending. The original input file with just the blank inputs removed and with the extended inputs have been uploaded here: 
+	(__wikiLink|href=/UserFiles/Info/638720411731356359|implicitdisplaytext=UserFiles/Info/638720411731356359)
+	$LF
+]div
+[div class=p 
+	"For the encoder, please use the input file with the extended inputs.
+]div

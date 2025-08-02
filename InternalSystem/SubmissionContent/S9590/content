@@ -1,0 +1,716 @@
+10
+[div class=p 
+	"The World’s Hardest Game is a classic flash rage game, perhaps even the most well-known of its kind. It was first released in december 2007 on the developer’s own site snubbyland, and then in march 2008 on armorgames. The game mechanics are very straight-forward, you control the red square with arrow keys or wasd, and you have to manoeuver from a to b while collecting the yellow circles and avoiding the blue circles. 
+	$LF
+]div
+[h3 id=HowGameWork 
+	"how game work
+	$LF
+]h3
+[div class=p 
+	"Despite having such simple mechanics, this game does have some speedtech, and also emulation inaccuracies. I will explain all of it in excruciating detail.
+	$LF
+]div
+[h4 id=Hitboxes 
+	"Hitboxes
+	$LF
+]h4
+[div class=p 
+	"There are two separate hitboxes for the player, one of them is just a square, which is used for colliding with coins and checkpoints (so anything yellow and green). 
+	$LF
+	"The other hitbox, used for enemies and walls, is much more lenient. It consists of only five pixel-sized points, arranged in a plus-shape on the square sprite. All of the corners are effectively invincible, enabling shenanigans. Subsequent installments in the whg series do add four points on the corners, as a much better approximation of a square.
+	[br 
+	]br
+	$LF
+	"Envisioning the player as a plus sign makes a lot of the tas much easier to follow and understand. 
+	$LF
+]div
+[h4 id=WallClip 
+	"Wall clip
+	$LF
+]h4
+[div class=p 
+	"Due to the player not having corners on its hitbox, moving around wall corners is very smooth. Both corners can overlap quite a bit, getting unintentionally ‘stuck’ on a wall is very hard, making for satisfying gameplay. This does lead to a funny little oversight; if you move diagonally into a wall at the corner, and keep going along the wall, one of the player’s points will be inside the wall. The wall attempts to push the player out, but this can be nullified by continuing to hold the direction opposite to the push. It’s a bit like taking the overlap at the corner and extending it to the rest of the wall.
+	[br 
+	]br
+	$LF
+	"Wall clips are widely applicable, although because of imprecise positions, not every wall clip is the same. For some walls it’s possible to “sink” a lot deeper into them than others, both normally and by clipping. For example, walls on the left or right can generally be clipped a bit further into than walls on the top or bottom.
+	$LF
+]div
+[h4 id=Cornerboost 
+	"Cornerboost
+	$LF
+]h4
+[div class=p 
+	"Continuing from a wall clip, what happens if you exit the wall on the other side? Well, the player starts to round the corner, and then another point enters the wall and gets pushed out. Since this push is in the same direction as one of the movement directions, it’s added instead of nullified, and the player moves a grand total of six pixels in one direction in one frame instead of the usual three, saving one whole frame in a bunch of places.
+	$LF
+	"Obviously not exactly the most groundbreaking tech, although sometimes these single framesaves can compound into entirely new routes becoming possible, saving seconds.
+	$LF
+]div
+[h4 id=ClickingGo 
+	"Clicking GO
+	$LF
+]h4
+[div class=p 
+	"Every fifth level is preceded with a wall of text giving helpful tips, which has to be advanced by clicking the big GO button at the bottom.
+	[br 
+	]br
+	$LF
+	"Now for a small bit of background, when coolmathgames hosted the game on their site, they made a few minor changes to the game such as removing the iconic L5 text (and later they also specifically requested the developer to make an HTML version of the game). One of these changes was the added functionality of using the spacebar to advance the GO screens. Since holding the spacebar ahead of time also works, this very quickly became the preferred version to speedrun, and to base every mod off of.
+	$LF
+	"Now, when this tas was being converted to libtas, the original version was used, so GO had to be clicked. And this eventually led us to realize that pressing/holding space actually ‘’cost’’ a frame this whole time (and we would’ve easily been able to tell just by looking at the code). This meant that every single tas we created up until this point was improvable by 6 frames, one for each GO. Multiple second barriers, deemed impossible to break, were suddenly shattered. Chaos reigned
+	$LF
+]div
+[h3 id=RuffleLimitations 
+	"Ruffle limitations
+	$LF
+]h3
+[div class=p 
+	"Yeah, so basically, there’s a bit more to talk about regarding this game, but it’s not entirely relevant for this tas specifically. Some of the more complex stuff is not currently possible to be implemented (which might be for the best?)
+	$LF
+]div
+[h4 id=HitboxesContD 
+	"Hitboxes (cont’d)
+	$LF
+]h4
+[div class=p 
+	"Time to dive into the actual nitty gritty of flash collision detection. There are two different ways, a point to pixel check and a bounding box check. Coins only use the bounding box check, which means they effectively have a square hitbox. Enemies use both, they first perform a bounding box check to see if they should perform a (more intensive) p2p check. The player will only die if both checks pass on at least one of its five points.
+	$LF
+	"We don’t exactly know how flash works, but we suspect that collision detection is done before rendering a new frame. This poses a problem, because a point to pixel check relies on pixels, which are rendered, whereas a bounding box check (as well as the points on the player) use the actual position regardless of what’s rendered. In practice, this means the enemies are disjointed from their own bounding box, and not every pixel is used for collision detection. The more distance they move per frame, the smaller their hitbox is. Because the points on the player are so spread apart, it’s not too uncommon for an enemy to go directly through the player and miss all of the points, which does not lead to a death. This is commonly referred to as an enemy clip, and is one of the core exploits in this game’s speedrun.
+	$LF
+]div
+[div class=p 
+	"If my hitbox explanation is not entirely clear, I have this handy infographic (thrown together in a few minutes)
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/JAtFKtG.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Notice the “trail” at the back corners of the enemy. While the hitbox becomes more lenient at the front, it also becomes more restrictive at the back. This is much more egregious with rotating enemies, since their bounding box rotates with them and they need to be encased by another bigger box that always has the same orientation (and changes in size).
+	$LF
+]div
+[div class=p 
+	"Ruffle does not emulate this particular quirk of flash, so the enemy hitboxes are always circles. This removes any possibility for clipping through enemies to save time, but it also introduces some new timesaves due to the lack of the trail.
+	$LF
+]div
+[h4 id=Resolution 
+	"Resolution
+	$LF
+]h4
+[div class=p 
+	"Another side effect of hit detection being based on rendering, is that it will in turn be affected by running the game on a different resolution. This is a lot more impactful than you’d think. The majority of levels have different times depending on what resolution you play on. Certain enemy clips become possible, certain walls allow for deeper clips, there’s quite a lot of variance, both minor and major. In some cases, the fastest known time of a level has only been performed on a single resolution, out of approximately 2125 possibilities that we’ve taken into consideration. 
+	$LF
+	"Some of the bigger timesaves happen to be mutually exclusive, so the main tas that the community uses as a benchmark is a ‘sum of best’ of sorts, a “what if we allow changing the resolution during level transitions” kinda tas. RTA does not currently allow changing resolution during a run, and the optimal resolution used for speedruns has changed multiple times.
+	[br 
+	]br
+	$LF
+	"Changing resolution can also be taken to the extreme; when the game size gets too small, enemies and walls can no longer be rendered and lose their hitboxes, while coins and checkpoints still work fine. Using this to its full extent would save nearly two minutes in the run. To simplify things we’ve decided to make the default size of 550 by 400 pixels the cutoff point for “legal” resolutions, any size smaller than this is not allowed. Even still, some framesaves have been found that are exclusive to a resolution slightly smaller than default, and as such remain unimplemented.
+	$LF
+]div
+[div class=p 
+	"On ruffle, changing the resolution does not appear to affect collision detection in any way. This massively reduces the routing options and makes optimization at a high level a lot easier. 
+	$LF
+	"Some of the routes that happen to work on ruffle don’t work on every resolution in flash, most notably L12. There actually exist a bunch of resolutions where flash is slower than ruffle overall.
+	$LF
+]div
+[h4 id=RuffleVsFlash 
+	"Ruffle vs Flash
+	$LF
+]h4
+[div class=p 
+	"Now that we’ve talked about the differences, time for some raw numbers.
+	[br 
+	]br
+	$LF
+	"Using the community standard timing that starts at clicking the second play game button, this tas on ruffle has a time of 5:01.633
+	$LF
+]div
+[div class=p 
+	"The flash tas on the default 550 by 400 resolution would be 4:55.900, coincidentally on the lower end of possible times.
+	[br 
+	]br
+	$LF
+	"The fastest time for any single resolution is 4:54.833, using 603 by 438. The height of 438 is what matters here, the width could be increased arbitrarily (it just adds black bars).
+	[br 
+	]br
+	$LF
+	"The sum of best individual level tases, with all resolutions above default allowed, is 4:51.800
+	[br 
+	]br
+	$LF
+	"(and as a sidenote, the slowest resolution we’ve found has a time of 5:03.433)
+	$LF
+]div
+[div class=p 
+	"Here are the original videos for the ruffle tas and the flash tases. Note that these were made with a specialized tas mod, which uses space for the go screens so the times are off by six frames.
+	$LF
+	(youtube|v=Xrx1HoWpIOk)
+	$LF
+	(youtube|v=In0AfMoTvDM)
+	$LF
+]div
+[div class=p 
+	"And here’s a time comparison for all the levels in ruffle and in the flash sum of best.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Ruffle tas
+			]th
+			[th 
+				"Flash tas
+			]th
+			[th 
+				"Difference
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"3,900
+			]td
+			[td 
+				"3,833
+			]td
+			[td 
+				"0,067
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"3,800
+			]td
+			[td 
+				"3,800
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"3,367
+			]td
+			[td 
+				"3,400
+			]td
+			[td 
+				"-0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"3,133
+			]td
+			[td 
+				"3,167
+			]td
+			[td 
+				"-0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"20,867
+			]td
+			[td 
+				"20,400
+			]td
+			[td 
+				"0,467
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"11,800
+			]td
+			[td 
+				"11,800
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"7,767
+			]td
+			[td 
+				"7,433
+			]td
+			[td 
+				"0,333
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"10,467
+			]td
+			[td 
+				"8,400
+			]td
+			[td 
+				"2,067
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"9,567
+			]td
+			[td 
+				"7,733
+			]td
+			[td 
+				"1,833
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"5,833
+			]td
+			[td 
+				"5,567
+			]td
+			[td 
+				"0,267
+			]td
+		]tr
+		[tr 
+			[td 
+				"11
+			]td
+			[td 
+				"12,000
+			]td
+			[td 
+				"12,033
+			]td
+			[td 
+				"-0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"12
+			]td
+			[td 
+				"12,700
+			]td
+			[td 
+				"12,733
+			]td
+			[td 
+				"-0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"13
+			]td
+			[td 
+				"1,867
+			]td
+			[td 
+				"1,867
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"14
+			]td
+			[td 
+				"4,000
+			]td
+			[td 
+				"3,867
+			]td
+			[td 
+				"0,133
+			]td
+		]tr
+		[tr 
+			[td 
+				"15
+			]td
+			[td 
+				"9,233
+			]td
+			[td 
+				"8,267
+			]td
+			[td 
+				"0,967
+			]td
+		]tr
+		[tr 
+			[td 
+				"16
+			]td
+			[td 
+				"7,800
+			]td
+			[td 
+				"7,800
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"17
+			]td
+			[td 
+				"16,033
+			]td
+			[td 
+				"16,000
+			]td
+			[td 
+				"0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"18
+			]td
+			[td 
+				"5,600
+			]td
+			[td 
+				"5,533
+			]td
+			[td 
+				"0,067
+			]td
+		]tr
+		[tr 
+			[td 
+				"19
+			]td
+			[td 
+				"3,533
+			]td
+			[td 
+				"3,533
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"20
+			]td
+			[td 
+				"10,600
+			]td
+			[td 
+				"10,033
+			]td
+			[td 
+				"0,567
+			]td
+		]tr
+		[tr 
+			[td 
+				"21
+			]td
+			[td 
+				"6,433
+			]td
+			[td 
+				"6,333
+			]td
+			[td 
+				"0,100
+			]td
+		]tr
+		[tr 
+			[td 
+				"22
+			]td
+			[td 
+				"10,500
+			]td
+			[td 
+				"10,300
+			]td
+			[td 
+				"0,200
+			]td
+		]tr
+		[tr 
+			[td 
+				"23
+			]td
+			[td 
+				"7,067
+			]td
+			[td 
+				"7,067
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"24
+			]td
+			[td 
+				"4,967
+			]td
+			[td 
+				"4,933
+			]td
+			[td 
+				"0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"25
+			]td
+			[td 
+				"6,567
+			]td
+			[td 
+				"6,533
+			]td
+			[td 
+				"0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"26
+			]td
+			[td 
+				"16,200
+			]td
+			[td 
+				"15,467
+			]td
+			[td 
+				"0,733
+			]td
+		]tr
+		[tr 
+			[td 
+				"27
+			]td
+			[td 
+				"10,067
+			]td
+			[td 
+				"9,600
+			]td
+			[td 
+				"0,467
+			]td
+		]tr
+		[tr 
+			[td 
+				"28
+			]td
+			[td 
+				"10,233
+			]td
+			[td 
+				"8,733
+			]td
+			[td 
+				"1,500
+			]td
+		]tr
+		[tr 
+			[td 
+				"29
+			]td
+			[td 
+				"8,033
+			]td
+			[td 
+				"7,967
+			]td
+			[td 
+				"0,067
+			]td
+		]tr
+		[tr 
+			[td 
+				"30
+			]td
+			[td 
+				"13,733
+			]td
+			[td 
+				"13,700
+			]td
+			[td 
+				"0,033
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"301,633
+			]td
+			[td 
+				"291,800
+			]td
+			[td 
+				"9,833
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Of course, there are many subtle differences not reflected in these times.
+	$LF
+]div
+[div class=p 
+	"As you can see, ruffle saves one frame in four of the levels, due to the aforementioned lack of trail in the enemy hitbox. In L4, L11 and L12 the respective bottlenecks are reduced by one frame, and in L3 a cornerboost is made possible.
+	$LF
+	"Of course this timesave pales in comparison to what can be done just by clipping through some enemies, which saves a massive amount of time in for example L8 by making a completely different route possible, and in L28 by making the bottom half much more straight-forward. Though it’s also worth noting that some commonly occurring suboptimal flash level times in for example 5, 20 and 27 are tied with ruffle.
+	[br 
+	]br
+	$LF
+	"As for L9, oh I nearly forgot to mention-
+	$LF
+]div
+[h4 id=HiddenCoin 
+	"Hidden coin
+	$LF
+]h4
+[div class=p 
+	"There exists a second, invisible, inaudible coin in level 9, inside of a wall. It is possible to collect with a wall clip, but only on certain resolutions. Because the level is coded to require exactly one coin to beat, it’s possible to skip the regular coin by getting the other one. Despite being out of the way of the normal route, collecting the hidden coin still saves a decent amount of time.
+	$LF
+	"The best time for L9 with the regular coin is 8.800, so that would still be a timesave of 0,767 over ruffle just from enemy clipping.
+	$LF
+]div
+[h3 id=Afterword 
+	"Afterword
+	$LF
+]h3
+[div class=p 
+	"Anyway, that just about sums up everything related and unrelated to this tas. I suspect whg2 might have a similar thing with ruffle-exclusive framesaves, although the flash tas for that game is much, much more insane. Especially with the added in-game option to change the quality, which only further affects the hitboxes.
+	[br 
+	]br
+	$LF
+	"As for potential improvements, we’re fairly certain that this tas doesn’t really have any of those under the current circumstances. Maybe someday ruffle will be able to emulate flash hitboxes correctly, and we can submit a new tas utilizing enemy clips. Only time will tell
+	$LF
+]div
+[h3 id=Credits 
+	"Credits
+	$LF
+]h3
+[div class=p 
+	"Authors of this tas:
+	[br 
+	]br
+	$LF
+	"GGG502: pretty much everything
+	[br 
+	]br
+	$LF
+	"Raflikk: saved seven frames across level 21 and 29
+	[br 
+	]br
+	$LF
+	"Dado: converted inputs to libtas, clicked go
+	[br 
+	]br
+	$LF
+	"(Fraims: suggested that level 7 might be improvable, does not have any inputs)
+	$LF
+]div
+[div class=p 
+	"Non-exhaustive list of people that have developed tas mods or tases for whg1 in flash:
+	[br 
+	]br
+	$LF
+	"Pzula, Steev0, Raflikk, GGG502, theme, Hsblue, Vowels, Fraims, Danicker
+	$LF
+]div
+[div class=p 
+	"Special thanks:
+	[br 
+	]br
+	$LF
+	"Stephen Critoph, for creating this game
+	[br 
+	]br
+	$LF
+	"Fraims, for writing these submission notes
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ikuyo 
+		"ikuyo
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Fixed formatting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ikuyo 
+		"ikuyo
+	]a
+	": 
+	[del 
+		"Delayed while authors work on submission notes
+	]del
+	" Judging now!
+]div

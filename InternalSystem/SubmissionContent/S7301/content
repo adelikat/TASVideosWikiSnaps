@@ -1,0 +1,639 @@
+4
+[div class=p 
+	"The Lawnmower Man was a game based on the 1992 movie of the same name. It features impressive graphics and effects for the time, to mimic the virtual reality scenes from the movie. Although the game was released on multiple consoles including the SNES, the Genesis / Megadrive version is vastly different and should be considered a completely different speedgame.
+	$LF
+	"This TAS completes the game on the hard difficulty. The hard difficulty gives you less health and makes the enemies take more hits. While a frustrating difficulty to play normally, the hard difficulty was used as that is generally the standard for TASes and also because it leads to more interesting boss strategies due to the fights lasting longer. A possible 100% category would complete all of the terminal puzzles to get 100% on the end screen, but this TAS does not complete any terminals, so falls under an “any%” category.
+	$LF
+	"The game is split up into half virtual reality sections and half platforming sections. At first glance, it looks like a bad speedgame because the virtual reality sections are autoscrollers. However, the platforming sections have extremely interesting tech that makes up for it. Furthermore, some of the virtual reality sections have bits where you need to stop and kill enemies before moving on, making it possible to save or lose time, and not completely be an autoscroller.
+	$LF
+]div
+[div class=p 
+	"Note that the final input is upon shooting the last access granted hexagon in the Jobe fight, but the encode uses some inputs to enter a name into the score screen.
+	$LF
+]div
+[div class=p 
+	"This TAS clocks in at 19:32.109 using TAS timing. This saves about 5 minutes and 40 seconds over the RTA WR of 25:09 on hard mode: 
+	[a href=https://youtu.be/DQl99kGd52s rel=noopener external nofollow 
+		"https://youtu.be/DQl99kGd52s
+	]a
+	" Of course, TAS and RTA should not be directly compared, but I’m listing it here for curiosity. There is also an old TAS by lollybomb clocking in at 26:08: 
+	[a href=https://youtu.be/R41vNS3YTIk rel=noopener external nofollow 
+		"https://youtu.be/R41vNS3YTIk
+	]a
+	" However, since the RTA record beat this TAS, I have mainly used the RTA record for reference.
+	$LF
+]div
+[h2 id=UsefulRamAddresses 
+	"Useful RAM addresses
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Description
+			]th
+			[th 
+				"Address
+			]th
+		]tr
+		[tr 
+			[td 
+				"X Pos
+			]td
+			[td 
+				" A284, A285, A286
+			]td
+		]tr
+		[tr 
+			[td 
+				"Y Pos
+			]td
+			[td 
+				" A288, A289, A28A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Screen X
+			]td
+			[td 
+				" 383A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Screen Y
+			]td
+			[td 
+				" 383C
+			]td
+		]tr
+		[tr 
+			[td 
+				"Level Screen Bounds
+			]td
+			[td 
+				"3882, 3884
+			]td
+		]tr
+		[tr 
+			[td 
+				"Y Velocity
+			]td
+			[td 
+				" 35AD, 35AE
+			]td
+		]tr
+		[tr 
+			[td 
+				"Jobe Fight HP Values
+			]td
+			[td 
+				"A784, A884, A59D, AD1D, AB1D, AB9D, AA1D, AC9D
+			]td
+		]tr
+		[tr 
+			[td 
+				"Misc HP Values
+			]td
+			[td 
+				"A_1D, A_9D
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Note that the boss HP values move around on the object array, so they will not be the same as what I had in this TAS. The other funny thing is the object names are written in plaintext ASCII within the object array, making it very easy to find what you’re looking for.
+	$LF
+]div
+[h2 id=GunComparision 
+	"Gun comparision
+	$LF
+]h2
+[div class=p 
+	"Fire rate is how long you have to wait before another shot
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Gun Type
+			]th
+			[th 
+				"Damage
+			]th
+			[th 
+				"Fire Rate
+			]th
+		]tr
+		[tr 
+			[td 
+				"2 shot (starting)
+			]td
+			[td 
+				"2 (1 per shot)
+			]td
+			[td 
+				"17 frames
+			]td
+		]tr
+		[tr 
+			[td 
+				"3 shot
+			]td
+			[td 
+				"3 (1 per shot)
+			]td
+			[td 
+				"17 frames
+			]td
+		]tr
+		[tr 
+			[td 
+				"4 shot
+			]td
+			[td 
+				"4 (1 per shot)
+			]td
+			[td 
+				"17 frames
+			]td
+		]tr
+		[tr 
+			[td 
+				"4 shot + homing
+			]td
+			[td 
+				"4 (1 per shot)
+			]td
+			[td 
+				"17 frames
+			]td
+		]tr
+		[tr 
+			[td 
+				"4 shot + homing + 2 back shooting bullets
+			]td
+			[td 
+				"6 (1 per shot)
+			]td
+			[td 
+				"17 frames
+			]td
+		]tr
+		[tr 
+			[td 
+				"Big circle shot
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"17 frames
+			]td
+		]tr
+		[tr 
+			[td 
+				"Line shaped dotty shot
+			]td
+			[td 
+				"2 (10 if gun is touching enemy)
+			]td
+			[td 
+				"11 frames
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The line shaped dotty shot is hilariously bad if you’re playing casually or doing an RTA speedrun. This is because it does a tiny 2 damage per shot and it doesn’t shoot in a straight line forward (it flies up eventually). But it has the unique feature, that it will deal 10 damage rather than 2 if your gun hitbox is inside the enemy you are attacking. Furthermore, if your gun hitbox is inside 2 enemies, it deals 10 damage to each. This is useful, for example in the cube boss where you can attack two at a time, dealing 20 total damage every 11 frames, vs the next best gun (circle) which deals 9 damage every 17 frames. The big downside of the dotty shot is that it’s hard to kill normal enemies, due to the sporadic firing direction. 
+	$LF
+	"Generally, RTA will use the big circle shot. This is realistically the best one for RTA, as it is unlikely that they can consistently get their gun inside bosses. But for TAS, it makes sense to get the dotty shot ASAP, purely based on DPS.
+	$LF
+]div
+[h2 id=MovementTech 
+	"Movement Tech
+	$LF
+]h2
+[h3 id=JumpingVsWalking 
+	"Jumping vs walking
+	$LF
+]h3
+[div class=p 
+	"Jumping speed is slower than walking speed, so I make an effort to avoid jumping where possible.
+	$LF
+]div
+[h3 id=DuckJumping 
+	"Duck Jumping
+	$LF
+]h3
+[div class=p 
+	"Ducking when landing from a jump allows you to jump slightly sooner. This is useful for attacking bosses that involve repeated jumping and shooting.
+	$LF
+]div
+[h3 id=DuckTurning 
+	"Duck Turning
+	$LF
+]h3
+[div class=p 
+	"Ducking slows you down quicker, meaning ducking can allow you to turn around quicker
+	$LF
+]div
+[h3 id=HighJumpTurningStrategy 
+	"High Jump (Turning Strategy)
+	$LF
+]h3
+[div class=p 
+	"Turning around a frame before a jump allows you to jump higher. This is used in the first platforming level to skip jumping on an inbetween platform at the end.
+	$LF
+]div
+[h3 id=HighJumpCybersuit 
+	"High Jump (Cybersuit)
+	$LF
+]h3
+[div class=p 
+	"Having the cybersuit allows you to jump higher. This requires collecting enough discs. This is used in combination with the high jump turning strategy to achieve the skip in the first platforming level.
+	$LF
+]div
+[h3 id=TheorisingWrongWarps 
+	"Theorising Wrong Warps
+	$LF
+]h3
+[div class=p 
+	"Most platformer levels take place on one large map, containing multiple levels. In theory you could get out of bounds and skip levels, but unfortunately the objects aren’t loaded anywhere except for the section you should be in. This means it looks like you have to complete the levels in order.
+	$LF
+	"Furthering this, after testing, it seems like the exits just send you to whatever the “next” level is, so even if the objects for future levels were loaded, they wouldn’t skip you past levels. I searched for glitchy exits out of bounds with no luck, but even if there were some glitchy exits out of bounds, based on these findings it looks like they wouldn’t send you anywhere interesting.
+	$LF
+]div
+[h3 id=LevelSkips 
+	"Level skips
+	$LF
+]h3
+[div class=p 
+	"The clipping technique allows many levels to be skipped straight to the end. This will be discussed further in the individual level comments.
+	$LF
+]div
+[h2 id=IndividualLevelComments 
+	"Individual Level Comments
+	$LF
+]h2
+[h4 id=Virtual1IndustrialZone 
+	" Virtual 1 (Industrial Zone)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platformer1WhiteCar 
+	" Platformer 1 (white car)
+	$LF
+]h4
+[div class=p 
+	"It is possible to skip the car boss in level 1. This is achieved by clipping through the floor and wrapping your y-coordinate past FF to get back to the top of the level. This allows you to reach the top of the building where you fight the car to reach the end of the level. A video of this skip can be found here: 
+	[a href=https://youtu.be/0h3L1VD9rEA rel=noopener external nofollow 
+		"https://youtu.be/0h3L1VD9rEA
+	]a
+	" 
+	$LF
+]div
+[div class=p 
+	"Surprisingly this skip only saves 54 frames, despite skipping the entire boss. The main reason for the lack of time save is the time taken to wrap your y-coordinate. The other reason is that it takes a long time to shoot the portal at the end of the level, since without the skip you come from the right, so you can shoot the portal at the end of the level as you’re running up to it.
+	$LF
+]div
+[div class=p 
+	"Although it is quicker to skip level 1, it is slower over the whole game. This is because skipping the car boss stops you from picking up the gun upgrade. The gun upgrade puts you up to 4 bullets rather than 2. Skipping the gun upgrade loses time on: the 3 monkeys in level 2, the bike boss, the black car boss or picking up another gun upgrade. There is another quick gun upgrade before the bike in level 2, but it only upgrades your gun to 3 bullets, unlike the 4 bullet upgrade in level 1. Because of this, the TAS completes level 1 normally.
+	$LF
+]div
+[div class=p 
+	"The car boss is approached with a mix of the charge shot and regular bullets. I keep to the left so that I can fire earlier, as firing the car up close means I have to wait until it’s on screen to fire. It’s important to have the correct distance from the car when firing the charge shot since it will do different damage amounts depending how many frames the charge shot beam makes contact with the car. It’s also important to duck when shooting the car. 
+	$LF
+	"One main goal of the level is to get the cyber suit. This is achieved by getting enough disc collectables and filling up the red bit of the bar on the top left of the screen. The cybersuit allows you to jump slightly higher, skipping a small section after the car by jumping straight onto the library. Getting enough discs is difficult, since they aren’t collectible until a short wait after they spawn. This means I had to stay and collect some from the car before moving on.
+	$LF
+]div
+[h4 id=Virtual2VirtualAtlantis 
+	" Virtual 2 (Virtual Atlantis)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platfomer2Bike 
+	" Platfomer 2 (Bike)
+	$LF
+]h4
+[div class=p 
+	"The first hurdle is the 3 monkeys. The strategy used was to kill the middle monkey, allowing a path to jump through. I managed to do this while holding right the entire time, but it did involve some jumping, which makes you move slower. I minimised jumping as much as possible. I did also play with clipping through the floor to get underneath the 3 monkeys and skip them, but this was slower by about 10 frames. I would suggest that RTA runners try clipping through the floor, as killing the monkeys RTA is slow and risky. I have a tutorial on it here: 
+	[a href=https://youtu.be/6NdAyMp_CKE rel=noopener external nofollow 
+		"https://youtu.be/6NdAyMp_CKE
+	]a
+	" 
+	$LF
+	"In a 100% all terminals run, clipping through the floor would save significant time as it avoids backtracking.
+	$LF
+]div
+[div class=p 
+	"Fun fact: These monkeys are likely inspired by the monkey at the start of the movie. In the extended directors cut of the movie, the monkey escapes and befriends Jobe. Jobe is happy to have his monkey friend, who he calls “cyberman”.
+	$LF
+]div
+[div class=p 
+	"The bike boss is short, thanks to it’s small health amount but unfortunately I couldn’t get it in one cycle. I beat it when to the right of the screen to cut some walking. After the boss there is a gun upgrade, but it’s not worth grabbing this.
+	$LF
+]div
+[h4 id=Virtual3CyberwarZone1 
+	" Virtual 3 (Cyberwar Zone 1)
+	$LF
+]h4
+[div class=p 
+	"The first non-autoscroller virtual section. The screen locks occasionally and won’t unlock until you defeat 5 enemies. I tried to manipulate where they appear but they came up consistently in the same spot seemingly no matter what I did earlier in the TAS. Due to this, I dealt with the patterns I got and tried to beat them as quickly as possible.
+	$LF
+]div
+[div class=p 
+	"You can generally shoot the enemies earlier by hovering right over the edge of where they spawn. I also played with some velocity tricks. For example, if I kill an enemy and the next one is to the left, I will make sure I’m moving full speed to the left already when killing it, meaning I will need to start from the right of the enemy.
+	$LF
+]div
+[h4 id=Platformer3BlackCarAndPumps 
+	" Platformer 3 (Black car and pumps)
+	$LF
+]h4
+[div class=p 
+	"This section starts with a short helicopter ride. The helicopter moves faster than the player, so it is used for as long as possible. You need to land the helicopter carefully on the ground, otherwise it will explode.
+	$LF
+]div
+[div class=p 
+	"The black car boss has a unique property where if you jump on the top, it will go into reverse and chase you back. This is used to keep it on screen for the whole fight, unlike the other bosses so far who take several screen exits to kill.
+	$LF
+]div
+[div class=p 
+	"Before the pumps, a gun upgrade is obtained at the cost of no time. This is the same strength as the 4 shot, but with homing bullets instead. It ends up being helpful in the pumps fight.
+	$LF
+]div
+[div class=p 
+	"The pumps have 3 phases: the hoses, the bases and the fire man. The hoses are the hardest and I try to line them up together to hit both of them with a charge shot as much as possible. Killing the hoses at similar times is important, so that I’ll be fighting both bases at the same time. Fighting one base at a time wastes valuable charge shots, since it could potentially hit both bases if they’re both active.
+	$LF
+]div
+[div class=p 
+	"Suprisingly, you don’t need to duck to hit the bases with your shots, even though they appear to be quite low. When fighting them normally, the front base gets destroyed much sooner than the back. This is because, even though the charge shot hits both, the 4 bullet shot will hit the front base with all 4 bullets if you’re not jumping. To avoid this, I time small jumps so that 2 bullets hit the front base and 2 hit the back at a time. This keeps their health roughly in sync, allowing them to both be beaten at the same time. Again, the reason why it’s bad to kill just one first is because it wastes the charge shot, which could potentially hit both of them at full power for just the one shot.
+	$LF
+]div
+[div class=p 
+	"The flame man patterns are random and depend when and how you kill the bases. It’s possible to have the flame man hang out just to the right of the screen and be able to hit him without him moving, but once he is down to half health he usually jumps further right, stopping you from hitting him until you slowly wait for him to come back. To avoid this, I manipulate him to to a big jump to the left at the start onto the screen and manipulate him to stand in the one spot. Having him on screen also allows your charge shot to connect for more frames and hence deal more damage per shot. Conveniently, I kill the flame man just before another charge shot is charged, allowing me to use it on the access denied portal.
+	$LF
+]div
+[h4 id=Virtual4CyberRun 
+	" Virtual 4 – Cyber Run
+	$LF
+]h4
+[div class=p 
+	"This is almost an autoscroller but not quite. The level starts with 5 enemies to kill. They take just one shot each to kill but you cant shoot them until they’re close enough. I’m not sure whether the level takes longer if you take longer to kill them, but I didn’t want to risk it so I kill them as soon as possible.
+	$LF
+]div
+[div class=p 
+	"After these enemies you get a turbo powerup, which ups your forwards speed. It’s crucial to hold onto this for the rest of the level, making the level an autoscroller from this point. It’s quite difficult to hold onto this RTA, but I manage to keep it to the end in TAS. This level gives a very fun opportunity for syncing shots up to music too.
+	$LF
+]div
+[div class=p 
+	"While doing the playaround, I noticed some lag frames in TAStudio, but the game seems to still process your movement during these, meaning the red frames don’t actually lose any time.
+	$LF
+]div
+[div class=p 
+	"Interestingly, the layout of this level seems different on different difficulties.
+	$LF
+]div
+[h4 id=Platformer4FirstWarehouse 
+	" Platformer 4 (First Warehouse)
+	$LF
+]h4
+[div class=p 
+	"Although I was disappointed that I couldn’t show off the level 1 boss skip in the TAS, the game finally gets broken at this point. You start down the bottom of the level and work your way up. Rather than climbing up, I clip through the ground and keep moving down until my y-coordinate overflows and I fall back through the top of the level.
+	$LF
+]div
+[div class=p 
+	"These long falls are incredibly difficult to optimise for two reasons: height of the jump and x-position. With the jump height, you need to line your height up so that the player hits the desired ground when you loop back around. Because the y-velocity is so high after looping, it’s very possible that when you clip through the last bit of out of bounds geometry, you will clip through the platform you’re actually trying to land on. To avoid this, I hold jump for a particular amount of time that gives me a frame where the character is slightly above the desired platform.
+	$LF
+]div
+[div class=p 
+	"The other factor is x-position. The portal is slightly to the right of where the level starts, and naturally I want to jump and start falling as soon as possible. You can move to the right while falling and upping your y-coordinate but you need to ensure you don’t hit any oob geometry or any death areas. It turns out that oob geometry is so common that you almost always need to be pressing lrlr to clip (and hence not moving to the right). As I was falling, I checked on every frame whether I needed to alternate directions to keep clipping down, or whether I could hold right to get some more x-position. Sometimes I could hold right for just two frames, but that doesn’t actually give you any more x-position, so I used these opportunities to offset my alternation pattern, so that the next batch of right presses may have one more frame held.
+	$LF
+]div
+[div class=p 
+	"Doing these falls optimally takes about an hour per fall and I had to keep pulling back the jump by a frame each time to see if I could make the jump earlier. Every time you pull back the jump by a frame, you have to redo the whole thing, taking about another hour.
+	$LF
+]div
+[div class=p 
+	"I fall next to the portal at the end and for some reason this triggers the cube boss fight. Luckily you can just hit the portal and finish the level.
+	$LF
+]div
+[div class=p 
+	"This skip saves 2429 frames (40.5 seconds), but it does lose some time later due to not having the better gun upgrade that would have been obtained without the skip. If you’re interested in seeing this level TASed without the skip, I do have it in an old WIP here: 
+	[a href=https://youtu.be/LnM7_g7mqTs?t=374 rel=noopener external nofollow 
+		"https://youtu.be/LnM7_g7mqTs?t=374
+	]a
+	" 
+	$LF
+]div
+[h4 id=Virtual5CyberDusk 
+	" Virtual 5 (Cyber Dusk)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platformer5HelicopterAndWarehouse2 
+	" Platformer 5 (Helicopter and Warehouse 2)
+	$LF
+]h4
+[div class=p 
+	"I couldn’t get the helicopter in the first time it was on screen but I just barely get it before it leaves the second time. The trick to this is dying mid fight to get i-frames. These i-frames allow me to enter the helicopter’s hitbox when it comes back and fire a charge shot to the left. When doing this, the helicopter flies very fast to the left, at a similar speed to the charge shot. This allows the charge shot to connect the entire time and deal significant damage. The fight may have been slightly faster if I had the better gun from the previous level, but in all my testing I still couldn’t kill the helicopter the first time it was on screen, even using that better gun.
+	$LF
+]div
+[div class=p 
+	"Dying in the helicopter fight drastically shortened it, but this makes me lose the cybersuit. Although not a major issue, the lower jump height loses me a small amount of time in a later level.
+	$LF
+]div
+[div class=p 
+	"After the helicopter is an indoor section. Hilariously, the end of level portal is directly above the starting point. This means a quick y-overflow gets me straight to the end, skipping a huge level. Luckily I didn’t have to re-optimise falling with x-position adjustments as I’m already in the perfect portal position before the fall.
+	$LF
+]div
+[h4 id=Virtual6ConcreteJungle 
+	" Virtual 6 (Concrete Jungle)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platformer6Elevator 
+	" Platformer 6 (elevator)
+	$LF
+]h4
+[div class=p 
+	"A tiny level with not much interesting to comment on.
+	$LF
+]div
+[h4 id=Virtual7Cyberwar2 
+	" Virtual 7 (Cyberwar 2)
+	$LF
+]h4
+[div class=p 
+	"Similar optimisation techniques to cyberwar 1.
+	$LF
+]div
+[h4 id=Platformer7Crates 
+	" Platformer 7 (Crates)
+	$LF
+]h4
+[div class=p 
+	"Another level absolutely broken by the clipping tech. The portal is directly below the starting point, allowing the entire level to be skipped easily. This is the only major clipping skip currently possible RTA and it saves about 50 seconds. I have a tutorial on it here: 
+	[a href=https://youtu.be/6NdAyMp_CKE rel=noopener external nofollow 
+		"https://youtu.be/6NdAyMp_CKE
+	]a
+	" 
+	$LF
+]div
+[h4 id=Virtual8CyberOffice 
+	" Virtual 8 (Cyber Office)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platformer8Shop1 
+	" Platformer 8 (Shop 1)
+	$LF
+]h4
+[div class=p 
+	"The vending machine is easily taken out by a few charge and normal shots. The only thing to watch is the cans it spots out that can either block your shots or kill you. The vending machine may have been quicker with the better gun, but not my much as the dotty shot has trouble hitting enemies from a distance.
+	$LF
+]div
+[div class=p 
+	"After the vending machine is a small elevator going upwards. It is possible to skip taking this elevator if you have the cybersuit, but unfortunately I lost it in the helicopter fight from earlier. Although that makes this section slower, it is worth it for the significant time save from the helicopter. I tried to get enough discs to get the cybersuit again before the elevator, but there aren’t enough quick discs to get it before the elevator.
+	$LF
+]div
+[div class=p 
+	"Towards the end of the level, I get the dotty shot. This is incredibly powerful up close but terrible for killing the two guards up ahead. It’s definitely worth getting for future boss fights. From now on, most of the small enemies are killed using the charge shot, as hitting the dotty shot from a distance is very unreliable and only does about 2 damage.
+	$LF
+]div
+[h4 id=Virtual9CyberEgypt 
+	" Virtual 9 (Cyber Egypt)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platformer9Shop2 
+	" Platformer 9 (Shop 2)
+	$LF
+]h4
+[div class=p 
+	"This begins with a scientist enemy who locks the screen. You need to wait for the black shield to go away before hitting him. A charge shot and a few quick close range dotty shots take him out easily. It’s possible to skip this scientist fight by clipping down under the floor and using the terminal, which unlocks the screen. However, using the terminal takes longer than the actual scientist fight. Skipping the fight with the terminal like this would be faster in a 100% All Terminals TAS though. After the scientist, I clip through the floor as it is faster than taking the elevator down.
+	$LF
+]div
+[div class=p 
+	"The next boss is the bees. I instantly take a death, as it allows me to get close enough for a 10 damage dotty shot without worrying about dying. The charge shot is timed to hit many bees at once where possible. At one point in the fight, 3 bees overlap, so I hit them with a close range dotty shot for 10 damage each.
+	$LF
+]div
+[div class=p 
+	"The next boss is the cubes. It was unfortunate to skip the first warehouse level as I liked the first cube fight, but fortunately the fight is shown in this level. The fight uses a unique strategy with a bomb item. The rocket man enemy drops a circular ! item, which causes an explosion when touched. I kill the rocket man, leaving the ! in the arena but unfortunately, it is inside the left stack of cubes. To get around this, I clip the floor to take a death, putting me back to the x-position I jumped from (inside the cubes). This allows me to hit the !, taking about half of the health off the stack of 3 cubes on the left. The other major adventage of dying is the i-frames allowing me to sit in the cubes for a while longer. While in the left cubes, I fire a charge shot to the right. This hits both the left stack and the right stack, making excellent use of the charge shot. Similarly, when I move to the right, I enter the right stack with my i-frames and fire a charge shot to the left to hit both stacks. The general strategy for the fight is to kill the left stack with the explosion and charge shots and the right stack with close range dotty shots.
+	$LF
+]div
+[h4 id=Virtual10Cyberwar3 
+	" Virtual 10 (Cyberwar 3)
+	$LF
+]h4
+[div class=p 
+	"Same optimisation strategies as Cyberwar 1 and 2.
+	$LF
+]div
+[h4 id=Platformer10Shop3 
+	" Platformer 10 (Shop 3)
+	$LF
+]h4
+[div class=p 
+	"This starts with another scientist enemy like before. Again, you can clip under him but the screen will still lock. After the scientist you are meant to drop down, then go left, drop again, then go right. But a clip skips this.
+	$LF
+]div
+[h4 id=Virtual11CyberDusk 
+	" Virtual 11 (Cyber Dusk)
+	$LF
+]h4
+[div class=p 
+	"Autoscroller
+	$LF
+]div
+[h4 id=Platformer11Shop4 
+	" Platformer 11 (Shop 4)
+	$LF
+]h4
+[div class=p 
+	"Just run right.
+	$LF
+]div
+[h4 id=Virtual12CyberTube 
+	" Virtual 12 (Cyber Tube)
+	$LF
+]h4
+[div class=p 
+	"Another very interesting level, but it’s still an autoscroller. I kill the various sets of enemies as quickly as possible, but I don’t think it actually has any impact on the overall time of the level.
+	$LF
+]div
+[h4 id=Platformer12Shop5 
+	" Platformer 12 (Shop 5)
+	$LF
+]h4
+[div class=p 
+	"Just run right… again.
+	$LF
+]div
+[h4 id=Jobe 
+	" Jobe
+	$LF
+]h4
+[div class=p 
+	"This fight is broken up into sections of shooting Jobe’s face, then shooting the access granted portals and changing them to access denied.
+	$LF
+	"Each of your shots to Jobe’s face will deal between 0 and 3 damage. The damage depends on the distance he is from you. You can have 4 bullets on screen at once, so fighting Jobe is a delicate balance of getting your bullets out quickly, but sometimes delaying them if doing so would deal extra damage. He gradually gets more health in each phase.
+	$LF
+]div
+[div class=p 
+	"Fighting the access granted portals is surprisingly technical. You have to deal 100 damage to each one and each shot deals 4 damage, unless you’re shooting on the edge of the portal, where a shot can deal between 0 and 4 damage. The technical aspect comes from the possibility of shooting two portals with one bullet. Usually when you do this, the 4 damage is divided between the two portals, but sometimes you can get over 4 in total with one bullet, using precise positioning. The game kicks you back to Jobe once it either times out this section, or you turn a portal from granted to denied. Unfortunately, even if you hit two portals with the same bullet, and both have one health left, only one will turn to denied. This eliminates any hope of a “cycle skip”. However, hitting two portals with one bullet was useful in slightly speeding up the fight. Since you need to deal 100 damage and you shoot bullets for 4 damage 4 at a time, you deal 16 damage for every group of shots you do. This means that you’ll reach 96 damage then have to wait for your next group of shots to deal your last 4 damage. To deal with this issue, I used overlap shots, to deal at least 4 damage to most portals before specifically targeting them the next round. This allows me to kill them in 8 groups of 4 shots rather then 8 groups + waiting for one loose shot.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Maybe I'm biased because I am the exact kind of person who vibes with weird licensed video games, but I had a great time with this. The floor clips were an obvious highlight, they're almost in that sort of cyberpunk style of "Well, I could take the long route, or I could just hack my way to the end", except instead of hacking, it's jumping through floors, and instead of the end... Okay, it's still the end. That doesn't change. I also really appreciate the planning put into each fight, particularly the ones near the end with the 
+	[del 
+		"chaser lightning shot from Gunstar Heroes
+	]del
+	" final gun upgrade that involved getting up close and personal to take full advantage. This, combined with some nice varied playarounds in the autoscrollers and overall great execution, made the run that much more of a joy to watch, both from an entertainment perspective and a technical perspective.
+	$LF
+]div
+[div class=p 
+	"Accepting!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

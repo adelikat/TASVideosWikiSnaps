@@ -1,0 +1,426 @@
+8
+[h3 id=Aim 
+	[b 
+		"Aim
+	]b
+	$LF
+]h3
+[div class=p 
+	"Beat the game as quickly as possible by exploiting a glitch in World 8-4 that allows controller inputs to be read as arbitrary code.
+	$LF
+]div
+[h3 id=Background 
+	[b 
+		"Background
+	]b
+	$LF
+]h3
+[div class=p 
+	"LuigiSidekick first discovered a bug where they accidentally crashed the game in 8-4 during a casual playthrough of SMB2 and posted about it on Twitter in March. 
+	[a class=intlink href=/Users/Profile/Simplistic6502 
+		"Simplistic6502
+	]a
+	" then discovered this post in the NESdev Discord server on March 28th and investigated the reasoning behind the crash. The crash occurs due to a logic error in the 
+	[b 
+		"DuplicateEnemyObj
+	]b
+	" subroutine, which is used by long firebars and Bowser. If all enemy slots are occupied, the object falls out of bounds into memory beyond the object slot flags (
+	[b 
+		"$0F
+	]b
+	" to 
+	[b 
+		"$14
+	]b
+	" in RAM), storing values at the slot corresponding to the first 
+	[b 
+		"$00
+	]b
+	" byte found. The first occurrence results in the object flag being stored at address 
+	[b 
+		"$15
+	]b
+	", which is an unused memory location. 
+	$LF
+]div
+[div class=p 
+	"However, if this happens a second time, the first slot to contain a green Koopa Troopa (a requirement as they have the ID 
+	[b 
+		"$00
+	]b
+	") in the object slot list is overwritten by a glitched object. The enemy ID which has replaced the first green Koopa Troopa will jump to a memory address corresponding to the slot available to the first half of the long firebar or Bowser and execute its contents as instructions.
+	$LF
+]div
+[h3 id=Method 
+	[b 
+		"Method
+	]b
+	$LF
+]h3
+[div class=p 
+	"The game-end glitch method used in this TAS was discovered by Threecreepio and involves loading enemy ID 
+	[b 
+		"$84
+	]b
+	" into any object slot other than slot 0. The code that processes enemy ID 
+	[b 
+		"$84
+	]b
+	" jumps to 
+	[b 
+		"$0747 (TimerControl)
+	]b
+	" in RAM, which can be manipulated by taking damage. Initially, it executes a 
+	[b 
+		"BRK 
+	]b
+	"opcode (
+	[b 
+		"$00
+	]b
+	"), triggering SMB2’s IRQ handler.
+	$LF
+]div
+[div class=p 
+	"Since this functions as a 2-byte opcode, the program counter moves to 
+	[b 
+		"$0749
+	]b
+	" once completed, which is also a 
+	[b 
+		"BRK
+	]b
+	" opcode. The values at 
+	[b 
+		"$074A
+	]b
+	" and 
+	[b 
+		"$074B
+	]b
+	" are determined by the controller inputs of Players 1 and 2, allowing full control over two bytes.
+	$LF
+]div
+[div class=p 
+	"Until damage is taken to manipulate 
+	[b 
+		"TimerControl
+	]b
+	", the game must be prevented from crashing by holding B + Select on Controller 2 to create an 
+	[b 
+		"RTS
+	]b
+	" instruction (
+	[b 
+		"$60
+	]b
+	"). Once damage is taken, 
+	[b 
+		"TimerControl
+	]b
+	" changes to 
+	[b 
+		"$FE
+	]b
+	", a 3-byte opcode that moves the program counter to 
+	[b 
+		"$074A
+	]b
+	" upon execution.
+	$LF
+]div
+[div class=p 
+	"At this point, the payload can be executed. The inputs from Controllers 1 and 2 result in the instruction 
+	[b 
+		"JMP ($008D)
+	]b
+	", an indirect jump to the address stored in locations 
+	[b 
+		"$8D
+	]b
+	" and 
+	[b 
+		"$8E
+	]b
+	". Addresses 
+	[b 
+		"$8D
+	]b
+	" and 
+	[b 
+		"$8E
+	]b
+	" store the X-position of fireballs shot by Mario, which can be freely manipulated. In this case, the stored values are 
+	[b 
+		"$81
+	]b
+	" and 
+	[b 
+		"$AA
+	]b
+	", forming the address 
+	[b 
+		"$AA81
+	]b
+	", which is part of the HandleAxeMetatile subroutine. This subroutine sets 
+	[b 
+		"OperMode ($0770)
+	]b
+	" to 
+	[b 
+		"$02
+	]b
+	", signaling the game to prepare the ending sequence.
+	$LF
+]div
+[h3 id=AlternateMethods 
+	[b 
+		"Alternate Methods
+	]b
+	$LF
+]h3
+[div class=p 
+	"It is theoretically possible to gain total control using a stop 'n' swap approach. A significant portion of SMB2's stack (
+	[b 
+		"$0160-$01E4
+	]b
+	") is not cleared by the Disk System BIOS, and SMB2 explicitly skips clearing this region when running the 
+	[b 
+		"InitializeMemory
+	]b
+	" subroutine. This method also relies on an indirect jump but uses only Controller 2 to jump to the address stored in 
+	[b 
+		"$00
+	]b
+	" and 
+	[b 
+		"$01
+	]b
+	", requiring camera-scroll manipulation. A smaller-scale version of this method, which does not require swapping cartridges, leverages the X-position of the 
+	[b 
+		"FloateyNumber
+	]b
+	" variables. This was discovered by 
+	[a class=intlink href=/Users/Profile/Simplistic6502 
+		"Simplistic6502
+	]a
+	" and 
+	[a class=intlink href=/Users/Profile/OnehundredthCoin 
+		"OnehundredthCoin
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Another alternative method, developed by 
+	[a class=intlink href=/Users/Profile/SBDWolf 
+		"SBDWolf
+	]a
+	" and 
+	[a class=intlink href=/Users/Profile/threecreepio 
+		"threecreepio
+	]a
+	", involves setting the coin count to 96 (
+	[b 
+		"$60
+	]b
+	") to create an 
+	[b 
+		"RTS
+	]b
+	" instruction and execute controller inputs as code across multiple frames. This approach requires having a life count other than 3, as this prevents the game from encountering a 
+	[b 
+		"STP
+	]b
+	" opcode and freezing when executing 
+	[b 
+		"NumberOfLives
+	]b
+	". Threecreepio has created a 
+	[a href=https://www.youtube.com/watch?v=w8WNu_VWJ10 rel=noopener external nofollow 
+		"demonstration video
+	]a
+	" showcasing this method.
+	$LF
+]div
+[h3 id=AreOtherSmb1EngineGamesVulnerableToThisExploit 
+	[b 
+		"Are Other SMB1-Engine Games Vulnerable to This Exploit?
+	]b
+	$LF
+]h3
+[div class=p 
+	"Yes. All Night Nippon Super Mario Bros. shares a nearly identical 8-4 level layout with SMB2, allowing this exploit to be used there as well. However, the enemy ID which must be loaded into memory to transfer execution to RAM is enemy ID 
+	[b 
+		"$83
+	]b
+	". While SMB1 and Vs. SMB have the same logic error in 
+	[b 
+		"DuplicateEnemyObj
+	]b
+	", no level layouts exist that allow a glitched enemy ID to spawn. Additionally, even if a glitched enemy could be spawned in SMB1, the game would likely crash on the cartridge release due to the 
+	[b 
+		"BRK
+	]b
+	" opcode causing an infinite loop.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Hard to believe but more than 10 years ago 
+	(__wikiLink|displaytext=I was the one|href=/Forum/Posts/355723)
+	" pushing for "game end glitch" movies not obsoleting regular completion! It even happened to 
+	(__wikiLink|displaytext=one of my movies|href=/Forum/Posts/356300)
+	"!
+	$LF
+]div
+[div class=p 
+	"But for all these years a certain aspect was so frequent in "game end glitch" branches (and other 
+	(__wikiLink|displaytext=major skip glitch|href=/Movies-warpbug)
+	" ones too) that it started feeling like a natural part of then and one of the reasons they are separate branches - 
+	(__wikiLink|displaytext=enormous time difference|href=/Forum/Posts/373897)
+	"!
+	$LF
+]div
+[figure 
+	[figcaption class=author 
+		"Quoting adelikat
+	]figcaption
+	[div class=p 
+		"actually, I did the math, and I calculated that when Masterjun aims for fastest time, his movie is on average 3395.25% faster than another author's movie
+		$LF
+	]div
+]figure
+[div class=p 
+	"Back in the times of tiers we aimed to have strict and clear rules for Vault, because the goal of that then-new tier was to have clear cuts, and if something doesn't clearly fit then it has to be entertaining enough for Moons. SPOILER: that goal was completely pointless, because no game was made with any kind of clear rules in mind, on the contrary - games aimed to be as varied as possible! That resulted in years of pain when we were trying to make make ends meet (literally) between games and policies. 
+	(__wikiLink|displaytext=The class system was introduced|href=/Forum/Topics/22710)
+	" as a white flag on our part, and we instead decided to 
+	(__wikiLink|displaytext=start focusing on authors|href=/Forum/Posts/512266)
+	" more than on policies.
+	$LF
+]div
+[div class=p 
+	"Then we started allowing more and more goals to be published without any feedback requirements, which constitutes the 
+	(__wikiLink|href=/Standard|implicitdisplaytext=standard)
+	" class. "Forgoes major skip glitch" was 
+	(__wikiLink|displaytext=the first new standard goal|href=/Forum/Posts/508613)
+	" after "fastest completion" and "full completion". Then 
+	(__wikiLink|displaytext=a whole bunch of others|href=/MovieRules#Standard)
+	".
+	$LF
+]div
+[div class=p 
+	"Now more quotes:
+	$LF
+]div
+[figure 
+	[figcaption class=author 
+		"Quoting feos
+	]figcaption
+	[div class=p 
+		"I personally think that whether major skip glitch is caused by memory corruption or breaking in-game physics, exact borderline will always need to be defined as a case-by-case consensus, depending on the game, how severe the skip is, and what the nature of the technique is. There can't be a simple clear-cut rule that resolves every known scenario nicely.
+		$LF
+	]div
+]figure
+[figure 
+	[figcaption class=author 
+		"Quoting feos
+	]figcaption
+	[div class=p 
+		"The decision should resolve the community consensus, not limit it
+		$LF
+	]div
+]figure
+[figure 
+	[figcaption class=author 
+		"Quoting MovieRules
+	]figcaption
+	[div class=p 
+		"The definition of a major skip varies from game to game, but is generally defined as an unintended skip of otherwise unavoidable gameplay.
+		$LF
+	]div
+]figure
+[div class=p 
+	"And only 
+	(__wikiLink|displaytext=the old description|href=/MovieTagGuidelines#MajorSkipGlitch)
+	" of the 
+	[em 
+		"Major skip glitch tag
+	]em
+	" says
+	$LF
+]div
+[figure 
+	[div class=p 
+		"Most of the time, more than half of the game is skipped, compared to the fastest movie that avoids this technique.
+		$LF
+	]div
+]figure
+[div class=p 
+	"but that's 1) old, 2) not a rule at all, and 3) even it says "most of the time" and refers to pure statistics.
+	$LF
+]div
+[div class=p 
+	"So after the discussion in this thread happened, we've also had a staff talk, and the agreement was the same: this movie shouldn't obsolete anything. To a lot of staff members, my initial claim that it would obsolete the current record didn't make sense at all, neither before explanation nor after.
+	$LF
+]div
+[div class=p 
+	"In the end, the only 
+	[b 
+		"reason for obsoletion
+	]b
+	" is if we ignore everything but the time difference.  But nobody wanted that, and we depend on the community when resolving edge cases.
+	$LF
+]div
+[div class=p 
+	"And the 
+	[b 
+		"reason to not obsolete
+	]b
+	" was that major skip glitch is not necessarily major 
+	[em 
+		"in time
+	]em
+	", but it can also be major 
+	[em 
+		"in its nature
+	]em
+	" and not in time.
+	$LF
+]div
+[div class=p 
+	"That's a fair point. Indeed if there are continuous improvements to the "game end glitch" branch, and we now obsolete because the time difference is too small, at which point exactly will we decide that it should stop obsoleting the main movie?
+	$LF
+]div
+[div class=p 
+	"Again if we ignore everything else but time, we'd have to obsolete "for now" and then when the "game end glitch" branch becomes "short enough", we'd unobsolete the regular movie and only keep "game end glitch" ones in their own obsoletion chain. The only problem is when exactly does "for now" end? There's no good answer for that, because it's all subjective anyway. The only real criterion we have is community consensus. And it'd be weird to ignore it until a certain time difference is reached, and then suddenly consider it after. Maybe at that point we wouldn't even have any audience left, because we'd be 
+	(__wikiLink|displaytext=rendered irrelevant|href=/Forum/Posts/514584)
+	" by the community at large.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Bottomline
+	]b
+	": Everyone wants this, so we just rely on community consensus and accept this movie as a separate goal, because skipping straight to the end is big enough difference on its own regardless of time.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

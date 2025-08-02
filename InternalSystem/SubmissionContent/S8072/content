@@ -1,0 +1,263 @@
+21
+[div class=p 
+	"This submission beats "Dragon Quest (J)" in about 6:20, using "Stone of Sunlight glitch".
+	$LF
+	"I used the Famicom version because the NES version doesn't have this glitch.
+	$LF
+]div
+[div class=p 
+	"NOTE: 
+	[b 
+		"I'm not sure if this movie syncs on a real console.
+	]b
+	" For example, in this movie, the game reads PPU write-only registers as data.
+	$LF
+]div
+[div class=p 
+	"At first, I made 
+	[a href=https://tasvideos.org/UserFiles/Info/638132478837146576 rel=noopener external nofollow 
+		"a movie
+	]a
+	" on FCEUX, but we replaced it with this SubNesHawk movie for accuracy.
+	$LF
+	"I believe we have to use SubNesHawk to make a verifiable movie of this game, because this game sometimes polls multiple inputs in a frame.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9 (SubNesHawk core)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+]ul
+[h3 id=AboutTheGlitch 
+	" About the glitch
+	$LF
+]h3
+[div class=p 
+	""Stone of Sunlight glitch" is originally 
+	[a href=https://www.nicovideo.jp/watch/sm40160521 rel=noopener external nofollow 
+		"found by cheap
+	]a
+	". I will describe it as possible as I can.
+	$LF
+]div
+[div class=p 
+	"First, you can take chests unlimitedly if you fill up the "open-chest" array (address $2A-$39).
+	$LF
+	"To do so, take some chests in a dungeon and die before exiting. Then the array is not re-initialized, so you can fill up the array before you take all chests in Tantegel Castle.
+	$LF
+	"(Note that the capacity of the array is 8 elements, and the array always has 3 elements for the chests in the throne room in Tantegel Castle)
+	$LF
+]div
+[div class=p 
+	"In this situation, if you take the chest containing "Stones of Sunlight", a glitch occurs and the game displays a string "12345".
+	$LF
+	"This is harmless by itself. But if your inventory is full, the game corrupts the window buffer ($0400-$07BF).
+	$LF
+	"And, the window buffer is corrupted a bit more if you open and close the inventory window.
+	$LF
+]div
+[div class=p 
+	"After corrupting the window buffer as above, scrolling the message window (dropping an item, using a cursed item, talking, etc.) causes a significant glitch and the game reads the beginning of zeropage memory as text script commands.
+	$LF
+	"Furthermore, the game treats zeropage memory as window buffer and corrupts it by message scrolling process.
+	$LF
+]div
+[div class=p 
+	"By the way, the "beat Dragonlord" flag exists at bit2 of $E4. So, if you can manipulate this address, you can beat the game just by going to the front of the king.
+	$LF
+	"But sometimes the game is softlocked by the glitch. Moreover, the address $E5 (message speed) is also often corrupted. If the message speed value is too large, conversations take so long time.
+	$LF
+]div
+[div class=p 
+	"As I said, the game reads zeropage memory as text script commands. So, you can write some script commands at some addresses (e.g. $47 (input), $4F (nmi counter), $50 (sprite animation counter)...).
+	$LF
+]div
+[div class=p 
+	"When the game corrupts zeropage memory by message scrolling, it writes via the pointer $42. And this pointer is also corrupted by the glitch.
+	$LF
+	"I found that the game writes 0 to $42 in many cases. In such cases, the game corrupts only the beginning of zeropage, so you cannot change $E4.
+	$LF
+	"To corrupt memory over $42, you need to write a large value to $42. To do so, write some script commands which emits multiple characters. For script commands, see 
+	[a href=https://datacrystal.romhacking.net/wiki/Dragon_Warrior:TBL rel=noopener external nofollow 
+		"Data Crystal
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Unfortunately, I haven't yet found a method to control this glitch precisely. It is difficult to analyze since it works like self-modifying code.
+	$LF
+]div
+[div class=p 
+	"rat926 uploads some examples of this glitch (movie files are available from the description texts):
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[a href=https://www.nicovideo.jp/watch/sm41740022 rel=noopener external nofollow 
+			"https://www.nicovideo.jp/watch/sm41740022
+		]a
+		" (syncs on FCEUX 2.6.5)
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://www.nicovideo.jp/watch/sm41821030 rel=noopener external nofollow 
+			"https://www.nicovideo.jp/watch/sm41821030
+		]a
+		" (syncs on FCEUX 2.1.2, desyncs on FCEUX 2.6.5)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Sometimes the hero name is corrupted by the glitch, and this tends to freeze the game when you talk to the king. But, you can sometimes avoid the freeze by opening and closing the menu beforehand (it partially fixed the corrupted hero name). This technique is found by pirohiko.
+	$LF
+]div
+[h3 id=AboutTheRun 
+	" About the run
+	$LF
+]h3
+[div class=p 
+	"The hero's stats depend on his name. I named him "は" for the reasons below:
+	$LF
+]div
+[ul 
+	[li 
+		" He has 15 HP, so he can walk through poisonous marsh with only one herb.
+		$LF
+	]li
+	[li 
+		" He has 3 agility, so enemies can easily surprise him (useful for deathwarp).
+		$LF
+	]li
+	[li 
+		" You can minimize cursor movements in the name screen.
+		$LF
+	]li
+]ul
+[div class=p 
+	"I go to Rimuldar and buy a key. And I return to Tantegel by deathwarp.
+	$LF
+]div
+[div class=p 
+	"I go to Rock Mountain Cave, open 5 chests, and fill up the inventory. And I deathwarp back to Tantegel.
+	$LF
+	"Note that the "open-chest" array is filled up.
+	$LF
+]div
+[div class=p 
+	"I go to the basement of Tantegel, and execute Stone of Sunlight glitch.
+	$LF
+	"I set $47 (input) to 0xAF (word "にじのしずく"), and set $50 to 0x70 (word "ラダトーム").
+	$LF
+]div
+[div class=p 
+	"The game enables the "beat Dragonlord" flag. The message speed value is still 0.
+	$LF
+	"And I go to the front of the king and beat the game.
+	$LF
+]div
+[div class=p 
+	"Note: In the first FCEUX movie, I mistaked the path in the bottom floor of Rock Mountain Cave, but this issue is fixed in the submission movie. (Thanks to juef for pointing out this.)
+	$LF
+]div
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[div class=p 
+	"This movie is just a resync of 
+	[a href=https://tasvideos.org/UserFiles/Info/638135566338441119 rel=noopener external nofollow 
+		"a NesHawk movie
+	]a
+	". In theory, you will be able to manipulate the RNG more efficiently taking advantage of subframe inputs.
+	$LF
+	"(For reference, I put 
+	[a href=https://gist.github.com/taotao54321/1bf4cd801f8de4cddaa4d1e94b99d7d2 rel=noopener external nofollow 
+		"a Lua script
+	]a
+	" to resync a NesHawk movie for SubNesHawk.)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I may have a bit of 
+	(__wikiLink|displaytext=fondness for this particular game on TASVideos|href=/469M)
+	". Judging!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I've tentatively added the "game end glitch" branch (EDIT: I actually did this time! I certainly didn't forget to do so on my first edit!!!), but I'm also dropping my judgement claim in order to let someone with more technical prowess judge the run more accurately. My fondness for TASes of this game remains the same, however.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": It's not often that a submission triggers improvements in emulation, but I've reached out to the nesdev people and got a test ROM that will allow us to see how consoles work with reading write-only PPU registers (which this movie relies on). While we're waiting for more console tests of it, I'm delaying this submission.
+	$LF
+]div
+[div class=p 
+	"Note that it doesn't mean that we will require emulation to be so good that this run will start syncing on console. Due to how console behavior on this front seems to be non-deterministic, and different from device to device, I want to accept this run (its SubNESHawk resync) if it's determined that this movie will work 
+	[b 
+		"in principle
+	]b
+	" if things align correctly, even if we can't find a console it will sync on.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Replacing with a 
+	(__wikiLink|displaytext=SubNESHawk resync|href=/Forum/Posts/520430)
+	" and accepting as a new branch.
+	$LF
+]div
+[div class=p 
+	"We've done due research, and based on the available info, nobody (not even NESDev gurus) claimed that this movie relies on an emulator glitch, even if it doesn't sync on the consoles we were able to try it on. We can't keep scrutinizing it further hoping to find a reason to reject, because reject reasons need to be 
+	[b 
+		"way
+	]b
+	" more apparent.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+	$LF
+]div

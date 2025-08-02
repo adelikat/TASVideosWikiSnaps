@@ -1,0 +1,634 @@
+6
+[div class=p 
+	[a href=https://distro.ibiblio.org/tinycorelinux/welcome.html rel=noopener external nofollow 
+		"Tiny Core Linux
+	]a
+	" is a lightweight Linux distribution that can run on older hardware, such as that emulated by PCem.  By default, it runs in RAM and does not save anything to a hard disk.  Usually, it requires Internet access in order to install programs, which come in TCZ files called extensions.  Extensions are similar to packages in other Linux distributions.  They may contain programs, documentation, or files with program settings.  Extensions sometimes require other extensions to be installed in order to work properly; these other extensions are called dependencies and are listed in DEP files.
+	$LF
+]div
+[div class=p 
+	"The steps below will walk you through an installation of Tiny Core Linux to a hard drive image.  They are based upon the instructions at 
+	[a href=http://distro.ibiblio.org/tinycorelinux/install_manual.html rel=noopener external nofollow 
+		"http://distro.ibiblio.org/tinycorelinux/install_manual.html
+	]a
+	".  However, everything will be done from the shell rather than via GUI programs.  If you wish to follow those instructions using GUI programs, you will probably need a TinyCore or CorePlus CD image and will probably need to set up PCem with network access.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#WhatYouLlNeed 
+					" What you'll need
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#InstallingTheExtensions 
+					" Installing the extensions
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#PartitioningTheHardDrive 
+					" Partitioning the hard drive
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#BootPartition 
+							" Boot partition
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#OptionalSwapPartition 
+							" Optional: Swap partition
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#FinishingUp 
+							" Finishing up
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#FormattingTheHardDrive 
+					" Formatting the hard drive
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#CopyingFilesToTheHardDrive 
+					" Copying files to the hard drive
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SettingUpGrub 
+					" Setting up GRUB
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h2 id=WhatYouLlNeed 
+	" What you'll need
+	$LF
+]h2
+[ul 
+	[li 
+		" PCem configured as per the 
+		(__wikiLink|displaytext=general guide|href=/EmulatorResources/PCem)
+		" up through the BIOS setup.
+		$LF
+	]li
+	[li 
+		" A bootable CD image with Tiny Core Linux.  These instructions will use the Core-7.0 ISO available 
+		[a href=https://distro.ibiblio.org/tinycorelinux/7.x/x86/archive/7.0/ rel=noopener external nofollow 
+			"here
+		]a
+		".  Other versions can be accessed via 
+		[a href=https://distro.ibiblio.org/tinycorelinux/downloads.html rel=noopener external nofollow 
+			"this downloads page
+		]a
+		".
+		$LF
+	]li
+	[li 
+		" The following extensions, which you can download from 
+		[a href=http://distro.ibiblio.org/tinycorelinux/7.x/x86/tcz/ rel=noopener external nofollow 
+			"here
+		]a
+		" and put on a floppy image:
+		$LF
+		[ul 
+			[li 
+				" cfdisk.tcz (and cfdisk.tcz.dep)
+				$LF
+			]li
+			[li 
+				" grub-0.97-splash.tcz (and grub-0.97-splash.tcz.dep)
+				$LF
+			]li
+			[li 
+				" ncurses.tcz
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"NOTE: In the following instructions, 
+	[b 
+		"bold text
+	]b
+	" should be typed into PCem.  Unless stated otherwise, press Enter after each line.  You can use tab completion for some commands, file names, and directory names.
+	$LF
+]div
+[h2 id=InstallingTheExtensions 
+	" Installing the extensions
+	$LF
+]h2
+[div class=p 
+	"Start PCem with the CD image in the CD drive.  At the boot prompt, press Enter.  After Tiny Core boots from the CD, you should reach the shell and see a line starting with 
+	[em 
+		"tc@box
+	]em
+	".
+	$LF
+]div
+[ul 
+	[li 
+		" Load the floppy image from above that contains the extensions.
+		$LF
+	]li
+	[li 
+		" Create a directory to access the contents of the floppy image: 
+		[b 
+			"mkdir /mnt/fl
+		]b
+		$LF
+	]li
+	[li 
+		" Mount the floppy so that you can access the files: 
+		[b 
+			"sudo mount /dev/fd0 /mnt/fl
+		]b
+		$LF
+	]li
+	[li 
+		" Copy the files from the floppy: 
+		[b 
+			"cp /mnt/fl/* .
+		]b
+		$LF
+	]li
+	[li 
+		" Unmount the floppy: 
+		[b 
+			"sudo umount /mnt/fl
+		]b
+		$LF
+	]li
+	[li 
+		" Install the extensions: 
+		[b 
+			"tce-load -i cfdisk.tcz grub-0.97-splash.tcz
+		]b
+		$LF
+	]li
+]ul
+[h2 id=PartitioningTheHardDrive 
+	" Partitioning the hard drive
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[b 
+			"fdisk -l
+		]b
+		" to show the available disks and partitions.  The following steps will use disk 
+		[em 
+			"/dev/sda
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"sudo su
+		]b
+		" to get a root shell.  You should see a line starting with 
+		[em 
+			"root@box
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"cfdisk /dev/sda
+		]b
+		" to start the cfdisk program that will be used to partition the disk.
+		$LF
+	]li
+]ul
+[div class=p 
+	"While in cfdisk, use the left and right arrow keys to navigate the menu at the bottom of the screen, and press Enter to select an option.
+	$LF
+]div
+[h3 id=BootPartition 
+	" Boot partition
+	$LF
+]h3
+[ul 
+	[li 
+		" Select 
+		[b 
+			"New
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Primary
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" Set the size that you want for the partition and press Enter.  NOTE: The hard disk does not boot properly if you enter the entire disk size here.  One workaround is to subtract 0.01 MB from the entire size.
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Beginning
+		]b
+		" to put the partition at the beginning of the available space.
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Bootable
+		]b
+		" so that the partition can be used to boot the computer.  Subsequent steps will use partition name 
+		[em 
+			"sda1
+		]em
+		".  If yours is different, then use that name.
+		$LF
+	]li
+]ul
+[h3 id=OptionalSwapPartition 
+	" Optional: Swap partition
+	$LF
+]h3
+[div class=p 
+	"A swap partition is hard drive space that can be used like RAM.  This can be useful if the actual RAM gets filled up, but writing to and reading from the hard drive is slower.
+	$LF
+]div
+[ul 
+	[li 
+		" Press the down arrow key to select the remaining free space.
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"New
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Primary
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" Set the size of the partition as desired.
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Beginning
+		]b
+		" to put the partition at the beginning of the available space.
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Type
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" Set type to 
+		[b 
+			"82
+		]b
+		" and press Enter.
+		$LF
+	]li
+]ul
+[h3 id=FinishingUp 
+	" Finishing up
+	$LF
+]h3
+[div class=p 
+	"After you have set up all of the partitions that you want:
+	$LF
+]div
+[ul 
+	[li 
+		" Select 
+		[b 
+			"Write
+		]b
+		", then type 
+		[b 
+			"yes
+		]b
+		" and press Enter.
+		$LF
+	]li
+	[li 
+		" Select 
+		[b 
+			"Quit
+		]b
+		" to exit cfdisk.
+		$LF
+	]li
+]ul
+[h2 id=FormattingTheHardDrive 
+	" Formatting the hard drive
+	$LF
+]h2
+[ul 
+	[li 
+		" Format the boot partition: 
+		[b 
+			"mkfs.ext3 /dev/sda1
+		]b
+		$LF
+	]li
+	[li 
+		" If you made a swap partition, type 
+		[b 
+			"mkswap /dev/sda2
+		]b
+		" and press Enter.  Use the appropriate partition name instead of 
+		[em 
+			"/dev/sda2
+		]em
+		".
+		$LF
+	]li
+	[li 
+		" Type 
+		[b 
+			"rebuildfstab
+		]b
+		" and press Enter.
+		$LF
+	]li
+]ul
+[h2 id=CopyingFilesToTheHardDrive 
+	" Copying files to the hard drive
+	$LF
+]h2
+[ul 
+	[li 
+		" Mount the boot partition: 
+		[b 
+			"mount /mnt/sda1/
+		]b
+		$LF
+	]li
+	[li 
+		" Mount the CD image that has the Tiny Core files: 
+		[b 
+			"mount /mnt/sr0/
+		]b
+		$LF
+	]li
+	[li 
+		" Create directories to hold the operating system and boot loader (GRUB) files: 
+		[b 
+			"mkdir -p /mnt/sda1/boot/grub
+		]b
+		$LF
+	]li
+	[li 
+		" Create a directory to hold extensions and the backup file: 
+		[b 
+			"mkdir -p /mnt/sda1/tce
+		]b
+		$LF
+	]li
+	[li 
+		" Copy the Tiny Core files to the hard drive: 
+		[b 
+			"cp -p /mnt/sr0/boot/* /mnt/sda1/boot/
+		]b
+		$LF
+	]li
+	[li 
+		" Copy the GRUB files to the hard drive: 
+		[b 
+			"cp -p /usr/lib/grub/i386-pc/* /mnt/sda1/boot/grub/
+		]b
+		$LF
+	]li
+	[li 
+		" Optional: Create the file used for backups: 
+		[b 
+			"touch /mnt/sda1/tce/mydata.tgz
+		]b
+		$LF
+	]li
+	[li 
+		" Unmount the CD image: 
+		[b 
+			"umount /mnt/sr0/
+		]b
+		$LF
+	]li
+]ul
+[h2 id=SettingUpGrub 
+	" Setting up GRUB
+	$LF
+]h2
+[ul 
+	[li 
+		" Start the vi text editor and create the file that GRUB uses for the boot menu: 
+		[b 
+			"vi /mnt/sda1/boot/grub/menu.lst
+		]b
+		$LF
+	]li
+	[li 
+		" In order to enter text, switch to insert mode by pressing 
+		[b 
+			"i
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" Type the following into the file:
+		$LF
+	]li
+]ul
+[pre 
+	"default 0
+	$LF
+	"timeout 10
+	$LF
+	"title Tiny Core 7
+	$LF
+	"kernel /boot/vmlinuz text
+	$LF
+	"initrd /boot/core.gz
+	$LF
+]pre
+[ul 
+	[li 
+		" Leave insert mode by pressing Esc.
+		$LF
+	]li
+	[li 
+		" Save the file and quit vi: 
+		[b 
+			":x
+		]b
+		$LF
+	]li
+	[li 
+		" Start GRUB: 
+		[b 
+			"grub
+		]b
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"root (hd0,0)
+		]b
+		" to specify which partition has the kernel image.  NOTE: If the partition name does not end in 
+		[em 
+			"a1
+		]em
+		", please see the GRUB documentation or the installation instructions on the Tiny Core site about how to figure out the numbers for this step and the next step.
+		$LF
+	]li
+	[li 
+		" Install GRUB: 
+		[b 
+			"setup (hd0)
+		]b
+		$LF
+	]li
+	[li 
+		" Exit GRUB: 
+		[b 
+			"quit
+		]b
+		$LF
+	]li
+]ul
+[div class=p 
+	"The hard disk image is now ready.  Eject the floppy and CD images.  You can shut down the system with 
+	[b 
+		"poweroff
+	]b
+	" or restart with 
+	[b 
+		"reboot
+	]b
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"For future reference:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[a href=https://flaterco.com/kb/audio/Semi_MIDI_Linux.html rel=noopener external nofollow 
+			"https://flaterco.com/kb/audio/Semi_MIDI_Linux.html
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://help.ubuntu.com/community/Midi/HardwareSynthesisSetup#For_Sound_Blaster_Awe64_.28and_probably_also_Awe32.29 rel=noopener external nofollow 
+			"https://help.ubuntu.com/community/Midi/HardwareSynthesisSetup#For_Sound_Blaster_Awe64_.28and_probably_also_Awe32.29
+		]a
+		$LF
+	]li
+]ul
+[div class=p 
+	"1. Add following line to the 
+	[code 
+		"/etc/modules
+	]code
+	" file. This will make the driver to load at boot time.
+	$LF
+]div
+[pre 
+	"snd-sb16
+	$LF
+]pre
+[div class=p 
+	"2. Add following line to the 
+	[code 
+		"/etc/modprobe.d/alsa_local
+	]code
+	" and 
+	[code 
+		"/etc/modutils/alsa_local
+	]code
+	" files.
+	$LF
+]div
+[pre 
+	"options snd-sb16 isapnp=0 port=0x220 irq=5 dma8=1 dma16=5 mpu_port=0x330
+	$LF
+]pre
+[div class=p 
+	"(I added this to 
+	[code 
+		"/etc/modprobe.d/alsa-base.conf
+	]code
+	" instead, 
+	[code 
+		"/etc/modutils
+	]code
+	" doesn't exist)
+	[br 
+	]br
+	$LF
+	[code 
+		"alsamixer
+	]code
+	" started displaying the sliders, 
+	[code 
+		"aplay -l
+	]code
+	" lists the card now
+	[br 
+	]br
+	$LF
+	[a href=https://i.imgur.com/rpvgILW.png rel=noopener external nofollow 
+		"https://i.imgur.com/rpvgILW.png
+	]a
+]div

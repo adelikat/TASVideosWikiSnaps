@@ -1,0 +1,426 @@
+5
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1 (BSNESv115+ core)
+		$LF
+	]li
+	[li 
+		" Aims for maximum score
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[div class=p 
+	"This run achieves the (probably) maximum scores for SNES "Same Game (J)".
+	$LF
+]div
+[div class=p 
+	"Here are the scores for each difficulties:
+	$LF
+]div
+[ul 
+	[li 
+		" Easy: 844
+		$LF
+	]li
+	[li 
+		" Medium: 2229
+		$LF
+	]li
+	[li 
+		" Hard: 8987
+		$LF
+	]li
+]ul
+[div class=p 
+	"Note: from a speedrun perspective, it is faster to reset the game immediately after a score is saved.
+	$LF
+	"But, this prevents the game from displaying the achieved score. So, I decided not to use a reset.
+	$LF
+]div
+[h3 id=AboutTheGame 
+	" About the game
+	$LF
+]h3
+[div class=p 
+	[a href=https://en.wikipedia.org/wiki/SameGame rel=noopener external nofollow 
+		"SameGame
+	]a
+	" is a tile-matching puzzle game.
+	$LF
+	"This game was originally created as "ChainShot!" by Morisuke, and it has been ported to various platforms.
+	$LF
+]div
+[div class=p 
+	"In this game, you can erase connected pieces of the same kind at once.
+	$LF
+	"In many versions, when you erase n pieces, you will get O(n^2) points.
+	$LF
+	"Additionally, if you erase all the pieces, you will get some bonus points.
+	$LF
+]div
+[div class=p 
+	"The SNES version has three modes:
+	$LF
+]div
+[ul 
+	[li 
+		" SameGame: "score attack" mode.
+		$LF
+	]li
+	[li 
+		" TumeGame: "problem" mode. (this term comes from "Tume Shogi" (Shogi problems))
+		$LF
+	]li
+	[li 
+		" UraGame: player-vs-player mode, involving some luck.
+		$LF
+	]li
+]ul
+[div class=p 
+	""SameGame" mode has three difficulties, "Easy", "Medium", and "Hard". Each difficulty has a different board size:
+	$LF
+]div
+[ul 
+	[li 
+		" Easy: 8x6
+		$LF
+	]li
+	[li 
+		" Medium: 10x8
+		$LF
+	]li
+	[li 
+		" Hard: 15x12
+		$LF
+	]li
+]ul
+[div class=p 
+	"In "SameGame" mode, you will get (n-1)^2 points when you erase n pieces.
+	$LF
+	"Additionally, if you erase all the pieces, you will get a bonus determined by each difficulties:
+	$LF
+]div
+[ul 
+	[li 
+		" Easy: 200
+		$LF
+	]li
+	[li 
+		" Medium: 500
+		$LF
+	]li
+	[li 
+		" Hard: 1000
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"I analyzed the RNG, and wrote a solver to achieve the maximum scores:
+	$LF
+]div
+[ul 
+	[li 
+		" Easy: 
+		[a href=https://github.com/taotao54321/SameGameSFCSmall2 rel=noopener external nofollow 
+			"https://github.com/taotao54321/SameGameSFCSmall2
+		]a
+		$LF
+	]li
+	[li 
+		" Medium: 
+		[a href=https://github.com/taotao54321/SameGameSFCMedium2 rel=noopener external nofollow 
+			"https://github.com/taotao54321/SameGameSFCMedium2
+		]a
+		$LF
+	]li
+	[li 
+		" Hard: 
+		[a href=https://github.com/taotao54321/SameGameSFCLarge2 rel=noopener external nofollow 
+			"https://github.com/taotao54321/SameGameSFCLarge2
+		]a
+		$LF
+	]li
+]ul
+[div class=p 
+	"The search space of this game is a DAG (Directed Acyclic Graph), so you can apply dynamic programming (managing the upper bound of score for each board with some hash table).
+	$LF
+	"I solved "Easy" and "Medium" with this method.
+	$LF
+]div
+[div class=p 
+	"For "Hard", the search space is somewhat large, so I solved it with beam search.
+	$LF
+	"But there are few boards that runs out the beam width, so I think it's unlikely that there are better solutions than this one.
+	$LF
+]div
+[div class=p 
+	"In this game, you can easily estimate the upper bound of score for a board by assuming you can erase all piece of the same kind at once (unless the count of the piece kind is 1). This is very useful for pruning nodes, especially in "Easy" and "Medium".
+	$LF
+]div
+[h4 id=AboutTheRng 
+	" About the RNG
+	$LF
+]h4
+[div class=p 
+	"The RNG depends on the elements below:
+	$LF
+]div
+[ul 
+	[li 
+		" 16-bit internal state (shift register, but actually the highest bit is meaningless)
+		$LF
+	]li
+	[li 
+		" NMI counter
+		$LF
+	]li
+	[li 
+		" mainloop counter (converted to 0 to 4, and works like a subtle entropy term)
+		$LF
+	]li
+	[li 
+		" (CPU cycles)
+		$LF
+	]li
+]ul
+[div class=p 
+	"In the board generation process, the RNG generates pieces based on the internal state, the NMI counter, and the mainloop counter. And, the internal state will be updated based on the previous internal state and the NMI counter.
+	$LF
+]div
+[div class=p 
+	"But, a NMI occurs while the board generation process, so the NMI counter is incremented once during the process.
+	$LF
+	"From my observation, a NMI usually will occur just after 40 pieces are generated.
+	$LF
+]div
+[div class=p 
+	"And, there is a restriction for the board generation. If there are too many pieces of the same kind, the board will be regenerated. (the count of the same kind must be less than (board square count) / 2)
+	$LF
+]div
+[div class=p 
+	"It is not so difficult to manipulate the RNG. You can regenerate a board by pressing Select or opening the menu by pressing L/R (you can also manipulate the mainloop counter slightly by opening the menu).
+	$LF
+	"And, when you regenerate a board, you can obtain 2^8 different RNG states by manipulating the NMI counter. So, you will be able to obtain a desired RNG state by regenerating a few boards (I used a quick-and dirty search until depth 2).
+	$LF
+]div
+[h4 id=MemoryMap 
+	" Memory map
+	$LF
+]h4
+[div class=p 
+	"RAM:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"type
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$7F0046
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"mainloop counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7F0467
+			]td
+			[td 
+				"u16le
+			]td
+			[td 
+				"board square count
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7F0469
+			]td
+			[td 
+				"u16le[5]
+			]td
+			[td 
+				"counts of each piece kind
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7F0F52
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"NMI counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7F0F53
+			]td
+			[td 
+				"u16le
+			]td
+			[td 
+				"RNG internal state
+			]td
+		]tr
+		[tr 
+			[td 
+				"$7F2000
+			]td
+			[td 
+				"u8[]
+			]td
+			[td 
+				"buffer for board generation
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"ROM:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"type
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$809AD2
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"board generation routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$809DD9
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"checks the restriction for the board generation
+			]td
+		]tr
+		[tr 
+			[td 
+				"$80A8A1
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"RNG helper (generate a piece from a random number and the mainloop counter)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$80D6BA
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"generates a random number within specified range
+			]td
+		]tr
+		[tr 
+			[td 
+				"$80D6D1
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"RNG core
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[div class=p 
+	"There might be more boards which I haven't checked:
+	$LF
+]div
+[ul 
+	[li 
+		" If you can manipulate the NMI timing during the board generation process, more different boards will become available.
+		$LF
+	]li
+	[li 
+		" When the board is regenerated by the restriction mentioned above, it seems that a NMI occurs at a different timing. I haven't investigated this case so deeply, but I haven't found a better solution taking advantage of this.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": The game that I, for some reason, hear referred more often to as Sega Swirl. Anyways, claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": I see a lot of work was done in understanding how the board is generated and how to maximize the score with regards to how board generation is done. The search algorithms and the provided code to find the maximum score for a given board also helped with maximizing the score for given boards. The final result of all this shows very clearly with the incredible amount of points gained overall. Nice work figuring this out!
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

@@ -1,8 +1,4 @@
-4
-[div class=p 
-	(youtube|v=najVhuDhwR4)
-	$LF
-]div
+6
 [ul 
 	[li 
 		" Emulator: lsnes rr2-beta23
@@ -39,29 +35,27 @@
 ]ul
 [div class=p 
 	"This is an improvement of 30127 frames from the 
-	[a class=intlink href=/2922M 
-		"previously published TAS
-	]a
+	(__wikiLink|displaytext=previously published TAS|href=/2922M)
 	", using mid-frame resets to skip another portion of the game and to speed up the fights. Like the previous TAS, it uses the 52 game-over glitch to trigger the ending. The mechanics of this glitch were described in the previous TAS, so we will only detail the improvements of the present TAS. Comments are embedded in the above video and are available 
-	[a class=extlink href=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/ff6_52go_v2_captions.srt rel=nofollow 
+	[a href=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/ff6_52go_v2_captions.srt rel=noopener external nofollow 
 		"here
 	]a
 	".
 	$LF
 ]div
-[h3 id=EarlyNarsheescape 
+[h3 id=EarlyNarsheEscape 
 	" Early Narshe escape
 	$LF
 ]h3
 [div class=p 
 	"When Terra wakes up in Arvis house and leaves the house to escape through the caves, there is a invisible NPC placed in front of the backdoor to prevent Terra from entering the house again. The flag for this NPC is located at bit 1 of address 
-	[tt 
+	[code 
 		"$1F41
-	]tt
+	]code
 	". However, this flag is not set before the Whelk fight, where there is a save point. Also, there is another save point in the caves after leaving Arvis. So by overwriting the NPC flag from the second save by the value of the first save, we obtain a save where we can go back and enter Arvis house. This gives us access to the whole Narshe town and we can leave the town.
 	$LF
 ]div
-[h3 id=Deadparty 
+[h3 id=DeadParty 
 	" Dead party
 	$LF
 ]h3
@@ -81,7 +75,7 @@
 	"However, we had to be sure to be able to leave the cave without a single fight. Luckily, it was barely possible when the danger value was minimal, so we triggered a fight just before the second save point.
 	$LF
 ]div
-[h3 id=Detailsofthecombinedsave 
+[h3 id=DetailsOfTheCombinedSave 
 	" Details of the combined save
 	$LF
 ]h3
@@ -165,27 +159,27 @@
 	"After all the mid-frame resets, we needed to get a valid savefile, which is tested by the game using a checksum system. To trigger a checksum collision, we carefully chose the name of Terra, so that after the last partial save overwrite, we ended up with a savefile with a correct checksum.
 	$LF
 ]div
-[h3 id=Triggeringtheending 
+[h3 id=TriggeringTheEnding 
 	" Triggering the ending
 	$LF
 ]h3
 [div class=p 
 	"Like the previous TAS, we will manipulate the event pointer to be 
-	[tt 
+	[code 
 		"$1860
-	]tt
+	]code
 	" in RAM, which correspond to the lower byte of the money value. By buying and selling items, we set this byte to be 
-	[tt 
+	[code 
 		"C4
-	]tt
+	]code
 	" (
-	[tt 
+	[code 
 		"C3-C7
-	]tt
+	]code
 	" works). Instruction 
-	[tt 
+	[code 
 		"C4
-	]tt
+	]code
 	" is:
 	$LF
 ]div
@@ -198,13 +192,13 @@
 ]pre
 [div class=p 
 	"So 
-	[tt 
+	[code 
 		"addr
-	]tt
+	]code
 	" is located at 
-	[tt 
+	[code 
 		"$186B-186D
-	]tt
+	]code
 	", which corresponds the item ids in slots 2-4 of the inventory. We placed a Leather Hat, a Mithril Pike (bought in Narshe) and a Buckler in these slots, so the memory looks like this:
 	$LF
 ]div
@@ -221,29 +215,29 @@
 ]pre
 [div class=p 
 	"When this 
-	[tt 
+	[code 
 		"C4
-	]tt
+	]code
 	" instruction is executed, it jumps to address 
-	[tt 
+	[code 
 		"$5A1D69 + $CA0000 = $241D69
-	]tt
+	]code
 	" if any of the 
-	[tt 
+	[code 
 		"tx
-	]tt
+	]code
 	" is true. We didn't have to manipulate a 
-	[tt 
+	[code 
 		"tx
-	]tt
+	]code
 	", it was very likely that one will be good.
 	$LF
 ]div
 [div class=p 
 	"Address 
-	[tt 
+	[code 
 		"$241D69
-	]tt
+	]code
 	" is located in RAM, in the middle of the window colors configuration. We can now write our code to trigger the ending using colors. The code to input was carefully chosen to minimize the change of color values, and the result code is:
 	$LF
 ]div
@@ -273,33 +267,33 @@
 ]pre
 [div class=p 
 	"The first two instructions 
-	[tt 
+	[code 
 		"CD
-	]tt
+	]code
 	" and 
-	[tt 
+	[code 
 		"C3
-	]tt
+	]code
 	" are just used to advance to the right location, where is actual relevant code is faster to input. In both cases, the test condition failed (which is surprising for the second one). The first 
-	[tt 
+	[code 
 		"B2
-	]tt
+	]code
 	" instruction jumps to address 
-	[tt 
+	[code 
 		"$CA530C
-	]tt
+	]code
 	" which is the very end of the world destruction sequence that loads the World of Ruin maps. It was necessary to avoid a softlock during the game ending. The last instruction jumps to 
-	[tt 
+	[code 
 		"$CA1352
-	]tt
+	]code
 	" which is the beginning of the ending sequence.
 	$LF
 ]div
-[h3 id=Smalltricks 
+[h3 id=SmallTricks 
 	" Small tricks
 	$LF
 ]h3
-[h4 id=Monster-in-a-box 
+[h4 id=MonsterInABox 
 	" Monster-in-a-box
 	$LF
 ]h4
@@ -307,19 +301,19 @@
 	"If the first death is against the monster-in-a-box inside the Beginner's room in Narshe, it will increment the stack size by 9, which is equivalent to three deaths.
 	$LF
 ]div
-[h4 id=Fastpreemptiverunaway 
+[h4 id=FastPreemptiveRunaway 
 	" Fast preemptive runaway
 	$LF
 ]h4
 [div class=p 
 	"During certain preemptive/side attacks, the party might not escape quickly, usually when there are more characters than enemies. However, by choosing 
-	[tt 
+	[code 
 		"Def.
-	]tt
+	]code
 	" with Terra at the very beginning of the fight, it delays the escape script so that all characters have the time to escape. This saves 2 seconds per fight.
 	$LF
 ]div
-[h3 id=Suggestedscreenshots 
+[h3 id=SuggestedScreenshots 
 	" Suggested screenshots
 	$LF
 ]h3
@@ -328,7 +322,7 @@
 	$LF
 ]div
 [div class=p 
-	[img class=embed src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6_52go_v2_99730f.png 
+	[img class=embed mw-100 src=https://raw.githubusercontent.com/clementgallet/ff6-tas/master/Screenshots/ff6_52go_v2_99730f.png 
 	]img
 	$LF
 ]div

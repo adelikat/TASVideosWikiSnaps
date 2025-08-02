@@ -1,0 +1,211 @@
+3
+[h2 id=YoshiSCookieNes 
+	"Yoshi's Cookie (NES)
+	$LF
+]h2
+[div class=p 
+	"A simple puzzle game where you match up cookies to remove them from the board.
+	$LF
+]div
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: fceux 2.2.3
+		$LF
+	]li
+	[li 
+		" Complete Round 1 of the puzzles as fast as possible
+		$LF
+	]li
+]ul
+[h2 id=Gameplay 
+	" Gameplay
+	$LF
+]h2
+[div class=p 
+	"The goal of the game is to remove all the cookies from the board on each stage.  You can rotate each row or column of the cookies in order to make full rows or columns of matching cookies which will then be removed unless they are a single cookie.  After some time, new cookies will come in from the edges in case you have made the puzzle impossible to clear.  The game is divided into 10 rounds, each with 10 puzzles.  This run only completes the first round of 10.
+	$LF
+]div
+[h3 id=Controls 
+	" Controls
+	$LF
+]h3
+[ul 
+	[li 
+		" dpad - Move the cursor around, wraps at board edges
+		$LF
+	]li
+	[li 
+		" a + dpad - Shift the row/column in the specified direction
+		$LF
+	]li
+	[li 
+		" start - pause
+		$LF
+	]li
+]ul
+[h3 id=Strategy 
+	" Strategy
+	$LF
+]h3
+[div class=p 
+	"When playing this game casually, the new incoming cookies will advance the PRNG, causing the puzzles to be different each time.  However, if you can clear the puzzles quickly enough that no new cookies spawn, the puzzles will be consistent, and you can memorize the solutions for each one in turn.
+	$LF
+]div
+[div class=p 
+	"Unfortunately, some puzzles come with a single cookie of one type, which is impossible to solve without getting additional cookies.  This can be mitigated by selecting a known puzzle seed.  The PRNG also runs during the introductory screen.  As such, the puzzles you get will depend on when you press start to begin the game.
+	$LF
+]div
+[div class=p 
+	"For this route, the puzzle seed was found manually by digshake when trying to do RTA runs of the game.  The search was not exhaustive, but searching the nearby frames resulted in strictly worse puzzle seeds.  In particular, the nearby seeds often contain single cookies which waste lots of time.
+	$LF
+]div
+[div class=p 
+	"Each puzzle was then solved by hand looking for optimal speed solutions.  In general, the solution with the least number of moves will be ideal, but due to the animations for clearing the cookies, this is sometimes not the case.  In particular, it is faster to clear the cookies in columns than it is to clear them in rows.  I proposed many solutions to each stage, and eunosXX then created an unoptimized TAS of the soltuions to see which was fastest for each stage.  This was again a manual process and was not exhaustive.
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=Stages15 
+	" Stages 1 - 5
+	$LF
+]h4
+[div class=p 
+	"These stages are always identical regardless of the puzzle seed chosen.  Which cookie varieties are in which position will change based on the seed, but the patterns of matching cookies do not change.  This is not of particular importance for the TAS, but it is useful when doing RTA runs to confirm that you have the correct puzzle seed before seeing the incorrect puzzles starting on stage 6.
+	$LF
+]div
+[div class=p 
+	"For reference, here are the solutions for these stages.
+	$LF
+]div
+[ul 
+	[li 
+		" Stage 1 - 
+		[code 
+			"RddR
+		]code
+		$LF
+	]li
+	[li 
+		" Stage 2 - 
+		[code 
+			"UL L
+		]code
+		$LF
+	]li
+	[li 
+		" Stage 3 - 
+		[code 
+			"UllU
+		]code
+		$LF
+	]li
+	[li 
+		" Stage 4 - 
+		[code 
+			"UllD R
+		]code
+		$LF
+	]li
+	[li 
+		" Stage 5 - 
+		[code 
+			"LuR
+		]code
+		$LF
+	]li
+]ul
+[div class=p 
+	"The letters represent the direction to press.  Capital letters indicate holding a to shift cookies for that move.  Spaces indicate time spent waiting for cookies to clear.
+	$LF
+]div
+[h4 id=Stage6 
+	" Stage 6
+	$LF
+]h4
+[div class=p 
+	"This is the first stage where in an RTA or casual play, you will get a potentially different puzzle.  Of course, this is not a concern for the TAS.  The solution is 
+	[code 
+		"RddR uuRDD
+	]code
+	".
+	$LF
+]div
+[h4 id=Stage7 
+	" Stage 7
+	$LF
+]h4
+[div class=p 
+	"There's nothing interesting to say about this stage.  The solution is 
+	[code 
+		"UllD RR
+	]code
+	".
+	$LF
+]div
+[h4 id=Stage8 
+	" Stage 8
+	$LF
+]h4
+[div class=p 
+	"This stage demonstrates where the shortest solution is not the fastest due to the cookie clearing animations.  The shortest solution I know of is 
+	[code 
+		"DllU llU R
+	]code
+	".  This is the solution that is used in top RTA times as well, as it is relatively easy to input as a human.  The TAS uses a different solution here, though, namely 
+	[code 
+		"DrUrrU lulLD
+	]code
+	".  This solution has a couple interesting features.
+	$LF
+]div
+[div class=p 
+	"First, it clears the puzzle in two clears rather than three.  This saves some frames because of the way the points animations appear and wait when clearing cookies.  Despite the fact that both clears are slower row-clears, having fewer clears saves time overall.
+	$LF
+]div
+[div class=p 
+	"Second, there is a two frame optimization in the second clear.  Before shifting the cookies, the cursor has to be moved left twice and up once.  This can be done in any order, but because of the way the game reads inputs, you can save a frame by alternating between two different directions versus moving in the same direction twice.  This is because the game has a delay if you hold a direction much like key repeating on a computer keyboard.  The quickest way to move twice in the same direction is to let go of the direction on the first frame the game reads the inputs and press it again on the second frame, thus losing one frame.  Conveniently, this one frame loss is not present when moving a direction and then shifting the cookies in that same direction, because you start holding a on the first frame of input check and that foregoes the repeat delay.
+	$LF
+]div
+[h4 id=Stages910 
+	" Stages 9-10
+	$LF
+]h4
+[div class=p 
+	"Strangely, stages 9 and 10 are the same puzzle, so the solution is the same for both of them.  While this solution is long and interesting to watch, there's no new information to give about it.  The solution is 
+	[code 
+		"RdRRUdlLUL dR
+	]code
+	".
+	$LF
+]div
+[h3 id=Improvements 
+	" Improvements
+	$LF
+]h3
+[div class=p 
+	"It is possible there is a better puzzle seed that could be solved more quickly, but I didn't spend time looking for one because the process is so manual.  It might be interesting to implement a solver that takes into account the speed of solutions and explore the puzzle seed space further.
+	$LF
+]div
+[h3 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" EunosXX for checking my solutions for speed and showing me how to use the TAS editor.
+		$LF
+	]li
+	[li 
+		" link_7777 for reminding me to submit this.
+		$LF
+	]li
+	[li 
+		" digshake for finding the puzzle seed we all used.
+	]li
+]ul

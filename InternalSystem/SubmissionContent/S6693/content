@@ -1,0 +1,192 @@
+11
+[div class=p 
+	"(movie file with high score input: 
+	(__wikiLink|href=/Userfiles/Info/62448398902454736|implicitdisplaytext=userfiles/info/62448398902454736)
+	$LF
+]div
+[div class=p 
+	"(originally Blazephlozard & Blazephlozard's NES Tengen Tetris)
+	$LF
+]div
+[div class=p 
+	"Tengen Tetris has many many things going for it above other Tetris ports of the time. One of them is a Cooperative mode, on a 12-wide board (instead of 10-wide). Being only 20% larger, but with twice the pieces getting dropped, it’s even more fast-paced and chaotic as a TAS than single-player! This submission aims to clear Level 17 as fast as possible, using the same techniques outlined in the 
+	(__wikiLink|displaytext=single-player submission|href=/6635S)
+	".
+	$LF
+]div
+[h3 id=ScriptsTasprojS 
+	" Scripts / tasproj’s
+	$LF
+]h3
+[div class=p 
+	"I’ve uploaded all my April 1st scripts and such here: 
+	[a href=https://drive.google.com/open?id=1NCSnD9OH7xsr8CzTMcUofp9fPPs2Tsyf rel=noopener external nofollow 
+		"https://drive.google.com/open?id=1NCSnD9OH7xsr8CzTMcUofp9fPPs2Tsyf
+	]a
+	$LF
+]div
+[h3 id=BlazeSComments 
+	" Blaze’s comments
+	$LF
+]h3
+[div class=p 
+	"I was in charge of Player 1, as well as making Lua scripts. Figuring out which initial RNG we would use would be difficult manually. To help with this, I went ahead and made a brute force Lua script to test as many possible inputs through the 5 menus as I could. It would pause when it finds a new RNG, so I can look at the garbage before saving the branch. I wrote down the most promising branch numbers as it went along.
+	$LF
+]div
+[div class=p 
+	"But even so, there’s just too many options to find them all. I hit 999 branches, with a maximum of 6 frames wait, and still hadn’t reached input variant #2/15 for music choice (and was on handicap menu variant #5/30).
+	$LF
+]div
+[div class=p 
+	"In the interest of saving frames, I kept the brute forcer going, but changed to only accepting 1 or 2 frame delays (while updating existing branches with faster ways to reach them). I finally reached music choice #2, and was pleased to see that I wasn’t getting many new results. It makes sense; delaying earlier menus can save lag frames between future menus, but delaying the final menu usually just loses time. At ~1250 saved branches, I decided I had spent enough time on it and didn’t add any more branches… You can find the original Lua script, ready to continue where I left off, if you want to search for an elusive Garbage Tetris, but a Garbage Triple seems pretty fine to me!
+	$LF
+]div
+[div class=p 
+	"Garbage layout is certainly important, but the pieces you get, in particular I-piece frequency, are even more important for a fast 30 lines in Cooperative! Despite dropping twice as many pieces, the board is only 12 wide (compared to 10 wide in solo). This means that, essentially, you could be making a Tetris every 6 pieces you drop. But god knows you won’t be getting I’s that frequently. And both players have the same piece order, so you don’t have two different options...
+	$LF
+]div
+[div class=p 
+	"Of the 3 Garbage Triple RNGs I found, I went with this one because the I-piece drought lengths are “7, 8, 3, 1, 0, 7, 11”. The other two had “8, 3, 0, 23, 0” and “6, 1, 2, 4, 24, 3”. Such a lengthy drought at the climax of the run would definitely ruin our time.
+	$LF
+]div
+[div class=p 
+	"Spikestuff helped design the next piece overlay, and I reworked the single player Lua to keep track each frame of how many pieces have been dropped. In single player I just counted the individual piece totals the game displays on the right side, but there’s no such values in memory in two-player. I used “piece height = 4” as the trigger, as that’s where new pieces spawn in. Didn’t run into any bugs.
+	$LF
+]div
+[div class=p 
+	"I also created a simple Lua script for TAStudio that lets you insert/delete frames from only one controller at a time. I figured that would be important for both of us to time our piece drops properly. Please note that if you use this on a large movie, it will be very very slow! It worked fine for my needs in this TAS, however. I don’t know if there’s a better way to copy all of one controller’s inputs to the previous/next frame...
+	$LF
+]div
+[h3 id=BlazeSComments_2 
+	" Blaze’s comments
+	$LF
+]h3
+[div class=p 
+	"I controlled Player 2, and was in charge of planning our placements. I definitely think this RNG is more usable than the other options, but that doesn’t make it easy. The sheer frequency of pieces we’re placing makes even the 7 and 8 droughts very difficult to handle. There was also an abundance of L’s and S’s that made our start very rough, and other long droughts of certain shapes.
+	$LF
+]div
+[div class=p 
+	"I ended up in charge of getting all 30 lines. Unfortunately, we can’t share the lines, or else we don’t clear the level. One might think Blaze should clear all the lines, as our gap is on the left side. But that didn’t seem to ever work out for the intro. Because the gap is on the left side, Blaze more frequently had to cross over to the other side to place pieces. This meant I had more pieces placed, and that’s important for reaching the I-pieces when we need them in the beginning. There was also another useful fact about me achieving the lines: if both players lock a piece at the same time, Player 1’s piece locks first, which can save time.
+	$LF
+]div
+[div class=p 
+	"Being on the right side, it was important for me to try to optimize the “rotation clipping”, as it can only be done leftward. Ideally both players stay on their side of the board, so there’s less leftward movement to do in general, since each half is only 6 wide. But I still had a few opportunities to take advantage of this tech.
+	$LF
+]div
+[div class=p 
+	"One thing I was very interested in was the possibility of rotation clipping using the other player’s current piece, perhaps even going all the way to the left edge. One thing you can do is overlapping a newly spawning piece:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/rc1esPi.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"In this example, the S piece can get a leftward rotation clip. Very interesting! (You can also softlock the game like this by, say, overlapping two O-pieces! I almost wanted to submit that...)
+	$LF
+]div
+[div class=p 
+	"I was unable to find any infinites when the pieces are both at the same height, but there are some interesting interactions when at differing heights. This was achieved by both players pressing A and B alternating every frame:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.gyazo.com/7a6dc4ab49a7bd1f21891807596ca40f.gif 
+	]img
+	$LF
+]div
+[div class=p 
+	"Unfortunately, the precise height differences needed, and the fact that it requires taking Player 1’s piece over to the right side just to have it move back left, makes these shenanigans not useful, as far as I could find. I just wanted to check if they were possible…
+	$LF
+]div
+[div class=p 
+	"Obviously, colliding with each other is an issue that has to be minimized in a Cooperative run.  We did our best to not get in each other’s ways, but for the sake of survival and board setup, a few frames here and there seem inevitable. Near the middle of the run, where I got a Back-to-Back Tetris, it was particularly difficult to set that up. Having 8 lines ready took almost all the bricks we had available, and did require a few hesitations during the crossovers to make it happen.
+	$LF
+]div
+[h3 id=BreakingNews 
+	" BREAKING NEWS
+	$LF
+]h3
+[div class=p 
+	"After finishing a V1 and playing around with trying to save frames on input end, I discovered that this game’s soft dropping is not as simplistic to input as I thought! I’d always basically been doing my horizontal input, then holding Down.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.gyazo.com/b43d3940b3e6c22388c5519f1f1bb7da.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"However, I managed to save 3 frames on just one piece’s locking by starting the soft drop as soon as possible, then interrupting it to finish my horizontal movement. (The first frame you gain control of a piece, Down actually prevents you from starting a soft drop, so that’s always a free horizontal movement frame.)
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.gyazo.com/5549726eb968731656a9dc3ebf8eaba6.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"It’s funny, in the single player run Blaze discovered a way to make horizontal travel more interesting after V1; now I have a way to make vertical travel more interesting! And I only discovered it because of the restrictions Cooperative brings; we were trying to reduce collision frames for one player by dropping the other player earlier, and was shocked to see it saved time. I was very excited to apply this as it’d help avoid spawn-row collisions between me and Blaze if the one crossing is below the spawn, and not losing time from it!
+	$LF
+]div
+[div class=p 
+	"The key RAM addresses for figuring out this behavior were 006A/6B (P1/P2). This is “number of frames until moving down”. It starts at 20 frames, but resets to only 5 frames. Pressing Down for 5 frames will move you down one row, as well as set the timer to 4. If you time this just right, you can go down a row two consecutive frames. So it loses frames for this to be applied when the timer is low already, and it’s best to apply it early!
+	$LF
+]div
+[div class=p 
+	"Because of the way soft drops accelerate up to 1 row per frame, pieces with more vertical travel than horizontal should do their horizontal first and build up speed for 12 frames as normal. But this mechanic had a lot of potential for high horizontal travel pieces, and pieces that don’t accelerate much (even if they don’t move horizontally). If you only need to drop 3 or 4 rows, lining up a natural drop + 5 frame soft drop to get a drop 2 frames in a row is immensely useful.
+	$LF
+]div
+[div class=p 
+	"With how much faster certain pieces were dropping, things lined up very differently, in a positive way! We were able to rebuild the board in a way that left the hole directly below my spawn, allowing an extremely early input end for me. Unfortunately, Blaze was 40 frames slower, as he had to fill in all the gaps!
+	$LF
+]div
+[div class=p 
+	"With the restrictions in place (poor piece variety, leaving the 4th garbage line hole open, then shifting the hole over to my spawn), there doesn’t seem to be any way to improve the board setup. I tried multiple different board setups, but nothing was faster than this. I attempted delaying my line clears, so the board was taller and Blaze could place pieces slightly faster, but this didn’t work out, because his next piece would want to be going directly on top of mine (and you can’t lock a piece in, even if there’s a floor below part of your piece, if it’s directly above another players’).
+	$LF
+]div
+[div class=p 
+	"To illustrate why I believe what I have is maxed, the finale starts with a Triple, with both of us perfectly synced up to allow it to happen:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/pfuuJ3d.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"That’s followed by playing an S and Z directly on top of where the Triple was, with me having to lock my Z in first, just two frames before Blaze locks in:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/OkkZZfo.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"So at this point, it’s impossible for either player to be any further ahead/behind than they are; if I was ahead, my Triple wouldn’t have been a Triple, but if I was behind, Blaze can’t lock in his S on top of me.
+	$LF
+]div
+[div class=p 
+	"Anyway, sorry for the long notes. We’re very happy with this run and we hope you enjoy it! It was a lot of fun playing with myself, and I think we came to a great finish!
+	$LF
+]div
+[div class=p 
+	"There will likely be another single player submission eventually, using the RNG bruteforcer to find a better board setup, and using this new fast drop tech.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Noxxa 
+		"Noxxa
+	]a
+	": Accepting as a new branch.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Dacicus 
+		"Dacicus
+	]a
+	": Processing...
+]div

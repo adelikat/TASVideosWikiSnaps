@@ -1,0 +1,766 @@
+19
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: lsnes rr2-β25
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Final boss skip glitch
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+]ul
+[h2 id=Comments 
+	" Comments
+	$LF
+]h2
+[div class=p 
+	"PAL takes the world record for the first time in Super Metroid history, beating 
+	[a href=https://tasvideos.org/3768M rel=noopener external nofollow 
+		"NTSC
+	]a
+	" by 30 seconds! This run uses a completely new arbitrary-code-execution setup that exploits a bug in Samus's animation system to skip all items and beat the game using only a spike, a bug spawner, and some rather unfriendly Beetoms.
+	$LF
+]div
+[div class=p 
+	"Notably, this is the first game-end-glitch in Super Metroid that does not require out-of-bounds movement or glitched beams. (The run still goes out-of-bounds to skip Bombs and for optimized movement, but the ACE setup itself is completely in-bounds.)
+	$LF
+]div
+[ul 
+	[li 
+		" TAS timing (from power-on to the last input): 
+		[b 
+			"6 minutes, 12 seconds, 40 frames
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" RTA timing (from Ceres Station to the last input): 
+		[b 
+			"3 minutes, 47 seconds, 47 frames
+		]b
+		".
+		$LF
+	]li
+	[li 
+		" In-game time (which does not count lag, door transitions, the pause menu, etc.): 
+		[b 
+			"1 minute 58 seconds 2 frames
+		]b
+		".
+		$LF
+	]li
+]ul
+[h3 id=Route 
+	" The Route
+	$LF
+]h3
+[div class=p 
+	"The most quickly accessible room with the necessary conditions for the exploit is 
+	[a href=https://wiki.supermetroid.run/Etecoon_Energy_Tank_Room rel=noopener external nofollow 
+		"Etecoon Energy Tank Room
+	]a
+	", located at the bottom of the 
+	[a href=https://wiki.supermetroid.run/Green_Brinstar_Main_Shaft rel=noopener external nofollow 
+		"Green Brinstar main shaft
+	]a
+	". (Specifically, this room has the necessary geometry of spikes next to solid tiles, and it's located close enough to the beginning of the game that we can reach it without needing to collect any items).
+	$LF
+]div
+[div class=p 
+	"The beginning of the run follows the previous 0% TAS route: completing Ceres Station as usual, and using a doorskip in 
+	[a href=https://wiki.supermetroid.run/Parlor_and_Alcatraz rel=noopener external nofollow 
+		"Parlor
+	]a
+	" to go out-of-bounds and skip Bombs. However, all these rooms had to be re-done and re-optimized for PAL, since the previous runs were performed on NTSC. The most notable improvement is a newly discovered PAL-exclusive doorskip in 
+	[a href=https://wiki.supermetroid.run/Mushroom_Kingdom rel=noopener external nofollow 
+		"Mushroom Kingdom
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"After going down the Green Brinstar elevator, a 
+	[a href=https://wiki.supermetroid.run/Moonwalk rel=noopener external nofollow 
+		"moonfall
+	]a
+	" is used to clip through the power-bomb blocks and reach the bottom of the shaft. From there we're a couple doors and an obnoxious tunnel crawl away from being able to set up the ACE.
+	$LF
+]div
+[h3 id= 
+	$LF
+]h3
+[h4 id=PosesTransitionsAnimationsAndSpritemaps 
+	" Poses, Transitions, Animations, and Spritemaps
+	$LF
+]h4
+[div class=p 
+	"Samus's movement is implemented as a state-machine with about 200 states, called 
+	[em 
+		"poses
+	]em
+	" (where each pose is something like "Facing left  - normal jump - not aiming - not moving - gun extended"). Each pose has some properties associated with it, including a 
+	[em 
+		"transition table
+	]em
+	" and an 
+	[em 
+		"animation
+	]em
+	".
+	$LF
+]div
+[div class=p 
+	"The transition table defines how Samus should respond to controller input. Each entry indicates a transition such as "if left and up are held, go to pose 'Facing left  - normal jump - aiming up-left'". Nearly all controller input in the game is processed using this transition table.
+	$LF
+]div
+[div class=p 
+	"An animation defines the appearance of a pose. It consists of a list of spritemaps, and a 
+	[em 
+		"delay table
+	]em
+	" indicating how long each spritemap should be visible for; as well as any special instructions that can do things like looping or triggering transitions to other poses. For example, the spin-jumping animation has a special instruction indicating that the animation should loop; and the turning-around animation has a special instruction indicating that Samus should be put in a standing pose once the animation completes. 
+	$LF
+]div
+[div class=p 
+	"A spritemap is a list of one or more hardware sprites to be drawn on screen. Most things in the game are made up of multiple sprites that are arranged next to and layered on top of each other; the spritemap defines what sprites should be used to draw something and how they should be arranged.
+	$LF
+]div
+[h4 id=PoseGlitch 
+	" The Pose Glitch
+	$LF
+]h4
+[div class=p 
+	"The overall design of Samus's code is quite elegant; it's very flexible and powerful, and it's what makes the movement in SM feel so good. But the implementation is quite messy. The code is very complex, and there are 
+	[em 
+		"hundreds
+	]em
+	" of special cases which lead to a lot of weird interactions. Specifically, this TAS abuses an interaction known as poseglitching, which occurs when three attempted pose transitions occur on the same frame:
+	$LF
+]div
+[ul 
+	[li 
+		" Samus's landing animation finishes, transitioning her into a standing pose.
+		$LF
+	]li
+	[li 
+		" The player presses "jump", transitioning Samus into a jumping pose.
+		$LF
+	]li
+	[li 
+		" Knockback runs out, transitioning Samus into a falling pose.
+		$LF
+	]li
+]ul
+[div class=p 
+	"When these transitions occur simultaneously, they all cancel each other out and 
+	[em 
+		"none
+	]em
+	" of the transitions actually take place:
+	$LF
+]div
+[ul 
+	[li 
+		" The landing transition recognizes that the player has pressed "jump", and aborts.
+		$LF
+	]li
+	[li 
+		" The jumping transition is cancelled due to the knockback transition.
+		$LF
+	]li
+	[li 
+		" The knockback transition recognizes that the player has landed on the ground -- interrupting the knockback animation -- and aborts.
+		$LF
+	]li
+]ul
+[div class=p 
+	"This causes Samus to remain in the "landing" pose. But this pose has already reached the last frame of its animation. which was supposed to end in a pose transition; skipping that transition causes the game to attempt to read past the end of the pose's animation instructions, and into the instructions for the next pose.
+	$LF
+]div
+[div class=p 
+	"If we trigger the glitch in a "landing-while-aiming-down-left" pose, something interesting happens. Immediately following this pose's animation data is the animation that plays after Samus is released from Mother Brain's rainbow beam, where Samus falls from the air and collapses to her knees upon hitting the ground. This is implemented using a special animation instruction that says "once Samus touches the ground, go to frame 7 of the current animation."
+	$LF
+]div
+[div class=p 
+	"Now, this cutscene pose does not have any transitions -- the cutscene will eventually force Samus back into a standing pose. But we're not actually in the cutscene pose -- we executed the cutscene animation instructions from a landing pose -- so we can transition to another pose while the "skip to frame 7" instruction executes. This allows us to skip to animation frame 7 of nearly 
+	[em 
+		"any
+	]em
+	" pose -- even poses that don't have 7 animation frames.
+	$LF
+]div
+[div class=p 
+	"Triggering the poseglitch is quite difficult; it's hard to land on solid ground after knockback quickly enough for the landing animation to finish in time. The setup used here involving a spike next to a solid platform is subpixel-precise and PAL-exclusive (because the landing animation is shorter on PAL).
+	$LF
+]div
+[div class=p 
+	"This glitch was discovered several years ago, and you can do some interesting things with it -- you can get into 
+	[a href=https://www.youtube.com/watch?v=OmI82Dt9fxI rel=noopener external nofollow 
+		"some glitched poses
+	]a
+	", or poses that you shouldn't have access to (for example, you can 
+	[a href=https://www.youtube.com/watch?v=jfrYu6s8Nxc rel=noopener external nofollow 
+		"morph without collecting morph ball
+	]a
+	"). But it was never thought to have any practical speedrun applications. Until now.
+	$LF
+]div
+[h4 id=SpriteLag 
+	" Sprite Lag
+	$LF
+]h4
+[div class=p 
+	"One of the things you can trigger with the poseglitch is a condition called spritelag. Certain spritemap pointers in the animation table are zeroed out -- for example, some poses are unused and don't have a spritemap, and some poses only draw a top-half Samus spritemap and don't have an entry in the bottom-half spritemap table. These zeroed entries are normally never used by the game, but since the poseglitch allows us to enter invalid animation frames, we can cause the game to attempt to draw a zero spritemap. If this happens, the game will simply start interpreting the bytes at memory address $0000 as a spritemap. This address is used by the game to store temporary variables, so a 
+	[em 
+		"lot
+	]em
+	" of different things can go here.
+	$LF
+]div
+[div class=p 
+	"The first 16 bits of the spritemap are interpreted as the number of sprites to draw. If the game has written a ROM address to address $0000, this value can be in the tens-of-thousands, causing the game to lag tremendously. This condition has been known about for many years, and there are other ways to trigger it besides the poseglitch (for instance, it is known to happen in RTA speedruns 
+	[a href=https://www.youtube.com/watch?v=qp52EpixJzE rel=noopener external nofollow 
+		"when the Mother Brain standup glitch goes wrong
+	]a
+	"). But it was never thought to have any interesting effects besides slowing down the game.
+	$LF
+]div
+[div class=p 
+	"However, the sprite-drawing loop has an interesting quirk:
+	$LF
+]div
+[pre 
+	"$81:8A20 98          TYA                    ;\
+	$LF
+	"$81:8A21 18          CLC                    ;|
+	$LF
+	"$81:8A22 69 05 00    ADC #$0005             ;} Y += 5 (next sprite map entry)
+	$LF
+	"$81:8A25 A8          TAY                    ;/
+	$LF
+	"$81:8A26 8A          TXA                    ;\
+	$LF
+	"$81:8A27 69 04 00    ADC #$0004             ;|
+	$LF
+	"$81:8A2A 29 FF 01    AND #$01FF             ;} X += 4 (next OAM entry)
+	$LF
+	"$81:8A2D AA          TAX                    ;/
+	$LF
+	"$81:8A2E C6 18       DEC $18    
+	"[$7E:0018]
+	"  ; Decrement $18
+	$LF
+	"$81:8A30 D0 98       BNE $98    
+	"[$89CA]
+	"     ; If 
+	"[$18]
+	" != 0: go to LOOP
+	$LF
+]pre
+[div class=p 
+	"The Y register holds the pointer to the current position within the spritemap, and the X register holds the pointer to the current position within the hardware sprite table (the "OAM stack pointer"). Because the carry flag is not reset between the two ADC instructions, if the first addition overflows and wraps around, then the second addition operation will add 5 instead of 4. This causes some problems later on, in this routine that runs at the end of a frame to clear the unused entries of the hardware sprite table:
+	$LF
+]div
+[pre 
+	";;; $896E: Finalise OAM ;;;
+	$LF
+	"{
+	$LF
+	"; Move unused sprites to Y = F0h and reset OAM stack pointer
+	$LF
+	"; Uses one hell of an unrolled loop
+	$LF
+	"$80:896E 08          PHP
+	$LF
+	"$80:896F C2 30       REP #$30
+	$LF
+	"$80:8971 AD 90 05    LDA $0590  
+	"[$7E:0590]
+	"  ;\
+	$LF
+	"$80:8974 C9 00 02    CMP #$0200             ;} If [OAM stack pointer] < 200h:
+	$LF
+	"$80:8977 10 14       BPL $14    
+	"[$898D]
+	"     ;/
+	$LF
+	"$80:8979 4A          LSR A                  ;\
+	$LF
+	"$80:897A 85 12       STA $12    
+	"[$7E:0012]
+	"  ;|
+	$LF
+	"$80:897C 4A          LSR A                  ;|
+	$LF
+	"$80:897D 65 12       ADC $12    
+	"[$7E:0012]
+	"  ;} $12 = $8992 + [OAM stack pointer] / 4 * 3
+	$LF
+	"$80:897F 18          CLC                    ;|
+	$LF
+	"$80:8980 69 92 89    ADC #$8992             ;|
+	$LF
+	"$80:8983 85 12       STA $12    
+	"[$7E:0012]
+	"  ;/
+	$LF
+	"$80:8985 A9 F0 00    LDA #$00F0             ; A = F0h (sprite Y position)
+	$LF
+	"$80:8988 E2 30       SEP #$30
+	$LF
+	"$80:898A 6C 12 00    JMP ($0012)
+	"[$80:8992]
+	"  ; Go to 
+	"[$12]
+	$LF
+	"[...]
+	$LF
+	"$80:8992 8D 71 03    STA $0371  
+	"[$7E:0371]
+	"  ; Sprite 0 Y position = F0h
+	$LF
+	"$80:8995 8D 75 03    STA $0375  
+	"[$7E:0375]
+	"  ; Sprite 1 Y position = F0h
+	$LF
+	"$80:8998 8D 79 03    STA $0379  
+	"[$7E:0379]
+	"  ; Sprite 2 Y position = F0h
+	$LF
+	"$80:899B 8D 7D 03    STA $037D  
+	"[$7E:037D]
+	"  ; Sprite 3 Y position = F0h
+	$LF
+	"$80:899E 8D 81 03    STA $0381  
+	"[$7E:0381]
+	"  ; Sprite 4 Y position = F0h
+	$LF
+	"[...]
+	$LF
+	"$80:8B06 8D 61 05    STA $0561  
+	"[$7E:0561]
+	"  ; Sprite 7Ch Y position = F0h
+	$LF
+	"$80:8B09 8D 65 05    STA $0565  
+	"[$7E:0565]
+	"  ; Sprite 7Dh Y position = F0h
+	$LF
+	"$80:8B0C 8D 69 05    STA $0569  
+	"[$7E:0569]
+	"  ; Sprite 7Eh Y position = F0h
+	$LF
+	"$80:8B0F 8D 6D 05    STA $056D  
+	"[$7E:056D]
+	"  ; Sprite 7Fh Y position = F0h
+	$LF
+	"$80:8B12 9C 90 05    STZ $0590  
+	"[$7E:0590]
+	"  ;\
+	$LF
+	"$80:8B15 9C 91 05    STZ $0591  
+	"[$7E:0591]
+	"  ;} OAM stack pointer = 0
+	$LF
+	"$80:8B18 28          PLP
+	$LF
+]pre
+[div class=p 
+	"This routine uses a giant unrolled loop, and calculates an address to jump to in the middle of the loop (to skip clearing the used OAM entries). If the OAM stack pointer is not a multiple of 4, this routine can jump into the middle of an instruction -- causing operand bytes to be interpreted as opcodes, and vice versa.
+	$LF
+]div
+[div class=p 
+	"Nearly all invalid jump addresses result in a few garbage instructions being executed before the CPU gets "synced" back up with the instruction stream. However, if we precisely manipulate the number of sprites on screen, we can jump into the middle of one of the last two STA instructions which causes the CPU will remain desynced for long enough that the PLP instruction is not executed correctly. For example, if the sprite stack pointer is $01ff, its highest possible value, the routine jumps to address $8b11 and...this happens:
+	$LF
+]div
+[pre 
+	"80898a jmp ($0012)   [800012] A:00f0 X:0002 Y:0003 S:1ffa D:0000 DB:82 nvMXdizc V:294 H: 682 MDR: 30
+	$LF
+	"808b11 ora $9c       [00009c] A:00f0 X:0002 Y:0003 S:1ffa D:0000 DB:82 nvMXdizc V:294 H: 716 MDR: 8b
+	$LF
+	"808b13 bcc $8b1a     [808b1a] A:00f0 X:0002 Y:0003 S:1ffa D:0000 DB:82 NvMXdizc V:294 H: 736 MDR: 00
+	$LF
+	"808b1a php                    A:00f0 X:0002 Y:0003 S:1ffa D:0000 DB:82 NvMXdizc V:294 H: 754 MDR: 05
+	$LF
+	"808b1b rep #$30               A:00f0 X:0002 Y:0003 S:1ff9 D:0000 DB:82 NvMXdizc V:294 H: 774 MDR: b0
+	$LF
+	"[...]
+	$LF
+	"808b4d plp                    A:00f0 X:0002 Y:0003 S:1ff9 D:0000 DB:82 Nvmxdizc V:294 H:1336 MDR: 00
+	$LF
+	"808b4e rtl                    A:00f0 X:0002 Y:0003 S:1ffa D:0000 DB:82 NvMXdizc V:294 H:1362 MDR: b0
+	$LF
+	"897501 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:295 H:  40 MDR: 89
+	$LF
+	"897503 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:295 H:  56 MDR: 89
+	$LF
+	"897505 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:295 H:  72 MDR: 89
+	$LF
+	"897507 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:295 H:  88 MDR: 89
+	$LF
+	"897509 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:295 H: 104 MDR: 89
+	$LF
+]pre
+[div class=p 
+	"[...]
+	$LF
+]div
+[div class=p 
+	"The desync caused us to skip both the PLP and RTL instructions at the end of the routine, and fall through into the next routine. The stack is now misaligned, as the following routine expects a return address to be on the top of the stack when instead we have a processor status byte. It thus returns to the wrong address: $897501. This address is open-bus: it's not mapped to any memory, so attempting to read from it will return the last value the hardware placed on the bus. The value currently on the bus is $89 (indicated by the "MDR" field in the trace log).
+	$LF
+]div
+[div class=p 
+	"If execution continues normally from this point, the game will execute a BRK opcode and crash -- it keeps executing $89 instructions until reaching ROM address $898001, which crashes. But note that $89 is a two-byte opcode; and because of the current alignment of the program counter odd bytes are treated as opcodes and even bytes are treated as operands. If we could somehow manipulate things such that it instead executed $898000 as an opcode, the game will end up jumping to address $3838 instead of crashing.
+	$LF
+]div
+[div class=p 
+	"This is where the beetoms come in. We carefully manipulated 4 beetoms so that they were all jumping at the time of the crash, and performed additional actions such as firing shots and pressing item-select to consume 
+	[em 
+		"juuuust
+	]em
+	" the right number of CPU cycles such that an 
+	[a href=https://www.youtube.com/watch?v=K7gWmdgXPgk rel=noopener external nofollow 
+		"HDMA
+	]a
+	" transfer occurs while we're executing from the open bus. This puts a new value on the bus: $ca, corresponding to the DEX instruction -- a one-byte opcode:
+	$LF
+]div
+[pre 
+	"[...]
+	$LF
+	"897fdf bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1152 MDR: 89
+	$LF
+	"897fe3 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1184 MDR: 89
+	$LF
+	"897fe5 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1200 MDR: 89
+	$LF
+	"897fe7 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1216 MDR: 89
+	$LF
+	"897fe9 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1232 MDR: 89
+	$LF
+	"897feb bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1248 MDR: 89
+	$LF
+	"897fed bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1264 MDR: 89
+	$LF
+	"897fef bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1280 MDR: 89
+	$LF
+	"897ff1 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1296 MDR: 89
+	$LF
+	"897ff3 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1312 MDR: 89
+	$LF
+	"897ff5 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1328 MDR: 89
+	$LF
+	"897ff7 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1344 MDR: 89
+	$LF
+	"897ff9 bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:311 H:1360 MDR: 89
+	$LF
+	"897ffb bit #$89               A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:  0 H:  12 MDR: 89
+	$LF
+	"-- HDMA occurs here --
+	$LF
+	"897ffd dex                    A:00f0 X:0002 Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:  0 H:  68 MDR: ca
+	$LF
+	"897ffe dex                    A:00f0 X:0001 Y:0003 S:1ffd D:0000 DB:82 nvMXdizc V:  0 H:  82 MDR: ca
+	$LF
+	"897fff dex                    A:00f0 X:0000 Y:0003 S:1ffd D:0000 DB:82 nvMXdiZc V:  0 H:  96 MDR: ca
+	$LF
+	"898000 bit $5f30     [825f30] A:00f0 X:00ff Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:  0 H: 110 MDR: ca
+	$LF
+	"898003 adc $2f6325,x [2f6424] A:00f0 X:00ff Y:0003 S:1ffd D:0000 DB:82 nVMXdizc V:  0 H: 134 MDR: 5f
+	$LF
+	"898007 adc [$3f]     [000000] A:00f0 X:00ff Y:0003 S:1ffd D:0000 DB:82 NvMXdizc V:  0 H: 166 MDR: 00
+	$LF
+	"898009 jmp ($386f)   [89386f] A:00c3 X:00ff Y:0003 S:1ffd D:0000 DB:82 NvMXdizC V:  0 H: 210 MDR: d3
+	$LF
+	"893838 sec                    A:00c3 X:00ff Y:0003 S:1ffd D:0000 DB:82 NvMXdizC V:  0 H: 240 MDR: 38
+	$LF
+	"893839 sec                    A:00c3 X:00ff Y:0003 S:1ffd D:0000 DB:82 NvMXdizC V:  0 H: 252 MDR: 38
+	$LF
+	"89383a sec                    A:00c3 X:00ff Y:0003 S:1ffd D:0000 DB:82 NvMXdizC V:  0 H: 264 MDR: 38
+	$LF
+]pre
+[div class=p 
+	"Eventually, execution falls through to the $4000 range, which contains the I/O registers. If we can reach address $4218, which holds the current controller input, we win. But before then we have to manipulate things such that we can successfully execute a number of registers without crashing. Here are all the readable registers and their values (dots indicate open bus):
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				" Address 
+			]td
+			[td 
+				"   Value   
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4016  
+			]td
+			[td 
+				" 
+				[code 
+					".... ..01
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4017  
+			]td
+			[td 
+				" 
+				[code 
+					"...1 1101
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4210  
+			]td
+			[td 
+				" 
+				[code 
+					"0... 0010
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4211  
+			]td
+			[td 
+				" 
+				[code 
+					"0... ....
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4212  
+			]td
+			[td 
+				" 
+				[code 
+					"0H.. ...0
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4213  
+			]td
+			[td 
+				" 
+				[code 
+					"0000 0000
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4214  
+			]td
+			[td 
+				" 
+				[code 
+					"0000 1001
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4215  
+			]td
+			[td 
+				" 
+				[code 
+					"0000 0000
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4216  
+			]td
+			[td 
+				" 
+				[code 
+					"0000 0101
+				]code
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"  $4217  
+			]td
+			[td 
+				" 
+				[code 
+					"0000 0000
+				]code
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"$4017 is the first tricky one -- assuming the open bus still has $ca, it will put a value of $dd on the bus. This instruction will read from a memory address dependent on the value in the X register, so we need to precisely manipulate the HDMA timing such that either X has a good value (by manipulating the number of DEX instructions) or another HDMA triggers to fix the open bus before anything bad happens.
+	$LF
+]div
+[div class=p 
+	"$4213, $4215, and $4217 are also particularly dangerous as these registers contain zeroes. Opcode $00 is the BRK instruction, which raises a software interrupt and causes a crash. Therefore, we must be sure to execute 2-byte opcodes at $4212, $4214, and $4216 to safely skip past these zero bytes. Luckily, $4214 and $4216 already contain values corresponding to 2-byte opcodes (specifically, they happen to contain the coordinates of the energy tank in the room, used for calculations relating to its blinking animation).
+	$LF
+]div
+[div class=p 
+	"However, registers $4210-4212 will reset almost all bits of the open bus to 0. Almost all the time, the read from $4212 returns $02, which raises a software interrupt (similar to $00). But if we can time things 
+	[em 
+		"perfectly
+	]em
+	" such that $4212 is read during H-Blank, the value will be $42 -- a 2-byte opcode. (This opcode happens to be called "WDM" after William D. Mensch, Jr, the designer of the processor; it is a 2-byte instruction that does nothing).
+	$LF
+]div
+[div class=p 
+	"The timing manipulation to make everything fall into place was quite a challenge. We need at least 4 out of the 5 beetoms in the room to be jumping on the frame of the crash (since jumping beetoms perform additional collision-detection checks that consume CPU time). This means that our movement in the room prior to the crash must bring each of the 4 beetoms on screen to activate them, and manipulate RNG such that no beetom ever bonks a wall (as that would cause it to deactivate). We also need the screen to be scrolled so that Samus is as far to the right on screen as possible (spritelag tends to last a little longer when Samus is drawn closer to the right side of the screen). We need exactly one beetom and one bug onscreen (since we need an exact number of sprites on screen to cause a crash). And as spritelag reads through an entire bank several times over, the amount of time it consumes depends on 
+	[em 
+		"every single value in RAM
+	]em
+	", in an only-semi-predictable fashion. Once a setup has been found that causes the game to crash, getting the perfect timing manipulation to turn the crash into an ACE requires a great deal of trial and error. And the tiniest change to the run will break an ACE setup -- after we finished optimizing the run, Sniq went back to add some entertainment during the Ceres Ridley fight, which changed a variable in RAM and meant the ACE setup had to be re-done.
+	$LF
+]div
+[div class=p 
+	"But in the end it all falls into place, and the processor makes it to address $4218 -- the controller input. On the final frame of the movie, we press buttons on the controller corresponding to the following instructions:
+	$LF
+]div
+[pre 
+	"F4 45 89    PEA $8945 	
+	$LF
+	"08          PHP 		
+	$LF
+	"5C D3 84 82 JML $8284D3	
+	$LF
+]pre
+[div class=p 
+	"This code fixes up the stack so that the game will return to the main loop instead of crashing, then jumps into the middle of a routine that sets up the game end cutscene & credits. The planet explodes and Samus escapes, with an in-game-time under 2 minutes for the first time ever.
+	$LF
+]div
+[h2 id=ContributionsAcknowledgements 
+	" Contributions & Acknowledgements
+	$LF
+]h2
+[div class=p 
+	"This TAS was created by:
+	$LF
+]div
+[ul 
+	[li 
+		" Sniq: Discovery of the pose glitch & the sprite lag crash; routing, movement, and optimizations (every input from power-on through the triggering of the pose glitch is Sniq's)
+		$LF
+	]li
+	[li 
+		" NobodyNada: Investigating the sprite lag crash to determine the necessary conditions to reproduce it; discovery and development of the HDMA timing manipulation strategies needed to turn it into arbitrary code execution (every input after the pose glitch is NobodyNada's)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Special thanks to:
+	$LF
+]div
+[ul 
+	[li 
+		" total, for his knowledge of previous arbitrary-code-execution methods in SM and assistance and insight developing this setup
+		$LF
+	]li
+	[li 
+		" PJBoy, for 
+		[a href=https://patrickjohnston.org/bank/index.html rel=noopener external nofollow 
+			"his comprehensive disassembly of the game
+		]a
+		$LF
+	]li
+	[li 
+		" The incredible SM speedrunning community, for all the countless discoveries, reference materials, and friendships over the years that made this run possible
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging. Real excited about this one.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Well, I have to say...I'm impressed with this. Since your last glitched submission, I've wondered if anything could ever be found again. This game continues to surprise.
+	$LF
+]div
+[div class=p 
+	"Optimization: 
+	[a class=intlink href=/Users/Profile/Sniq 
+		"Sniq
+	]a
+	"...over the years, I have found that your optimization is among the very best I've ever seen. Having TASed Super Metroid myself, I know of the difficulties involved and I certainly cannot see any improvements. Even if I did, this PAL version would certainly wreck the implementation of ACE. 
+	[a class=intlink href=/Users/Profile/NobodyNada 
+		"NobodyNada
+	]a
+	", your contribution to this work cannot be underestimated. I found your part to be extremely interesting and very descriptive of the exploits involved. Great job to the two of you!
+	$LF
+]div
+[div class=p 
+	"Branch: From the very beginning, there was never any doubt that this submission was going to be accepted. Having beaten 
+	(__wikiLink|href=/6063S|implicitdisplaytext=6063S)
+	" by roughly 30 seconds...this is verification enough for me to accept. On the other hand, the decision to create two branches has always been in question. As judge, I have had to weigh the opinions of many members and measure them against our rules. I went into this, thinking of obsoletion. Now, with enough feedback and staff discussions...I'm staying put with that decision.
+	$LF
+]div
+[div class=p 
+	"It is my honor and privilege to Accept this submission over 
+	(__wikiLink|href=/6063S|implicitdisplaytext=6063S)
+	" for publication.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Processing...
+]div

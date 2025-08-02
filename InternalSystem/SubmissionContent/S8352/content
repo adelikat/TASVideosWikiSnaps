@@ -1,0 +1,362 @@
+13
+[div class=p 
+	(youtube|h=240|v=4ztM7H_s6II|w=320)
+	$LF
+]div
+[h3 id=Stuff 
+	" Stuff
+	$LF
+]h3
+[ul 
+	[li 
+		" BizHawk 2.7
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Uses Warps
+		$LF
+	]li
+	[li 
+		" Professional elevator manipulator
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[div class=p 
+	"This is a 2122 frames improvement to the 
+	(__wikiLink|displaytext=published TAS by jlun2|href=/2213M)
+	". Most of the timesave came from better handling of the elevators and a faster method of movement.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h3 id=Elevators 
+	" Elevators
+	$LF
+]h3
+[pre 
+	$LF
+]pre
+[h4 id=ElevatorMechanics 
+	" Elevator mechanics
+	$LF
+]h4
+[div class=p 
+	"First of all, the destination floor depends on the frame you enter the elevator. You want an optimal floor route without wasting too much time waiting for the best floor. Going up by 1 floor would make sense as the fastest way to progress through the hotel, but because of the way the elevators work it isn't. We'll get back to that later.
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Once the game has loaded the elevator, the game starts a timer that goes from 0 to 47, after which it resets to 0. The cycle needs to be completed 4 times for the door to close and the elevator to start going. After this, a completed cycle will do one of two actions:
+	$LF
+	"it will either change the floor number on the screen, or slow down the elevator to prepare to stop. 
+	$LF
+	[br 
+	]br
+	$LF
+	"For example, when traveling from floor L to floor 12, the game will need to complete 3 cycles of the elevator timer. First to change the floor number to 11, then another one to change it to 12 and the final one to stop the elevator. 
+	$LF
+	[br 
+	]br
+	$LF
+	"This cycle can be completed early by pressing A. This can only be done after 24 frames, so on 0-23 nothing happens, but on 24-47 the timer will reset to 0. With specific A presses, we can minimize the time the elevator needs to reach the target floor. The final A press (or completed cycle) needs to be as close to the stopping point as possible, otherwise the elevator will slow down early and lose time. The A press is sometimes adjusted to line up with the timer for the door opening as well.
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"After you've arrived at the destination floor, you once again need 4 completed cycles to open the door, same as closing it.
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Manipulating the elevator timer like this saves 1137 frames. However, the routing can also be improved, so we'll save even more.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h4 id=FloorRouting 
+	" Floor routing
+	$LF
+]h4
+[div class=p 
+	"In some cases, the elevator timer will slow down the elevator too early. This is the case when moving a single floor between the numbered floors, which is why Lobby to 11 to 12 to 14 to 15 to 16 is not the fastest route. So we need to find the fastest route.
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"To make matters more complicated, the Lobby elevator behaves differently to all the other ones. 
+	$LF
+	"This is how long each elevator takes:
+	$LF
+	[br 
+	]br
+	$LF
+	[br 
+	]br
+	$LF
+	"• Lobby to floor 11: 268 frames			Between numbered floors, moving 1 floor:  348 frames
+	$LF
+	[br 
+	]br
+	$LF
+	"• Lobby to floor 12: 320 frames			Between numbered floors, moving 2 floors: 268 frames
+	$LF
+	[br 
+	]br
+	$LF
+	"• Lobby to floor 14: 319 frames			Between numbered floors, moving 3 floors: 321 frames
+	$LF
+	[br 
+	]br
+	$LF
+	"• Lobby to floor 15: 345 frames			Between numbered floors, moving 4 floors: 318 frames
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"You always start from the Lobby and finish at floor 16. Elevators going down take 1 more frame than elevators going up, this is because of the game spending 1 frame to change the arrow from up to down.
+	$LF
+]div
+[div class=p 
+	"The fastest route is: L > 12 > 15 > 11 > 14 > 16 (320 + 268 + 321 + 268 + 268 frames).
+	$LF
+	"The next best route is 27 frames slower, so that's the limit of how long we can wait for the optimal elevators.
+	$LF
+]div
+[div class=p 
+	"Total time saved on elevators: 1352 frames.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h3 id=Movement 
+	" Movement
+	$LF
+]h3
+[pre 
+	$LF
+]pre
+[div class=p 
+	"Kevin accelerates at 3 units/frame. Once it reaches speed 66, it will then drop down to 64 and be kept there. Though instead of moving forward when you have speed 66, you can slide to keep the speed of 66 longer. There is however a speed frame rule every four frames, you can therefore only keep speed 66 for three frames total before it will drop down to 64. Before this occurs, the speed is dropped down to 63 by turning around for one frame, then simply accelerate back up to 66 and repeat the progress. The speed cycle is then the following: 63, 66, 66, 66, 63, 66, 66, 66 and repeat.
+	$LF
+]div
+[div class=p 
+	"In midair, the speed works differently. The speed of 64 is kept constant while in air, but by turning around you'll drop to 0 at once. If you press no directional button, it will drop every 4th frame, halving the speed each time: 32, 16, 8, 4, 2, 1 and 0. You can however keep the speed of 66 when you jump and keep it for two frames by not holding left or right. It's therefore best to jump on the first frame of the frame rule cycle; with speed 66, if a jump is required,
+	$LF
+]div
+[div class=p 
+	"Once landing, you can initiate a slide, which will drop the speed from 64 to 62. Accelerate to 65, keep it for three frames due the frame rule, it will then drop down to 63 and you can restart the usual cycle. Like the following: 64, 62, 65, 65, 65, 63, 66, 66, 66.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h3 id=LevelByLevel 
+	" Level by level:
+	$LF
+]h3
+[pre 
+	$LF
+]pre
+[h4 id=Hotel 
+	" The Hotel
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Floor 1 - 89f saved
+	]b
+	" 
+	$LF
+]div
+[div class=p 
+	"A dart gun, pearls and ammo are collected on the first floor. These are needed to stun enemies on the floors above. Some enemies, like the suitcases and rats, can be killed by sliding.
+	$LF
+]div
+[div class=p 
+	"When the elevators have been spawned, a 1535 frame timer starts ticking down. You first need to hit the elevator button once. If this is done before the timer reaches 1280, it will rest back to 1535 again. After that... You just wait. Once the timer hits 255, you need to hit it an additional four times for you to be able to enter the elevator. A 5th time would open up the doors, but it's possible to enter anyway.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Floor 12 - 25f saved
+	]b
+	$LF
+]div
+[div class=p 
+	"The goal of floor 11, 12, 14 and 15 is to reach a specific checkpoint in the level, only then can you proceed to the next floor. One dart shot used to stun the lady, eight shots remaining.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Floor 15 - 56f saved
+	]b
+	$LF
+]div
+[div class=p 
+	"Luckily, all brooms can be slid under without slowing down. Two shots used for the ladies however, six shots remaining.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Floor 11 - 24f saved
+	]b
+	$LF
+]div
+[div class=p 
+	"Slightly shorter floor, just as uninteresting as before. Two ladies got darted, four shots remaining.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Floor 14 - 18f saved
+	]b
+	$LF
+]div
+[div class=p 
+	"The first lady can't be dodged under, because she spawns too close to you. You can use a gun on the same frame you exit the elevator, this way she'll already be hit when Kevin gets out. A dart hit in combination with the pearls takes out the hotel porter. While the dart gun only stuns it, the pearls get rid of him permanently, otherwise another dart shot had to be used on the way back, and ammo is scarce. As we don't have enough ammo, we need to take damage a couple of times to proceed. By pausing and unpausing when taking damage, we get control back earlier. Still at a cost of 2-3 frames each damage taken. Then a final shot for the last old lady, with one dart remaining.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	[b 
+		"Floor 16 - 63f saved
+	]b
+	$LF
+]div
+[div class=p 
+	"Last dart ammo used to stun the first lady. Ammo will be refilled after the level, your health will not... In the first room we find a power up that gives you both invincibility and a speed boost, increasing the top speed from 66 to 114. It lasts on a timer, which is both ticking down during cutscenes but also kept into the next level. A hidden warp takes Kevin into the next level.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h4 id=CentralPark175fSaved 
+	" Central Park - 175f saved
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[div class=p 
+	"Moving backwards has no effect on the actual speed, it just looks cool and wasted no time. Kevin needs a better gun. The dart gun is only able to stun, though the Super Flying Fist will be used to take down enemies permanently.
+	$LF
+	"After the gun has been picked up, the power up timer runs out. If you hold forward the speed will instantly drop down to 64 again. This can be prevented by sliding, which will drop the speed value by 2 every four frames, giving a higher speed for a longer time.
+	$LF
+	"Climbing takes use of the Y-speed you have at the moment you start climbing upwards. You want to jump so that you land as soon as you start falling down to use your low falling speed into quick acceleration upwards, while the speed drops down to the normal climbing speed.
+	$LF
+]div
+[div class=p 
+	"In the sewers is where the upgraded gun is needed. Each of the three birds will constantly respawn unless they are taken down with the better gun. While you can jump while climbing the ladder at the end, it's not possible to regrab it in midair. It is however possible to reach the loading zone quicker. Then we slide into the next stage.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h4 id=UncleSTownhouse194fSaved 
+	" The Uncle's Townhouse - 194f saved
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[div class=p 
+	"This level consists of several floors where you need to collect a key to proceed upwards to the roof. The first set of bandits can't be stunned or damaged boosted to go through, one has to be knocked out with the 10 TON.
+	$LF
+	"On the second floor, damage is taken from the paint can for invincibility frames to go through the bandit, as he can't be stunned nor taken damaged from, it's insta kill. The end of the second floor has the Bell power up. This will give Kevin a screw attack for the rest of the game, you can avoid taking damage from everything. However, due to it being slightly out of the way, and that it's slower to turn around in midair when it's active, it was slower to pick up in the end.
+	$LF
+	"Once on the roof, the rest is straight-forward sliding up to the tree.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h4 id=ChristmasTree98fSaved 
+	" Christmas Tree - 98f saved
+	$LF
+]h4
+[pre 
+	$LF
+]pre
+[div class=p 
+	"This ladder can be jumped up, as there are platforms to stand on within the ladder.
+	$LF
+	"For the fight itself, get to the top and press Up to have the lady throw bird food at the bandits three times each, for the bird to then kill each of them. Bird kills them off and Kevin is happily united with his family!
+	$LF
+]div
+[div class=p 
+	"Thanks for watching!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Adding encode to "Encode Embed Link" field and judging statement.
+	$LF
+]div
+[div class=p 
+	"It is my honor to judge one of the icons of the community. Good work on the elevator routing/manipulation and the acceleration movement. I know that it was mentioned how it doesn't look pretty, but TASes are going to eventually end up looking odd...as more mechanical exploits are found. I personally liked it, since I have something similar in some of my own work and can appreciate the inhumanly possible tricks. :D
+	$LF
+]div
+[div class=p 
+	"Accepting over 
+	(__wikiLink|href=/2213M|implicitdisplaytext=2213M)
+	" for publication.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

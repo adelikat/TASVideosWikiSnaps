@@ -1,0 +1,230 @@
+7
+[div class=p 
+	"Improvement over 
+	(__wikiLink|href=/3655M|implicitdisplaytext=3655M)
+	". This submission intends to go along with the decision in 
+	(__wikiLink|href=/9293S|implicitdisplaytext=9293S)
+	" and have Red/Blue and Yellow non-save glitch runs be separated instead of obsoleting each other.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Completes the game as fast as possible without save data corruption
+		$LF
+	]li
+]ul
+[h3 id=AceSetup 
+	" ACE setup
+	$LF
+]h3
+[div class=p 
+	"This run like the previous run abuses 0xF8FF ACE. This ends up resulting in the player name being executed twice, then Box Pokemon data, along with other inconsequential data. The player is named "Mn].♀Pkdo", where Mn and Pk are both 1 character. The trainer ID is manipulated to be 0x06D6. The boxed Pokemon's DVs are manipulated to be 0xC282. This results in the following payload:
+	$LF
+]div
+[pre 
+	"; player name 1
+	$LF
+	"ldh [c],a
+	$LF
+	"sbc a ; z and n set
+	$LF
+	"ldh a,[c]
+	$LF
+	"push af ; [sp] = 0xFFC0
+	$LF
+	"pop hl ; hl = 0xFFC0, [hl] = 0xE9
+	$LF
+	"and e ; a = 0x8D
+	$LF
+	"xor [hl] ; a = 0x64
+	$LF
+	"; player name 2
+	$LF
+	"ldh [c],a
+	$LF
+	"sbc a ; z and n set
+	$LF
+	"ldh a,[c]
+	$LF
+	"push af ; [sp] = 0x64C0
+	$LF
+	"pop hl ; hl = 0x64C0
+	$LF
+	"and e
+	$LF
+	"xor [hl]
+	$LF
+	"; boxed Pokemon
+	$LF
+	"; catch rate
+	$LF
+	"dec l ; hl = 0x64BF
+	$LF
+	"; growl
+	$LF
+	"dec l ; hl = 0x64BE
+	$LF
+	"; tid
+	$LF
+	"ld b,0xD6
+	$LF
+	"; dvs and pp
+	$LF
+	"jp nz,0x2382
+	$LF
+]pre
+[div class=p 
+	"The end of the payload does a jump to 
+	[code 
+		"0x2382
+	]code
+	". This is a ROM address, in the middle of some of the game's 
+	[a href=https://github.com/pret/pokered/blob/9a2f1b2170dab77a88d0230fe479e31e8356ce04/home/audio.asm#L99 rel=noopener external nofollow 
+		"music code
+	]a
+	". This ends up calling the 
+	[code 
+		"Bankswitch
+	]code
+	" function in the game, which switches the ROM bank over to whatever 
+	[code 
+		"b
+	]code
+	" has and jumps to whatever 
+	[code 
+		"hl
+	]code
+	" has. This means the game bankswitches to bank 0x16 (keep in mind the game only has 0x40 ROM banks, so any 
+	[code 
+		"b
+	]code
+	" value higher than 0x3F effectively gets moduloed by 0x40, 0xD6 % 0x40 = 0x16), and jumps to 
+	[code 
+		"0x64BE
+	]code
+	". 
+	[code 
+		"0x64BE
+	]code
+	" in bank 0x16 is the middle of the 
+	[a href=https://github.com/pret/pokered/blob/9a2f1b2170dab77a88d0230fe479e31e8356ce04/scripts/HallOfFame.asm#L25 rel=noopener external nofollow 
+		"Hall of Fame script
+	]a
+	". This is also in fact around the same place the 
+	(__wikiLink|displaytext=current save glitch movie|href=/4329M)
+	" ends up redirecting execution to.
+	$LF
+]div
+[div class=p 
+	"The 
+	(__wikiLink|displaytext=previous movie|href=/3655M)
+	" opted to jump to the game's warp code with the parameter set to the Hall Of Fame room. This loses around 10 seconds, mainly as you have to wait for Oak's speech. As such, redirecting execution directly to the Hall Of Fame's script comprises most of the timesave in this TAS.
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[ul 
+	[li 
+		" The trainer ID is manipulated to be 0x06D6. 0x0616, 0x0656, and 0x0696 also work, but 0x06D6 ended up being the fastest to manipulate.
+		$LF
+	]li
+	[li 
+		" The player is named "Mn].♀Pkdo" and the Rival is set to the preset RED name. This preset name is why Blue is used over Red, as it is shorter than the Rival preset name in Red.
+		$LF
+	]li
+	[li 
+		" Charmander is picked as the starter, with 0xC282 DVs. 0xC482 would also work for this TAS. In theory, a ton of other DVs would work for the ACE payload, but 0xC282 and 0xC482 are the best in this case, as they are the only ones which give Charmander 0 HP DVs, and thus gives Charmander 18 HP (even 1 HP DV would bump Charmander's HP to 19). It is not nicknamed, as the name is not shown enough to save time nicknaming. Squirtle and Bulbasaur cannot be used, as they have Tackle, which ruins the payload used.
+		$LF
+	]li
+	[li 
+		" The Rival fight is purposefully lost, as it does not need to be won and it is fastest to lose. This is done in 3 turns, each comprising of a 1/256 miss with Growl, and a 1/39 crit with Tackle. A 1/39 Tackle crit does 6 damage to Charmander, so having 18 HP allows for a 3 turn fight. Who doesn't love a 1/1178114537369 Rival fight.
+		$LF
+	]li
+	[li 
+		" Options are set after the Rival fight. Keeping animations on during the Rival fight saves a bit of time due to Tackle being faster with animations on rather than off.
+		$LF
+	]li
+	[li 
+		" A Level 5 Spearow is caught with 0xE8E3 DVs. Various DVs were workable here: Attack must be 10, 12, or 14; Defense must be 0, 2, 4, 6, or 8; Speed must be 14; Special can be any value.
+		$LF
+	]li
+	[li 
+		" Charmander is deposited into the PC, and the Pokemon Center is used to set the blackout location.
+		$LF
+	]li
+	[li 
+		" A Level 5 Pikachu is manipulated at the end of the forest to deathwarp. Pikachu's stats are irrelevant (even if Pikachu had 0 special and Spearow had 15 special, Thundershock crit is a guaranteed KO).
+		$LF
+	]li
+	[li 
+		" The first bug catcher fight is manipulated to have 2 1/39 crits from Weedle, allowing for red bar for the rest of the run. The L9 Weedle is KO'd with a 1/39 non-crit and a high roll non-crit.
+		$LF
+	]li
+	[li 
+		" The second bug catcher's L9 Weedle has the same KO requirements, 1/39 non-crit and a high roll non-crit.
+		$LF
+	]li
+	[li 
+		" The third bug catcher's Pokemon can all be OHKO'd with crits.
+		$LF
+	]li
+	[li 
+		" The Hall of Fame still needs input to clear some textboxes to advance to the credits, so input doesn't end until those textboxes are cleared.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	":  replaced movie file to fix the platform being misdetected as GBC
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/DrD2k9 
+		"DrD2k9
+	]a
+	":  This situation is similar to how 
+	(__wikiLink|displaytext=Gold/Silver|href=/4465M)
+	" vs 
+	(__wikiLink|displaytext=Crystal|href=/9293S)
+	" require different setups in order to perform similar glitches.   Red/Blue warrant separate publication vs 
+	(__wikiLink|displaytext=Yellow|href=/3901M)
+	" because the setup required to achieve the game end glitch is different.  If at some point in the future a new (and faster) approach is found that works the same for all three versions of the game (Red, Blue, Yellow) then we can go back to one publication of the branch that covers all three versions; but for now, splitting is warranted.
+	$LF
+]div
+[div class=p 
+	"Accepting in order to split Red/Blue from Yellow and as an improvement to 
+	(__wikiLink|href=/3655M|implicitdisplaytext=3655M)
+	".
+	$LF
+]div
+[div class=p 
+	"NOTE TO PUBLISHER: As with 
+	(__wikiLink|displaytext=9293S|href=/9293S)
+	", Once this is published we need to update the obsoletion chains to separate the Blue/Red and Yellow runs of the "game end glitch" branch. I don't mind doing it if you don't want to.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Processing...
+]div

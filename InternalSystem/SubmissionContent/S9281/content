@@ -1,0 +1,656 @@
+5
+[div class=p 
+	"We're back in the city of Shapeir, but this time we know better. When danger rears its ugly head, our hero bravely fled.
+	$LF
+]div
+[div class=p 
+	(youtube|v=k6wgmgtCxpI)
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" To become a... hero?
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Emulator used: JPC-rr 11.9-alpha
+		$LF
+	]li
+	[li 
+		" Game Version 1.102
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=WhatIsActuallyHappeningHere 
+	" What is actually happening here?
+	$LF
+]h4
+[div class=p 
+	"In order to sell the illusion that the desert is actually thousands of screens long, the entirety of the desert is actually a single room (665). A variable is used to track your position in the desert; divide by 1000 to get your north/south position, modulus by 1000 to get your east/west position. The Shapeir overlook is located at 1300, the griffin nest at 1296, Julanar at 1307, the oasis at 6303, the Raseir overlook at 8700, and the caged beast at 4295. These desert coordinates and their corresponding rooms were stored in an array to pair the coordinates with their corresponding rooms: (-650, 1296, -780, 1300, -640, 1307, -620, 6303, -880, 8700) with a separate code segment to append the cage room to this array. The calcRoom procedure is coded to check and see if the coordinates are in the array, and if they are to return the corresponding room rather than the coordinates. But note the room is negative. Instance desert of Rm overrides the newRoom with a lot of code to make the desert work, but the important part is that if procedure calcRoom returned a negative number, super's newRoom method is called with the negative of the negative (a positive number). Procedure calcRoom makes sure to subtract 1000 from your position every time you go north a room but it doesn't do any input validation to make sure that number is actually within bounds. Go north enough and you could end up with negative coordinates.
+	$LF
+]div
+[h4 id=WhatSTheShortVersion 
+	" What's the short version?
+	$LF
+]h4
+[div class=p 
+	"If you glitch upward past the northern-most mountains twice, you can theoretically go to any room in the game.
+	$LF
+]div
+[h4 id=HowDoesThisPlayOutInThisRun 
+	" How does this play out in this run?
+	$LF
+]h4
+[div class=p 
+	"The ending sequence starts playing out on room 820. Rooms 821 and 822 consist of the ending ceremony sequence in the palace, and once all of that is done the character export screen is on room 840.
+	$LF
+]div
+[div class=p 
+	"Since Shapeir is located at 1300, you can warp to room 820 by going left 120 screens and glitching north twice past the mountains. (1300 - 120 - 2000 = -820). This is the direction that single-game any% runs take. Full series speedruns have to factor in the time spent on the ending and will go 140 screens left to warp straight to the export hero screen to skip the ending.
+	$LF
+]div
+[h4 id=HowDoYouActuallyGlitchPastTheMountains 
+	" How do you actually glitch past the mountains?
+	$LF
+]h4
+[div class=p 
+	"The mountains are only solid on the screen you can actually see in front of you. If you can run diagonally up and left off screen, you can run past the barrier that is normally there. Normally when you hit the edge of the screen you will activate some code that causes the desert to scroll to a new room. If you can override that script with some other script, you can bypass the normal barriers.
+	$LF
+]div
+[div class=p 
+	"Normally when you cast spells with a targeting reticle (or throw objects), a handsOff script will be called. HandsOff will stop the hero from walking normally. But when you press a direction, you turn and then you walk. Turning isn't walking. So if you happen to be in the middle of turning when handsOff is called, you could then run off screen. A mouse click would only run to the position you clicked but a keyboard press would keep running until you hit an edge. Note that you do actually end up sliding one or more screens east or west when doing this and that calculation must be taken into account when using desert warping. If you run further, you'll slide more screens. The hero will eventually run into something off-screen and the maximum number of screens you can slide east/west in one go is seven.
+	$LF
+]div
+[h4 id=AnythingElseOfNote 
+	" Anything else of note?
+	$LF
+]h4
+[div class=p 
+	"Quest for Glory 2 continues to have some of the same limitations that Hero's Quest did in regard to mousing and keyboarding: The keyboard only polls every 100 milliseconds and the mouse polls every 10 milliseconds. But there's a catch: the hero's move speed appears to be 
+	[em 
+		"faster
+	]em
+	" with the keyboard than the mouse. The mouse is more responsive but you still want to be using keyboard presses to move when possible. In a lot of situations the optimal approach ends up being to click mouse to move and then press a keyboard direction when you can.
+	$LF
+]div
+[h3 id=RoomByRoomSpecifics 
+	" Room-by-room specifics
+	$LF
+]h3
+[h4 id=OpeningDisclaimer 
+	" Opening disclaimer
+	$LF
+]h4
+[div class=p 
+	"There's a brief bit during the opening disclaimer where you can actually type something into the text parser. This bit was used to try to parser dump the initial "stand" input for the hero. Note that it's also possible to type "run" here and get into a running state before the game even begins.
+	$LF
+]div
+[h4 id=CharacterSheet 
+	" Character sheet
+	$LF
+]h4
+[div class=p 
+	"The fastest input that allows you to make use of HandsOff failing to stop you while turning is casting the Open spell. Pick Magic-User to not have to allocate any stats. It's also possible to type a bit of input once you select your class, but "stand" was already pre-typed during the opening disclaimer and your hero's name must be a minimum of 3 characters. I used the bit of loading to parser dump the name before clicking start.
+	$LF
+]div
+[h4 id=KattaSTaleInn 
+	" Katta's Tale Inn
+	$LF
+]h4
+[div class=p 
+	"Not only can Abdulla's opening dialogue be clicked away (rather than using the keyboard), it will click away faster if the game detail is set to low. After using F3 to use the pre-typed "stand" command we type "run" to get the hero into a running state. Mouse clicks are used to begin movement with further keyboard presses then guiding the hero to the room. Sleeping at the inn is on a full-second frame rule and we had about 100-150 ms of leeway for the current frame rule. This is enough time to also bring up the game difficulty and set it to Easy. We sleep until night and then head out.
+	$LF
+]div
+[h4 id=Stables 
+	" Stables
+	$LF
+]h4
+[div class=p 
+	"The hero automatically returns to a walking state upon entering the stables. "run" was the last command typed and we can just F3 it again here. Because of the timing of the keyboard commands in the desert, I needed to delay here about 10 milliseconds in order to make the CAST OPEN command in the desert line up correctly with the mouse click to turn in the desert. This could have been done by simply delaying the mouse click on the run input, but ultimately I decided to instead use a mouse click to move the hero on this room and slow him down just slightly. The result of this is that the hero is slightly higher on the screen when casting open in the desert (y=138, where a simple 10ms delay had y=153 instead)
+	$LF
+]div
+[h4 id=RunningThroughTheDesert 
+	" Running through the desert
+	$LF
+]h4
+[div class=p 
+	"We're trying to avoid scrolling animations here. Being right next to the mountain side in the desert gets you a scrolling animation and any day-time wandering of the desert also has the open dunes scrolling left and right. Going south of the overlook one screen and having it be night time avoids the scrolling animation in the desert and is faster. We're also making use of turning isn't walking to slide the hero past the point at which the dune walking script would take over and send him north one screen and running across the sky. Doing this and running off the top of the screen at y=3 is saving a significant amount of time by making it so the engine does not have to draw the sprite at any point. We're also throwing the cursor off screen to the bottom right just to save that bit of drawing time as well (an off-screen cursor saved about 200 milliseconds over 100 screens).
+	$LF
+]div
+[div class=p 
+	"We run left 112 screens. At this point we start preparing to do our slides. We were able to use a perfectly timed mouse click in the desert for Turning Isn't Walking, but to run off screen we need keyboard presses. The game speed must be turned down two notches for the hero to still be turning after pressing the opposite direction when the next keyboard input is consumed. We can turn it up two notches again after getting the targeting reticle.
+	$LF
+]div
+[div class=p 
+	"I tested several variations of the slides. It's possible to dump most of the ending input into the keyboard buffer as you start your slides and end time there. The first test of sliding ended up sliding 1 screen west on the first input, 2 screens west on the second input. I next tried two variations: Slide 1 screen then 7, and slide 7 then 7. 1-7 ended its input by far the soonest and is the variation I ended up with. 1-2 didn't enter its first screen until well after and 7-7 didn't enter the second screen until well after (and 7-7 had bad positioning that would have made it difficult to set up a keyboard input ending).
+	$LF
+]div
+[h3 id=Other 
+	" Other
+	$LF
+]h3
+[div class=p 
+	"My most important takeaway from this TAS was the fact that keyboard movement is faster. Developer Corey Cole indicated that the Actor class was likely where any such code would be handled and I don't see any significant differences between the Actor class in this game and the one in Hero's Quest, which makes me wonder how much of this applies to other Sierra SCI games. Is it possible keyboard movement is faster in other games as well? The other take-away is that because of how fast the game runs and how slowly SCI polls keyboard and mouse in comparison, the game can be loosely defined by keyboard frame rules or possibly even mouse frame rules.
+	$LF
+]div
+[div class=p 
+	"Part of my motivation for doing this TAS was because the currently-existing TAS lacks many of the tricks and improvements we've found within the community, but this one skips so much of the game that the other TAS should probably remain. The goal of that one might be renamed to something like "No Wrong Warps" or "No Desert Warps". There are still a few tricks that exist in RTA that the TAS doesn't use, mostly in the forbidden city segment.
+	$LF
+]div
+[div class=p 
+	"I'm thinking about how a max points TAS might work. My original thought was simply magic-user with 550 points, but other members of the QFG community have pointed out that it's possible to wrong warp back to the class select screen without resetting points and doing that may allow for a higher point total. This has never been routed, but any route that involves getting the fighter's points mean figuring out how to optimize for combat RNG without the same easy means of RNG advancement that Hero's Quest had.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"Files: (Some quick notes - my GOG installation of QFG2 didn't appear to have some of the files that C-Square had and my SNDBLAST.DRV file is different from his)
+	$LF
+]div
+[div class=p 
+	"HDD, 16 tracks, 63 sectors, 16 sides.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Filename
+			]th
+			[th 
+				"Size
+			]th
+			[th 
+				"MD5
+				$LF
+			]th
+		]tr
+		[tr 
+			[td 
+				"ADL.DRV
+			]td
+			[td 
+				"7976
+			]td
+			[td 
+				"eeca13109c381afef6584d78daaccab2
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"CGA320M.DRV
+			]td
+			[td 
+				"2049
+			]td
+			[td 
+				"57a3da77af2b48851cf048e5752695fb
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"CMS.DRV
+			]td
+			[td 
+				"3734
+			]td
+			[td 
+				"4b5bd8739e73f44ce5562b93b2723287
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"EGA320.DRV
+			]td
+			[td 
+				"3273
+			]td
+			[td 
+				"d80d8207b80d8d108c749a2d5629cb15
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"FONT.000
+			]td
+			[td 
+				"1782
+			]td
+			[td 
+				"4ff2dc339352972581da584cc0a8d2f1
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"HERCMONO.DRV
+			]td
+			[td 
+				"2212
+			]td
+			[td 
+				"2bc97203eb593636d0271569e3c01f92
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"IBMKBD.DRV
+			]td
+			[td 
+				"449
+			]td
+			[td 
+				"fdf344726b857a44934eb14dd0d37c59
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"IBMPS1.DRV
+			]td
+			[td 
+				"4354
+			]td
+			[td 
+				"121983ae1b4df7c47986bd32f5790ab3
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"INST.EXE
+			]td
+			[td 
+				"13355
+			]td
+			[td 
+				"7271fb1d6430c1807584021e8d01dc58
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"INSTALL.HLP
+			]td
+			[td 
+				"6464
+			]td
+			[td 
+				"e152f2bce8445fa4fba255d1668b8416
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"JOYSTICK.DRV
+			]td
+			[td 
+				"607
+			]td
+			[td 
+				"c75b73974160ff652a909a0d01f97214
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"MCGA320.DRV
+			]td
+			[td 
+				"2745
+			]td
+			[td 
+				"3a24c298a2d77b07d9459ba89d9bf375
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"MT32.DRV
+			]td
+			[td 
+				"1989
+			]td
+			[td 
+				"1216bb30f321c652909aa1c2239dd7d4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.000
+			]td
+			[td 
+				"212119
+			]td
+			[td 
+				"fe18a816a08c89f245f9143642bf84eb
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.001
+			]td
+			[td 
+				"867866
+			]td
+			[td 
+				"733686eea71255794a9762f683ac789f
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.002
+			]td
+			[td 
+				"790750
+			]td
+			[td 
+				"3d5223fd488fb04025ba3199485a0756
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.003
+			]td
+			[td 
+				"972804
+			]td
+			[td 
+				"f0544e220e3a5b66df2070d9638527b4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.004
+			]td
+			[td 
+				"983617
+			]td
+			[td 
+				"7cb86c2af9399b81a1f796a6b07aeeb3
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.CFG
+			]td
+			[td 
+				"79
+			]td
+			[td 
+				"f961b3028d27f36b778e10bfd78e3da0
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"RESOURCE.MAP
+			]td
+			[td 
+				"6906
+			]td
+			[td 
+				"06d0cb2c9496d7d4494b0f37f2c6c4c2
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"SCIV.EXE
+			]td
+			[td 
+				"59150
+			]td
+			[td 
+				"2a20c5077e59902e84f26982b502c10a
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"SNDBLAST.DRV
+			]td
+			[td 
+				"9638
+			]td
+			[td 
+				"21853539fe5271f2bb596b6ae550b12c
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"STD.DRV
+			]td
+			[td 
+				"1448
+			]td
+			[td 
+				"380f442686174ae0282b851ac4c1e765
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"TANDY.DRV
+			]td
+			[td 
+				"4429
+			]td
+			[td 
+				"f70edf481b1a320fd10190fe041c29cc
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"TANDY320.DRV
+			]td
+			[td 
+				"2999
+			]td
+			[td 
+				"3e0716270e0953a5a64c95a9765b9c9f
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"TANDY3V.DRV
+			]td
+			[td 
+				"3893
+			]td
+			[td 
+				"bf2856d43f4bc063fe20820651dc1657
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"TANDYKBD.DRV
+			]td
+			[td 
+				"3893
+			]td
+			[td 
+				"da0e7a40996a64224d918069ef8adea9
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VERSION
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"26913b564c71d9fb7f83e0f4f165d999
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.913
+			]td
+			[td 
+				"2449
+			]td
+			[td 
+				"5511c133471681cab70295d860be96c4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.994
+			]td
+			[td 
+				"112
+			]td
+			[td 
+				"1d3beaac41d0d09790a47c8dc1cadf85
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.995
+			]td
+			[td 
+				"609
+			]td
+			[td 
+				"b99b2ceac1a672c6e4785b48d6dc11be
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.996
+			]td
+			[td 
+				"590
+			]td
+			[td 
+				"f230096194cc9791737b634b36ac7980
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.997
+			]td
+			[td 
+				"8339
+			]td
+			[td 
+				"e501f7de3c7a3b68d6d11f0b965b6697
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.998
+			]td
+			[td 
+				"1229
+			]td
+			[td 
+				"0ef7f63b24dfe1bbeea28e2f8ede90d6
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"VOCAB.999
+			]td
+			[td 
+				"1148
+			]td
+			[td 
+				"df638320d85ee4029e6c3d62b86f7043
+				$LF
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": able to generate hdd disk now
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": I became a fan of quest-like speedrunning after falling into the OneShortEye youtube rabbit hole. So now after seeing some of that community's heroes davidtki and mrprmiller around I knew I HAD to judge this movie.
+	$LF
+]div
+[div class=p 
+	"The movie abuses the game's room coordinate calculation algorithm to quickly jump to the final room, which triggers the final cutscene. To get there, the movie also exploits the game movement, including glitching through montains. By skipping pratically the entire game, the hero finishes the game much faster than the current 
+	[a href=https://www.speedrun.com/quest_for_glory_ii_trial_by_fire/runs/me05dd0z rel=noopener external nofollow 
+		"RTA any% record
+	]a
+	" and receives a measly 20/500 puzzle points for doing so.
+	$LF
+]div
+[div class=p 
+	"I agree that this movie is rather broken and should not supersede the non-glitched one (
+	(__wikiLink|href=/3818M|implicitdisplaytext=3818M)
+	"), as they both offer an entertaining yet very different experience. Therefore, I consider the "Game End Glitch" goal to be appropriate.
+	$LF
+]div
+[div class=p 
+	"Thanks for submitting this. I truly hope to see an updated version of the 'normal' TAS with all the new tricks sometime soon.
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard 'game end glitch'
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

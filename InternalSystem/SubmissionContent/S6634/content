@@ -1,0 +1,627 @@
+16
+[div class=p 
+	"Undertale is an indie RPG created in 2015 by Toby Fox. There are 3 main endings: True Pacifist, Neutral, and Genocide. This TAS achieves the Genocide Ending, which is known for being the most RNG-intensive category in the game due to the heavy emphasis on combat; the player must kill a specific amount of enemies in each area in order to not lock themselves out of this ending. 
+	$LF
+]div
+[div class=p 
+	"Note: For the TAS to sync, enable "Prevent writing to disk" and Runtime > Time tracking > clock_gettime(). You'll also need extra dependencies in order to make Undertale to work by typing this in terminal:  
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" sudo apt-get install libopenal1:i386 libssl1.0.0:i386 libglu1-mesa:i386 
+			]th
+		]tr
+	]tbody
+]table
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: LibTAS v 1.3.4
+		$LF
+	]li
+	[li 
+		" Plays on version 1.08
+		$LF
+	]li
+	[li 
+		" Reaches the Genocide Ending
+		$LF
+	]li
+	[li 
+		" Avoids taking damage, unless it saves time
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"This TAS, although shorter than the already-published True Pacifist Ending TAS, features many more re-records. This is due to the constant presence of RNG throughout the run; everything from which enemies are encountered, to when those encounters take place, to how much damage is caused in those encounters, to which attacks the enemies use is all fully manipulated to produce what is the fastest possible result based on our current game knowledge. Each area features a specific number of kills as this is a prerequisite for achieving the Genocide Ending.In order to generate an encounter, the player must walk a specific number of frames in any room that can spawn them. Every frame of movement increments the step counter by one. 
+	$LF
+]div
+[div class=p 
+	"The encounter rate works like this:
+	$LF
+]div
+[div class=p 
+	"Minimum steps = 80 
+	$LF
+	"Random steps = 40 
+	$LF
+	"Population = 20 
+	$LF
+	"Kills flag = 202
+	$LF
+]div
+[div class=p 
+	"Minimum steps are self explanatory. Random steps means the game rolls from 0-40 and adds that number onto minimum steps; the worse case scenario is therefore 120 steps. Population determines the modifier for the encounter rate as you kill more enemies. The Kills flag is used alongside population to keep track of what your encounter rate multiplier should be.
+	[br 
+	]br
+	$LF
+	"This example was made using the first room that can generate encounters, the Froggit/Whimsun room.
+	[br 
+	]br
+	$LF
+	"If you don’t refresh the room after a fight by leaving/re-entering, you will retain the previous step counter values that were set during the previous fight(s).
+	[br 
+	]br
+	$LF
+	"Core is unique in that only the random steps increase, not the minimum steps. meaning if you got perfect RNG you would never need to room refresh. Keep in mind as you go further into your murderous rampage that rolling bad random steps will be more punishing.
+	[br 
+	]br
+	$LF
+	"In simple terms, this is how you can calculate the difference between the least/most required steps for the next encounter:
+	$LF
+]div
+[div class=p 
+	"Steps difference delta = Max Random Steps Value * Pf (Population Factor);
+	[br 
+	]br
+	$LF
+	"Pf = KL/ (KL - KC), where:
+	[br 
+	]br
+	$LF
+	"KL = Kill Limit for current area;
+	[br 
+	]br
+	$LF
+	"KC = current Kill Counter
+	$LF
+]div
+[div class=p 
+	"You can find the minimum/random steps counter values for most of the rooms in this pastebin (some info there is outdated, but the step values should be correct): 
+	[a href=https://pastebin.com/4Ma3Y9g2 rel=noopener external nofollow 
+		"https://pastebin.com/4Ma3Y9g2
+	]a
+	$LF
+]div
+[div class=p 
+	"Full details on how the fastest encounter routes were determined can be found in the Google sheet link which you can find in the description below.
+	$LF
+]div
+[h3 id=TricksUsed 
+	" Tricks Used
+	$LF
+]h3
+[h4 id=WallHumping 
+	" Wall Humping
+	$LF
+]h4
+[div class=p 
+	"Holding up and down simultaneously whilst against a northern wall results in a glitched walking animation that alternates between moving up/down on consecutive frames. In many cases this is for comic effect, but the step counter also continues to increment whilst wall humping is being performed, making it possible to grind for encounters whilst reliably remaining one pixel away from a screen’s loading zone. Additionally, doing this in a spot in which you cannot move vertically will result in doubled horizontal speed.
+	$LF
+]div
+[h4 id=MenuBuffering 
+	" Menu Buffering
+	$LF
+]h4
+[div class=p 
+	"Opening the menu repeatedly can be exploited to delay specific encounter checks. This is possible in many areas but is only used once in the run to save time. Encounters and cutscenes in this game do not start playing until the menu has been closed, and in certain situations the player has a single frame to open the menu when a cutscene would otherwise start, and this can be repeatedly performed with frame-perfect menuing.
+	$LF
+]div
+[h4 id=TextStorage 
+	" Text Storage
+	$LF
+]h4
+[div class=p 
+	"Triggering a text box on the same frame that a cutscene or event starts results in both occurring simultaneously. This can be exploited to grant the player control during a cutscene since control is returned whenever a textbox is closed, regardless of if it was enabled or not during the cutscene. This can also be used to initiate wrong warps and overflows, explained below.
+	$LF
+]div
+[h4 id=WrongWarp 
+	" Wrong Warp
+	$LF
+]h4
+[div class=p 
+	"A wrong warp is performed by gaining control whilst a room transition is occurring. Performed correctly, it places the player at the origin point of the next room, which is often further into the room than the regular screen transition point. Wrong warps are not common in the Genocide route due to lacking the Punch Card Exploit used in Neutral/True Pacifist, which is often used to facilitate the glitch. The only way to reliably trigger a wrong warp in Genocide is to already have text storage, and to close the stored textbox once the screen transition occurs, as the act of closing a textbox grants control to the player. In RTA play, performing a wrong warp incorrectly results in a softlock as control becomes impossible to return to the player.
+	$LF
+]div
+[h4 id=RngManipulation 
+	" RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"This is the most complex element to optimize. In general terms, the game uses an advancing RNG call advancing to determine specific random values. This includes things such as enemy attack patterns, types of encounter, and most importantly, the number of “random” steps you must walk before generating an encounter. Enemies are manipulated into using attacks with shorter animations, or animations that can be cancelled via various player actions such as colliding with their attacks. Every text character that displays onscreen (including all text in battles) advances RNG by 2 per frame (including space), so delaying text advancement for a certain number of frames will alter the RNG pattern following it. Room transitions advance RNG by 1, and fade-in/fade-out effects advance RNG by 1 per frame. Some areas may advance RNG in the open world, such as the snow that covers a mini-map in Dogi’s room or several rooms in Waterfall with a bubble animation effect.
+	[br 
+	]br
+	$LF
+	"Menu text doesn’t affect RNG, but there are a number of actions that can create a textbox with advancing text, such as phone calls, reading item info, dropping/using items etc.
+	$LF
+]div
+[h4 id=Overflow 
+	" Overflow
+	$LF
+]h4
+[div class=p 
+	"An overflow is performed whilst exploiting text storage. On any textbox that can only be seen once or any choice prompt, interacting with it multiple times before the first textbox finishes displaying causes a glitched state in which the game displays a different piece of text. This is used in the run to obtain a weapon early during a cutscene by triggering a choice to collect said weapon from the ‘wrong’ textbox.
+	$LF
+]div
+[h3 id=AreaComments 
+	" Area Comments 
+	$LF
+]h3
+[h4 id=Ruins 
+	" Ruins
+	$LF
+]h4
+[div class=p 
+	"The run deviates from the TPE TAS from the very beginning. There is a commonly known strat where you move into the top-left corner in the Flowey tutorial in order to take intentional damage as soon as possible. Avoiding this damage adds 2 more attack cycles from Flowey. It turned out that there are a number of ways to manipulate the attack pattern to force one of the bullets into moving faster and/or on a straighter path towards the soul by being in a specific position before the attack begins. It saved ~8 frames over the old method.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for the Ruins is 20. However, the first actual enemy encounter is unique and works differently to the later ones. It is always a Froggit in the same spot, with lowered health (20 instead of 30) and a higher EXP reward (10 instead of 3) than other Froggits . It allows you to get LV 2 and increase your ATK/HP stats, but there is an issue. The game doesn't consider this a kill for the purpose of the kill counter, which means that you can choose to flee instead. It's common to take that kill in RTA runs to make later fights slightly easier, but it costs about 45 extra frames over fleeing. More frames are saved later (around 15) from having a higher LV earlier, but it still winds up being slower in a TAS (or even RTA, assuming that you'll get the same types of encounters in the Ruins).
+	$LF
+]div
+[div class=p 
+	"The Ruins are divided into 2 different grind areas like in RTA uns, but the number of kills per area is different. The first area can generate one of two possible encounters; a single Froggit or a single Whimsun. The Whimsun is preferable because you always can kill him in one attack, with the weakest possible hit.
+	$LF
+]div
+[div class=p 
+	"The save point is used to restore HP after getting LV 2 due to needing >20 max HP for the damage boosting used in the second grind area. Reading a sign in the room with the 10th kill skips the third phone call event. There are five possible encounters that can be generated in the second grind room: 1/2/3 Moldsmals, 2 Froggits, or Froggit and Whimsun. The last option is the fastest because Whimsun is instantly killed on the first turn, and Froggit’s turns are then skipped by manipulating a specific attack and damage-boosting on it to cancel the animation. This is the only attack in Ruins which can be cancelled in this manner.
+	$LF
+]div
+[div class=p 
+	"Interacting with the moving rock can alter the encounter you receive due to text advancing the RNG, which was used several times during the grind. To manipulate Froggit’s attack pattern and damage rolls, the battle text was used.
+	$LF
+]div
+[div class=p 
+	"Before the final kill. I managed to get TAS Rock Skip, which barely saves any time in Genocide, but it allows you to walk over spikes because the collision is gone. In order to do this, the player must interact with the rock on the last (and only possible) frame while it is still moving, then interact two more times.
+	$LF
+]div
+[div class=p 
+	"Getting 20 kills by this point forces Napstablook to disappear, skipping the fight entirely. The rest of Ruins is a straight walk to Home and killing Toriel in one hit.
+	$LF
+]div
+[h4 id=Snowdin 
+	" Snowdin
+	$LF
+]h4
+[div class=p 
+	"Routing in this area took a very long time, but it was worth it because I managed to find a Genocide-exclusive BS (Blind Skeletons) Skip that wasn’t known before.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for Snowdin is 16, but there are also 4 enemies that are required to keep Genocide mode active even though the game doesn’t track them for the kill count; Doggo, Greater Dog and Dogi (Dogamy + Dogaressa). Snowdrake and Lesser Dog are also required kills, but the game counts them.
+	$LF
+]div
+[div class=p 
+	"A new weapon is obtained before the grind from the box; the Tough Glove. This is used for the duration of Snowdin due to higher damage allowing one-hit kills.
+	$LF
+]div
+[div class=p 
+	"The awkward part starts after the first kill. I managed to trigger a cutscene on the same frame as an encounter (guaranteed Ice Cap). Doing this allows the player to skip some text and retain movement during the cutscene after killing Ice Cap. An invisible wall blocks you from getting close to Sans and Papyrus, whilst going back to the previous room resets the cutscene, so the best strategy is to progress the step counter to get more kills, even though grinding in this manner without switching rooms is usually sub-optimal.
+	$LF
+]div
+[div class=p 
+	"The third regular encounter is always Lesser Dog. It’s faster to use the Stick on the first turn (The Stick automatically enters the inventory after equipping the Tough Glove) in order to decrease their defense. This allows a one-hit kill on the next turn with a weakest-possible hit. Afterwards, manually making any text appear onscreen (such as reading info about the Stick from the inventory) before a new cutscene’s text appears allows you to retain movement for the rest of the cutscene. This can be typically performed with the Punch Card in other categories, but this item cannot be obtained in Genocide.
+	$LF
+]div
+[div class=p 
+	"All remaining rooms that generate encounters until Dogi have a 50% chance to generate either a single Ice Cap or a single Chilldrake. Ice Caps are better because you can one-shot them.
+	$LF
+]div
+[div class=p 
+	"It’s faster to take intentional damage on Doggo in order to make his turn faster. Reading the sign at the end of this room manipulated a better random step count in the next room.
+	$LF
+]div
+[div class=p 
+	"The Dogi skip has been known for a while, but is essentially random in RTA runs due to the random step count. In Genocide we cannot skip the fight entirely, so a small amount of time is saved by walking to the the edge of the next room’s loading trigger during the pre-fight cutscene. A backtrack is done purely for entertainment as there is downtime. Killing Dogaressa first saves a turn due to reducing Dogamy’s defense, this does not occur if you kill Dogamy first.
+	$LF
+]div
+[div class=p 
+	"After the Dogi room, the possible encounters are either a double (Ice Cap and Jerry) or triple (Ice Cap, Chilldrake and Jerry) encounter. Both are a flat 50% chance. Jerry is an awkward enemy; he doesn’t attack but instead increases the length of other enemy attacks by 2 seconds. Normally he is avoided because he has very high defense and HP, which requires 8 turns (9 in RTA because a perfect damage roll is required every hit to 8-shot him). As a result, Jerry is Spared whenever possible.
+	$LF
+]div
+[div class=p 
+	"For Greater Dog I used the battle text to manipulate an attack that can be cancelled early (like with Froggit). It’s possible to get LV 8 before this fight with an early grind and finish the Dogi/Greater Dog fights one turn sooner each as a result (which was the original plan), but it turned out that an early grind causes the steps required for the remaining encounters to be high enough to lose time overall.
+	$LF
+]div
+[div class=p 
+	"The rest of the grind is done in the final possible room. The strategy is to get doubles until 11/16 kills, then two more triples - I spare Jerry in the first triple encounter and kill him in the second. Here is a video I made to show the difference between the most important Snowdin routes: 
+	[a href=https://youtu.be/cToDU3YTpeU rel=noopener external nofollow 
+		"https://youtu.be/cToDU3YTpeU
+	]a
+	$LF
+]div
+[div class=p 
+	"Papyrus is another one-hit kill, just like Toriel. Before the fight I read a sign on the same frame as entering a tunnel in Snowdin that allows you to perform a wrong warp by closing the text during the next room transition. This saves several frames in the next room by spawning you slightly further than the default room entry location. I also dropped the stick during the wrong warp to improve menuing later in the run due to having an emptier inventory, and it costs no frames to do this during a room transition. This is only possible during a wrong warp, because the menu is not available otherwise during a room transition.
+	$LF
+]div
+[h4 id=Waterfall 
+	" Waterfall
+	$LF
+]h4
+[div class=p 
+	"This area most closely resembles a regular run, although many routes were still tested to determine the optimal route.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for Waterfall is 18, with the only required enemies being Shyren and Glad Dummy (both count for the kill counter).
+	$LF
+]div
+[div class=p 
+	"Hugging the north wall before the first Undyne cutscene saves 5 frames over holding right from entering the screen.
+	$LF
+]div
+[div class=p 
+	"The first two encounters can be variable. The base steps counter is extremely high in the first possible room (340), but is only 20 upon entering for the first time (This changes after the first encounter, Aaron). Since Aaron has 98 HP, it requires at least two turns to kill him, but it is generally faster to have the fewest possible turns in fights, so I skipped this fight by triggering a room transition on the same frame as the encounter. This saves two seconds over fleeing the battle. I fled from Woshua in the next room for the same reason, but since this encounter occurs in the middle of the room, it’s not worth cancelling in the same way.
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"The next encounter before getting a new weapon (Ballet Shoes) is always two Moldsmals. With our current loadout a one-hit kill is now trivial.
+	$LF
+]div
+[div class=p 
+	"The next encounter can be either two Moldsmals, Aaron, Woshua, or both Aaron and Woshua. Two Moldsmals is the best option at the current kill count.
+	$LF
+]div
+[div class=p 
+	"The Tough Glove was dropped from the inventory before the second spears chase with Undyne, as there is substantial downtime and it costs no frames to do so.
+	$LF
+]div
+[div class=p 
+	"After killing Glad Dummy (who has 5 HP in Genocide), the next encounters follow a static order: Temmie > Moldsmal/Moldbygg > Woshua/Aaron > Moldbygg/Woshua. Since the Ballet Shoes are capable of killing Woshua in one turn, the only two-turn enemy left is Aaron, so I fled instead of killing him. After the scripted encounters I kept manipulating RNG to only get Moldbygg/Woshua. Woshua has the fastest attack pattern, so it’s preferable to kill Moldbygg first. The only variable was when to room transition multiple times (you’re forced to do it once in this route). In theory it shouldn’t matter, but in practice it alters RNG, so I chose the route which is two frames faster (purely by RNG).
+	$LF
+]div
+[div class=p 
+	"The grind is finished once you have 14/18 kills because the next 2 rooms are so long that you naturally get two more encounters before you reach the end of the rooms regardless of step counter RNG.
+	$LF
+]div
+[h4 id=UndyneTheUndying 
+	" Undyne the Undying
+	$LF
+]h4
+[div class=p 
+	"This is the first legitimate boss fight in Genocide, and it’s an odd one. Your damage is 21 times higher than in regular fights, and this applies to damage rolls as well (You can either get +21 or +42 to each attack). Undyne’s HP is 23,000. After some math, it turned out that there is no possible method to save a turn over a perfect RTA fight at LV 10; even with the best possible damage rolls on every turn, you will still be short by 68 damage after the 13th turn. There are no items that can raise your ATK stat at this point, and getting an extra LV for the sake of skipping one turn on Undyne is absolutely not worth it. Perfectly-central hits in this fight require a frame-perfect input for each individual cursor, three per turn.
+	$LF
+]div
+[div class=p 
+	"Minimum damage in this fight is also odd. If you deal less than 600, a random integer between 600 and 666 is selected. Because of this, the optimal method is to get the fastest Ballet Shoes cursor patterns regardless of damage roll, and to save frames with slightly imperfect hits a couple of times, whilst ensuring that you’ll deal enough damage by the final turn.
+	$LF
+]div
+[div class=p 
+	"The calculations tab can be found here: 
+	[a href=https://docs.google.com/spreadsheets/d/1E0_E_wo0VCQPz_hopL7TYa462j2asNKnbJ4F4cYDL08/edit#gid=395168983 rel=noopener external nofollow 
+		"https://docs.google.com/spreadsheets/d/1E0_E_wo0VCQPz_hopL7TYa462j2asNKnbJ4F4cYDL08/edit#gid=395168983
+	]a
+	$LF
+]div
+[h4 id=HotlandsAndCore 
+	" Hotlands and Core
+	$LF
+]h4
+[div class=p 
+	"The game counts these two locations as the same area in Genocide, likely because all puzzles are deactivated and the 2nd floor in Hotlands is completely blocked, so you barely do anything here. The kill requirement here is 40. Required kills include Royal Guards and Muffet, and all encounters count towards the total kills counter.
+	$LF
+]div
+[div class=p 
+	"Alphys’ Lab features the most well-known glitch in this category; Early Pan. By using the bag of dog food and the north wall, it is possible to stand on top of the trigger for the Mettaton cutscene without triggering it until the movement keys are released. By interacting with the dog food and then opening the menu the frame after closing the text, you are given movement during the cutscene. Frisk appears to continue to stand still, however this is because the game makes your actual sprite invisible and the one onscreen does not correspond to your physical location. Using the text from the cutscene, you can overflow the Instant Noodles choice from the fridge with Mettaton's text and access the Burnt Pan choice, allowing you to collect it without walking to the intended location. Watching the entire cutscene afterwards is required as this sets a flag to keep Genocide mode active.
+	$LF
+]div
+[div class=p 
+	"Hotlands kills are as easy as they look. There is a short wrong warp before Muffet which requires you to face the door for at least one frame and then start moving up+left, interacting with it at the same time. Walking against the north wall whilst inside the web saves 3 frames over walking against the south wall, and is overall faster than not walking against either of them. Muffet has 1250 HP, but you retain boosted damage as in the Undyne fight, so only one solid hit is required to finish the battle.
+	$LF
+]div
+[div class=p 
+	"The TASCore route is literally the same as in normal runs, but there were several details that needed to be tested also. First of all, I used the Ballet Shoes instead of the Burnt Pan or Empty Gun because the Ballet Shoes have the fastest weapon animation in the game. The Pan and Gun allow you to OHKO every enemy, but it turned out that the Ballet Shoes can also OHKO most encounters except for Knight Knight and Madjick. Astigmatism is the most dangerous enemy to use the Ballet Shoes against because he has 120 HP, but you can normally only deal up to 118 damage at LV 13. However, the highest damage roll will deal precisely 120 damage, which is very risky to perform in an RTA run (The success rate for high damage rolls would be 25%, and you still need to get a perfect hit, which is triple-frame-perfect).
+	$LF
+]div
+[div class=p 
+	"Another detail is the manipulation for which encounters are generated. The game generates preset enemies at first, in the following order: Astigmatism > Whimsalot/Final Froggit > Whimsalot/Astigmatism > Final Froggit/Astigmatism > Knight Knight/Madjick. After much testing, it turned out that it’s not worth it to skip enemies that require extra turns to kill (Knight Knight and Madjick) like Aaron in Waterfall; I just equipped the Burnt Pan to one-shot them. Madjick’s attack animation is ten frames longer than any other enemy in Core, so he dies first.
+	$LF
+]div
+[div class=p 
+	"After the scripted encounters, the kill counter is 14/40. We continue to grind until 30/40 in the same room, so the strategy is to get two more double encounters, followed by triple encounters. Because of the high kill requirement, low base and high random steps counter here, the order of encounters doesn’t matter very much during the early part of the grind, so I went for the fastest combinations of doubles/triples instead of getting doubles first; tests showed that it saves time over extra manipulation.
+	$LF
+]div
+[div class=p 
+	"After the 30th kill, I moved towards the Warrior’s Path which contains three scripted encounters (7 enemies), getting one more triple encounter on the way. Taking this walk is ultimately faster than continuing to grind on the bridge. I switched weapons for one more Knight Knight/Madjick fight.
+	$LF
+]div
+[div class=p 
+	"After the grind, I went back to Mettaton Neo. In order to skip the “But nobody came” encounter I used menu buffers until I reached the room transition. I tried to use this in Ruins and Waterfall (where the first Woshua was), but it never saved time there because of how far each room transition was. Mettaton Neo dies in one turn because your damage is crazy in this fight.
+	$LF
+]div
+[div class=p 
+	"There is a skip that saves almost 20 seconds and allows you to exit the Long Elevator early, but it is console-exclusive and works only on the Switch version.
+	$LF
+]div
+[div class=p 
+	"In New Home, going for the left key first saves 50 frames. Flowey encounters are impossible to buffer, so the rest is normal until the Last Corridor.
+	$LF
+]div
+[h4 id=Sans 
+	" Sans
+	$LF
+]h4
+[div class=p 
+	"This boss fight is considered an autoscroller in RTA which you simply need to survive. This is not accurate in a TAS; despite the attack order being consistent, time can be saved on specific attacks and some manipulation is possible.
+	$LF
+]div
+[div class=p 
+	"The first phase is a legitimate autoscroller. The first attack of the second phase is when the RNG optimization nightmare begins. In essence, the second phase features turns that consist of a combination of 5 or 6 different patterns, each of which requires a different number of frames to finish. This attack occurs at least three times during the fight. There are nine total patterns that can occur (including some reversed variations). I occasionally delay text advancement by a variable number of frames on different turns, and such manipulation doesn’t even lose time because there is an 8-frame window after Sans’ text before the game can progress. It’s possible to get the fastest patterns every turn, but I’ll just quote OceanBagel about it:
+	$LF
+]div
+[div class=p 
+	"“Now for the fun part.... the probability
+	[br 
+	]br
+	$LF
+	"For each phase (pattern), the game starts by randomly choosing one of the attacks and executing that attack. Then on subsequent attacks in that phase, the game will start by randomly choosing an attack. If that attack is the same as the previous attack, the game will try to choose another random attack. If it's the same again, the game tries once more to choose a random attack. If it's the same a third time, the game executes the attack anyway.
+	[br 
+	]br
+	$LF
+	"This means that for phase 0, there's a 1 in 152,587,890,625 chance that you'll get 6 of the most optimal attack in a row.
+	[br 
+	]br
+	$LF
+	"For phase 1, your chances are slightly better at 1 in 4,294,967,296 that you'll get 6 of the most optimal attack in a row.
+	[br 
+	]br
+	$LF
+	"For phase 3, you're approaching the heat death of the universe at a 1 in 1,853,020,188,851,840 chance that you'll get 6 of the most optimal attack in a row.
+	[br 
+	]br
+	$LF
+	"So yes, it's possible to get 6 of the same attack in a row... but you're definitely better off brute forcing the best RNG you can find rather than spending eternity and a half trying to find the perfect RNG. btw you might be able to manip RNG between each phase, but in an RTA speedrun, the odds of getting perfectly optimal Sans RNG on just these three turns is a 1 in 1,214,395,310,965,942,517,760,000,000,000,000,000 chance.” 
+	$LF
+]div
+[div class=p 
+	"In other words, assuming that I use one character of text (which advances RNG by 2 per frame), I would have a 50% chance to get every single perfect pattern by delaying the text advancement by somewhere between 1 frame and 3,784,320,000~ years, but the movie file might be too large to upload.
+	$LF
+]div
+[div class=p 
+	"Here is a spreadsheet I used to calculate the fastest available combinations, featuring 500+ tests:
+	$LF
+	[a href=https://docs.google.com/spreadsheets/d/1E0_E_wo0VCQPz_hopL7TYa462j2asNKnbJ4F4cYDL08/edit#gid=919482650 rel=noopener external nofollow 
+		"https://docs.google.com/spreadsheets/d/1E0_E_wo0VCQPz_hopL7TYa462j2asNKnbJ4F4cYDL08/edit#gid=919482650
+	]a
+	" 
+	[br 
+	]br
+	$LF
+	"Another way to save frames is to keep the heart as close to the wall as possible during Sans’gravity-altering attacks.
+	$LF
+]div
+[div class=p 
+	"It’s possible to avoid taking damage in the menu, but it would cost several seconds in total. Other than that, this is the fastest possible no-hit fight that I was able to manage.
+	$LF
+]div
+[div class=p 
+	"There is nothing notable after this fight. I advance to the Throne room, kill Asgore and Flowey and make a final choice with Chara. Either of them lead to the game’s end, but the left choice is faster by TAS timing since inputs end 101 frames earlier. Switching between choices does not cost time, since the game doesn’t let you pick an option in the first ten frames.
+	$LF
+]div
+[h3 id=WorkingGroup 
+	" Working group:
+	$LF
+]h3
+[div class=p 
+	"TommyeAsY
+	[br 
+	]br
+	$LF
+	"Drakodan
+	[br 
+	]br
+	$LF
+	"Shanekilz
+	$LF
+]div
+[h3 id=ThanksList 
+	" Thanks list:
+	$LF
+]h3
+[div class=p 
+	"OceanBagel
+	[br 
+	]br
+	$LF
+	"Narry
+	[br 
+	]br
+	$LF
+	"Fixylol
+	[br 
+	]br
+	$LF
+	"Depa
+	[br 
+	]br
+	$LF
+	"OnVar
+	[br 
+	]br
+	$LF
+	"Kelnin
+	$LF
+]div
+[h3 id=ExtraMaterial 
+	" Extra material:
+	$LF
+]h3
+[div class=p 
+	"Stream premiere of the run (before final optimizations, with english commentary):
+	[br 
+	]br
+	$LF
+	[a href=https://youtu.be/lHjxeFCZuV4 rel=noopener external nofollow 
+		"https://youtu.be/lHjxeFCZuV4
+	]a
+	" (slightly desynced because of export) or 
+	[a href=https://www.twitch.tv/videos/521612567 rel=noopener external nofollow 
+		"https://www.twitch.tv/videos/521612567
+	]a
+	" (synced, with community in chat);
+	[br 
+	]br
+	$LF
+	"Routing with phone calls as a method to manipulate RNG (was slower than used methods):
+	[br 
+	]br
+	$LF
+	[a href=https://youtu.be/yUcUF6k0T1o rel=noopener external nofollow 
+		"https://youtu.be/yUcUF6k0T1o
+	]a
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Video comparison of 4 most important routes in Snowdin:
+	[br 
+	]br
+	$LF
+	[a href=https://youtu.be/cToDU3YTpeU rel=noopener external nofollow 
+		"https://youtu.be/cToDU3YTpeU
+	]a
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Suboptimal attempt of Woshua skip:
+	[br 
+	]br
+	$LF
+	[a href=https://youtu.be/rPJcdfWNq3k rel=noopener external nofollow 
+		"https://youtu.be/rPJcdfWNq3k
+	]a
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Video comparison of current route with Shayy’s route, which idea was to spend 2 turns for early Woshua kill and trade next double encounter for single monster type:
+	[br 
+	]br
+	$LF
+	[a href=https://youtu.be/w1OMZFRm7j8 rel=noopener external nofollow 
+		"https://youtu.be/w1OMZFRm7j8
+	]a
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Video comparison of north and south walls boosts in web in Muffet’s room:
+	[br 
+	]br
+	$LF
+	[a href=https://youtu.be/EnxaH731B1U rel=noopener external nofollow 
+		"https://youtu.be/EnxaH731B1U
+	]a
+	$LF
+]div
+[div class=p 
+	"Shoutouts to Drakodan for making this text more readable.
+	$LF
+]div
+[h3 id=Screenshots 
+	" Screenshots
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/se70yqr.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/LaMDL8W.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/OCl3qPZ.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/AoYA3eK.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": File replaced for including annotations about requirements and instructions for replaying the movie, also added the executable name in the config file. All inputs and the remaining settings are unchanged, so sync won't be affected.
+	$LF
+]div
+[div class=p 
+	"Movie optimization seems to be very good. Showcases a lot of tricks and route planning, moreover some not present in known speedruns.
+	$LF
+]div
+[div class=p 
+	"The movie goal chosen for this movie is one of the most common for this game, and the game itself is very popular, so it appears as an obligatory category for this game. Nonetheless, our rules have some requirement for a new movie goal to be accepted as an independent branch.
+	$LF
+]div
+[div class=p 
+	"First of all, while it's true that this movie follows one of the main goals internally defined by the game itself, it must be noted that it can't be considered as an independent game mode, so it can't be accepted for Vault as an independent publication. And on the other hand, it can't be accepted for Vault as fastest completion either, since known speedruns of the Neutral ending finished the game faster (in case we wanted to consider Genocide ending as a canonical ending for this game).
+	$LF
+]div
+[div class=p 
+	"The other possibility for this movie to be accepted is to be considered for an independent Alternative-only branch. The main requirements are essentially three:
+	$LF
+]div
+[ul 
+	[li 
+		"The movie goal needs to be 
+		(__wikiLink|displaytext=clear and objectively definible|href=/MovieRules#Alternative_2)
+		".
+		$LF
+	]li
+	[li 
+		"The movie contents needs to 
+		(__wikiLink|displaytext=differ|href=/JudgeGuidelines#SumUp)
+		" from the other published branches.
+		$LF
+	]li
+	[li 
+		"The movie entertaining needs to meet the 
+		(__wikiLink|displaytext=Alternative tier|href=/Alternative)
+		" standards.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Since the movie goal is clear, interesting, and has been much appreciated by the audience, I'm accepting it for Alternative as a new branch.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Pub.
+]div

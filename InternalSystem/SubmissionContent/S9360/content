@@ -1,0 +1,1456 @@
+6
+[div class=p 
+	"This run beats Famicom version of Wizardry scenario #1 in ~26 seconds, crafting a fake hero struct by abusing the savedata scrambling process.
+	$LF
+]div
+[div class=p 
+	"For now, I haven't found a method to execute a save glitch on NES version, so I used Famicom version.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1 (SubNesHawk core)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+	[li 
+		" Uses a game restart sequence
+		$LF
+	]li
+]ul
+[h3 id=RunOverview 
+	" Run overview
+	$LF
+]h3
+[ul 
+	[li 
+		" I create a new hero for the save glitch, manipulating his properties (name, stats, etc.) appropriately.
+		$LF
+	]li
+	[li 
+		" I order to delete the new hero, and reset the game immediately after his CRC is corrupted (his backup is preserved).
+		$LF
+	]li
+	[li 
+		" I craft a fake hero with subframe resets.
+		$LF
+	]li
+	[li 
+		" I change the item name language setting to English.
+		$LF
+	]li
+	[li 
+		" I add the fake hero to my party. (If the item name is Japanese, the game loops infinitely here.)
+		$LF
+	]li
+	[li 
+		" I go to the maze, and immediately return to the castle. (Trivia: this fake hero instantly dies if he walks.)
+		$LF
+	]li
+	[li 
+		" The game thinks that the fake hero has the amulet of Werdna, and executes the ending scene.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The fake hero has 255 (0xFF) items, and he has an alignment value 0x5E (item ID of the amulet). That's why the game thinks he has the amulet.
+	$LF
+]div
+[h3 id=RunDetails 
+	" Run details
+	$LF
+]h3
+[h4 id=MemoryMap 
+	" Memory map
+	$LF
+]h4
+[div class=p 
+	"To understand the save glitch, some knowledge of memory map is needed.
+	$LF
+]div
+[div class=p 
+	"The size of a hero struct is 0x80, and its backup also has the same size. The hero structs and their backups sit on $6000-$73FF:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"decription
+			]th
+		]tr
+		[tr 
+			[td 
+				"$6000
+			]td
+			[td 
+				"hero struct 0
+			]td
+		]tr
+		[tr 
+			[td 
+				"$6080
+			]td
+			[td 
+				"hero struct 0 backup
+			]td
+		]tr
+		[tr 
+			[td 
+				"$6100
+			]td
+			[td 
+				"hero struct 1
+			]td
+		]tr
+		[tr 
+			[td 
+				"$6180
+			]td
+			[td 
+				"hero struct 1 backup
+			]td
+		]tr
+		[tr 
+			[td 
+				"...
+			]td
+			[td 
+				"...
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Here is the details of hero struct:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"offset
+			]th
+			[th 
+				"type
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x00
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"scenario ID (0:not exists, 1:exists)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x01
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"name length
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02
+			]td
+			[td 
+				"u8[8]
+			]td
+			[td 
+				"name
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0A
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"race
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0B
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"class
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0C
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"alignment
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0D
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"strength
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0E
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"iq
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0F
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"piety
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x10
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"vitality
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x11
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"agility
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x12
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"luck
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x13
+			]td
+			[td 
+				"u8[6]
+			]td
+			[td 
+				"gold (12-digits packed BCD)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x19
+			]td
+			[td 
+				"u8[6]
+			]td
+			[td 
+				"experience point (12-digits packed BCD)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1F
+			]td
+			[td 
+				"u16be
+			]td
+			[td 
+				"HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x21
+			]td
+			[td 
+				"u16be
+			]td
+			[td 
+				"max HP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x23
+			]td
+			[td 
+				"u16be
+			]td
+			[td 
+				"experience level
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x25
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"status (0:OK)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x26
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"age (year)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x27
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"age (week)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x28
+			]td
+			[td 
+				"i8
+			]td
+			[td 
+				"AC
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x29
+			]td
+			[td 
+				"u8[7]
+			]td
+			[td 
+				"mage MP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x30
+			]td
+			[td 
+				"u8[7]
+			]td
+			[td 
+				"priest MP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x37
+			]td
+			[td 
+				"u8[7]
+			]td
+			[td 
+				"mage max MP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3E
+			]td
+			[td 
+				"u8[7]
+			]td
+			[td 
+				"priest max MP
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x45
+			]td
+			[td 
+				"u8[7]
+			]td
+			[td 
+				"learned spells mask (bitset)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x4C
+			]td
+			[td 
+				"u8[8]
+			]td
+			[td 
+				"inventory item flags
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x54
+			]td
+			[td 
+				"u8[8]
+			]td
+			[td 
+				"inventory item IDs
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x5C
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"inventory item count
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x5D
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"out of tavern (bit7)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x5E
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"maze position x
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x5F
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"maze position y
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x60
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"maze position depth
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x61
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"poison value
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x62
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"badges
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x63
+			]td
+			[td 
+				"u8[13]
+			]td
+			[td 
+				"unused (usually zero cleared)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x70
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 0 (offset 0x00..=0x07)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x71
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 1 (offset 0x08..=0x0F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x72
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 2 (offset 0x10..=0x17)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x73
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 3 (offset 0x18..=0x1F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x74
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 4 (offset 0x20..=0x27)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x75
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 5 (offset 0x28..=0x2F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x76
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 6 (offset 0x30..=0x37)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x77
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 7 (offset 0x38..=0x3F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x78
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 8 (offset 0x40..=0x47)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x79
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 9 (offset 0x48..=0x4F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7A
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 10 (offset 0x50..=0x57)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7B
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 11 (offset 0x58..=0x5F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7C
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 12 (offset 0x60..=0x67)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7D
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"checksum of chunk 13 (offset 0x68..=0x6F)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x7E
+			]td
+			[td 
+				"u16be
+			]td
+			[td 
+				"CRC (CRC-16-CCITT)
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=HeroStructBackup 
+	" Hero struct backup
+	$LF
+]h4
+[div class=p 
+	"This game often saves hero structs to their backup. Backup is scrambled like below:
+	$LF
+]div
+[pre 
+	"for i in 0..=0x7F {
+	$LF
+	"  backup[i] = scramble(hero[0x7F - i]);
+	$LF
+	"}
+	$LF
+]pre
+[div class=p 
+	[code 
+		"scramble
+	]code
+	" function swaps nibbles of a byte, and inverts it:
+	$LF
+]div
+[pre 
+	"fn scramble(b: u8) -> u8 {
+	$LF
+	"  return !b.rotate_left(4);
+	$LF
+	"}
+	$LF
+]pre
+[div class=p 
+	"Note that the 
+	[code 
+		"scramble
+	]code
+	" function and the entire scrambling process is symmetric (in other words, you will get the original data if you execute them twice). So, scrambling and de-scrambling are equivalent.
+	$LF
+]div
+[div class=p 
+	"On power/reset, the game first verifies checksums/CRC of each hero struct. If a verification failed, the game tries to restore the hero struct from its backup. If the checksums/CRC of the backup is also wrong, the game tries to repair the hero struct with some heuristics (this repair functionality is not considered in this run).
+	$LF
+]div
+[div class=p 
+	"When the game tries to restore a hero struct from its backup, it first (de-)scrambles the backup. Its result is written to the same backup memory, from the end to the beginning.
+	$LF
+]div
+[h4 id=SaveGlitchWithSubframeReset 
+	" Save glitch with subframe reset
+	$LF
+]h4
+[div class=p 
+	"As said above, the game (de-)scrambles the backup from the end to the beginning. So, if you reset during this process, you will have a backup consisting of plaintext and ciphertext.
+	$LF
+]div
+[div class=p 
+	"Usually, any backup is a complete ciphertext. And, if you reset immediately after it is (de-)scrambled, it becomes a complete plaintext. From the symmetry, they are essentially equivalent. From here, I will describe things from plaintext perspective to avoid confusion. (And, consider that plaintext is overwritten from the beginning to the end.)
+	$LF
+]div
+[div class=p 
+	"For example, let's assume that a backup is a complete plaintext first, and you reset the game after it is partly scrambled. The backup will be like below ('P' means plaintext, and 'C' means ciphertext):
+	$LF
+]div
+[pre 
+	" 0x00                      0x7F
+	$LF
+	"+==============================+
+	$LF
+	"|   C   |      P       |   P   |
+	$LF
+	"+==============================+
+	$LF
+	"=======>*
+	$LF
+	"      RESET!
+	$LF
+]pre
+[div class=p 
+	"And, note that the left/right part will be unchanged anymore even if you reset the game. So, this glitch can be thought as determining (P,C) / (C,P) chunk pairs from both edges. (The center area is (P,P) or (C,C), and has 0 or more bytes.)
+	$LF
+]div
+[div class=p 
+	"In a backup, offset 
+	[code 
+		"i
+	]code
+	" and 
+	[code 
+		"0x7F-i
+	]code
+	" becomes a plain/cipher byte pair. Here is the table:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"left
+			]th
+			[th 
+				"right
+			]th
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 0 ~~~
+			]td
+			[td 
+				"~~~ chunk 15 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x00: scenario ID
+			]td
+			[td 
+				"0x7F: CRC lo
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x01: name length
+			]td
+			[td 
+				"0x7E: CRC hi
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02: name[0]
+			]td
+			[td 
+				"0x7D: checksums[13]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x03: name[1]
+			]td
+			[td 
+				"0x7C: checksums[12]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x04: name[2]
+			]td
+			[td 
+				"0x7B: checksums[11]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x05: name[3]
+			]td
+			[td 
+				"0x7A: checksums[10]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x06: name[4]
+			]td
+			[td 
+				"0x79: checksums[9]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x07: name[5]
+			]td
+			[td 
+				"0x78: checksums[8]
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 1 ~~~
+			]td
+			[td 
+				"~~~ chunk 14 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x08: name[6]
+			]td
+			[td 
+				"0x77: checksums[7]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x09: name[7]
+			]td
+			[td 
+				"0x76: checksums[6]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0A: race
+			]td
+			[td 
+				"0x75: checksums[5]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0B: class
+			]td
+			[td 
+				"0x74: checksums[4]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0C: alignment
+			]td
+			[td 
+				"0x73: checksums[3]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0D: strength
+			]td
+			[td 
+				"0x72: checksums[2]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0E: iq
+			]td
+			[td 
+				"0x71: checksums[1]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0F: piety
+			]td
+			[td 
+				"0x70: checksums[0]
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 2 ~~~
+			]td
+			[td 
+				"~~~ chunk 13 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x10: vitality
+			]td
+			[td 
+				"0x6F: unused[12]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x11: agility
+			]td
+			[td 
+				"0x6E: unused[11]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x12: luck
+			]td
+			[td 
+				"0x6D: unused[10]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x13: gold[0]
+			]td
+			[td 
+				"0x6C: unused[9]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x14: gold[1]
+			]td
+			[td 
+				"0x6B: unused[8]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x15: gold[2]
+			]td
+			[td 
+				"0x6A: unused[7]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x16: gold[3]
+			]td
+			[td 
+				"0x69: unused[6]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x17: gold[4]
+			]td
+			[td 
+				"0x68: unused[5]
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 3 ~~~
+			]td
+			[td 
+				"~~~ chunk 12 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x18: gold[5]
+			]td
+			[td 
+				"0x67: unused[4]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x19: xp[0]
+			]td
+			[td 
+				"0x66: unused[3]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1A: xp[1]
+			]td
+			[td 
+				"0x65: unused[2]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1B: xp[2]
+			]td
+			[td 
+				"0x64: unused[1]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1C: xp[3]
+			]td
+			[td 
+				"0x63: unused[0]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1D: xp[4]
+			]td
+			[td 
+				"0x62: badges
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1E: xp[5]
+			]td
+			[td 
+				"0x61: poison
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x1F: HP hi
+			]td
+			[td 
+				"0x60: maze depth
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 4 ~~~
+			]td
+			[td 
+				"~~~ chunk 11 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x20: HP lo
+			]td
+			[td 
+				"0x5F: maze y
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x21: MaxHP hi
+			]td
+			[td 
+				"0x5E: maze x
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x22: MaxHP lo
+			]td
+			[td 
+				"0x5D: out of tavern
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x23: XL hi
+			]td
+			[td 
+				"0x5C: ItemCount
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x24: XL lo
+			]td
+			[td 
+				"0x5B: ItemIDs[7]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x25: status
+			]td
+			[td 
+				"0x5A: ItemIDs[6]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x26: year
+			]td
+			[td 
+				"0x59: ItemIDs[5]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x27: week
+			]td
+			[td 
+				"0x58: ItemIDs[4]
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 5 ~~~
+			]td
+			[td 
+				"~~~ chunk 10 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x28: AC
+			]td
+			[td 
+				"0x57: ItemIDs[3]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x29: MagMP[0]
+			]td
+			[td 
+				"0x56: ItemIDs[2]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2A: MagMP[1]
+			]td
+			[td 
+				"0x55: ItemIDs[1]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2B: MagMP[2]
+			]td
+			[td 
+				"0x54: ItemIDs[0]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2C: MagMP[3]
+			]td
+			[td 
+				"0x53: ItemFlags[7]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2D: MagMP[4]
+			]td
+			[td 
+				"0x52: ItemFlags[6]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2E: MagMP[5]
+			]td
+			[td 
+				"0x51: ItemFlags[5]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x2F: MagMP[6]
+			]td
+			[td 
+				"0x50: ItemFlags[4]
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 6 ~~~
+			]td
+			[td 
+				"~~~ chunk 9 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x30: PriMP[0]
+			]td
+			[td 
+				"0x4F: ItemFlags[3]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x31: PriMP[1]
+			]td
+			[td 
+				"0x4E: ItemFlags[2]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x32: PriMP[2]
+			]td
+			[td 
+				"0x4D: ItemFlags[1]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x33: PriMP[3]
+			]td
+			[td 
+				"0x4C: ItemFlags[0]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x34: PriMP[4]
+			]td
+			[td 
+				"0x4B: Spells[6]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x35: PriMP[5]
+			]td
+			[td 
+				"0x4A: Spells[5]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x36: PriMP[6]
+			]td
+			[td 
+				"0x49: Spells[4]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x37: MagMaxMP[0]
+			]td
+			[td 
+				"0x48: spells[3]
+			]td
+		]tr
+		[tr 
+			[td 
+				"~~~ chunk 7 ~~~
+			]td
+			[td 
+				"~~~ chunk 8 ~~~
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x38: MagMaxMP[1]
+			]td
+			[td 
+				" 0x47: Spells[2]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x39: MagMaxMP[2]
+			]td
+			[td 
+				" 0x46: Spells[1]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3A: MagMaxMP[3]
+			]td
+			[td 
+				" 0x45: Spells[0]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3B: MagMaxMP[4]
+			]td
+			[td 
+				" 0x44: PriMaxMp[6]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3C: MagMaxMP[5]
+			]td
+			[td 
+				" 0x43: PriMaxMp[5]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3D: MagMaxMP[6]
+			]td
+			[td 
+				" 0x42: PriMaxMp[4]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3E: PriMaxMp[0]
+			]td
+			[td 
+				" 0x41: PriMaxMp[3]
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x3F: PriMaxMp[1]
+			]td
+			[td 
+				" 0x40: PriMaxMp[2]
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"But, offset pair (0x00, 0x7F) is a special case. The game overwrites the scenario ID in a backup before (de-)scrambling it. So, a scenario ID is always plaintext, and a CRC lo-byte can be chosen as you like.
+	$LF
+]div
+[div class=p 
+	"Considering all of above, you can craft a "valid" fake hero who has 0xFF items. I used 
+	[a href=https://github.com/Z3Prover/z3 rel=noopener external nofollow 
+		"Z3 solver
+	]a
+	" to find a solution (
+	[a href=https://github.com/taotao54321/WizardrySaveGlitch4 rel=noopener external nofollow 
+		"my solver code
+	]a
+	").
+	$LF
+]div
+[div class=p 
+	"This sub-frame reset operation can be done also on NES version. But, I couldn't find any solution for NES version, because you can only fewer character kinds for a hero name than Famicom version. (Especially, it's problematic that you cannot use 0x7F as a name byte, because a checksum value 0x08 (zero-filled chunk) is scrambled to 0x7F.)
+	$LF
+]div
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[div class=p 
+	"In Famicom version, the games displays a logo every time you reset. If you can execute a save glitch in NES version, it will be quite fast.
+	$LF
+	"I think my method is not applicable to NES version (not strictly proven though). But, this game overwrites the savedata in various ways (e.g. SRAM clearing, savedata repairing functionality, etc.). So, you might be able to execute a save glitch on NES version with some detours.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": It always blows my mind, when these kind of TASes are created. I love how creative the method is that corrupts memory to the point that it is tricked into the ownership of the Amulet. Technically, I understand the process here...but I have no idea how to go about the discovery of it. Great job on this!
+	$LF
+]div
+[div class=p 
+	"Accepting as "Fastest Completion" for a branch of "save glitch".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

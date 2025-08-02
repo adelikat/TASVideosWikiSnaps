@@ -1,0 +1,97 @@
+7
+[div class=p 
+	"(Note: This page contains only information about the "Lucky Draw" level in Famidash v1.2.1.nes and how randomness works. If other information about Famidash in general is to be added, consider moving the below information to a subpage. Outdated information on Lucky Draw v1.2 is on 
+	(__wikiLink|displaytext=this subpage|href=/GameResources/NES/Famidash/LuckyDrawOld)
+	".)
+	$LF
+]div
+[h2 id=LuckyDraw 
+	" Lucky Draw
+	$LF
+]h2
+[div class=p 
+	"Known source code files implementing random functions:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[a href=https://github.com/tfdsoft/famidash/blob/main/LIB/asm/neslib.s rel=noopener external nofollow 
+			"https://github.com/tfdsoft/famidash/blob/main/LIB/asm/neslib.s
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://github.com/tfdsoft/famidash/blob/main/SAUCE/functions/sprite_loading.h rel=noopener external nofollow 
+			"https://github.com/tfdsoft/famidash/blob/main/SAUCE/functions/sprite_loading.h
+		]a
+		$LF
+	]li
+]ul
+[h3 id=Newrand 
+	" _newrand
+	$LF
+]h3
+[div class=p 
+	"Based on the source code's _newrand function, the main pseudo-random number generator (PRNG) is a simple 32-bit, period 2^32-1 
+	[a href=https://en.wikipedia.org/wiki/Linear-feedback_shift_register rel=noopener external nofollow 
+		"linear feedback shift register
+	]a
+	" (LFSR) that is equivalent to the following Lua code:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The above PRNG auto-runs once per frame in most cases, without using this value. In rare instances, Famidash runs this function to get a random value. (Famidash typically does not have randomness in its levels.)
+	$LF
+]div
+[h3 id=Rand1 
+	" rand1
+	$LF
+]h3
+[div class=p 
+	"As of v1.2.1, rand1 uses an RNG address different from that of _newrand, in order to fix incorrect Lucky Draw behavior. Whether an attempt is successful in Lucky Draw no longer uses rand1 anywhere in its determination.
+	$LF
+]div
+[div class=p 
+	"The rand1 operates on a single byte and is a LFSR as follows:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The above function can run multiple times per frame (as well as running _newrand during the same frame), and determines the flashing effects on some objects. 
+	$LF
+]div
+[h3 id=HowLuckyDrawDeterminesWhetherAnAttemptIsSuccessful 
+	" How Lucky Draw determines whether an attempt is successful
+	$LF
+]h3
+[div class=p 
+	"When first selecting Lucky Draw, as well as after any death, the RNG address for _newrand (0x1B, four byte little endian) will freeze on a particular value. As far as is known, this value is the only thing that determines whether the first/following attempt is a successful attempt. No player input that changes RNG has been found.
+	$LF
+]div
+[div class=p 
+	"As of v1.2.1, whether an attempt is successful in Lucky Draw no longer uses rand1 anywhere in its determination.
+	$LF
+]div
+[div class=p 
+	"The following procedure determines whether an attempt is successful:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"If the attempt is unsuccessful, the RNG value when the player was killed will be the new RNG value for the next attempt.
+]div

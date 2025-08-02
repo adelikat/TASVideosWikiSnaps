@@ -1,0 +1,906 @@
+10
+[h2 id=FinalFantasyIiImprovedTas 
+	" Final Fantasy II improved TAS
+	$LF
+]h2
+[div class=p 
+	"Submission translated by xxezrabxxx
+	$LF
+]div
+[h3 id=Overview 
+	" Overview
+	$LF
+]h3
+[div class=p 
+	"This is a revised version of TAS #7136.
+	$LF
+]div
+[ul 
+	[li 
+		" Defeat the Ogre Mage and pick up The Spellbook of Blink.
+		$LF
+	]li
+	[li 
+		" The Spellbook of Blink's only proficiency experience as a weapon will be 67 in the next battle.
+		$LF
+	]li
+	[li 
+		" Call up the ending from the inn.
+		$LF
+	]li
+	[li 
+		" No subframe reset or arbitrary code execution
+		$LF
+	]li
+]ul
+[h2 id=EncounterManipulation 
+	" Encounter manipulation
+	$LF
+]h2
+[div class=p 
+	"The enemy group is determined by the player's position and address $00f7, and the value is incremented by a structured number of steps. 
+	$LF
+	"The default value of address $00f7 in FCEUX is 0xff, and it is power-cycled to be the closest 2 to 0xff so that the Ogre Mage will appear.
+	$LF
+]div
+[h2 id=RngManipulation 
+	" RNG Manipulation
+	$LF
+]h2
+[h3 id=ZeropageSum 
+	" zeropage sum
+	$LF
+]h3
+[div class=p 
+	"The basis of the random number is the sum of the zeropage data and carry bit when switching from the overworld to battle. 
+	$LF
+	"The sum is the value of the A-register at PC $0B:$97DC. 
+	$LF
+	"The sum is a very important parameter in the RNG manipulation, which determines the following:
+	$LF
+]div
+[ul 
+	[li 
+		" Number of monsters in the group encounter (address $00f7)
+		$LF
+	]li
+	[li 
+		" Whether a pre*emptive attack is avaliable
+		$LF
+	]li
+	[li 
+		" The monster's first action
+		$LF
+	]li
+	[li 
+		" The contents of the RNG table (2 types)
+		$LF
+	]li
+]ul
+[h3 id=RngIndexAddress0042AndTheRngTableAddresses7a487b47 
+	" The RNG Index (address $0042) and the RNG Table (addresses $7a48-$7b47)
+	$LF
+]h3
+[div class=p 
+	"After initialization, the sum is used as a RNG index and is incremented after various RNG calculations. 
+	$LF
+	"The incremented number depends on the calculation contents (eg; monster's action selection, turn order determination, attack damage calculation ...).
+	$LF
+]div
+[div class=p 
+	"The random value is determined by the table address + index, but the contents of the table depend on bit 1 of the sum. 
+	$LF
+	"The following is the first 32 bytes of the table contents.
+	$LF
+]div
+[pre 
+	"(bit1 = 0)
+	$LF
+	"7A48:  01 04 0D 28 79 93 45 D0 71 AB 02 07 16 43 CA 5F
+	$LF
+	"7A58:  E1 A4 12 37 A6 0C 25 70 AE 0B 22 67 C9 5C EA BF
+	$LF
+]pre
+[pre 
+	"(bit1 = 1)
+	$LF
+	"7A48:  02 0C 3E C7 1A 84 96 F0 B2 83 91 D7 35 F4 C6 1F
+	$LF
+	"7A58:  9D EC 9E E7 85 9B F6 D0 12 5C 31 F7 D5 2B D9 3F	
+	$LF
+]pre
+[h3 id=HowToManipulateRandomNumbersBeforeBattleExceptForTheBlackKnightBattle 
+	" How to manipulate random numbers before battle (except for the Black Knight battle):
+	$LF
+]h3
+[div class=p 
+	"Random Encounters during the movement can be manipulated with the input keys just before the battle (address $0020, $0021) and the A and B button counters during the movement (address $0024, $0025).
+	$LF
+]div
+[div class=p 
+	"For example, before the Ogre Mage battle, the input keys were the only controls that were 16 short of the sum of the objectives, so I adjusted it by pressing the A and B buttons 8 times during the movement.
+	$LF
+]div
+[div class=p 
+	"As for the input keys to be pressed just before moving, A, B, SELECT, and START are not included in these conditions, so you can press them freely without any consequences. However, if you press the direction keys at the same time, the priority is determined in the following order:
+	$LF
+]div
+[pre 
+	"RIGHT > LEFT > DOWN > UP
+	$LF
+]pre
+[h3 id=BlackKnightBattle 
+	" Black Knight Battle
+	$LF
+]h3
+[div class=p 
+	"Since most of the zeropage is filled with data 0 just before the battle, the operation relies on the frame counter at address $00f0-$00f1. 
+	$LF
+	"Since address $00f0-$00f9 is not intentionally initialized since power-on, its initial value will vary depending on the SRAM used in the console.
+	$LF
+]div
+[div class=p 
+	"In this TAS, the default value of FCEUX is selected as the SRAM default value, but this default value has a long latency for the battle.
+	$LF
+]div
+[div class=p 
+	"The fastest summation is the following 7 ways, with the monster's first attack and the first turn killing 3 allies without crit. In this TAS, 0x02 is used.
+	$LF
+]div
+[pre 
+	"0x02, 0x0c, 0x0d, 0x2c, 0x4d, 0x96, 0xab
+	$LF
+]pre
+[h3 id=OgreMageBattle 
+	" Ogre Mage Battle:
+	$LF
+]h3
+[h4 id=ZeropageSum_2 
+	" zeropage sum
+	$LF
+]h4
+[div class=p 
+	"In the summation below, there is one Ogre Mage and the player has the advantage because he attacks first:
+	$LF
+]div
+[pre 
+	"bit1 = 0: 0x09, 0x14, 0x18, 0x25, 0xac
+	$LF
+	"bit1 = 1: 0xfe
+	$LF
+]pre
+[h4 id=AttackWithABookOfFireAndAMereDropOfBlink 
+	" Attack with a book of fire and a mere drop of blink
+	$LF
+]h4
+[div class=p 
+	"The RNG index before attacking an Ogre Mage determines whether or not the Ogre Mage will pick up a fraction of the blink. 
+	$LF
+	"The following four conditions are required before the drop operation:
+	$LF
+]div
+[ul 
+	[li 
+		" Attacking characters
+		$LF
+	]li
+	[li 
+		" Type of RNG table
+		$LF
+	]li
+	[li 
+		" RNG index
+		$LF
+	]li
+	[li 
+		" Number of valid blinks for ogre mage (address $7e3a)
+		$LF
+	]li
+]ul
+[div class=p 
+	"And the random number index is only a few as shown below:
+	$LF
+]div
+[pre 
+	"table #0       | table #1
+	$LF
+	"C <$42  b@7e3a | C <$42  b@7e3a
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	"-- | 
+	[del 
+	]del
+	[del 
+	]del
+	"--
+	$LF
+	"0 0x16  0x01   | 0 0x1d  0x01
+	$LF
+	"0 0xd4  0x01   | 0 0x93  0x01
+	$LF
+	"0 0x49  0x03   | 0 0xd0  0x02
+	$LF
+	"2 0x16  0x01   | 0 0x52  0x04
+	$LF
+	"2 0xab  0x01   | 1 0x93  0x01
+	$LF
+	"2 0xd4  0x01   | 1 0xd0  0x02
+	$LF
+	"2 0x49  0x03   | 1 0x52  0x04
+	$LF
+	"2 0x42  0x05   | 2 0x1d  0x01
+	$LF
+	"               | 2 0x6d  0x01
+	$LF
+	"               | 2 0x93  0x01
+	$LF
+	"               | 2 0x97  0x02
+	$LF
+	"               | 2 0xd0  0x02
+	$LF
+	"               | 2 0x2a  0x03
+	$LF
+	"               | 2 0x52  0x04
+	$LF
+]pre
+[ul 
+	[li 
+		" C: Chara # (0: Flio, 1: Maria, 2: Guy)
+		$LF
+	]li
+	[li 
+		" <$42: RNG index. Address $0042
+		$LF
+	]li
+	[li 
+		" b@7e3a: the Evasion Value of the Ogre Mage
+		$LF
+	]li
+	[li 
+		" chara #1 cannot defeat the Ogre Mage in table #0
+		$LF
+	]li
+]ul
+[h4 id=PredictingTheRngVariation 
+	" Predicting the RNG variation
+	$LF
+]h4
+[div class=p 
+	"You can change the order of actions of your character by changing your equipment or the target of your attacks. 
+	$LF
+	"You can change the order of your actions by changing your equipment or the target of your attacks.
+	$LF
+]div
+[div class=p 
+	"If you or the monster chant magic, the variation of RNG index is large. 
+	$LF
+]div
+[h4 id=ManipulatingRngIndex 
+	" Manipulating RNG index
+	$LF
+]h4
+[div class=p 
+	"When you use a consumable item, the RNG index is increased by 1, and you can increase it again and again by canceling it. 
+	$LF
+	"However, it is not time efficient.
+	$LF
+]div
+[h4 id=RngInATas 
+	" RNG in a TAS
+	$LF
+]h4
+[div class=p 
+	"I decided that it was impossible to defeat the Ogre Mage quickly in one turn and pick up the Blink book, so I ended the battle in two turns.
+	$LF
+]div
+[div class=p 
+	"I have examined and analyzed the player's equipment in all aspects, including the seemingly unfavorable sums.
+	$LF
+]div
+[div class=p 
+	"During the analysis, there is one way in which the condition was met with a sum of 0x18, and two ways with a sum of 0xfe. 
+	$LF
+	"The fastest is the one with the sum of 0x18, where the Ogre Mage's Blink chant increased the random number index to 0x49.
+	$LF
+]div
+[h4 id=GoblinFight 
+	" Goblin Fight
+	$LF
+]h4
+[div class=p 
+	"The only summation that satisfies all of the following conditions is 0xfd.
+	$LF
+]div
+[ul 
+	[li 
+		" One goblin
+		$LF
+	]li
+	[li 
+		" No first strike against each other
+		$LF
+	]li
+	[li 
+		" The goblin's action is run away.
+		$LF
+	]li
+	[li 
+		" The player can't run away.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Chara #1 (Maria) will write data 0x43 to address $62bb as proficiency experience by equipping Blink's book as a weapon and choosing "attack" 67 times.
+	$LF
+]div
+[div class=p 
+	"The formula is as follows:
+	$LF
+]div
+[pre 
+	"Experience = initial experience + number of actions - level reword
+	$LF
+]pre
+[ul 
+	[li 
+		" Initial experience: 20
+		$LF
+	]li
+	[li 
+		" Action count: 67
+		$LF
+	]li
+	[li 
+		" Level reward: 20
+		$LF
+	]li
+]ul
+[h3 id=InnEvent 
+	" Inn Event
+	$LF
+]h3
+[div class=p 
+	"The address $62bb written in the goblin battle is originally the event ID for the Inn.
+	$LF
+]div
+[ol 
+	[li 
+		" The script pointer address (address $0072-$0073) is calculated from the event ID, and if ID# 0x43, data $0020 is written to the pointer.
+		$LF
+	]li
+	[li 
+		" Since address $0020 is used as the user's button input, data 0xe7 is generated to address $0020 when the user presses left, down, right, select, B, and A on the joypad.
+		$LF
+	]li
+	[li 
+		" When the script system reads it, the ending will begin.
+		$LF
+	]li
+]ol
+[div class=p 
+	"The button input for "Yes" will be saved at address $0021, and the button input that closes the message window will be saved at address $0020, and the script will be loaded.
+	$LF
+]div
+[div class=p 
+	"In the previous TAS, the address $0020 was not important because the A button was pressed to close the message window. 
+	$LF
+]div
+[div class=p 
+	"This time, I've combined the buttons for the dance (data 0xe4).
+	$LF
+]div
+[div class=p 
+	"This will delay the start of the ending, but will not affect the final button input time.
+	$LF
+]div
+[h2 id= 
+	" 概要
+	$LF
+]h2
+[div class=p 
+	"これは TAS #7136 の改訂版です.
+	$LF
+]div
+[ul 
+	[li 
+		" オーガメイジを倒してブリンクのほんを拾得
+		$LF
+	]li
+	[li 
+		" その次の戦闘で武器としてのブリンクのほんの熟練度経験値を 67 にする
+		$LF
+	]li
+	[li 
+		" 宿屋からエンディングを呼び出す
+		$LF
+	]li
+	[li 
+		" サブフレームリセットや任意コード実行はなし
+		$LF
+	]li
+]ul
+[div class=p 
+	(youtube|v=Hur77N5UlSk)
+	$LF
+]div
+[h2 id=_2 
+	" エンカウント調整
+	$LF
+]h2
+[div class=p 
+	"敵グループはプレイヤーの位置と address $00f7 によって決まり、決まった歩数で値が加算されます. FCEUX での default では address $00f7 の初期値が 0xff で、オーガメイジが出るように 0xff から一番近い 2 になるよう電源再投入をしています.
+	$LF
+]div
+[h2 id=_3 
+	" 乱数調整
+	$LF
+]h2
+[h3 id=Zeropage 
+	" zeropage 総和
+	$LF
+]h3
+[div class=p 
+	"乱数の基準はフィールドから戦闘に切り替わるときの zeropage の carry 込の総和です. 総和は PC $0B:$97DC での A レジスタの値です. 乱数調整では総和が非常に重要なパラメータで下記が決まります.
+	$LF
+]div
+[ul 
+	[li 
+		" 敵グループ(address $00f7)の中でのモンスターの数
+		$LF
+	]li
+	[li 
+		" 先制攻撃の有無
+		$LF
+	]li
+	[li 
+		" モンスターの初回行動
+		$LF
+	]li
+	[li 
+		" 乱数テーブルの中身 (2種類)
+		$LF
+	]li
+]ul
+[h3 id=IndexAddress0042TableAddress7a487b47 
+	" 乱数 index (address $0042) と 乱数 table (address $7a48-$7b47)
+	$LF
+]h3
+[div class=p 
+	"総和は初期化以降, 乱数 index として使用されて各種乱数算出のあと加算されます.加算回数は計算内容(モンスターの行動選択、ターンでの順番決定、攻撃のダメージ値計算) によって異なります.
+	$LF
+]div
+[div class=p 
+	"乱数値は table address + index で決まりますが、 table の内容は総和の bit 1 に依存します. 下記は table の中身の先頭から 32 byte です.
+	$LF
+]div
+[div class=p 
+	"(bit1 = 0)
+	$LF
+]div
+[pre 
+	"7A48:  01 04 0D 28 79 93 45 D0 71 AB 02 07 16 43 CA 5F
+	$LF
+	"7A58:  E1 A4 12 37 A6 0C 25 70 AE 0B 22 67 C9 5C EA BF
+	$LF
+]pre
+[div class=p 
+	"(bit1 = 1)
+	$LF
+]div
+[pre 
+	"7A48:  02 0C 3E C7 1A 84 96 F0 B2 83 91 D7 35 F4 C6 1F
+	$LF
+	"7A58:  9D EC 9E E7 85 9B F6 D0 12 5C 31 F7 D5 2B D9 3F
+	$LF
+]pre
+[h3 id=_4 
+	" 戦闘前乱数操作方法 (くろきし戦は除く)
+	$LF
+]h3
+[div class=p 
+	"移動中のランダムエンカウントは戦闘直前の入力キー (address $0020, $0021)と移動中のAボタン,Bボタンカウンタ (address $0024, $0025) で待ち時間無しで総和を任意の値を作成できます.
+	$LF
+]div
+[div class=p 
+	"例えば今回のオーガメイジ戦前では入力キーの操作だけは目的の総和から 16 足りないため、移動途中に A ボタンと B ボタンを 8 回押して調整しています.
+	$LF
+]div
+[div class=p 
+	"移動直前に押す入力キーは A,B,SELECT,START は条件に含まれてないので自由におせますが、 方向キーは同時に押した場合は下記の順に優先度が決まっています. 上を除き移動したい方向キーは移動したい方向以外にも複数押せます.
+	$LF
+]div
+[div class=p 
+	"移動方向優先度: RIGHT > LEFT > DOWN > UP
+	$LF
+]div
+[h3 id=_5 
+	" くろきし戦
+	$LF
+]h3
+[div class=p 
+	"戦闘直前に zeropage の大半が data 0 で埋められるので、操作方法は address $00f0-$00f1 のフレームカウンタに頼ることになります. address $00f0-$00f9 は電源投入時から意図的に初期化されていないので、利用する本体内部の SRAM によって初期値が異なります. 
+	$LF
+]div
+[div class=p 
+	"この TAS では SRAM 初期値として FCEUX の default を選んでいますが、この初期値は待ち時間が長いです.
+	$LF
+]div
+[div class=p 
+	"最速に終わる総和は下記 7 通りで、モンスターの先制攻撃と第1ターンで味方3人をクリティカルなしで仕留めてくれます. この TAS では 0x02 を使用しています.
+	$LF
+]div
+[pre 
+	"0x02, 0x0c, 0x0d, 0x2c, 0x4d, 0x96, 0xab
+	$LF
+]pre
+[h3 id=_6 
+	" オーガメイジ戦
+	$LF
+]h3
+[h4 id=Zeropage_2 
+	" zeropage 総和
+	$LF
+]h4
+[div class=p 
+	"下記の総和ではオーガメイジ1匹かつプレイヤー側が先制攻撃をするため有利です.
+	$LF
+]div
+[pre 
+	"bit1 = 0: 0x09, 0x14, 0x18, 0x25, 0xac
+	$LF
+	"bit1 = 1: 0xfe
+	$LF
+]pre
+[h4 id=Drop 
+	" ファイアのほんでの攻撃とブリンクのほんの drop
+	$LF
+]h4
+[div class=p 
+	"オーガメイジを攻撃する前の乱数 index でブリンクのほんの拾得の可否が確定します. drop 操作に必要な攻撃直前の条件は下記の4つです.
+	$LF
+]div
+[ul 
+	[li 
+		" 攻撃キャラ
+		$LF
+	]li
+	[li 
+		" 乱数tableの種類
+		$LF
+	]li
+	[li 
+		" 乱数 index
+		$LF
+	]li
+	[li 
+		" オーガメイジのブリンクの有効回数 (address $7e3a)
+		$LF
+	]li
+]ul
+[div class=p 
+	"そしてその乱数 index は下記のわずかなものです.
+	$LF
+]div
+[pre 
+	"table #0       | table #1
+	$LF
+	"C <$42  b@7e3a | C <$42  b@7e3a
+	$LF
+	[del 
+	]del
+	[del 
+	]del
+	"-- | 
+	[del 
+	]del
+	[del 
+	]del
+	"--
+	$LF
+	"0 0x16  0x01   | 0 0x1d  0x01
+	$LF
+	"0 0xd4  0x01   | 0 0x93  0x01
+	$LF
+	"0 0x49  0x03   | 0 0xd0  0x02
+	$LF
+	"2 0x16  0x01   | 0 0x52  0x04
+	$LF
+	"2 0xab  0x01   | 1 0x93  0x01
+	$LF
+	"2 0xd4  0x01   | 1 0xd0  0x02
+	$LF
+	"2 0x49  0x03   | 1 0x52  0x04
+	$LF
+	"2 0x42  0x05   | 2 0x1d  0x01
+	$LF
+	"               | 2 0x6d  0x01
+	$LF
+	"               | 2 0x93  0x01
+	$LF
+	"               | 2 0x97  0x02
+	$LF
+	"               | 2 0xd0  0x02
+	$LF
+	"               | 2 0x2a  0x03
+	$LF
+	"               | 2 0x52  0x04
+	$LF
+]pre
+[ul 
+	[li 
+		" C: Chara # (0:Flio, 1:Maria, 2:Guy)
+		$LF
+	]li
+	[li 
+		" <$42: 乱数 index. address $0042
+		$LF
+	]li
+	[li 
+		" b@7e3a: オーガメイジの回避値
+		$LF
+	]li
+	[li 
+		" chara #1 は table #0 ではオーガメイジを倒せない
+		$LF
+	]li
+]ul
+[h4 id=_7 
+	" 乱数の変動の予想
+	$LF
+]h4
+[div class=p 
+	"にげる、たたかうなどでは変動は少ないですが変動値は同一ではありません.
+	$LF
+	"プレイヤーキャラでも装備を変える、攻撃対象を変えることである程度行動順番を操作できます.
+	$LF
+	"魔法詠唱をすると乱数 index の変動は大きいです.
+	$LF
+]div
+[h4 id=Index 
+	" 乱数 index の操作
+	$LF
+]h4
+[div class=p 
+	"アイテムで消耗品を利用すると乱数 index が 1 増え、キャンセルすると何度も増やせます. ただし時間効率が悪いです.
+	$LF
+]div
+[h4 id=Tas 
+	" TAS での乱数
+	$LF
+]h4
+[div class=p 
+	"1ターンで早くオーガメイジを倒し、ブリンクのほんを拾得するのは不可能と判断し、2ターンで戦闘を終わらせています.
+	$LF
+]div
+[div class=p 
+	"一見有利ではない総和も含めてプレイヤーの装備を全通りで調べて解析をしました.
+	$LF
+]div
+[div class=p 
+	"解析中に条件を満たせたのは総和 0x18 で1通り、総和 0xfe で2通りあります.
+	$LF
+	"最速は総和 0x18 のもので、オーガメイジのブリンクの詠唱により乱数 index が 0x49 に増えたところを仕留めています.
+	$LF
+]div
+[h3 id=_8 
+	" ゴブリン戦
+	$LF
+]h3
+[div class=p 
+	"下記の条件をすべて満たす総和は 0xfd のみの1通りです.
+	$LF
+]div
+[ul 
+	[li 
+		" ゴブリンが1匹
+		$LF
+	]li
+	[li 
+		" お互いに先制攻撃なし
+		$LF
+	]li
+	[li 
+		" ゴブリンの行動がにげる
+		$LF
+	]li
+	[li 
+		" プレイヤー側はにげられない
+		$LF
+	]li
+]ul
+[div class=p 
+	"Chara #1 (Maria) がブリンクのほんを武器として装備して 67 回たたかうを選ぶことで、熟練度経験値として address $62bb へ data 0x43 を書き込みます.
+	$LF
+]div
+[div class=p 
+	"計算式は下記です.
+	$LF
+]div
+[pre 
+	"経験値 =  初期経験値 + 行動回数 - レベル補正
+	$LF
+]pre
+[ul 
+	[li 
+		" 初期経験値: 20
+		$LF
+	]li
+	[li 
+		" 行動回数: 67
+		$LF
+	]li
+	[li 
+		" レベル補正: 20
+		$LF
+	]li
+]ul
+[h2 id=_9 
+	" 宿泊イベント
+	$LF
+]h2
+[div class=p 
+	"ゴブリン戦で書き込まれた address $62bb は本来は宿泊時のイベント ID です.
+	$LF
+]div
+[ol 
+	[li 
+		" イベント ID から script pointer address (address $0072-$0073) が算出され、 ID# 0x43 の場合は pointer へ data $0020 が書き込まれます. 
+		$LF
+	]li
+	[li 
+		" address $0020 はユーザーのボタン入力として利用されているため、ジョイパッドの 左,下,右,セレクト,B,Aをすべて押すと address $0020 へdata 0xe7 が生成されます. 
+		$LF
+	]li
+	[li 
+		" script system がそれを読み込むとエンディングが始まります.
+		$LF
+	]li
+]ol
+[div class=p 
+	"はいを選んだ時のボタン入力は address $0021、 セリフを消す時のボタン入力は address $0020 に保存された状態でスクリプトが読み込まれます.
+	$LF
+]div
+[div class=p 
+	"前回の TAS ではセリフを消す時に A ボタンを押したので address $0020 は重要ではありませんでした. 今回はダンスをするボタンの組み合わせ (data 0xe4) を行っています
+	$LF
+	".
+	$LF
+	"これによりエンディングの開始が遅くなりますが最終ボタン入力の時間には影響がありません.
+	$LF
+]div
+[h2 id=Appendix 
+	" Appendix
+	$LF
+]h2
+[h3 id=SumInZeroPage 
+	" sum in zero page
+	$LF
+]h3
+[pre 
+	"97D5: ldx #$00
+	$LF
+	"97D7: adc <$00,x
+	$LF
+	"97D9: inx
+	$LF
+	"97DA: bne $97d7
+	$LF
+	"97DC: sta $0042 ;sum in zero page
+	$LF
+	"97DF: and #$02  ;a seed of random value table
+	$LF
+]pre
+[h3 id=EventIdToScriptPointer 
+	" event ID to script pointer
+	$LF
+]h3
+[div class=p 
+	"(at the inn)
+	$LF
+]div
+[pre 
+	"8DCA: lda $62bb ;load ID number
+	$LF
+	"8DCD: sta <$6c
+	$LF
+	"8DCF: jmp $91b8
+	$LF
+]pre
+[div class=p 
+	"(load <$6c, store address into script pointer <$72)
+	$LF
+]div
+[pre 
+	"CBF4: lda <$6c ;ID number
+	$LF
+	"CBF6: beq $cbfb
+	$LF
+	"CBF8: jmp $c6f4
+	$LF
+	"C6F4: asl a
+	$LF
+	"C6F5: tax
+	$LF
+	"C6F6: lda #$0d
+	$LF
+	"C6F8: jsr $fe03 ;switch a bank
+	$LF
+	"C6FB: lda $bfc0,x
+	$LF
+	"C6FE: sta <$72 ;script pointer.l
+	$LF
+	"C700: lda $bfc1,x
+	$LF
+	"C703: sta <$73 ;script pointer.h
+	$LF
+	"C705: lda #$01
+	$LF
+	"C707: sta <$6c
+	$LF
+	"C709: lda #$00
+	$LF
+	"C70B: sta <$17
+	$LF
+	"C70D: rts
+	$LF
+]pre
+[div class=p 
+	"(0xbfc0+(0x43<<1): 0xc046)
+	$LF
+]div
+[pre 
+	"C046: 20 00 fe jsr $fe00
+	$LF
+]pre
+[h2 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h2
+[div class=p 
+	"Cheap, Pirohiko, Mimi-Hisakaki, xxezrabxxx
+	$LF
+]div
+[h3 id=EzraSNote 
+	" Ezra’s note
+	$LF
+]h3
+[div class=p 
+	"Me and Naruko spent a good deal of time checking over what was translated and fixing errors. I am sure I made some mistakes but I hope what I have given to you is understandable to a good degree. I had lots of fun and learned a lot. Thanks for Naruko-san for letting me translate it. いいゆめ!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Judging!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Yeah, this game is thoroughly broken now. I'm glad to see the new route optimized and submitted, and the audience seems glad as well with very positive voting. Given that this run calls the ending (despite not being ACE), I am adding the "game end glitch" branch and accepting it as an improvement to 
+	(__wikiLink|displaytext=the published GEG run|href=/2903M)
+	". Excellent work!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Publishing.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Changing intended tier to 
+	(__wikiLink|href=/Standard|implicitdisplaytext=Standard)
+	" due to a recent site change.
+]div

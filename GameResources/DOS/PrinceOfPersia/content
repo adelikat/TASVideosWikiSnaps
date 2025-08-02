@@ -1,0 +1,1347 @@
+17
+[h2 id=Introduction 
+	" Introduction
+	$LF
+]h2
+[div class=p 
+	"This page is dedicated to document aspects of the DOS port of Prince of Persia (PoP) that pertain to TAS and speedrunning. 
+	$LF
+]div
+[h3 id=ExternalResources 
+	" External Resources
+	$LF
+]h3
+[div class=p 
+	"Abundant information exists regarding all other aspects of this game, its history, and trivia. Here I document a the most important:
+	$LF
+]div
+[ul 
+	[li 
+		" Prince of Persia  
+		[a href=https://popuw.com/ rel=noopener external nofollow 
+			"Unofficial Website
+		]a
+		": It's the most complete resource regarding the PoP series, their official and unofficial releases, modding community, and trivia.
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://www.princed.org/ rel=noopener external nofollow 
+			"Princed Project
+		]a
+		": A site dedicated to PoP modding community and applications. Their 
+		[a href=https://forum.princed.org/ rel=noopener external nofollow 
+			"forum
+		]a
+		" is the ultimate community interaction townhall.
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://github.com/NagyD/SDLPoP rel=noopener external nofollow 
+			"SDLPoP
+		]a
+		": Is an open-source port of Prince of Persia, based on the disassembly of the DOS version, extended with new features.' This project was and is the ultimate resource for deciphering the game's internal mechanics and subsequent botting efforts.
+		$LF
+	]li
+	[li 
+		" The 
+		[a href=https://www.speedrun.com/pop1 rel=noopener external nofollow 
+			"PoP speedrunning community
+		]a
+		". This is where the best players gather and run the game as fast as possible. A lot of information regarding how to speedrun the game and tips and tricks can be found here. 
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://github.com/SergioMartin86/jaffarPlus rel=noopener external nofollow 
+			"JaffarPlus
+		]a
+		". A routing used to discover the fastest way to solve PoP levels.
+		$LF
+	]li
+]ul
+[h2 id=TableOfContents 
+	" Table of Contents
+	$LF
+]h2
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#Introduction 
+					" Introduction
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#ExternalResources 
+							" External Resources
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#TableOfContents 
+					" Table of Contents
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Emulation 
+					" Emulation
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Tools 
+							" Tools
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#TasEmulation 
+									" TAS Emulation
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#AdditionalTools 
+									" Additional tools
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#RunningTheGame 
+							" Running the Game
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#PcemConfiguration 
+									" PCem Configuration
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#LibtasConfiguration 
+									" LibTAS Configuration
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#LaunchingLibtas 
+									" Launching libTAS
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#LaunchingTheGame 
+									" Launching the game
+									$LF
+								]a
+							]li
+						]ul
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#MemoryAnalysis 
+					" Memory Analysis
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#AttachingPinceToPcem 
+							" Attaching PINCE to PCem
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#LookingForTheHook 
+									" Looking for the Hook
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#RelevantAddresses 
+									" Relevant Addresses
+									$LF
+								]a
+							]li
+						]ul
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#GameMechanics 
+					" Game Mechanics
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#GamePhases 
+							" Game Phases
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#GameLoading 
+									" Game Loading
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#TitleScreenDemo 
+									" Title Screen & Demo
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#CopyProtectionLevel 
+									" Copy Protection Level
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Cutscenes 
+									" Cutscenes
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Levels 
+									" Levels
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#HallOfFame 
+									" Hall of Fame
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#GameTimer 
+							" Game Timer
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#TimerLogic 
+									" Timer Logic
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#TimerBug 
+									" Timer Bug
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Exceptions 
+									" Exceptions
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#HofScoreCalculation 
+									" HoF Score Calculation
+									$LF
+								]a
+							]li
+						]ul
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#RandomNumberGeneratorRng 
+					" Random Number Generator (RNG)
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#InternalState 
+							" Internal State
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#InitializationLogic 
+									" Initialization Logic
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#UpdateLogic 
+									" Update Logic
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#ActiveRngElements 
+							" Active RNG Elements
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#GuardRngBehavior 
+									" Guard RNG Behavior
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#FallingTilesLevel13 
+									" Falling Tiles (Level 13)
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#PassiveRngElements 
+							" Passive RNG Elements
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#LooseTiles 
+									" Loose Tiles
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Torches 
+									" Torches
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Potions 
+									" Potions
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Sword 
+									" Sword
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Stars 
+									" Stars
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#OtherRngElements 
+							" Other RNG Elements
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#CopyProtectionLetters 
+									" Copy Protection Letters
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#Cutscenes_2 
+									" Cutscenes
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#InvariantRooms 
+									" Invariant Rooms
+									$LF
+								]a
+							]li
+						]ul
+					]li
+				]ul
+			]li
+		]ul
+	]div
+]div
+[h2 id=Emulation 
+	" Emulation
+	$LF
+]h2
+[h3 id=Tools 
+	" Tools
+	$LF
+]h3
+[div class=p 
+	"Casual gamers are advised to use 
+	[a href=https://github.com/NagyD/SDLPoP rel=noopener external nofollow 
+		"SDLPoP
+	]a
+	" to conveniently and quickly run the game over Windows or Linux. Speedrunners can use DosBox to accurately 
+	[a href=https://www.speedrun.com/pop1/guide/r6nek rel=noopener external nofollow 
+		"emulate
+	]a
+	" and 
+	[a href=https://www.speedrun.com/pop1/guide/edoyd rel=noopener external nofollow 
+		"time
+	]a
+	" their runs competitively.
+	$LF
+]div
+[h4 id=TasEmulation 
+	" TAS Emulation
+	$LF
+]h4
+[div class=p 
+	"For TASing, however, the game requires a precise, reproducible environment. Here I provide the currently better tested setup, based on the instructions given in this  
+	(__wikiLink|displaytext=article|href=/EmulatorResources/PCem)
+	".
+	$LF
+]div
+[ul 
+	[li 
+		" Game Release: Prince of Persia v1.4, from the 
+		[a href=http://redump.org/disc/9664/ rel=noopener external nofollow 
+			"Prince of Persia Collection: Limited Edition
+		]a
+		" CD (MD5: 7f185559f694140312bc84fba0558d9a)
+		$LF
+	]li
+	[li 
+		" Emulator: 
+		[a href=https://github.com/TASEmulators/pcem/releases/tag/17%2Bst-1 rel=noopener external nofollow 
+			"PCem 17+st-1
+		]a
+		" + 
+		(__wikiLink|displaytext=Late 90's|href=/EmulatorResources/PCem/DOS/Configurations#Late90s_2)
+		" PC configuration.
+		$LF
+	]li
+	[li 
+		" TAS Engine: 
+		[a href=https://github.com/clementgallet/libTAS/releases rel=noopener external nofollow 
+			"LibTAS 1.4.4
+		]a
+		$LF
+	]li
+	[li 
+		" Recommended OS: 
+		[a href=https://ubuntu.com/download/desktop rel=noopener external nofollow 
+			"Ubuntu Desktop 22.04
+		]a
+		$LF
+	]li
+]ul
+[h4 id=AdditionalTools 
+	" Additional tools
+	$LF
+]h4
+[ul 
+	[li 
+		" Memory Analysis: 
+		[a href=https://github.com/korcankaraokcu/PINCE rel=noopener external nofollow 
+			"PINCE (Pince Is Not Cheat Engine)
+		]a
+		$LF
+	]li
+	[li 
+		" Routing: 
+		[a href=https://github.com/SergioMartin86/jaffarPlus rel=noopener external nofollow 
+			"JaffarPlus
+		]a
+		$LF
+	]li
+]ul
+[h3 id=RunningTheGame 
+	" Running the Game
+	$LF
+]h3
+[h4 id=PcemConfiguration 
+	" PCem Configuration
+	$LF
+]h4
+[div class=p 
+	"The 
+	(__wikiLink|displaytext=late '90s package|href=/EmulatorResources/PCem/DOS#PremadeConfigurations)
+	" can be used, except in 
+	[code 
+		"late90s.cfg
+	]code
+	" you need to change 
+	[code 
+		"mem_size
+	]code
+	" from 32768 to 8192, as the game does not need that much, and it makes the savestates and boot (memcheck) time smaller.
+	$LF
+]div
+[div class=p 
+	"Also don't forget to set the 
+	[code 
+		"cdrom_path
+	]code
+	" to point to the game image and 
+	[code 
+		"hdc_fn
+	]code
+	" to point to 
+	[code 
+		"late90s.img
+	]code
+	" (full path without quotes, spaces are fine).
+	$LF
+]div
+[h4 id=LibtasConfiguration 
+	" LibTAS Configuration
+	$LF
+]h4
+[div class=p 
+	"Don't be like me and make sure the following configurations are activated in libTAS
+	$LF
+]div
+[ul 
+	[li 
+		" Frames per second: 100/1 
+		[img class=embed mw-100 src=https://i.ibb.co/vmGHBd6/image2.png 
+		]img
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Runtime configuration: Should look exactly like this 
+		[img class=embed mw-100 src=https://i.ibb.co/HttKdhH/image5.png 
+		]img
+		$LF
+	]li
+]ul
+[h4 id=LaunchingLibtas 
+	" Launching libTAS
+	$LF
+]h4
+[div class=p 
+	"To run libTAS, you can use the following command:
+	$LF
+]div
+[pre 
+	$LF
+	"libTAS /usr/bin/pcem --config ${PWD}/late90s.cfg
+	$LF
+]pre
+[h4 id=LaunchingTheGame 
+	" Launching the game
+	$LF
+]h4
+[div class=p 
+	"Once you go through booting the PCem machine, you will be greeted by the DOS command line. The quickest way to launch the game is by running it straight from the CD-ROM, by running the following commands:
+	$LF
+]div
+[pre 
+	"D:
+	$LF
+	"cd prince
+	$LF
+	"cd prince1
+	$LF
+	"prince
+	$LF
+]pre
+[h2 id=MemoryAnalysis 
+	" Memory Analysis
+	$LF
+]h2
+[div class=p 
+	"If you are going to TAS this game, you absolutely need to keep track of important variables. To achieve this, you need to use memory analysis tools, like Cheat Engine. Unfortunately, CE does not work natively on Linux, so you need any of the following alternatives:
+	$LF
+]div
+[ul 
+	[li 
+		" 1) Running PCem inside a Virtual Machine (e.g., using 
+		[a href=https://www.vmware.com/products/workstation-player.html rel=noopener external nofollow 
+			"VMware Workstation Player
+		]a
+		") and running CE on the host. The disadvantage of this approach is that CE will need to scan the entire VM memory to find the correct values.
+		$LF
+	]li
+	[li 
+		" 2) Running a Linux-native tool like 
+		[a href=https://github.com/korcankaraokcu/PINCE rel=noopener external nofollow 
+			"PINCE
+		]a
+		". This is the recommended way as it allows attaching directly to the PCem process. 
+		$LF
+	]li
+	[li 
+		" 3) Using libTAS' LUA engine to do the scanning and logging. I haven't tried this one, but it could be an easier way to grab data from the game.
+		$LF
+	]li
+]ul
+[h3 id=AttachingPinceToPcem 
+	" Attaching PINCE to PCem
+	$LF
+]h3
+[div class=p 
+	"To attach PINCE to the game, first install PINCE and then run it using the following command:
+	$LF
+]div
+[pre 
+	"bash PINCE.sh
+	$LF
+]pre
+[div class=p 
+	"Then, attach it to PCem by following these steps: 
+	[img class=embed mw-100 src=https://i.ibb.co/j8sP83P/image4.png 
+	]img
+	$LF
+]div
+[h4 id=LookingForTheHook 
+	" Looking for the Hook
+	$LF
+]h4
+[div class=p 
+	"After launching the game, press the "Pause" button during the game's loading phase. At this point, use PINCE to look for the following array of bytes:
+	$LF
+]div
+[pre 
+	"00 00 00 b0 1d 2b 0f 00 00 00
+	$LF
+]pre
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/GWNfvd0/image19.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"A single memory address should be found. 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/pwdFmsx/image13.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"This address will be the hook address. This value has no intrinsic meaning, other than being the address from which we will obtain other relevant addresses. 
+	$LF
+]div
+[h4 id=RelevantAddresses 
+	" Relevant Addresses
+	$LF
+]h4
+[div class=p 
+	"Use a programmer calculator to calculate the addresses of the following relevant values, based on their offset with regards to the hook address.
+	$LF
+]div
+[ul 
+	[li 
+		" RNG State (-0x0233): A 64-bit integer (0x00000000-0xFFFFFFFF) containing the current state of the game's only pseudo-random number generator. 
+		$LF
+	]li
+	[li 
+		" Timer Minutes Left (+0xCBD): The number of minutes left before the game's timeout. Used to calculate the minute aspect of the hall of fame scoreboard.
+		$LF
+	]li
+	[li 
+		" Timer Ticks Left (+0xCC3): The number of 1/12s of a second (ticks) left before the current timer minute runs out.
+		$LF
+	]li
+]ul
+[h2 id=GameMechanics 
+	" Game Mechanics
+	$LF
+]h2
+[div class=p 
+	"This section discusses game mechanics that are relevant to effective TASing.
+	$LF
+]div
+[h3 id=GamePhases 
+	" Game Phases
+	$LF
+]h3
+[h4 id=GameLoading 
+	" Game Loading
+	$LF
+]h4
+[div class=p 
+	"As soon as the game is launched, it starts loading all the relevant files from the CDROM (or floppy disk or hard disk drive) into memory. At this stage the game displays the following text:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/pn1M4Mp/image1.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"As soon as the game finishes loading, it transitions towards the title screen.
+	$LF
+]div
+[h4 id=TitleScreenDemo 
+	" Title Screen & Demo
+	$LF
+]h4
+[div class=p 
+	"The title screen is the first image that appears after the loading phase. As long as no keys are pressed, the credits and backstory will show. Later, a randomized demo sequence will be shown. After the demo sequence finishes, the title screen is displayed again. 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/5RVJTBm/image11.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"You come back to the title screen after the game restarts. This can happen in three situations:
+	$LF
+]div
+[ul 
+	[li 
+		" You manually press Ctrl+R. In this case, the current game is terminated and title screen reappears immediately.
+		$LF
+	]li
+	[li 
+		" You lose the game on time. This happens when the time runs out (more on this later).
+		$LF
+	]li
+	[li 
+		" You lose the game on death. If you die and do not press any key within the allotted time, the game restarts.
+		$LF
+	]li
+	[li 
+		" You beat the game. In this case, the title screen reappears after the hall of fame.
+		$LF
+	]li
+]ul
+[h4 id=CopyProtectionLevel 
+	" Copy Protection Level
+	$LF
+]h4
+[div class=p 
+	"If you play an original copy of the game, you will need to pass a playable copy protection level between levels 1 and 2. This level appears only once in the session.) after you pass the level, you won't be prompted to pass it again later if you restart the game.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/d4fwPnP/image10.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"In this level, a total of 14 potions are presented to you. Your task is to drink the correct potion, i.e., the one whose letter corresponds to the first letter of the word within the original user manual indicated in the prompt at the bottom of the screen. After you drink the correct potion, the exit door will open and you can progress to level 2. If you drink the wrong potion, you'll lose half your life. If you drink two wrong potions you'll die and the game will restart.
+	$LF
+]div
+[div class=p 
+	"Funnily enough, you can beat the protection scheme very quickly by restarting and advancing (shift+L) repeatedly until the closest potion is the correct one, as shown in this 
+	[a href=https://www.youtube.com/watch?v=Bs4NFx3Etoc rel=noopener external nofollow 
+		"video
+	]a
+	".
+	$LF
+]div
+[h4 id=Cutscenes 
+	" Cutscenes
+	$LF
+]h4
+[div class=p 
+	"As soon as the current level finishes (screen goes to black) and the next level starts, the clock will remain stopped. This includes the cutscenes that play during some of the levels. 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/LR7wn5j/image8.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The following table shows what are the game cutscenes and their duration
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Transition
+			]th
+			[th 
+				"Duration
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"Level 1->2
+			]td
+			[td 
+				"44 Frames
+			]td
+			[td 
+				"Princess stands anxiously while the sand clock runs
+			]td
+		]tr
+		[tr 
+			[td 
+				"Level 3->4
+			]td
+			[td 
+				"44 Frames
+			]td
+			[td 
+				"Princess lays anxiously while the sand clock runs
+			]td
+		]tr
+		[tr 
+			[td 
+				"Level 5->6
+			]td
+			[td 
+				"44 Frames
+			]td
+			[td 
+				"Princess stands anxiously while the sand clock runs
+			]td
+		]tr
+		[tr 
+			[td 
+				"Level 7->8
+			]td
+			[td 
+				"79 Frames
+			]td
+			[td 
+				"Princess releases mouse to aid our hero
+			]td
+		]tr
+		[tr 
+			[td 
+				"Level 8->9
+			]td
+			[td 
+				"90 Frames
+			]td
+			[td 
+				"Princess receives a successful mouse
+			]td
+		]tr
+		[tr 
+			[td 
+				"Level 11->12
+			]td
+			[td 
+				"44 Frames
+			]td
+			[td 
+				"Princess stands anxiously while the sand clock runs
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=Levels 
+	" Levels
+	$LF
+]h4
+[div class=p 
+	"The game consists of 15 playable levels. 
+	$LF
+]div
+[ul 
+	[li 
+		" Levels 1-13 are the ones needed to beat the game.
+		$LF
+	]li
+	[li 
+		" Level 14 is the last level where you run to meet the princess. You cannot die, hurt yourself, or lose on time in this level and the only possible outcome is the transition to the game win sequence. 
+		$LF
+	]li
+	[li 
+		" Level 15 is the copy protection level. Plays between levels 1 and 2, only if the test hasn't been passed before.
+		$LF
+	]li
+	[li 
+		" Level 0 (non-playable) corresponds to the demonstration mode.
+		$LF
+	]li
+]ul
+[h4 id=HallOfFame 
+	" Hall of Fame
+	$LF
+]h4
+[div class=p 
+	"The hall of fame (HoF) appears once you beat the game, after the last 'hug cutscene' and the closing credits. 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/pLxLGvY/image18.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The HoF, like many arcade machines of its era, is dedicated as a persistent record of the best players. After beating the game, the player will be given the opportunity of inputting their names. The entry will be stored in the order of score (the best on top). The store reflects how much time remained at the moment of defeating Jaffar, as explained in later.
+	$LF
+]div
+[h3 id=GameTimer 
+	" Game Timer
+	$LF
+]h3
+[div class=p 
+	"Both the human and tool-assisted speedruns of the game use the In-Game Timer (IGT), as opposed to wall-clock time, for measuring which run is faster. There are multiple reasons for the game's speedrunning community to have reached this decision:
+	$LF
+]div
+[ul 
+	[li 
+		" The IGT timer provides an accurate and consistent measurement of how many game frames have passed between the start and the end of the run. 
+		$LF
+	]li
+	[li 
+		" Taking the wall-clock time (i.e., using a real-life chronometer) cannot provide consistent measurements since different PCs and emulators take different amounts of time to run each frame, and to load cutscenes and level transitions.
+		$LF
+	]li
+	[li 
+		" The IGT timer is accessible directly from RAM, via the provided two addresses above.
+		$LF
+	]li
+]ul
+[h4 id=TimerLogic 
+	" Timer Logic
+	$LF
+]h4
+[div class=p 
+	"At the very beginning of the game, the timer is initialized with the following values:
+	$LF
+]div
+[ul 
+	[li 
+		" Minutes Left: 60
+		$LF
+	]li
+	[li 
+		" Ticks Left: 719
+		$LF
+	]li
+]ul
+[div class=p 
+	"Each game frame, the number of ticks is reduced by one. When the number of ticks left reaches 001, the number of minutes left is reduced by one, and the tick count comes back to 711. The following progression illustrates the Minute/Tick progression from start to game over:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"When the minutes left counter reaches zero, the game is lost and the bad ending scene is displayed.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/1ZPrVBB/image3.png 
+	]img
+	$LF
+]div
+[h4 id=TimerBug 
+	" Timer Bug
+	$LF
+]h4
+[div class=p 
+	"Those keen eyed individuals might have noted that the timer logic is flawed. In total, 711 ticks pass for each reduction in the minute timer. This bug has the following interpretations:
+	$LF
+]div
+[ul 
+	[li 
+		" Each game second equals 711/712 = 0.9986 real life seconds.
+		$LF
+	]li
+	[li 
+		" Every minute, the game subtracts one tick from the remaining time.
+		$LF
+	]li
+	[li 
+		" The game time runs out in 42660, instead of 42720 frames
+		$LF
+	]li
+]ul
+[div class=p 
+	"Anybody looking to TAS this game and squeeze every single frame from IGT needs to keep this bug in mind, as it might affect their final movie length calculations.
+	$LF
+]div
+[h4 id=Exceptions 
+	" Exceptions
+	$LF
+]h4
+[div class=p 
+	"The game timer will run as described, except for the following situations:
+	$LF
+]div
+[ul 
+	[li 
+		" Title screen. During the loading phase, title screen, and demo playing, the game has not started yet and the timer is not running. If the player restarts the game (Ctrl+R), the timer will stop and will reset back to 59:711 as soon as the game starts again.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Copy Protection Level. To avoid handicapping the player during this level, the game stops the clock until the player exits and level 2 starts.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Cutscenes. The clock remains stopped during cutscenes.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Level Restart. If the player restarts the level (Ctrl+A), the first frame after the restart is not counter towards the timer. This affects the timing in levels 1 and 3, where the restart is used to perform small skips by restarting.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Jaffar Dies. The very frame that Jaffar dies in level 13, the clock stops running and no more ticks, including the current one, are reduced. You can still die after this point, after which both the level and the clock will restart.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Level 14. The final level after Jaffar is defeated, the timer no longer runs.
+		$LF
+	]li
+]ul
+[h4 id=HofScoreCalculation 
+	" HoF Score Calculation
+	$LF
+]h4
+[div class=p 
+	"The score is calculated as the remaining minutes/seconds remaining at the time of beating Jaffar in level 13. If the timer was 49:01 at the time of Jaffar's death, the HoF will display 48:00 as the player's score. If the timer was 48:711, time HoF will display 47:59. The time displayed by the HoF is crucial as proof of score for a TAS, where the improvement can be registered at a second level. Should a TAS improve on another at the tick level (where the tick does not pass the second barrier), the TASer / judge would have to provide proof of improvement by accessing the internal timer as shown before.
+	$LF
+]div
+[h2 id=RandomNumberGeneratorRng 
+	" Random Number Generator (RNG)
+	$LF
+]h2
+[div class=p 
+	"The game contains a single RNG from which all pseudo-randomized events are determined. Although most of the game elements that use the RNG are not relevant to the outcome of a play (i.e., they are mere decoration), one crucial gameplay element is affected by it: the guard's fighting actions. Therefore, any changes in RNG will make a TAS movie desync whereas a different one might work, exactly and only at the points where guard fights are involved.
+	$LF
+]div
+[h3 id=InternalState 
+	" Internal State
+	$LF
+]h3
+[div class=p 
+	"The game's pseudo random events are determined by a single RNG whose internal state is a 64-bit integer. Just like any other RNG, this state is updated every time the RNG is used to generate a new number, such that it produces a (mostly) different number every time it is queried.
+	$LF
+]div
+[h4 id=InitializationLogic 
+	" Initialization Logic
+	$LF
+]h4
+[div class=p 
+	"Upon launching the game, the 4 bytes of memory space corresponding to the internal state start 
+	[a href=https://en.wikipedia.org/wiki/Uninitialized_variable rel=noopener external nofollow 
+		"uninitialized
+	]a
+	". Before displaying the Title screen for the first time, the game calls the RNG update function. Inside this function, there is a check whereas, if the current value of the internal state:
+	$LF
+]div
+[ul 
+	[li 
+		" If it is zero, use the system's timer to determine the initial value.
+		$LF
+	]li
+	[li 
+		" Otherwise, use the update logic explained below.
+		$LF
+	]li
+]ul
+[div class=p 
+	"At this point in the game initialization phase, the game banks on the fact that a zero value for the timer is the most likely scenario (especially on a fresh system boot) or the operating system clears previous memory pages before assigning them to a new process, we can assume that querying the system clock will be the most likely course of action.
+	$LF
+]div
+[div class=p 
+	"The DOS function used to query the clock will return the number of microseconds passed since the start of the day. The system date does not count towards setting the initial RNG state.
+	$LF
+]div
+[h4 id=UpdateLogic 
+	" Update Logic
+	$LF
+]h4
+[div class=p 
+	"The way in which the internal state is updated is given by the formula:
+	$LF
+]div
+[pre 
+	"state = state * 0x000343FD + 0x000269EC3
+	$LF
+]pre
+[div class=p 
+	"Nevertheless, given that the state is a 64-bit integer, both the multiplication and addition are subject to overflow. Effectively they are passed through a modulo filter after each calculation, such that, purely mathematically, the calculation corresponds to:
+	$LF
+]div
+[pre 
+	$LF
+	"state = ( ( (state * 0x000343FD) % 0x100000000) + 0x000269EC3 ) % 0x100000000
+	$LF
+]pre
+[div class=p 
+	"The combination of these operations make it so that each state number maps to another number within the 64-bit range that appears to be entirely random. The relation is bijective, such that it is possible to calculate an undoing of the random state by the following operation:
+	$LF
+]div
+[pre 
+	"state = (state + 0xFFd9613D) * 0xB9B33155
+	$LF
+]pre
+[div class=p 
+	"Similarly, to account for overflow:
+	$LF
+]div
+[pre 
+	"state = ( ( (state + 0xFFd9613D) % 0x100000000) * 0xB9B33155 ) % 0x100000000
+	$LF
+]pre
+[div class=p 
+	"All events in the game update the RNG state using the above formula. However, some events trigger it more than once in between frames.
+	$LF
+]div
+[h3 id=ActiveRngElements 
+	" Active RNG Elements
+	$LF
+]h3
+[h4 id=GuardRngBehavior 
+	" Guard RNG Behavior
+	$LF
+]h4
+[div class=p 
+	"Guards are the only element in the game that can change the outcome of a TAS movie if the RNG diverges. That is because the guards' fighting actions are determined by a set of 
+	[a href=https://github.com/NagyD/SDLPoP/blob/7aeacd83167ab407272ab539ed5190fffc1d80f7/src/data.h#L840 rel=noopener external nofollow 
+		"action probabilities
+	]a
+	". These actions (attack, wait, respond, advance) contain a trigger probability that goes from 0 to 100, where 0 means that it won't ever be triggered, or; 100, meaning it will always be triggered. Every guard in the game contains a different set of probabilities based on their skill, where the skills are determined by the following 
+	[a href=https://www.speedrun.com/pop1/guide/kxbch rel=noopener external nofollow 
+		"table
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/nMN9STj/image15.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Any intermediate probability will trigger an action (or not) depending on whether the outcome of random(0,255) is equal or smaller than the probability value. This query 
+	$LF
+	"updates the internal RNG state once per frame, when the guard is in the middle of a fight (not when he is simply en garde).
+	$LF
+]div
+[h4 id=FallingTilesLevel13 
+	" Falling Tiles (Level 13)
+	$LF
+]h4
+[div class=p 
+	"At the very beginning of level 13, the tiles on the ceiling will start breaking and falling over the running hero. This is assumed to be Jaffar stomping on them to hurt and bothering you (indeed, many runs have been lost to these tiles breaking the player's run). 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/ZWnjWHK/image6.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"To determine the order in which these tiles are activated, the RNG is queried once per each.
+	$LF
+]div
+[h3 id=PassiveRngElements 
+	" Passive RNG Elements
+	$LF
+]h3
+[h4 id=LooseTiles 
+	" Loose Tiles
+	$LF
+]h4
+[div class=p 
+	"If the game runs on Sound Blaster or another synthetized sound device (not PC Speaker), the game's loose tiles will affect the RNG. Every time once such tile is activated, either by disturbing from afar it or pressing on it until it falls, the RNG will be queried to determine which of the 3 possible sounds will play. This randomness contributes to the game's innovative life-full feel. However, the logic affects the RNG state non-deterministically.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/176nM8z/image12.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The game stores the value of the last loose sound produced, to prevent reproducing it twice consecutively. This value is stored as a single byte that starts uninitialized at the beginning of the game. Once the first loose tile is activated (either in level one or the demonstration level), its value will oscillate between the values: 19, 20, and 21. These are indexes to the synthetized sample corresponding to three slightly different tile sounds. 
+	$LF
+]div
+[div class=p 
+	"To determine the new loose tile sound, the game uses the following 
+	[a href=https://github.com/NagyD/SDLPoP/blob/7aeacd83167ab407272ab539ed5190fffc1d80f7/src/seg007.c#L865 rel=noopener external nofollow 
+		"logic
+	]a
+	", simplified as:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Since it can be expected that the initial value of this variable is zero at the beginning of the game, this aspect of RNG cannot be manipulated a priori. However, it plays a crucial role in reproducibility as, even if you enter the level with the same RNG state, it might diverge upon hitting one of these tiles.
+	$LF
+]div
+[h4 id=Torches 
+	" Torches
+	$LF
+]h4
+[div class=p 
+	"Every torch visible on screen triggers, each, an RNG update to determine the shape of its flame in the next frame. Every update is deterministic as this selection allows the flame shape to repeat between two consecutive frames. 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/VxzFCWW/image16.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"On the frame where the hero enters a new room, the number of torches in the new room is the number of RNG updates that will be calculated.
+	$LF
+]div
+[h4 id=Potions 
+	" Potions
+	$LF
+]h4
+[div class=p 
+	"Potions produce a smoke effect that repeats deterministically and does not affect RNG at every frame. Instead, the only update on the RNG is produced upon entering a room where a potion exists, to determine the initial phase of the pattern. This is done to prevent multiple potions to all produce the same pattern at the same time. This is the case for all types of potions (+1HP, -1HP, +1MaxHP, Slowfall).
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/j6hhMh0/image7.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The RNG will not be affected upon drinking the potion, but it also won't be updated upon reentering the room.
+	$LF
+]div
+[h4 id=Sword 
+	" Sword
+	$LF
+]h4
+[div class=p 
+	"Twice in the game you can observe a pickable sword laying on the ground: once in level 1 --the sword you use to fight throughout the game--, and; once in level 12 -- the shadow's sword. To denote its sharpness, the game will add a twinkling effect on the sword every so often. 
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/2nN6pPN/image14.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"To determine whether the sword should twinkle, the game checks:
+	$LF
+]div
+[ul 
+	[li 
+		" If the sword is currently twinkling or has twinkled in the previous N frames , do not twinkle in the next frame
+		$LF
+	]li
+	[li 
+		" Otherwise, check the RNG value to make it twinkle now and set N to the random number.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The fact that updating the RNG or not depends on a previous result, makes this a non-deterministic effect on its internal state. This is not a problem, however, as current TAS skips the first sword, and picks up the second one without any RNG-based effects on the actions required to do so.
+	$LF
+]div
+[h4 id=Stars 
+	" Stars
+	$LF
+]h4
+[div class=p 
+	"What? Stars?. Yes, these ones:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/GxYY3r5/image9.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"They twinkle every 3 or so frames. Which one of them twinkles is determined by the game's RNG. This check updates its internal state once. 
+	$LF
+]div
+[h3 id=OtherRngElements 
+	" Other RNG Elements
+	$LF
+]h3
+[h4 id=CopyProtectionLetters 
+	" Copy Protection Letters
+	$LF
+]h4
+[div class=p 
+	"The position and letters hovering over the potions in level 15 are determined at the start of the game. The index of each of the potions is shown below.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/f4FGVsG/image17.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The letter positioning uses (and affects) the RNG internal state a non-deterministic amount of times, given the following pseudo-code:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The important aspect of the code above is that the letter selection code above will access the RNG a non-deterministic number of times (i.e., until the letter picked has not been picked before). This is of crucial aspect of manipulating RNG in a TAS, as the process needs to be replicated exactly as in the 
+	[a href=https://github.com/NagyD/SDLPoP/blob/7aeacd83167ab407272ab539ed5190fffc1d80f7/src/seg000.c#L215 rel=noopener external nofollow 
+		"game code
+	]a
+	".
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h4 id=Cutscenes_2 
+	" Cutscenes
+	$LF
+]h4
+[div class=p 
+	"The RNG state is modified even during cutscenes, since they contain two torches and a set of stars in the window. For some reason, the number of RNG state updates per frame is inconsistent on different cutscenes. Here is an exact progression of the number of RNG updates:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[h4 id=InvariantRooms 
+	" Invariant Rooms
+	$LF
+]h4
+[div class=p 
+	"There are rooms where no RNG elements exist and therefore will keep the RNG state fixed until you exit.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.ibb.co/k6mTpKv/invariant.png 
+	]img
+	$LF
+]div

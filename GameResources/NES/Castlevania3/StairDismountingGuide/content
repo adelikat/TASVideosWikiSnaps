@@ -1,0 +1,442 @@
+27
+[h2 id=CastlevaniaIiiStairDismountingGuide 
+	" Castlevania III Stair Dismounting Guide
+	$LF
+]h2
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#CastlevaniaIiiStairDismountingGuide 
+					" Castlevania III Stair Dismounting Guide
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Preliminaries 
+							" Preliminaries
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#StairFormat 
+									" Stair Format
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#EnteringStairs 
+									" Entering Stairs
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#Methods 
+							" Methods
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#CameraScroll 
+									" Camera Scroll
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#VerticalScreenTransition 
+									" Vertical Screen Transition
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#SyphaSFreezeSpell 
+									" Sypha's Freeze Spell
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#VerticalFloorDisalignWithCharacterSwitching 
+									" Vertical Floor Disalign with Character Switching
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#HorizontalScreenEdge 
+									" Horizontal Screen Edge
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#ScrollGlitching 
+									" Scroll Glitching
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#OvercomingObstacles 
+							" Overcoming Obstacles
+							$LF
+						]a
+					]li
+				]ul
+			]li
+		]ul
+	]div
+]div
+[div class=p 
+	"The purpose of this guide is to illustrate all known ways in which you can disalign yourself from a staircase in Castlevania III.
+	$LF
+	"By disaligning yourself from a staircase, you can walk beyond the intended end point of a staircase and into the room above or below.
+	$LF
+	"This can either be used for shortcuts to later areas of the level, or to enter invalid rooms, where you can trigger memory corruption, which can in turn cause other effects such as warp glitches.
+	$LF
+]div
+[div class=p 
+	"Many methods require a specific character to work.
+	$LF
+	"Some methods can easily be done in real-time, while others require TAS precision.
+	$LF
+	"Unless otherwise noted, all methods work exactly the same on both the J and U versions of the game.
+	$LF
+]div
+[h3 id=Preliminaries 
+	" Preliminaries
+	$LF
+]h3
+[div class=p 
+	"Below, there is some basic information about how stairs work in general.
+	$LF
+	"To see the tricks in action, scroll down further.
+	$LF
+]div
+[h4 id=StairFormat 
+	" Stair Format
+	$LF
+]h4
+[div class=p 
+	"The game has no notion of stair tiles per se.
+	$LF
+	"The stairs that you see on the screen are just for show.
+	$LF
+	"Instead, each room in the game has a list of stair entrances going up or down.
+	$LF
+	"If you are standing on the ground and push Up or Down on the D-Pad, the game will iterate through each stair entrance for the current room and check if it is range of your character.
+	$LF
+	"The current stair data is located by a pointer stored at 
+	[code 
+		"$69
+	]code
+	" on U, and 
+	[code 
+		"$66
+	]code
+	" on J.
+	$LF
+	"Normally, this pointer points to a swappable bank in PRG ROM, but if you are entering glitched rooms, the pointer can point anywhere, resulting in the game attempting to read stair data from RAM.
+	$LF
+	"This in turn causes glitched, and often rapidly changing stair entrances.
+	$LF
+]div
+[div class=p 
+	"See 
+	[a href=https://github.com/scrimpeh/cv3tools/blob/master/cv3_scripts/corruption-tools/modules/map-viewer/stairs.lua#L5-L22 rel=noopener external nofollow 
+		"here
+	]a
+	" for a description of the binary stair data format.
+	$LF
+]div
+[h4 id=EnteringStairs 
+	" Entering Stairs
+	$LF
+]h4
+[div class=p 
+	"To find out if the player is in range of a staircase, the game adds the player's on-screen position to the camera position and checks it against the coordinates of the stair entrance.
+	$LF
+	"If you are standing on the ground and are in range of a staircase, pushing Up or Down will move you onto that staircase.
+	$LF
+	"You can be up to 13 pixels left or 12 pixels right of the staircase.
+	$LF
+	"You can also be up to 6 pixels above or 5 pixels below the intended staircase entrance, which allows you to walk on the staircase higher or lower than intended.
+	$LF
+	"This is the basis for some of the tricks outlined below.
+	$LF
+	"You don't need to be standing on solid ground tiles to enter a staircase.
+	$LF
+	"Instead, the game also considers you as standing on the ground when you are on a moving platform, such as a swinging pendulum or a frozen enemy.
+	$LF
+]div
+[div class=p 
+	"When you are on a staircase, pushing up or down will make the character walk for 8 pixels in that direction.
+	$LF
+	"When reaching the next step, the game will check if you are standing near a floor and drop you from the staircase if this is the case.
+	$LF
+	"The methods shown below will put you either 
+	[b 
+		"above
+	]b
+	", 
+	[b 
+		"below
+	]b
+	", 
+	[b 
+		"left
+	]b
+	", or 
+	[b 
+		"right
+	]b
+	" of the intended axis of the staircase.
+	$LF
+	"When you are displaced sideways, you can clear the end of a staircase if there is no floor blocking you at the exit.
+	$LF
+	"For example, if you are shifted left from a staircase going down right, you can clear the end at the bottom if there are no tiles on the left side of the lower stair exit.
+	$LF
+	"When you are displaced vertically, you can also defeat the floor detection by switching between Trevor and Grant at the right time, since they have different heights where floor detection kicks in.
+	$LF
+	"This is explained in further detail below.
+	$LF
+	"Finally, if you corrupt the tile geometry, you can also clear the intended end of a staircase.
+	$LF
+]div
+[h3 id=Methods 
+	" Methods
+	$LF
+]h3
+[div class=p 
+	"The methods below are listed roughly in order of difficulty.
+	$LF
+]div
+[h4 id=CameraScroll 
+	" Camera Scroll
+	$LF
+]h4
+[div class=p 
+	[em 
+		"Sideways displacement, any character
+	]em
+	$LF
+]div
+[div class=p 
+	"If the room is large enough to scroll, a staircase that is near the screen edge can be used for disaligning yourself horizontally.
+	$LF
+	"By repeatedly walking down the stairs and back up, you will cause the camera to scroll and hit the screen edge.
+	$LF
+	"Each time the camera starts scrolling from the screen edge, your character gets shifted to the side by one pixel.
+	$LF
+	"If you repeat this multiple times, you can clear the end of a staircase.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=QxH5lB0pMTA|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621047066861753)
+	$LF
+]div
+[h4 id=VerticalScreenTransition 
+	" Vertical Screen Transition
+	$LF
+]h4
+[div class=p 
+	[em 
+		"Sideways displacement, Grant only
+	]em
+	$LF
+]div
+[div class=p 
+	"Walk down a staircase with Trevor and walk down into the screen below. After the final step, switch to Grant immediately before the screen transition happens. You will be displaced sideways from the staircase in the descending direction.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=6LGgfsXtAlA|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621049569880225)
+	$LF
+]div
+[h4 id=SyphaSFreezeSpell 
+	" Sypha's Freeze Spell
+	$LF
+]h4
+[div class=p 
+	[em 
+		"Vertical and sideways displacement, Sypha only
+	]em
+	$LF
+]div
+[div class=p 
+	"Sypha's freeze spell can be used to disalign yourself from the stairs vertically and horizontally.
+	$LF
+	"By freezing an enemy at the right height, you can stand on them and enter a staircase in mid-air.
+	$LF
+	"This is usually very finnicky, as most mid-air enemies behave very erratically, and frozen enemy hitboxes are very wonky.
+	$LF
+	"On the ground, a frozen enemy can block Sypha from walking toward the start point of the staircase, which causes horizontal displacement.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=4IcHvKJfrSI|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621049277802051)
+	$LF
+]div
+[h4 id=VerticalFloorDisalignWithCharacterSwitching 
+	" Vertical Floor Disalign with Character Switching
+	$LF
+]h4
+[div class=p 
+	"By switching between characters under the right circumstances, you may end up partially embedded in the ground or hovering in the air by a few pixels. Entering a staircase will start you displaced vertically. The most common methods are listed below:
+	$LF
+]div
+[div class=p 
+	[b 
+		"Grant Mid-Air
+	]b
+	$LF
+]div
+[div class=p 
+	[em 
+		"Upwards displacement, Grant
+	]em
+	$LF
+]div
+[div class=p 
+	"By switching characters in mid-air on the right frame, Grant can stand up to four pixels above the ground without falling.
+	$LF
+	"It is easiest to do this by jumping a certain height with Grant, switching to Trevor and then switching back on the first possible frame.
+	$LF
+	"This allows him to enter the staircase with some vertical displacement.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=hD_QMcJqWiE|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621048527789528)
+	$LF
+]div
+[div class=p 
+	[b 
+		"Inside Floor
+	]b
+	$LF
+]div
+[div class=p 
+	[em 
+		"Downwards displacement, Grant
+	]em
+	$LF
+]div
+[div class=p 
+	"This is similar to the method above.
+	$LF
+	"When jumping from a high ledge, there is a one-frame window where your character clips into the ground before the game puts you back on the ground.
+	$LF
+	"By switching characters on that frame, it is possible to get yourself embedded into the floor, and start climbing staircases vertically displaced.
+	$LF
+	"This is once again easiest by using Grant's variable jump height.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=BUEv9PANysI|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621048222665459)
+	$LF
+]div
+[div class=p 
+	[b 
+		"Alucard Bat Form
+	]b
+	$LF
+]div
+[div class=p 
+	[em 
+		"Downwards displacement, Alucard
+	]em
+	$LF
+]div
+[div class=p 
+	"Use Alucard's Bat Form and switch back to Trevor while you are partially intersecting with the ground. This will start you a few pixels into the ground.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=Co_pAgARQjs|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621046540990831)
+	$LF
+]div
+[h4 id=HorizontalScreenEdge 
+	" Horizontal Screen Edge
+	$LF
+]h4
+[div class=p 
+	[em 
+		"Sideways displacement, Grant only
+	]em
+	$LF
+]div
+[div class=p 
+	"By pulling yourself up and down corners with Grant, it is possible to move towards the edge of the screen without moving the camera.
+	$LF
+	"While at the edge of the screen, attempting to enter a staircase will push you away from the screen edge, displacing you sideways.
+	$LF
+	"Ceilings are generally more effective for this than floors.
+	$LF
+	"Using the same method, you can also wrap around the screen edge, which allows you to quickly get to the right edge of the screen when you were at the left edge and vice-versa.
+	$LF
+	"This is generally slower, though.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=imwlVxKtMtM|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621047452619313)
+	$LF
+]div
+[h4 id=ScrollGlitching 
+	" Scroll Glitching
+	$LF
+]h4
+[div class=p 
+	[em 
+		"Any character
+	]em
+	$LF
+]div
+[div class=p 
+	"You can despawn the tile geometry around the stair entrances by using scroll glitching. This method is entirely TAS-only.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=n_YBRLpk9M8|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621048934878403)
+	$LF
+]div
+[h3 id=OvercomingObstacles 
+	" Overcoming Obstacles
+	$LF
+]h3
+[div class=p 
+	"When you are already disaligned from a staircase, other floors in your way can present an obstacle, since they will block you and prevent you from climbing out-of-bounds.
+	$LF
+	"As mentioned, you can use Grant to overcome this by switching characters at the right times, since the game checks for floor collisions with him at different heights.
+	$LF
+	"You must already be displaced vertically from the staircase.
+	$LF
+	"Up to two character switches can be required to clear a set of floor tiles.
+	$LF
+]div
+[div class=p 
+	(Youtube|h=240|v=LwtV_akDNRI|w=320)
+	$LF
+	(__wikiLink|displaytext=BK2 Download|href=/UserFiles/Info/638621047816098943)
+	$LF
+]div

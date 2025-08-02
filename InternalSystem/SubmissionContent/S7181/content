@@ -1,0 +1,374 @@
+15
+[div class=p 
+	"VVVVVV is a game about flipping, and has support for custom levels. Dimension Open is a custom level that you can complete by simply zipping through the entire map.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses death to save time
+		$LF
+	]li
+	[li 
+		" Abuses a programming error
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"This run is done on VVVVVV 2.2 and Dimension Open 1.1.3.
+	$LF
+]div
+[div class=p 
+	"Due to being a custom level, timing does not start upon game boot, and so this TAS is actually completed in 3 minutes, 10 seconds, and 536 milliseconds. See 
+	[b 
+		"Timing
+	]b
+	" below for details and rationale.
+	$LF
+]div
+[div class=p 
+	"I have made a 
+	[a href=https://youtu.be/gFijKR2C--o rel=noopener external nofollow 
+		"commentated video
+	]a
+	" explaining this run. It does not assume the viewer has any prior technical knowledge (or even knows what VVVVVV is), and as such, explains every concept needed to understand this run to the average person.
+	$LF
+]div
+[div class=p 
+	"Here is an uncommentated encode: 
+	(youtube|v=La1nXmlw_Ow)
+	$LF
+]div
+[h3 id=ZipGlitch 
+	" Zip glitch
+	$LF
+]h3
+[div class=p 
+	"The single most major glitch this run relies on is the "zip glitch". It works on the Windows and macOS versions of the game; however, it is 
+	[a href=https://en.wikipedia.org/wiki/Undefined_behavior rel=noopener external nofollow 
+		"undefined behavior
+	]a
+	", and so will result in a softlock (actually a really long zip) when performed on those versions. (The Windows version even behaves differently if you run it under Wine.)
+	$LF
+]div
+[div class=p 
+	"The zip glitch is a simple oversight of failing to check for an out-of-bounds value. The game stores all loaded entities in the current room in an 
+	[code 
+		"std::vector
+	]code
+	" (from the C++ Standard Template Library (STL)), with 200 elements (in VVVVVV 2.2 and previous). It uses indices to refer to each entity in the array (a programming technique known as "handles"). For example, the player entity is always at indice 0.
+	$LF
+]div
+[div class=p 
+	"Teleporters are used in the main game to teleport you places. Whenever you teleport with them, your respawn point will be set to the position of your destination teleporter.
+	$LF
+]div
+[div class=p 
+	"To fetch the teleporter in a given room, the game uses a function called 
+	[code 
+		"entityclass::getteleporter()
+	]code
+	", which returns the indice of the given teleporter.
+	$LF
+]div
+[div class=p 
+	"However, teleporters were never meant to be used in custom levels. When you use them in custom levels, the room you teleport to will not contain a teleporter. Because of this, 
+	[code 
+		"entityclass::getteleporter()
+	]code
+	" will return -1 instead.
+	$LF
+]div
+[div class=p 
+	"The game uses the result of 
+	[code 
+		"entityclass::getteleporter()
+	]code
+	" to (1) fling Viridian out of the teleporter, and (2) set their respawn point at the teleporter. For (1), it checks that the value isn't -1 and doesn't follow it. However, for (2), it follows it and ends up reading an x-position of 0 and a y-position of 46,097; it is always guaranteed to produce those values on Linux (on other versions, the values are different). From my investigation, the 46,097 seems to be glibc malloc bookkeeping, hence why it is stable.
+	$LF
+]div
+[div class=p 
+	"Then after this, dying will respawn Viridian at that y-position.
+	$LF
+]div
+[div class=p 
+	"As the game window is only 320 pixels by 240 pixels, such a high y-position always places Viridian in the offscreen area, and will keep triggering a room transition on every frame. The room transition will keep teleporting Viridian upwards by 240 pixels until they arrive back onscreen, giving us around 6 seconds of zipping through rooms.
+	$LF
+]div
+[div class=p 
+	"We have no way to land on a specific room, unless we go through vertically-warping rooms. These rooms will stop us from triggering a room transition every frame, but we still get teleported up by 232 pixels on every frame. However, we can precisely time it so that we land in a specific room by exiting the vertically-warping room on a specific frame.
+	$LF
+]div
+[div class=p 
+	"By carefully taking a specific route throughout the map, we can exit out of the zip and into the final room of the level, to rescue the only required crewmate needed to beat the level.
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=Start 
+	" Start
+	$LF
+]h4
+[div class=p 
+	"In the 2 frames of control at the very start of the level before the opening cutscene, I hold right so I have less distance to travel later (saving 1 frame).
+	$LF
+]div
+[div class=p 
+	"During the cutscene, I press alt+enter (the toggle fullscreen keybind) to flip upwards, so the time that going upwards takes is spent during the cutscene itself. This way, I don't lose time waiting for Viridian to move upwards, like I would have if I flipped after the cutscene is done.
+	$LF
+]div
+[div class=p 
+	"In the T5 teleporter room, I hit the checkpoint and make sure to avoid all other checkpoints from then on until I get the blue keycard (for Valso skip).
+	$LF
+]div
+[h4 id=Lab 
+	" Lab
+	$LF
+]h4
+[div class=p 
+	"It's faster to bounce on the top gravity line twice in "The Bernoulli Principle II" than it is to hit it once and then hit the middle gravity line.
+	$LF
+]div
+[div class=p 
+	"I perform a vertical gravity line clip (like a horizontal gravity line clip, but for vertical gravity lines) in "Keycard", which saves time over not doing it and having to land on the other side of the three-tile spike gap before flipping again.
+	$LF
+]div
+[div class=p 
+	"I perform Valso skip by pressing R right as I activate the blue keycard download terminal, and respawn in the T5 teleporter room, closer to the next zone of the level. This skips having to rescue Valso and complete the Lab.
+	$LF
+]div
+[h4 id=WarpZoneSkipped 
+	" Warp Zone (skipped)
+	$LF
+]h4
+[div class=p 
+	"In a similar vein to Valso skip, I skip the Warp Zone by setting my checkpoint in the red keycard gate, then backtracking to the blue keycard gate (while avoiding checkpoints), running its cutscene, and pressing R at the right time.
+	$LF
+]div
+[div class=p 
+	"Both the blue keycard and red keycard scripts call the script command 
+	[code 
+		"destroy(warptokens)
+	]code
+	" to destroy the warp token that acts as their gate; however, there's nothing preventing that script command from being ran in a different room than intended.
+	$LF
+]div
+[h4 id=SpaceStation 
+	" Space Station
+	$LF
+]h4
+[div class=p 
+	"I make sure to grab the checkpoint in "Upper Hand" and avoid all checkpoints thereafter so I can set up a timesave in the post-level cutscene.
+	$LF
+]div
+[div class=p 
+	"I save time after completing the level by not having to walk over to the T5 terminal in the hub room (needed so I can set the teleporter destination to teleport) after the cutscene ends.
+	$LF
+]div
+[div class=p 
+	"In the cutscene, there's one part where Viridian moves rightwards. Then the cutscene script calls 
+	[code 
+		"gotoroom()
+	]code
+	" (which teleports you to a given room) to clear all entities created with the 
+	[code 
+		"createentity()
+	]code
+	" script command.
+	$LF
+]div
+[div class=p 
+	"By pressing R and respawning in "Frustration" during the cutscene, I utilize the rightwards movement to perfectly line Viridian up with the same x-position as the T5 terminal, by having them hit the vertically-moving platform in "Frustration". (One pixel to the left, and I would lose 1 frame when traveling to the T0 terminal, due to pixel alignment.) Then when the 
+	[code 
+		"gotoroom()
+	]code
+	" happens, I get teleported back into the hub room, and can immediately activate the T5 terminal once the cutscene ends.
+	$LF
+]div
+[h4 id=GreenKeycardGate 
+	" Green keycard gate
+	$LF
+]h4
+[div class=p 
+	"To move through the gate on the first possible frame I can, I press left and flip at the same time as I activate the terminal, so I'm positioned above the passageway but don't fall through it just yet. Then I press alt+enter on the first possible frame I can without hitting the warp tokens that get destroyed.
+	$LF
+]div
+[div class=p 
+	"Dimension Open does not intend for you to be able to access the round teleporter spawned in the red teleporter room (it stops you with a cutscene). However, since there are 2 frames of delay before the script box which spawns the teleporter actually spawns the teleporter, I can enter the room, then immediately move backwards to spawn the teleporter in the previous room, where I can then access it.
+	$LF
+]div
+[div class=p 
+	"I use the zip glitch here to zip to the end of the level and rescue the last crewmate.
+	$LF
+]div
+[h3 id=Timing 
+	" Timing
+	$LF
+]h3
+[div class=p 
+	"I have decided upon the following rules for timing custom levels:
+	$LF
+]div
+[ol 
+	[li 
+		" Time starts on the first frame of a level.
+		$LF
+	]li
+	[li 
+		" Time ends on the last input frame needed in order to eventually achieve either one of these two conditions:
+		$LF
+		[ol 
+			[li 
+				" You have rescued all crewmates, and the gamestate is 1013.
+				$LF
+			]li
+			[li 
+				" You have rescued all crewmates, the gamestate is 1012, and pressing ACTION here would lead to 1013 and wouldn't be interrupted.
+				$LF
+			]li
+		]ol
+	]li
+]ol
+[div class=p 
+	"In VVVVVV 2.2 and previous, the first frame of a level is easy to spot by simply looking for the first non-red frame after loading a level in libTAS's input editor.
+	$LF
+]div
+[div class=p 
+	"Gamestate 1013 is the gamestate the game uses to complete a level, award you stars for completion, and send you back to the title screen.
+	$LF
+]div
+[div class=p 
+	"Gamestate 1012 is the "All crewmates rescued!" text box prompt, if you have rescued all crewmates.
+	$LF
+]div
+[div class=p 
+	"Note that the only crewmate that counts for completion in this level is the one at the very end of the level. If you rescue it, you will always be awarded stars for completion. The other crewmates are not the same type of entity as this crewmate (touching them won't lead to a "You have found a lost crewmate!" prompt).
+	$LF
+]div
+[h4 id=Rationale 
+	" Rationale
+	$LF
+]h4
+[div class=p 
+	"I have decided upon rule 1, rather than starting time from game boot, because otherwise the position of a level in the levels list would end up contributing to its movie time. The levels list is sorted alphabetically. In other words, the very name of the level would end up being a factor in how fast it would be able to be completed, which doesn't seem fair to me.
+	$LF
+]div
+[div class=p 
+	"Rule 2 is more complex. Essentially, the two conditions are your input leads to a state that eventually either completes the level, or gets to the "All crewmates rescued!" text box prompt. I've decided that the "All crewmates rescued!" text box prompt counts as completion (and in fact, I use it in this TAS), to enable being able to end input as early as possible leading up to the final crewmate.
+	$LF
+]div
+[div class=p 
+	"Otherwise, I'd have to add some more input frames, plus wait 15 frames just to press ACTION. I see no point in having to wait 15 frames to press ACTION. Plus, viewers get to see the "All crewmates rescued!" text box in all its glory, rather than it being visible for only a handful of frames and easily missed.
+	$LF
+]div
+[div class=p 
+	"The "wouldn't be interrupted" clause in the second condition is simply to cover very rare cases of levels where it's easily possible to interrupt the gamestate sequence of rescuing the final crewmate, and end up being stuck without being able to properly complete the level.
+	$LF
+]div
+[div class=p 
+	"In such levels, what happens is that either the gamestate sequence is canceled completely, or you're stuck on gamestate 1012, without an ACTION prompt, so you can't press ACTION to continue, and since you're in a "complete stop" mode, the game won't accept any other input (which is a softlock; I have fixed this softlock in VVVVVV 2.3).
+	$LF
+]div
+[div class=p 
+	"These cases happen because the level creators place script boxes or other various entities on top of the crewmates, for no particularly good reason. Dimension Open does not do that, so we need not worry about this clause here.
+	$LF
+]div
+[h3 id=HistoryAndImprovements 
+	" History and improvements
+	$LF
+]h3
+[div class=p 
+	"This is an improvement of 23 seconds and 52 milliseconds from my previous TAS of this level, which was done in 3 minutes, 35 seconds, and 588 milliseconds (
+	[a href=https://youtu.be/GmC3D4N7MLA rel=noopener external nofollow 
+		"video here
+	]a
+	"). It uses the zip glitch as well but is generally slower overall. The biggest improvements are accessing the teleporter with a wrong load, using alt+enter to position Viridian better during cutscenes, and general movement optimizations throughout the run.
+	$LF
+]div
+[div class=p 
+	"I first finished this run in November 2019, with an initial time of 3 minutes, 15 seconds, and 942 milliseconds.
+	$LF
+]div
+[div class=p 
+	"For almost 2 years, I have worked to produce the commentated video, as well as worked to find any improvements to the run (of which there were plenty).
+	$LF
+]div
+[div class=p 
+	"This TAS is the most optimized movie I can produce given current knowledge. There are no known improvements.
+	$LF
+]div
+[h3 id=SuggestedScreenshot 
+	" Suggested screenshot
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/o5Q8pV4.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": I didn't anticipate having to reject this movie because what I saw in the submission text is surprising attention to optimization details. Awesome job on that! But I looked at the thread and ended up agreeing that custom levels should be treated like ROM hacks, so their movies have to meet the 
+	(__wikiLink|displaytext=requirements we have for ROM hacks|href=/MovieRules#NonOfficialGamesHacksHomebrewsEtcAndPrototypes)
+	". A good explanation of this reasoning was posted by Radiant 
+	(__wikiLink|displaytext=here|href=/Forum/Posts/508111)
+	", and other judges agreed.
+	$LF
+]div
+[div class=p 
+	"So since we want ROM hacks to be 
+	[em 
+		""entertaining enough to make it to the Moons class, usually by showing unique gameplay or brand new content"
+	]em
+	", we want the same for custom levels. Unfortunately, it's hard to tell is this level is entertaining and different enough, because we don't get to see its gameplay in full. Feedback in the thread was against using the major skip glitch in a custom level, because that defeats the purpose of being as entertaining and different as possible.
+	$LF
+]div
+[div class=p 
+	"So we will most likely accept some other custom level of this game, as long as it's a high quality product, has unique gameplay mechanics, and the movie showcases its differences, resulting in positive feedback.
+	$LF
+]div
+[div class=p 
+	"Rejecting this one, unfortunately.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": revisiting based on rule changes
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": OK so given that derivative game content can now go to standard, I took a look at this submission. What I didn't quite realize until watching was that this submission uses a major skip glitch unique to custom levels. As long as TASes of derivative game content are distinct from each other (ie don't use ACE to beat every SMB3 hack before reaching the title screen), it can go to standard.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

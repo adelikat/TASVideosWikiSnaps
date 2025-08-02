@@ -1,0 +1,399 @@
+5
+[div class=p 
+	"The purpose of this page is to document all known tricks of the Pokemon generation 2 games on Game Boy Color, which include Gold, Silver, and Crystal.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#LuckManipulation 
+					" Luck Manipulation
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#UsefulMemoryAddressesGs1 
+					" Useful memory addresses (GS)
+					[sup 
+						"[
+						"1
+						"]
+					]sup
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[ul 
+	[li 
+		" G/S = Gold/Silver
+		$LF
+	]li
+	[li 
+		" C = Crystal
+		$LF
+	]li
+	[li 
+		" RNG = Random Number Generator
+		$LF
+	]li
+]ul
+[h3 id=LuckManipulation 
+	" Luck Manipulation
+	$LF
+]h3
+[div class=p 
+	"Gen 2, like Gen 1, revolves its RNG around the 
+	[code 
+		"rDIV
+	]code
+	". The 
+	[code 
+		"rDIV
+	]code
+	" is essentially a 16-bit CPU cycle counter, with only the upper 8 bits able to be seen. The exact function is also fairly similar: take the 
+	[code 
+		"rDIV
+	]code
+	", then add it to 
+	[code 
+		"hRandomAdd
+	]code
+	", then subtract it to 
+	[code 
+		"hRandomSub
+	]code
+	". This is done every time Random is called, and an equivalent function is also done at Vblank. For all intents and purposes, 
+	[code 
+		"hRandomSub
+	]code
+	" is the main RNG byte used for randomness, with 
+	[code 
+		"hRandomAdd
+	]code
+	" secondary (and rarely used). In G/S, 
+	[code 
+		"hRandomAdd
+	]code
+	" is at 0xFFE3, and 
+	[code 
+		"hRandomSub
+	]code
+	" is at 0xFFE4. In C, 
+	[code 
+		"hRandomAdd
+	]code
+	" is at 0xFFE1, and 
+	[code 
+		"hRandomSub
+	]code
+	" is at 0xFFE2.
+	$LF
+]div
+[div class=p 
+	"Luck manipulation primarily revolves around a function called 
+	[code 
+		"PrintLetterDelay
+	]code
+	". This function is responsible for delaying text, notably making it so with 
+	[code 
+		"FAST
+	]code
+	" text, each character is delayed so text is printed at 1 frame per character. This 1 frame per character speed is also done if A or B is held, but this results in a different amount of cycles used. This can often be used to offset Random calls, by simply pressing A/B on the 1 or 2 frames before the Random call happens. It should be noted that you can hold down A/B while text is printing for a while to get a minor effect on RNG, but this should be cautioned, as often any "major effects" end up actually being the result of a Vblank leak, which ends up almost the same if you just had a frame of delay when manipulating (emphasis on almost, the differences can sometimes prove useful).
+	$LF
+]div
+[div class=p 
+	"In G/S only, whether or not you press a button before a lag frame (e.g. decompressing sprites, loading new maps, etc.) can have a substantial affect on RNG.
+	$LF
+]div
+[div class=p 
+	"Trainers choose their move before the player does (before the FIGHT/PKMN/PACK/RUN menu appears). Most trainers have AI, with the trainer class dictating the level of AI they have (with the exception of Gym Leaders and the Elite 4, who all have individual levels of AI). In general, more complicated AI results in more Random calls, which results in greater variance when abusing 
+	[code 
+		"PrintLetterDelay
+	]code
+	". As a minor note, unlike trainers, wild Pokemon choose their move after the player chooses theirs. More specific info on AI can be found 
+	[a href=https://pastebin.com/EjAW76cx rel=noopener external nofollow 
+		"here
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"When catching Pokémon, the frame you enter the PACK and when you select USE on the Pokeball will highly greatly affect RNG, with 
+	[code 
+		"PrintLetterDelay
+	]code
+	" minorly affecting the catch roll. Walking around in the grass with different paths has a mild influence; the desired type of Pokémon is not likely to change, but its DVs are likely to change. Pressing A at certain points can sometimes affect RNG, most notably when loading in a randomly moving sprite.
+	$LF
+]div
+[div class=p 
+	"When attacking, the game does most of the calculations (and random calls) happen after the "(pokemon) used (move)" textbox is printed, first to roll a critical hit, then it does a damage roll, then it does an accuracy roll (if needed), then it does an effect roll (if needed). There are a few things to watch out for:
+	$LF
+]div
+[div class=p 
+	"(Game Mechanics)
+	$LF
+]div
+[ul 
+	[li 
+		" When both Pokémon have the same speed, and both moves have the same priority, the one going first is decided when the attack is selected in the menu.
+		$LF
+	]li
+	[li 
+		" When using Quick Claw (1/4 chance to go first if slower, all other things being equal), the chance is determined when the attack is selected.
+		$LF
+		[ul 
+			[li 
+				" Priority overrides the Quick Claw effect; the Quick Claw is only used if both moves have equal priority.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Paralyze effect (unable to move) is determined just before the attack is attempted, and confusion effect (self-damage) is determined after "(Pokémon) is confused!"
+		$LF
+	]li
+]ul
+[div class=p 
+	"(Overworld)
+	$LF
+]div
+[ul 
+	[li 
+		" Some things like the direction that a randomly looking trainer looks, as well as people movement, can be manipulated.
+		$LF
+	]li
+	[li 
+		" Wild Pokémon encounters are determined when you step into a patch of grass.
+		$LF
+	]li
+]ul
+[div class=p 
+	"(Pokémon personal stats)
+	$LF
+]div
+[ul 
+	[li 
+		" Personal stats (DVs) for the starter Pokémon are determined when you obtain the Pokémon, specifically when the "(player) received Pokemon!" textbox is closed. Shininess is linked the DVs.
+		$LF
+	]li
+	[li 
+		" Personal stats for wild Pokémon are determined on encounter.
+		$LF
+	]li
+]ul
+[div class=p 
+	"(Pokerus)
+	$LF
+]div
+[ul 
+	[li 
+		" Essentially a "virus" for Pokemon, this ends up being helpful for the host, doubling the Stat Exp. (essentially the EVs of Gen 1-2) it obtains in battle. This however has a glaring restriction, your Pokemon cannot contract Pokerus until you visit Goldenrod City, leaving the player locked out of Pokerus for the early game.
+		$LF
+	]li
+]ul
+[h3 id=UsefulMemoryAddressesGs1 
+	" Useful memory addresses (GS)
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	$LF
+]h3
+[div class=p 
+	"D0F5-D0F6: DVs of current opponent. This is used to determine the
+	$LF
+	"DVs of wild Pokémon that you want to catch.
+	$LF
+]div
+[div class=p 
+	"D0FF-D10C: Stats of current opponent. Each value is two-byte big-endian
+	$LF
+	"in the following order: current HP, total HP, attack, defense, speed,
+	$LF
+	"special attack, special defense. The current HP is the most important.
+	[br 
+	]br
+	$LF
+	"(Note: Focus on D100, D102, ... instead of D0FF, D101, ...)
+	$LF
+]div
+[div class=p 
+	"D141-D142: Amount of damage (big-endian) that an attack is about to do.
+	$LF
+	"How this address works is rather convoluted. Calculations begin after the
+	$LF
+	"dialog “X used attack”.
+	$LF
+]div
+[ol 
+	[li 
+		" The base damage is calculated (if critical hit, it is considered) and placed in D142.
+		$LF
+	]li
+	[li 
+		" If attack is super-effective or not-very-effective or such, multiply D142 appropriately.
+		$LF
+	]li
+	[li 
+		" If a multiplying factor such as Rage is involved, multiply D142 appropriately.
+		$LF
+	]li
+	[li 
+		" If any other factors, multiply D142 appropriately.
+		$LF
+	]li
+	[li 
+		" Random reduction factor, multiply D142 by a random number between 217 and 255, and integer divide by 255.
+		$LF
+		[ol 
+			[li 
+				" The number before this step is the max damage possible and is only achieved rarely (if the random number is 255).
+				$LF
+			]li
+		]ol
+	]li
+	[li 
+		" If miss, set D142 to 0.
+		$LF
+	]li
+	[li 
+		" The value in D142 now is the damage inflicted.
+		$LF
+	]li
+	[li 
+		" If it would knock out Pokémon, set to current HP of that Pokémon (after HP bar begins to decrease).
+		$LF
+	]li
+]ol
+[div class=p 
+	"Note that not all these values appear, but the base damage, max damage, and
+	$LF
+	"damage inflicted will usually appear on a frame-by-frame basis.
+	[br 
+	]br
+	$LF
+	"(Note: Focus on D142 instead of D141)
+	$LF
+]div
+[div class=p 
+	"D151: General purpose temporary variable. Notably, if using Magnitude, the Magnitude number appears here right after “X used attack” appears.
+	$LF
+]div
+[div class=p 
+	"In-game time:
+	[br 
+	]br
+	$LF
+	"D1EC: Hours
+	[br 
+	]br
+	$LF
+	"D1ED: Minutes, one byte
+	[br 
+	]br
+	$LF
+	"D1EE: Seconds, one byte
+	[br 
+	]br
+	$LF
+	"D1EF: Frames, one byte
+	$LF
+]div
+[div class=p 
+	"D9BC/D9EC: One-byte values for the overworld step count (mod 256). Useful for going through dark tunnels without having to mash the arrow buttons.
+	$LF
+]div
+[div class=p 
+	"DA02-DA03: X-Y coordinates of character on overworld map. Going right increases X and going down increases Y.
+	$LF
+]div
+[div class=p 
+	"DA3F-DA40: DVs of first Pokémon in party. This is for your starting Pokémon.
+	$LF
+]div
+[div class=p 
+	"For other RAM and ROM addresses, check out the symbols files provided by the pret disassemblies:
+	$LF
+]div
+[ul 
+	[li 
+		"Gold: 
+		[a href=https://raw.githubusercontent.com/pret/pokegold/symbols/pokegold.sym rel=noopener external nofollow 
+			"https://raw.githubusercontent.com/pret/pokegold/symbols/pokegold.sym
+		]a
+		$LF
+	]li
+	[li 
+		"Silver: 
+		[a href=https://raw.githubusercontent.com/pret/pokegold/symbols/pokesilver.sym rel=noopener external nofollow 
+			"https://raw.githubusercontent.com/pret/pokegold/symbols/pokesilver.sym
+		]a
+		$LF
+	]li
+	[li 
+		"Crystal 1.0: 
+		[a href=https://github.com/pret/pokecrystal/blob/symbols/pokecrystal.sym rel=noopener external nofollow 
+			"https://github.com/pret/pokecrystal/blob/symbols/pokecrystal.sym
+		]a
+		$LF
+	]li
+	[li 
+		"Crystal 1.1: 
+		[a href=https://github.com/pret/pokecrystal/blob/symbols/pokecrystal11.sym rel=noopener external nofollow 
+			"https://github.com/pret/pokecrystal/blob/symbols/pokecrystal11.sym
+		]a
+		$LF
+	]li
+	[li 
+		"Crystal AU: 
+		[a href=https://github.com/pret/pokecrystal/blob/symbols/pokecrystal_au.sym rel=noopener external nofollow 
+			"https://github.com/pret/pokecrystal/blob/symbols/pokecrystal_au.sym
+		]a
+		$LF
+	]li
+]ul
+[div class=p 
+	"And of course, the actual disassemblies for the games:
+	$LF
+]div
+[ul 
+	[li 
+		"G/S: 
+		[a href=https://github.com/pret/pokegold rel=noopener external nofollow 
+			"https://github.com/pret/pokegold
+		]a
+		$LF
+	]li
+	[li 
+		"C: 
+		[a href=https://github.com/pret/pokecrystal rel=noopener external nofollow 
+			"https://github.com/pret/pokecrystal
+		]a
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" Credit goes to primorial#soup who found the memory addresses.
+]div

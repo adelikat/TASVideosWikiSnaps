@@ -1,0 +1,573 @@
+9
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"The Magic of Scheherazade is a hidden gem for the NES by Culture Brain which combines action/adventure elements (fighting overworld enemies with a rod/sword, boss fights) with RPG elements (HP/MP, a leveling system, random turn-based battles, party members joining).  The game is set in Arabia and features time travel heavily.
+	$LF
+]div
+[div class=p 
+	"I made a TAS for it roughly two years ago (
+	(__wikiLink|href=/3736M|implicitdisplaytext=3736M)
+	"), but since then there have been several advances in the theory for this game, so the TAS is due for an update.  Most notably, we have now figured out how turn-based battles are determined.  In the old TAS, when leaving any encounter screen, it was always a surprise whether or not an encounter would show up, and when one appeared, it typically led to a long session of blind trial-and-error trying to remove it.  The finished version ultimately had 7 encounters which I could not figure out how to remove without making even bigger concessions.  With the new knowledge, the updated TAS successfully avoids all turn-based encounters (and with fewer rerecords since there was not nearly as much trial and error).
+	$LF
+]div
+[div class=p 
+	"The majority of the time save from the old TAS to this one actually was not from removing random encounters but rather from death warps which are described in the "Glitches and Quirks" section and in the chapter summaries.  Also, in this version, the movement is generally more efficient, especially near the beginning of the game since I had not yet figured out all the snapping mechanics by then the first time.
+	$LF
+]div
+[div class=p 
+	"Special credit goes to ct187 for finding the block of variables that ultimately led to the discovery of how encounters work, and in particular for noticing the relevance of the variables R1 and R2 described in the turn-based encounters section.  (It is also certainly worth mentioning that ct187 wrote a fun randomizer for this game.)  Thanks also to synthpopisback for mentioning the possibility of the Ch. 5 game over warp and for finding several memory addresses, to aaron2u2 for his work in finding practical ways to avoid encounters, to Sathdresh for promoting the game and breaking ground on the 100% run, and to Darkwing Duck for figuring out many speedrunning strategies for this game long before I had ever heard of speedrunning.
+	$LF
+]div
+[div class=p 
+	"With all that said, enjoy!
+	$LF
+]div
+[hr 
+]hr
+[h3 id=Snapping 
+	" Snapping
+	$LF
+]h3
+[div class=p 
+	"This run makes extensive use of the game’s snapping mechanics to cut corners and shorten distances. These include:
+	$LF
+]div
+[ul 
+	[li 
+		" Jump snaps – When landing after a jump, the player will snap forward or backward to the nearest grid line.  An ideally placed jump will get the maximum forward snap possible (saving 5 frames for a left jump, 6 for a right jump, 3 for an up jump, and 8 for a down jump).  A poorly-timed jump can snap backward when landing and actually lose time compared to not jumping.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Screen transitions – After walking off a screen, the player will snap to the nearest grid spot when emerging onto the next screen. Also, once close enough to the edge of the screen to cause a screen transition, it is fastest to let off the D-pad and transition immediately rather than finish walking to the very edge of the screen.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Snaps to objects (trees, walls, etc.) – Done by newly pressing in the direction of the object once close enough to snap to it.  It is also possible to snap to an object at the end of a rod shot or sword swing.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Snaps out of/away from objects – Done by pressing in the direction of the object when overlapping with it.  For instance, after jumping and landing in the top of a tree, pushing down on the D-pad will snap up out of the treetop.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Snaps into staircases - Entering a staircase is triggered by newly coming into alignment with the staircase block either horizontally or vertically while overlapping with it enough in the other dimension.  This means, for instance, if approaching a staircase directly from above, it is faster to get halfway over the staircase block, then go a pixel left then right (or vice versa) to come into horizontal alignment, than it is to walk all the way to the bottom of the staircase block to line up vertically.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" NPC snaps - These are more technical than the other snaps, and often multiple useful snaps can be done consecutively on the same NPC.  The general pattern is to newly turn toward the NPC when positioned well for a snap, then press the desired direction to snap (so for instance, to snap up while walking up with an NPC on the left, first walk up to a good position, then push left then up).
+		$LF
+	]li
+]ul
+[div class=p 
+	"In general, I sought to optimize snaps completely.  This included making sure all individual snaps were properly placed as well as planning out the snaps that would be used on each screen.  When there were multiple reasonable ways of handling a screen, I often charted the screen each way and chose the method that used the fewest frames.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=Framerules 
+	" Framerules
+	$LF
+]h3
+[div class=p 
+	"After any transition where the screen gradually darkens (entering or leaving a town or palace, entering a shop/mosque/staircase/demon's room, emerging from a carpet ride/time door, etc.), the screen reappears according to a 16-frame framerule.  Entering one of these transitions on a slightly different frame has no effect on when the screen reappears unless the change is enough to move the transition to the previous or next framerule, in which case the screen will reappear exactly 16 frames earlier or later.
+	$LF
+]div
+[div class=p 
+	"The existence of these framerules played a significant part in the making of this TAS.  For one thing, it meant that a missed snap or an otherwise slightly suboptimal walk might not make the run take any extra frames overall.  In many cases, this let me use extra frames to avoid taking damage or kill a few more enemies without penalty.
+	$LF
+]div
+[div class=p 
+	"The ends of spell casts such as Bolttor, Flamol, Defenee, and Thunder also follow a 16-frame framerule.  This means, for instance, that when fighting the demons at the end of Ch. 1 and Ch. 5 which involve multiple Bolttor casts (where the player is frozen during the animation), it is more efficient not to cast the spell immediately each time, but rather to wait until the last frame which gets the same framerule, and in the meantime walk a few pixels in a useful direction.
+	$LF
+]div
+[div class=p 
+	"(Ordinary screen transitions are not on a framerule – they simply take 14 frames.  Leaving a screen one frame later means entering the next screen one frame later, etc.)
+	$LF
+]div
+[hr 
+]hr
+[h3 id=TurnBasedEncounters 
+	" Turn-Based Encounters
+	$LF
+]h3
+[div class=p 
+	"In addition to the usual overworld enemies, this game contains turn-based encounters (similar to Dragon Warrior and Final Fantasy) which occur at screen transitions.  More specifically, some screens are flagged as encounter screens, and walking off one of these screens has a chance to spawn a turn-based battle before entering the next screen.  For speed it is best to avoid the encounters showing up entirely.  Escaping is frame-based, so a TAS can always escape first try, but even so each encounter would waste about 240 frames.
+	$LF
+]div
+[div class=p 
+	"The major tech breakthrough between the previous TAS and this one was the discovery of how these encounters are determined.  For each of the possible pairs of values of the variables R1 and R2 (see the "addresses" section below), there is a repeating sequence of 8 true/false values, and each time the player leaves an encounter screen, the current value in the sequence is used to determine whether or not the encounter appears, and the position in the sequence advances.  The values R1 and R2 are either fixed or cycling, and what they are doing can be affected in some situations by taking damage from an enemy, by getting 10 consecutive kills without taking damage, and by a few other things.  Most of the damage in this TAS (aside from damage tiles, environmental damage, and demon fights) is directly related to manipulating the values of R1 and R2, stopping and starting their cycling appropriately, to avoid turn-based encounters.
+	$LF
+]div
+[div class=p 
+	"The old TAS used the spell Ramipas frequently in chapters 4 and 5 to avoid turn-based encounters.  Ramipas simply makes it so you get the encounter at every 8th encounter screen (counting from the start of the game) and avoid all others, in addition to reducing the amount of overworld enemies that appear.  It takes time to cast it (with the message "I won't meet any more enemies") as well as to get the message later that the spell wore off.  This TAS avoids all turn-based encounters without ever resorting to Ramipas.
+	$LF
+]div
+[div class=p 
+	"For anyone interested, a video tutorial of how random encounter manipulation works is here:
+	$LF
+]div
+[div class=p 
+	[a href=https://www.twitch.tv/rbarbaloot/video/365691278 rel=noopener external nofollow 
+		"https://www.twitch.tv/rbarbaloot/video/365691278
+	]a
+	$LF
+]div
+[div class=p 
+	"The video is long, but most of it focuses on what a human player should do in Ch. 1 to avoid the encounters there. The mechanics are all explained in the first 25 minutes.
+	$LF
+]div
+[div class=p 
+	"The google doc here shows the route this TAS takes to avoid encounters for all 54 of the encounter screens it passes through:
+	$LF
+]div
+[div class=p 
+	[a href=https://docs.google.com/spreadsheets/d/1u9Mf9LtJjZxgY99Ce6-JUZ6ApMOR0TLPUooYnsFhs5s/edit?usp=sharing rel=noopener external nofollow 
+		"https://docs.google.com/spreadsheets/d/1u9Mf9LtJjZxgY99Ce6-JUZ6ApMOR0TLPUooYnsFhs5s/edit?usp=sharing
+	]a
+	$LF
+]div
+[hr 
+]hr
+[h3 id=LuckManipulation 
+	" Luck Manipulation
+	$LF
+]h3
+[div class=p 
+	"Luck manipulation is used regularly throughout the run, including:
+	$LF
+]div
+[ul 
+	[li 
+		" Waiting frames before entering a screen in order to spawn/despawn the enemies there (sometimes in order to alter RNG for a later screen)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Waiting frames before entering a screen in order to alter enemy or NPC movement
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulating away turn-based fights (mainly by taking well-timed damage and kill counting)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulation of demon fights (see chapter overviews)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Drop manipulation – The items dropped by ordinary enemies follow a specific sequence, but whether or not the enemy drops an item and progresses in the sequence is frame-based.  Many times throughout the run, enemies are killed on specific frames which cause them to drop or not drop an item, often with the goal of setting up important drops (money bags, HP drinks) to occur at convenient spots.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=GlitchesAndQuirks 
+	" Glitches and Quirks
+	$LF
+]h3
+[div class=p 
+	"This run used the following minor glitches/quirks:
+	$LF
+]div
+[ul 
+	[li 
+		" The “Loan Trick” - There is supposed to be a limit of 400 rupias that you can borrow from the shopkeeper, but the player can get around this limit and borrow an extra 100 (but no more) by accumulating a debt of exactly 350 rupias, then asking for 150 more.  (This trick is also used in human speedruns of this game.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Death warps - This game has a lives system where the player starts with 2 lives, and the third death results in a game over.  Each screen has a specific place on it where the player respawns regardless of where on the screen the death happened.  Some screens (in mazes, palaces, and in some cases the overworld) have multiple parts which are not directly connected, and on certain screens, it is possible to walk onto it, take a death, and respawn in a more favorable section of the screen.  Also, after a game over, the player starts back at the beginning of the chapter with half as much money, but all experience and items are retained.  This fact is used to save a large chunk of time in Ch. 5 by taking a game over to return to the present without having to walk back to the time door in the past.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" When hitting certain levels, including Lv. 5, the game gives you a free key if you currently have zero keys in your inventory.  Two keys were needed in this run, and rather than buying any in Ch. 1, I got the free key from Lv. 5 and then bought a second key in Ch. 3, saving 40 rupias relative to paying for both keys.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" For some spells, in addition to ending on a framerule, there are two frames within each framerule which causes the spell to end a framerule early.  This fact is used to save time on Flamol casts in the Curly fight (Ch. 2), in the Defenee cast before the Troll fight (Ch. 3), and on Caraba casts in both wizard fights in the final palace in Ch. 5.  (The Ch. 5 Caraba casts also had to be on a specific frame when the wizard had already formed but had not summoned its allies, so timing the Caraba casts to save a framerule involved entering the wizard fight on a good frame.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" When entering a wizard fight, for some reason firing a projectile the first frame possible when entering the screen gives you control of the character 8 frames earlier after the wizard has finished forming.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" While making this TAS, I discovered a glitch which lets the player walk into palace walls when entering a screen with a locked door from the top.  This glitch is not all that useful (it would be if the game had any divided screens with locked doors), but it does allow for multiple rod snaps while inside the wall.  This glitch makes an appearance in Ch. 5 just after getting the Legend sword.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" On the pillar screen near the end of the game, the player is supposed to shoot the wall when the star shines blue.  By standing where the hero just overlaps the star horizontally by one or two pixels, the player can shoot the rod once and make the star quickly cycle through all its colors, leading to the wall being destroyed when the star turns blue.  This cuts out the need for three rod shots to change the star’s color one by one.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=ChapterOverviews 
+	" Chapter Overviews
+	$LF
+]h3
+[div class=p 
+	"The game is divided into five chapters, each of which finishes with a palace followed by a demon fight.  The player's level is capped at Lv. 5 for Ch. 1, Lv. 10 for Ch. 2, Lv. 15 for Ch. 3, etc. and no Exp. can be gained in the chapter after reaching the cap.  At the end of every chapter (except the last one), the player is automatically leveled up to the cap for the chapter.
+	$LF
+]div
+[div class=p 
+	"An overview of the considerations of each chapter is given below.
+	$LF
+]div
+[h4 id=Ch1Overview 
+	" Ch. 1 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Needed to reach Lv. 3 (80 Exp.) in order to learn Bolttor1 for the Gilga fight.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Needed enough HP to survive the Gilga fight, including taking 30 damage from Gilga's stone magic cast.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Bought enough items (5 mashroob, 2 carpets, and a set of horns) to last through Ch. 3, when the next visit to a shop would be.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulating away turn-based encounters in this chapter involved three instances of taking well-timed damage followed by racking up 10 kills.  All damage before the Gilga fight is deliberate and directly related to encounter manip.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" By luck, entering the Gilga fight the first frame possible led to a favorable eye formation which allowed 7 of the 8 eyes to be hit by rod shots (which saves time by reducing the number of Bolttor casts).  The old TAS had waited 16 frames for a good eye formation.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Saved 1104 frames in Ch. 1 relative to the old TAS.
+		$LF
+	]li
+]ul
+[h4 id=Ch2Overview 
+	" Ch. 2 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Needed to reach Lv. 7 (780 Exp.) to learn Flamol1 for the Curly fight.  Most of this experience came from the sandbeast grind at the start of the chapter.  In both the old TAS and this one, I had very good luck in getting the sandbeasts to spawn without having to burn too many frames.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Skipped most of the chapter by knowing the way through the maze desert without recruiting the allies who show you the way (a trick also used in human speedruns).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" All damage from overworld enemies was directly related to encounter manip.  Part of the manip also involved burning a little over 20 frames before leaving a certain screen in the palace (on frame 44574) in order to give R1 and R2 time to cycle up.  Leaving this screen even one frame earlier would have resulted in a turn-based battle.  
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" In the second phase of the Curly fight, she counters each Flamol1 cast by healing a random arm to full health, and which arm she heals is framerule-based.  The Flamol casts are timed so she heals the same arm every time, so 5 of her 6 arms die after the 5th cast.  Given the framerule I entered the fight, leaving only the middle-right arm was the fastest option.  In theory, leaving a lower arm would be better since it would take fewer frames to hit it with rod shots at the end, but it would have involved an additional 272 frames of waiting.  (Which arm takes damage on each framerule may be deterministic from the start of the game.  When I tried, I was able to recreate the exact RNG of the old TAS's fight if I waited about 1400 frames so the casts occurred on the same framerules as in the old TAS.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Saved 304 frames in Ch. 2 relative to the old TAS.
+		$LF
+	]li
+]ul
+[h4 id=Ch3Overview 
+	" Ch. 3 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Needed to reach Lv. 11 (2000 Exp.) for the increase in rod strength, ideally no later than the Changarl (wizard) fight so the dragons afterward would take only 3 rod hits to kill instead of 4.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Needed to be above 110 HP to survive the Troll fight, ideally without stopping to heal.  Getting the Cimaron rod refills HP, but after that point it was critical to avoid unnecessary damage.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Bought a key and 3 carpets, enough to last the rest of the run.  (This was one fewer carpet than in the old TAS since the Ch. 5 game over warp removed the need for one of them.  This made the shopping trip take 234 fewer frames and saved 20 rupias.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Avoided all turn-based encounters by a combination of well-timed damage, hitting 10 kills at certain spots, and in a couple places waiting some frames before leaving screens (without losing a framerule) in order to let the counter for R1 and R2 advance as much as possible.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Manipulated Troll to appear in favorable spots during his first stage by hitting him on specific frames.  The Troll fight in this run is completely optimal for Lv. 11, even though not every rod hit was on the first possible frame.  All of Troll’s Thunder counters ended exactly 272 frames apart, or 17 framerules, and in his 2nd form, all the rod hits are exactly 32 frames apart, the length of his invincibility frames.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Saved 1088 frames in Ch. 3 relative to the old TAS.
+		$LF
+	]li
+]ul
+[h4 id=Ch4Overview 
+	" Ch. 4 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" Did not need to gain any levels.  Reaching Lv. 17 (6000 Exp.) would have made the rod increase in strength and made it possible to 1-cycle Salamander, but it would have taken too long to gain this experience to be worth it.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Needed enough money to afford changing class to Fighter (60 rupias), then back to Magician (100 rupias).  Money bags and convenient coin drops were picked up in the first 3 chapters with this in mind, and I already had all the needed money by the end of Ch. 3.  After the Magician class change in Ch. 4, money was no longer needed.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" All encounters were avoided by taking damage at certain places.  Part of this chapter's encounter manip involved getting the damage counter up to 5 to get R1 and R2 cycling again just before the transition in the past where the music changes.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Took a deliberate death by falling off the bridge shortly after recruiting Gubibi.  After the death, the character respawned on a separate bridge on the same screen.  This death warp actually lost a small amount of time on its own relative to walking normally, but I needed an extra death somewhere before the game over warp in Ch. 5, and the screen here was the least wasteful place to take it since it also cut out a few screens of walking.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Successfully despawned all ifrits and djinns from the bridge area except for one ifrit (on the death warp screen) which did not waste any time since the character had already fallen off the bridge and died.  Normally, an ifrit or djinn appearing would waste time since the player is frozen for about 60 frames while it forms.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" In human speedruns, the Salamander fight is the single biggest source of variability (and frustration), but the TAS can make sure every rod shot hits.  The fact that this is possible eliminates the need for grinding for experience and makes this fight and this chapter much shorter than it is in human speedruns.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Saved 560 frames in Ch. 4 relative to the old TAS.
+		$LF
+	]li
+]ul
+[h4 id=Ch5Overview 
+	" Ch. 5 Overview
+	$LF
+]h4
+[ul 
+	[li 
+		" The time save in this chapter is larger than in all of the other chapters combined thanks to the death warps and the game over warp which cut out dozens of screens of walking.  The game over warp on its own saved about 40 seconds by skipping walking back through the Light Palace in the past as well as the time door animation returning to the present.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" The old TAS reached Lv. 21 (11300 Exp.), but this one stayed at Lv. 20.  The benefit to hitting Lv. 21 would be a stronger rod, which makes dragons take one fewer hit each and Goragora take 2 fewer hits.  For hitting Lv. 21 to be worthwhile for a TAS, it would need to come before the second trip through the dragon gauntlet in the Fire Palace, as otherwise sitting through the level up fanfare is a loss of time without enough resulting time save to show for it.  With all the skipped screens in this version due to the death warps, hitting Lv. 21 early enough to be worth doing proved to be unrealistic, so 6 dragon fights and the Goragora fight each take slightly longer in this TAS.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" All encounters in this chapter are again avoided by a combination of well-timed damage and kill counting.  (It was also a stroke of luck that R1 and R2 happened to work out to avoid the first encounter after the game over, since the game over resets those values and there was not much time to do anything about them.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Somehow, I was able to despawn all ifrits and djinns from the bridge section both times through it without Ramipas.  I doubt I could reliably do this again in a remake.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" The TAS could technically be made 8 frames shorter by removing the final input (frame 130006) dismissing the finished dialogue screen and instead waiting for it to eventually disappear on its own, but this would be slower getting to the rest of the ending.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Saved 4490(!) frames in Ch. 5 relative to the old TAS.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[h3 id=Addresses 
+	" Addresses
+	$LF
+]h3
+[h4 id=EncounterManip 
+	" Encounter Manip
+	$LF
+]h4
+[div class=p 
+	"This is the block of variables ct187 found that ultimately led to figuring out how to manipulate away turn-based fights.  R1 and R2 are the variables that, together with the number of encounter screens crossed so far (B), determine whether or not each potential turn-based fight appears.
+	$LF
+]div
+[div class=p 
+	"03F0 - B  (number of battle screen exits so far)
+	$LF
+]div
+[div class=p 
+	"03F1 - ?  (never figured this one out)
+	$LF
+]div
+[div class=p 
+	"03F2 - K  (kill count)
+	$LF
+]div
+[div class=p 
+	"03F3 - C  (time counter which determines when R1 and R2 cycle, when they are cycling)
+	$LF
+]div
+[div class=p 
+	"03F4 - R1 
+	$LF
+]div
+[div class=p 
+	"03F5 - R2
+	$LF
+]div
+[div class=p 
+	"03F6 - D  (damage count)
+	$LF
+]div
+[h4 id=EnemyHp 
+	" Enemy HP
+	$LF
+]h4
+[div class=p 
+	"The addresses below are for the 6 arms of Curly's 2nd form, and they are also often used for other HP counts, including for overworld enemies and wizards.  The first 3 are also the HP of the three parts of Gilga's 2nd form, and 0739 gives HP for all forms of Troll, Salamander, and Goragora except for Goragora's 2nd form, which is 0749.
+	$LF
+]div
+[div class=p 
+	"0739
+	$LF
+]div
+[div class=p 
+	"0741
+	$LF
+]div
+[div class=p 
+	"0749
+	$LF
+]div
+[div class=p 
+	"0751
+	$LF
+]div
+[div class=p 
+	"0759
+	$LF
+]div
+[div class=p 
+	"0761
+	$LF
+]div
+[div class=p 
+	"Also, 002B and 002C are often counters for when demons perform actions, such as when Gilga casts the stone magic, Salamander casts the fire magic or goes into the fire field, and Goragora casts spells.  0012 represents Curly and Salamander's x-position.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=PossibleImprovements 
+	" Possible Improvements
+	$LF
+]h3
+[div class=p 
+	"This TAS is close to optimal based on the tech known for almost all of the time it was made.  That being said...
+	$LF
+]div
+[div class=p 
+	"...when I was putting the final touches on this already-completed TAS last night, I discovered a bit of tech (an extension of an idea used a few times at screen transitions in this TAS) and found that it can be used for a major sequence break in Ch. 5 that would save at least 3 minutes.  The sequence break would require preparation, including saving up for and buying an additional item, so it would require redoing significant amounts of the TAS which I will not realistically get to any time soon.  This means the route this TAS uses is already obsolete, but I am submitting it anyway since it is still a 2+ minute improvement over the old one, a demonstration of completely removing all turn-based battles, and an example of what the ideal run would be based on the known tech of early 2020, over 30 years after the game's release.
+	$LF
+]div
+[div class=p 
+	"It is also worth mentioning that the "Culture Brain Presents" message at the very beginning can be dismissed by pressing Start, though A doesn't work.  This would get the game underway 117 frames earlier but would change RNG for the entire game and require the whole TAS to be completely redone.  And hey, Culture Brain deserves all 117 of those frames for making this great game!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"[Suggested screenshot frame: 13246, as long as the frame number is not displayed where FCEUX puts it...]
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Accepting as an improvement over the 
+	(__wikiLink|displaytext=published movie|href=/3736M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Pub.
+]div

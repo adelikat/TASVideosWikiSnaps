@@ -1,0 +1,508 @@
+8
+[div class=p 
+	"Unity is a multiplatform game engine, and it has supported Linux games since Unity 4. Since it is based on Mono, all that is required to run Linux games is an appropiate executable. There are several caveats to this procedure, but it is reasonably doable. I'll be explaining how to do it, my own attempts and it and how they panned out.
+	$LF
+]div
+[div class=p 
+	"Most of this is based on an old wiki post on GamingOnLinux. The article (and the wiki itself) are gone, and they needed an update anyway. I was able to get an archive of it from the owner of GamingOnLinux. There's also an older version on PCGamingWiki.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#BeforePorting 
+					"Before porting
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#PortingAWindowsOrMacGame 
+					"Porting a Windows or Mac game
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#ObtainingGameFiles 
+							"Obtaining game files
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#CheckingUnityVersionOfTheGame 
+							"Checking Unity version of the game
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#RelevantUnityFiles 
+							"Relevant Unity files
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#ObtainingTheFiles 
+							"Obtaining the files
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Debugging 
+					"Debugging
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#WorkingWithLibtas 
+					"Working with libTAS
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#CommonIssues 
+					"Common Issues
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#TestedGames 
+					"Tested games
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h2 id=BeforePorting 
+	"Before porting
+	$LF
+]h2
+[div class=p 
+	"Save yourself some headache first by checking some relevant stuff. For starters, your game only needs manual porting if the game has not been already released on Linux. Games like SUPERHOT already have Unity Linux ports. From here on end, I'll assume the game has no native Linux buiild.
+	$LF
+]div
+[div class=p 
+	"A major limitation of Unity building is that most Windows Unity games do not support OpenGL or Vulkan. You can check pcgamingwiki for information on that, but there is an easier way: You can run the game on windows with the arguments -force-glcore or -force-vulkan. If your game does not boot, the windows port cannot be used for a native port. Thanks to rythin for pointing this out to me.
+	$LF
+]div
+[div class=p 
+	"As a rule of thumb, Mac ports usually support OpenGL right out of the gate. Check if your game has a Mac port too in case the Windows build is not available.
+	$LF
+]div
+[div class=p 
+	"Another relevant element is Unity's introduction of IL2CPP in 2019. This guide will only work with Mono games (which should be any game prior to Unity 2019 and some games after). Porting IL2CPP builds should be possible, but I have not found good ways to do it.
+	$LF
+]div
+[div class=p 
+	"Finally, this guide will not cover porting from Console builds. I have tried my hand at porting Switch builds but no luck so far.
+	$LF
+]div
+[h2 id=PortingAWindowsOrMacGame 
+	"Porting a Windows or Mac game
+	$LF
+]h2
+[h3 id=ObtainingGameFiles 
+	"Obtaining game files
+	$LF
+]h3
+[div class=p 
+	"First, get your hands on the copy of the game you will be working with. 
+	$LF
+]div
+[div class=p 
+	"For Windows games, the obtained folder structure with GameName.exe and GameName_Data is the same as it would be for the Linux build.
+	$LF
+	"For Mac games, the file structure is different and you'll need to move some files around: 
+	$LF
+]div
+[pre 
+	"  mv GameName.app/Contents/Resources/Data GameName_Data
+	$LF
+	"  mv GameName.app/Contents/Resources/unity\ default\ resources GameName_Data/Resources/unity\ default\ resources
+	$LF
+	"  mv GameName.app/Contents/Resources/UnityPlayerIcon.png GameName_Data/Resources/UnityPlayer.png
+	$LF
+]pre
+[div class=p 
+	"The executable is stored in GameName.app/Contents/MacOS/GameName, but it won't be used. The rest of the files are not needed, as they will be replaced with contents from the Linux Unity player later on.
+	$LF
+	"GameName is the Unity project game name. You'll have to rename this file later.
+	$LF
+]div
+[h3 id=CheckingUnityVersionOfTheGame 
+	"Checking Unity version of the game
+	$LF
+]h3
+[div class=p 
+	"Second, you need to know which version of Unity is being used. Again, PCGamingWiki is an useful resource here as they list the Unity version quite often for Unity games. However, it never hurts to check and thankfully this is reasonably easy. There are two ways to get this done:
+	$LF
+]div
+[ul 
+	[li 
+		" Navigate to the GameName_Data folder of the game to be checked and run this command. If will spit out the expected version:
+		$LF
+	]li
+]ul
+[pre 
+	"   strings level0 | head -1
+	$LF
+]pre
+[div class=p 
+	"If nothing is returned, it's a very old Unity engine version, which has the version information towards the end of the file, but for which no Linux support exists anyway.
+	$LF
+]div
+[ul 
+	[li 
+		" If any Linux Unity Player executable is available, it is possible to put this executable in the same level as GameName.exe and GameName_Data and launch the game from terminal or with -logfile /location/to/file.txt command line parameter to force the game write a log to /location/to/file.txt and inspect the output. A similar to this should be looked for in log:
+		$LF
+	]li
+]ul
+[pre 
+	"   Expected version: 5.6.3p3. Actual version: 5.6.4p1.
+	$LF
+]pre
+[div class=p 
+	"Expected version is the version of the executable, in that case Unity Patch Release 5.6.3p3.
+	$LF
+	"Actual version is the version of the executable needed, in that case Unity Patch Release 5.6.4p1.
+	$LF
+]div
+[h3 id=RelevantUnityFiles 
+	"Relevant Unity files
+	$LF
+]h3
+[div class=p 
+	"Knowing the exact game version, Unity Linux Playback Engine files needs to be obtained. These can either be taken from another Linux Unity game of the same version, or can be extracted from official Unity Linux Build Support ~100 MB exectuable (Unity 5+) or ~1.5 GB Unity Editor (Unity 4).
+	$LF
+	"The files that are essential to work are:
+	$LF
+]div
+[ul 
+	[li 
+		" For 32-bit version:
+		$LF
+		[ul 
+			[li 
+				" GameName.x86 (.x86 part is sometimes omitted in newer Unity versions, leaving only GameName in some games)
+				$LF
+			]li
+			[li 
+				" GameName_Data/Mono/x86/libmono.so
+				$LF
+			]li
+			[li 
+				" GameName_Data/Mono/x86/libMonoPosixHelper.so (since Unity 5.5)
+				$LF
+			]li
+			[li 
+				" GameName_Data/Plugins/x86/ScreenSelector.so (since Unity 4.3)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		" For 64-bit version:
+		$LF
+		[ul 
+			[li 
+				" GameName.x86_64 (.x86_64 part is sometimes omitted in newer Unity versions, leaving only GameName in some games)
+				$LF
+			]li
+			[li 
+				" GameName_Data/Mono/x86_64/libmono.so
+				$LF
+			]li
+			[li 
+				" GameName_Data/Mono/x86_64/libMonoPosixHelper.so (since Unity 5.5)
+				$LF
+			]li
+			[li 
+				" GameName_Data/Plugins/x86_64/ScreenSelector.so (since Unity 4.3)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Sometimes additional .so plugin files need to be put in either the GameName_Data/Plugins/x86 directory for 32-bit version or GameName_Data/Plugins/x86_64 for 64-versions. It's not needed in most cases, but if the game needs them, the names can be deducted from .dll files stored in GameName_Data/Plugins directory for Windows, or from .bundle directories in GameName.app/Contents/Plugins for Mac.
+	$LF
+	"Some common plugins include:
+	$LF
+]div
+[ul 
+	[li 
+		" AkSoundEngine.dll – ???.so. There's a lot of versions of precompiled plugins available, but it's difficult to find out which one might be needed. Part of Audiokinetic.
+		$LF
+	]li
+	[li 
+		" CSteamworks.dll – libCSteamworks.so. Available from GitHub - rlabrecque/Steamworks.NET: Steamworks wrapper for Unity / C#.
+		$LF
+	]li
+	[li 
+		" fmod.dll – ???.so. There's no source, only precompiled plugins for 32 and 64-bit. Difficult to find the one needed. Available from FMOD Download - FMOD for registered users.
+		$LF
+	]li
+	[li 
+		" FMODUnity.dll – ???.so. Source is available from FMODUnity .NET Plugin at SquareTangle (archived by Wayback Machine).
+		$LF
+	]li
+	[li 
+		" steam_api.dll – libsteam_api.so. Access to the Steam API by itself. It is only needed to find this precompiled file.
+		$LF
+	]li
+	[li 
+		" SteamworksManaged.dll ???.so(32-bit only). Available from GitHub - reallyjoel/Ludosity-s-Steamworks-Wrapper: Fully managed .NET wrapper for Steamworks API.
+		$LF
+	]li
+	[li 
+		" SteamworksNative.dll ???.so (32-bit only). Available from GitHub - reallyjoel/Ludosity-s-Steamworks-Wrapper: Fully managed .NET wrapper for Steamworks API.
+		$LF
+	]li
+	[li 
+		" UWKPlugin.dll – ???.so. Source is available, but no precompiled Linux plugins. Used to be available from uWebKit/uWebKit · GitHub (archived by Wayback Machine).
+		$LF
+	]li
+	[li 
+		" XInputInterface.dll – ???.so. Apparently comes from speps/XInputDotNet: C# wrapper around XInput, works with any Mono or .NET application (eg. Unity3D).
+		$LF
+	]li
+	[li 
+		" Rewired.dll – Rewired_Linux.dll. I was able to grab it from 
+		[a href=https://github.com/DemoJameson/Cuphead.macOStoLinux/ rel=noopener external nofollow 
+			"https://github.com/DemoJameson/Cuphead.macOStoLinux/
+		]a
+		$LF
+	]li
+]ul
+[h3 id=ObtainingTheFiles 
+	"Obtaining the files
+	$LF
+]h3
+[div class=p 
+	"There are two ways of obtaining the required files. The most widely available is to obtain them directly from Unity official downloads. This changes depending on the type of release, of which there are four of:
+	$LF
+]div
+[ul 
+	[li 
+		" Full Releases (X.Y.Zf1). Some full releases start with with number higher than 1, that means that the previous versions were release candidates, obtainable from beta archive.
+		$LF
+	]li
+	[li 
+		" Patch Releases (X.Y.Zp1—∞)
+		$LF
+	]li
+	[li 
+		" Beta Releases** (X.Y.Zb1—∞ for Beta versions and X.Y.Zf1—∞ for Release Candidate versions). Only the current beta releases are available for download, so if an old beta executables is needed, then unless it is 5.4.0b10, 5.4.0b13, 5.4.0b15, 5.4.0b16, 5.4.0b18, 5.4.0b21, 5.4.0b23, 5.5.0b1, 5.5.0b2, 5.5.0b5, 2017.2.0b11, 2017.3.0b1, 2018.1.0b8, 2018.1.0b13, 2018.2.0b2, 2018.2.0b5 or 2018.2.0b7 available from Linux Releases, archived release somewhere else or another game using it needs to found (see Finding files from other games section).
+		$LF
+	]li
+	[li 
+		" Linux Releases (X.Y.Zx***f/p/b1—∞). The xb/xf/xp notation was only used for the Linux Editor builds of Unity 5.5.0p1—2017.1.1f1 (inclusive) and 2017.2.0b6 – i.e. the builds published between 2016-12-13 and 2017-09-05.
+		$LF
+	]li
+]ul
+[div class=p 
+	"For Unity 4, you'll need to download the full executable. For Unity 5.3 and above, you can find the downloadable for Linux Build support in the official release page for it, which usually looks like 
+	[a href=https://unity.com/releases/editor/whats-new/5.3.0-1. rel=noopener external nofollow 
+		"https://unity.com/releases/editor/whats-new/5.3.0-1.
+	]a
+	" The fully archive of downloadable versions is on the Unity Download Archive: 
+	[a href=https://unity.com/releases/editor/archive rel=noopener external nofollow 
+		"https://unity.com/releases/editor/archive
+	]a
+	$LF
+]div
+[div class=p 
+	"After obtaining the installers, you need to extract the files from them. The archives are an NSIS installers and can be extracted with 7zip. Navigate to the location of the downloaded file for example using cd in terminal and extract the files with e.g. 7z x UnitySetup-version.exe, where version is either the respective version of Linux Support for Editor for Unity 5+ or the full installer for Unity 4 downloaded. For Unity 5+, the files needed will be located in $INSTDIR$_XX_/Variations/ folder, where XX is a random number, and for Unity 4 in Data/PlaybackEngines/linuxstandalonesupport/Variations/ folder. The variations needed are most likely the linux64_withgfx_nondevelopment_mono and/or linux32_withgfx_nondevelopment_mono, but feel free to experiment.
+	$LF
+]div
+[div class=p 
+	"For Unity 2019 and onward, they changed the way the NSIS installers are packaged and therefore you might not get any actual files form them. If you run into this issue, you can instead download the Mac version of the Linux build target support package, for example: 
+	[a href=https://download.unity3d.com/download_unity/b7c424a951c0/MacEditorTargetInstaller/UnitySetup-Linux-Support-for-Editor-2018.4.1f1.pkg. rel=noopener external nofollow 
+		"https://download.unity3d.com/download_unity/b7c424a951c0/MacEditorTargetInstaller/UnitySetup-Linux-Support-for-Editor-2018.4.1f1.pkg.
+	]a
+	" You can open this with 7zip as well, but you'll have to decompress the Payload specifically, which you can do with this command: cat Payload | gunzip -dc | cpio -i.
+	$LF
+]div
+[div class=p 
+	"Only the files mentioned in Obtaining Unity files section are needed, so feel free to remove the rest – replacing the files that ship with Windows game may result in game not starting otherwise!
+	$LF
+	"Renaming LinuxPlayer to GameName and Data directory to GameName_Data is also needed, where GameName is the game name (see Obtaining game files section.)
+	$LF
+]div
+[div class=p 
+	"You can also get the files from an already existing Linux Unity game using the same Unity version. The process should be identical otherwise.
+	$LF
+]div
+[div class=p 
+	"Once you've obtained the files, make a copy of your game directory, replace the files as stated above, and you should have a native build of your game! Make sure to run it on its own before jumping into libTAS, to make sure any potential issues are not caused by libTAS itself.
+	$LF
+]div
+[h2 id=Debugging 
+	"Debugging
+	$LF
+]h2
+[div class=p 
+	"if your build doesn't work, don't despair. Unity games usually print any debug information for errors to an specific folder found on ~/.config/unity3d. The folder then goes to developer name and game name. That's also where the game will store save data. Reading this information will help find issues be it on your port or while running the game with libTAS.
+	$LF
+]div
+[h2 id=WorkingWithLibtas 
+	"Working with libTAS
+	$LF
+]h2
+[div class=p 
+	"Once you've confirmed the game runs, you can connect it with libTAS. Open the location of your executable in libTAS to get started. To ensure sync, add -force-gfx-direct to the Command Line Arguments, as otherwise some games will refuse to run or desync heavily.
+	$LF
+	"Since Unity is based on Mono, you might need to check Runtime - Time Tracking - clock_gettime() (for libTAS 1.4.3 or prior) or clock_gettime() monotonic (libTAS 1.4.4+). DO THIS ONLY TO AVOID SOFTLOCKS, as enabling this otherwise is likely to introduce more desync possibilities.
+	$LF
+]div
+[div class=p 
+	"Ask me how I know.
+	$LF
+]div
+[h2 id=CommonIssues 
+	"Common Issues
+	$LF
+]h2
+[div class=p 
+	"Desyncs are by far the most common enemy of Unity TASers. Even with all the precautions, Unity games love async loading, and you will have to come to understand how your game handles loading to avoid issues. It's worth mentioning that Unity games are remarkably easy to decompile, to the point where that info is widely available and I won't provide it here. Taking a look at code to figure out potential trouble points never hurts.
+	$LF
+]div
+[h2 id=TestedGames 
+	"Tested games
+	$LF
+]h2
+[div class=p 
+	"Here's an 
+	[b 
+		"absolutely not comprehensive
+	]b
+	" list of Unity games that have been user ported, and the degree of success to which they worked.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Game
+			]th
+			[th 
+				"Unity Version
+			]th
+			[th 
+				"Ported by
+			]th
+			[th 
+				"Status
+			]th
+		]tr
+		[tr 
+			[td 
+				"Untitled Goose Game
+			]td
+			[td 
+				"2018.4.1f1
+			]td
+			[td 
+				"WDN2010
+			]td
+			[td 
+				"Worked with libTAS 1.4.2, 
+				(__wikiLink|displaytext=and was submitted|href=/7325S)
+				", but the judge could not get it to sync. Has been tested in newer libTAS versions and it appears to work better.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cuphead
+			]td
+			[td 
+				"5.6.2p1/2017.4.9f1
+			]td
+			[td 
+				"DemoJameson/SBDWolf
+			]td
+			[td 
+				"Works, but has serious desync issues
+			]td
+		]tr
+		[tr 
+			[td 
+				"Sayonara Wild Hearts
+			]td
+			[td 
+				"2019.4.1f1
+			]td
+			[td 
+				"ikuyo
+			]td
+			[td 
+				"Works in libTAS 1.4.4 with minor desync issues.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yo! Noid 2
+			]td
+			[td 
+				"2017.4.9f1
+			]td
+			[td 
+				"rythin
+			]td
+			[td 
+				(__wikiLink|displaytext=Worked well enough to get published!|href=/4984M)
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dandara
+			]td
+			[td 
+				"2018.4.12f1
+			]td
+			[td 
+				"kilaye
+			]td
+			[td 
+				"Works, but has issues with RNG
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bug Fables
+			]td
+			[td 
+				"2018.4.12f1
+			]td
+			[td 
+				"Cyan
+			]td
+			[td 
+				"Direct3D only, unlikely to work
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cave Story's Secret Santa
+			]td
+			[td 
+				"2021.2.1f1
+			]td
+			[td 
+				"ikuyo
+			]td
+			[td 
+				"Direct3D only
+			]td
+		]tr
+	]tbody
+]table

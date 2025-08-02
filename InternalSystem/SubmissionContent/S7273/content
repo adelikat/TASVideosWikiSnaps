@@ -1,0 +1,616 @@
+11
+[div class=p 
+	"TLDR; By pressing buttons really fast, we can begin executing code from address $0001, which lets us write code through button presses and win the game.
+	$LF
+]div
+[div class=p 
+	"You can use the comma and period keys to frame advance inside the youtube video, if you want to see it frame by frame.
+	[br 
+	]br
+	$LF
+]div
+[h3 id=Goals 
+	"Goals
+	$LF
+]h3
+[ul 
+	[li 
+		"Complete the game as fast as possible.
+		$LF
+	]li
+	[li 
+		"Load the credits without any visual bugs.
+		$LF
+	]li
+]ul
+[h3 id=AdditionalComments 
+	"Additional Comments
+	$LF
+]h3
+[div class=p 
+	"This run is 6 frames faster than the previous run of 19 frames, and has been 
+	[a href=https://www.youtube.com/watch?v=JyHB1BGgD8I rel=noopener external nofollow 
+		"console verified
+	]a
+	" by Bigbass.
+	$LF
+]div
+[div class=p 
+	"The time save was achieved by utilizing a different version of the game, and how this version change shifts the function that sets up the princess cutscene / credits to an easier to write place in memory.
+	$LF
+]div
+[div class=p 
+	"I created this run with the SubNesHawk core of Bizhawk 2.6.3, using the Trace Logger to know exactly where the program counter was at the end of each frame.
+	$LF
+]div
+[h3 id=DpcmBug 
+	"The DPCM Bug
+	$LF
+]h3
+[div class=p 
+	"The NES (or in this instance, the Famicom) had a hardware issue called the DPCM Bug. You can read more about the bug 
+	[a href=https://wiki.nesdev.org/w/index.php/Controller_reading#DPCM_conflict rel=noopener external nofollow 
+		"here
+	]a
+	", but in summary, a hardware error existed that could "Double clock" a controller read, which would result in inaccurate data being read. 
+	$LF
+]div
+[div class=p 
+	"To work around this bug, the game reads button inputs in a loop until two consecutive inputs are the same. Normally inputs are read twice in a frame per controller, but should the DPCM Bug happen, the inputs would be read no more than 4 times.
+	$LF
+]div
+[div class=p 
+	"To exploit the workaround, we could press different buttons every time the inputs are polled. This would cause the input loop to happen as many times as we want, as the controllers will keep being read until we provide two consecutive matching inputs! But “what good does that do us?” you might ask. Let's take a look at how my run exploits this, and the technical details behind it that allow for such a run to exist.
+	$LF
+]div
+[h3 id=WhyTheVersionChange 
+	"Why the version change?
+	$LF
+]h3
+[div class=p 
+	"This run was done on the Japanese Version, Revision 1. Due to certain functions being in ever slightly different places in memory, it's possible to write a jump to somewhere that could win the game, that would otherwise crash the game on the international version. More details later in the writeup, but that change in combination with some newly discovered regions of memory that I can manipulate are the biggest factors in making this TAS possible.
+	$LF
+]div
+[div class=p 
+	"In a really neat turn of events, by playing the game on this version we have gone full circle, as this is the version used in 
+	(__wikiLink|displaytext=Morimoto's TAS|href=/668M)
+	" that lead to the creation of this website.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=HowTheRunWorks 
+	"How the run works
+	$LF
+]h3
+[div class=p 
+	"Let's take a step back, and take a brief look at how the console even plays games. This is a dramatic oversimplification, but I'm writing it out this way to help everyone follow along. Gameplay can be broken down into segments called frames. The NES Runs slightly faster than 60 frames per second. Imagine an old CRT television drawing the game with a scanning beam scrolling across every pixel required to draw the game. Once the scanning beam hits the bottom on the screen, it needs to return to the top before it can draw the next frame. This is called a vertical blanking period, or V-Blank for short.
+	$LF
+]div
+[div class=p 
+	"For the sake of this run, let's assume every frame begins at the beginning of V-Blank. Most graphical changes can only happen during a blanking period, so the game wants to make all of them before the scanning beam begins drawing the top of the frame. To make sure that this code begins at the very beginning of V-Blank (To ensure there's as much time as possible to make these changes) something called an Interrupt happens. The game will temporarily stop working on whatever code it was just reading, and run through the code required for graphical changes before returning where it was. This particular interrupt, which happens at the start of V-Blank, is called the Non-Maskable-Interrupt, or NMI for short.
+	$LF
+]div
+[div class=p 
+	"The existence of a Non-Maskable-Interrupt implies there must be maskable interrupts, right? And indeed there are! The other Interrupt we need to consider is called the Programmable Interrupt. Have you ever noticed how Super Mario Bros. 3 has a HUD at the bottom of the screen that remains stationary while the rest of the screen scrolls? The NES doesn't have multiple background layers, so this effect is done by counting scanlines, and running an "Interrupt Request" or IRQ. Inside the IRQ's code, the game will change where the screen is drawing from, which keeps the HUD in place. Again, as with the NMI, this interrupt will temporarily stop whatever code was being read, and jump to this code for a quick change, and then return to what it was previously doing.
+	$LF
+]div
+[div class=p 
+	"The IRQ's code uses a specific byte to keep track of what branches to take depending on what "mode" the gameplay is in. It's different for the title, the map, vertical levels, and so on. While on the title screen, the IRQ mode is 0x20, and this will jump to a very specific address in PRG bank 0x18. This interrupt is what allows the checkerboard floor to remain in one place while the curtains rise. Again, without extra background layers, interrupts are the one of the best ways to give the illusion of multiple layers. This IRQ happens at the bottom of the screen, but what the developers never planned for was the potential for the IRQ to interrupt the controller reading loop, which is contained inside the NMI's code. 
+	$LF
+]div
+[div class=p 
+	"The NMI swaps out PRG banks during the graphics changes, but will restore the proper banks at the end of the NMI. While making these graphical changes, the NMI uses PRG Bank 0x1A, but at the point the controllers are being read, the banks haven't been restored yet. By alternating button presses every time the controllers are read, we can stall inside this loop all the way until the IRQ fires near the end of the frame! Since the IRQ is expecting bank 0x18 to be loaded in, it makes the jump, but due to incorrect code being loaded, the game eventually executes an "RTS" instruction. This is how the game returns to code it jumped away from through a JSR instruction, except in this case, we didn't arrive here from a JSR instruction, it was through an interrupt! There's a specific instruction for returning from interrupts, "RTI", and by running into the wrong one in this instance, we end up "returning" to a completely different place in memory. This sends us to address $0001.
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/4IbTpV4.png 
+	]img
+	$LF
+	"This part of RAM is filled with BRK instructions, which jumps to the programmable interrupt code. Every time this happens, since the IRQ Mode is still 0x20, the same problems occur. We enter the code as an interrupt, but exit the code with RTS, sending us back to $0001. This might sound like it’s an infinite loop, but luckily for us, the IRQ Mode is at address $101, which happens to be inside the stack! With each BRK leading to an RTS, the stack pointer is moving downwards 6 bytes. This will eventually reach the IRQ Mode, overwriting it with 0xB4. Now when the programmable interrupt is executed, it properly reaches an RTI instruction, so the stack pointer stops shifting around with every BRK, and we can continue to execute bytes after address $0001.
+	$LF
+]div
+[div class=p 
+	"The NMI continues to happen every frame, and the buttons we press during the NMI are stored at addresses $17, $18, $F5, $F6, $F7, and $F8. Through careful planning, these bytes are all we need to win the game.
+	$LF
+]div
+[h3 id=Limitations 
+	"The limitations
+	$LF
+]h3
+[div class=p 
+	"Every frame we can choose what buttons to hold down on both controllers, and these fill in the bytes listed above in a specific manner. Let's look at addresses $17 and $18 first.
+	$LF
+]div
+[div class=p 
+	"$17 is the total held buttons on controller 1
+	[br 
+	]br
+	$LF
+	"$18 is the newly pressed buttons on controller 1 for this frame.
+	$LF
+]div
+[div class=p 
+	"For instance, suppose I wish to use these addresses to write A9 20. Let’s understand how button presses are used to write these hexadecimal numbers. Each button corresponds to a single binary bit of this number: (Button names have been shortened to a single character. Start is represented by a capital S; Select with a lowercase s)
+	$LF
+]div
+[pre 
+	[br 
+	]br
+	"A: 0x80
+	[br 
+	]br
+	"B: 0x40
+	[br 
+	]br
+	"s: 0x20
+	[br 
+	]br
+	"S: 0x10
+	[br 
+	]br
+	"U: 0x08
+	[br 
+	]br
+	"D: 0x04
+	[br 
+	]br
+	"L: 0x02
+	[br 
+	]br
+	"R: 0x01
+	$LF
+]pre
+[div class=p 
+	"So if I wish to hold down 0xA9, I need 0x80 + 0x20 + 0x08 + 0x01. (A + Select + Up + Right)
+	$LF
+]div
+[div class=p 
+	"To write A9 20, I need to take two frames. For the first frame, I’ll push all the buttons except the ones required for address $18. That will allow me to press the new buttons on the next frame, and write out the full desired operation. So for the first frame, I would only press 0x80 + 0x08 + 0x01. That makes the following:
+	$LF
+]div
+[div class=p 
+	"$17: 89 (Total held)
+	[br 
+	]br
+	$LF
+	"$18: 89 (New buttons)
+	$LF
+]div
+[div class=p 
+	"And by continuing to hold down all of those previous buttons, and pressing 0x20 on the next frame, I can write:
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/el20Jih.png 
+	]img
+	$LF
+	"$17: A9 (Total Held)
+	[br 
+	]br
+	$LF
+	"$18: 20 (New buttons)
+	$LF
+]div
+[div class=p 
+	"You might see the problem already. Suppose I want to write A9 10. It’s not possible to hold down 0xA9 when the newly pressed buttons write 0x10, as that would make the total buttons 0x80 + 0x20 + 0x10 + 0x08 + 0x01 which adds up to 0xB9. 
+	[b 
+		"The bits that compose address $18 are required to fit within the bits composing address $17.
+	]b
+	$LF
+]div
+[div class=p 
+	"Now let’s say I want to write BD BD 00. Since the third byte is 00 I don’t need to change that byte, so this could be written with just the two addresses, right? Well, let’s see. To write this, I need to press A, Select, Start, Up, Down, and Right. 
+	[b 
+		"Super Mario Bros. 3 masks away Up + Down, as well as Left + Right
+	]b
+	", so the result would actually be 0xB1, as the Up and Down presses get removed. This limits what bytes we can create, as 
+	[b 
+		"any bytes ending in 3, 7, B, C, D, E, or F are impossible to write with button presses.
+	]b
+	$LF
+]div
+[div class=p 
+	"Moving on to addresses $F5 through $F8
+	$LF
+]div
+[div class=p 
+	"$F5: New buttons pressed for controller 1
+	[br 
+	]br
+	$LF
+	"$F6: New buttons pressed for controller 2
+	[br 
+	]br
+	$LF
+	"$F7: Total held buttons for controller 1
+	[br 
+	]br
+	$LF
+	"$F8: Total held buttons for controller 2
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/jIxnncN.png 
+	]img
+	$LF
+	"Just like the previous addresses, the bits that compose $F5 need to be contained within the bits composing $F7. The same applies for $F6 and $F8. This allows us to write much more than what can be written with addresses $17 and $18, though it too has its restrictions. Suppose I want to write 0A 20 5A B8. Like before, this takes two frames.
+	$LF
+]div
+[div class=p 
+	"Frame 1:
+	[br 
+	]br
+	$LF
+	"$F5: 50 (New 1)
+	[br 
+	]br
+	$LF
+	"$F6: 98 (New 2)
+	[br 
+	]br
+	$LF
+	"$F7: 50 (Total 1)
+	[br 
+	]br
+	$LF
+	"$F8: 98 (Total 2)
+	$LF
+]div
+[div class=p 
+	"Frame 2:
+	[br 
+	]br
+	$LF
+	"$F5: 0A (New 1)
+	[br 
+	]br
+	$LF
+	"$F6: 20 (New 2)
+	[br 
+	]br
+	$LF
+	"$F7: 5A (Total 1)
+	[br 
+	]br
+	$LF
+	"$F8: B8 (Total 2)
+	$LF
+]div
+[div class=p 
+	"However, suppose I want to write A2 20 86 F9. This cannot be done, as A2 contains bits that 86 does not, when both need to be written with controller 1.
+	$LF
+]div
+[h3 id=WinCondition 
+	"The win condition
+	$LF
+]h3
+[div class=p 
+	"The goal is to reach the princess cutscene and then the credits. Jumping to the princess cutscene is surprisingly easy, though the credits are where the issues come in. Like the IRQ, the NMI has a byte that determines which branches the code should take. If the NMI Mode isn’t set to 0x20, the credits fail to load properly, resulting in a black screen. 
+	$LF
+]div
+[div class=p 
+	"In order to win the game with the proper credits sequence, we need to meet 6 requirements.
+	$LF
+]div
+[ol 
+	[li 
+		"The $C000 bank needs to be 0x19
+		$LF
+	]li
+	[li 
+		"The $A000 bank needs to be 0x18
+		$LF
+	]li
+	[li 
+		"The PPU Control Register Copy (Address $FF) must be 0xA8
+		$LF
+	]li
+	[li 
+		"The Stack Pointer must be greater than 0x30
+		$LF
+	]li
+	[li 
+		"The NMI Mode (Address $100) must be 0x20
+		$LF
+	]li
+	[li 
+		"Jump to $B85A
+		$LF
+	]li
+]ol
+[div class=p 
+	"It’s worth mentioning that by the first frame we gain control, the first 3 requirements are met and will remain that way so long as we don’t change the PRG banks or affect the PPU Control Register. Let’s focus on the other 3 requirements. After the first frame with inputs, the stack pointer is at 0x08, and the NMI mode is 0xB4.
+	$LF
+]div
+[div class=p 
+	"To take care of the remaining requirements, we have two options:
+	$LF
+]div
+[ol 
+	[li 
+		"Correct the stack pointer and jump to $8FF4. (Recall that this is done on the Japanese Version, more on that in a bit)
+		$LF
+	]li
+	[li 
+		"Correct the stack pointer and set up requirements 5 and 6 manually.
+		$LF
+	]li
+]ol
+[div class=p 
+	"In my previous run, I opted to set up the requirements manually, as it saved ample time compared to the run before it. I simply offset the stack pointer and pushed 0x20 onto the stack where it would overwrite the NMI mode, and set up requirement 5. In this run, I took a different approach.
+	$LF
+]div
+[div class=p 
+	"Address $8FF4 is where the game prepares the princess cutscene on the Japanese Version. This function is as follows:
+	$LF
+]div
+[pre 
+	"LDA #$19
+	$LF
+	"STA PAGE_C000
+	$LF
+	"LDA #$18
+	$LF
+	"STA Page_A000
+	$LF
+	"JSR PRGROM_Change_Both2
+	$LF
+	"LDA #$A8
+	$LF
+	"STA <PPU_Control_Register_Copy
+	$LF
+	"LDA #$20
+	$LF
+	"STA NMI_Mode
+	$LF
+	"JMP $B85A
+	$LF
+]pre
+[div class=p 
+	"In case you can't read assembly code let me explain what's happening here. The first five lines are loading the correct PRG banks. This is done through a function called PRGROM_Change_Both2, that the game jumps to in order to swap the banks accordingly. The function uses the bytes named PAGE_C000 and Page_A000 as a reference for what banks to load in; On their own these bytes don't do anything, but this function uses them when changing banks.
+	$LF
+]div
+[div class=p 
+	"Following those lines, we have 
+	[code 
+		"LDA #$A8
+	]code
+	", and 
+	[code 
+		"STA <PPU_Control_Register_Copy
+	]code
+	". This is used to set the PPU Control Register Copy to a value of A8.
+	$LF
+]div
+[div class=p 
+	"Since all of those things are already set properly (due to the title screen using the PRG banks as the credits), this next part is the most important for this run: 
+	[code 
+		"LDA #$20, STA NMI_Mode
+	]code
+	" is what sets the NMI mode to hold the number we need to prevent the credits from crashing. This snippit of code takes place 17 bytes after the start of the function, which is the primary reason for switching to the Japanese Version. Since those bytes are now located at address $9005, a jump to $9000 would run that code, and writing such a jump would be incredibly easy! Right?
+	$LF
+]div
+[h3 id=Problems 
+	"The problems
+	$LF
+]h3
+[div class=p 
+	"Almost all of the problems on the previous TAS are irrelevant. Here's what made this run hard to create:
+	$LF
+]div
+[div class=p 
+	"Even though all of the bytes required to write 
+	[code 
+		"JSR $9000
+	]code
+	" can be written using button presses, due to no conflicting D-Pad inputs, there still lies the problem of the bits within 0x90 aren't contained within the bits composing 0x20.
+	$LF
+]div
+[div class=p 
+	"Even if I could simply write a jump to $9000, I still need to find a way to fix the stack pointer, which just happened in the last TAS due to my chosen method of updating the NMI mode setting the stack pointer to a good place. This time, I need to set that up before jumping to $9000.
+	$LF
+]div
+[h3 id=Solutions 
+	"The solutions
+	$LF
+]h3
+[div class=p 
+	"One of the largest drawbacks of the previous TAS was how the first three frames with inputs are all spent stalling to give me time to write a 2 byte instruction, and to avoid a game crash. I spent a lot of time trying to find a better use for these frames, and what I discovered was that I actually have two more bytes at my disposal for writing code than I initially thought. However, they can only be written during the first frame with inputs. Let me break this down.
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/a0SSt6f.png 
+	]img
+	$LF
+	"Addresses $0000 through $000F are used as "Temporary bytes". All of these bytes are written to from all over the place whenever some temporary information is needed to make some calculations. These bytes normally don't hold information for longer than a frame, but addresses $0000 through $0002 have a little extra special property to them. Since the NMI utilizes these addresses for some quick calculations, these bytes are also pushed to the stack and restored at the end of the NMI. What does the NMI use these bytes for, you might ask? Well they are used when reading the controller, both for comparing with the inputs held last frame, and to check for conflicting D-Pad inputs. Afterwards, these bytes are overwritten and the NMI moves on, but you may recall that on the first frame the IRQ interrupts the controller reading and never returns. I could write whatever I want in address $0000 and $0002, even conflicting D-Pad inputs, and the game will even protect these bytes during future NMI's by storing them on the stack at the start, and restoring the information at the end of the NMI. 
+	$LF
+]div
+[div class=p 
+	"This is used to write 
+	[code 
+		"JSR $9000
+	]code
+	" on the very first frame. Since the IRQ places the program counter at $0001 this code can't be read on the first frame, which might sound disappointing at first, but it's actually incredibly useful that it gets skipped. We still need to fix the stack pointer before taking that jump, after all!
+	$LF
+]div
+[h3 id=Execution 
+	"The execution
+	$LF
+]h3
+[div class=p 
+	"The first frame with inputs is used both to stall inside the input loop and begin reading code from $0001, and also to write 
+	[code 
+		"JSR $9000
+	]code
+	" at address $0000.
+	$LF
+]div
+[div class=p 
+	"To fix the stack pointer, I spend the second frame with inputs writing 
+	[code 
+		"TAX
+	]code
+	", which transfers the value of the A register to the X register. On the third and final frame of the TAS, I write 
+	[code 
+		"TXS, JSR $0000
+	]code
+	", which transfers X to the Stack Pointer, and jump to $0000. $0000 holds the jump I wrote to $9000, which fixes the NMI mode and wins the game.
+	$LF
+]div
+[div class=p 
+	"Here's how it's done
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes 
+			]th
+			[th 
+				"Instruction 
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"AA (AA) 
+			]td
+			[td 
+				" TAX, (TAX) 
+			]td
+			[td 
+				" This transfers a value of 0xFA to X. This happens twice, but there's no side effect in the duplicate instruction.
+			]td
+		]tr
+		[tr 
+			[td 
+				"(10 00) 9A 20 
+			]td
+			[td 
+				" (BPL $00F7), TXS, JSR $0000 
+			]td
+			[td 
+				" The branch to $00F7 technically happens, though does nothing. The stack pointer is then changed to whatever value the X register held, which in this case was 0xFA. Finally, the JSR $0000 sends us to the JSR that was written on the first frame.
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/OsDKKz3.png 
+	]img
+	$LF
+	"To reiterate, when I’m “stalling” inside the input loop, I’m switching between pressing the A button and no inputs between every instance where the controllers are polled.
+	$LF
+]div
+[div class=p 
+	"It's also worth noting that I need to stall for a single poll on the second frame with inputs. The NMI would otherwise happen inside the programmable interrupt that a BRK jumped to, at the exact moment between preparing for a bank swap (writing to $8000) and actually swapping banks (writing to $8001). Without stalling for a single poll there, the wrong banks are loaded and the game crashes after jumping to $B85A. (which is done inside the function we jump into at $9000)
+	$LF
+]div
+[div class=p 
+	"A frame by frame explanation is as follows:
+	$LF
+]div
+[ul 
+	[li 
+		"The game takes 10 frames to set up the title screen.
+		$LF
+	]li
+]ul
+[ol 
+	[li 
+		"Stall inside the NMI until the IRQ fires, after pressing 0x90 on controller 2, and having the IRQ interrupt the second read of controller 1 after pressing 0x20.
+		$LF
+	]li
+	[li 
+		"TAX
+		$LF
+	]li
+	[li 
+		"TXS, and JSR $0000; Which leads to JSR $9000, winning the game.
+		$LF
+	]li
+]ol
+[div class=p 
+	"To the right, I have a screenshot of the entire TasStudio movie. While using the SubNesHawk core, frames in red indicate the beginning of a frame, while frames in green indicate each time the controllers are polled during the frame. For instance, you can see 11 red frames at the beginning. Those are 10 full frames with no instances of the controller being polled, followed by one more red frame indicating the start of the frame containing 104 polls of the controllers. If you've worked in TasStudio, it may look like the run is 125 frames long at first glance, but I thought I'd clear up how SubNesHawk changes the way TasStudio is set up.
+	$LF
+]div
+[h3 id=SpecialThanksTo 
+	"Special thanks to
+	$LF
+]h3
+[ul 
+	[li 
+		"Bigbass, who 
+		[a href=https://www.youtube.com/watch?v=JyHB1BGgD8I rel=noopener external nofollow 
+			"verified the run on console again!
+		]a
+		$LF
+	]li
+	[li 
+		"Everyone who helped out with my previous submission, Specifically Samsara, feos, and Spikestuff.
+		$LF
+	]li
+]ul
+[h3 id=SuggestedScreenshot 
+	"Suggested Screenshot
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/UjF7vtU.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Always happy to help! Judging again!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Well, heck, you did it again. The incredible thing is I could actually copy-paste my judgement of your previous run and change the statistics and it would still be 100% accurate: I am still stunned at the fact that you were able to improve the published run at all, let alone by this much from where it already was. It may not have been halved this time, but it's still down to two-thirds of where it just was. We're under a 
+	[em 
+		"quarter
+	]em
+	" of a second now as opposed to just a 
+	[em 
+		"third
+	]em
+	" of a second. There is now a 7.692% chance that someone can guess my favorite frame in this movie. This is now breaking 
+	[em 
+		"breaking
+	]em
+	" 
+	[b 
+		"breaking
+	]b
+	" the limit of what's possible with TASing. I love this. Genuinely.
+	$LF
+]div
+[div class=p 
+	"There were a couple questions about the improvement when the run was submitted, so I'll clarify here: Normally, 
+	(__wikiLink|displaytext=regional differences aren't taken into account when judging movies|href=/MovieRules#UseTheCorrectVersionOfAGame)
+	". This allows for the author to have some freedom (for example, a Japanese author who prefers to TAS games in their native language), but it also prevents "free improvements" from faster text. In this submission's case, the version choice was made to directly improve gameplay. The game doesn't even run long enough to reach a single point where the regional differences we discount even appear. It's all good.
+	$LF
+]div
+[div class=p 
+	"I wasn't expecting to say this so soon after the last one (it's literally still on the front page as I write this!), but I'm accepting this as an improvement to the 
+	(__wikiLink|displaytext=published run|href=/4554M)
+	"!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

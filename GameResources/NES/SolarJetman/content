@@ -1,5 +1,5 @@
-1
-[h3 id=Usefuladdresses 
+9
+[h3 id=UsefulAddresses 
 	"Useful addresses
 	$LF
 ]h3
@@ -338,14 +338,26 @@
 	"Straight down (16) or straight up (0) is not counted as thrusting either left or right. There will be no interference for horizontal momentum that exceeds 3.0 pixels/frame.
 	$LF
 ]div
-[h4 id=Tetheredobjects 
+[h4 id=TetheredObjects 
 	" Tethered objects
 	$LF
 ]h4
-[h3 id=TheRNG 
-	"The RNG
+[div class=p 
+	"Tethered objects are impacted by gravity in an intuitive way. By accelerating in the opposite direction of the motion of a tethered object, player actions can also help increase the tethering speed. The faster the tethering speed and the heavier the object, the more it influences/accelerates the player's speed. Generally speaking, this is again done in an intuitive way. But please note that there are oddities in how the game calculates the resulting pod speed. For example, continuously thrusting in the opposite direction of the movement of the tethered object will not necessarily result in generating the most speed. Some thrusts have more impact for the speed than others. And some thrusts even have a negative impact on the speed, even though they intuitively should instead be contributing. The underlying mechanics have not been investigated in further details, but are important to take into account when TASing, even if it's only in the form of playing around with inputs by "trial-and-error".
 	$LF
-]h3
+]div
+[div class=p 
+	"So for example, when travelling to the right, a tethered object will accelerate the player when moving in front of the pod (doesn't matter if the object is moving clockwise or anti-clockwise around the pod), up to a speed of 4p/f. Once the tethered object crosses the vertical line of the pod to the left side, it will start to decelerate the player. If the object comes to rest, it will no longer impact the pod's speed, even if it's off-center with respect to the pod. This speed-up mechanic is significantly more efficient when traveling to the left than when traveling to the right. The reason for this has not been investigated.
+	$LF
+]div
+[div class=p 
+	"Vertical motion is impacted by tethered objects in a similar way as horizontal motion. The main difference being that the gravity fields of the planets prevent the pod from speeding up above 3p/f (not applicable to large wormholes!). This limitation can be bypassed by activating the "anti-gravity" upgrade. To speed up for example downward movement, place the tethered object above the horizontal centerline (or below in an inverted gravity field), the higher the better, and let it freely fall down. When it's about to pass the centerline, ensure the pod's y-speed is already 3p/f and activate anti-gravity. While the object swings below the pod, it will accelerate the pod up to a vertical speed of 4p/f.
+	$LF
+]div
+[h4 id=Rng 
+	" The RNG
+	$LF
+]h4
 [table 
 	[tbody 
 		[tr 
@@ -374,9 +386,9 @@
 ]table
 [div class=p 
 	"The value at address 
-	[tt 
+	[code 
 		"005A
-	]tt
+	]code
 	" is affected by the following:
 	$LF
 ]div
@@ -444,9 +456,9 @@
 			]th
 			[td 
 				" Looks like address 
-				[tt 
+				[code 
 					"005D
-				]tt
+				]code
 				" MOD 8
 			]td
 		]tr
@@ -454,57 +466,57 @@
 ]table
 [div class=p 
 	"The thing that matters is the fact 
-	[tt 
+	[code 
 		"005A
-	]tt
+	]code
 	" is affected by direct controller input. This includes Player 2, which has no effect anywhere else in the game. By using Player 2, it is possible to gain very strong control over how the RNG works.
 	$LF
 ]div
 [div class=p 
 	"The values at address 
-	[tt 
+	[code 
 		"005B
-	]tt
+	]code
 	" and 
-	[tt 
+	[code 
 		"005C
-	]tt
+	]code
 	" are left-shifted every frame. The bit shifted into 
-	[tt 
+	[code 
 		"005C
-	]tt
+	]code
 	" is an XOR of bits 0x40 and 0x08 from 
-	[tt 
+	[code 
 		"005A
-	]tt
+	]code
 	", although it has been observed to, on rare occasion, shift in an opposite of this bit. The bit shifted out of 
-	[tt 
+	[code 
 		"005C
-	]tt
+	]code
 	" is shifted into 
-	[tt 
+	[code 
 		"005B
-	]tt
+	]code
 	", and the bit shifted out of 005B is thrown away.
 	$LF
 ]div
 [div class=p 
 	"Since 
-	[tt 
+	[code 
 		"005B
-	]tt
+	]code
 	" and 
-	[tt 
+	[code 
 		"005C
-	]tt
+	]code
 	" are affected by what happens with 
-	[tt 
+	[code 
 		"005A
-	]tt
+	]code
 	", and 
-	[tt 
+	[code 
 		"005A
-	]tt
+	]code
 	" is affected by controller input, this means you should have complete control over the RNG.
 	$LF
 ]div
@@ -514,4 +526,66 @@
 ]div
 [div class=p 
 	"All three RNG addresses are used for various random events.
+	$LF
+]div
+[h4 id=FinalBoss 
+	" Final boss
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"038B-038F
+			]th
+			[td 
+				" Eye aperture states
+			]td
+		]tr
+		[tr 
+			[th 
+				"0419-041D
+			]th
+			[td 
+				" Eye timers
+			]td
+		]tr
+		[tr 
+			[th 
+				"0439-043D
+			]th
+			[td 
+				" Eye opening sequences
+			]td
+		]tr
+		[tr 
+			[th 
+				"0458-045C
+			]th
+			[td 
+				" Eye health
+			]td
+		]tr
+		[tr 
+			[th 
+				"0460-0464
+			]th
+			[td 
+				" Eye states
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The top eye can be despawned during the auto-scroller, well before the actual boss fight begins. This can be seen by monitoring the eye state address $0461. At the time of writing, the best description for what happens is found here: 
+	(__wikiLink|href=/Forum/Posts/367718|implicitdisplaytext=Forum/Posts/367718)
+	" . There have been no reports of additional eyes being despawned (or other eyes than the one at the top). The bot 'Jaffar', created by TASer 'eien86', was able to quickly find solutions that despawned the top eye, but did not find any other variants.
+	$LF
+]div
+[div class=p 
+	"When the window gets "close enough" to the boss, the eye timers get initialized one-by-one to 0 and will then start ticking up every 8 frames. This appears to be programmed in a set pattern, meaning the start order of the eye openings is always the same. Note that small variations have been observed, so there appears to be a little room for manipulation in the timing of the first eye openings, but this has not been investigated in detail.
+	$LF
+]div
+[div class=p 
+	"When an eye timer reaches 0x20, the game will branch at instruction $C08C to the piece of code for the eye opening sequence. The sequence is split in 8 segments, each consisting of 8 frames. The first and last consist of the eye being half-open (and not vulnerable). When the eye opening sequence begins, the game will also re-initialize the timer for the next phase. This is done by comparing one of the RNG-addresses and 0x1F. The result is written to the timer and becomes its new start value. The eyes with index 0, 2 and 4 use $5B for this and the eyes with index 1 and 3 use $5A. Since the RNG-addresses can be manipulated (see section above), the player has control over all eye openings at any time, except for the first cycle as explained above.
 ]div

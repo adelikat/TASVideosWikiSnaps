@@ -1,0 +1,161 @@
+4
+[div class=p 
+	"The 
+	[a href=https://videogamegeek.com/videogamehardware/266112/intellivision-tv-play-power rel=noopener external nofollow 
+		"Intellivision 10, 2nd Edition
+	]a
+	" Video Game System was one in a series of cheap plug and play systems featuring compilations of what I like to call "demastered" Intellivision games, and was actually licensed by Intellivision themselves. I don't know why they decided to go this route instead of just re-releasing some of the originals like they did later with the Intellivision Flashback. Too expensive at the time? Anyway, the systems consists of some stripped-down NES hardware, otherwise known as "Famiclone" or "NES-on-a-chip", all contained within the controller. It is not known who programmed the games on this plug and play system, although many speculate Nice Code Software had some involvement.
+	$LF
+]div
+[div class=p 
+	"Crown of Kings is based on the Intellivision game Advanced Dungeons & Dragons: Cloudy Mountain. This port is 
+	[em 
+		"good
+	]em
+	", but the slow movement while navigating the caves really takes away from the experience. Also, bats and spiders do not inconvenience the player at all in this version probably because their behaviors are bugged.
+	$LF
+]div
+[div class=p 
+	"As many of you may realize by now, this is yet another installment in my quest to TAS the original Cloudy Mountain and all of its ports. If accepted, I think this would be the sixth such TAS on the site. By the way, did you know there's a TI-89 version of Cloudy Mountain? BizHawk TI-89 support when? :P
+	$LF
+]div
+[h4 id=Objectives 
+	"Objectives
+	$LF
+]h4
+[ul 
+	[li 
+		" 100% completion (collect the boat, axe, and key)
+		$LF
+	]li
+	[li 
+		" Uses hardest difficulty
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Takes intentional damage
+		$LF
+	]li
+	[li 
+		" Genre: Action/Adventure
+		$LF
+	]li
+]ul
+[h4 id=Difficulty 
+	"Difficulty
+	$LF
+]h4
+[div class=p 
+	"The difficulty selected affects the speed of enemies and the number of arrows you get from quivers. This TAS played on the hardest difficulty, called "Hero" difficulty.
+	$LF
+]div
+[h4 id=FastestOverworldLayout 
+	"Fastest Overworld Layout
+	$LF
+]h4
+[div class=p 
+	"After analyzing all possible overworld map layouts, all of the fastest routes to Cloudy Mountain (the final mountain on the right) cross at least some river and forests. Therefore, we must first enter a blue mountain to pick up the boat to cross the rivers, then a red mountain to pick up the axe to traverse the forests, and finally head to Cloudy Mountain. The specific overworld layout we would manipulate is the first one which can make the complete traversal—blue mountain to red mountain to Cloudy Mountain—using only up-right, right, and down-right inputs on the map. This ensures that you're getting closer to Cloudy Mountain with 
+	[em 
+		"every
+	]em
+	" step since each would have a rightwards component. You can move one space on the overworld map every 8 frames so it is imperative we avoid any extraneous map movements.
+	$LF
+]div
+[h4 id=ButWaitThisIsTheAllToolsTas 
+	"But wait, this is the all tools TAS!
+	$LF
+]h4
+[div class=p 
+	"This is pretty much the only part, both in the final movie and in these submission notes, that is different from the 
+	[a href=https://tasvideos.org/9021S rel=noopener external nofollow 
+		"Any% TAS I submitted
+	]a
+	" for this game: we have to also enter a purple mountain to grab the key and satisfy the "all tools" requirement. You'll notice in the final movie that three extra map movements were required over the Any% TAS to enter/exit the purple mountain I decided on. So why not find a different map layout that has more efficient mountain placement overall? Well, it's because such a map layout 
+	[em 
+		"doesn't exist
+	]em
+	"! That's right, I analyzed all map layouts again and there is seriously no other layout that is more efficient than three extra movements when factoring in the purple mountain visit. I certainly can't complain because that made making this TAS like 100x easier!
+	$LF
+]div
+[h4 id=FastestCaveLayout 
+	"Fastest Cave Layout
+	$LF
+]h4
+[div class=p 
+	"It's easy to analyze the overworld map layouts via visual inspection, but what about the cave layouts? Well, I could write a script that would read the positions of the tools and ladders or crown halves upon entering a mountain, calculate the rectilinear distance between them, and then calculate the rectilinear distance from each to the player spawn point. Rectilinear distance would be used because it's the best approximation of true distance (which can be shorter if the player can move diagonally, or longer if corridor/chamber geometry doesn't allow a direct path from point A to point B). The minimum total rectilinear distance would then be calculated to decipher which cave layout(s) is/are optimal. This is exactly what I did and it worked better than expected. While there are a large yet finite number of cave layouts, there was only one 
+	[em 
+		"CLEAR
+	]em
+	" winner from the analysis.
+	$LF
+]div
+[div class=p 
+	[a href=https://tasvideos.org/UserFiles/Info/638492465665812103 rel=noopener external nofollow 
+		"The Lua script can be downloaded here
+	]a
+	$LF
+]div
+[div class=p 
+	"So to put numbers to things, the shortest total distance calculated of all cave layouts was 27 units. There were two of them. As I described earlier, calculating rectilinear total distance is merely an approximation, so I manually calculated the true distance for traversing all layouts which outputted distances of up to I believe 31. One of the 27-distance layouts was the 
+	[em 
+		"CLEAR
+	]em
+	" winner, being at least several units shorter than all others when measuring true distance. This is the very cave layout you see me traverse in all three mountains in the final movie.
+	$LF
+]div
+[h4 id=LuckManipulation 
+	"Luck Manipulation
+	$LF
+]h4
+[div class=p 
+	"OK, so how could we actually 
+	[em 
+		"get
+	]em
+	" this cave layout every time? Well, simply delaying a certain number of frames and/or changing the inputs made on the overworld layout prior to entering the mountain could change the next cave layout that is loaded. Even invalid map movements, which can be made at a rate of every 1-2 frames instead of every 8 can change the next layout. Depending on the situation, this can quickly grow into an unmanageable number of potential input and delay combinations to check, which is the second thing that the Lua script linked above can do. For a given input sequence, the script can check what cave layout occurs for every possible delay you could wait between each input—within a specified maximum frame the mountain should be entered on, of course. With this script, I was able to 
+	[em 
+		"EXHAUSTIVELY
+	]em
+	" test every single input/delay combination between each mountain that could be faster than the one in the final movie, and am highly confident that the final movie does indeed get the best cave layout with the smallest delay.
+	$LF
+]div
+[h4 id=DeathsAndArrowUsage 
+	"Deaths and Arrow Usage
+	$LF
+]h4
+[div class=p 
+	"In the blue and red mountains, taking a death after collecting the tool then progressing to the ladder from the initial spawn point was only faster in the short term if you shot yourself with an arrow first before taking the final hit from an enemy. It is not faster in the long term because in Cloudy Mountain, it saves more time to go for the lower crown half first and survive, which you need to save all your arrows for.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": I watched other console runs you have done for this category. This run follows suits, along with the same techniques used as the any% run. Everything checks out here.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

@@ -1,0 +1,228 @@
+6
+[div class=p 
+	"Bad Apple, for Tsuri Sensei.
+	$LF
+]div
+[div class=p 
+	"As mentioned in my 
+	(__wikiLink|displaytext=Any% submission|href=/7172S)
+	", this game has ACE potential, but I initially dismissed it as being too slow to be useful for Any%.
+	$LF
+]div
+[div class=p 
+	"However, that doesn't mean it can't be used to Bad Apple. After a ton of experimentation, I finally found a suitable ACE setup, which ended up being fast enough where it could beat Any% (a game end glitch submission will happen sometime later).
+	$LF
+]div
+[h4 id=ScriptStackOverflowGlitch 
+	" The Script Stack Overflow Glitch
+	$LF
+]h4
+[div class=p 
+	"This ACE exploit relies on a developer mistake. The game implements a scripting system, which appears to manage all of the game logic, from menus, to fishing, to even the credits. This scripting system has its own script stack. Somehow, the developers screwed up and did not properly pop this stack upon exiting the map screen, only when exiting the status menu is the script stack reset. This eventually just leads to a classic stack overflow within this script stack, which usually happens to cause execution to jump to the script stack itself at $D8BE.
+	$LF
+]div
+[div class=p 
+	"This itself isn't particularly useful. The nearest controllable memory is a bit after the script stack at $D915, which is just a few bytes that changes depending on the last text printed. Generally, this just ends up hitting a 
+	[code 
+		"reti
+	]code
+	" (a byte that usually doesn't change), which proceeds to advance the script engine and execute more garbage script data, eventually reaching to $F00B. This leads to fairly static uncontrollable data which ends in a stop opcode, freezing the game. For a few NPC textboxes, the 
+	[code 
+		"reti
+	]code
+	" can be bypassed (either by it changing to some other byte or being eaten by a multi-byte opcode), but doing such just ends up also leading to a crash in the later bytes, not to mention SRAM ends up getting locked, preventing more useful data to be executed.
+	$LF
+]div
+[div class=p 
+	"A saving grace comes in with various NPCs (well, mostly wild animals) which after talking to them, move out of the way. These plaster some bytes after the script stack for some reason, starting at $D8E0. The main prize in these bytes is it has a 
+	[code 
+		"jr $xx
+	]code
+	" opcode. What 
+	[code 
+		"$xx
+	]code
+	" is depends on the direction which the NPC was spoken to. For most directions, this is some number >=$80, i.e. negative, as such just creating an infinite loop. However, when speaking from below, $7A is used, leading to a forward jump to $D95F.
+	$LF
+]div
+[div class=p 
+	"$D95F is in a middle of some giant buffer that changes depending on the last text. I assume it's some buffer storing text itself. Even better, the buffer isn't explicitly cleared out with new text data, instead it's simply overwritten until the new text data has been written. This can lead to a mixmatching of different text data to create some kind of payload, at least one which can redirect execution.
+	$LF
+]div
+[div class=p 
+	"This payload ends up being created with only 2 NPCs. Some shop clerk is asked for advice(?), which is random. One specific advice is wanted in this case, so some delay is needed to get such. Next some fishing instructor(?) person is talked to, with No selected for getting info on how to fish(?). This ends up creating a payload with these vital instructions (with a bunch of other relatively harmless instructions surrounding such):
+	$LF
+]div
+[pre 
+	"push af
+	$LF
+	"inc sp
+	$LF
+	"ret nz
+	$LF
+]pre
+[div class=p 
+	"These end up by sheer chance redirecting execution to $A158. This is extremely useful, as SRAM is where file names are stored, and it's normally unlocked (although the ACE exploit here has a tendency to lock SRAM due to the somewhat randomness of the instructions executed, the NPCs choosen happen to make instructions that do not do this). These file names give quite a few bytes to work with, under these ranges:
+	$LF
+]div
+[pre 
+	"$01-$0E
+	$LF
+	"$10-$1E
+	$LF
+	"$20-$2E
+	$LF
+	"$30-$3E
+	$LF
+	"$40-$4E
+	$LF
+	"$C0-$C5
+	$LF
+	"$E9
+	$LF
+	"$FF
+	$LF
+]pre
+[div class=p 
+	"This isn't many opcodes to choose from, and each name only has 4 bytes to choose from. Worse, getting to the next name will cause some other relatively uncontrollable bytes to be executed. Right after every name is $FF, corresponding to 
+	[code 
+		"rst $38
+	]code
+	". This is fairly harmless in this game (as the rst vector is implemented with an actual function), but has the effect of increasing HL by A * 2. The limited number of bytes given here mean the only way the payload can loop is using 
+	[code 
+		"jp hl
+	]code
+	" (with $E9), as such HL needs to stay constant.
+	$LF
+]div
+[div class=p 
+	"All of the other uncontrollable bytes are relatively harmless. By sheer chance, they end up being quite useful however. The opcodes end up setting D to whatever H is, and leave E alone. HL is also left alone here.
+	$LF
+]div
+[div class=p 
+	"This leads to setting HL within the first name executed, in order to become the loop point. HL here would be after the first name executed and before the second name executed, and would remain constant with the second and third names being executed. As such, the first name is:
+	$LF
+]div
+[pre 
+	"ld h,$28
+	$LF
+	"add hl,hl
+	$LF
+	"add hl,hl
+	$LF
+]pre
+[pre 
+	"$26 $28 $29 $29
+	$LF
+]pre
+[div class=p 
+	"The second name executed ends up just being a simple call to the game's joypad routine at $0625. Due to the $FF byte after the name, the fourth character of the name has to be one which eats that byte (in this case, 
+	[code 
+		"ld b,xx
+	]code
+	", as it's $06, the same last byte in $0625 in little endian order). As such, the second name is:
+	$LF
+]div
+[pre 
+	"call nz,$0625
+	$LF
+	"ld b,$FF
+	$LF
+]pre
+[pre 
+	"$C4 $25 $06 $06
+	$LF
+]pre
+[div class=p 
+	"The third name executed can now simply write A to [DE] and increment E. After such, the code can loop with a 
+	[code 
+		"jp hl
+	]code
+	". As such, the third name is:
+	$LF
+]div
+[pre 
+	"ld [de],a
+	$LF
+	"inc e
+	$LF
+	"jp hl
+	$LF
+]pre
+[pre 
+	"$12 $1C $E9
+	$LF
+]pre
+[div class=p 
+	"Either an E or DE increment technically works here, in any case D is set to H anyways. As such, eventually the pointer loops backwards to the beginning of the 256 byte chunk, allowing the next payload be written without it being executed. Once the next payload is finished, a backwards jr can be written to jump to the next payload.
+	$LF
+]div
+[div class=p 
+	"A minor issue here however is that the joypad function returns the newly pressed buttons in the A register, not the currently pressed buttons. Due to this, the first few bytes written are ones which clear the game's joypad state variable in $FF91. This luckily can be done while abiding by the newly pressed buttons limitation, using the following opcodes:
+	$LF
+]div
+[pre 
+	"ld c,$91
+	$LF
+	"nop
+	$LF
+	"xor a
+	$LF
+	"nop
+	$LF
+	"ldh [c],a
+	$LF
+]pre
+[pre 
+	"$0E $91 $00 $AF $00 $E2
+	$LF
+]pre
+[div class=p 
+	"The next payload is a small payload which writes in the final payload as fast as it can. That next payload along with the final payload main payload is (mostly) the as ones in Red, with minor adjustments to deal with game specific details: 
+	[a href=https://tasvideos.org/9604S rel=noopener external nofollow 
+		"https://tasvideos.org/9604S
+	]a
+	$LF
+]div
+[div class=p 
+	"Another minor detail to note is the save file name order isn't as you'd immediately expect. What gets executed first is the "active" save file, then the first save file, then the second save file, then finally the third save file. As such, the third save file is used for the run in order to make it the "active" save file, and ends up having the first name executed.
+	$LF
+]div
+[div class=p 
+	"Actual movie is too big, what's submitted is a truncated movie, full movie can be found here: 
+	[a href=https://mega.nz/file/osdBhLBJ#_-TUWCHeQxLN8ZFPNUY3FD3QEDNeybT0KdJ7u5YMojI rel=noopener external nofollow 
+		"https://mega.nz/file/osdBhLBJ#_-TUWCHeQxLN8ZFPNUY3FD3QEDNeybT0KdJ7u5YMojI
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Uploading the actual file.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Accepting.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/inconsistent 
+		"inconsistent
+	]a
+	": Processing...
+]div

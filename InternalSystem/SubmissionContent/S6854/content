@@ -1,0 +1,98 @@
+4
+[ul 
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" One player controls two players
+		$LF
+	]li
+	[li 
+		" Plays each stage once
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Resets midway through
+		$LF
+	]li
+	[li 
+		" Genre: Puzzle 
+		$LF
+	]li
+]ul
+[div class=p 
+	"I wanted to try improving the solutions for this existing TAS because they seemed suboptimal and solving these puzzles in the fewest steps was an interesting problem for me to solve. 
+	$LF
+]div
+[div class=p 
+	"Each puzzle can be simplified and reduced to an instance of the traveling salesman problem, where each of the ingots to be revealed is a vertex to be visited in the graph. For the easier (red) stages, each ingot needs to be duplicated as two nodes depending on which direction you are traveling through it since this affects the distance from that point to other points. This makes the problem a "generalized TSP" meaning that rather than visit every point we only need to visit one point out of each "cluster" of points. This type of problem can be easily converted into a regular TSP problem with some manipulation.
+	$LF
+]div
+[div class=p 
+	"However, this only applies to the red stages. Where it gets interesting (as noted in the previous submission) is that after the first stage of each loop, the game begins to prohibit certain turns. Specifically, it prohibits a RD turn directly into a DR turn, and an UR turn directly into a RU turn. This is presumably because the player speed increases with each level which causes the player to miss the very small frame window allowing for switching between a CW or CCW turn (normally 1 or 2 frame window on the slowest speed). In order to account for this in my model I instead duplicated every vertex in the graph a maximum of six times depending on which direction the player travels through it and whether they are going straight, clockwise or counterclockwise. Then in the ensuing graph, I made sure not to directly connect any vertices that would only be directly connected by one of these illegal turns. This produces a distance matrix from which any ensuing solution will avoid these turns.
+	$LF
+]div
+[div class=p 
+	"The 5th stage in each loop as well as the bonus stage both seem to have additional turn restrictions, however this is not actually the case. As it turns out, for some turns if you do a full connected 180-270 degree turn (by holding the button down the whole time), if you try to switch out of it into an opposite turn it won't let you. However, if instead of doing a full turn, you break it down into smaller turns (that is, if you are turning CW three times you do a 90 degree turn, release, grab back on and continue for another 90 degree turn, and so on), it delays your movement just slightly so that you are within the right frame window and are able to make that turn that seemed impossible.
+	$LF
+]div
+[div class=p 
+	"After producing the distance matrix for each puzzle I then used the program LKH-3 (
+	[a href=http://akira.ruc.dk/~keld/research/LKH-3/) rel=noopener external nofollow 
+		"http://akira.ruc.dk/~keld/research/LKH-3/)
+	]a
+	" to solve the multiple TSP problem for 2 vehicles. Specifically you indicate the "min-max" objective meaning that you are trying to balance the paths in order to minimize the maximum path length for any vehicle. 
+	$LF
+]div
+[div class=p 
+	"Some problems with this simplified form of the puzzle are:
+	$LF
+]div
+[ul 
+	[li 
+		" I simplified the distance between any two points in the graph as a generic cost of 1, except for doing U-turns via bumps against the stage boundary or rubber walls which are a distance of 2 to account for the time it takes for the animation. In actuality there is some slight frame invariance that comes up and not every "turn" is equal in length. But it's close enough to have produced very good improvements.
+		$LF
+	]li
+	[li 
+		" For some stages even if I complete the actual level faster, the ensuing tally screen might be longer resulting in an overall slower solution. I double checked the "true" length of each of my new solutions to make sure it was actually faster than my previous best.
+		$LF
+	]li
+	[li 
+		" In some stages, the proposed solution either results in the players colliding, or in a situation where too many ingots are being collected at once which will cause at least one of them to not register properly as the player passes over it (due to all of the "100 point" sprites on screen). In order to get around this in some stages I had one of the players start later than the other one so that they didn't pass over the same point at the same time & so not as many ingots are collected at once.
+		$LF
+	]li
+	[li 
+		" The behavior of the hidden rubber walls is a little harder to model because the way they work is that they are only revealed once you try passing through them straight, but you can freely rotate through them beforehand.
+		$LF
+	]li
+]ul
+[div class=p 
+	"As for the tally screen:
+	$LF
+]div
+[ul 
+	[li 
+		" Time is wasted awarding points for killed enemies so I don't kill any. For the most part I try to manipulate RNG to avoid enemies completely but in cases where I had to stun the enemies I made sure not to then crush them against a wall.
+		$LF
+	]li
+	[li 
+		" For stages with an even number of ingots, if each player collects exactly half of the ingots then the point tally will be shorter & neither player will be awarded a bonus. A lot of my solutions evenly divide the ingots but in some cases there were superior solutions where the number was intentionally uneven because the amount of frames added in the tally screen was much less than what was saved in the actual stage.
+		$LF
+	]li
+	[li 
+		" The game tallies down the game timer in increments of 10 time units. For solutions that would normally end with a multiple of 10 on the timer, usually if you intentionally stall yourself so that the timer runs down one additional time unit, you will save time overall.
+		$LF
+	]li
+]ul
+[div class=p 
+	"There seems to be a frame rule in effect where delaying your completion of the level by a few frames still results in the next stage starting at the same time. In some cases it actually saves you time to delay a frame or two. Sometimes I intentionally delay a frame in order to avoid the clock item spawning in the next stage (since this causes the other player to stop moving).
+	$LF
+]div
+[div class=p 
+	"For resetting back to the title screen, the original publication was kind of vague as to exactly when this should be done ("after the last screen flash") so I defined it here as making sure there are exactly 242 frames between when the P1/P2 sprites disappear and when the title screen is visible after resetting. Manipulating which stages appear in the loops is a matter of delaying when you press start (the level order for each loop is visible in RAM starting at 0x720) but getting each stage to appear among each of the 4 loops is kind of tricky. Rather than being truly random it seems like only about a third of the 1028 total possible combinations will ever appear as the pattern for the first loop. I spent 301 frames total manipulating this particular stage order but it's possible an improvement exists.
+]div

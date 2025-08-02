@@ -1,0 +1,326 @@
+12
+[div class=p 
+	"The classic Bad Apple, this time on the Game Boy Color with Pokemon Crystal.
+	$LF
+]div
+[h4 id=PlatformChoice 
+	" Platform Choice
+	$LF
+]h4
+[div class=p 
+	"The Game Boy and Game Boy Color are platforms I am intimately familar with already. The Game Boy has 
+	(__wikiLink|displaytext=already had someone done Bad Apple|href=/9565S)
+	", and the Game Boy Color has various extra tricks available, allowing for substantial improvements for both audio and video quality. As such, the Game Boy Color (with a Game Boy Color game) is used.
+	$LF
+]div
+[div class=p 
+	"Note that the emulator is not set to emulate a Game Boy Color within a Game Boy Advance, as one of the tricks used in this run does not work on the Game Boy Advance.
+	$LF
+]div
+[h4 id=GameChoice 
+	" Game Choice
+	$LF
+]h4
+[div class=p 
+	"Crystal is used mainly as it was the 
+	(__wikiLink|displaytext=simplest movie to convert|href=/6237M)
+	" to a "total control" ACE TAS (as the movie is somewhat already a total control ACE TAS in a limited capacity). It is also used as Pokemon is generally the kind of game you'd expect these kind of ACE TASes, and Crystal (along with Gen 2 Pokemon) is more associated with the Game Boy Color compared to Gen 1 (which only has international Yellow gaining GBC enhancements, which were so shoddy Yellow was not even advertised as a GBC enhanced game). Gen 2 Pokemon is also just my preference against Gen 1 Pokemon (as evidenced by my Gen 2 TASes).
+	$LF
+]div
+[h4 id=VideoBasics 
+	" Video Basics
+	$LF
+]h4
+[div class=card-header-userinfo 
+	[div class=p 
+		"More detailed info can be found on the Pan Docs: 
+		[a href=https://gbdev.io/pandocs/Graphics.html rel=noopener external nofollow 
+			"https://gbdev.io/pandocs/Graphics.html
+		]a
+		$LF
+	]div
+]div
+[div class=p 
+	"The Game Boy and Game Boy Color operate under a tile system like other retro systems at the time. VRAM holds 384 (768 in GBC mode) 8x8 pixel tiles at addresses $8000-$97FF. Each tile contains 16 bytes, with each pixel using 2 bits to encode a color ID for each pixel (i.e. 2BPP, 2 bits per pixel). For the background and window layers, these tiles are selected for rendering using one of two 32x32 tile maps stored in VRAM at addresses $9800-$9BFF and $9C00-$9FFF. These tile maps contains 1 byte indexes for the tile to be displayed. Which tile map is used, the origin point for fetching tiles from the tilemap, and how these 1 byte indexes address tile data depends on the LCDC register and scrolling registers.
+	$LF
+]div
+[div class=p 
+	"On the Game Boy Color, in order to mostly reuse the Game Boy's graphics system, VRAM stores two 32x32 tile attribute maps at addresses $9800-$9BFF and $9C00-$9FFF. These attribute maps correspond to tile maps, giving extra info for the tiles pointed to by the tile map. One of these is selecting which background palette is used among the Game Boy Color's 8 4-color background palettes. This thus maintains the old 2BPP tile format while giving Color to the Game Boy.
+	$LF
+]div
+[div class=p 
+	"This system is intended to allow reuse of various graphics, saving on precious VRAM and CPU time. However, Bad Apple is a full motion video. It does not fit neatly into simple 8x8 tiles (without heavily butchering the video anyways), and requires constant change, potentially for the entire frame of video. As such, the entire display should be filled unique tiles, in this case, 360 different tiles (20x18 tiles, for the 160x144 screen), while the tile map stays constant. 
+	$LF
+]div
+[div class=p 
+	"360 different tiles is a ton of memory, 5760 bytes, and that is assuming tile attribute maps are completely untouched. Since Bad Apple is largely black and white anyways, I opt to simply keep the video to only 4 colors, thus avoid ever needing to touch palettes and thus allowing the tile attribute maps to stay constant.
+	$LF
+]div
+[div class=p 
+	"The Game Boy Color, as another enhancement, features a second VRAM bank, giving twice the VRAM as the original Game Boy, along with introducing banking at all for VRAM in the GB line. This is what holds the latter 384 tiles, along with the tile attribute maps (hence why their addresses "overlap"). Tile attribute maps also specify which bank tile data should be fetched from. Since only 360 tiles are needed here and the tile attribute maps will stay constant here, the second VRAM bank doesn't need to be touched for playback (outside of initially clearing it).
+	$LF
+]div
+[h4 id=TileAddressingModes 
+	" Tile Addressing Modes
+	$LF
+]h4
+[div class=p 
+	"As said before, a tile map contains 1 byte indexes for each tile. However, a single byte only has 256 values, which is certainly not enough for the 360 different tiles needed (nor the maximum 384/768 tiles available). So how can 360 different tiles be used?
+	$LF
+]div
+[div class=p 
+	"The LCDC register contains bits which controls how tiles will be addressed. There are two addressing modes, the "$8000 method" and the "$8800 method".
+	$LF
+]div
+[div class=p 
+	"For the $8000 method, tiles are stored at $8000-$8FFF, with the tile index being an unsigned index with $8000 used as a base pointer. This results in a formula of $8000 + index * $10 to get tile data, where index is 0 to 255. Thus index 0 has a tile at $8000-$800F, index 1 has a tile at $8010-$801F, and so on until index 255 with a tile at $8FF0-$8FFF.
+	$LF
+]div
+[div class=p 
+	"For the $8800 method, tiles are stored at $8800-$97FF, with the tile index being a signed index with $9000 used as a base pointer. This results in a formula of $9000 + index * $10 to get tile data, where index is -128 to 127 (in standard two's complement). Thus index 0 has a tile at $9000-$900F, index 1 has a tile at $9010-$901F, and so on until index 127 with a tile at $97F0-$97FF. Then on the other side, index -1 has a tile at $8FF0-$8FFF, and so on until index -128 with a tile at $8800-$880F.
+	$LF
+]div
+[div class=p 
+	"The LCDC register can be modified at any point, even mid-scanline. In this case, only 2 writes to LCDC are needed per frame, once at the beginning to use the $8000 method, then another time halfway through the frame to use the $8800 method, thus allowing 360 unique tiles to be used.
+	$LF
+]div
+[h4 id=VideoTransfers 
+	" Video Transfers
+	$LF
+]h4
+[div class=p 
+	"The goal here is now to transfer 5760 bytes to change the entire frame. This presents two problems, reading 5760 bytes from the joypad, and uploading such to VRAM very quickly (preferably uploading within a single frame to avoid tearing).
+	$LF
+]div
+[div class=p 
+	"The first problem ends up bringing up the first trick the Game Boy Color brings to the table: double speed mode. As an enhancement, games can switch to double speed mode, doubling the CPU's clock rate (while other components such as the PPU and APU still operate under the same frequency as before), doubling the amount of CPU cycles available within a frame. Using this mode effectively allows for doubling the amount of bytes that can be read from the joypad.
+	$LF
+]div
+[div class=p 
+	"The second problem brings in the second trick the Game Boy Color brings to the table: VRAM DMA. The Game Boy Color introduces a new DMA unit for VRAM transfers. In this context, it is effectively a unit which transfers blocks of $10 bytes (i.e. a tile's worth of granularity) at 1 "double speed" CPU cycles per byte or 0.5 "normal speed" CPU cycle per byte. The DMA unit is clocked at the same rate regardless of if double speed mode is active, hence double speed mode taking twice as many cycles (although still the same amount of time as normal speed mode). While the DMA is active, the CPU remains halted.
+	$LF
+]div
+[div class=p 
+	"Despite VRAM DMA not benefiting from double speed mode, it is still incredibly fast. On a normal Game Boy, the fastest way to transfer bytes to VRAM would be a popslide technique (e.g. 
+	[code 
+		"pop de / ld [hl],d / inc l / ld [hl],e / inc l
+	]code
+	"), usually at best around 9 normal speed cycles for 2 bytes, or around 4.5 normal speed cycles per byte. This technique is much slower compared to a DMA (around 9x slower!), and still slower on the Game Boy Color with double speed mode (around 4.5x slower). This technique also has an incredible amount of register pressure (like any copy on the CPU would have), which a DMA does not have (as the source and destination for DMA are just I/O registers, which increment while the DMA occurs, so very little is needed in terms of CPU register usage to continuously apply DMAs).
+	$LF
+]div
+[div class=p 
+	"With VRAM DMA, I aim to copy 2 tiles every scanline. There's plenty of time between PPU rendering (which locks VRAM access) to DMA way more tiles, but such isn't needed and DMA length has to be balanced out with audio handling regardless. In total, 180 scanlines are used to perform DMAs for all 360 tiles.
+	$LF
+]div
+[div class=p 
+	"Of course, 180 scanlines is more than the 144 total scanlines rendered (and more still if including the 10 "scanlines" for vblank). So how does this end up not tearing? Quite simple: the DMAs start the frame before the new frame would be displayed, after 8 scanlines have been displayed. Once 8 scanlines are displayed, the first row of tiles can be replaced as they have already be displayed. Rendering will go faster than the DMAs will replace tiles, so there's no risk of the DMAs "winning" the race against the PPU reading VRAM. The DMAs will end up finishing before the PPU ends up reaching anywhere near the end of the new 360 tiles, thus allowing an new frame to be transferred over without any tearing.
+	$LF
+]div
+[div class=p 
+	"Reading 5760 bytes from the joypad ends up being the main bottleneck however here. There simply isn't enough time to end up reading enough bytes from the joypad while also transferring them into VRAM at Bad Apple's original 30 FPS. As such, the framerate is sacrificed, going from 30 FPS down to 20 FPS. This extra frame is enough to gain enough time to read all the bytes from the joypad and transferring them into VRAM.
+	$LF
+]div
+[h4 id=AudioBasics 
+	" Audio Basics
+	$LF
+]h4
+[div class=card-header-userinfo 
+	[div class=p 
+		"More detailed info can be found on the Pan Docs: 
+		[a href=https://gbdev.io/pandocs/Audio.html rel=noopener external nofollow 
+			"https://gbdev.io/pandocs/Audio.html
+		]a
+		$LF
+	]div
+]div
+[div class=p 
+	"The Game Boy and Game Boy Color, like other systems at the time, produces sounds using multiple sound generation units. These sound generation units are denoted as channels. The Game Boy and Game Boy Color have 4 different channels, each with specialized usage.
+	$LF
+]div
+[div class=p 
+	"This system allows for so called "8-bit" or "chiptune" music, but not easily for raw PCM playback that voices generally need. Luckily, one of the channels available, Channel 3, is a simple channel that allows for playing back arbitrary 4-bit PCM samples, with 32 total able to be stored at once (within "wave ram"), possibly set to forever loop.
+	$LF
+]div
+[div class=p 
+	"Channel 3 can be set at any 
+	[code 
+		"2097152 / (2048 - x)
+	]code
+	" frequency where 
+	[code 
+		"x
+	]code
+	" is 0-2047. In this case, 
+	[code 
+		"x
+	]code
+	" is set to 1991, making a frequency of 
+	[code 
+		"2097152 / (2048 - 1991)
+	]code
+	", i.e. 
+	[code 
+		"2097152 / 57
+	]code
+	", i.e. ~36792.14Hz. 57 here is used as that allows for exactly 4 samples to be played back every scanline.
+	$LF
+]div
+[div class=p 
+	"Only 4-bits of amplitude is fairly low quality. The quality however can be increased by changing the master volume for each sample. The master volume is a linear control that amplifies (i.e. multiplies) the mixed channel audio, with 8 different values per side (although, for this video, the music is kept mono regardless). This nearly provides roughly a 7-bit PCM quality playback (although not exactly, as multiple multiplications just result in the same value), just enough for fairly high quality PCM playback.
+	$LF
+]div
+[h4 id=AudioTransfer 
+	" Audio Transfer
+	$LF
+]h4
+[div class=p 
+	"Obviously, Bad Apple will take way more than just 32 samples to play back. This brings in another trick (or rather quirk) available to the Game Boy Color: writing to wave ram while channel 3 is active. Normally, you are not supposed to write to wave ram while the channel is active. However, on the Game Boy Color, this ends up just writing to whichever byte the last sample was read from channel 3. Using this trick, wave ram can be continously written to, effectively perfectly streaming PCM audio (although the bytes written will end up being 32 samples "ahead" as the written sample won't be read until the channel loops back around).
+	$LF
+]div
+[div class=p 
+	"Note that writing to wave ram while the channel is active differs on the original Game Boy, which prevents the write from going through, except on the exact cycle which wave ram is read by channel 3, which case the write does go through in the same manner as the Game Boy Color. Of course too, if this trick is attempted on a Game Boy game running on the Game Boy Color, it will work just the same as on a Game Boy Color game, as this is just a hardware quirk rather than any explicit enhancement. As such, a potential improvement to a Bad Apple run on the Game Boy could simply be to use the Game Boy Color's Game Boy compatibility mode and take advantage of this quirk (although that could be sort of considered "cheating" perhaps, but I digress).
+	$LF
+]div
+[div class=p 
+	"On the Game Boy Advance (running a Game Boy/Game Boy Color game), writes to wave ram while the channel is active will 
+	[em 
+		"always
+	]em
+	" fail. As such, this trick would not work at all on the GBA and does not work with the emulator set to GBA mode as it accurately emulates such. Due to this, the run must be done with the console mode set to GBC rather than GBA like my existing Crystal TAS does. Some minor work was thus done to "resync" the existing Crystal TAS to the GBC (which in practice was just finding a different TID manip setup).
+	$LF
+]div
+[div class=p 
+	"Note this audio quirk, along with the volume trick, is nothing new. It was already used anyways in 
+	(__wikiLink|displaytext=MrWint's Yellow TAS|href=/3358M)
+	" (and the general idea has likely been used even before that TAS), although that used ~18KHz instead of ~36KHz as I've used.
+	$LF
+]div
+[h4 id=FirstPayload 
+	" The first payload
+	$LF
+]h4
+[div class=p 
+	"The first payload is just exactly the same my 
+	(__wikiLink|displaytext=existing Crystal TAS|href=/6237M)
+	". It simply executes opcodes according to the current joypad value. The game's own joypad routine is used, so it is rather slow compared to a hand crafted joypad reading function, and only the 
+	[code 
+		"HL
+	]code
+	" register is free to be be used. This is enough however to write the second payload.
+	$LF
+]div
+[h4 id=SecondPayload 
+	" The second payload
+	$LF
+]h4
+[div class=p 
+	"The 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS/blob/2e7d5006daeb7d58b8338e1d8d9659f6c88c790e/asm/payload.asm#L12-L30 rel=noopener external nofollow 
+		"second payload
+	]a
+	" is nothing special, it simply swaps over to bank 3 of WRAM (unused by Crystal), and fills the entirety of that bank with data from the joypad, comprising of the final payload.
+	$LF
+]div
+[h4 id=FinalPayload 
+	" The final payload
+	$LF
+]h4
+[div class=p 
+	"The 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS/blob/2e7d5006daeb7d58b8338e1d8d9659f6c88c790e/asm/payload.asm rel=noopener external nofollow 
+		"final payload
+	]a
+	" is where things get interesting. At the beginning, it simply sets up the console state appropriately for the video and audio playback, then falling into a tight "main loop," performing jobs (reading the joypad, adjusting volume, writing to wave ram, DMAing over buffered joypad reads) needed for video and audio playback. The code was mostly carefully written to allow for everything to fall into place (although there's some sloppy work present mostly due to not bothering to clean up some iteration cruft).
+	$LF
+]div
+[div class=p 
+	"Out of the total 462 scanlines within the 3 frames, 280 read 15 bytes each from the joypad for the video buffer, 180 read 10 bytes each, and 2 read 14 bytes each. As such, for each "20 FPS" frame, 6028 bytes end up read for the video (overshooting of course from the target 5760 bytes, but more doesn't hurt in this case). Each of the 462 scanlines too read out 4 bytes from the joypad each for audio handling, for a total of 1848 bytes for each "20 FPS" frame. In total, this means 7876 bytes get read every "20 FPS" frame, averaging around ~2625.3 bytes read per GB frame.
+	$LF
+]div
+[h4 id=SourceCode 
+	" Source Code
+	$LF
+]h4
+[div class=p 
+	"Code for stringing this run together can be found here: 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS rel=noopener external nofollow 
+		"https://github.com/CasualPokePlayer/BadAppleTAS
+	]a
+	$LF
+]div
+[div class=p 
+	"Note that a lot of conversions were actually just done using ffmpeg, the commands for which aren't listed anywhere (but would be relatively easy to re-create if need be).
+	$LF
+]div
+[div class=p 
+	"The movie submitted isn't actually the full movie due to the full movie being too big, the full movie can be found here: 
+	[a href=https://mega.nz/file/B0VXAbKb#-N4vC93fFxL3zuOaiPVubeH5quPdq5oZUW3B46jP-h0 rel=noopener external nofollow 
+		"https://mega.nz/file/B0VXAbKb#-N4vC93fFxL3zuOaiPVubeH5quPdq5oZUW3B46jP-h0
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": This was an entertaining and very technically impressive submission.  I see no reason why this should not be accepted to Alternative.  
+	[b 
+		"There is a site issue with the file size being too large that the site devs will have to figure out, but for now the actual submission file can be downloaded from submission text.
+	]b
+	$LF
+]div
+[div class=p 
+	"Accepting to "arbitrary code execution" goal for Alternative.
+	$LF
+]div
+[div class=p 
+	"Excellent job!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Waiting for someone to upload it.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Replacing the file with what the author sent in a chat.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": file was updated. Thsnks feos. Accepting to "arbitrary code execution" goal for Alternative.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

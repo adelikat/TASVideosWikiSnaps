@@ -1,0 +1,616 @@
+1
+[div class=p 
+	"This run improves the previous TAS by 28723 frames, roughly 8 minutes. 
+	$LF
+]div
+[h3 id=Goals 
+	"Goals
+	$LF
+]h3
+[ul 
+	[li 
+		"Aims for good ending
+		$LF
+	]li
+	[li 
+		"Emulator used: BizHawk 2.9.1
+		$LF
+	]li
+	[li 
+		"Sync settings: use real BIOS, skip firmware
+		$LF
+	]li
+	[li 
+		"Abuses glitches
+		$LF
+	]li
+]ul
+[h3 id=Encode 
+	"Encode
+	$LF
+]h3
+[div class=p 
+	"Bilibili: 
+	[a href=https://www.bilibili.com/video/BV1tVB3Y7EfF/ rel=noopener external nofollow 
+		"https://www.bilibili.com/video/BV1tVB3Y7EfF/
+	]a
+	$LF
+]div
+[div class=p 
+	"Nicovideo: 
+	[a href=https://www.nicovideo.jp/watch/sm44423367 rel=noopener external nofollow 
+		"https://www.nicovideo.jp/watch/sm44423367
+	]a
+	$LF
+]div
+[h3 id=Glitches 
+	"Glitches
+	$LF
+]h3
+[h4 id=RapidMpRestoration 
+	"Rapid MP Restoration
+	$LF
+]h4
+[div class=p 
+	"Normally it takes 60 frames to start an MP restoration and restores 1 MP per frame. I found that repeatedly switching glyph equipments (requires Glyph Sleeve) can make MP restoration faster. Depending on whether MP restoration has started, each switch can make the restoration starts 1 frame earlier or restore 1 extra MP. We can do 1 switch every 2 frame and make MP restoration 50% faster than it normally be. 
+	$LF
+]div
+[h4 id=MagicalTicketGlitch 
+	"Magical Ticket Glitch
+	$LF
+]h4
+[div class=p 
+	"Magical Ticket, the item that teleports player to Wygol Village, is intended to be only usable after rescuing Nikolai and not being in boss fight arena, Wygol Village, or rooms with event. Found by halgorithm, there is a way to use Magical Ticket even if it is restricted. 
+	$LF
+]div
+[div class=p 
+	"By selecting other usable items and move the cursor to Magic Ticket at the next frame, we can bypass the restriction and use Magical Ticket anywhere. 
+	$LF
+	"Also found by halgotithm, there is a way to achieve good ending without rescuing all villagers utilizing magical ticket glitch. By our tests, skipping villagers ends up being slower than rescuing them. 
+	$LF
+]div
+[h4 id=EntityElimination 
+	"Entity Elimination
+	$LF
+]h4
+[div class=p 
+	"For the years player know Ignis can do something wired but don’t know how it works. Geinuhayst found that Union Secare can do the same thing and here is our explanation for this glitch. 
+	$LF
+]div
+[div class=p 
+	"The game stores currently loaded entities from address 0x021092A0 to 0x0211DF5F in RAM. Each entity slot is 0x160-bytes long and numbered from 0x00 to 0xF1. Depending on the slot numbers, the slots have different usage, here is slots we focus on: 
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Slot Number
+			]th
+			[th 
+				"Usage
+			]th
+		]tr
+		[tr 
+			[td 
+				"08-10
+			]td
+			[td 
+				"Y glyph
+			]td
+		]tr
+		[tr 
+			[td 
+				"11-19
+			]td
+			[td 
+				"X glyph
+			]td
+		]tr
+		[tr 
+			[td 
+				"21-2A
+			]td
+			[td 
+				"Union Glyph
+			]td
+		]tr
+		[tr 
+			[td 
+				"2D-7C
+			]td
+			[td 
+				"Various room entities including treasure chests, enemies, enemy spawner, NPCs, etc.
+			]td
+		]tr
+		[tr 
+			[td 
+				"7D-E8
+			]td
+			[td 
+				"Various entities including glyph, enemies’ projectile, items, graphic/visual effects
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"When player cast an Ignis, 7 entities spawn at the same frame. 3 of them are the fireballs: they are stored in slot 09-0B or 12-14 depending on which button the Ignis is armed to. The other 3 are entities that draw particles behind the fireballs: they are stored in the first 3 empty slot among 7D-E8. Each particle entity is linked to 1 of the fireball. When a fireball despawns because of hitting a target, going too far from the screen, or exiting a room, the particles linked with it also despawn. Let’s say a player is in Room A and no entity is loaded in slot 7D-E8. Casting an Ignis will spawns the particles at slot 7D-7F. If player enters Room B, the game unloads the particles and load entities in Room B, potentially taking slot 7D-7F, then the games unloads the fireballs, and any entities loaded in slot 7D-7F, because slot 7D-7F are linked with the fireballs and they despawn along with the fireballs. As a result, some irrelevant entities in Room B can be eliminated with Ignis. 
+	$LF
+]div
+[div class=p 
+	"When player use a Union Secare, 3 entities spawn in an order. First 2 entities are the sword (stored at slot 0x21) and the entity draws afterimage of the sword (stored at the first empty slot among 7D-E8). The third entity spawn at some frame later. It draws the curve track of the sword’s tip and is stored at the first empty slot among 7D-E8. When player use Union Secare, the curve entity despawns at a certain frame of this move. Again, let’s say a player is in the empty room A. When the player use Union Secare, the afterimage takes slot 7D and then the curve takes slot 7E. If player enters Room B, the afterimage remains in slot 7D, the curve get unloaded, and there can be an entity for Room B get loaded in slot 7E (the first empty slot in this case). At a certain frame of Union Secare, the game unloads slot 7E, the slot where the curve was in, and eventually eliminates the irrelevant entity in it in Room B. 
+	$LF
+]div
+[div class=p 
+	"There is two things we can do with this glitch: quickly rescuing villagers, remotely taking action with treasure chests, warp points, NPCs, etc. The first one is simple: by eliminating Torpor (the glyph that traps villagers) the villagers can be freed immediately. 
+	$LF
+]div
+[div class=p 
+	"Here we take treasure chests as an example for explanation of the second trick. When player enter a room with a treasure chest, a D-pad icon will spawns and gets stored at the first empty slot among 7D-E8. The D-pad icon checks player’s position, if player stands near to the treasure chest, a flag (stored at address offset+0x1C) will be set and it becomes visible to prompt the player to press up. The treasure chest does not check player’s position directly but checks the mentioned flag for D-pad icon. If the value of the flag is not 0 and player is standing, player is able to open the treasure chest no matter where the player is. 
+	$LF
+]div
+[div class=p 
+	"In this run we use both Union Secare and Ignis. Ignis can eliminate up to 6 entities at a time if Ignis is equipped to both Y and X button and it allows more things we can do. 
+	$LF
+]div
+[h4 id=PauseGlitch 
+	"Pause Glitch
+	$LF
+]h4
+[div class=p 
+	"Each time unpausing the game there is 1 frame that room transition won’t happen even if player exit a room. By repeatedly pause and unpause the game, we can infinitely delay the room transition and move freely outside the room. 
+	$LF
+]div
+[div class=p 
+	"Trigger room transition far off the room can lead the start position in the next room to be far from the edge of the room and potentially bypass an obstacle. 
+	$LF
+	"This glitch is found by me. 
+	$LF
+]div
+[h3 id=RngManipulationRandomTreasureChests 
+	"RNG manipulation & Random Treasure Chests
+	$LF
+]h3
+[div class=p 
+	"When starting a new game or loading a save, the RNG seed is initialized according to the global timer: 
+	$LF
+]div
+[div class=p 
+	"RNG_Seed = (GlobalTimer << 16 >> 8) + 0x1E86EF (Here >> refers to logical right shift.)
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Description
+			]th
+			[th 
+				"Address
+			]th
+			[th 
+				"Data Size
+			]th
+		]tr
+		[tr 
+			[td 
+				"RNG seed
+			]td
+			[td 
+				"021389C0
+			]td
+			[td 
+				"4 bytes
+			]td
+		]tr
+		[tr 
+			[td 
+				"Global timer
+			]td
+			[td 
+				"020FFC54
+			]td
+			[td 
+				"4 bytes
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"After initializing RNG seed, random numbers are generated by the below function and used as the RNG seed for the next random number. 
+	$LF
+]div
+[div class=p 
+	"RandomNumber = (RNG_Seed >> 8) * 0x3243F6AD + 0x1B0CB175 (Here >> refers to logical arithmetical shift.)
+	$LF
+]div
+[div class=p 
+	"Each global timer value gives a certain random number sequence, and we can manipulate the random number sequence by delaying the frame for starting new game. 
+	$LF
+]div
+[div class=p 
+	"In many areas there are treasure chests with random contents. Contents in all random treasure chests in the area are determined at the same frame entering the area. There isn’t a way to manipulate the RNG between determining every content, leading it to be very difficult to manipulates multiple contents in a same area. 
+	$LF
+]div
+[div class=p 
+	"In this run we delay the timing for starting new game by 1 frame, due to the earliest global timer count cannot give a single random number that gives all the items we want in Monastery. 
+	$LF
+]div
+[div class=p 
+	"In Wygol Village, random treasure chests refill and re-determine the contents each time a boss is killed. The chests give Meat (restores 29 HP) in 25% chance, Milk (restores 4 hearts) in 50% chance, and Coffee (restores 6 hearts) in 25% chance. Thanks to Ignis, we can collect Coffee as many as we can with little time loss in this run. 
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Description
+			]th
+			[th 
+				"Address
+			]th
+			[th 
+				"Data Size
+			]th
+		]tr
+		[tr 
+			[td 
+				"Wygol chest content 1
+			]td
+			[td 
+				"021007BA
+			]td
+			[td 
+				"2 bytes
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wygol chest content 2
+			]td
+			[td 
+				"021007BC
+			]td
+			[td 
+				"2 bytes
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wygol chest content 3
+			]td
+			[td 
+				"021007BE
+			]td
+			[td 
+				"2 bytes
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wygol chest content 4 (unused)
+			]td
+			[td 
+				"021007C0
+			]td
+			[td 
+				"2 bytes
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=StageByStageComments 
+	"Stage by Stage Comments
+	$LF
+]h3
+[h4 id=Beginning 
+	"Beginning
+	$LF
+]h4
+[div class=p 
+	"We skip the opening movie before the title screen by soft reset (L+R+select+start). This is roughly 0.5 second faster than just pressing buttons. Soft reset also sets global timer’s value to 0. As mentioned earlier, we wait for 1 frame before starting new game for manipulating Monastery random treasure chests. 
+	$LF
+]div
+[h4 id=Ecclesia 
+	"Ecclesia
+	$LF
+]h4
+[div class=p 
+	"In the hand Glyph tutorial section we need to attack Barlowe 3 times and he teleports between each attack. Like other enemies, Barlowe has 3 invincibility timers against different attacks. The invincibility timers freeze during the time he is doing teleport. 
+	$LF
+	"In this run we attack Barlowe with Y, X, and Y attack, and only wait for the invincibility before 3rd attack. (Y attack and X attack are regarded as different attack.)
+	$LF
+]div
+[div class=p 
+	"At the end of this area we change the movement pattern only for manipulating Monastery random treasure chests, costing a few frames. 
+	$LF
+]div
+[h4 id=Monastery 
+	"Monastery
+	$LF
+]h4
+[div class=p 
+	"In Monastery we collect 2 Heart Repairs (restores 30 hearts) and 1 Magical Ticket from 3 random treasure chests. Though collecting the 2 Heart Repairs costs some time, it allows us not to wait for MP restoration in Arthroverta fight. 
+	$LF
+]div
+[div class=p 
+	"In the last horizontal room where Zombies spawn, we optimize the positions where Zombies spawn, in a way that we can get Shanoa knocked forwards when doing 1-frame jump and touching Zombies. 
+	$LF
+]div
+[div class=p 
+	"Nikolai only appears in Wygol Village after seeing the event in the last room of Monastery. After seeing that event we use Magic Ticket glitch to quickly warp to Wygol Village, skipping the entire backtracking section. 
+	$LF
+]div
+[h4 id=RuvasForest 
+	"Ruvas Forest
+	$LF
+]h4
+[div class=p 
+	"Collects 2 Heart Repairs from random treasure chests here. 
+	$LF
+]div
+[h4 id=KalidusChannelUpperPart 
+	"Kalidus Channel (Upper Part)
+	$LF
+]h4
+[div class=p 
+	"With Union Secare we can collect the Heart Max Up at the beginning of the area. (The chest lies underwater and normally inaccessible at current progress.) Though it is possible to rescue Jacob with Union Secare, we opt to absorb Torpor to save hearts for Giant Skeleton fight. 
+	$LF
+]div
+[h4 id=MineraPrisonIsland 
+	"Minera Prison Island
+	$LF
+]h4
+[div class=p 
+	"Throughout the area we manipulate Spear Guards to do poke attack, allowing Shanoa to get knocked forwards when taking damage. 
+	$LF
+]div
+[div class=p 
+	"At the early part we collect Military Wear from a random treasure chest and equip it. Military Wear has a lower DEF than Protect Ring, another equipment can be gotten from random treasure chest, but it gives a resistance against slash attribute and cut more damage from Spear Guards and the swinging blade at the middle of the area. 
+	$LF
+]div
+[div class=p 
+	"In this game there are some 1x1 sized rooms that the game loads data in bulk after player goes across the center of the room. If player exits the room too quick the room transition becomes longer. In Minera Prison Island we need to open the menu twice. We do it in 2 of the rooms with long transition, so we can give the game more time to load data and shorten the room transition. This trick is also used in Oblivion Ridge and Dracula’s Castle. 
+	$LF
+]div
+[div class=p 
+	"At the last part of the area we skip Falcis. Falcis has slower startup and combo in exchange for higher ATK, and Union Falcis has equal ATK to Union Secare but the hitbox is poor. Overall collecting Falcis does not save time. 
+	$LF
+]div
+[h4 id=Lighthouse 
+	"Lighthouse
+	$LF
+]h4
+[div class=p 
+	"Thanks to Union Secare we are able to activate the elevator early and instantly kill Brachyura. One thing we need to point out is that the quick kill can sometime crash the game. The crash seems to be related to the state of 0x7E entity slot. We prevent the crash by activating the elevator when Brachyura starts showing up. Aceearly1993 and 大魚 helped to test our idea on US and JPN version respectively on console, with Ignis instead of Union Secare, and it works. Somehow DeSmuME never crash when executing the quick kills, and there are some videos made with DeSmuME floating around that are actually unable to replicate on console. 
+	$LF
+]div
+[div class=p 
+	"After Brachyura fight, we move some extra distance to open a relic chest and then rescue Eugen. Torpor occupies 0x7D slot in Eugen room, to eliminate it we need to make Union Secare’s curve to take 0x7D slot in either of the rooms next to Eugen. 0x7D slot in Brachyura fight arena seems impossible to be freed. In relic chest room, the D-pad icon linked with the chest takes 0x7D slot. We free this slot by simply open the chest. 
+	$LF
+]div
+[h4 id=KalidusChannelLowerPart 
+	"Kalidus Channel (Lower Part)
+	$LF
+]h4
+[div class=p 
+	"Nothing special. We does not collect Gold Ring here because we do not need as much money as the old TAS does. 
+	$LF
+]div
+[h4 id=TymeoMountains 
+	"Tymeo Mountains
+	$LF
+]h4
+[div class=p 
+	"At a room the path splits into 2. Normally player should go to the left branch to unlock Misty Forest Road at the first visit and go to right branch to rescue Marcel after having double jump. We are able to go to the right branch with pause glitch. In the right branch we also collect Moonwalkers, Ignis, and a Heart Max Up. 
+	$LF
+]div
+[div class=p 
+	"Moonwalkers increases backdash initial speed by 1 pixel and gives 12-frame invincibility when doing backdash. It saves time throughout the rest of the run. 
+	$LF
+]div
+[div class=p 
+	"Exiting the area from the right branch also unlocks Misty Forest Road. As such the entire left branch can be skipped. 
+	$LF
+]div
+[h4 id=MistyForestRoad 
+	"Misty Forest Road
+	$LF
+]h4
+[div class=p 
+	"We collect a Milk (restores 4 hearts) from Black Fomor. The recovery is minimal but allows us to use an extra Union Secare in Goliath fight. 
+	$LF
+]div
+[h4 id=SkeletonCave 
+	"Skeleton Cave
+	$LF
+]h4
+[div class=p 
+	"The length of Maneater death animation can be shorten by killing when its position is low. The time save is so significant that we opt to save the item and wait for Maneater to do the drop attack. 
+	$LF
+]div
+[div class=p 
+	"Beating Maneater unlocks Battle Boots (STR+2) in the shop. Before heading to Somnus Reef we go to the shop, sell the Archer Ring that we got in Tymeo Mountains and buy 2 Tonic (restores 100 MP), 9 Magical Tickets, and Battle Boots. 
+	$LF
+]div
+[h4 id=SomnusReef 
+	"Somnus Reef
+	$LF
+]h4
+[div class=p 
+	"In Rusalka fight we manage to hit the boss 4 times with bat form’s single kick. The kick’s hitbox at the first frame which is active is very small and lies below Shanoa, to hit Rusalka with the tiny hitbox we have to jump and get close to it. 
+	$LF
+]div
+[h4 id=KalidusChannelBacktracking 
+	"Kalidus Channel (Backtracking)
+	$LF
+]h4
+[div class=p 
+	"Before going to Giant’s Dwelling, we need to restore hearts in Wygol Village. Instead of directly going to Wygol Village, we backtrack to Kalidus Channel first. There we rescue Monica and use Magical Ticket to warp to Wygol Village. We cast an Ignis before using Magical Ticket and eliminate 3 D-pad icons that linked with the censer and 2 chests in Wygol Village, so we can make censer spawns big hearts before reaching it and collect 2 Coffee there. 
+	$LF
+]div
+[h4 id=GiantSDwelling 
+	"Giant’s Dwelling
+	$LF
+]h4
+[div class=p 
+	"Here we collect Barbarian Helm (STR+5) from Barbarian Beast and 5 Heart Repairs from Ladycats, and skip Vol Falcis. Vol Falcis is powerful and does around twice as much damage as Secare. but by our tests collecting Vol Falcis ends up being slower overall. 
+	$LF
+]div
+[h4 id=TristisPass 
+	"Tristis Pass
+	$LF
+]h4
+[div class=p 
+	"On the way there is a frozen waterfall, where player should absorb Vol Grando on top of the waterfall to unfreeze it. We bypass waterfall with pause glitch and it saves around 3 seconds. Also we does not collect Traveler’s Hat like the old TAS does, for it is less powerful than Barbarian Helm. 
+	$LF
+]div
+[h4 id=OblivionRidge 
+	"Oblivion Ridge
+	$LF
+]h4
+[div class=p 
+	"Gravedorcus death animation only starts after it dives under the ground. We manipulate Gravedorcus to do specific attacks so we can kill it just before it dives under the ground and make the death animation starts early. 
+	$LF
+]div
+[div class=p 
+	"After seeing the event in the last room, we cast 2 Ignis and use Magical Ticket to warp to Wygol Village. It eliminates 6 entities, 4 of them are D-pad icons linked with the censer, 2 treasure chests, and the exit of Wygol Village. With the icon eliminated we can exit Wygol Village anywhere, and we time exiting the village so we can restore hearts and collect 2 Coffee when the screen fade out. We do not do this trick after backtracking Kalidus Channel because it requires to open the Glyph equipment menu one more time there. 
+	$LF
+]div
+[h4 id=MineraPrisonIslandBacktracking 
+	"Minera Prison Island (Backtracking)
+	$LF
+]h4
+[div class=p 
+	"We revisit Minera Prison Island to rescue Aeon as late as possible, so we can come here with highest max MP. It is possible to rescue Aeon with pause glitch at the fist visit, but pause glitch takes too much time here. 
+	$LF
+]div
+[h4 id=ArgilaSwamp 
+	"Argila Swamp
+	$LF
+]h4
+[div class=p 
+	"Nothing special except a Jersey Devil warps into the screen. We don’t know why it happens but it is just funny. There is a random treasure chest on the way that can gives Tonic, but we don’t need Tonic anymore. 
+	$LF
+]div
+[h4 id=MysteryManor 
+	"Mystery Manor
+	$LF
+]h4
+[div class=p 
+	"At the very end of Albus fight, we cast 2 Dominus Hatred. Albus is weak against dark attribute, and Dominus Hatred do very well damage. Due to full MP only affords 2 Dominus Hatred and it gives Albus 30-frame invincibility against the same attack, we only use it at the very end of the fight. Dominus Anger has a same ATK with Dominus Hatred, but the startup is too slow and it also gives Albus 30-frame invincibility, giving us no reason to use Dominus Anger. 
+	$LF
+]div
+[div class=p 
+	"After Albus fight we restore full hearts and collect 2 Coffee in the Wygol Village. Though the following Barlowe fight requires 75 hearts, we need to leave enough hearts for Dracula’s Castle in this run. 
+	$LF
+]div
+[h4 id=Ecclesia_2 
+	"Ecclesia
+	$LF
+]h4
+[div class=p 
+	"As we skip Vol Grando in Tristis Pass, we cannot use more powerful ice sword Union Glyph in Barlowe fight, but we can use Union Secare without problem. 
+	$LF
+]div
+[h4 id=CastleEntrance 
+	"Castle Entrance
+	$LF
+]h4
+[div class=p 
+	"We perform a warp when entering Dracula’s Castle. We do not why it happens but exiting Wygol Village while Shanoa is on a ramp and then entering Dracula’s Castle can sometime make the game fail to correctly initialize Shanoa’s coordinate in Dracula’s first room. In case that the coordinate initialization fails, Shanoa appears at bottom right off the first room, zips up due to being inside the floor, and trigger the room transition when Shanoa’s position is high enough, and enters the room on the right. For the years speedrunner do this trick with Redire, but this can be done with Ignis as well. We use Ignis to eliminate the D-pad icon that linked to the exit of Wygol Village so we can exit the village while reaching the ramp. 
+	$LF
+]div
+[div class=p 
+	"We forgo Heart Max Up on the way. At this point we have enough heart-restoring items and we can use them in exchange for avoiding the pause of getting Heart Max Up. 
+	$LF
+]div
+[h4 id=Library 
+	"Library
+	$LF
+]h4
+[div class=p 
+	"It is possible to skip Wallman fight with pause glitch, but it does not save time. On the way to next area, we explore the warp point near Forsaken Cloister and collect Dextro Custos.
+	$LF
+]div
+[h4 id=ForsakenCloister 
+	"Forsaken Cloister
+	$LF
+]h4
+[div class=p 
+	"Forsaken Cloister connects with Library, Mechanical Tower, and Final Approach. Player should collect Dextro Custos, Sinestro Custos, and Arma Custos, and use them at the Cerberus room (the central room of this area) to open the lock that blocks the way to Final Approach, the final stage of the game. Geinuhayst found the suspend glitch (
+	[a href=https://tasvideos.org/Forum/Topics/8036?CurrentPage=8&Highlight=521537#521537 rel=noopener external nofollow 
+		"https://tasvideos.org/Forum/Topics/8036?CurrentPage=8&Highlight=521537#521537
+	]a
+	" ) which can be used to reach Final Approach without opening the lock. However, Dracula won’t show up unless the event after opening the lock has be seen, we still need to collect the 3 Custos glyph. 
+	$LF
+]div
+[div class=p 
+	"There is also a lock that blocks the way to Mechanical Tower, the area Sinestro Custos is located. We can just bypass this lock with pause glitch. The entire Underground Labyrinth and Barracks area are skipped. 
+	$LF
+]div
+[h4 id=MechanicalTower 
+	"Mechanical Tower
+	$LF
+]h4
+[div class=p 
+	"After Death fight we collect Sinestro Custos and have 40 hearts remained. We need to collect 20 hearts on the way to Eligor so we can use laser sword Union Glyph in the fight against Eligor. 
+	$LF
+]div
+[h4 id=ArmsDepot 
+	"Arms Depot
+	$LF
+]h4
+[div class=p 
+	"In the room before Eligor fight arena, we collect a Mint Sundae, the item that restores 10 hearts. 
+	$LF
+]div
+[div class=p 
+	"In the first phase of Eligor fight, we can land on its back from the front when it is doing a stab attack or using the crossbow. We manipulate it to do stab attack early and land on its back, jump over its head and quickly kill it. We aren’t able to kill it without jumping over its head because Eligor seems to be immune to any attack when player is not on its back. 
+	$LF
+	"After Eligor fight, we have all the Custos glyph. We again collect 2 Coffee in Wygol Village and head to Final Approach via Forsaken Cloister. 
+	$LF
+]div
+[h4 id=FinalApproach 
+	"Final Approach
+	$LF
+]h4
+[div class=p 
+	"At the moment we start Dracula fight, we have 116 hearts, 1 Mint Sundae and 4 Coffee (restores 34 hearts in total) in inventory, which allows using laser sword Union Glyph 10 times, We spends all hearts and items to kill Dracula and eventually close the run. 
+	$LF
+]div
+[h3 id=LuaScript 
+	"Lua Script
+	$LF
+]h3
+[div class=p 
+	"Here is a script altered from the one we used for creating this run. It features a prediction of enemy drops and a entity slot state viewer. 
+	$LF
+]div
+[div class=p 
+	[a href=https://tasvideos.org/UserFiles/Info/638700540172624460 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638700540172624460
+	]a
+	$LF
+]div
+[h3 id=Acknowledgements 
+	"Acknowledgements
+	$LF
+]h3
+[ul 
+	[li 
+		"Thanks to klmz and KSeptuple for their help while creating this run. 
+		$LF
+	]li
+	[li 
+		"Thanks to mtbRc for the prior any% TASes. 
+		$LF
+	]li
+	[li 
+		"Thanks to Aceearly1993 and 大魚 for testing Brachyura quick kill on console. 
+		$LF
+	]li
+	[li 
+		"Thanks to the handheld IGAVania speedrun community, especially halgorithm, for their ideas of improvement. 
+	]li
+]ul

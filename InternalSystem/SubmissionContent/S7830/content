@@ -1,0 +1,118 @@
+10
+[div class=p 
+	"You read that right. Max score, Desert Bus. ~33 day long TAS.
+	$LF
+]div
+[div class=p 
+	"This is an actual serious submission, now with the new rules apparently making this acceptable.
+	$LF
+]div
+[div class=p 
+	"Rerecord count is just from preparing the intro and doing some research. A majority of the run was automated, using a stripped down environment to quickly generate the input (well, it still took ~1.5 days to generate). The repo for this can be found here: 
+	[a href=https://github.com/CasualPokePlayer/slimhawk rel=noopener external nofollow 
+		"https://github.com/CasualPokePlayer/slimhawk
+	]a
+	$LF
+]div
+[div class=p 
+	"Also, input ends early here. For the final trip, I skew to the left side of the road enough to ensure once I stop input, the bus will not slow down faster than otherwise. I didn't know exactly where it should stop (outside of a rough guess of 0x181 game distance units), so I set my bot to slowly figure it out with a buffer of 0x400 distance.
+	$LF
+]div
+[div class=p 
+	"Thanks goes to Dacicus for a lua script I referenced when making my C bot. The lua script can be found here: 
+	[a href=https://tasvideos.org/UserFiles/Info/58177909671900143 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/58177909671900143
+	]a
+	$LF
+]div
+[div class=p 
+	"Now for actual issues with this submission: while this movie was originally intended for 2.8, it requires a dev build to actually play back. Simply be, BizHawk will crash if you load a movie with more than 134217728 frames. This wasn't an explicit limitation, but rather it was due to implementation details with .NET. 
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	" The issue has been fixed in 2.9 development builds. No sync related changes for gpgx have actually occurred which particularly affect, and there probably will not be when 2.9 is released (as the core isn't particularly active in maintaining). If absolutely needed, I can simply re-run my bot with 2.9's gpgx.
+	$LF
+]div
+[div class=p 
+	"Another fun issue for this TAS was that previously submitting this would crash the site parser. This was due to it reading the ENTIRE input log file at once, UNCOMPRESSED, into a single string. The input log file here is 2.7GB uncompressed (and as a fun bonus, .NET stores strings as UTF16 rather than UTF8, so reading the file into a single string resulted in a 5.4GB sized string!). This easily hit .NET's 2GB limit, and thus crashed and resulted in a "general error." This has been fixed of course (otherwise this submission could not happen :P)
+	$LF
+]div
+[div class=p 
+	"Extra thanks to Samsara for saying Desert Bus is now acceptable and thus making me do this insane thing.
+	$LF
+]div
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" For those interested in gory technical reasons: Internally, BizHawk uses a "List" of strings to store input. Internally, this "List" uses an array of strings, whose size is doubled every time it needs to grow. So when the array has 134217728 strings in it, and it needs to double when another string is added, which results in an array of 268435456 strings. In .NET, a single object cannot be > 2GB in size. And in .NET, a string is a reference type (i.e. "pointer"), which on a 64-bit system is 8 bytes big. 268435456*8=2147483648, 2GB, add some more bytes for size... whoops, too big! 
+	[del 
+		"The workaround is simple: use a fixed size for the growth of the "List" (16777216 is used in 2.9 dev's fix, which should in practice help not insanely long TASes a tad performance wise as a bonus).
+	]del
+	" And we ended up ditching that due to some other issues and just made it so "very large objects" were allowed, so the List should be able to store at least 4294967295 frames of input.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": oh no
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Y'know what? I'm gonna set this to Needs More Info, partially to be unique but also to be entirely accurate. Thing is, the info we need is whether or not we can actually, from a purely technical standpoint, publish a TAS that is over a month long, so I'll get back to y'all when we stop shrieking in fear and figure it out one way or another.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I think we've managed to get to a place where we've figured out how we want to publish this.
+	$LF
+]div
+[div class=p 
+	"It's been quite a while since this was submitted and the acceptability of it was discussed, so here's a quick reminder of my thoughts and why those are irrelevant now. My initial thought with this run was simply that it shows superhuman capability through endurance. Human limits make this run nearly impossible in RTA (and actually impossible for a single human): Assuming you have a large group of people and absolutely nothing goes wrong the entire time, which over the course of over a month is a slim possibility, it is theoretically possible, but even in situations where 
+	[a href=https://desertbus.org rel=noopener external nofollow 
+		"a group of people actively play the game for extended periods of time
+	]a
+	", plenty of things go wrong. In other words, this is absolutely not a trivial run. The gameplay itself is intentionally trivial, but reaching the score limit in particular has and probably will never be done by human hands. All that being said, since this run was submitted, we 
+	(__wikiLink|displaytext=repealed the triviality clause|href=/MovieRules/History#TrivialityIsNoLongerARejectionFactor20221231)
+	" and came up with a solid definition for the kinds of things we can accept. Desert Bus clearly fits this criteria, so all of my waxing poetic over surpassing human limits and arguing against triviality is effectively meaningless.
+	$LF
+]div
+[div class=p 
+	"That just left the publication issue, or as I like to call it, several agonizing months of circular conversation that never really got anywhere. Just to put it bluntly: We cannot publish this normally. YouTube will not allow it. I believe the downloadables on Archive are going to be "normal" (although there could definitely be problems with uploading them, because Archive), but there's no way we can come to a sensible conclusion with putting the entire thing on YouTube. Simply put, it would take too much time that we can't spare and too many resources that we can't afford. A conservative estimate was that uploading the full run to YouTube in some way would take nearly two full months from a single Publisher, which is absolutely unreasonable in our collective opinion as staff. It would be shorter if we had multiple Publishers working, but the more hands we tie up with this single run, the less people we have working on the rest of the workbench, and not only do we not have that many Publishers to begin with, but we're in a record-shattering year of submissions that are only going to keep piling up. We can barely afford to have one Publisher tied up on Desert Bus, multiple would be a nightmare. I believe the consensus was to only put the first point on YouTube and link to the downloadables for anyone who really wants to watch the full run. It's possible that, in the future, should we have more time/resources/people to spare, that the other 98 points can also go up, but we're not going to focus on that right now or likely even anytime soon. We have the rest of the site to focus on.
+	$LF
+]div
+[div class=p 
+	"Welp. Time to be the person who literally accepts Desert Bus on TASVideos. E-mail me some Rumple Minze if you want to help me deal with the inevitable fallout. My e-mail address is some letters. What's alcohol poisoning? Good luck.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	" has already begun the publication process. Also, I've wiped the rerecord count since the run contains 33 days of botted input.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Well shit.
+]div

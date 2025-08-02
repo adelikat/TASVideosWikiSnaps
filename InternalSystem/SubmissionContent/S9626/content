@@ -1,0 +1,2127 @@
+13
+[div class=p 
+	""Gotta go fast!"
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	$LF
+]div
+[div class=p 
+	"Notes for judges/TASVideos staff: the actual TAS file is not the one I submitted, due to my own TAS file type obviously not being supported. I have currently nested a ".3ct TAS file" inside the .bk2, and this .3ct is the file I am submitting here. I have also uploaded it in the form of a .txt file as a userfile: 
+	(__wikiLink|href=/UserFiles/Info/638791195450995494|implicitdisplaytext=UserFiles/Info/638791195450995494)
+	" which would need to be renamed as a .3ct file to run it in my emulator. It's a long story, but to save you some time looking for the emulator, I've put a link to the GitHub right 
+	[a href=https://github.com/100thCoin/TriCNES rel=noopener external nofollow 
+		"here
+	]a
+	". Thanks! I guess .3ct files don't have any way of tracking rerecord counts. Let's just say this one had 101405 rerecords, since my code the find the best list of cartridges found that many potential working set of cartridges, and this one was chosen due to how much I liked the cartridges in this list.
+	$LF
+]div
+[div class=p 
+	"For a video based explanation of this run, see the following:
+	$LF
+	(youtube|v=pK7hU-ovUso)
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#IntroductionToTheObjectives 
+					" Introduction to the Objectives:
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheIntroduction 
+					" Introduction to the Introduction
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToThe6502Cpu 
+					" Introduction to the 6502 CPU
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheMmc3MapperChip 
+					" Introduction to the MMC3 mapper chip
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheSuperMarioBros3Code 
+					" Introduction to the Super Mario Bros. 3 code
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheAudioProcessingUnit 
+					" Introduction to the Audio Processing Unit
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheIntercycleCartridgeSwap 
+					" Introduction to the Intercycle Cartridge Swap
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheRun 
+					" Introduction to the Run
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToThePictureProcessingUnitSResetFlag 
+					" Introduction to the Picture Processing Unit's Reset Flag
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToThePhysicsProblem 
+					" Introduction to the Physics Problem
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheTricnesEmulator 
+					" Introduction to the TriCNES emulator
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheConsoleVerificationProcess 
+					" Introduction to the console verification process
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheConclusion 
+					" Introduction to the Conclusion
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheSpecialThanks 
+					" Introduction to the Special Thanks
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#IntroductionToTheReferences 
+					" Introduction to the References
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=IntroductionToTheObjectives 
+	" Introduction to the Objectives:
+	$LF
+]h3
+[ol 
+	[li 
+		"Do a little tomfoolery
+		$LF
+	]li
+	[li 
+		"Stop n' Swop but without stopping
+		$LF
+	]li
+	[li 
+		"Beat the game in 0.00001676 seconds from power on
+		$LF
+	]li
+]ol
+[h3 id=IntroductionToTheIntroduction 
+	" Introduction to the Introduction
+	$LF
+]h3
+[div class=p 
+	"ACEVideos day has arrived once again, so I want you to consider the following hypothetical. You want to play a good ol' fashion run of Super Mario Bros. 3, but your bedtime is in 17 microseconds. By following this handy tutorial, we might just be able to a get a full run in, with a quarter of a microsecond to spare.
+	$LF
+]div
+[div class=p 
+	"Back in 2021 when I submitted 
+	(__wikiLink|displaytext=this run of Super Mario Bros. 3|href=/7273S)
+	", some people asked me if this was "the fastest possible completion" of the game. One of the first ideas I had to improve it was "in theory, if you could swap NES cartridges between CPU cycles, you could run arbitrary code by knowing where the PC is and the value of that address in every single NES cartridge". I call this method of running arbitrary code "Intercycle Cartridge Swapping", and in this TAS I aim to use this in order to complete Super Mario Bros. 3 as quickly as possible.
+	$LF
+]div
+[div class=p 
+	"Before we actually talk about the run, I need to dump a couple years worth of NES programming knowledge upon you, so bear with me. (And if you aren't interested in how the NES CPU works, I have provided an optional "Story Mode" at the end of each section.)
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-2363-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-2363-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-2363-0 
+		]div
+		[div class=tab-pane fade id=tabs-2363-1 
+			[div class=p 
+				"I want to just give a quick overview of how this came to be. I was making a custom NES emulator in late 2021 around the time I submitted my first TAS here on TASVideos. When I optimized the run down to 13 frames, 3 of which have inputs, it started to sound realistic that the game could be brute forced. Could the game be beaten in only 2 frames of inputs? I had to find out. I can't recall how accurate my emulator at the time was, (I know it didn't have open bus support) but I ran all combinations of 2 controllers for those two frames. My emulator at the time determined the 13 frame TAS I submitted in 2021 was the best I could make. But people asked me, and I still wondered, "Could it be done faster if we get looser with the rules?"
+				$LF
+			]div
+			[div class=p 
+				"People joke about creating some sort of high-energy-particle-emitter and firing it at the NES to cause bit flips, and while that would be amusing, I like the idea of using official hardware with my exploits. When making a NES emulator, you become quite familiar with how the CPU works, and while implementing the MMC3 mapper, I had an interesting thought. The way the code is swapped out in ROM banks completely changes what bytes exist in the ROM address space. But what if instead of swapping banks intentionally, I maliciously used the cartridge slot an another input for a TAS?
+				$LF
+			]div
+			[div class=p 
+				"This idea sat in the back of my mind for a few years, and I didn't really consider making it until 2023, where I modified bizhawk to allow cart-swapping mid-TAS. That's when I realized, "Hey, this might not be as far-fetched of an idea as I thought."
+				$LF
+			]div
+			[div class=p 
+				"After submitting the bad apple TAS, I got to work making a new NES emulator. The old ones I had made have never really had any amount of accuracy tests done on them, so this time I wanted to do it right. As I got the emulator working, I began testing the idea of swapping carts between CPU cycles, and it worked. Perhaps I was jumping the gun a bit, for my emulator still had accuracy issues to work out, but in that moment I knew I had to make a video about this. At the time, I was still working on my video that explains how the Bad Apple TAS works, but I included a little teaser at the end saying "What if I could beat Mario 3 in 5 millionths of a second?". I wrote a script, but realized something important. I still never made a video explaining the 13 frame TAS from 2021. "Alright, a two-parter." I said to myself.
+				$LF
+			]div
+			[div class=p 
+				"And so I got to work, making the NES emulator, and passing as many accuracy test ROMs as I could find. I had a lot of help from people in the NesDev Discord, and after 8 months, I was satisfied.
+				$LF
+			]div
+			[div class=p 
+				"This has been the combination of all my knowledge about the NES, several months of work creating my own NES emulator to pull this off, more months of work to spread the word about this, and the eventual console verification of this method. I present to you, the Intercycle Cart Swap TAS Proof of Concept.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/CADI85Y.png 
+				]img
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToThe6502Cpu 
+	" Introduction to the 6502 CPU
+	$LF
+]h3
+[div class=p 
+	"In this context, a byte is an 8 bit value. This means a single byte could represent any number from 0 to 255. If we're using base 16 (hexadecimal) then that range is conveniently every possible 2-digit hex number. $00 to $FF. (the '$' symbol is used in 6502 Assembly to denote the following number is in base 16.)
+	$LF
+]div
+[div class=p 
+	"Suppose we have more than one byte, and each of these bytes could have a different value. If the CPU wants to read one of these bytes, it needs to have some way of referring to each byte separately. We'll give each byte an "address". The first byte will be address 0, the next will be address 1, and so on. Now when the CPU wants to read the value of a specific byte, we can also say which byte we want to read by providing the address.
+	$LF
+]div
+[div class=p 
+	"The CPU of the NES has a 16-bit address space, which means there are 65,536 addresses, which we will label in hexadecimal from $0000 to $FFFF. The program data of a game cartridge will be accessible from address $8000 through $FFFF. While the CPU is running it processes bytes one at a time. The CPU needs to keep track of which byte to process next, and it tracks this information in a 16-bit register called the Program Counter, or PC for short. So if the PC is at address $8000, when the CPU processes the next byte, the value of the byte at address $8000 will be read, and then the PC will increment to address $8001 for the next byte to be processed.
+	$LF
+]div
+[div class=p 
+	"To provide even more detail, when the CPU needs to read a byte, it needs to put the target address on the 16-bit "Address Bus". Then, the value read will be put on the 8-bit "Data Bus". So if the CPU needs to process another byte, the value of the program counter is transferred to the address bus, which will then be used to determine the byte to read.
+	$LF
+]div
+[div class=p 
+	"The CPU works one cycle at a time. Each cycle is either a read, or a write. For an example, let's study the instruction 
+	[code 
+		"LDA $8000
+	]code
+	". The bytes that create this instruction in the program data of the cartridge would look like this: 
+	[code 
+		"$AD  $00  $80
+	]code
+	".
+	$LF
+]div
+[ol 
+	[li 
+		"The value of the PC is transferred to the address bus, and Cycle 1 will read the byte determined by the address bus. This would be 
+		[code 
+			"$AD
+		]code
+		". The program counter is incremented. The value of 
+		[code 
+			"$AD
+		]code
+		" tells the CPU we're running the LDA Absolute instruction.
+		$LF
+	]li
+	[li 
+		"The value of the PC is transferred to the address bus, and Cycle 2 will read the byte determined by the address bus. This would be 
+		[code 
+			"$00
+		]code
+		". The program counter is incremented. That value of 
+		[code 
+			"$00
+		]code
+		" will be stored in the "data latch" of the CPU.
+		$LF
+	]li
+	[li 
+		"The value of the PC is transferred to the address bus, and Cycle 3 will read the byte determined by the address bus. This would be 
+		[code 
+			"$80
+		]code
+		". The program counter is incremented. That value of 
+		[code 
+			"$80
+		]code
+		" and the value stored in the data latch, (
+		[code 
+			"$00
+		]code
+		") are combined to form the value 
+		[code 
+			"$8000
+		]code
+		" which is stored in the address bus.
+		$LF
+	]li
+	[li 
+		"The value of the address bus is NOT overwritten by the PC, and Cycle 4 will read the byte determined by the address bus. This would be whatever value is at address 
+		[code 
+			"$8000
+		]code
+		". Since this is the 
+		[code 
+			"LDA
+		]code
+		" instruction, the value read by cycle 4 will be stored in the CPU's A register.
+		$LF
+	]li
+]ol
+[div class=p 
+	"The instruction 
+	[code 
+		"STA $8000
+	]code
+	" would behave very similarly. The first 3 cycles would actually be nearly identical, with the exception of the value read in cycle 1 being 
+	[code 
+		"$8D
+	]code
+	" instead. Since that value represents the STA Absolute instruction, cycle 4 will instead 
+	[em 
+		"write
+	]em
+	" to the value at address $8000.
+	$LF
+]div
+[div class=p 
+	"To fully understand how the CPU works, I'd basically need to explain every instruction of the CPU, which I don't plan to do here. I will however explain the 5 most important ones for this run. LDA Immediate, STA Absolute, JMP, BRK, and RESET.
+	$LF
+]div
+[div class=p 
+	"LDA Immediate is a 2 cycle instruction that loads the A register with the value read during cycle 2. Eg. 
+	[code 
+		"LDA #5A
+	]code
+	" loads the A register with the value 
+	[code 
+		"$5A
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"STA Absolute was already explained, but I'll explain it again for safe measure. STA Absolute is a 4 cycle instruction that will store the value of the A register in the byte at a target address.
+	$LF
+]div
+[div class=p 
+	"JMP is a 3 cycle instruction that moves the program counter to a target address.
+	$LF
+]div
+[div class=p 
+	"BRK is a 7 cycle instruction that moves the program counter to a specific address. The value of address $FFFE and $FFFF are combined to form the new location of the Program Counter. This instruction also pushes 3 bytes to the stack, but don't worry about that. The logic for this instruction is primarily used in interrupts
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	" to move the PC to a specific function to handle interrupts, but again, don't worry too much about that.
+	$LF
+]div
+[div class=p 
+	"RESET is a 7 cycle instruction, reusing logic from the BRK instruction. When powering on the console, this is the first instruction the CPU will process, but unlike the BRK instruction, this uses the value of addresses $FFFC and $FFFD to determine where to move the PC. It's worth knowing the timing of this, as it will be relevant when the run begins. Address $FFFC is read during cycle 6, and address $FFFD is read during cycle 7.
+	$LF
+]div
+[div class=p 
+	"So to recap, when you power on the console, the first 7 CPU cycles will be spent running the RESET instruction, which moves the PC to some specific address where the game's logic will begin. Each instruction will begin by reading from where the PC currently is, and every time the PC is transferred to the address bus, it is also incremented. The LDA instruction loads a value into the A register, while the STA instruction stores the value of the A register in a target address. JMP can relocate the PC to any target address, and now you're pretty much all caught up on how the CPU works for the purposes of this run.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-11039-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-11039-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-11039-0 
+		]div
+		[div class=tab-pane fade id=tabs-11039-1 
+			[div class=p 
+				"With the CPU of my custom emulator implemented and fully functional according to some accuracy tests, I figured it was time to make the run. It was to my horror, that the run failed. I had already tested it before, and I even wrote about it being done in 5 microseconds at the end of my Bad Apple TAS explanation video, but somewhere along the way, something was fixed, and the run no longer worked.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/mIMLWUE.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"(Image unrelated, the game actually crashed before loading the victory screen, making the run impossible.)
+				$LF
+			]div
+			[div class=p 
+				"Or so I thought...
+				$LF
+			]div
+			[div class=p 
+				"You see, the run might not work from the moment you power on the console, but the main issues include the MMC3 chip putting the credits code in another spot at the moment the console boots, and some magic number SMB3 reads and if the value isn't there, the game resets. If I run my TAS at the moment I press the RESET button, assuming I'm on the title screen, it once again works. Phew! But what to do about the run from power on?
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheMmc3MapperChip 
+	" Introduction to the MMC3 mapper chip
+	$LF
+]h3
+[div class=p 
+	"Amazingly, we're still not ready to talk about the run, as we need to talk about the mapper chip
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	" inside the cartridge of Super Mario Bros. 3. As stated before, the program data of the inserted cartridge can be read from address $8000 to address $FFFF (32,768 bytes) but the program data of Super Mario Bros. 3 is 262,144 bytes! 262,144 is greater than 32,768,
+	[sup 
+		"[citation needed]
+	]sup
+	" so it begs the question, "how can we fit all the data from the game into a smaller space?"
+	$LF
+]div
+[div class=p 
+	"The answer is to break the program data of the game down into smaller 8 kibibyte "banks" that can be swapped in and out when needed. If you need to run the logic for how mario moves, swap in banks 7 and 8. If the background graphics need updating, swap in banks 25 and 26. By splitting the game into banks like this, the program data could be dramatically larger than the CPU address space. But this mapper chip has some rules you need to follow.
+	$LF
+]div
+[div class=p 
+	"First off, the final 8 kibibyte bank of program data will always be accessible at address $E000 through $FFFF. This way, when instructions like RESET read from address $FFFC, these bytes will always be the same, as you cannot swap another bank into this address. Secondly, the 2nd the last program bank will also always be loaded, but the MMC3 chip has a bit of leniency on this one. If you (the game developer) would prefer, the 2nd to last program bank could always be loaded at address $8000 through $9FFF, or if you'd prefer, it could be loaded at address $C000 through $DFFF. 
+	$LF
+]div
+[div class=p 
+	"You might be wondering, "How does a programmer utilize the MMC3 chip to swap banks in and out, or decide where to put the 2nd to last program bank?". At this point, I'm going to once again display this footnote
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	" as the documentation on the NesDev Wiki will do a better job than I, but I'll still give a brief rundown. In short, the MMC3 chip has "registers" you can access and modify by running a store instruction to address $8000 and $8001. The value written to $8000 is the "bank swap mode", and the value written to $8001 is the value of the bank you want to swap in.
+	$LF
+]div
+[div class=p 
+	"The bank swap mode determines both the location of the 2nd to last program bank (determined by the 6th bit of the value written to $8000), as well as the location of the bank you want to swap in (determined by bit 0). So in the case of Super Mario Bros. 3, which always has the 2nd to last bank at address $8000 through $9FFF, every single time a bank is being swapped out, it also needs to make sure bit 6 of the value written to $8000 is set.
+	$LF
+]div
+[div class=p 
+	"The MMC3 chip also features "program RAM", which contains $2000 extra bytes for the CPU to store data in from address $6000 to $7FFF. This RAM is enabled by writing a value of $80 to address $A001.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-14884-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-14884-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-14884-0 
+		]div
+		[div class=tab-pane fade id=tabs-14884-1 
+			[div class=p 
+				"But of course I wasn't going to stop just because my initial run didn't work. If this could work from RESET, it can work from POWER too. I spoiled it in the previous story mode section, but setting up the MMC3 registers wasn't enough. We need to write to some "magic" location in the cartridge's external Program RAM, and also make sure we move the PC to the function which prepares the victory screen. Let's look through the SMB3 disassembly and figure out what to do.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/K3upFla.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"Delightfully devilish, 100th_Coin!
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheSuperMarioBros3Code 
+	" Introduction to the Super Mario Bros. 3 code
+	$LF
+]h3
+[div class=p 
+	"Okay, now that we've learned the basics of how the CPU works, and how the MMC3 chip inside the Super Mario Bros. 3 cartridge works, let's talk a little bit about how Super Mario Bros. 3 is organized. It was mentioned that the second to last program bank is loaded from address $8000 to $9FFF, and inside this bank at address $8FE3, we'll find the function that prepares the victory screen of the game. This function prepares some values in RAM, jumps to a subroutine that swaps in the program banks for the credits, and then jumps to address $B85A inside one of the newly loaded program banks.
+	$LF
+]div
+[div class=p 
+	"Every frame, an Interrupt Request (or IRQ for short) occurs. This IRQ is used to jump to a function that will update the graphics so the checkerboard floor can remain in one place while the curtains can drop or raise during the credits. However, (and the reason for this is beyond me) inside the IRQ function, the game will check if address $7964 contains the value $5A, and if it does not, the PC is moved to the same location used when the game is initially powered on. Everything in RAM gets cleared, and the game reboots. It's also worth noting that the only time this value of $5A is ever written to address $7964 is during the code executed while preparing to load the title screen, and this one line of code in the IRQ function is the only use for it.
+	$LF
+]div
+[div class=p 
+	"And finally with the knowledge of where the function is that loads the credits, the fact that we need to write $5A to address $7964, and that we would need to write to address $8000 to move the 2nd to last bank in the correct location such that the credits is in-fact at address $8FE3, we're finally ready to talk about the run.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-17227-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-17227-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-17227-0 
+		]div
+		[div class=tab-pane fade id=tabs-17227-1 
+			[div class=p 
+				"I was feeling confident. Perhaps too confident. This run initially worked in my emulator, but to test it on actual hardware, I wrote a ROM Hack of SMB3 that simply executes the code of my TAS from power on. It crashes.
+				$LF
+			]div
+			[div class=p 
+				"Just when I thought I had everything figured out, another roadblock appears.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/zQj68wn.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"The Audio Processing Unit.
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheAudioProcessingUnit 
+	" Introduction to the Audio Processing Unit
+	$LF
+]h3
+[div class=p 
+	"Just kidding. Before we talk about the run, we also need to talk about the APU's "Frame Counter"
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	".
+	$LF
+]div
+[div class=p 
+	"Approximately 59.99908 times a second (keep in mind, the NES PPU actually has a frame rate of approximately 60.098814 frames a second), the audio chip of the console will create an Interrupt Request. The APU will also continuously send IRQ requests infinitely unless you either disable this behavior, or read from address $4015. Since the IRQ enables the interrupt flag (which prevents another IRQ from running), there won't be another IRQ until the flag is either disabled, or an RTI instruction occurs (since RTI will restore the previous state of the interrupt flag), but that RTI would immediately lead into another IRQ, and this pattern would never stop. Since the IRQ routine of Super Mario Bros. 3 does not read address $4015, the RTI at the end of the IRQ routine would immediately be followed by another IRQ, causing an infinite loop.
+	$LF
+]div
+[div class=p 
+	"This behavior can be disabled, though it's enabled by default. To disable it, we need to write to address $4017 with a value that has bit 6 enabled. 
+	$LF
+]div
+[div class=p 
+	"Now that we know where the function to prepare the credits is located, how to make sure the bank containing that code is in the correct spot, how we need to write $5A to address $7964, and how to disable the APU Frame counter IRQ's, we can finally talk about the run, for real this time.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-19093-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-19093-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-19093-0 
+		]div
+		[div class=tab-pane fade id=tabs-19093-1 
+			[div class=p 
+				"And finally the run works. The new custom Rom Hack that runs this code from power on doesn't crash, and I felt this huge wave of relief. I had a proof of concept for my proof of concept.
+				$LF
+			]div
+			[div class=p 
+				"In the context of this run, I don't believe there's such a thing as going too far. Some will say "rules were meant to be broken", but I like to think my angle is a bit more "rules were meant to be discovered" than anything else. Perhaps that rule is "This is allowed", who knows. If you are a TASVideos staff member reading this, I just wanted to say "oops" for making this. I can almost hear a faint musical number beginning...
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/YgwZPe4.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"♫ 100th_Coin with his crazy innovations! ♫
+				[br 
+				]br
+				$LF
+				"♫ TASVideos staff are gonna update regulation ♫
+				[br 
+				]br
+				$LF
+				"♫ When they see Coin's outrageous emulation. ♫
+				[br 
+				]br
+				$LF
+				"♫ There'll be trouble in town tonight! ♫
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheIntercycleCartridgeSwap 
+	" Introduction to the Intercycle Cartridge Swap
+	$LF
+]h3
+[div class=p 
+	"Okay, just one more tangent.
+	$LF
+]div
+[div class=p 
+	"For this run, we won't be using the controllers. Instead, we're going to be swapping cartridges between CPU cycles in order to run custom code. Here is the assembly code I wish to run, with comments:
+	$LF
+]div
+[pre 
+	[code class=language-<assembly> 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"If we were to "assemble" those instructions into bytes, we would get this string of hexadecimal values: 
+	[code 
+		"A0 80 A9 5A 8C 01 A0 8D 17 40 8D 00 80 8D 69 79 4C E3 8F
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"Here's the plan. After the CPU reads 
+	[code 
+		"A0
+	]code
+	" from some cartridge, we will then remove the currently inserted cartridge from the NES, and insert another cartridge. The PC will be incremented, and the cartridge we just inserted would have the value 
+	[code 
+		"80
+	]code
+	" at the new address of the PC. That value is read, and we then swap the cartridge out for yet another cartridge. Whenever the CPU is writing, we'll insert Super Mario Bros. 3 to make sure the MMC3 registers/PRG RAM get updated.
+	$LF
+]div
+[div class=p 
+	"And without any further ado, let's see how the run goes.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-21650-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-21650-1 
+					"Show Story (It's a big one this time)
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-21650-0 
+		]div
+		[div class=tab-pane fade id=tabs-21650-1 
+			[div class=p 
+				"This run initially came together in August 2024, and I'm loosely following the order of events here with this "story mode", but surely you have started to ask an important question. How were you testing these runs in your emulator? How do you even get a list of cartridges for this to work?! I mean, logically you can't run such a TAS without making it, so how do we figure this all out?
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/wcdqPI7.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"Oops, I turned the story mode into nerd-talk. If you're not into this sort of thing, feel free to skip this one.
+				$LF
+			]div
+			[div class=p 
+				"Let's talk about how this run was put together. By now you should understand the basics of how the run works. The cartridge is replaced with another cartridge, the PC is initially moved by the RESET instruction, but then incremented during instructions.
+				$LF
+			]div
+			[div class=p 
+				"Let's start with the "from RESET" run to understand how this was put together. If I wanted to immediately move the PC to address $8FE3, could this be done in the RESET instruction? We would need to find a game with the value $E3 in address $FFFC, and $8F in the address $FFFD. If there are games that meet this criteria, how do we determine this? 
+				$LF
+			]div
+			[div class=p 
+				"Assume for the sake of this programming exercise, that you have a copy of every NES ROM. The data is stored in the following way: The header, the Program ROM, and then the Character ROM.  By first reading the contents of the ines header, we could determine the length of the Program ROM. With this length determined, we know exactly which bytes are for the Program ROM and which bytes are for the Character ROM. See the ines header info here: 
+				[a href=https://www.nesdev.org/wiki/INES rel=noopener external nofollow 
+					"https://www.nesdev.org/wiki/INES
+				]a
+				$LF
+			]div
+			[div class=p 
+				"Let's analyze a NES ROM. Correction- let's analyze every NES ROM. Alas, reading the value at a target address is not as simple as reading the index into the ROM. Some games have mapper chips, and of course, index $10 into the ROM is the first byte of the Program Data, which we would find at address $8000, which could potentially be mirroring the values at address $C000 if the cartridge is small enough. It's all sorts of complex! Luckily, right now, we're just after the interrupt vectors.
+				$LF
+			]div
+			[div class=p 
+				"Regardless of mapper chip, the Interrupt Vectors are always the final 6 bytes of the Program ROM, so the RESET Vector is always 4 bytes before the end of the ROM. This means, if we were to analyze every NES game and check the value 4 bytes and 3 bytes before the end of the program data, we can check if any games have the values we need!
+				$LF
+			]div
+			[div class=p 
+				"The function to do this would simply be, take the length of the Program ROM, and then look at the byte at index $10 + ProgramRom.Length - 4.
+				$LF
+			]div
+			[div class=p 
+				"The function to check every NES game for a specific value in the interrupt vectors would be as easy as looping over every NES game and checking if that target address has the value we want.
+				$LF
+			]div
+			[div class=p 
+				"And the moment you've been waiting for! For address $FFFC, we could use... none. There are no games with the value $E3 in address $FFFC. Zero. Oh- and the same applies to a value of $8F in address $FFFD. (And the unbelievably clever among you might recognize that the title screen and credits of SMB3 use the same program banks. Could we try a RESET to address $B85A, where the credits-preparation function at address $8FE3 jumps to after loading the already-loaded program banks? Nope, there aren't any games featuring a value of $B8 in address $FFFD, but good try!)
+				$LF
+			]div
+			[div class=p 
+				"That's a bit of a set back. I guess we'll need to be able to read other addresses than just the interrupt vectors. Ignoring games with mappers other than NROM (since those can have nondeterministic power on states) let's assume address $10 into the ROM file will be address $8000 of the CPU address bus. If the Program ROM is only $4000 bytes long, we'll duplicate these values to address $C000-FFFF as well. Now, reading from a specific address is as simple as subtracting $7FF0. You want to read address $9000? $9000-$7FF0 = $1010, so we read index $1010 of the ROM. Remember, this only applies to games with the "NROM Mapper", and a handful of other mappers without Program Bank swapping. More info on NROM can be found here: 
+				[a href=https://www.nesdev.org/wiki/NROM rel=noopener external nofollow 
+					"https://www.nesdev.org/wiki/NROM
+				]a
+				$LF
+			]div
+			[div class=p 
+				"With that sorted out, can we jump to $9000? There are over a hundred NES games with the value $00 in address $FFFC, so we got that covered. Are there any games with a value of $90 in $FFFD? Yes! Just one. "Dash Galaxy in the Alien Asylum".
+				$LF
+			]div
+			[div class=p 
+				"So, if we move the PC to address $9000, we could branch to address $8FE3 faster than we could JMP to address $8FE3. (Well, technically the JMP takes fewer CPU cycles, but we could swap to SMB3 sooner with the branch.) Let's talk about branches. We need a branch instruction that will be taken, and the operand is a signed value for how many bytes to move the PC. I chose a BCC instruction, since the Carry flag is clear for the majority of a frame on SMB3's title screen.
+				$LF
+			]div
+			[div class=p 
+				"The BCC instruction has the value $90. Are there are games that have the value $90 at address $9000? Let's ignore games with mapper chips here, as they tend to have nondeterministic power-on states, and we want to guarantee the values exist where we need them. There's a handful of games with the value we need, but the best of them is Kung Fu. This game is the most "first-party" of the options, so I went with it.
+				$LF
+			]div
+			[div class=p 
+				"The operand of the branch needs to move the PC to address $8FE3 from address $9002, which means the value needed is $E1. By searching for a value of $E1 at address $9001, I found the game Pipe Dream. And after that, we can swap to SMB3.
+				$LF
+			]div
+			[div class=p 
+				"So that's how the "from RESET" run was created, but the "from POWER" run is 30 cycles long. Surely we can automate the process of looking through the entire NES address space for a 19-byte string, right? Yeah we can!
+				$LF
+			]div
+			[div class=p 
+				"I basically just looped from address $8000 to $FFFF until we found all 19 bytes in a row across various NES cartridges. (I also implemented ways of checking the MMC3 and MMC1 mappers.) The end result was less impressive than I hoped, for I barely recognized any of the games in this list:
+				$LF
+			]div
+			[pre 
+				[code 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				"To improve this list, I assigned a "popularity score" to each game, and calculated the total score for every possible set of cartridges that works. This was entirely opinion based, and a very arbitrary metric, but the end result had a lot of cartridges I was familiar with, which makes me pleased. (see the cartridges listed below for the final list)
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheRun 
+	" Introduction to the Run
+	$LF
+]h3
+[div class=p 
+	"We power on the console. At this point, it doesn't yet matter what cartridge is inserted.
+	$LF
+]div
+[div class=p 
+	"The first few CPU cycles of the RESET instruction are "dummy reads" which means they don't do anything.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Cycle
+			]th
+			[th 
+				"Program Counter
+			]th
+			[th 
+				"Address Bus
+			]th
+			[th 
+				"Value
+			]th
+			[th 
+				"Cartridge Inserted
+			]th
+			[th 
+				"Purpose
+			]th
+		]tr
+		[tr 
+			[th 
+				"1
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$??
+			]th
+			[th 
+				"Any cartridge
+			]th
+			[th 
+				"Reading the opcode of the next instruction. The CPU "reset flag" is set, so this value is discarded and replaced with $00.
+			]th
+		]tr
+		[tr 
+			[th 
+				"2
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$??
+			]th
+			[th 
+				"Any cartridge
+			]th
+			[th 
+				"Reading the operand of the RESET instruction. This does nothing.
+			]th
+		]tr
+		[tr 
+			[th 
+				"3
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$0100
+			]th
+			[th 
+				"$00
+			]th
+			[th 
+				"Any cartridge
+			]th
+			[th 
+				"Reading from the stack. The value read is unused. The stack pointer is decremented.
+			]th
+		]tr
+		[tr 
+			[th 
+				"4
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$01FF
+			]th
+			[th 
+				"$00
+			]th
+			[th 
+				"Any cartridge
+			]th
+			[th 
+				"Reading from the stack. The value read is unused. The stack pointer is decremented.
+			]th
+		]tr
+		[tr 
+			[th 
+				"5
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$01FE
+			]th
+			[th 
+				"$00
+			]th
+			[th 
+				"Any cartridge
+			]th
+			[th 
+				"Reading from the stack. The value read is unused. The stack pointer is decremented.
+			]th
+		]tr
+		[tr 
+			[th 
+				"6
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$FFFC
+			]th
+			[th 
+				"$24
+			]th
+			[th 
+				"BurgerTime
+			]th
+			[th 
+				"Reading from $FFFC. This will be the low byte of the PC once the RESET instruction ends.
+			]th
+		]tr
+		[tr 
+			[th 
+				"7
+			]th
+			[th 
+				"$????
+			]th
+			[th 
+				"$FFFD
+			]th
+			[th 
+				"$F9
+			]th
+			[th 
+				"Krusty's Fun House
+			]th
+			[th 
+				"Reading from $FFFD. This value will become the high byte of the PC. The PC is now at $F924.
+			]th
+		]tr
+		[tr 
+			[th 
+				"8
+			]th
+			[th 
+				"$F924
+			]th
+			[th 
+				"$F924
+			]th
+			[th 
+				"$A0
+			]th
+			[th 
+				"BreakThru
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $A0 is for the LDY Immediate instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"9
+			]th
+			[th 
+				"$F925
+			]th
+			[th 
+				"$F925
+			]th
+			[th 
+				"$80
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Reading the operand of the LDY Immediate instruction. Y = $80.
+			]th
+		]tr
+		[tr 
+			[th 
+				"10
+			]th
+			[th 
+				"$F926
+			]th
+			[th 
+				"$F926
+			]th
+			[th 
+				"$A9
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $A9 is for the LDA Immediate instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"11
+			]th
+			[th 
+				"$F927
+			]th
+			[th 
+				"$F927
+			]th
+			[th 
+				"$5A
+			]th
+			[th 
+				"Bomberman II
+			]th
+			[th 
+				"Reading the operand of the LDA Immediate instruction. A = $5A.
+			]th
+		]tr
+		[tr 
+			[th 
+				"12
+			]th
+			[th 
+				"$F928
+			]th
+			[th 
+				"$F928
+			]th
+			[th 
+				"$8C
+			]th
+			[th 
+				"Mickey Mousecapade
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $8C is for the STY Absolute instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"13
+			]th
+			[th 
+				"$F929
+			]th
+			[th 
+				"$F929
+			]th
+			[th 
+				"$01
+			]th
+			[th 
+				"Gradius
+			]th
+			[th 
+				"Reading the first operand of the STY Absolute instruction. This will be the low byte of the target address.
+			]th
+		]tr
+		[tr 
+			[th 
+				"14
+			]th
+			[th 
+				"$F92A
+			]th
+			[th 
+				"$F92A
+			]th
+			[th 
+				"$A0
+			]th
+			[th 
+				"BurgerTime
+			]th
+			[th 
+				"Reading the second operand of the STY Absolute instruction. This will be the high byte of the target address. ($A001)
+			]th
+		]tr
+		[tr 
+			[th 
+				"15
+			]th
+			[th 
+				"$F92B
+			]th
+			[th 
+				"$A001
+			]th
+			[th 
+				"Y  ($80)
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Store $80 at address $A001 to enable the MMC3 chip's PRG RAM.
+			]th
+		]tr
+		[tr 
+			[th 
+				"16
+			]th
+			[th 
+				"$F92B
+			]th
+			[th 
+				"$F92B
+			]th
+			[th 
+				"$8D
+			]th
+			[th 
+				"Super Mario Bros.
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $8D is for the STA Absolute instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"17
+			]th
+			[th 
+				"$F92C
+			]th
+			[th 
+				"$F92C
+			]th
+			[th 
+				"$17
+			]th
+			[th 
+				"Athena
+			]th
+			[th 
+				"Reading the first operand of the STA Absolute instruction. This will be the low byte of the target address.
+			]th
+		]tr
+		[tr 
+			[th 
+				"18
+			]th
+			[th 
+				"$F92D
+			]th
+			[th 
+				"$F92D
+			]th
+			[th 
+				"$40
+			]th
+			[th 
+				"BurgerTime
+			]th
+			[th 
+				"Reading the second operand of the STA Absolute instruction. This will be the high byte of the target address. ($4017)
+			]th
+		]tr
+		[tr 
+			[th 
+				"19
+			]th
+			[th 
+				"$F92E
+			]th
+			[th 
+				"$4017
+			]th
+			[th 
+				"A ($5A)
+			]th
+			[th 
+				"BurgerTime
+			]th
+			[th 
+				"Store $5A in address $4017 to disable the APU Frame Counter IRQs
+			]th
+		]tr
+		[tr 
+			[th 
+				"20
+			]th
+			[th 
+				"$F92E
+			]th
+			[th 
+				"$F92E
+			]th
+			[th 
+				"$8D
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $8D is for the STA Absolute instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"21
+			]th
+			[th 
+				"$F92F
+			]th
+			[th 
+				"$F92F
+			]th
+			[th 
+				"$00
+			]th
+			[th 
+				"Kid Icarus
+			]th
+			[th 
+				"Reading the first operand of the STA Absolute instruction. This will be the low byte of the target address.
+			]th
+		]tr
+		[tr 
+			[th 
+				"22
+			]th
+			[th 
+				"$F930
+			]th
+			[th 
+				"$F930
+			]th
+			[th 
+				"$80
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Reading the second operand of the STA Absolute instruction. This will be the high byte of the target address. ($8000)
+			]th
+		]tr
+		[tr 
+			[th 
+				"23
+			]th
+			[th 
+				"$F931
+			]th
+			[th 
+				"$8000
+			]th
+			[th 
+				"A ($5A)
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Store $5A in address $8000 to set up the MMC3 chip so the 2nd to last program bank is loaded from address $8000 to $9FFF
+			]th
+		]tr
+		[tr 
+			[th 
+				"24
+			]th
+			[th 
+				"$F931
+			]th
+			[th 
+				"$F931
+			]th
+			[th 
+				"$8D
+			]th
+			[th 
+				"Soccer
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $8D is for the STA Absolute instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"25
+			]th
+			[th 
+				"$F932
+			]th
+			[th 
+				"$F932
+			]th
+			[th 
+				"$64
+			]th
+			[th 
+				"Jaws
+			]th
+			[th 
+				"Reading the first operand of the STA Absolute instruction. This will be the low byte of the target address.
+			]th
+		]tr
+		[tr 
+			[th 
+				"26
+			]th
+			[th 
+				"$F933
+			]th
+			[th 
+				"$F933
+			]th
+			[th 
+				"$79
+			]th
+			[th 
+				"Kirby's Adventure (PRG1)
+			]th
+			[th 
+				"Reading the second operand of the STA Absolute instruction. This will be the high byte of the target address. ($7964)
+			]th
+		]tr
+		[tr 
+			[th 
+				"27
+			]th
+			[th 
+				"$F934
+			]th
+			[th 
+				"$7964
+			]th
+			[th 
+				"A ($5A)
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Store $5A in address $7964 of the MMC3 Program RAM. This prevents Super Mario Bros. 3 from rebooting every frame.
+			]th
+		]tr
+		[tr 
+			[th 
+				"28
+			]th
+			[th 
+				"$F934
+			]th
+			[th 
+				"$F934
+			]th
+			[th 
+				"$4C
+			]th
+			[th 
+				"The Legend of Zelda
+			]th
+			[th 
+				"Reading the opcode of the next instruction. $4C is for the JMP instruction.
+			]th
+		]tr
+		[tr 
+			[th 
+				"29
+			]th
+			[th 
+				"$F935
+			]th
+			[th 
+				"$F935
+			]th
+			[th 
+				"$E3
+			]th
+			[th 
+				"Zanac
+			]th
+			[th 
+				"Reading the first operand of the JMP instruction. This will be the low byte of the Program Counter.
+			]th
+		]tr
+		[tr 
+			[th 
+				"30
+			]th
+			[th 
+				"$F936
+			]th
+			[th 
+				"$F936
+			]th
+			[th 
+				"$8F
+			]th
+			[th 
+				"Super Mario Bros. 2
+			]th
+			[th 
+				"Reading the second operand of the JMP instruction. This will be the high byte of the Program Counter. ($8FE3)
+			]th
+		]tr
+		[tr 
+			[th 
+				"31
+			]th
+			[th 
+				"$8FE3
+			]th
+			[th 
+				"$8FE3
+			]th
+			[th 
+				"$A9
+			]th
+			[th 
+				"Super Mario Bros. 3
+			]th
+			[th 
+				"Before this cycle actually runs, stop the timer with Super Mario Bros. 3 inserted. Without any further input from us, the game will begin preparing the victory screen.
+			]th
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Keep in mind, Super Mario Bros. 3 will be inserted before the 31st CPU cycle, to the run is only 30 CPU cycles long. And if all goes according to plan, we should see the victory screen!
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/qiifjUM.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Uh-
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-33515-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-33515-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-33515-0 
+		]div
+		[div class=tab-pane fade id=tabs-33515-1 
+			[div class=p 
+				"So this was actually found out the day before I uploaded my video about this. I had a deadline to stick to, and there wasn't time to fix this, so this ended up as a footnote in the section about the PPU reset flag. I was pretty shocked (to say the least) that I had overlooked this. I wasn't really able to do any tests on my console about the PPU Reset Flag, since the Everdrive I'm using does some funny stuff behind the scenes on the first few frames after a RESET, so the flag is already cleared by the time my custom ROM would begin running. I later learned the exact timing of it, wrote it down in the footnote for the video, and didn't make the realization that the flag would be set during the SMB3 runs too!
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/rBYTKQV.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"I'm going to pretend this is fine. Once the curtains drop, it's visually identical to any other run anyway.
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToThePictureProcessingUnitSResetFlag 
+	" Introduction to the Picture Processing Unit's Reset Flag
+	$LF
+]h3
+[div class=p 
+	"When the console is powered on or reset (but only when powered on for the Famicom), the Picture Processing unit sets a "reset flag" that is cleared on dot 1 of the 261
+	[sup 
+		"st
+	]sup
+	" scanline.
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	" This reset flag prevents writing to a handful of the PPU Registers. To list out the important parts of what cannot be done with this reset flag set, you can not enable the NMI, enable rendering, or change the 'v' register of the PPU
+	[a id=r6 
+	]a
+	[sup 
+		"[
+		[a href=#6 
+			"6
+		]a
+		"]
+	]sup
+	" (The read/write address). Since the read/write address of the PPU cannot be modified until the 261
+	[sup 
+		"st
+	]sup
+	" scanline, a lot of the princess's chamber isn't properly rendered, as the game attempts to write to the PPU before the reset flag is cleared. This results in the default pattern of PPU RAM being shown for much of the background. This default pattern is different per RAM chip, but with my console it has the following pattern: 
+	$LF
+]div
+[div class=p 
+	[code 
+		"F0 F0 0F 0F F0 F0 0F 0F F0 F0 0F 0F F0 F0 0F 0F 0F 0F F0 F0 0F 0F F0 F0 0F 0F F0 F0 0F 0F F0 F0
+	]code
+	" (Numbers shown in hexadecimal)
+	$LF
+]div
+[div class=p 
+	"The 
+	[code 
+		"F0
+	]code
+	" value corresponds to the '0' character being drawn, and the 
+	[code 
+		"0F
+	]code
+	" value is that other character next to the 0's, which is the upper right of a leaf. The fun way the color palettes are assigned to these tiles also has to do with this default pattern.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-35759-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-35759-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-35759-0 
+		]div
+		[div class=tab-pane fade id=tabs-35759-1 
+			[div class=p 
+				"With the PPU Reset flag implemented in my emulator, the run from reset looks broken, and you've already seen how the run from power on looks. It was a bit disappointing to see the runs no longer looking identical to a regular completion of the game. Oh well. Easy come, easy go I guess.
+				$LF
+			]div
+			[div class=p 
+				"Anyway, I forgot to make a Steamed Hams reference here.
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToThePhysicsProblem 
+	" Introduction to the Physics Problem
+	$LF
+]h3
+[div class=p 
+	"Okay, cool. So this has been a big ol' mess of various NES programming knowledge, and it's quite possible you don't care about any of that, so let's talk about something entertaining for a paragraph. To recap, the idea here involves swapping NES cartridges between CPU cyles. If we were to perform this on actual hardware, we would likely need to use a "toploader console". This is where I would mention that the toploader is missing the CIC chip as well as how the CIC chip works, but I said this paragraph would be entertaining.
+	$LF
+]div
+[div class=p 
+	"Assume the cartridge needs to be inserted with a depth of 1.6 inches. The "M2 pin" of the cartridge slot is the clock, and when M2 has low voltage, the address bus is unstable. By taking into account the clock rate of 1789772.72 cycles per second and the 5/8 duty cycle of the M2 line, that leaves us with 175 nanoseconds to take out a cartridge and 175 more nanoseconds to insert a different cartridge. Some quick math gives me 9.16 million inches per second, or 520,661 miles per hour. (837922 Kilometers per hour)
+	$LF
+]div
+[div class=p 
+	"Did I say this section would be entertaining? I meant it would have math. At any rate, those cartridges would be the fastest man-made object as of writing this, which only complicates things further if we account for air resistance. It goes without saying, the cartridges would be destroyed. Also the console. Probably everything within a few hundred feet too. I passed the numbers to a friend of mine, who calculated the Reynolds Number
+	[a id=r7 
+	]a
+	[sup 
+		"[
+		[a href=#7 
+			"7
+		]a
+		"]
+	]sup
+	" of this hypothetical cartridge in this situation as 10 trillion.
+	$LF
+]div
+[div class=p 
+	"Well, if we're not able to move these cartridges fast enough to perform this, just how do we test it?
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-37870-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-37870-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-37870-0 
+		]div
+		[div class=tab-pane fade id=tabs-37870-1 
+			[div class=p 
+				"I hope the numbers haven't lost all meaning. Sometimes you just see big numbers and it becomes white noise. A metaphor for "big". I don't even know what the heck a Reynolds Number is, but 10 trillion sounds mighty impressive.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/zThYiZS.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"But you bring up a good point. This run, these hypotheticals... that's not a TAS. Data alone cannot be submitted to TASVideos, even on ACEVideos day. I'll need something concrete. Something that can be submitted in a .zip file, and ran on your own computer. But how...
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheTricnesEmulator 
+	" Introduction to the TriCNES emulator
+	$LF
+]h3
+[div class=p 
+	"We emulate it of course! Since swapping cartridges between CPU cycles is not a feature of Bizhawk (and I highly doubt it ever will be) I had to take matters into my own hands and make an emulator that could achieve just this.
+	[a id=r8 
+	]a
+	[sup 
+		"[
+		[a href=#8 
+			"8
+		]a
+		"]
+	]sup
+	" (Oh man- I bet the judges will have a few words to say about this.) I spent 8 months working on emulator accuracy. Is it perfect? no. Is it just as good as Bizhawk? I'd say so. There are some tests where TriCNES fails but Bizhawk succeeds, and there are tests that Bizhawk fails and TriCNES succeeds. No emulator is perfect, but I'm happy with what I made.
+	$LF
+]div
+[div class=p 
+	"Also, if you're curious, TriCNES is the abbreviated version of the name. The full name is "Coin's Contrabulous Cartswapulator", but I figured Tri-C NES was a good shorthand for it.
+	$LF
+]div
+[div class=p 
+	"Let's talk about this TAS file. Since TriCNES was designed with cart-swapping TASes in mind, we needed to create a custom file format. Introducing a .3ct TAS file! (which of course stands for Tri-C (Coin's Contrabulous Cartswapulator) TAS)
+	$LF
+]div
+[div class=p 
+	"The format works like this. The first line is the number of cartridges used in this TAS, and let's call this value 'n'. The following 'n' lines are a list of cartridges used in the form of a local file path from the TriCNES "roms" folder. Every line after that until the end of the file are in the following format. "x y" where x and y are integer values separated by a space. With this format, just before cycle x, the emulator will swap to index y of the cartridge array.
+	$LF
+]div
+[div class=p 
+	"Let's see the submitted TAS as an example.
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Just before cycle 6, the emulator will swap in cartridge 0, BurgerTime (U) 
+	"[!]
+	".nes, before continuing.
+	$LF
+	"Just before cycle 7, the emulator will swap in cartridge 1, Krusty's Fun House (U) 
+	"[!]
+	".nes, before continuing.
+	$LF
+	"And so on. See the table in "Introduction to the run" to compare with the .3ct file.
+	$LF
+]div
+[div class=p 
+	"With the TriCNES emulator open, click the dropdown menu "TAS > Run .3ct TAS" and select the .3ct TAS file you wish to watch. Click the "Load Cartridges button" inside the menu, which will check if you have all the required cartridges and load them into an array. Optionally, you could change the CPU/PPU clock alignments, but that has essentially no effect on this TAS. Make sure the run is set to start from RESET. Finally, click the "Run TAS button". You will then see the victory screen, with a few artifacts here and there as discussed in the "Introduction to the Picture Processing Unit's Reset Flag" section.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-41603-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-41603-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-41603-0 
+		]div
+		[div class=tab-pane fade id=tabs-41603-1 
+			[div class=p 
+				"As absurd as this run has been to make, it has been so much fun. I spent so much time making this emulator, you have no idea how proud I am of it. Sure, there are a couple things it's getting wrong, and a notable lack of support for certain mapper chips, but I made it from the ground up, and the code is available to be dissected and for people to tell me I'm doing something wrong. I will happily make updates and fix issues.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/MKeQM2o.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"And it was at this point where I thought the story had come to an end, but suddenly, about 48 hours ago, I received a message in my discord server... someone had done it. A console verification has occurred.
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheConsoleVerificationProcess 
+	" Introduction to the console verification process
+	$LF
+]h3
+[div class=p 
+	"This is not a traditional TAS. This could not work with a traditional replay device. For this run, I had the help of Decrazyo, who built a custom board capable of holding multiple cartridges.
+	$LF
+]div
+[div class=p 
+	(youtube|v=BGvvY5FOTL8)
+	$LF
+]div
+[div class=p 
+	"Full disclosure, the custom board by Decrayzo would not be able to perform this specific run. This run requires 16 cartridges, which is a bit absurd. However, Decrayzo's board, which holds 5 cartridges, was able to perform the "from RESET" TAS I envisioned
+	[a id=r9 
+	]a
+	[sup 
+		"[
+		[a href=#9 
+			"9
+		]a
+		"]
+	]sup
+	". It's not the one I'm submitting (because here at TASVideos, we tend to prefer if our TASes began at power on), but I hope the fact that this other run works is enough to convince you that this one is also likely to work.
+	$LF
+]div
+[div class=p 
+	"But while we're here, let's talk about how insane it is that the "from RESET" run in 9 CPU cycles (0.000005 seconds) has been confirmed to work. It's absolutely incredible. I feel like a mad scientist watching my creation come to life. This ridiculous theory I had to run arbitrary code by swapping cartridges actually works!
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-43434-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-43434-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-43434-0 
+		]div
+		[div class=tab-pane fade id=tabs-43434-1 
+			[div class=p 
+				"And while this method of electronically switching which cartridge is connected to the console exceeds in the whole "not destroying the neighborhood" aspect, and also the "This could be presented" aspect, I have to admit, it feels like something is missing.
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/XB0jlfc.png 
+				]img
+				$LF
+			]div
+			[div class=p 
+				"Nah, just kidding. This is incredible. I still can't believe it works. I cannot thank Decrazyo enough for their efforts to do this. It's amazing.
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheConclusion 
+	" Introduction to the Conclusion
+	$LF
+]h3
+[div class=p 
+	"After figuring out the exact code you want to execute, running a program to determine what address it can be executed at and what cartridges contain all the values you need, assuming it even CAN be executed... by swapping cartridges every CPU cycle, which requires moving them at over 500,000 Miles/Hour making this the most superhuman submission ever made, we are left with a run completing the game long before rendering is enabled, even before the scanning beam completes a single scanline, which is hidden by the NTSC overscan
+	[a id=r10 
+	]a
+	[sup 
+		"[
+		[a href=#10 
+			"10
+		]a
+		"]
+	]sup
+	", effectively stopping input before the screen has done a single thing. Entertainment value is a thing of the past, as this run can only be found entertaining through understanding how it works, for the human eye couldn't even process the run occurring.
+	$LF
+]div
+[div class=p 
+	"This is the the most absurd TAS I've ever made. This is one of the most absurd projects I've ever had. This is one of the most absurd ideas I have ever taken seriously.
+	$LF
+]div
+[div class=p 
+	"I strongly encourage people to do silly things and document it. "Remember kids, the only difference between screwing around and science is writing it down."
+	[a id=r11 
+	]a
+	[sup 
+		"[
+		[a href=#11 
+			"11
+		]a
+		"]
+	]sup
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-45097-0 
+					"Hide Story
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-45097-1 
+					"Show Story
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-45097-0 
+		]div
+		[div class=tab-pane fade id=tabs-45097-1 
+			[div class=p 
+				"And so this journey comes to a close. I don't know if I plan to make any more Intercycle Cart Swap runs. It's certainly a gimmick, but it's one I'm really proud of. On top of this one I'm submitting, I also created the "from RESET" run of SMB3, as well as two runs of SMB1. The first one beats the game without fixing any of the graphics (which I later found out the PPU's reset flag prevented me from enabling the NMI, so that run actually wouldn't work, ha!), and a second SMB1 run that does fix the graphics. (That run would work, since I wait for the reset flag to clear before doing stuff.) It was suggested by ais523 that I try compressing the graphics of the SMB1 run and write code in unused areas of RAM to fix the graphics, allowing for the final input to happen before the reset flag is cleared while still fixing everything. I might revisit that some day, but I don't think it's the kind of run I'd submit to TASVideos. I'm not sure where I'll go from here. I mean, how could I one-up this?
+				$LF
+			]div
+			[div class=p 
+				[img class=embed mw-100 src=https://i.imgur.com/hfmNvVh.png 
+				]img
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=IntroductionToTheSpecialThanks 
+	" Introduction to the Special Thanks
+	$LF
+]h3
+[div class=p 
+	"Thank you to Decrazyo for creating the custom board, console verifying the "from RESET" run, essentially verifying this one as well.
+	$LF
+]div
+[div class=p 
+	"Thank you to everybody in the NesDev community, especially the people who maintain the NesDev Wiki, those who are active in the discord, and those who made accuracy test ROMs between now and over two decades ago. Especially Blargg for their work making test ROMs, as well as lidnariq and Fiskbit for answering countless questions in the NesDev discord as well as making test ROMs.
+	$LF
+]div
+[div class=p 
+	"Thank you to to the TASBot discord server for your help answering any questions I had, specifically BigBass, TheDot, dwangoAC, CompuCat, and blastermak.
+	$LF
+]div
+[div class=p 
+	"Thank you to ais523 for reaching out to me about a potential way to optimize a different Intercycle Cart Swap TAS. I'm glad to hear I'm not the only one taking this idea seriously.
+	$LF
+]div
+[div class=p 
+	"Thank you to Kosmic, Bismuth, GTAce, ThaRixer, Adef, Big Ted, Pannen, and Lain for your occasional advice, and inspiring projects.
+	$LF
+]div
+[div class=p 
+	"Thank you to Tony, Alli, Luke, and Grey for listening to my non-stop rambling as I developed this emulator for 8 months, then spent 6 months making a video about this TAS. I seriously cannot believe your patience, or thank you enough for it.
+	$LF
+]div
+[div class=p 
+	"Thank you for reading.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=IntroductionToTheReferences 
+	" Introduction to the References
+	$LF
+]h3
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" 
+	[a href=https://www.youtube.com/watch?v=Z9G1Mf6TZRs rel=noopener external nofollow 
+		"Sonic X opening theme
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" 
+	[a href=https://www.nesdev.org/wiki/CPU_interrupts rel=noopener external nofollow 
+		"CPU Interrupts documentation
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" 
+	[a href=https://www.nesdev.org/wiki/MMC3 rel=noopener external nofollow 
+		"MMC3 Mapper Chip documentation
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" 
+	[a href=https://www.nesdev.org/wiki/APU_Frame_Counter rel=noopener external nofollow 
+		"APU Frame Counter documentation
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	" 
+	[a href=https://www.nesdev.org/wiki/PPU_power_up_state rel=noopener external nofollow 
+		"PPU Power Up State documentation
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	" 
+	[a href=https://www.nesdev.org/wiki/PPU_registers#PPUSCROLL rel=noopener external nofollow 
+		"PPU Registers: PPUSCROLL
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=7 
+	]a
+	[a href=#r7 
+		"7
+	]a
+	"]
+	" 
+	[a href=https://en.wikipedia.org/wiki/Reynolds_number rel=noopener external nofollow 
+		"Reynolds Number on Wikipedia
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=8 
+	]a
+	[a href=#r8 
+		"8
+	]a
+	"]
+	" 
+	[a href=https://github.com/100thCoin/TriCNES rel=noopener external nofollow 
+		"The TriCNES emulator
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=9 
+	]a
+	[a href=#r9 
+		"9
+	]a
+	"]
+	" 
+	[a href=https://www.youtube.com/watch?v=atbIClUt5tI rel=noopener external nofollow 
+		"Console Verification by Decrazyo
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=10 
+	]a
+	[a href=#r10 
+		"10
+	]a
+	"]
+	" 
+	[a href=https://www.nesdev.org/wiki/Overscan rel=noopener external nofollow 
+		"Overscan documentation
+	]a
+	[br 
+	]br
+	$LF
+	"[
+	[a id=11 
+	]a
+	[a href=#r11 
+		"11
+	]a
+	"]
+	" 
+	[a href=https://www.reddit.com/r/mythbusters/comments/3wgqgv/the_origin_of_the_remember_kids_the_only/ rel=noopener external nofollow 
+		"Adam Savage, quoting Alex Jason
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Delaying., Waiting on site support for this file format.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": File format is supported. Uploading .3ct file. Changing status to Judging Underway.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": This is an unusual case where the game is beat by swapping to different video games to build a set of assembly instruction codes that jump straight to the credits. This does sync with the correct games and the author's cart swapping emulator.  Let's work through potential issues here.
+	$LF
+]div
+[div class=p 
+	"1) Is this physically possible to reproduce?
+	$LF
+	"Probably.   Author created an emulator that does this, and in theory this could work with the right hardware to electronically swap out each game.  There is a video proof of concept of five games by Decrazyo, but this submission uses more games and no setup exists to show it in action.  Not much of a stretch to assume that since five games can be swapped more should work though.  So this does seem physically possible only requiring a larger list of games to swap.
+	$LF
+]div
+[div class=p 
+	"2) Emulator does not have audio nor can it output an audio/video dump.
+	$LF
+	"Which violates requirements from 
+	[a href=https://tasvideos.org/EmulatorResources/Requirements. rel=noopener external nofollow 
+		"https://tasvideos.org/EmulatorResources/Requirements.
+	]a
+	" This means the tas cannot be accepted to Standard or Alternative, only Playground.  In the explanation video there was also a note about how the emulator runs as fast as the current pc is it on instead of at a stable framerate.
+	$LF
+]div
+[div class=p 
+	"3) How is this any different from NES Super Mario Bros. "arbitrary code execution" by OnehundredthCoin in 04:52.65 which also uses a cart swap?
+	$LF
+	"The previous point restricts this to Playground, but let's continue addressing some other points.  For one the SMB ACE submission was setup through a modified version of Bizhawk to allow swapping which is already an approved emulator. That SMB ACE movie was also shown to work on an actual console.  It also only uses one cart swap, with SMB3 used to initialize SMB, while the current submission swaps games to get the write byte to build the correct assembly instructions. 
+	$LF
+]div
+[div class=p 
+	"4) Is this a publishable Tasvideos submission?
+	$LF
+	"This final point is problematic where the set of instructions to reach the end is built with different games in this way.  It raises the question of exactly what game is even being played. Typically a game is played from power on all the way to the end of the game, but here we have games being switched in between instructions.  Which means with this method ANY NES game could reach the ending credits in microseconds as long as the right bytes could be loaded from the NES game library.  Not only is this quite removed from what is typically thought of as "speedrunning the game", this is even far removed from a sub frame tool-assisted speedrun which accepts input in between frames. Deciding the fate of more of these types of submissions can be revisited if a submission can be Alternative or Standard eligible (meaning the emulator can support audio and avi dumping).
+	$LF
+]div
+[div class=p 
+	"However, this submission is a technical marvel and Tasvideos' does encourage tasers to push what is possible. The current user feedback is 12 yes and 2 No, which is heavily in favor of this submission.  This shows the community appreciates this submission and found this entertaining.  As a taser and judge I am with the majority that I enjoyed reading about and watching the end result of this.  At this point in time the lack of audio and avi dumping and unstable framerate in the emulator means it can only go to Playground though. 
+	$LF
+]div
+[div class=p 
+	"Accepting to Playground. 
+	$LF
+]div
+[div class=p 
+	"Interesting tas!
+	$LF
+]div
+[div class=p 
+	"Thanks to adelicat for adding site functionality to accept this file format!
+]div

@@ -1,0 +1,665 @@
+4
+[div class=p 
+	"Animaniacs is a platformer puzzle game released for the Genesis / Megadrive in 1994. It is an entirely different game to the SNES version of the same name. This TAS completes the game as fast as possible on the hard difficulty with no restrictions.
+	$LF
+]div
+[div class=p 
+	"There are 3 playable characters that you can swap between: Yakko, Wakko and Dot. Each of these characters has a different ability used to solve the puzzles throughout the game. You can swap to the next character at any time by using the swap button.
+	$LF
+]div
+[div class=p 
+	"Overall this is a pretty solid game, with nearly no glitches. It makes up for it with some sections involving cheeky puzzle skips and fast paced character swapping action.
+	$LF
+]div
+[h3 id=DifficultySetting 
+	"Difficulty Setting
+	$LF
+]h3
+[div class=p 
+	"This TAS is played on the hard difficulty. This means enemies do more damage, you start with 0 lives, you have less time to complete each level and the final boss takes more hits.
+	$LF
+]div
+[div class=p 
+	"Most of these lost time, apart from the extra lives, since this makes the score bonus screens shorter.
+	$LF
+]div
+[h2 id=UsefulRamValues 
+	"Useful RAM values
+	$LF
+]h2
+[div class=p 
+	"Each character has their own position value in RAM, so I wrote a lua script to display the position of the current character. Nevertheless, here’s a chunky RAM watch:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"Last Boss HP
+			]td
+			[td 
+				"0xC2C5
+			]td
+		]tr
+		[tr 
+			[td 
+				"Current Animaniac
+			]td
+			[td 
+				"0xB297
+			]td
+		]tr
+		[tr 
+			[td 
+				"HP
+			]td
+			[td 
+				" 0xB377, 0xFB17
+			]td
+		]tr
+		[tr 
+			[td 
+				"Global Cycle Stuff
+			]td
+			[td 
+				"0xB000, 0xB001
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yakko X
+			]td
+			[td 
+				"0xC008, 0xC009, 0xC00A
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yakko Y
+			]td
+			[td 
+				"0xC00C, 0xC00D, 0xC00E
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yakko VX
+			]td
+			[td 
+				"0xC010, 0xC011, 0xC012
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yakko VY
+			]td
+			[td 
+				"0xC014, 0xC015, 0xC016
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wakko Values
+			]td
+			[td 
+				"Same as Yakko + 0x0080
+			]td
+		]tr
+		[tr 
+			[td 
+				"Dot Values
+			]td
+			[td 
+				"Same as Yakko + 0x0100
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=TricksAndTechniques 
+	"Tricks and Techniques
+	$LF
+]h2
+[h3 id=ManagingSpeed 
+	"Managing Speed
+	$LF
+]h3
+[div class=p 
+	"Maximum speed is 1C0. Jumping causes you to lose about 080 units on jumping and 040 units of speed on landing totalling to 0C0 units lost per jump. Naturally I avoid jumping where possible due to this. By using the characters attack on frame 1 of the jump, you reduce it to only losing 080 units overall rather than 0C0, so I attack at the start of every jump.
+	$LF
+]div
+[div class=p 
+	"The only issue with attacking in a jump is it costs some jump height, so I avoid attacking when trying to make a tight jump. Attacking on the jump also helps you speed up from a standstill so after pulling a box I will often jump attack to start my movement again.
+	$LF
+]div
+[div class=p 
+	"Breaking the speed cap is very rare. It can happen after you shoot from a cannon and you can retain your speed, losing 040 speed each frame. Unfortunately the two cannon spots in the game don’t allow for this speed retention to be seen in full.
+	$LF
+]div
+[h3 id=BoxBoosts 
+	"Box boosts
+	$LF
+]h3
+[div class=p 
+	"I thought I was done with box boosts and global cycles now that I’ve finished the Crash 1 TAS – but Animaniacs has both of them.
+	$LF
+]div
+[div class=p 
+	"If you jump over an object and get slightly inside it on the landing, you will clip out of it. This is most common to see on the pushable boxes in this game, but is used all over the TAS in various places.
+	$LF
+	"The boosts I’ve been able to get range between about 0x0200 and 0x1000 units (about 1-6 frames saved per boost)
+	$LF
+]div
+[h3 id=GlobalCycles 
+	"Global Cycles
+	$LF
+]h3
+[div class=p 
+	"I’m sure that enemies rely on these too, but the main time I’ve seen these used is in the grey shrinking and expanding platforms in level 1 and 3. The barrels in level 3 seem to rely on a global cycle too.
+	$LF
+]div
+[h3 id=CharacterSwappingShenanigans 
+	"Character swapping shenanigans
+	$LF
+]h3
+[div class=p 
+	"Character swapping can mess with position a bit. I haven’t found many good uses for it, no matter how much I’ve tried to clip using it. The main good use is to cancel out vertical velocity. After hitting a see-saw you can character swap to cancel that out and move off quicker horizontally. 
+	$LF
+]div
+[div class=p 
+	"The other potential character swap application is getting a big jump. For some reason, jumping on the frame your new character comes in (about 15 frames after you hit swap), causes you to do a full jump but without holding the jump button. This would have been useful to end inputs early after the last boss, since I could retain the speed to collect all 5 of the collectibles. Unfortunately this wasn’t useful in the end since the last input is clearing the score screen after that level.
+	$LF
+]div
+[div class=p 
+	"Another application of swapping is to speed up box pulls. When finishing a pull it is one frame faster to swap away from Yakko rather than actually letting go manually. You have to time this in advance though.
+	$LF
+]div
+[h3 id=CharacterSelectionDesync 
+	"Character selection desync
+	$LF
+]h3
+[div class=p 
+	"When going to a new screen, you can change your character and have the “current character bit” update. If you do it too late before the transition you’ll still be playing as your old character but with the bit saying you’re the new character. You can resolve this and update to the “correct” character by taking damage or swapping characters again. I haven’t found any useful applications of this.
+	$LF
+]div
+[h3 id=GetUnderTheFloor 
+	"Get under the floor
+	$LF
+]h3
+[div class=p 
+	"Not really useful but just something strange that happened to me in Scene 4: 
+	[a href=https://youtu.be/ueGOC8Yv6sE rel=noopener external nofollow 
+		"https://youtu.be/ueGOC8Yv6sE
+	]a
+	" 
+	$LF
+]div
+[h3 id=GripFloor 
+	"Grip floor
+	$LF
+]h3
+[div class=p 
+	"In the boulder section of level 1 I managed to grip the floor with a jump. This happens a few times in the TAS and doesn’t really save any time unless you want to do a bunch of jumps in quick succession. A similar glitch happens in Scene 3 to skip some platforms using a barrel.
+	$LF
+]div
+[h2 id=IndividualLevelComments 
+	"Individual Level Comments
+	$LF
+]h2
+[h3 id=IntroLevel 
+	" Intro Level
+	$LF
+]h3
+[div class=p 
+	"Jumping out from the tower, the priority is moving downwards asap rather than prioritising moving right. I do the smallest possible jump out of the WB logo and then do a small jump off the ledge to fall down fast. Using the paddle makes you fall quicker so I do that on the way down. The reason you want to fall fast is because you need to push the box from the left. I also move a bit left before moving right because this builds up speed out of the WB logo (not that it matters because the bottleneck is downwards movement).
+	$LF
+]div
+[div class=p 
+	"I stop pushing the box on the earliest frame I can while still making the jump across. Doing a bigger jump allows me to move right sooner. I need to do a swap from Yakko to Wakko at some point and doing it now reduces some of the speed loss from the jump anyway.
+	$LF
+]div
+[div class=p 
+	"I hit the bomb on the earliest possible frame and step back while waiting for the explosion. I use this chance to swap to Dot since swapping slows you down and I might as well do it while waiting. I manage to get through the bomb without damage using some slight positioning and jumping nuance. I blow a kiss with Dot during the explosion because this reduces 1 lag frame from the explosion.
+	$LF
+]div
+[div class=p 
+	"I blow a kiss at the dog at the end of the level asap then wait for it to sit down. If you go on top of the dog then you have to wait for the character to slowly fall down to go through the door, so I time a jump to land on the dog the frame that it sits. This saves about 10 frames over just holding right into the door from the top of the dog. 
+	$LF
+]div
+[h3 id=Level1 
+	" Level 1
+	$LF
+]h3
+[div class=p 
+	"This level unfortunately has a lot of auto scrolling sections, but luckily level 2, 3, 4 have far less of these.
+	$LF
+]div
+[h4 id=Screen1 
+	" Screen 1
+	$LF
+]h4
+[div class=p 
+	"The first part is on a cycle based on the platform so my priority is to reduce lag frames. I then enter the cannon by hammering. Kissing the headphones guy was complicated because you can’t get him on the way up. So I have to compromise and get him on the way down. 
+	$LF
+]div
+[div class=p 
+	"This part of the level ends with a spike pit and a walker device that goes across. I opt to damage abuse to get across quicker. Unfortunately by leaving the walker up you can bonk on the lights on your way down. So the best approach is to lower the walker and do a small jump under the high light. On paper the best strategy would be to turn around and hammer which gives you more horizontal speed and less height – perfect for getting under the light. However in practice, it was better to not hammer. I turn around when I hit the spikes to damage abuse to the right. I would like to damage abuse more but you will die I you get hit twice.
+	$LF
+]div
+[h4 id=Screen2And3 
+	" Screen 2 and 3
+	$LF
+]h4
+[div class=p 
+	"Mostly autoscrollers. Not much to say here. On screen 2 I was unable to hammer the elephant with a jump hammer, so I had to slow down and hammer it from the ground.
+	$LF
+]div
+[h4 id=Screen4 
+	" Screen 4
+	$LF
+]h4
+[div class=p 
+	"First use of the see-saws here. I actually lost about 10 frames since I didn’t know about the character swap see-saw optimisation. However, that 10 frames doesn’t matter as I only just make the global cycle in level 3. I actually found that character swap while trying to hit the global cycle in level 3, then realised it could be applied back in level 1. This game is medium sync-friendly. It syncs on some screens but not others, meaning if I incorporated the save in level 1 I would have to redo the entire TAS (I was up to mid level 3 at that point). Given this wouldn’t have saved any time due to the global cycle I didn’t include it.
+	$LF
+]div
+[h4 id=Screen5 
+	" Screen 5
+	$LF
+]h4
+[div class=p 
+	"Just before the boss door I get a cheeky zip forward on the red switch
+	$LF
+]div
+[h4 id=Boss 
+	" Boss
+	$LF
+]h4
+[div class=p 
+	"Hitting Ralph with the rock off the see-saw does twice as much damage as paddling him down below and he has the same amount of i-frames. The strategy here is to keep rocking him. Rocking as quickly as possible wouldn’t work because he has i-frames so I had to space them out.
+	$LF
+]div
+[div class=p 
+	"On the last hit of the boss, I hit him on the right. Since I wait for i-frames anyway, I used that time to walk to the edge of the screen to be ready for the end of the fight. This saved time over beating him on the left then walking right after the fight.
+	$LF
+]div
+[h3 id=Level2 
+	"Level 2
+	$LF
+]h3
+[h4 id=Screen1_2 
+	" Screen 1
+	$LF
+]h4
+[div class=p 
+	"The two boxes stacked could be pushed forwards and jumped through from underneath or pulled to make a staircase. The staircase pull was a tad quicker.
+	$LF
+]div
+[div class=p 
+	"Conveyor belts speed me up and it was a delicate balance doing these along with box boosts.
+	$LF
+]div
+[h4 id=Screen2 
+	" Screen 2
+	$LF
+]h4
+[div class=p 
+	"Avoiding the damage here is slower.
+	$LF
+]div
+[div class=p 
+	"The “boss fight” is literally just a waiting game until the rock hits him. You can’t speed it up by dealing damage. I use this time to farm the chests for health since health management is very tight in this level. You sometimes get a health and sometimes get a star so I RNG manipulated to always get health. Jumping on the ground stops him from moving so I use this to gradually lure him to the edge and get the screen unlock with optimal movement.
+	$LF
+]div
+[h4 id=Screen3 
+	" Screen 3
+	$LF
+]h4
+[div class=p 
+	"Huge puzzle room. Skip it with some box jumps. Also why does the background look like two robots taking a bath?
+	$LF
+]div
+[h4 id=Screen4_2 
+	" Screen 4
+	$LF
+]h4
+[div class=p 
+	"Quicker to take damage through the boss rather than slow down.
+	$LF
+]div
+[div class=p 
+	"Box pull was 1f quicker with the swap out strat. Further down I use the switch to gradually open the door. I squeeze through the door as early as possible.
+	$LF
+]div
+[h4 id=Screen5_2 
+	" Screen 5
+	$LF
+]h4
+[div class=p 
+	"A cheeky little skip to skip the third set of rotating platforms.
+	$LF
+]div
+[h4 id=Screen6 
+	" Screen 6
+	$LF
+]h4
+[div class=p 
+	"Unfortunately the cannon couldn’t boost me across the floor since the floor causes damage. I can jump to the little statue dude with the speed I have but can’t make it much further. The floor does very slightly over half your maximum health so you can only take one hit off it. If it dealt less damage this room would be much quicker.
+	$LF
+]div
+[h4 id=Boss_2 
+	" Boss
+	$LF
+]h4
+[div class=p 
+	"Literally just run to the end. I get a lot of boosts off the gas shooters. You have to hit the boss at the end of the level just once then you get the collectible. The collectible isn’t tangible until it hits the ground, so there’s no point jumping after it.
+	$LF
+]div
+[h3 id=Level3 
+	"Level 3
+	$LF
+]h3
+[div class=p 
+	"Level 3 was the hardest to optimize in the TAS. It’s full of RNG, global cycles and confusing mechanics.
+	$LF
+]div
+[h4 id=Screen1_3 
+	" Screen 1
+	$LF
+]h4
+[div class=p 
+	"Ralph throws bombs and you just have to wait until he’s done. How long this takes is very RNG dependant and you can save or lose up to seconds depending on luck. This is why I slow down a bit before reaching him, to manipulate it. You can also manipulate it by paddling him, but paddling him stops him from throwing bombs briefly so it is usually slower.
+	$LF
+]div
+[div class=p 
+	"After the screen unlocks there are some horses that you use as platforms. After the first cactus jump, the next horse only spawns if you touch the ground. So I have to take damage here unless I want to scroll the camera all the way to the right, which would take too long.
+	$LF
+]div
+[h4 id=Screen2_2 
+	" Screen 2
+	$LF
+]h4
+[div class=p 
+	"This tiny room just has a box puzzle. I can damage boost over the spikes, but that’s less optimal as I need the health to skip a huge puzzle later.
+	$LF
+]div
+[h4 id=Screen3_2 
+	" Screen 3
+	$LF
+]h4
+[div class=p 
+	"While the bridge drops there’s a weird property where you can walk on the air. I show it a bit and would have liked to show a mid-air jump off it, but this would have been slower. 
+	$LF
+]div
+[h4 id=Screen4_3 
+	" Screen 4
+	$LF
+]h4
+[div class=p 
+	"Barrels seem to be influenced a bit by global cycles. When I had a few passes through this level the barrel pattern was shifted a bit forward or back each time.
+	$LF
+]div
+[div class=p 
+	"You can get forward zips on barrels, so I do this where possible.
+	$LF
+]div
+[div class=p 
+	"I do a little skip by jumping on a barrel rather than going left up the platforms. This is pretty tricky.
+	$LF
+]div
+[h4 id=Screen5_3 
+	" Screen 5
+	$LF
+]h4
+[div class=p 
+	"The intended puzzle at the start of this screen takes way too long to do normally. I saved my health to boost through the flames. The next flame puzzle had to be done normally though.
+	$LF
+]div
+[div class=p 
+	"At the end of this room is a see-saw and platforms on a global cycle. I just made the cycle by using the see-saw character swap glitch. If I didn’t make this cycle I would have lost heaps of time.
+	$LF
+]div
+[h4 id=Screen6_2 
+	" Screen 6
+	$LF
+]h4
+[div class=p 
+	"The thing that the dog is pushing can move if you paddle while on top of it. I also kiss the bird to being it across. If you don’t do this, then you have to go around the bottom then the top, costing heaps of time.
+	$LF
+]div
+[h4 id=BossFight 
+	" Boss Fight
+	$LF
+]h4
+[div class=p 
+	"Definitely one of the more complicated boss fights in the game. First phase is on the candy cart where you have to hit coins at Ralph.
+	$LF
+]div
+[div class=p 
+	"I can just hit him as soon as possible each time, buit it’s a bit more optimal to let him get all the way to the right then hit him. When he gets hit, he flies back to the left, but not all the way, meaning your next hit can be when he’s on the left. If you go right, left, right, left rather than left, left, left, left that’ll save 3 frames each time (6 frames over the whole fight).
+	$LF
+]div
+[div class=p 
+	"In terms of actually hitting him, the direction that the coin shooter goes is random. Depending on what frame you hit it on, it can fly right, left or neutral.
+	$LF
+]div
+[div class=p 
+	"When the boss finished, I acoided getting the health on the candy cart otherwise it would have caused a lag frame due to the screen unlocking at the same time.
+	$LF
+]div
+[div class=p 
+	"The next phase of the boss is where he’s chasing you on the train. Basically this section is on a timer. He needs to spend a certain amount of time chasing you on the track to completely tick up the timer and trigger the ending of the level. He will jump at you if he gets too close, but only once this timer is reached, he will come back on screen without his cart. If you just keep running away optimally, he will jump at you when the timer is reached and miss the train, then come back without a cart. But it’s slow since he has to run out the timer then jump after that. But if you make him do a “got too close to you jump” then the timer runs out just as he’s about to come back on screen, that saves a bunch of time. There’s a funny effect if you get something in the middle, where he’ll randomly jump at you from off screen. This is slower.
+	$LF
+]div
+[div class=p 
+	"For RTA speedrunners, I would recommend just trying to optimally escape him as fast as possible. Letting him to the “got too close to you” jumps won’t speed much up usually.
+	$LF
+]div
+[div class=p 
+	"Also I hit him with the paddle just before taking off the train. This doesn’t save any time.
+	$LF
+]div
+[h3 id=Level4 
+	"Level 4
+	$LF
+]h3
+[h4 id=Screen1_4 
+	" Screen 1
+	$LF
+]h4
+[div class=p 
+	"There’s a vampire here that you need to kiss to get past. Luckily there’s just enough space to change to Dot without losing time.
+	$LF
+]div
+[div class=p 
+	"There’s a bouncy thing that knocks you back but you can skip this by timing a character swap to get past. Similar to see-saw optimisations with swapping.
+	$LF
+]div
+[h4 id=Screen4_4 
+	" Screen 4
+	$LF
+]h4
+[div class=p 
+	"I can get on top of the grey statue but can’t make the jump to the other side without the box. You have to be careful of the falling light in this situation. Coming in from underneath results in damage but falling from the top doesn’t.
+	$LF
+]div
+[div class=p 
+	"There’s a little waiting section with Pinky and the Brain. I have to wait this out to access the box.
+	$LF
+]div
+[div class=p 
+	"With the shape puzzle, you need to do it both wrong and right to access both paths. One gives you a box that you need to use to get through and the other opens the actual path you need to go on.
+	$LF
+]div
+[h4 id=Screen5_4 
+	" Screen 5
+	$LF
+]h4
+[div class=p 
+	"The goal of this room is to drain the water down the bottom left. I do a little skip by not bringing the box across to hold down the water spurt. 
+	$LF
+]div
+[div class=p 
+	"Once the water is drained you have to wait for it to hit the bottom before you go down. You can get partially down and stand on the plug but you still can’t jump off this until it’s emptier. The water takes 7 damage from you each frame, so you’re likely to die if you spend much time in it at all. I can go in it a little bit where I jump in then out quickly to enter it before it’s fully drained. I would have done this jump even earlier to squeeze out a bit more distance, but if the water is too deep you float rather than walk through it, so I couldn’t use this even though I had the health to do so.
+	$LF
+]div
+[h4 id=Boss_3 
+	" Boss
+	$LF
+]h4
+[div class=p 
+	"This vampire boss involves hitting the switch diagonally opposite from her to drop the platform and make her fall to the ground. She will spawn in the spot horizontally across from you (making hitting the diagonal switch always pretty difficult).
+	$LF
+]div
+[div class=p 
+	"I tested all 4 spots for how quickly she takes damage and jumps back up. Left and right made no difference but the bottom spots were 54 frames faster overall per hit (40 frames faster for her to fly back up to the bottom spots vs the top ones, and 14 frames faster for her to hit the ground after falling)
+	$LF
+]div
+[div class=p 
+	"I could get these hits in optimally by tightening my movement up to the switch but I found it more fun to jump off the lower switch to hit the upper switch.
+	$LF
+]div
+[div class=p 
+	"In all my testing, she spawned in the top right, so I unavoidably lost some time there.
+	$LF
+]div
+[h3 id=Level5 
+	"Level 5
+	$LF
+]h3
+[h4 id=Screen1_5 
+	" Screen 1
+	$LF
+]h4
+[div class=p 
+	"For a couple of frames my speed roughly tripled. It didn’t save any time as it seemed to compensate for an earlier speed loss, but it was just a bit weird. I couldn’t figure out a way to retain this speed.
+	$LF
+]div
+[h4 id=Screen2_3 
+	" Screen 2
+	$LF
+]h4
+[div class=p 
+	"The lift section has to be one of my least favourite bits of the game. I damage boost through the flames, but you can’t boost through the electricity. It takes 1 more damage than your maximum health. You have to wait for Pinky and the Brain to dance and break the device that’s controlling it.
+	$LF
+]div
+[div class=p 
+	"You can kiss Ralph here for good luck.
+	$LF
+]div
+[div class=p 
+	"When the two boxes dropped on each other, I was able to get them to slightly clip inside each other (not in the final TAS). I couldn’t expand this into anything significant, since as soon as I moved, they snapped back to the proper position.
+	$LF
+]div
+[h4 id=Screen3_3 
+	" Screen 3
+	$LF
+]h4
+[div class=p 
+	"These platform cycles suck.
+	$LF
+]div
+[h4 id=Screen4_5 
+	" Screen 4
+	$LF
+]h4
+[div class=p 
+	"Getting down to the detonator was very tricky to optimise. While I would like to do a jump down, the platform hitboxes extend too far.
+	$LF
+]div
+[h4 id=Screen5_5 
+	" Screen 5
+	$LF
+]h4
+[div class=p 
+	"A bit of a chase screen. I have to slow down on the three switches to avoid bonking the doors. 
+	$LF
+]div
+[h4 id=Screen6_3 
+	" Screen 6
+	$LF
+]h4
+[div class=p 
+	"The glass that the helicopter shoots out can hurt you.
+	$LF
+]div
+[div class=p 
+	"I was very silly and did not watch the RTA run do this room before TASing it. I missed that you can get the hammer switch without pulling out the box and then finished the whole TAS before realising it. I had to go back and redo that along with all of the following screens and boss fight.
+	$LF
+]div
+[h4 id=Screen7 
+	" Screen 7
+	$LF
+]h4
+[div class=p 
+	"There’s a bit of RNG to this fire. In my initial run through I had slightly better luck, but the luck in the final TAS is pretty decent. Putting out the fire usually isn’t worth it due to lag, but also because you want the hydrants intact to get boosts off.
+	$LF
+]div
+[h4 id=Screen8 
+	" Screen 8
+	$LF
+]h4
+[div class=p 
+	"Your controls are locked when on the car. I would like to jump off but can’t. I hit an extra life on the car, which makes the last bonus screen a tad longer, but I can’t avoid this. 
+	$LF
+]div
+[div class=p 
+	"The cutscene with Pinky and the Brain is unskippable.
+	$LF
+]div
+[h4 id=LastBoss 
+	" Last Boss
+	$LF
+]h4
+[div class=p 
+	"This was the most complex section of the TAS. To hit this boss, you kiss Pinky with Dot to stop Pinky lighting the bombs. Then you push the bombs with Wakko towards the boss then hammer them with Wakko to detonate them and damage the boss. I was usually able to shorten the push by positioning the character over the spot where the bomb will spawn, clipping it a bit to the right. If you’re quick enough you can get all 3 bombs from every set the boss throws and avoid waiting.
+	$LF
+	"The first half of the fight requires 8 hits on the boss. I get these by detonating bombs on it, and this phase is fairly limited in terms of timesave, just because I’m waiting for the bombs to spawn. The only thing to make sure of is that you don’t get too close to the boss, otherwise it will kick (slowing it down). Before landing the 8th hit on Phase 1, I wait for the 9th bomb to spawn. This lets me take it into phase 2 to save 17 frames over waiting for an extra bomb in phase 2.
+	$LF
+]div
+[div class=p 
+	"Phase 2 is the bulk of the optimisation. You can damage the boss by detonating bombs, which is locked in speed based on how quickly the bombs spawn (like phase 1). But you can also make the boss take damage by having it kick itself with the legs.
+	$LF
+]div
+[div class=p 
+	"The leg movement is very predictable. It will walk then jump forward after a short amount of time. But if you stand just in front of the legs you can get them to kick. The kick stops movement, so it usually slows the legs down, but you need them to kick to damage the boss.
+	$LF
+	"When the boss enters phase 2 it can go to the left or the right (it goes to the opposite of the side you’re on). If I made the boss go left, I could get the kicks in sooner but going to the right meant that the legs ended in the right spot to kick the boss. The legs kick the boss after you beat it to deal the finishing blow, so it’s advantageous to finish the fight with the legs close to the boss.
+	$LF
+]div
+[div class=p 
+	"My strategy was to have the boss torso fly to the right, then do damage with bombs, apart from 2 of the hits done with the legs. I can only get 2 because I get one hit on the way towards the boss, then make the legs jump past the boss then get one more hit on the way back from the boss. It’s extremely tight to get 2 hits and almost impossible to do without taking damage to get inside the torso. While all this is happening I also have to be optimally hitting the boss with the bombs. The boss has a large invulnerability period after being hit, so I had to delay the last bomb hit on the boss as it was too close to the leg hit.
+	$LF
+]div
+[div class=p 
+	"The last optimisation was in the path manipulation of the legs. They will always go left then right but if I just left them alone they would do a jump just before they turned around to the right. Normally they turn around quite early but this jump sends them way further left than they would naturally walk to. After the jump they still have to turn around and walk that entire distance right again, losing time. To solve this, I made them kick as soon as they spawned by standing in front of them. Since a jump always follows a kick, they jumped to the spot where they would normally turn around to the right. This was a much earlier turnaround then just leaving the legs alone and saved 160 frames over leaving them alone.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": This isn't the usual fast-paced game that you'd expect on Genesis, but it's optimized nonetheless. Accepting for Standard.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing this Claimie
+]div

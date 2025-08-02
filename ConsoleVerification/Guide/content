@@ -1,0 +1,668 @@
+28
+[div class=p 
+	(__wikiLink|displaytext=Console Verified Movies|href=/ConsoleVerification/Movies)
+	" | 
+	(__wikiLink|displaytext=Console Verification Tests|href=/ConsoleVerification/Tests)
+	$LF
+]div
+[div class=p 
+	"This guide will explain how console verification works and take you through the steps to play back movies on physical consoles.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#Introduction 
+					" Introduction
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Dumping 
+					" Dumping
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Formats 
+							" Formats
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Scripts 
+							" Scripts
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#ConsoleSpecificsAndProtocols 
+					" Console Specifics and Protocols
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ReplayDevices 
+					" Replay Devices
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#DesignHistory 
+							" Design History
+							$LF
+						]a
+					]li
+				]ul
+			]li
+		]ul
+	]div
+]div
+[h2 id=Introduction 
+	" Introduction
+	$LF
+]h2
+[div class=p 
+	"Verifying a TAS on console consists of starting with a TAS movie file (.bk2, .fm2, etc.), typically a Lua "dump" script to convert the movie file to a suitable format for use on a real console, a replay device that emulates the controller, and the console itself. In order for a replay device to know when to supply the next controller input, it uses some method of staying in sync with the console. The most common method is to keep track of when the console polls the controller, but not all consoles behave this way, so alternative methods like monitoring VSYNC or counting clock cycles are sometimes necessary.
+	$LF
+]div
+[div class=p 
+	"TAS movies are almost always made in an emulator, and the emulator dictates how those inputs are saved. Often, this is not directly compatible with how controllers actually work, or how the replay device stays in sync. Because of this, the movie inputs must be filtered for only the information the replay device truly needs. This is where dump scripts come in.
+	$LF
+]div
+[div class=p 
+	"While playing the TAS movie in an emulator, a script (usually in Lua) is used to gather the information needed by the replay device. What this involves will depend greatly on the console in question, and may additionally be affected by game-specific quirks. On rare occasions, an emulator may produce a TAS movie which already provides the proper inputs needed for verification, in which case a dump script is not typically needed (mupen64 movies are an example of this).
+	$LF
+]div
+[div class=p 
+	"Usually, the main issue is that emulators will save inputs based on frames, even if the console doesn't actually poll/read any controller inputs during the frame. If the replay device relies on the polling sequence for staying in sync, these extra inputs in the TAS movie need to be filtered out. Additionally, some games poll multiple times per frame, while the emulator only saves a single input for each frame.
+	$LF
+]div
+[hr 
+]hr
+[h2 id=Dumping 
+	" Dumping
+	$LF
+]h2
+[div class=p 
+	"Once the inputs have been dumped from a TAS movie, they need to be stored in a structured file format so that replay devices (and the software that interfaces with them) can easily read the necessary information. Historically, these dump formats have been largely inadequate and highly dependent on the replay device being used.
+	$LF
+]div
+[h3 id=Formats 
+	" Formats
+	$LF
+]h3
+[div class=p 
+	"TASVideos user 
+	[a class=intlink href=/Users/Profile/true 
+		"true
+	]a
+	" created the 
+	[code 
+		".r08
+	]code
+	" and 
+	[code 
+		".r16m
+	]code
+	" formats (
+	[a href=https://pastebin.com/98eXgnRL rel=noopener external nofollow 
+		"documented
+	]a
+	" by 
+	[a class=intlink href=/Users/Profile/TheMas3212 
+		"TheMas3212
+	]a
+	") for use with the NES and SNES respectively. However, these formats do not differentiate between poll-based and frame-based inputs, and provide no way to specify console resets. Nonetheless, these are the most common publicly available formats for those consoles for runs created from 2013 through 2023.
+	$LF
+]div
+[div class=p 
+	"For GB/C/A replays, 
+	[a class=intlink href=/Users/Profile/Extrems 
+		"Extrems
+	]a
+	" created the GameBoyInterface (GBI) software for the GameBoy Player, which uses its own format for storing inputs based on the number of audio PWM cycles since power-on, and similarly does not support resets or inputs that require more precision.
+	$LF
+]div
+[div class=p 
+	"In 2021, 
+	[a class=intlink href=/Users/Profile/ViGreyTech 
+		"ViGreyTech
+	]a
+	" and 
+	[a class=intlink href=/Users/Profile/Bigbass 
+		"Bigbass
+	]a
+	" started work on a unified dump format that is compatible with all consoles, and provides much more information than just the basic inputs (such as reset handling and attributions). While not finalized, 
+	[a href=https://github.com/bigbass1997/TASD-Spec/tree/main/docs/tasd-spec-0001 rel=noopener external nofollow 
+		"a draft is available
+	]a
+	".
+	$LF
+]div
+[h3 id=Scripts 
+	" Scripts
+	$LF
+]h3
+[div class=p 
+	"Only a few dump scripts are readily available to download. The scripts that do exist aren't always bug free or have odd quirks which may affect whether or not the dumped inputs actually work on console. Below are scripts that are known to work well.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-3857-0 
+					"Hide
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3857-1 
+					"GB/C/A
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3857-2 
+					"NES
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3857-3 
+					"SNES
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-3857-0 
+		]div
+		[div class=tab-pane fade id=tabs-3857-1 
+			[div class=p 
+				"The GBI-compatible script for the GameBoy and GameBoy Color can be 
+				[a href=https://runs.tas.bot/GBC.html rel=noopener external nofollow 
+					"found here
+				]a
+				". GameBoy Advance script details are 
+				[a href=https://runs.tas.bot/GBA.html rel=noopener external nofollow 
+					"found here
+				]a
+				".
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-3857-2 
+			[div class=p 
+				[a class=intlink href=/Users/Profile/Bigbass 
+					"Bigbass
+				]a
+				" has written scripts for use with Bizhawk and FCEUX that dump to the .r08 format. 
+				$LF
+			]div
+			[div class= 
+				[div class= 
+					[ul class=nav nav-tabs role=tablist 
+						[li class=nav-item 
+							[a class=active nav-link data-bs-toggle=tab href=#tabs-4204-0 
+								"Hide
+							]a
+						]li
+						[li class=nav-item 
+							[a class=nav-link data-bs-toggle=tab href=#tabs-4204-1 
+								"Bizhawk
+							]a
+						]li
+						[li class=nav-item 
+							[a class=nav-link data-bs-toggle=tab href=#tabs-4204-2 
+								"FCEUX
+							]a
+						]li
+					]ul
+				]div
+				[div class=tab-content 
+					[div class=tab-pane fade active show id=tabs-4204-0 
+					]div
+					[div class=tab-pane fade id=tabs-4204-1 
+						[div class=p 
+							(__wikiLink|displaytext=Download script|href=/UserFiles/Info/638406821710992453)
+							". Instructions:
+							$LF
+						]div
+						[ol 
+							[li 
+								" Load rom
+								$LF
+							]li
+							[li 
+								" Open Tools > Lua Console
+								$LF
+							]li
+							[li 
+								" Open dump script (but do not start it)
+								$LF
+							]li
+							[li 
+								" Select the movie in File > Movie > Play movie...
+								$LF
+							]li
+							[li 
+								" Do not check the "Stop on frame" or "Last frame" options
+								$LF
+							]li
+							[li 
+								" Press ok in the dialog.
+								$LF
+							]li
+							[li 
+								" Start the script
+								$LF
+							]li
+						]ol
+					]div
+					[div class=tab-pane fade id=tabs-4204-2 
+						[div class=p 
+							(__wikiLink|displaytext=Download script|href=/UserFiles/Info/638406822164178639)
+							". Instructions:
+							$LF
+						]div
+						[ol 
+							[li 
+								" Load rom
+								$LF
+							]li
+							[li 
+								" Open Lua Script window, and load dump script
+								$LF
+							]li
+							[li 
+								" Optional: Run the script, if it's not already (the game will play, but that's no problem)
+								$LF
+							]li
+							[li 
+								" Select the movie in File > Movie > Play movie...
+								$LF
+							]li
+							[li 
+								" Do not check/enable the "pause movie at frame" option
+								$LF
+							]li
+							[li 
+								" Press ok in the dialog.
+								$LF
+							]li
+							[li 
+								" If the script is already running, the dump should begin now. Otherwise, start the script.
+								$LF
+							]li
+						]ol
+					]div
+				]div
+			]div
+			[div class=p 
+				"Some much older scripts can also be found 
+				[a href=https://github.com/dwangoac/TASBot-Projects/tree/master/Dump_Scripts rel=noopener external nofollow 
+					"here
+				]a
+				" but the NES scripts are harder to use reliably, and can produce off-by-one dumps under certain circumstances due to Lua API lag-frame quirks (discovered by ViGreyTech).
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-3857-3 
+			[div class=p 
+				"A few scripts for the SNES (.r16m format) can be 
+				[a href=https://github.com/dwangoac/TASBot-Projects/tree/master/Dump_Scripts rel=noopener external nofollow 
+					"found here
+				]a
+				". The latest builds of the lsnes emulator now have built-in dump support.
+				$LF
+			]div
+		]div
+	]div
+]div
+[div class=p 
+	"For the moment, finding scripts for any other console is up to you. If you are using a replay device someone else created, which supports the console you're interested in, ask the creator for any script recommendations. They may have scripts tailored specifically to their device. Otherwise you'll need to create your own or find some other method to stay in sync which allows you to use the original movie file.
+	$LF
+]div
+[hr 
+]hr
+[h2 id=ConsoleSpecificsAndProtocols 
+	" Console Specifics and Protocols
+	$LF
+]h2
+[div class=p 
+	"Each console has its own methods for grabbing user inputs, and its own unique quirks which can inhibit verification efforts. Each tab below explains what is known for each console, and includes replay device design strategies.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-6244-0 
+					"Hide
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-1 
+					"NES
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-2 
+					"SNES
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-3 
+					"GB/C
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-4 
+					"GBA
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-5 
+					"N64
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-6 
+					"Genesis
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-6244-7 
+					"A2600
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-6244-0 
+		]div
+		[div class=tab-pane fade id=tabs-6244-1 
+			[div class=p 
+				"NES controllers internally are just simple 8-bit shift registers, controlled by the game reading/writing to special memory-mapped registers. Each controller port contains a latch (LAT), clock (CLK), and serial data (SER or DAT or OUT) signal pin, as well as power, ground, and two other pins that are unused by standard controllers. The latch is shared across ports, so a HIGH signal on the first port's LAT pin will also be HIGH on the second port's LAT pin. The clock is manually pulsed by the game, and each pulse will shift the data in the respective controller by 1 bit. The serial pin is tied to the shift register's current output.
+				$LF
+			]div
+			[div class=p 
+				"Since NES games are technically able to latch or clock controllers in any order they want, not all games will work the same way. However, in nearly all cases, games will follow the same general order of operations: pulse LAT HIGH for a short period, then alternate between pulsing CLK LOW and reading the current state of the serial data pin, typically 8 times. Some games may latch twice per frame, once for each controller port (even though the latch pin is shared across ports). Some games may poll the first controller before the second, some games the second before the first.
+				$LF
+			]div
+			[hr 
+			]hr
+			[div class=p 
+				"For replay devices, there are two critical mechanics that must be understood: latch filtering and clock filtering. 
+				$LF
+			]div
+			[h3 
+				" Latch Filtering
+				$LF
+			]h3
+			[div class=p 
+				"Most emulators will represent inputs as having only a single state per frame (SubNESHawk is one exception). However, this does not reflect how games actually poll controllers. Quite often games will latch multiple times per frame.
+				$LF
+			]div
+			[div class=p 
+				"This multiple latching becomes a problem if a replay device believes that each latch is equivalent to each movie frame, in which case the replay will likely desync very early in a game. Historically, dump scripts for emulators would often dump one input value for each frame, rather than for each latch. This means that a replay device needs some way to duplicate input values for games that latch multiple times per frame.
+				$LF
+			]div
+			[div class=p 
+				"The easiest, albeit not fool-proof, solution is called a latch filter (also referred to as windowed mode). Essentially it's just a length of time, typically 8 milliseconds. After the first latch of a frame, any new latches within that time limit will reset the controller's input state with the same value as the first. Only after the time limit is reached, will the next dumped input be used.
+				$LF
+			]div
+			[div class=p 
+				"Alternatively, if the dump script dumps inputs based on emulated latches (via a memory watch callback, or SubNESHawk), the latch filter is completely unnecessary and should be disabled. This is also required for verifying some games, because they poll across frame boundaries (e.g. the first few bits are read during one frame, and the remaining bits are read during the next frame).
+				$LF
+			]div
+			[div class=p 
+				[b 
+					[em 
+						"Notice:
+					]em
+				]b
+				" The .r08 dump format does NOT differentiate between these two dumping methodologies. There is no way to tell with just an .r08 file whether the inputs represent whole frames, or individual latches.
+				$LF
+			]div
+			[h3 
+				" Clock Filtering
+				$LF
+			]h3
+			[div class=p 
+				"Games that utilize the NES's DPCM audio, 
+				[a href=https://www.nesdev.org/wiki/Controller_reading#DPCM_conflict rel=noopener external nofollow 
+					"can encounter a bug
+				]a
+				" when polling controllers at the same time a DPCM sample is being played. The bug can randomly cause the CLK pin to pulse an extra time shortly after a real pulse, without the game knowing. 
+				[b 
+					"Most, but not all,
+				]b
+				" games will deal with this by continually polling the controller until two successive polls return the same value. This could be mitigated by using a latch filter, but that won't be possible or helpful in all cases.
+				$LF
+			]div
+			[div class=p 
+				"Instead, a replay device should ignore all additional clock pulses for some amount of time, typically 4 microseconds, after each initial pulse.
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-6244-2 
+			[div class=p 
+				[b 
+					[em 
+						"TODO
+					]em
+				]b
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-6244-3 
+			[div class=p 
+				[b 
+					[em 
+						"TODO
+					]em
+				]b
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-6244-4 
+			[div class=p 
+				[b 
+					[em 
+						"TODO
+					]em
+				]b
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-6244-5 
+			[div class=p 
+				"Officially known as the Joybus Protocol, the N64 uses a much more complex polling protocol than other consoles before it. The N64 homebrew community has extensively documented the protocol on 
+				[a href=https://n64brew.dev/wiki/Joybus_Protocol rel=noopener external nofollow 
+					"their wiki
+				]a
+				". Replay devices only usually need to be concerned with the 0xFF, 0x00, and 0x01 commands for the standard controller. If multiple controllers are used, note that they are polled sequentially, one after the other (except on the iQue Player, where they are polled in parallel).
+				$LF
+			]div
+			[div class=p 
+				"The N64 has historically been very difficult to verify TASes on. This is primarily due to poorly implemented emulators that do not emulate timing well enough for console verifications. As such, even as emulators progress, existing TAS publications are unlikely to work. Nevertheless, there are a few games that happen to verify consistently because they poll controllers in an uncommon way allowing us to ignore timing-related emulator inaccuracies.
+				$LF
+			]div
+			[div class=p 
+				"As long as the emulator in question properly emulates the game logic with reasonable accuracy, it should be possible to verify TASes for games that only poll controllers based on the game's internal main loop. Games that automatically poll during the Video Interface Interrupt (similar to vsync) are significantly less likely to verify.
+				$LF
+			]div
+			[hr 
+			]hr
+			[div class=p 
+				[b 
+					"Lag/Polling Technical Explanation
+				]b
+				$LF
+			]div
+			[div class=p 
+				"All official N64 games, except Namco Museum, use the N64's Reality Coprocessor (RCP) to generate the next video frame. The frame is generated using a list of graphical commands supplied to the RCP (typically) once the game logic has finished updating the game's state. When the RCP finishes creating the frame, the frame is transferred into memory, and then rendered out to a TV by the Video Interface. Games will typically also employ Double Buffering, which means the finished frame is saved to memory that's not being drawn, and then during an interrupt, the buffer is swapped to the new frame.
+				$LF
+			]div
+			[div class=p 
+				"If the game logic, and/or the RCP, takes too long to generate the next frame, the Video Interface will redraw the previous frame from memory, and will continue to do so until the next frame is ready. In this situation, most games will continue to poll controllers for input on every video frame, even if the game logic has already taken inputs into account and is just waiting for the rest of the process to finish.
+				$LF
+			]div
+			[div class=p 
+				"Emulators that do not accurately emulate timings will produce a varying number of these "lag frames", and thus in such cases a replay device will see a different number of controller polls (and a different number of vsync's) than what the emulator thought would occur. Thus a desync will happen.
+				$LF
+			]div
+			[div class=p 
+				"Rarely, a game such as Super Mario 64 will only poll once per game loop, regardless of how long it takes to generate the next frame. In this case, the replay device can stay in sync. Other games known to verify include only Mario Kart 64, and Mortal Kombat 3.
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-6244-6 
+			[div class=p 
+				[b 
+					[em 
+						"TODO
+					]em
+				]b
+				$LF
+			]div
+		]div
+		[div class=tab-pane fade id=tabs-6244-7 
+			[div class=p 
+				[b 
+					[em 
+						"TODO
+					]em
+				]b
+				$LF
+			]div
+		]div
+	]div
+]div
+[hr 
+]hr
+[h2 id=ReplayDevices 
+	" Replay Devices
+	$LF
+]h2
+[div class=p 
+	"Sometimes known as a "bot", a replay device is an electronic device which emulates a controller's behavior (aka 
+	[a href=https://en.wikipedia.org/wiki/Hardware_emulation rel=noopener external nofollow 
+		"Hardware Emulation
+	]a
+	"). However, instead of using physical buttons to convey inputs, it automatically provides a set of sequential inputs from internal memory and/or streamed over USB from a computer.
+	$LF
+]div
+[div class=p 
+	"Replay devices are usually made using a programmable microcontroller. Depending on the demands of a console, 8-bit microcontrollers like an AVR (used in Arduinos) or a PIC can be used, otherwise more powerful devices like the family of 32-bit STM microcontrollers or the RP2040 can also be used. It's rarely necessary to use FPGA's, but they have been used before for specific situations.
+	$LF
+]div
+[div class=p 
+	"During public events or live streams, the mascot 
+	(__wikiLink|href=/TASBot|implicitdisplaytext=TASBot)
+	" may be seen holding a replay device. TASBot is not a replay device, and for this reason replay devices are not referred to as "TASBots". Care should be taken not to conflate these terms.
+	$LF
+]div
+[h3 id=DesignHistory 
+	" Design History
+	$LF
+]h3
+[div class=p 
+	"Many replay devices have been created by a variety of dedicated people. Below is the known history of replay devices. Note that there are certainly more devices than those included here. More may be added over time.
+	$LF
+]div
+[div class=p 
+	"Around 2011, NESBot was the first device to be publicly announced, which was created by 
+	[a class=intlink href=/Users/Profile/micro500 
+		"micro500
+	]a
+	", who also wrote an 
+	[a href=http://www.instructables.com/id/NESBot-Arduino-Powered-Robot-beating-Super-Mario-/ rel=noopener external nofollow 
+		"Instructables guide
+	]a
+	" for creating and using their device. micro500 later created the 
+	(__wikiLink|displaytext=N64Bot|href=/Forum/Posts/305411)
+	" for N64 TASes in 2014 and used it for the SM64 run at 
+	(__wikiLink|displaytext=AGDQ 2014|href=/GamesDoneQuick/AGDQ2014)
+	". Then in early 2016, micro500 started work on the 
+	[a href=https://github.com/micro500/TASLink rel=noopener external nofollow 
+		"TASLink device
+	]a
+	" capable of replaying NES, SNES, and N64 TASes.
+	$LF
+]div
+[div class=p 
+	"In 2013, 
+	[a class=intlink href=/Users/Profile/true 
+		"true
+	]a
+	" released his 
+	[a href=http://truecontrol.org rel=noopener external nofollow 
+		"NES / SNES Replay Device
+	]a
+	" which was capable of playing back both NES and SNES TASes.  This is the version that was used during 
+	(__wikiLink|displaytext=AGDQ 2014|href=/Forum/Posts/353915)
+	" and was also employed during 
+	(__wikiLink|displaytext=AGDQ 2015|href=/GamesDoneQuick/AGDQ2015)
+	" for Pokemon Red / Pokemon Plays Twitch. In 2014, true released his MultiReplay board which added Genesis, SMS, and other platform support and incorporated a built-in display.  This version was used during AGDQ 2015 for SMB on SMW.
+	$LF
+]div
+[div class=p 
+	"Later in 2018, 
+	[a class=intlink href=/Users/Profile/tuvok302 
+		"tuvok302
+	]a
+	" (aka TheDot) developed an 
+	[a href=https://github.com/tuvok302/TAS_Replay rel=noopener external nofollow 
+		"Arduino-based device
+	]a
+	" that supports the NES and SNES.
+	$LF
+]div
+[div class=p 
+	"Around February 2019, 
+	[a class=intlink href=/Users/Profile/Ownasaurus 
+		"Ownasaurus
+	]a
+	" began work on the open-source 
+	[a href=https://github.com/Ownasaurus/TAStm32 rel=noopener external nofollow 
+		"TAStm32
+	]a
+	" which has since gone through four major iterations and is still in active development and usage. It supports the NES, SNES, N64, Gamecube, and Genesis. It's the first device to be sold to and actively used by multiple people. It's also been used during many 
+	(__wikiLink|href=/TASBot|implicitdisplaytext=TASBot)
+	" appearances at 
+	(__wikiLink|href=/GamesDoneQuick|implicitdisplaytext=GamesDoneQuick)
+	" and other speedrunning marathons.
+	$LF
+]div
+[div class=p 
+	"In late 2020, 
+	[a class=intlink href=/Users/Profile/Bigbass 
+		"Bigbass
+	]a
+	" created another open-source replay device, the 
+	[a href=https://github.com/bigbass1997/PICTAS rel=noopener external nofollow 
+		"PICTAS
+	]a
+	". Based on dual PIC18 microcontrollers, it supports the NES, N64, and Atari 2600. It was used to verify a large portion of the TASes first verified during 2021 and 2022.
+	$LF
+]div
+[div class=p 
+	"By mid-2022, due to supply Microchip supply shortages, 
+	[a class=intlink href=/Users/Profile/Bigbass 
+		"Bigbass
+	]a
+	" started a new project named 
+	[a href=https://github.com/bigbass1997/VeriTAS rel=noopener external nofollow 
+		"VeriTAS
+	]a
+	". It utilizes the RP2040 microcontroller (typically found on the Raspberry Pi Pico). VeriTAS currently has support for the NES and Genesis/MegaDrive, but more are planned.
+]div

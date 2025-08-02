@@ -1,0 +1,690 @@
+5
+[div class=p 
+	"This game would feature an epic storyline, where the protagonist saves the virtual world of Evermore and the lives of those who are trapped inside…
+	$LF
+	"If we wouldn't skip all but two minor dialogs of the game. This is the story of "The Dog" and his trancendence once he's realized that he's actually trapped in the Matrix.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: lsnes rr2-β23
+		$LF
+	]li
+	[li 
+		" Objective: Reach the credits as quickly as possible
+		$LF
+	]li
+	[li 
+		" Categories:
+		$LF
+		[ul 
+			[li 
+				" Heavy glitch abuse
+				$LF
+			]li
+			[li 
+				" Corrupts memory
+				$LF
+			]li
+			[li 
+				" Uses a game restart sequence
+				$LF
+			]li
+			[li 
+				" Genre: Action RPG
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=GlitchesTechniques 
+	" Glitches/Techniques
+	$LF
+]h3
+[h4 id=IndefiniteProjectiles 
+	" Indefinite Projectiles
+	$LF
+]h4
+[div class=p 
+	"Alchemy in the game is heavily restricted. Presumably to make alchemy feel less overpowered there are many restrictions that apply to casting:
+	$LF
+]div
+[ul 
+	[li 
+		" Alchemy can be classified in two schools and has 8 slots for each
+		$LF
+		[ul 
+			[li 
+				" Projectile (E.g. Hard Ball, Flash, etc.)
+				$LF
+			]li
+			[li 
+				" Animation (Everything else, including items)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Both schools are limited in the amount of concurrent spells
+		$LF
+		[ul 
+			[li 
+				" The Boy realistically cannot cause the game to have more than 2-3 active alchemy spells (Cooldown capped)
+				$LF
+			]li
+			[li 
+				" The Dog has no mandatory cooldown, but instead runs into the limited slots (Memory capped)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Generally referred to as "multi-casting", having the Dog as the active player and opening the Boy's menu pushes the game to it's limits.
+	$LF
+	"So why is this important, you may ask?
+	$LF
+]div
+[div class=p 
+	"Because even though they added a hard limit to the amount of alchemy slots to 8 each, they did not limit the amount of projectiles that can be on screen:
+	$LF
+]div
+[ul 
+	[li 
+		" Projectiles are only loosly linked to the projectile alchemy slots that created them
+		$LF
+	]li
+	[li 
+		" Projectiles are marked as active until the game decides that they aren't being used anymore
+		$LF
+		[ul 
+			[li 
+				" In the frame the damage number shows up a projectile is being marked as inactive
+				$LF
+			]li
+			[li 
+				" A map transition marks all pending projectiles as inactive
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" This leads to a so-called race condition, which means that based on the frame you leave a screen it either happens before or after
+		$LF
+		[ul 
+			[li 
+				" Position close to a map exit (projectile count = 0)
+				$LF
+			]li
+			[li 
+				" Cast 8 projectile alchemy spells and walk into the transition (The game clears pending projectiles, projectile count = 8)
+				$LF
+			]li
+			[li 
+				" Upon entering the new map the game is tricked into thinking the projectiles are still on the screen (projectile count = 8)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"From now on every new projectile corrupts the memory of the animation alchemy, which crashes the game on every frame it tries to render that memory.
+	$LF
+]div
+[h4 id=ExecutingCodeAce 
+	" Executing Code (ACE)
+	$LF
+]h4
+[div class=p 
+	"As with most ACEs we abuse the fact that a loop in the controller registers can be performed.
+	$LF
+]div
+[blockquote 
+	" Disclaimer: The background information isn't too important. The focus should be on the fact that the projectile makes the game execute the controller register as code, if everything was lined up perfectly!
+	$LF
+]blockquote
+[div class=p 
+	"To access the controller registers various aspects have been abused:
+	$LF
+]div
+[ul 
+	[li 
+		" The 9th projectile overflows the available memory (And ends up corrupting the memory of the first animation alchemy slot)
+		$LF
+		[ul 
+			[li 
+				" It's yet unknown what influences the pseudo random values (But getting a specific value of 
+				[code 
+					"$00xx
+				]code
+				" or 
+				[code 
+					"$FFxx
+				]code
+				" seems to be roughly 1:600)
+				$LF
+			]li
+			[li 
+				" Jumping directly into 
+				[code 
+					"$0100
+				]code
+				" would also work, but the probability for that to happen is way lower (Therefore it's not worth the trouble)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Code from the alchemy spells is executed in bank 
+		[code 
+			"$91
+		]code
+		$LF
+		[ul 
+			[li 
+				" No direct accces to WRAM values (Which is located in bank 
+				[code 
+					"$7E
+				]code
+				")
+				$LF
+			]li
+			[li 
+				" In multiple locations the bank can access the LowRAM, which shadows parts of the WRAM (Only 
+				[code 
+					"$0000-$1FFF
+				]code
+				", which excludes the Boys name e.g.)
+				$LF
+			]li
+			[li 
+				" Overflowing an address within a bank makes it wrap around, which is somewhat important to access the LowRAM (Which is located in 
+				[code 
+					"$0000-$1FFF
+				]code
+				")
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" The "default bank" (database) is bank 
+		[code 
+			"$7E
+		]code
+		", which allows us to access WRAM without "long" commands
+		$LF
+	]li
+	[li 
+		" WAI makes the controller inputs update, while the code is still being executed
+		$LF
+		[ul 
+			[li 
+				" This is important, because controller inputs may not be changed while they are being updated
+				$LF
+			]li
+			[li 
+				" It's important not to change the general structure of 
+				[code 
+					"<code><wait><loop>
+				]code
+				", because after WAI the following byte is still being executed, which has to perform a loop
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" RTS returns from the corrupted script and progresses the game up until the next frame
+		$LF
+		[ul 
+			[li 
+				" If the game crash is no longer wanted the corrupted memory has to be cleared before
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Long story short - The corrupted animation alchemy jumps to a pseudo random address, which can be manipulated by having entities walk around.
+	$LF
+]div
+[div class=p 
+	"The jump happens in three steps, because of the properties of all involved memory addresses, which leads to those memory values during the crash:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"Value
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				[code 
+					"$7E/3378
+				]code
+			]td
+			[td 
+				"Parts of alchemy Slot #0
+			]td
+			[td 
+				[code 
+					"$005A
+				]code
+			]td
+			[td 
+				"Points at the Camera Offset
+			]td
+		]tr
+		[tr 
+			[td 
+				[code 
+					"$91/005A
+				]code
+			]td
+			[td 
+				"Camera Offset (
+				[code 
+					"LSB Y
+				]code
+				", 
+				[code 
+					"MSB X
+				]code
+				")
+			]td
+			[td 
+				[code 
+					"$8100
+				]code
+			]td
+			[td 
+				"Points at the Frame Counter (Offset 
+				[code 
+					"$8000
+				]code
+				")
+			]td
+		]tr
+		[tr 
+			[td 
+				[code 
+					"$91/0100
+				]code
+			]td
+			[td 
+				"Frame Counter
+			]td
+			[td 
+				[code 
+					"$4218
+				]code
+			]td
+			[td 
+				"Points at the Controller Registers
+			]td
+		]tr
+		[tr 
+			[td 
+				[code 
+					"$91/4218
+				]code
+			]td
+			[td 
+				"Controller Register
+			]td
+			[td 
+				[code 
+					"$xxxxxxxxxxxxxxxx
+				]code
+			]td
+			[td 
+				"The executed code is based on the buttons pressed in the current frame
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"After the jump into the controller registers we end up in a state called total control, which we use to write the following, very generic code: (
+	[code 
+		"<code><wait><loop>
+	]code
+	")
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[code 
+			"NOP NOP NOP NOP NOP WAI BRA $F8 ; Synchronize first jump in the controller register
+		]code
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"LDA $yy $xx NOP NOP WAI BRA $F8 ; Load value $xxyy
+		]code
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"STA $yy $xx NOP NOP WAI BRA $F8 ; Store value to address $xxyy
+		]code
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"RTS RTS RTS RTS RTS RTS RTS RTS ; Unfreeze the game
+		]code
+		$LF
+	]li
+]ul
+[h3 id=BoysTale 
+	" The Boys Tale
+	$LF
+]h3
+[h4 id=ArcISaveReset 
+	" Arc I: Save+Reset
+	$LF
+]h4
+[div class=p 
+	"Unlike all previous runs of this game, our first goal is to reset the frame counter as fast as possible.
+	$LF
+	"By not skipping the Raptor Fight event we end up in the first of two dialogs, where we kindly accept the offer to save the game.
+	$LF
+]div
+[div class=p 
+	"Timesaves:
+	$LF
+]div
+[ul 
+	[li 
+		" Avoiding unnecessary screen transitions, because they stop the frame counter from incrementing for a brief moment
+		$LF
+	]li
+	[li 
+		" Losing the Raptor Fight instantly by entering the screen with 0 HP
+		$LF
+	]li
+	[li 
+		" Resetting the frame counter isn't part of the upcoming setup, but reduces the waiting time from ~23 to ~2 minutes
+		$LF
+	]li
+]ul
+[h4 id=ArcIiSetup 
+	" Arc II: Setup
+	$LF
+]h4
+[div class=p 
+	"Because there is no known intro skip most of this segment is dedicated to waiting for the frame count to contain a specific value. (See "The Dogs Tale")
+	$LF
+	"The time can be used to set up the ACE, though.
+	$LF
+	"Our second and last dialog rewards us with the Hard Ball formula, which is also the reason why we have to gather ingredients for 9 casts on the way.
+	$LF
+]div
+[div class=p 
+	"The setup:
+	$LF
+]div
+[ul 
+	[li 
+		" Glitching 8 projectiles to stay in memory indefinitely (Projectile count = 8)
+		$LF
+	]li
+	[li 
+		" Positioning the camera in a specific area (
+		[code 
+			"$91/005A = $8100
+		]code
+		")
+		$LF
+	]li
+	[li 
+		" Waiting for the frame counter to reach a certain frame (
+		[code 
+			"$91/0100 = $4218
+		]code
+		")
+		$LF
+	]li
+]ul
+[h4 id=ArcIiiAce 
+	" Arc III: ACE
+	$LF
+]h4
+[div class=p 
+	"By aligning all the previously set up memory values with a RNG manipulated crash in the same frame makes the game execute code from the controller inputs.
+	$LF
+]div
+[div class=p 
+	"What happens while the game appears to be frozen:
+	$LF
+]div
+[ul 
+	[li 
+		" Casting the 9th Hard Ball makes the game glitch out on every frame the game tries to render it (
+		[code 
+			"$7E/3378 = $005A
+		]code
+		", projectile count = 9)
+		$LF
+	]li
+	[li 
+		" Pressing buttons now is being treated as code, that can be used similar to the concept of a Game Genie:
+		$LF
+		[ul 
+			[li 
+				" Set all story progress flags to true (Takes 3 frames)
+				$LF
+			]li
+			[li 
+				" Remove the 9th projectile from the memory (Takes 14 frames, projectile count = 8)
+				$LF
+			]li
+			[li 
+				" Warp into the trigger that takes us back to the previous area (Takes 2 frames)
+				$LF
+			]li
+			[li 
+				" Return to the game (Takes 1 frame)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Walking into the Sandpit area with the glitched story progress flags now makes the game play the credits in a rather odd order.
+	$LF
+	"But at some point the game reaches the "The End" screen, which concludes the run.
+	$LF
+]div
+[h3 id=DogsTale 
+	" The Dogs Tale
+	$LF
+]h3
+[blockquote 
+	" Disclaimer: This part does not affect the ACE whatsoever! It just acts as a segue while waiting for a specific frame between Arc II and III!
+	$LF
+]blockquote
+[div class=p 
+	"Hear me out on this. This is the story of an unnamed hero, often referred to as "The Dog".
+	$LF
+]div
+[div class=p 
+	"The game actively prevents our true hero from being used as the main character, by not letting him interact with many objects and events.
+	$LF
+]div
+[div class=p 
+	"Due to the fact that every input can be buffered it's possible to circumvent those restrictions:
+	$LF
+]div
+[ul 
+	[li 
+		" Skipping triggers
+		$LF
+		[ul 
+			[li 
+				" Inactive characters do not interact with triggers and can walk right through them
+				$LF
+			]li
+			[li 
+				" 
+				[code 
+					"L
+				]code
+				" and 
+				[code 
+					"R
+				]code
+				" can be used to let the dog sniff, which makes him walk towards gourds
+				$LF
+			]li
+			[li 
+				" Pressing a directional button the frame before you switch characters makes the AI "leash" in that directional
+				$LF
+			]li
+			[li 
+				" 
+				[code 
+					"B
+				]code
+				" makes the dog leap during an attack, which has the same properties as leashing
+				$LF
+			]li
+			[li 
+				" Standing pixel-perfectly inbetween triggers to prevent activating them (E.g. sandpits)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Looting gourds
+		$LF
+		[ul 
+			[li 
+				" Interact with 
+				[code 
+					"B
+				]code
+				$LF
+			]li
+			[li 
+				" Perform a frame perfect character switch
+				$LF
+			]li
+			[li 
+				" Wait for the Boy's looting animation to finish (First frame with text)
+				$LF
+			]li
+			[li 
+				" Switch back to the Dog
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Talking to people
+		$LF
+		[ul 
+			[li 
+				" Same as looting
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Casting alchemy
+		$LF
+		[ul 
+			[li 
+				" 
+				[code 
+					"X
+				]code
+				" opens the Boys ring menu which can be freely accessed for "multi casts"
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Looting "incorrect" ammounts of ingredients
+		$LF
+		[ul 
+			[li 
+				" Interact with 
+				[code 
+					"B
+				]code
+				" as the dog (Which "progresses" the loot table and increases the amount you loot, because it's based on the order)
+				$LF
+			]li
+			[li 
+				" Loot it again as usual
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"A lot of small tricks have been performed that can be considered "normal" for the Boy, but impossible for the Dog.
+	$LF
+	"The most important part being the skip of the Jaguar Ring, which was supposed to be mandatory for the Sandpits area.
+	$LF
+]div
+[div class=p 
+	"Additionally the gameplay has been slowed down as inconspicuously as possible:
+	$LF
+]div
+[ul 
+	[li 
+		" Dodging enemy attacks triggers an animation, which slows the character down
+		$LF
+	]li
+	[li 
+		" For the final ingredient (the 9th clay) the gourd that was the furthest away was chosen
+		$LF
+	]li
+]ul
+[div class=p 
+	"…OK, OK, I'll admit that this is not a good idea… But it's technically possible and could be called "dog%"!
+	$LF
+]div
+[div class=p 
+	"Anyway, this excursion takes roughly 1 minute, doesn't waste any valuable frames, but fills the waiting time quite nicely.
+	$LF
+]div
+[h3 id=Thanks 
+	" Thanks!
+	$LF
+]h3
+[ul 
+	[li 
+		" Black_Sliver, p4plus2, as well as the TASBot and TASvideos discord for the technical guidance
+		$LF
+	]li
+	[li 
+		" itsCliqz, MetaSigma, Solarcell007, TheAngryPanda, ZockerStu for helping me understand the game
+		$LF
+	]li
+	[li 
+		" And basically the whole Evermore discord for all the streams and being awesome!
+	]li
+]ul

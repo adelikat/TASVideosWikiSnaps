@@ -1,0 +1,123 @@
+6
+[div class=p 
+	"My submission is inspired by Acmlm's excellent, longstanding record (and NESCardinality's awesome live speedrun).
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Recorded with FCEUX 2.2.3 (using new PPU)
+		$LF
+	]li
+	[li 
+		" Fastest time to reach the ending (any%)
+		$LF
+	]li
+	[li 
+		" Uses death as shortcut
+		$LF
+	]li
+	[li 
+		" (A lot of) Luck manipulation
+		$LF
+	]li
+]ul
+[h3 id=Improvements 
+	" Improvements
+	$LF
+]h3
+[div class=p 
+	"I saved 33 seconds by not getting Erdrick's armor.  That saves about a minute and a half, by itself, but I lose more than half that time making up for not having the armor:
+	$LF
+]div
+[ul 
+	[li 
+		" Killing a second goldman (getting max gold from one of them)
+		$LF
+	]li
+	[li 
+		" Buying 5 herbs in Garinham (only 3 steps out of the way).
+		$LF
+	]li
+	[li 
+		" Picking up a 6th herb in Garinham (0 steps out of the way).
+		$LF
+	]li
+	[li 
+		" It's slower to walk through swamps and barriers without Erdrick's armor.
+		$LF
+	]li
+	[li 
+		" Using all 6 herbs -- 1 outside Charlock and 5 in the barriers on the first floor of Charlock.
+		$LF
+	]li
+	[li 
+		" Picking up a last herb in the bottom level of Charlock (0 steps out of the way, near the wings) and using it.
+		$LF
+	]li
+]ul
+[h3 id=Techniques 
+	" Techniques
+	$LF
+]h3
+[div class=p 
+	"I did not copy Acmlm's video and modify pieces (though I referred to it a lot).  I started over with a different character name ('Y' vs '!'), which gave a different random seed.  I used Ryan8bit's disassembly and guide for Dragon Warrior (
+	[a href=https://gamefaqs.gamespot.com/nes/563408-dragon-warrior/faqs/61640) rel=noopener external nofollow 
+		"https://gamefaqs.gamespot.com/nes/563408-dragon-warrior/faqs/61640)
+	]a
+	" and wrote thousands of lines of perl and python code to simulate the game.
+	$LF
+]div
+[div class=p 
+	"First, I optimized each step separately (e.g. each combat) using A* search, then tried to hook it all together.  The runtime increases exponentially with the # steps, so I was only able to run that through the first deathwarp.  I hope to make further improvements and simulate the whole game, but my last few months' tinkering have been less about Dragon Warrior and more about optimizing my optimizer, so here is my submission!
+	$LF
+]div
+[div class=p 
+	"See Acmlm's record (Forum/Topics/9190]) for background on luck manipulation.  My biggest simulation problem was not knowing how many random numbers a pause would skip -- 86 or 87.  I believe there is some concurrency/threading affecting this, because in the middle of a long pause, you can sometimes see the random number in the middle of being updated.  Also, pauses skip a different number of random numbers depending on whether you use the old or new PPU.  So my simulation has to compute a lot of potential solutions to the game, some of which may or may not actually be possible depending on how the pauses work out.
+	$LF
+]div
+[div class=p 
+	"Traveling is the least certain part.  I approximated each leg of the journey as needing a certain number of short pauses to avoid combats.  Fortunately, most travel steps are followed by extra pause frames to get to a good point in the random number sequence.  A long pause (5+ frames) can be split into two pauses, using 1 more frame and skipping 1-2 more random numbers.  This often let me get to a desired point in the random number sequence.  It also let me shave frames in some cases, which is why my run has a few strings of short pauses separated by individual steps.
+	$LF
+]div
+[div class=p 
+	"I also wrote a separate program to tell me, for a given point on a path, how many steps I could take before having an encounter.  That told me whether to stop for an extra frame when going down stairs, or to extend a pause by a frame or two.  That is faster than having a separate pausing, since a minimal pause uses 3 frames.
+	$LF
+]div
+[div class=p 
+	"As Acmlm noted, we could get a more optimal solution if the movie input wasn't tied to frames and we could unpause after skipping a desired number of random numbers.  It would also help to know when a pause will skip 86 vs. 87 random numbers.  I thought about writing a program to drive FCEUX and get exact answers, but that would run probably a thousand times slower *and* add many decision points.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Masterjun 
+		"Masterjun
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Masterjun 
+		"Masterjun
+	]a
+	": Nice improvements. Take a look at 
+	(__wikiLink|displaytext=this reply|href=/Forum/Posts/488424)
+	", there is a core in BizHawk allowing for subframe inputs, so that input is not tied to frames. It might help improving the run even further. But that can be done in a different submission.
+	$LF
+]div
+[div class=p 
+	"Accepted to Moons as an improvement to the 
+	(__wikiLink|displaytext=previous run|href=/1482M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Dacicus 
+		"Dacicus
+	]a
+	": Processing...
+]div

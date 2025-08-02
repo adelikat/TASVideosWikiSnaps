@@ -1,0 +1,923 @@
+45
+[h3 id=Rockman1BeatenIn94535ByShinryuuPirohikoMaruAndFinalfighter 
+	"Rockman 1 beaten in 9:45.35 by Shinryuu, pirohiko, Maru, and FinalFighter
+	$LF
+]h3
+[div class=p 
+	"Rockman needs no introduction! It has been at the center of TASing attention since the dawn of TASVideos. This is an improvement of 9495 frames compared to the published run by Shinryuu and FinalFighter through more applications of DelayObjectGlitch and better optimization. Remember to use FCEUX OldPPU with this movie.
+	$LF
+]div
+[div class=p 
+	"Our run includes at least the following:
+	$LF
+]div
+[ul 
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+	[li 
+		" Uses death to save time
+		$LF
+	]li
+	[li 
+		" Forgoes major skip glitch
+		$LF
+	]li
+	[li 
+		" Forgoes final boss skip glitch
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" Forgoes time-saving glitches
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+]ul
+[h4 id=DetailedAndFixedUpGraphicsEncodeFromPirohiko 
+	" Detailed and fixed up graphics encode from pirohiko
+	$LF
+]h4
+[div class=p 
+	(youtube|v=C7wiG31iGMs)
+	$LF
+]div
+[h3 id=IsThisAce 
+	" Is this ACE?
+	$LF
+]h3
+[div class=p 
+	"The answer is no. What we are doing is not ACE. We are not executing RAM as code. The values that are being used to generate the objects are simply being “looked up”. To achieve arbitrary code execution with these glitches, you need to go a step further. Looking back at FinalFighter’s jump address list, there is object 0x55 (85) that executes $600. In this situation, it’s executing RAM as code, and this is exactly what the game end glitch TAS does to reach the end credits. With objects 0x75 and 0xF5, we are calling ROM addresses. In short, if we are executing something below $8000, it is considered ACE, but we avoid doing that.
+	$LF
+]div
+[h3 id=GoalChoice 
+	" Goal choice
+	$LF
+]h3
+[pre 
+	$LF
+]pre
+[div class=p 
+	"Although memory corruption is used, we acquire everything in our inventory that counts towards full completion, and all of the stages are completed. However, we also understand that DelayStageClear glitches may be damaging entertainment in some people’s eyes. Therefore, Maru, a TASVideos judge, proposes the following branches for this game:
+	$LF
+]div
+[ul 
+	[li 
+		" Game end glitch (already exists)
+		$LF
+	]li
+	[li 
+		" This TAS (already exists)
+		$LF
+	]li
+	[li 
+		" A TAS that does not use object glitches (Bisqwit & Deign -like gameplay)
+		$LF
+	]li
+]ul
+[h3 id=ExplanationOfDelayobjectglitch 
+	" Explanation of DelayObjectGlitch
+	$LF
+]h3
+[div class=p 
+	"DelayObjectGlitch is a very complicated glitch that needs to be 
+	[code 
+		"re-explained
+	]code
+	". To start off, it is worth mentioning that many NES games, Rockman being no exception, use banks to help accomplish internal tasks. This is because the NES can only address so much data at one time, and many games have to swap the data around in big chunks that are small enough to fit. For example, enemy routines are located in bank 6. Then, the NMI comes into play, which runs every frame so the game functions the way it is supposed to. It’s an interrupter that occurs at the same time no matter what, and will in every scenario interrupt any logic that the game was currently dealing with. Some calls associated with NMI are in different banks, so as a result, the game has to perform a bank switch. A bank’s value is stored in a given memory address and restored after the NMI interrupt routine was completed. In most cases, you will be in bank 5 before the bankswitch. However, you can execute an NMI during the bankswitch, the key being after it is switched but before it is saved. This causes us to return to the wrong bank. When we’re in bank 5, the object pointer simply contains zeros. The game is supposed to use offsets to get its data, which works perfectly fine when we’re in the correct bank, but since we’re in bank 5, it points at incorrect addresses.
+	$LF
+]div
+[div class=p 
+	"Note that the game has a series of objects from 0x00-0xFF. Under normal conditions, the game will never generate an object higher than 0x4A (74). However, DelayObjectGlitch allows us to generate those objects that would never be generated in normal scenarios. The objects that are generated from 0x00 to 0x7F are repeated from 0x80 and onward.
+	$LF
+]div
+[div class=p 
+	[em 
+		"How can we go further than this?
+	]em
+	$LF
+]div
+[h3 id=Delayobjectffglitch 
+	" DelayObjectFFGlitch
+	$LF
+]h3
+[div class=p 
+	"This allows us to have more freedom in terms of which objects we can generate. Object 0xFF is an invisible object associated with palette table remapping and appears scarcely. It happens to appear in the Iceman stage in a point that we can take advantage of, and unlike the normal DelayObjectGlitch, we have more freedom in terms of which objects we can generate. The object is read from bank 2 and followed with a switch to bank 6. However, with careful placement of an NMI, we can return to bank 2. This allows us to control which object that we can spawn. Object 0xFF is also generated in Bombman after two instances of DelayObjectGlitch bank switches, but the object numbers are more limited. We also use DelayObjectFFGlitch after one instance of DelayObjectGlitch bank switching in Wily 2.
+	$LF
+]div
+[h3 id=Doubleobjectffglitch 
+	" DoubleObjectFFGlitch
+	$LF
+]h3
+[div class=p 
+	"This glitch is known by the RTA community as the double object wiggle glitch. In Iceman stage, object 0xFF actually appears in another place where you can take advantage of this glitch. You have to wander around the area where object 0xFF occurs, which is after the water section of the stage. This executes processes associated with object 0xFF, and by doing a wiggle, you can read the wrong data from bank 2. However, this is slower than DelayObjectFFGlitch in Iceman.
+	$LF
+]div
+[div class=p 
+	"In Gutsman stage, there are a couple of areas that we can use this glitch, but in certain places, you can control which object is spawned based on second controller input. We picked the earliest place in the level that we could do it to call the level ending.
+	$LF
+]div
+[div class=p 
+	"More details on DoubleObjectFFGlitch are available here: 
+	[a href=https://ch.nicovideo.jp/TASVideos/blomaga/ar535617 rel=noopener external nofollow 
+		"https://ch.nicovideo.jp/TASVideos/blomaga/ar535617
+	]a
+	$LF
+]div
+[h3 id=DelaystageclearDelaymagnetbeamadapter 
+	" DelayStageClear, DelayMagnetBeamAdapter
+	$LF
+]h3
+[div class=p 
+	"There are a few objects that were of immense help during the making of this TAS. Most specifically, objects 0x75 and 0xF5 allow us to end levels early through what we refer to as DelayStageClear. This object contains some broken jump tables that serve to call the score routine ($c0bd) that consequently ends the level.
+	$LF
+]div
+[div class=p 
+	"There was another object that helped us too, however. Object 0x42 (66) gives us the magnet beam. We were able to generate this object to save time in a later stage.
+	$LF
+]div
+[div class=p 
+	"FinalFighter was nice enough to assemble a jump address list for each object that you can generate. This can be seen here: 
+	[a href=http://www.yuko2ch.net/rockman/JumpAddressList.txt rel=noopener external nofollow 
+		"http://www.yuko2ch.net/rockman/JumpAddressList.txt
+	]a
+	$LF
+]div
+[h3 id=LevelDifferences 
+	" Level differences
+	$LF
+]h3
+[ul 
+	[li 
+		" Iceman: 3053 frames
+		$LF
+	]li
+	[li 
+		" Fireman: 85 frames
+		$LF
+	]li
+	[li 
+		" Gutsman: 2900 frames
+		$LF
+	]li
+	[li 
+		" Cutman: 100 frames
+		$LF
+	]li
+	[li 
+		" Elecman: 2649 frames
+		$LF
+	]li
+	[li 
+		" Bombman: 103 frames
+		$LF
+	]li
+	[li 
+		" Wily 1: 200 frames
+		$LF
+	]li
+	[li 
+		" Wily 2: 246 frames
+		$LF
+	]li
+	[li 
+		" Wily 3: -1 frame
+		$LF
+	]li
+	[li 
+		" Wily 4: 160 frames
+		$LF
+	]li
+]ul
+[h3 id=RouteOutline 
+	" Route outline
+	$LF
+]h3
+[div class=p 
+	[b 
+		"This project:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Iceman: DelayObjectFFGlitch(Object 0x42 and Object 0x75) -> DelayMagnetBeamAdapter and DelayStageClear
+		$LF
+	]li
+	[li 
+		" Fireman
+		$LF
+	]li
+	[li 
+		" Gutsman: DoubleObjectFFGlitch(Object 0x75)
+		$LF
+	]li
+	[li 
+		" Cutman
+		$LF
+	]li
+	[li 
+		" Elecman: with magnet beam at the start of the stage
+		$LF
+	]li
+	[li 
+		" Bombman: DelayObjectGlitch(Object 0xF5) -> DelayStageClear
+		$LF
+	]li
+	[li 
+		" Wily 1: DelayObjectGlitch(Object 0x75) -> DelayStageClear
+		$LF
+	]li
+	[li 
+		" Wily 2: DelayObjectFFGlitch(Object 0x42 and Object 0x75) -> DelayMagnetBeamAdapter and DelayStageClear
+		$LF
+	]li
+	[li 
+		" Wily 3
+		$LF
+	]li
+	[li 
+		" Wily 4
+		$LF
+	]li
+]ul
+[div class=p 
+	[b 
+		"Published run:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Elecman (to acquire magnet beam)
+		$LF
+	]li
+	[li 
+		" Iceman: DelayObjectGlitch(Object 0x2F) -> DelayWaterCurrent
+		$LF
+	]li
+	[li 
+		" Fireman
+		$LF
+	]li
+	[li 
+		" Bombman: DelayObjectGlitch(Object 0xF5) -> DelayStageClear
+		$LF
+	]li
+	[li 
+		" Gutsman
+		$LF
+	]li
+	[li 
+		" Cutman
+		$LF
+	]li
+	[li 
+		" Wily 1: DelayObjectGlitch(Object 0x75) -> DelayStageClear
+		$LF
+	]li
+	[li 
+		" Wily 2: DelayObjectGlitch(Object 0x5D) -> DelayWarpDeath -> DelayStageClear
+		$LF
+	]li
+	[li 
+		" Wily 3
+		$LF
+	]li
+	[li 
+		" Wily 4
+		$LF
+	]li
+]ul
+[h3 id=LevelComments 
+	" Level comments
+	$LF
+]h3
+[h4 id=Iceman 
+	" Iceman:
+	$LF
+]h4
+[div class=p 
+	"In this level, we use DelayObjectFFGlitch. Immediately, we start off with two precise calculations involved to acquire the magnet beam (DelayMagnetBeamAdapter) and end the stage early (DelayStageClear). We have to take the three flying robot heads to a place where Object 0xFF is available. We manipulate enemy drops, instruction count, and the music to carefully place the NMI routine where we want it to be.
+	$LF
+]div
+[div class=p 
+	"Then, we have to figure out which address to read object numbers from. This is where the calculation gets interesting… There’s a frame counter address located at $23 which seems like the natural choice for such a thing (this was what the published game end glitch TAS did), but there’s one problem with it. It’s slow, and by that, we mean over 3 seconds slower.
+	$LF
+]div
+[div class=p 
+	"Maru found something that was quite a bit faster but more difficult to succeed with...
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	"We use $17, which is an address associated with 2P input, to generate the magnet beam and end the level. Here is what it took to read from $17 twice:
+	$LF
+]div
+[ul 
+	[li 
+		" $7b-8a must not contain 0x05.
+		$LF
+	]li
+	[li 
+		" $8c must contain 0x05 (x-position must be 1 or 2)
+		$LF
+	]li
+	[li 
+		" $14 must be less than or equal to 0x04.
+		$LF
+	]li
+	[li 
+		" When an object is generated (the magnet beam in this case), the number of objects that were generated is added to $8c, so it changes to 0x0a.
+		$LF
+	]li
+	[li 
+		" 0x05 was written to $81 when the magnet beam was generated, and it is not overridden upon collecting the magnet beam, so we override it by quickly generating two more objects immediately after.
+		$LF
+	]li
+	[li 
+		" We need $8c to change back to 0x05, so we do a quick wiggle to change the x-position for a frame.
+		$LF
+	]li
+	[li 
+		" All of this must be done while the instruction count is sufficient for the proper bank switches to occur.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The magnet beam is generated by pressing B and L on the second controller. It is difficult because we also need to manipulate the coordinates where the magnet beam will spawn at. The magnet beam’s coordinates are decided by $15 (X) and $16 (Y), and once it is generated, it will move in the 11 o’clock direction.
+	$LF
+]div
+[div class=p 
+	"Now, after generating and grabbing the magnet beam, we have enough lag and instructions in order to read from $17 again. This time, we use it to end the level by pressing A, Select, U, D, and L.
+	$LF
+]div
+[div class=p 
+	"The published run used DelayWaterCurrent in this stage, but this relies on the mechanics behind DelayObjectGlitch rather than DelayObjectFFGlitch. DelayObjectFFGlitch was not known during the time.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" pirohiko (execution and optimization)
+		$LF
+	]li
+	[li 
+		" Maru (investigation)
+		$LF
+	]li
+]ul
+[h4 id=Fireman 
+	" Fireman:
+	$LF
+]h4
+[div class=p 
+	"There is an annoying framerule in this level that prevents small gameplay improvements from helping, and that is the four frame framerule associated with item refills.
+	$LF
+]div
+[div class=p 
+	"After some slight optimizations in the first screen, we used a completely different strategy in the second screen that involved a vertical zip. With enough optimization, we were able to save time with it. We also changed our strategy in the room before the long horizontal damage zip to avoid having to wait for the moving fireballs.
+	$LF
+]div
+[div class=p 
+	"We changed our strategy slightly in the final part of the level. Extreme optimization with subpixels and careful magnet beam length management were needed to save a few frames just before the boss.
+	$LF
+]div
+[div class=p 
+	"The rest of the frames that we saved came from lag reduction from the glitched graphics as a result of performing DelayStageClear in Iceman.
+	$LF
+]div
+[div class=p 
+	"In total, we saved 85 frames in this level compared to the published run.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Maru (main player, optimization)
+		$LF
+	]li
+]ul
+[h4 id=Gutsman 
+	" Gutsman:
+	$LF
+]h4
+[div class=p 
+	"We end this level out of nowhere, so it may seem like we are using some sort of cheat code, but that is not the case. Object 0xFF appears in double in a place where we can use the DoubleObjectFFGlitch. In order to perform the glitch, we need a specific x-position and must wiggle to force the object to be read from the wrong bank. In this level, it is being read from $17, which is associated with second controller input. By pressing the correct buttons on the controller (A, Select, U, D, L), we can force the game to generate object 0x75, ending the level.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" pirohiko (discovered DoubleObjectFFGlitch)
+		$LF
+	]li
+	[li 
+		" Maru (optimized the magnet beam usage)
+		$LF
+	]li
+]ul
+[h4 id=Cutman 
+	" Cutman:
+	$LF
+]h4
+[div class=p 
+	"This level has a handful of minor improvements compared to the published run. We start off with some lag reduction early on in the stage. 
+	$LF
+]div
+[div class=p 
+	"In the early vertical section of the stage, we utilize a new trick on ladders that was found by coolkid. This involves using a magnet beam and quickly pausing to obtain more height when climbing ladders. The reason this trick works is because of a greater y-velocity during the screen transition. We used more magnet beams in the early vertical section, notably to start zipping earlier in one screen and to avoid a projectile without slowing down in the screen just before the refills.
+	$LF
+]div
+[div class=p 
+	"In order to save time in this level with this in mind, we had to manipulate two large item refills, which has a cumulative probability of 1/4096. We didn’t have to lose much time in order to manipulate the item refill drops. It is difficult because we need enough room to make the initial item switch and then enough time to switch back to the magnet beam in order to collect the refills.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	"During the latter half of the stage, we optimized the climbing sections, particularly by avoiding pauses that were in the previous TAS. A new strategy through the climbing screen just before the long vertical zip saved several frames. Lag reduction is extremely tricky in that screen though. This was the best solution we found.
+	$LF
+]div
+[div class=p 
+	"In total, we saved 100 frames in this level.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Shinryuu (first half of stage)
+		$LF
+	]li
+	[li 
+		" Maru (second half of stage)
+		$LF
+	]li
+]ul
+[h4 id=Elecman 
+	" Elecman:
+	$LF
+]h4
+[div class=p 
+	"We already have the magnet beam, so we can save time climbing in the first part of the stage. Having the magnet beam at the start of the level saves about 17 seconds. Most of that time comes from not having to wait for the appearing blocks. Although it looks slow, we collect all of the small capsules for the extra magnet beams because we need every one that we can get.
+	$LF
+]div
+[div class=p 
+	"Coolkid’s ladder trick works even when there are no magnet beams in memory. Although it looks slow to climb up that ladder after the trick was used, we didn’t find any better ways of using the magnet beams before grabbing the “real magnet beam adapter”. You might notice on that same screen, we used several select+start pauses. This is actually done to remove a frame of lag because we have to wait for RNG anyway.
+	$LF
+]div
+[div class=p 
+	"Collecting the magnet beam item without the use of DelayObjectFFGlitch simply provides a full refill for us, so the rest of the stage is played similarly to the published run. We save 26 seconds in the boss fight by having Cutman’s item instead of needing to use buster.
+	$LF
+]div
+[div class=p 
+	"In total, we saved just over 44 seconds in this stage.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	" 
+	$LF
+]div
+[ul 
+	[li 
+		" Shinryuu (main player)
+		$LF
+	]li
+	[li 
+		" Maru (optimization)
+		$LF
+	]li
+]ul
+[h4 id=Bombman 
+	" Bombman:
+	$LF
+]h4
+[div class=p 
+	"We use a different setup to perform DelayStageClear in this level. We manipulate enemies into position to generate the NMI routine in the needed place. This is finally accomplished by some rapid buster fire accompanied with screen wiggling to call object 0xF5, which ends the level.
+	$LF
+]div
+[div class=p 
+	"With two instances of DelayObjectGlitch bank switching, we can generate Object 0xFF. At this point, we can wiggle to generate object F5 to call the end of the level. Bombman relies on $2006 + X to generate objects when in the wrong bank, and those addresses are associated with the PPU, so there is more freedom with which objects can be generated.
+	$LF
+]div
+[div class=p 
+	"Although this was technically not our fastest combination of inputs that led to calling the end of the level, we have to be very careful not to change $d1. $d1 is an address that may or may not change when the ending is triggered in Bombman. If it changes, it will prevent the DelayObjectGlitch mechanics from working in Wily 2.
+	$LF
+]div
+[div class=p 
+	"Overall, we saved 103 frames in this stage.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	" 
+	$LF
+]div
+[ul 
+	[li 
+		" Shinryuu (gameplay, manipulation)
+		$LF
+	]li
+	[li 
+		" pirohiko (DelayStageClear, optimization)
+		$LF
+	]li
+]ul
+[h4 id=Wily1 
+	" Wily 1:
+	$LF
+]h4
+[div class=p 
+	"The first section of this stage is not much different from the published run, although it was optimized a bit. We use the ladder tech entering the second screen in this stage because it saves several frames. In the second room, however, we start using magnet beams like crazy. That’s because we have a new strategy in Wily 2. More on that later…
+	$LF
+]div
+[div class=p 
+	"A few frames had to be lost to manipulate the spike enemies. They are more finicky than most people would think. Specific object slots must be manipulated in Wily 1 in order to trigger the DelayStageClear effect. When the conditions are correct, object 75 will be read from $608, which is associated with the y-position that a thunder beam was fired at. Thunder beams are good in that they cause a lot of lag, making it very useful for these types of glitches, even though it requires a weapon switch.
+	$LF
+]div
+[div class=p 
+	"In total, 200 frames were saved in this stage.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Shinryuu (first screen of Wily 1)
+		$LF
+	]li
+	[li 
+		" Maru (DelayStageClear)
+		$LF
+	]li
+]ul
+[h4 id=Wily2 
+	" Wily 2:
+	$LF
+]h4
+[div class=p 
+	"We decided to play this level a little differently compared to the published run. The published run used DelayObjectGlitch to generate object 0x5D, which messes up object information. As a result, the value from $618, which happens to be the y-coordinate of the 9th object, is copied into $6f8. If $618 is 0x75, the level ending will be triggered.
+	$LF
+]div
+[div class=p 
+	"The published run manipulated a large magnet beam refill drop and after collecting that drop, switched to the thunder beam to perform DelayStageClear, but we had a better idea in mind.
+	$LF
+]div
+[div class=p 
+	"We were able to generate object 0xFF using the damage sound animation after one instance of DelayObjectGlitch bank switching. After that, we were able to use second controller input to generate the magnet beam object and object 0x75 to end the level. We did not have to switch to the thunder beam either, so some time was saved in that regard as well.  
+	$LF
+]div
+[div class=p 
+	"The difficult thing with this strategy is that we can only collect the magnet beam and call the end of the level while $92 is changing. When we hit the instance of DelayObjectGlitch bank switching, $92 changes from 0 to 15 and will start counting down by 1 during each non-lag frame. When it hits 0, we generate object 0xFF, which starts the $92 counter all over again and gives us 15 frames to generate the magnet beam and call the end of the level. It’s a very tight window, but we were able to make it work.
+	$LF
+]div
+[div class=p 
+	"We saved 246 frames compared to published run here.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" pirohiko (DelayMagnetBeamAdapter + DelayStageClear)
+		$LF
+	]li
+	[li 
+		" Maru (initial testing)
+		$LF
+	]li
+]ul
+[h4 id=Wily3 
+	" Wily 3:
+	$LF
+]h4
+[div class=p 
+	"This level isn’t much different from the published run. The boss fight is difficult to get things right with due to how random it can be at times. We tried our best to entertain even though it was difficult. There is a two frame framerule in this level for starting the boss fight, so we had to lose one frame to the published run here.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Shinryuu (gameplay, optimization)
+		$LF
+	]li
+	[li 
+		" Maru (stylistic changes)
+		$LF
+	]li
+]ul
+[h4 id=Wily4 
+	" Wily 4:
+	$LF
+]h4
+[div class=p 
+	"This stage is interesting because we had more magnet beams than usual. We found that it was actually faster to skip getting the large magnet beam refill after the climbing section of the level. That large refill is a 37 frame delay, and we didn’t find anywhere to use magnet beams to save 37 frames. There can only be so many magnet beams on screen at one time as well. Deign’s old TAS used a magnet beam at the beginning of the stage, but we found that it was faster to use an extra magnet beam to set up a zip in the third screen faster.
+	$LF
+]div
+[div class=p 
+	"The refight skip was further optimized compared to the published run. There are some limiting factors with the refight skip, so it is important to minimize lag.
+	$LF
+]div
+[div class=p 
+	"We used a new strategy during the final boss fight, which saved several frames compared to the published run. While glitched graphics helped with lag reduction in several stages, it does not seem to want to help us here. It took several days for us to figure out this boss fight, and you’d be surprised at how difficult of an optimization challenge it was. Note that we opted to end the input early for this boss fight. The actual boss itself can actually be killed about 10 frames faster, but to do that, we would have to end the input later.
+	$LF
+]div
+[div class=p 
+	"Needless to say, we managed to save 160 frames in this stage.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Work sharing:
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Maru (main player)
+		$LF
+	]li
+	[li 
+		" pirohiko (final boss fight)
+		$LF
+	]li
+]ul
+[h3 id=CommentsFromUsers 
+	" Comments from users
+	$LF
+]h3
+[h4 id=MaruSComments 
+	" Maru’s comments:
+	$LF
+]h4
+[div class=p 
+	""I’m glad this TAS is completed. I have always been a fan of Mega Man games, and it was great that I could contribute my improvements and help to assemble everything together. It is truly a fascinating game with a lot of secrets that require people to explore deep into the game mechanics in order to uncover them.
+	$LF
+]div
+[div class=p 
+	"I have to thank FinalFighter for his dedication to the game, his code analysis, explaining these glitches and providing us with useful scripts when needed. I must also thank Pirohiko for being able to use my ideas to further improve Iceman and always being able to find a solution to problems that I came across. Shinryuu was also a great TASing partner to have and accompanied me while we struggled through the minefield of exact instruction timings in this game.
+	$LF
+]div
+[div class=p 
+	"We are working on a “no object glitch” TAS of Rockman 1. In the meantime, I need to finish SMB3 100% at some point. I haven’t forgotten about that project.
+	$LF
+]div
+[div class=p 
+	"Note that we used FCEUX for this TAS because even though BizHawk is slightly better at emulating exact instruction timings, all of our tools that allowed us to perform these precise calculations were on FCEUX, and BizHawk is not ideal for running heavy scripts because it slows the game down tremendously. Furthermore, Shinryuu does not have access to BizHawk. We have done tests with console verification of Bombman DelayStageClear using BizHawk, and while we can conclude that BizHawk is slightly better than FCEUX at emulating those instruction timings, it is not significantly better to the point where there is a high likelihood of console verification."
+	$LF
+]div
+[h4 id=ShinryuuSComments 
+	" Shinryuu’s comments:
+	$LF
+]h4
+[div class=p 
+	""This was a wild ride. Improvements over improvements and new techniques popped out of nowhere. I started this new project years ago but our group partially 'disbanded' at some point. That's what they call life I believe. You get older and have more obligations to do in your life. Happily the group got together years later, Maru joined later on and he spiced the RM1 motivation up and now we have a finished product. I’m also glad this is not an ACE run.
+	$LF
+]div
+[div class=p 
+	"I have more knowledge about Rockman 2 in general so making this tool-assisted speedrun provided me a good ground for learning how mechanics works instead. Both games do share something in common but this game feels like a prototype with messed up frame rules and glitches. I can't understand how we were able to beat this game without crashing it. Both Maru and pirohiko showed a great amount of interest and optimization towards the game.
+	$LF
+]div
+[div class=p 
+	"This game is quite demanding at times and we had trouble to understand some ’basic’ mechanics including frame rules. We understood that most of the time things seems to change at every two frames. They’re still quite similiar and close to the Rockman 2 but there are more variables in the way. Wily 3 fight had to be done again several times. That was a time sink but we wanted to play as much we can by hand. That gave us a better control and understanding. Sometimes copy-pasting worked, sometimes not.
+	$LF
+]div
+[div class=p 
+	"I let Maru to handle submission text because he had a vast knowledge about how everything works. I'm more interested to beat the game instead without providing this arcane black magic to the users. To be honest; I have trouble to express and dive deep and write about these techniques even I do know how they mostly work. I'm the player who gets feeded by knowledge.
+	$LF
+]div
+[div class=p 
+	"And yes; we’re going working on a ”No Object Glitch” tool-assisted speedrun. To give you a better idea, it should honor and look pretty much the same how Bisqwit and Deign made their runs. I prefer to handle things ”as fast as possible as long it’s not ACE” but I’m willing to do work on this new category as well. It’s actually really challenging, interesting and it completes stages in a more sane or normal way."
+	$LF
+]div
+[h4 id=PirohikoSComments 
+	" Pirohiko’s comments:
+	$LF
+]h4
+[div class=p 
+	""I ran the BOT continuously for about a week with changing conditions to make the delay glitch successful on the Iceman stage. The interval from the first to the last glitch was 50 frames, which the BOT reduced to 48 -> 46 -> 44 -> 42 -> 38 -> 34 -> 32 -> 26 -> 22. After reading the assembly code and understanding the success conditions, by manually adjusting things in TAStudio, I eventually reduced it to just 8 frames.
+	$LF
+]div
+[div class=p 
+	"I've found that understanding how to succeed and then doing 1000 rerecords gives better results than having the BOT rerecord 10 million times blindly.
+	$LF
+]div
+[div class=p 
+	"ディレイ技を連続で成功させる為に条件を変えながら1週間くらいBOT回してて最初のディレイ技から最後の技までの間隔が50fから始まって48，46，44，42，38、34，32，26，22と縮んでいって、最終的にトレースログ読んで条件を理解したあと手動で調整してたら運良く8fまで縮んだ
+	$LF
+	"条件を理解してないBOTの1000万追記よりも、
+	$LF
+	"条件を理解してる人間の1000追記のほうがずっといい結果を出すことがよくわかった"
+	$LF
+]div
+[h4 id=FinalfighterSComments 
+	" FinalFighter’s comments:
+	$LF
+]h4
+[div class=p 
+	""I, Pirohiko and Shinryuu were making RM1 Any little by little, Maru was also working on Any in another project. Maru's understanding of RM1 was great, so we decided to fuse it with our project I think that the fusion of the two projects led to better results.
+	$LF
+]div
+[div class=p 
+	"My job this time was to explain how Glitch works and create a BOT. If ProcessCounter does not go through our operable memory, there is a way to get MagnetBeamAdapter. Then, We would be given a new surprise.DelayObjectGlitch, DelayObjectFFGlitch, DoubleObjectFFGlitch are further optimized and used.As a result, Any has been greatly updated. And we are working on another Rockman TAS. Please wait for everyone."
+	$LF
+]div
+[h4 id=SpecialThanks 
+	" Special thanks:
+	$LF
+]h4
+[ul 
+	[li 
+		" Adelikat, Nach, Dwedit: They helped solve the issue with OldPPU.
+		$LF
+	]li
+	[li 
+		" Cstrakm: He discovered DelayWaterCurrent. It led to the discovery of DelayObjectGlitch.
+		$LF
+	]li
+	[li 
+		" Inzult: He verified that DelayObjectGlitch was possible on a real NES.
+		$LF
+	]li
+	[li 
+		" Tekepen, Kureyuni: Their help with 6502 assembly was useful.
+		$LF
+	]li
+	[li 
+		" AlphaBeta, NinjyaSuperK, Vagla, Bisqwit: Their analysis of Rockman 1 helped during the creation of this TAS.
+		$LF
+	]li
+	[li 
+		" warmCabin: His encouragement and dedication to Rockman TASing was helpful to us.
+		$LF
+	]li
+	[li 
+		" aglasscage: Although primarily a Rockman 2 TASer, he has been a part of our team for a while.
+		$LF
+	]li
+	[li 
+		" Paosidufygth: He had some interesting strategies in the PSX TAS of Rockman 1.
+		$LF
+	]li
+]ul
+[h4 id=SuggestedScreenshots 
+	" Suggested screenshots
+	$LF
+]h4
+[div class=p 
+	[img class=embed mw-100 src=https://gitlab.com/Shinryuu/dotties/raw/master/screenshots/Rockman%20(J)-0.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://gitlab.com/Shinryuu/dotties/raw/master/screenshots/Rockman%20(J)-1.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://gitlab.com/Shinryuu/dotties/raw/master/screenshots/Rockman%20(J)-2.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://gitlab.com/Shinryuu/dotties/raw/master/screenshots/new2.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://gitlab.com/Shinryuu/dotties/raw/master/screenshots/Rockman%20(J)-8.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://gitlab.com/Shinryuu/dotties/raw/master/screenshots/new1.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Potential for branching discussion? Claiming.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Maru 
+		"Maru
+	]a
+	": Updated with file that is 5 frames faster.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Maru 
+		"Maru
+	]a
+	": The ride never ends. Updated with file that is 24 frames faster.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Maru 
+		"Maru
+	]a
+	": Updated with file that is 6 frames faster.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Maru 
+		"Maru
+	]a
+	": Setting to delayed for the time being.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Maru 
+		"Maru
+	]a
+	": Updated with file that is 12 frames faster.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Maru 
+		"Maru
+	]a
+	": I exhaustively optimized this some more... maybe we are done now?
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Resuming judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Optimization is not a problem with this submission, especially after all the additional improvements.
+	$LF
+]div
+[div class=p 
+	"While there was one person who expressed disappointment with the amount of times the level end was triggered using memory corruption techniques, overall this submission was very well received. As such this branch can continue to exist alongside game end glitch. I can also see value in a run that does not abuse the memory corruption glitches at all.
+	$LF
+]div
+[div class=p 
+	"However, I disagree with the assertion that this is full completion. While the magnet beam is obtained using memory corruption techniques, it is spawned as a physical pickup that is collected. One could potentially argue this is similar to what 
+	(__wikiLink|href=/3687M|implicitdisplaytext=3687M)
+	" performs. However, the other criteria listed in the submission notes is that all levels are completed. A large amount of levels are ended via memory corruption, which seems contrary to 
+	(__wikiLink|displaytext=the rules on full completion|href=/MovieRules#FullCompletionCriteriaMustBeReachedThroughInGameActionsOnly)
+	". Personally, I do not think that full completion is even a particularly necessary label for Mega Man 1 TASes. Through standard actions, one must complete all levels anyways, resulting in the only truly optional achievement being collecting the magnet beam, something that most branches will do anyway.
+	$LF
+]div
+[div class=p 
+	"Accepting to Stars as an improvement to the 
+	(__wikiLink|displaytext=current run|href=/1686M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

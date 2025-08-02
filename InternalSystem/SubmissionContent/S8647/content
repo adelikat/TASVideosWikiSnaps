@@ -1,0 +1,877 @@
+6
+[div class=p 
+	"In the first Harry Potter game for the Game Boy Color, the story of Harry's first year at Hogwarts School of Witchcraft and Wizardry is told in the form of a traditional role-playing game. Harry realizes the power of  
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.8 (Syncs on 2.9.1 as well)
+		$LF
+	]li
+	[li 
+		" Fastest time
+		$LF
+	]li
+	[li 
+		" All glitches are allowed
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"Sanqui discovered that holding Right while using the "Chocolate Frog" item lead to the game jumping to WRAM, but at the cost of messing up the stack. 
+	$LF
+]div
+[div class=p 
+	"I realized it jumped to 0xCABB, which changes based on your X position. However, I wasn't able to figure out how to reach items, since when I checked, items were never loaded as it was located in bank 6 in WRAM. Earlier this month, Sanqui was investigating this glitch again, and realized in the middle of the frame, the game does swap to bank 6 of WRAM, so items are indeed able to be executed as code. They made the following payload
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"This is the following values:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"This needed 2 items right next to each other, followed by another 2 items next to each other, followed by 3 items next to each other.
+	$LF
+]div
+[div class=p 
+	"This gave:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Corresponds to:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Amount
+			]th
+			[th 
+				"Item
+			]th
+			[th 
+				"Cost in Sickles
+			]th
+		]tr
+		[tr 
+			[td 
+				"Antidotes
+			]td
+			[td 
+				"62
+			]td
+			[td 
+				"9,300
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wiggenweld Potions
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"750
+			]td
+		]tr
+		[tr 
+			[td 
+				"Collapsible Cauldron
+			]td
+			[td 
+				"224
+			]td
+			[td 
+				"11,424
+			]td
+		]tr
+		[tr 
+			[td 
+				"Copper Cauldron
+			]td
+			[td 
+				"210
+			]td
+			[td 
+				"21,210
+			]td
+		]tr
+		[tr 
+			[td 
+				"Best Blowing Gum
+			]td
+			[td 
+				"49
+			]td
+			[td 
+				"196
+			]td
+		]tr
+		[tr 
+			[td 
+				"Pumpkin Pasties
+			]td
+			[td 
+				"249
+			]td
+			[td 
+				"2,490
+			]td
+		]tr
+		[tr 
+			[td 
+				"Licorice Wands
+			]td
+			[td 
+				"201
+			]td
+			[td 
+				"402
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cauldron Cakes
+			]td
+			[td 
+				"207
+			]td
+			[td 
+				"1656
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"For a total of 47,428 sickles. This was basically inpractical without an hour of grinding at the start for sickles. You could get 57K sickles at the train area, but then you be away from the stores unless you used "yes" item to reset the game, maintaining your sickles. 
+	$LF
+]div
+[div class=p 
+	"Sanqui then tried to reduce the amount of sickles needed with the following:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Where it now corresponds to:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"This allowed E2 to be a much cheaper item, since it does not need to be next to another item in WRAM. Then we can just skip buying the expensive cauldrons, and instead buy 226 Every Flavor Beans for 1,356 sickles. Unfortunatly, between the cauldrons and the candy are story related items that you are forced to obtain. Mainly:
+	$LF
+]div
+[ul 
+	[li 
+		" Spellbook
+		$LF
+	]li
+	[li 
+		" School Books
+		$LF
+	]li
+	[li 
+		" Folio Triplicus
+		$LF
+	]li
+	[li 
+		" Folio Magi
+		$LF
+	]li
+	[li 
+		" Harry's Wand
+		$LF
+	]li
+]ul
+[div class=p 
+	"You obtain 1 of each, which means the opcode LD BC,  _ _ _ _ is unavoidable. If this had worked, it would bring the amount of sickles needed down to ~28k.
+	$LF
+]div
+[div class=p 
+	"I then went and made a trace log of the game when you used the chocolate frog at X position 61,462 to see if there's anything else that was useable.
+	$LF
+	"This was the trace log:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Here register D has $41, H has $D1, L has $05
+	$LF
+	"These are already values we need. So the payload was changed to reflect that:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"For the values:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Since there's now 4 independent values to choose from, we could then use the cheaper cloth items as well for payload. The payload now became
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"We couldn't use Chocolate Frog as part of the payload, since it gets used during the glitch, so 226 potion kits was chosen since we needed it anyways.
+	$LF
+]div
+[div class=p 
+	"This reduced the amount of sickles needed to 7,780, which made it viable for RTA. The time for this game dropped from 2 hours, to 20 minutes real time.
+	$LF
+]div
+[div class=p 
+	"When I actually tried this payload, I ran into a problem. To skip the train section, you must use cards. If I used a card, it would give me 3 more items. In this case, 3 Hardened Boots from the first giant rat boss. I couldn't use 1 name tag, since it would mess up register C, so I bought 25 instead, taking 1 extra frame.
+	$LF
+]div
+[div class=p 
+	"After resyncing everything, I ran across another problem. It appeared whenever I tried to use the "yes" item to bring up the menu to skip the lake, it would always give me 1 pair of Superlative Boots. This caused me to modify the what I needed again to the following:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"I also needed to take account into the school items
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"For a total of 9,554 sickles. I actually ran out of money on the way to Cauldron shop, so I duped once more to get enough. This also gave me 3 more pair of boots, but it doesn't mess with the payload.
+	$LF
+]div
+[div class=p 
+	"Unfortunatly again, after I bought all this and resynced to the lake, the game refuses to actually bring up the menu during a fight with the dragonflies. I actually wanted to skip using the frog, and just play the lake and beat the knight as normal, but 
+	$LF
+	"1. Setting up lake skip just barely faster than doing it normally, ignoring the frog.
+	$LF
+	"2. Knight using 3 turns took 1700 frames.
+	$LF
+	"3. Beating the frog, but doing the lake normally completely loses all time.
+	$LF
+]div
+[div class=p 
+	"I realized the lake was a huge problem to overcome, so I thought of a different way to get to 0,0. 
+	$LF
+]div
+[div class=p 
+	"There was an idea to use the 1st giant rat encounter to get to 0,0, but Sanqui tried, it turns out 0xCABB isn't X position. From discord:
+	$LF
+]div
+[figure 
+	[figcaption class=author 
+		"Quoting Sanqui
+	]figcaption
+	[div class=p 
+		"Unfortunately, there's Hagrid on that map, and a NPC breaks the setup
+		$LF
+		"and yeah, a different set of items would be necessary, but that's not the issue
+		$LF
+		"current set of items is simply optimized for dungeons
+		$LF
+		"unfortunately, the address we use is not actually harry's X position, but a temporary variable holding the bounding box coordinates used to calculate character collisions
+		$LF
+		"and if there's a npc other than harry on the map, it holds their value (at time of menuing) so OOB is useless
+		$LF
+	]div
+]figure
+[div class=p 
+	"This also made the OoB bug from pressing Start near the purple cloaked npc at Diagon Alley worthless.
+	$LF
+	"However, I remembered that the train also had a warp to Forbidden Forest. It is completely useless in most cases, since it does not update the story progress counter, so it just softlocks you. However, the map itself is completely empty of other NPCs. Additionally, it also has NPC layouts that would let the "yes" item bring up the menu. So I tried using the Forbidden Forest to warp to the credits, and it worked.
+	$LF
+]div
+[div class=p 
+	"This saved 6k frames over using the lake, without using frog during lake.
+	$LF
+]div
+[div class=p 
+	"This is what gets run when I use chocolate frog:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Item
+			]th
+			[th 
+				"Amount
+			]th
+			[th 
+				"Cost
+			]th
+			[th 
+				"Hex
+			]th
+			[th 
+				"Opcode
+			]th
+		]tr
+		[tr 
+			[td 
+				"Leather Belt
+			]td
+			[td 
+				"122
+			]td
+			[td 
+				"366
+			]td
+			[td 
+				"7A
+			]td
+			[td 
+				[b 
+					"LD A,D
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hardened Boots
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"03
+			]td
+			[td 
+				"INC BC
+			]td
+		]tr
+		[tr 
+			[td 
+				"Superlative Boots
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"LD BC, 0000
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bulwark Boots
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Optimum Boots
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Pack of Name Tags
+			]td
+			[td 
+				"76
+			]td
+			[td 
+				"760
+			]td
+			[td 
+				"4C
+			]td
+			[td 
+				[b 
+					"LD C, H
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Antidote
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"450
+			]td
+			[td 
+				"03
+			]td
+			[td 
+				[b 
+					"INC BC
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Potion Kit Bag
+			]td
+			[td 
+				"226
+			]td
+			[td 
+				"2260
+			]td
+			[td 
+				"E2
+			]td
+			[td 
+				[b 
+					"LD (FF00 + C), A
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Collapsible Cauldron
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"51
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"LD BC, 0000
+			]td
+		]tr
+		[tr 
+			[td 
+				"Copper Cauldron
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Brass Cauldron
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Spellbook
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"LD BC, 0101
+			]td
+		]tr
+		[tr 
+			[td 
+				"School Books
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"143
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Folio Triplicus
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Folio Magi
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"LD BC, 0000
+			]td
+		]tr
+		[tr 
+			[td 
+				"Notebook
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Curse Book
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Harry's Wand
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"01
+			]td
+			[td 
+				"LD BC, 0000
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ordinary Broom
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Comet 260
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"00
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Best Blowing Gum
+			]td
+			[td 
+				"49
+			]td
+			[td 
+				"196
+			]td
+			[td 
+				"31
+			]td
+			[td 
+				[b 
+					"LD SP, CFF9
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Pumpkin Pasties
+			]td
+			[td 
+				"249
+			]td
+			[td 
+				"2,490
+			]td
+			[td 
+				"F9
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Cauldron Cakes
+			]td
+			[td 
+				"207
+			]td
+			[td 
+				"1656
+			]td
+			[td 
+				"CF
+			]td
+			[td 
+				"-
+			]td
+		]tr
+		[tr 
+			[td 
+				"Licorice Wands
+			]td
+			[td 
+				"201
+			]td
+			[td 
+				"402
+			]td
+			[td 
+				"C9
+			]td
+			[td 
+				[b 
+					"RET
+				]b
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Possible improvement:
+	$LF
+]div
+[ol 
+	[li 
+		" The blue deck, "Gulliver Pokeby" Deck, has Sickle Seek. This quadruples the amount of sickles gained after battle. The flag only gets reset at the start of the next fight, so it should be possible to use it for duping. However, I'm not sure how to get enough cards for it before the giant rat fight to make a difference.
+		$LF
+	]li
+	[li 
+		" The RNG can be improved. Right now, there's some delay to make sure the following:
+		$LF
+		[ol 
+			[li 
+				" The giant rat fight results in 2 critical hits from me.
+				$LF
+			]li
+			[li 
+				" The giant rat fight results in a drop of 1 pair of hardened boots only
+				$LF
+			]li
+			[li 
+				" NPCs wont move in to my way
+				$LF
+			]li
+			[li 
+				" The next time I used cards, there will be no drop, to prevent crashing
+				$LF
+			]li
+			[li 
+				" The frog fight needs to have at least 1 critical
+				$LF
+			]li
+			[li 
+				" The frog fight needs to drop item 127, "Yes" to get OoB later
+				$LF
+			]li
+			[li 
+				" The last encounter must have a layout that doesn't result in HALT, or invalid opcode in C000 area.
+				$LF
+			]li
+		]ol
+	]li
+]ol
+[div class=p 
+	"I do not understand the RNG enough to manipulate it outside delaying. There might be a way to get better RNG.
+	$LF
+]div
+[ol 
+	[li 
+		" The "Yes" item actually jumps to C000 when used. That's where battle sprites are stored. I don't understand the game enough to make it jump to inventory, but if that was possible that bypasses the need to move OoB entirely.
+		$LF
+	]li
+	[li 
+		" The final payload can be changed from C9 (201, for RET), to C8 (200, for RET Z) for Licorice Wands. This would save 48 frames from having to buy a single Licorice Wand at the end, but I was not able to get "Yes" to leave the battle when I tried resyncing it. If anyone wants to try, here's the wip up to the fight at the end: 
+		[a href=https://tasvideos.org/UserFiles/Info/638317929758634206 rel=noopener external nofollow 
+			"https://tasvideos.org/UserFiles/Info/638317929758634206
+		]a
+		$LF
+	]li
+	[li 
+		" The final opcode before return is LD SP, $CFF9. This is needed, since the game crashes due to corrupted stack. If a lower value for SP can be found, or a function that magically fixes the stack appears, it can potentially save time from having to buy over 200 candies twice.
+		$LF
+	]li
+]ol
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/arkiandruski 
+		"arkiandruski
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/arkiandruski 
+		"arkiandruski
+	]a
+	": Looks good. Accepting as a fastest completion
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

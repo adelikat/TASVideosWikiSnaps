@@ -1,0 +1,2581 @@
+2
+[pre 
+	[code class=language-lua 
+		"-- q, w, i, a keys while unpaused or frame-advancing toggles stuff
+		$LF
+		"-- for FCEUX 2.2.3 or newer
+		$LF
+		$LF
+		"local rb = memory.readbyte
+		$LF
+		"local rw = memory.readword
+		$LF
+		"local wb = memory.writebyte
+		$LF
+		"local rs = memory.readbytesigned
+		$LF
+		"local prb = ppu.readbyte
+		$LF
+		"local reg = memory.getregister
+		$LF
+		"local setr = memory.setregister
+		$LF
+		"local memreg = memory.register
+		$LF
+		"local memexec = memory.registerexec
+		$LF
+		"local band = bit.band
+		$LF
+		"local shift = bit.rshift
+		$LF
+		"local BIT = BIT
+		$LF
+		"local hex = bit.tohex
+		$LF
+		"local sf = string.format
+		$LF
+		"local txt = gui.text
+		$LF
+		"local pix = gui.pixel
+		$LF
+		"local box = gui.box
+		$LF
+		"local line = gui.line
+		$LF
+		$LF
+		$LF
+		"local f, g = "gray", 0x00000070
+		$LF
+		"local lv, move, pk, kp = 0x30, "", {}, {}
+		$LF
+		"local qtog, atog, wtog, itog = false, false, true, true
+		$LF
+		"local substage = "abc  abc  abcde abcabc abcabc abc  abcdeabcde   "
+		$LF
+		"--local xPlot, yPlot = {}, {}
+		$LF
+		"local fstr1 = "%02d\n%s\n\n%02X\n%s\n%02X\n\n%02X\n%02X\n%s"
+		$LF
+		"local fstr2 = " %02X%02X %02X%02X % .2f  %s\n %02X%02X %02X%02X % .2f\n%05X"
+		$LF
+		"local qfstr = "%02X:%02X|\n%02X.%02X|\n%02X.%02X|\n%02X.%02X|\n%02X.%02X|"
+		$LF
+		$LF
+		"local function Spawns()
+		$LF
+		"  local function PrintSpawns(blks,pntr,lvl)
+		$LF
+		$LF
+		"    local count = rb(0xC9)
+		$LF
+		"    local blocks, spawns = "",""
+		$LF
+		$LF
+		"    for i = 0, count do
+		$LF
+		"      local eOff = rb(pntr+i)
+		$LF
+		"      blocks = blocks..sf(" %02X", rb(blks+i))
+		$LF
+		"      spawns = spawns..sf(" %02X", rb(0xE56D+eOff))
+		$LF
+		"    end
+		$LF
+		"    local stagenum = sf("%02X\t",lvl)..prb(0x2356).."-"..
+		$LF
+		"                     prb(0x2358)..substage:sub(lvl+1,lvl+1)
+		$LF
+		"    print(stagenum,"\r\nB:",blocks,"\r\nE:",spawns,"\r\n\r\n")
+		$LF
+		"  end
+		$LF
+		$LF
+		"  local function PrintOrbs(lvl)
+		$LF
+		"    local count = rb(0xB9)-1
+		$LF
+		"    local bPntr = rw(0xBA)
+		$LF
+		"    local oPntr = rw(0xBC)
+		$LF
+		"    local right = rb(0x92)==0
+		$LF
+		"    local blocks, spawns = "",""
+		$LF
+		$LF
+		"    for i = 0, count do
+		$LF
+		"      local blk = rb(bPntr+i)
+		$LF
+		"      if right then blk = blk-0x10 end
+		$LF
+		"      blocks = blocks..sf(" %02X", blk)
+		$LF
+		"      spawns = spawns..sf(" %02X", band(rb(oPntr+i),0xF))
+		$LF
+		"    end
+		$LF
+		"    print(sf("%02X\r\nB: ",lvl)..blocks.."\r\nO: "..spawns.."\r\n")
+		$LF
+		"  end
+		$LF
+		$LF
+		"  local spawnBlks  = rw(0xC3)
+		$LF
+		"  local spawnPntr  = rw(0xC7)
+		$LF
+		"  local offset     = rb(0xCA)
+		$LF
+		"  local spawn      = rb(spawnBlks+offset)
+		$LF
+		"  local spwnBlk    = rb(0x40)
+		$LF
+		"  local nextSpawn  = sf("%02X",rb(0xE56D+rb(spawnPntr+offset)))
+		$LF
+		"  local R, L = "R ", "L "
+		$LF
+		"  if (spwnBlk   == spawn) then R = R..nextSpawn end
+		$LF
+		"  if (spwnBlk+1 == spawn) then L = L..nextSpawn end
+		$LF
+		"  txt(0,66,R.."\n"..L,f,g)
+		$LF
+		$LF
+		"  if f == "white" then
+		$LF
+		"    local level = rb(0x7E)
+		$LF
+		"    if (lv ~= level) then PrintSpawns(spawnBlks,spawnPntr,level) end
+		$LF
+		"    -- if (lv ~= level) then PrintOrbs(level) end
+		$LF
+		"    lv = level
+		$LF
+		"  end
+		$LF
+		"end
+		$LF
+		$LF
+		"local function ViewBGh()
+		$LF
+		"  local x, y = 37, 67
+		$LF
+		"  local function pr(a) if a==0 then return end txt(x,y,hex(a,-1),f,g) end
+		$LF
+		"  for c = 0, 0xE1, 0xF do
+		$LF
+		"    for r = 0, 0xE do
+		$LF
+		"      local tile = rb(0x300+c+r)
+		$LF
+		"      pr(shift(tile,4))
+		$LF
+		"      x = x+6
+		$LF
+		"      pr(band(tile,0xF))
+		$LF
+		"      x, y = x-6, y+8
+		$LF
+		"    end
+		$LF
+		"    x, y = x+12, 67
+		$LF
+		"  end
+		$LF
+		"end
+		$LF
+		$LF
+		"local function NG2RAMview()
+		$LF
+		"  if not itog then return end
+		$LF
+		"  local xPos_f   = rb(0x538)
+		$LF
+		"  local xPos     = rb(0x550)
+		$LF
+		"  local xSpd_f   = rb(0x598)
+		$LF
+		"  local xSpd     = rs(0x5B0)
+		$LF
+		"  local yPos_f   = rb(0x568)
+		$LF
+		"  local yPos     = rb(0x580)
+		$LF
+		"  local ySpd_f   = rb(0x5C8)
+		$LF
+		"  local ySpd     = rs(0x5E0)
+		$LF
+		"  local action   = rb(0x4A8)
+		$LF
+		"  local bgColl   = rb(0x4C0)
+		$LF
+		"  local screen_f = rb(0x39)
+		$LF
+		"  local screen_p = rb(0x3A)
+		$LF
+		"  local screen   = rb(0x3B)*0x10000
+		$LF
+		"  local inv      = rb(0x68)
+		$LF
+		"  local bossHP   = rb(0x4D) > 0 and sf("%02d",rb(0x60F)) or ""
+		$LF
+		"  local windT    = rb(0x42)
+		$LF
+		"  local windC    = rb(0x66)
+		$LF
+		"  local atks     = band(rb(0x49),7)
+		$LF
+		"  atks = atks > 0 and tobitstring(atks):sub(7,9) or ""
+		$LF
+		$LF
+		"  Spawns()
+		$LF
+		"  if atog then ViewBGh() end
+		$LF
+		$LF
+		"  local face = band(rb(0x4F0),0x40) > 0 and "L" or "R"
+		$LF
+		"  txt(242,25,fstr1:format(
+		$LF
+		"    inv,bossHP,bgColl,move,action,windT,windC,face),f,g)
+		$LF
+		$LF
+		"  local ecks = screen + screen_p*0x100 + screen_f
+		$LF
+		"  local xv, yv = xSpd+(xSpd_f/256), ySpd+(ySpd_f/256)
+		$LF
+		"  txt(0,41,fstr2:format(
+		$LF
+		"    yPos,yPos_f,band(ySpd,0xFF),ySpd_f,yv,atks,
+		$LF
+		"    xPos,xPos_f,band(xSpd,0xFF),xSpd_f,xv,
+		$LF
+		"    ecks),f,g)
+		$LF
+		$LF
+		"  move, f = "!!", 0xff7f00ff
+		$LF
+		"  --xPlot[#xPlot+1],yPlot[#yPlot+1]=xPos,yPos
+		$LF
+		"  --for i=1,#xPlot do pix(xPlot[i],yPlot[i],"red") end
+		$LF
+		"end
+		$LF
+		$LF
+		"local function Objects()
+		$LF
+		"  if not wtog then return end
+		$LF
+		"  local tX, tY, back, etxt = 210, 0, 0x000000c0, "green"
+		$LF
+		"  local oddcount, crouch, slash = rb(0xC1)%2==1, band(rb(0x520),2) > 0, rb(0x4A8)
+		$LF
+		"  slash = (slash >= 0x1D and slash <= 0x1F)
+		$LF
+		"  local eBox = (oddcount or slash) and 0xffffff3f or 0xff000070
+		$LF
+		$LF
+		"  local sx, sy, sd = {}, {}, {}
+		$LF
+		"  for s=0,2 do
+		$LF
+		"    sx[s] = rb(0x550+s)
+		$LF
+		"    sy[s] = rb(0x580+s)
+		$LF
+		"    sd[s] = band(rb(0x4F0+s),0x40) > 0
+		$LF
+		"  end
+		$LF
+		$LF
+		"  local active = rw(0x49)*0x100 + rb(0x48)
+		$LF
+		$LF
+		"  local function Swords(xpos,ypos,xrad,yrad,color,orb)
+		$LF
+		"  -- Attempts to show when a slash would be in range of something
+		$LF
+		"  -- (B-press on framecount-2 for jump slash, on framecount-4 for standing slash)
+		$LF
+		"  -- may show some false positives for bottom of item orbs
+		$LF
+		"    for s=2,0,-1 do
+		$LF
+		"      local x, y = sx[s], orb and sy[s] or sy[s]-3
+		$LF
+		"      local sxrad, inrange = 0x20
+		$LF
+		$LF
+		"      if sd[s] then
+		$LF
+		"        local xleft = orb and sxrad or 0x22
+		$LF
+		"        sxrad = -sxrad
+		$LF
+		"        inrange = (band(x-(xpos+xrad), 0xFF) < xleft)
+		$LF
+		"      else
+		$LF
+		"        inrange = (band(xpos-xrad - x, 0xFF) < sxrad)
+		$LF
+		"      end
+		$LF
+		$LF
+		"      if inrange then
+		$LF
+		"        if (y < ypos) then
+		$LF
+		"          inrange = (ypos-yrad < y)
+		$LF
+		"        else
+		$LF
+		"          inrange = (ypos+yrad >=y)
+		$LF
+		"        end
+		$LF
+		"      end
+		$LF
+		$LF
+		"      if inrange then line(x,y,x+sxrad,y,color) end
+		$LF
+		"    end
+		$LF
+		"  end
+		$LF
+		$LF
+		"  -- Enemies
+		$LF
+		"  for i = 0x17, 0x0B, -1 do
+		$LF
+		"    local eID    = rb(0x4D8+i)
+		$LF
+		"    local eXpos  = rb(0x550+i)
+		$LF
+		"    local eYpos  = rb(0x580+i)
+		$LF
+		"    local a = band(active, BIT(i)) > 0
+		$LF
+		$LF
+		"    if (a and (eID ~= 0xAF and eID ~= 0x05)) then
+		$LF
+		"      local eBGc   = rb(0x4C0+i)
+		$LF
+		"      local eTimer = rb(0x508+i)
+		$LF
+		"      local eXrad  = rb(0x610+i)
+		$LF
+		"      local eYrad  = rb(0x628+i)
+		$LF
+		"      local eMisc  = rb(0x640+i)
+		$LF
+		"      local notProj = band(rb(0x520+i),0x10)==0
+		$LF
+		$LF
+		"      Swords(eXpos,eYpos,eXrad,eYrad,"magenta",false)
+		$LF
+		"      box(eXpos-eXrad,eYpos-eYrad,eXpos+eXrad,eYpos+eYrad,eBox,eBox)
+		$LF
+		$LF
+		"      txt(eXpos,eYpos-8,sf("%02X:%02X",i,eMisc),etxt,0)
+		$LF
+		"      if eTimer > 0 then
+		$LF
+		"        txt(eXpos,eYpos+1,sf("%02X",eTimer),etxt,0) end
+		$LF
+		"      if (eBGc > 0 and notProj) then
+		$LF
+		"        txt(eXpos+15,eYpos+1,sf("%02X",eBGc),etxt,0) end
+		$LF
+		"      --if (eID=='45')then xPlot[#xPlot+1],yPlot[#yPlot+1]=eXpos,eYpos end
+		$LF
+		"    end
+		$LF
+		$LF
+		"    if qtog then
+		$LF
+		"      local front = a and 0xaaeeaaff or 0xff9f8fff
+		$LF
+		"      local einfo = qfstr:format(i, eID,
+		$LF
+		"            eXpos, rb(0x538+i),rb(0x5B0+i), rb(0x598+i),
+		$LF
+		"            eYpos, rb(0x568+i), rb(0x5E0+i), rb(0x5C8+i))
+		$LF
+		"      txt(tX, tY, einfo, front, back)
+		$LF
+		"      tX=tX-30
+		$LF
+		"      if (i == 0x10) then tX, tY, back = 210, 200, 0x00000040 end
+		$LF
+		"    end
+		$LF
+		"  end
+		$LF
+		$LF
+		"  -- Weapons
+		$LF
+		"  local size, wBox = rb(0xC0), (not oddcount or slash) and 0xffffff5f or 0x00ff005f
+		$LF
+		"  for i = 0xA, 0x8, -1 do
+		$LF
+		"    local a = band(active, BIT(i)) > 0
+		$LF
+		"    if a then
+		$LF
+		"      local x = rb(0x550+i)
+		$LF
+		"      local y = rb(0x580+i)
+		$LF
+		"      box(x-size,y-size,x+size,y+size,wBox,wBox)
+		$LF
+		"    end
+		$LF
+		"  end
+		$LF
+		$LF
+		"  -- Orbs
+		$LF
+		"  local xrad, yrad, oBox = 0, 0xC, 0xffffff5f
+		$LF
+		"  for i = 0x7, 0x4, -1 do
+		$LF
+		"    local a = band(active, BIT(i)) > 0
+		$LF
+		"    local orbf = band(rb(0x4F0+i),4)==0
+		$LF
+		"    if (a and orbf) then
+		$LF
+		"      local orbS = rb(0x520+i)
+		$LF
+		"      local x = rb(0x550+i)
+		$LF
+		"      local y = rb(0x580+i)
+		$LF
+		$LF
+		"      if (orbS <= 0xF) then Swords(x,y,xrad,yrad,oBox,true) end
+		$LF
+		"      line(x,y-yrad,x,y+yrad,oBox)
+		$LF
+		"      txt(x-2,y-2,hex(orbS,-1),"black",oBox)
+		$LF
+		"    end
+		$LF
+		"  end
+		$LF
+		$LF
+		"  -- Clone boxes (keeps something visible when frame-advancing or if sprites are disabled)
+		$LF
+		"  xrad, yrad = 3, 10
+		$LF
+		"  for i = 1, 2 do  box(sx[i]-xrad,sy[i]-yrad,
+		$LF
+		"            sx[i]+xrad,sy[i]+yrad, 0xff00003f,0xff00003f) end
+		$LF
+		$LF
+		"  -- Ryu
+		$LF
+		"  local x, y = sx[0], sy[0]
+		$LF
+		"  xrad, yrad = 0x08, crouch and 0x0C or 0x10
+		$LF
+		"  box(x-xrad,y-yrad,x+xrad,y+yrad,0x0000ff40,0x0000ff40)
+		$LF
+		"end
+		$LF
+		$LF
+		"local props = {[0] =
+		$LF
+		"-- U,D,L,R,color
+		$LF
+		"  {0,0,0,0,0},           -- 0, air
+		$LF
+		"  {1,0,0,0,0x00ff00cf},  -- 1, platform
+		$LF
+		"  {1,1,1,1,0x0000ffff},  -- 2, barrier
+		$LF
+		"  {0,0,1,0,0x00ff00ff},  -- 3, right wall
+		$LF
+		"  {0,0,0,1,0x00ff00ff},  -- 4, left wall
+		$LF
+		"  {1,1,1,1,0x00ff00ef},  -- 5, corner
+		$LF
+		"  {1,1,1,1,0xffffffff},  -- 6, exit, next
+		$LF
+		"  {1,1,1,1,0xffffffff},  -- 7, exit, previous
+		$LF
+		"  {1,1,1,1,0xcf002fff},  -- 8, spikes/flames
+		$LF
+		"  {1,1,1,1,0xffff00ff},  -- 9, exit, cutscene
+		$LF
+		"  {1,1,1,1,0xff00ffff},  -- A, unused
+		$LF
+		"  {1,0,0,0,0x00ff00cf},  -- B, ice platform
+		$LF
+		"  {1,1,1,0,0x00ff00cf},  -- C, ice corner, left
+		$LF
+		"  {1,1,0,1,0x00ff00cf},  -- D, ice corner, right
+		$LF
+		"  {1,1,1,1,0x00cf7fff},  -- E, right water
+		$LF
+		"  {1,1,1,1,0x007fcfff}}  -- F, left water
+		$LF
+		$LF
+		"local function Background()
+		$LF
+		"  if not wtog then return end
+		$LF
+		"  local x_off = rb(0xC2)
+		$LF
+		"  local c_off = rb(0x8A)
+		$LF
+		"  local b, base = 15, 0x300
+		$LF
+		$LF
+		"  local function DrawBG(a,x,y)
+		$LF
+		"    local c2 = props[a][5]
+		$LF
+		"    if props[a][1] == 1 then line(x,   y,   x+b, y,   c2) end
+		$LF
+		"    if props[a][2] == 1 then line(x,   y+b, x+b, y+b, c2-0x30) end
+		$LF
+		"    if props[a][3] == 1 then line(x,   y,   x,   y+b, c2) end
+		$LF
+		"    if props[a][4] == 1 then line(x+b, y,   x+b, y+b, c2) end
+		$LF
+		"  end
+		$LF
+		$LF
+		"  for c = 0, 8 do
+		$LF
+		"    local col = (c*0xF+c_off)%0xF0 + base
+		$LF
+		"    local x, y = c*32-x_off, 48
+		$LF
+		"    for row = 0, 11 do
+		$LF
+		"      local tile = rb(col+row)
+		$LF
+		"      local hi = shift(tile,4)
+		$LF
+		"      local lo = band(tile,0xF)
+		$LF
+		"      if hi > 0 then DrawBG(hi,x,y) end
+		$LF
+		"      if lo > 0 then DrawBG(lo,x+16,y) end
+		$LF
+		"      y = y+16
+		$LF
+		"    end
+		$LF
+		"  end
+		$LF
+		$LF
+		"  local xPos, yPos = rb(0x550), rb(0x580)
+		$LF
+		"  local yPlat, yWall, c1 = rb(0x054)+yPos, rb(0x055)+yPos, "magenta"
+		$LF
+		"  local bgX = rb(0x67)*0x100 + rb(0x09)  -- $67 should always be 0 for Ryu
+		$LF
+		$LF
+		"  if (rb(0x5E0) <= 0x7F) then
+		$LF
+		"    pix(xPos+3,yPlat,c1)  -- platform, right
+		$LF
+		"    pix(xPos-5,yPlat,c1)  -- platform, left
+		$LF
+		"  end
+		$LF
+		"  pix(xPos+5,yPos,"blue") -- barrier, right
+		$LF
+		"  pix(xPos+5,yWall,c1)    -- wall, right
+		$LF
+		"  pix(xPos-9,yPos,"blue") -- barrier, left
+		$LF
+		"  pix(xPos-9,yWall,c1)    -- wall, left
+		$LF
+		"  txt(140,41,sf("%02X  %03X",yPos,bgX),"gray",g)
+		$LF
+		"end
+		$LF
+		$LF
+		"emu.registerafter(NG2RAMview)
+		$LF
+		"memexec(0x9BEF, function() move="+" end)  -- shadow clone movement
+		$LF
+		"memexec(0xE2DA, function() f="white" end) -- indicates gameplay frames
+		$LF
+		"memexec(0xC2B9, Background)
+		$LF
+		"memexec(0xE285, Objects)
+		$LF
+		"-- uncomment next line to see all points checked for background collision (Ryu, bad guys, falling items)
+		$LF
+		"-- memexec(0x977C, function() pix(reg('x')-rb(0xC2),reg('y'),'yellow');end)
+		$LF
+		$LF
+		$LF
+		"local function Pr(b) return kp[b] and not pk[b] end
+		$LF
+		"while true do
+		$LF
+		"  pk, kp = kp, input.get()
+		$LF
+		"  if Pr('Q') then qtog = not qtog end
+		$LF
+		"  if Pr('A') then atog = not atog end
+		$LF
+		"  if Pr('W') then wtog = not wtog end
+		$LF
+		"  if Pr('I') then itog = not itog end
+		$LF
+		"  emu.frameadvance()
+		$LF
+		"end
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	"namelist files for FCEUX. Change debuggerPageSize to 13 in fceux.cfg
+	$LF
+]div
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.ram.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$0010#soft_ppu_ctrl#
+		$LF
+		"$0011#soft_ppu_mask#
+		$LF
+		"$0012#input_this_frame#
+		$LF
+		"$0013#input_new_buttons#
+		$LF
+		"$0014#input_last_frame#backup
+		$LF
+		"$0015#nmi_flag#b7 set at end of NMI routine
+		$LF
+		"$0016#ppu_trans_flag#b7 set when there's stuff at $3F0 to transmit during next NMI, e.g., status bar updates, palette changes
+		$LF
+		"$0017#chr_bank_R0#
+		$LF
+		"$0018#chr_bank_R1#
+		$LF
+		"$0019#chr_bank_R2#
+		$LF
+		"$001A#chr_bank_R3#
+		$LF
+		"$001B#chr_bank_R4#
+		$LF
+		"$001C#chr_bank_R5#
+		$LF
+		"$001D#prg_bank_R6#
+		$LF
+		"$001E#prg_bank_R7#
+		$LF
+		"$001F#mmc3_irq_latch#
+		$LF
+		"$0020#cs_xscroll_adjustment#
+		$LF
+		"$0021#soft_ppuscroll_x#
+		$LF
+		"$0022#cs_yscroll_adjustment#
+		$LF
+		"$0023#soft_ppuscroll_y#
+		$LF
+		"$0024#last_prg_bank#
+		$LF
+		"$0025#bank_mode_bits#
+		$LF
+		"$0026#sound_A000#which bank is used during sound routine: C or D
+		$LF
+		"$0027#nt_mirroring#(0: vertical; 1: horizontal)
+		$LF
+		"$0028#a_temp_nmi#
+		$LF
+		"$0029#x_temp_nmi#
+		$LF
+		"$002A#y_temp_nmi#
+		$LF
+		"$002B#input_shifter_outer#
+		$LF
+		"$002C#input_first_poll#
+		$LF
+		"$002D#irq_flag#
+		$LF
+		"$002E#cs_flag_&_irq_jmp_offset#
+		$LF
+		"$002F#irq_jmp_ptr_lo#
+		$LF
+		"$0030#irq_jmp_ptr_hi#
+		$LF
+		"$0031#a_temp_irq#
+		$LF
+		"$0032#x_temp_irq#
+		$LF
+		"$0033#y_temp_irq#
+		$LF
+		"$0034#irq_chr_bank_0#
+		$LF
+		"$0035#irq_x_scroll_1#
+		$LF
+		"$0036#irq_x_scroll_2#
+		$LF
+		"$0037#irq_x_scroll_4#
+		$LF
+		"$0038#irq_x_scroll_9#
+		$LF
+		"$0039#cam_pos_fractions#
+		$LF
+		"$003A#cam_pos_pixel#
+		$LF
+		"$003B#cam_pos_screen#
+		$LF
+		"$003D#movement_direction#b7=left
+		$LF
+		"$003E#scroll_flag#b6
+		$LF
+		"$003F#ppu_ctrl_NT_base#bits 0,1 to be OR'd with a value for PPU_CTRL writes
+		$LF
+		"$0040#current_block#
+		$LF
+		"$0041#collision_xdiff#b7 determines damage bounce direction
+		$LF
+		"$0042#wind_timer#
+		$LF
+		"$0046#state_temp#
+		$LF
+		"$0047#facing_temp#
+		$LF
+		"$0048#active_objects_0#b7-4=orbs; b3=spc.wpn symbol; b2-1=shadow clones; b0=Ryu
+		$LF
+		"$0049#active_objects_1#bits 7-3 = enemies 0x0F-0x0B; bits 2-0 = special weapons
+		$LF
+		"$004A#active_objects_2#enemies 0x17-0x10
+		$LF
+		"$004B#shadows_offset#index into shadow clone arrays @ $100,$140,$180
+		$LF
+		"$004C#ryu_blink_flag#1=no flicker (initial Y reg for ryu/clone/weapon blink loop)
+		$LF
+		"$004D#boss_fight_flag#b4, to allow updates of enemy health bar and DEC level on death vs boss
+		$LF
+		"$004E#multi_pointer_lo#C614=object routines; C16F=wind; D809=dpad input; 04:9810=sub-wpn get, and many more
+		$LF
+		"$004F#multi_pointer_hi#
+		$LF
+		"$0050#temp_indirect_ptr_lo#
+		$LF
+		"$0051#temp_indirect_ptr_hi#
+		$LF
+		"$0052#pause_flag#b7
+		$LF
+		"$0053#object_index#
+		$LF
+		"$0054#crouch_y_offset_0#
+		$LF
+		"$0055#crouch_y_offset_1#
+		$LF
+		"$0056#pal_change_flags#
+		$LF
+		"$0057#pal_ptr_offset_0#
+		$LF
+		"$0058#pal_ptr_offset_1#
+		$LF
+		"$0059#pal_ptr_offset_2#
+		$LF
+		"$005A#pal_ptr_offset_3#
+		$LF
+		"$005B#pal_ptr_offset_4#status bar
+		$LF
+		"$005C#palette_change_timer_0#
+		$LF
+		"$005D#palette_change_timer_1#
+		$LF
+		"$005E#palette_change_timer_2#
+		$LF
+		"$005F#palette_change_timer_3#
+		$LF
+		"$0060#palette_change_timer_4#
+		$LF
+		"$0061#palette_index_0#
+		$LF
+		"$0062#palette_index_1#
+		$LF
+		"$0063#palette_index_2#
+		$LF
+		"$0064#palette_index_3#
+		$LF
+		"$0065#palette_index_4#
+		$LF
+		"$0066#wind_cycle#
+		$LF
+		"$0067#carry_temp#
+		$LF
+		"$0068#inv_frames#
+		$LF
+		"$0069#lvldata_0_lo#I am tired of labeling things.
+		$LF
+		"$006A#lvldata_0_hi#
+		$LF
+		"$006B#lvldata_1_lo#
+		$LF
+		"$006C#lvldata_1_hi#
+		$LF
+		"$006D#lvldata_2_lo#
+		$LF
+		"$006E#lvldata_2_hi#
+		$LF
+		"$006F#bgcoll_base_lo#
+		$LF
+		"$0070#bgcoll_base_hi#
+		$LF
+		"$0071#obj_bitfield_index#JSR $9E24
+		$LF
+		"$0072#bitmask_index#JSR $9E24
+		$LF
+		"$0073#oam_write_offset#
+		$LF
+		"$007D#current_sub_weapon#
+		$LF
+		"$007E#current_level#lvl data index 1-1a==0x00; 7-5==0x2F
+		$LF
+		"$007F#lvl_width_in_screens#
+		$LF
+		"$0080#ryuHP#
+		$LF
+		"$0081#enemy_bar#
+		$LF
+		"$0082#tile_x_lo#
+		$LF
+		"$0083#tile_x_hi#16 pixel position for updating nametable address
+		$LF
+		"$0084#metatile_x_lo#
+		$LF
+		"$0085#metatile_x_hi#32 pixel position for updating tile address and background collision data
+		$LF
+		"$0086#tile_ptr_lo#
+		$LF
+		"$0087#tile_ptr_hi#
+		$LF
+		"$0088#nametable_base_lo#
+		$LF
+		"$0089#nametable_base_hi#
+		$LF
+		"$008A#bg_collision_offset#
+		$LF
+		"$008B#bg_collision_write_offset#
+		$LF
+		"$008C#scroll_spd_lo#
+		$LF
+		"$008D#scroll_spd_hi#
+		$LF
+		"$008E#directional_indicator#-1 = left; 0 = right or not moving
+		$LF
+		"$0092#left_scroller_flag#
+		$LF
+		"$0093#bg_pal_0#
+		$LF
+		"$0094#bg_pal_1#
+		$LF
+		"$0095#bg_pal_2#
+		$LF
+		"$0096#bg_pal_3#
+		$LF
+		"$0097#sprite_pal_2#
+		$LF
+		"$0098#sprite_pal_3#
+		$LF
+		"$0099#univ_bg_color_offset#@ 01:BFF0, all black except for 4-1
+		$LF
+		"$009B#stage_numbers#b7=sprites behind BG (for 6-1); b6-3=left digit; b2-0=right digit
+		$LF
+		"$009C#platform#
+		$LF
+		"$009D#wall_right#
+		$LF
+		"$009E#wall_left#
+		$LF
+		"$009F#wall_top#
+		$LF
+		"$00A0#status_updates_index#
+		$LF
+		"$00A1#score0#
+		$LF
+		"$00A2#score1#
+		$LF
+		"$00A3#score2#
+		$LF
+		"$00A4#score3#
+		$LF
+		"$00A5#lives#
+		$LF
+		"$00A6#maxNinpo_tens#
+		$LF
+		"$00A7#maxNinpo_hundos#
+		$LF
+		"$00A8#ninpo_ones#
+		$LF
+		"$00A9#ninpo_tens#
+		$LF
+		"$00AA#ninpo_hundos#
+		$LF
+		"$00AB#timer_ones#
+		$LF
+		"$00AC#timer_tens#
+		$LF
+		"$00AD#timer_hundos#
+		$LF
+		"$00AE#current_ninpo#
+		$LF
+		"$00AF#max_ninpo#
+		$LF
+		"$00B0#timer_frames#
+		$LF
+		"$00B1#timer_seconds#
+		$LF
+		"$00B2#active_temp#
+		$LF
+		"$00B4#room_revisit_flag#
+		$LF
+		"$00B6#level_load_type#
+		$LF
+		"$00B7#orb_spawn_index_R#
+		$LF
+		"$00B8#orb_spawn_index_L#
+		$LF
+		"$00B9#orb_spawn_quantity#
+		$LF
+		"$00BA#orb_spawn_blocks_ptr_lo#
+		$LF
+		"$00BB#orb_spawn_blocks_ptr_hi#
+		$LF
+		"$00BC#orb_contents_and_ypos_ptr_lo#lo nybble=contents, hi nybble=ypos
+		$LF
+		"$00BD#orb_contents_and_ypos_ptr_hi#
+		$LF
+		"$00BE#player_death_flag#and frame count before restart. b7=pit; b6=damage/timer death
+		$LF
+		"$00BF#debug_invuln_flag#b7=enabled, jumps over pit death and enemy collision checks
+		$LF
+		"$00C0#spc_wpn_size#
+		$LF
+		"$00C1#frame_counter#used to split parts of the program to different frames and to jumble the final boss's spew a bit
+		$LF
+		"$00C2#tile_x_offset#($3A AND 0x1F) for object-bg collision
+		$LF
+		"$00C3#enemy_spawn_blocks_ptr_lo#
+		$LF
+		"$00C4#enemy_spawn_blocks_ptr_hi#
+		$LF
+		"$00C5#enemy_spawn_positions_ptr_lo#x and y
+		$LF
+		"$00C6#enemy_spawn_positions_ptr_hi#
+		$LF
+		"$00C7#enemy_spawn_ID_offsets_ptr_lo#
+		$LF
+		"$00C8#enemy_spawn_ID_offsets_ptr_hi#
+		$LF
+		"$00C9#enemy_spawn_quantity#
+		$LF
+		"$00CA#enemy_spawn_list_index#
+		$LF
+		"$00CB#last_cs_played#
+		$LF
+		"$00CC#bg_animation_flags#b7=no animation; b2=alt CHR banks (for 7-1,7-2)
+		$LF
+		"$00CD#bg_animation_period#
+		$LF
+		"$00CE#bg animation timer#
+		$LF
+		"$00CF#bg_animation_index#
+		$LF
+		"$00D0#boss_dead_tally_flag#b7=tally timer; b6=tally ninpo
+		$LF
+		"$00D1#music_track#
+		$LF
+		"$00D2#scroll_get#0x30 after getting scroll from current level, boss kill resets it so dying after killing jaquio1 or jaquio2 allows you to get up to two bonus scrolls for a max maximum of 120 ninpo
+		$LF
+		"$00D3#highest_boss_passed#
+		$LF
+		"$00D8#orb_bits#$D8-$EF reserved, though it will never use more than a few bytes
+		$LF
+		"$00E0#title_fade_count#determines which sound test is used
+		$LF
+		"$00E1#title_fade_timer#
+		$LF
+		"$0100#shdw_xpos_array#
+		$LF
+		"$0140#shdw_ypos_array#
+		$LF
+		"$0180#shdw_states_array#
+		$LF
+		"$01C0#palettes#0x20 bytes
+		$LF
+		"$01E0#metatiles#6 bytes
+		$LF
+		"$0300#collision_tiles_0#
+		$LF
+		"$0378#collision_tiles_1#
+		$LF
+		"$03F0#ppu_trans#size,ppuaddr,ppuaddr,data ...
+		$LF
+		"$0440#enemy_bits#$440-$45F
+		$LF
+		"$0460#animation_id#index into data pointers at $ab70, $ac00
+		$LF
+		"$0478#animation_timer#
+		$LF
+		"$0490#animation_frame#
+		$LF
+		"$04A8#current_action#
+		$LF
+		"$04C0#bg_collision#b7=overlapping wall/just walljumped; b4=platform; b3=L grab; b2=L barrier; b1=R grab; b0=R barrier
+		$LF
+		"$04D8#object_ID#ai pointer index
+		$LF
+		"$04F0#sprite_attr#b7=v-flip; b6=h-flip (face left); b5=priority; b2=don't draw(flicker); b1,b0=palette
+		$LF
+		"$0508#timer#Enemy actions, explosions, power-up time-outs
+		$LF
+		"$050E#score_tally_timer#2 bytes, 61*5
+		$LF
+		"$0520#state#Ryu: b6=in air; b5=walljmp; b4=jump; b3=slow; b2=sword; b1=crouch; b0=spc atk; Enemies: b7=no bgCollision; b6=air; b5=boss; b4=proj.; b1=invulnerable; b0=dead
+		$LF
+		"$0538#x_pos_lo#
+		$LF
+		"$0550#x_pos_hi#
+		$LF
+		"$0551#shadow1_x_pos#
+		$LF
+		"$0552#shadow2_x_pos#
+		$LF
+		"$0568#y_pos_lo#
+		$LF
+		"$0580#y_pos_hi#
+		$LF
+		"$0581#shadow1_y_pos#
+		$LF
+		"$0582#shadow2_y_pos#
+		$LF
+		"$0598#x_speed_lo#
+		$LF
+		"$05B0#x_speed_hi#
+		$LF
+		"$05C8#y_speed_lo#
+		$LF
+		"$05E0#y_speed_hi#
+		$LF
+		"$05F8#health#
+		$LF
+		"$0610#x_rad#
+		$LF
+		"$0628#y_rad#
+		$LF
+		"$0640#multi_purpose#Ryu Ypos @ spawn for bats for later comparison, index to tie projectile back to whatever spawned it, 2nd action timer, etc.
+		$LF
+		"$0658#spawn_number#
+		$LF
+		"$0670#enemy_touch_damage#
+		$LF
+		"$0688#points#
+		$LF
+		"$0700#sound_buffer#sound effect, music track, or command to initiate next nmi
+		$LF
+		"$07E9#sound_suspend_flag#0x2B (pause sound effect) sets, 0x2C unsets
+		$LF
+		"$0009#bgc_tX#
+		$LF
+		"$000A#bgc_t2#
+		$LF
+		"$000B#l_coll_d#
+		$LF
+		"$000C#r_coll_u#
+		$LF
+		"$000D#r_coll_d#
+		$LF
+		"$000E#l_coll_u#
+		$LF
+		"$000F#bgc_temp#
+		$LF
+		"$003C#_unused#
+		$LF
+		"$0074#_unused#
+		$LF
+		"$0075#_unused#
+		$LF
+		"$0076#_unused#
+		$LF
+		"$0077#_unused#
+		$LF
+		"$0078#_unused#
+		$LF
+		"$0079#_unused#
+		$LF
+		"$007A#_unused#
+		$LF
+		"$007B#_unused#
+		$LF
+		"$007C#_unused#
+		$LF
+		"$0090#_unused#
+		$LF
+		"$0091#_unused#
+		$LF
+		"$009A#_unused#
+		$LF
+		"$00B3#_unused#
+		$LF
+		"$00B5#_unused#
+		$LF
+		"$00D4#_unused#
+		$LF
+		"$00D5#_unused#
+		$LF
+		"$00D6#_unused#
+		$LF
+		"$00D7#_unused#
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.0.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$8000#level_layouts#0x2136 bytes total
+		$LF
+		"$8000#1_1a#
+		$LF
+		"$81E0#1_1b#
+		$LF
+		"$8210#1_1c#
+		$LF
+		"$8270#1_2#
+		$LF
+		"$82A0#2_1#
+		$LF
+		"$84E6#2_2a#
+		$LF
+		"$85D6#2_2b#
+		$LF
+		"$86F6#2_2c#
+		$LF
+		"$8756#2_3#
+		$LF
+		"$8786#3_1#
+		$LF
+		"$89C6#3_2a#
+		$LF
+		"$8A56#3_2b#
+		$LF
+		"$8AE6#3_2c#
+		$LF
+		"$8B76#3_2d#
+		$LF
+		"$8C06#3_2e#
+		$LF
+		"$8C96#3_3#
+		$LF
+		"$8CC6#4_1a#
+		$LF
+		"$8DE6#4_1b#
+		$LF
+		"$8E16#4_1c#
+		$LF
+		"$8F66#4_2a#
+		$LF
+		"$9056#4_2b#
+		$LF
+		"$90E6#4_2c#
+		$LF
+		"$9266#4_3#
+		$LF
+		"$9296#5_1a#
+		$LF
+		"$9326#5_1b#
+		$LF
+		"$9416#5_1c#
+		$LF
+		"$94A6#5_2a#
+		$LF
+		"$95F6#5_2b#
+		$LF
+		"$9626#5_2c#
+		$LF
+		"$9776#5_3#
+		$LF
+		"$97A6#6_1a#
+		$LF
+		"$9866#6_1b#
+		$LF
+		"$9896#6_1c#
+		$LF
+		"$99E6#6_2#
+		$LF
+		"$9B06#6_3#
+		$LF
+		"$9B36#7_1a#
+		$LF
+		"$9C26#7_1b#
+		$LF
+		"$9C56#7_1c#
+		$LF
+		"$9D16#7_1d#
+		$LF
+		"$9D46#7_1e#
+		$LF
+		"$9DD6#7_2a#
+		$LF
+		"$9EC6#7_2b#
+		$LF
+		"$9EF6#7_2c#
+		$LF
+		"$9FE6#7_2d#
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.1.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$A016#7_2e#
+		$LF
+		"$A0A6#7_3#
+		$LF
+		"$A0D6#7_4#
+		$LF
+		"$A106#7_5#
+		$LF
+		"$A136#unused_0x5CA_bytes#
+		$LF
+		"$A700#bg_tile_ptrs_lo#to level layout data @ $8000-A135
+		$LF
+		"$A730#bg_tile_ptrs_hi#
+		$LF
+		"$A760#sprjunk0#
+		$LF
+		"$A830#sprjunk1_lo#AE90-BA38
+		$LF
+		"$A900#sprjunk1_hi#
+		$LF
+		"$A9D0#sprjunk2_lo#BA39-BD6A
+		$LF
+		"$AAA0#sprjunk2_hi#
+		$LF
+		"$AB70#ani_ptrs_lo#BD6C-BFF2
+		$LF
+		"$AC00#ani_ptrs_hi#
+		$LF
+		"$AC90#bgpani_data_ptrs_lo#ACB0-ACCC
+		$LF
+		"$ACA0#bgpani_data_ptrs_hi#
+		$LF
+		"$ACB0#bgpani_data#
+		$LF
+		"$AD10#bg_pal_ptrs_lo#AD50-AE84
+		$LF
+		"$AD30#bg_pal_ptrs_hi#
+		$LF
+		"$AD50#bg_pal_data#
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.4.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$8000#bg_palettes_1#
+		$LF
+		"$8030#bg_palettes_2#
+		$LF
+		"$8060#bg_palettes_3#
+		$LF
+		"$8090#sprite_palettes_2#
+		$LF
+		"$80C0#sprite_palettes_3#plus b7 set = no bg animation
+		$LF
+		"$80F0#level_data#b7=left scroller
+		$LF
+		"$8120#more_lvl_data#b7-3 = $18; b2-0 = $34
+		$LF
+		"$8150#lvl_chr_bank_offsets#hi nybble = chr_bank_5 ; lo nybble = chr_bank_4
+		$LF
+		"$8180#lvl_widths#lo=width in screens; hi=universal bg color offset
+		$LF
+		"$81B0#lvl_start_positions#hi nybble = ypos; lo = offset to xpos @ $D262
+		$LF
+		"$81E0#lvl_revisit_positions#
+		$LF
+		"$8210#bg_animation_data#b7-3=pal change stuff; b2=flag; b1-0=period offset
+		$LF
+		"$8240#lvl_transition_info#b7-2 = restart point after game over ; b1-0 = transition type
+		$LF
+		"$8270#stage_numbers&bg_mask#
+		$LF
+		"$82A0#orb spawn quantity per lvl#
+		$LF
+		"$82D0#enemy spawn quantity per lvl#
+		$LF
+		"$8300#music_offsets#
+		$LF
+		"$8330#template_ptrs_lo#
+		$LF
+		"$8340#template_ptrs_hi#
+		$LF
+		"$8350#00#GAME OVER
+		$LF
+		"$835D#01#sound test channel visualizer
+		$LF
+		"$83A9#02#title screen attribute table
+		$LF
+		"$83E5#03#title 2
+		$LF
+		"$8443#04#title 3
+		$LF
+		"$84A1#05#title 4
+		$LF
+		"$8505#06#title 5
+		$LF
+		"$853F#07#title 6
+		$LF
+		"$858D#08#TECMO PRESENTS 1990
+		$LF
+		"$85CA#09#NINJA GAIDEN II
+		$LF
+		"$85F4#0C#sound test and lvl select palettes
+		$LF
+		"$8618#0D#musicruise 1
+		$LF
+		"$8620#0E#musicruise 2
+		$LF
+		"$865A#0F#musicruise 3
+		$LF
+		"$86AF#unused_0x71_bytes#
+		$LF
+		"$8720#orb_spawn_blocks_lo#
+		$LF
+		"$8750#orb_spawn_blocks_hi#
+		$LF
+		"$8780#orb_contents_and_ypos_lo#
+		$LF
+		"$87B0#orb_contents_and_ypos_hi#
+		$LF
+		"$87E0#enemy_spawn_blocks_lo#
+		$LF
+		"$8810#enemy_spawn_blocks_hi#
+		$LF
+		"$8840#enemy_spawn_pos_lo#
+		$LF
+		"$8870#enemy_spawn_pos_hi#
+		$LF
+		"$88A0#enemy_spawn_id_offsets_lo#
+		$LF
+		"$88D0#enemy_spawn_id_offsets_hi#
+		$LF
+		"$8900#orb_spawn_data#0x29A bytes
+		$LF
+		"$8B9A#enemy_spawn_data#referenced by pointers stored at $C3-$C8; 0x5FD bytes
+		$LF
+		"$91A0#Object: face_Ryu#
+		$LF
+		"$91B6#Object: approach_Ryu#
+		$LF
+		"$91CF#Object: proximity_check#
+		$LF
+		"$91E2#Object: find_free_slot#
+		$LF
+		"$920E#Object: x_reverse#
+		$LF
+		"$9220#Object: y_reverse#
+		$LF
+		"$9232#Object: set_hitbox#
+		$LF
+		"$924A#x_sizes#
+		$LF
+		"$9250#y_sizes#
+		$LF
+		"$9258#Object: x_movement#
+		$LF
+		"$9267#Object: y_movement#
+		$LF
+		"$9293#Object: animate#
+		$LF
+		"$92CE#Animate_spcW&orbs_while_paused#
+		$LF
+		"$92DD#bg_properties#
+		$LF
+		"$92ED#bitmasks#
+		$LF
+		"$92F5#bitmask_offsets#
+		$LF
+		"$930D#act_obj_bf_offs#
+		$LF
+		"$9325#Level_fade_in#
+		$LF
+		"$9374#Level_fade_out#
+		$LF
+		"$93CD#Ryu_clone_&_weapon_flicker#
+		$LF
+		"$93F4#Collision: pick_ups & ground#
+		$LF
+		"$9442#Animate_background#
+		$LF
+		"$946C#Setup_bg_pal_animation#
+		$LF
+		"$94A2#Palette_junk#
+		$LF
+		"$951C#Set_attack_state#
+		$LF
+		"$9548#Set_airborne_state#
+		$LF
+		"$954D#contact#
+		$LF
+		"$9569#no_contact#
+		$LF
+		"$9583#Set_crouch_state#
+		$LF
+		"$95CE#Clear_object_RAM#
+		$LF
+		"$95E8#Clear_nametables#
+		$LF
+		"$962E#Shutter_fade_prep#
+		$LF
+		"$968A#Blacken_palettes#
+		$LF
+		"$96C2#Update_status_bar#
+		$LF
+		"$96EB#05_ninja_bar#
+		$LF
+		"$96F1#06_enemy_bar#
+		$LF
+		"$9717#0-4_score_lives_maxninpo_ninpo_timer#
+		$LF
+		"$9743#Fade_from_black#
+		$LF
+		"$9746#Fade_to_black#
+		$LF
+		"$977C#Find_collision_tile#
+		$LF
+		"$97A8#get_hi_nybble#
+		$LF
+		"$97AE#get_lo_nybble#
+		$LF
+		"$97B2#column_offsets#
+		$LF
+		"$97BB#Collision: pick_ups & Ryu#
+		$LF
+		"$97D8#PickUp_collision_check#
+		$LF
+		"$97F5#PickUp_collision_occurred#
+		$LF
+		"$9810#sub_weapon_pickup#
+		$LF
+		"$9812#non_weapon#
+		$LF
+		"$9821#item_pickup_ptrs#
+		$LF
+		"$983B#blue_ninpo#
+		$LF
+		"$985E#red_ninpo#
+		$LF
+		"$9876#scroll#
+		$LF
+		"$98AA#blue_sack#
+		$LF
+		"$98AF#red_sack#
+		$LF
+		"$98B4#health_jar#
+		$LF
+		"$98C9#shadow_clone#
+		$LF
+		"$98EB#extra_life#
+		$LF
+		"$98FE#all_weapons#
+		$LF
+		"$9903#jsr_equip_star_for_new_stage#
+		$LF
+		"$993C#weapon_IDs#
+		$LF
+		"$9941#weapon_attr#
+		$LF
+		"$9946#weapon_sizes#
+		$LF
+		"$994B#weapon_index#
+		$LF
+		"$994E#Collision: orbs & attacks#
+		$LF
+		"$9959#slash#
+		$LF
+		"$99B0#special_attack#
+		$LF
+		"$9A1E#Orb_opened#
+		$LF
+		"$9A2C#replace scroll with blue ninpo if already taken from this level#
+		$LF
+		"$9A5B#pickup_graphics#
+		$LF
+		"$9A68#pickup_colors#1=red
+		$LF
+		"$9A75#Wait_for_irq#
+		$LF
+		"$9A7C#Ryu: special attack#
+		$LF
+		"$9B4B#spc_atk_HUD_dec_ones#
+		$LF
+		"$9B50#spc_atk_HUD_dec_tens#
+		$LF
+		"$9B55#spc_attack_costs#
+		$LF
+		"$9B5A#spc_attack_sounds#
+		$LF
+		"$9B5F#spc_atk_x_speeds_right#
+		$LF
+		"$9B64#spc_atk_x_speeds_left#
+		$LF
+		"$9B69#spc_atk_y_speeds#
+		$LF
+		"$9B7A#room_revisit_offsets_lo#
+		$LF
+		"$9B7B#room_revisit_offsets_hi#
+		$LF
+		"$9B9A#Preset_ppu_transmission#
+		$LF
+		"$9BD5#Set_ppu_trans_and_wait_for_vblank#
+		$LF
+		"$9BD9#Wait_for_vblank#
+		$LF
+		"$9BE1#Ryu: shadow stuff#
+		$LF
+		"$9C37#branch here if stationary#
+		$LF
+		"$9C4B#clones_attack#
+		$LF
+		"$9C60#Shadow: animate attack#
+		$LF
+		"$9C67#sword#
+		$LF
+		"$9C78#spc_atk#
+		$LF
+		"$9C97#L#
+		$LF
+		"$9C9D#R#
+		$LF
+		"$9CAB#Shadow: animate#
+		$LF
+		"$9CC0#Shadow: animate1#
+		$LF
+		"$9CEB#Shadow: set pos and state#
+		$LF
+		"$9D0C#Get_Shdw1_offset#
+		$LF
+		"$9D16#Object: remove#
+		$LF
+		"$9D55#projectile_or_not_enemy#
+		$LF
+		"$9D68#Add_points#
+		$LF
+		"$9D92#Set_bg_collision#
+		$LF
+		"$9DC3#Setup_palettes#
+		$LF
+		"$9E16#Clear_sprites#
+		$LF
+		"$9E24#Set_sprites#
+		$LF
+		"$9F30#Spawn: orbs#
+		$LF
+		"$9F34#moving_right#
+		$LF
+		"$9F4C#moving_left#
+		$LF
+		"$9F58#left_spawn#
+		$LF
+		"$9F5E#right_spawn#
+		$LF
+		"$9FB4#already_opened#
+		$LF
+		"$9FD3#Palette_update#
+		$LF
+		"$9FE0#Palette_stuff#
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.5.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$A000#CutScene_code#0x1134 bytes
+		$LF
+		"$A003#CS_irq#
+		$LF
+		"$B134#CS_data#0xA7A bytes
+		$LF
+		"$BF00#CS_pointers#
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.E.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$C000#PRG_bank_8000#
+		$LF
+		"$C011#PRG_bank_A000#
+		$LF
+		"$C022#Ryu: environment#and such
+		$LF
+		"$C03D#l_wall#
+		$LF
+		"$C044#r_wall#
+		$LF
+		"$C064#not_moving#
+		$LF
+		"$C069#touching ice|water#
+		$LF
+		"$C07C#not crouching|slashing#
+		$LF
+		"$C08E#go_left#
+		$LF
+		"$C0A6#go_right#
+		$LF
+		"$C0D0#go_right2#
+		$LF
+		"$C0E4#go_left2#
+		$LF
+		"$C105#on_surface#
+		$LF
+		"$C114#on_climbable_surface#
+		$LF
+		"$C124#down_pressed#
+		$LF
+		"$C128#up_pressed#
+		$LF
+		"$C141#slide_down_ice|water#
+		$LF
+		"$C14A#do_jumps#
+		$LF
+		"$C153#walljump_state_b5#
+		$LF
+		"$C159#jump_state_b4#
+		$LF
+		"$C16F#EnviroMovement#
+		$LF
+		"$C180#wind_jump_table#
+		$LF
+		"$C1A2#no_wind#
+		$LF
+		"$C1BB#left_wind|water#
+		$LF
+		"$C1C6#right_wind|water#
+		$LF
+		"$C1D1#ice#
+		$LF
+		"$C1DB#ice: standing#
+		$LF
+		"$C201#ice: right#
+		$LF
+		"$C205#ice: left#
+		$LF
+		"$C23D#wind01#
+		$LF
+		"$C242#wind02#
+		$LF
+		"$C249#wind03#
+		$LF
+		"$C24E#wind04#
+		$LF
+		"$C255#wind05#
+		$LF
+		"$C25A#wind06#
+		$LF
+		"$C261#wind07#
+		$LF
+		"$C266#wind08#
+		$LF
+		"$C26D#wind09#
+		$LF
+		"$C272#wind0A#
+		$LF
+		"$C279#wind0B#
+		$LF
+		"$C27E#wind0C#
+		$LF
+		"$C285#wind0D#
+		$LF
+		"$C28A#wind0E#
+		$LF
+		"$C291#wind0F#
+		$LF
+		"$C296#wind10#
+		$LF
+		"$C29D#from_the_top#
+		$LF
+		"$C2A2#wind_transition#
+		$LF
+		"$C2A7#Ryu: BG_collision#
+		$LF
+		"$C2D3#too_high_no_touching#
+		$LF
+		"$C2E2#find_platform_right#
+		$LF
+		"$C2FF#find_platform_left#
+		$LF
+		"$C315#found_platform#
+		$LF
+		"$C322#not_crouching#
+		$LF
+		"$C333#find_wall_R(up)#
+		$LF
+		"$C34B#(down)#
+		$LF
+		"$C361#L_find_wall(up)#
+		$LF
+		"$C379#(down)#
+		$LF
+		"$C38C#overlapping_wall#
+		$LF
+		"$C3AA#not_overlapping_wall#
+		$LF
+		"$C3F6#Object: aim#
+		$LF
+		"$C40E#ryu_left#
+		$LF
+		"$C41D#ryu_right#
+		$LF
+		"$C441#ryu_above#
+		$LF
+		"$C44E#ryu_below#
+		$LF
+		"$C45B#left|above_lo#
+		$LF
+		"$C45C#left|above_hi#
+		$LF
+		"$C47B#right|below_lo#
+		$LF
+		"$C47C#right|below_hi#
+		$LF
+		"$C49B#Object: BG collision#
+		$LF
+		"$C4C9#not_too_high#
+		$LF
+		"$C511#on_platform#
+		$LF
+		"$C520#not_on_platform#
+		$LF
+		"$C526#and_not_already_falling#
+		$LF
+		"$C535#Object: set_vertical_movement#
+		$LF
+		"$C544#Object: variant_spawn#
+		$LF
+		"$C54E#Object: fix_projectile_to_owner#
+		$LF
+		"$C558#Object: clear_speed#
+		$LF
+		"$C567#arc_x_speed_lo#
+		$LF
+		"$C56B#arc_x_speed_hi#
+		$LF
+		"$C56F#Spawn: enemies#
+		$LF
+		"$C575#check_list_R#
+		$LF
+		"$C584#list_ok_R#
+		$LF
+		"$C58C#check_list_L#
+		$LF
+		"$C5A0#list_ok_L#
+		$LF
+		"$C5A6#check_bits#make sure this spawn isn't already on screen
+		$LF
+		"$C5C0#spawn_it!#write basic stats and position, ID for enemy-specific routines, where it came from
+		$LF
+		"$C614#Object: id_specified_routine#
+		$LF
+		"$C639#Miscellany#invulnerability, player death, end-stage score tally, lvl timer, lvl exits, spawn block
+		$LF
+		"$C65B#waiting_to_land_after_hit#
+		$LF
+		"$C66A#player_death_check#
+		$LF
+		"$C67A#score_tally#
+		$LF
+		"$C6EB#level_timer#
+		$LF
+		"$C71D#check_for_exits#
+		$LF
+		"$C739#get_block#divide level into 16 pixel "blocks" for spawn checks
+		$LF
+		"$C74E#exit_to_cut_scene#
+		$LF
+		"$C799#go_back#
+		$LF
+		"$C7A2#go_forward#
+		$LF
+		"$C820#Tecmo_Cinema#
+		$LF
+		"$C85C#Ryu_is_dead#
+		$LF
+		"$C8A6#Game_over#
+		$LF
+		"$C8D6#game_over_loop#
+		$LF
+		"$C913#tally_done#
+		$LF
+		"$C925#lvls_with_cutscenes#
+		$LF
+		"$C933#cs_list#
+		$LF
+		"$C941#Read_Input#
+		$LF
+		"$C95B#Update_background_data#
+		$LF
+		"$CA02#Collision: enemies#and fire and spikes
+		$LF
+		"$CA15#odd: spikes&enemies#
+		$LF
+		"$CA1D#sword_slash#
+		$LF
+		"$CA2C#ryu|clone active#
+		$LF
+		"$CA4A#and an enemy is active#
+		$LF
+		"$CA53#and not dead#
+		$LF
+		"$CA5C#and ryu is facing right#
+		$LF
+		"$CA6F#and ryu is facing left#
+		$LF
+		"$CA84#and ryu is close enough on the x axis#
+		$LF
+		"$CAAB#and ryu is close enough on the y axis#
+		$LF
+		"$CAB0#-#first shadow to score a (non-boss) hit skips things on to Ryu, but leaves the temp X reg ($9) alone so double-kills can only happen if Ryu is hitting something lower on the list
+		$LF
+		"$CABE#it's dead#
+		$LF
+		"$CAD1#but it's still alive#
+		$LF
+		"$CADD#damage_knockback#for non-boss enemies with health > 1
+		$LF
+		"$CAE9#even: weapons#
+		$LF
+		"$CB2F#Spc_weapons#
+		$LF
+		"$CB9C#itsaboss#
+		$LF
+		"$CBAA#throwing_star_boss_bounce#
+		$LF
+		"$CBD6#Spike_collision#and fire
+		$LF
+		"$CC07#enemy_collison#
+		$LF
+		"$CC09#enemy_loop#
+		$LF
+		"$CC22#check_collision#
+		$LF
+		"$CC6A#ryu_touched_a_bad_guy#
+		$LF
+		"$CC7D#Ryu_died#
+		$LF
+		"$CCAD#absorb_if_projectile#
+		$LF
+		"$CCBA#Boss_kill#
+		$LF
+		"$CD36#debug_lvl_select#Disabled code: [20 37 DC]
+		$LF
+		"$CD4B#Start_new_stage#or restart after death
+		$LF
+		"$CD66#new_game#
+		$LF
+		"$CD7B#died#
+		$LF
+		"$CD95#game_over#
+		$LF
+		"$CDA7#new_stage#
+		$LF
+		"$CDAD#mid_act_cut_scene#
+		$LF
+		"$CDC3#general#
+		$LF
+		"$CE44#Status_setup#
+		$LF
+		"$CE4F#bulk_ppu_trans_offsets#for score, lives, max ninpo, ninpo at stage start
+		$LF
+		"$CE59#status_row_one#
+		$LF
+		"$CE87#status_rows_two_and_three#
+		$LF
+		"$CEB7#ten_ninpo#
+		$LF
+		"$CEC5#2_lives_0_score#
+		$LF
+		"$CED2#Load_level#
+		$LF
+		"$CF19#bg_periods#
+		$LF
+		"$CF1D#lvl_has_bg_animation#
+		$LF
+		"$CF2D#lvl_has_no_bg_animation#
+		$LF
+		"$CFA9#scroll_left#
+		$LF
+		"$CFD7#scroll_right#
+		$LF
+		"$D04E#level_load_loop#
+		$LF
+		"$D081#train#
+		$LF
+		"$D085#funky#
+		$LF
+		"$D0FF#7-2_music_selection#
+		$LF
+		"$D164#change_stage#
+		$LF
+		"$D174#change_room#
+		$LF
+		"$D17D#boss#
+		$LF
+		"$D1DB#stage_number_template#
+		$LF
+		"$D1E2#New_stage_prep#
+		$LF
+		"$D1F2#set sprite priority for 6-1#
+		$LF
+		"$D24A#chr_banks_table#
+		$LF
+		"$D25A#irq_chr_banks#
+		$LF
+		"$D262#start_x#
+		$LF
+		"$D26E#music_tracks#
+		$LF
+		"$D277#irq#
+		$LF
+		"$D29C#irq_jump_pointers#
+		$LF
+		"$D2B2#00#
+		$LF
+		"$D2DC#01#
+		$LF
+		"$D30D#02#
+		$LF
+		"$D328#03#
+		$LF
+		"$D350#04#
+		$LF
+		"$D373#05#
+		$LF
+		"$D37D#07#
+		$LF
+		"$D3A1#08#
+		$LF
+		"$D3D2#09#
+		$LF
+		"$D3F4#0A#
+		$LF
+		"$D41E#Object: move#(excludes Ryu, clones, equipped weapon symbol)
+		$LF
+		"$D4F3#nmi#
+		$LF
+		"$D62C#From_the_top#
+		$LF
+		"$D668#tecmo_presents_1990#
+		$LF
+		"$D682#ninja_gaiden_ii#
+		$LF
+		"$D69A#title_screen_setup#
+		$LF
+		"$D721#title_screen_loop#
+		$LF
+		"$D751#start_game#
+		$LF
+		"$D75D#do_sound_test#
+		$LF
+		"$D78F#Wait_for_start_press#
+		$LF
+		"$D7A1#Ryu: movement, input, BG collision#
+		$LF
+		"$D7AD#in air, accelerate#
+		$LF
+		"$D7BE#move#branch here if surface contact or at fall speed cap
+		$LF
+		"$D7D2#pit_death_check#
+		$LF
+		"$D7E9#clear wall-cling bits if dead#
+		$LF
+		"$D7FA#RTS if bouncing off enemy (no control)#
+		$LF
+		"$D803#on_platform_or_in_air#
+		$LF
+		"$D817#A+away_from_wall_pressed#
+		$LF
+		"$D832#wall_cling#
+		$LF
+		"$D83D#B_pressed#
+		$LF
+		"$D845#B+L#
+		$LF
+		"$D84C#B+R#
+		$LF
+		"$D851#facing_right#
+		$LF
+		"$D856#facing_left#
+		$LF
+		"$D85B#B_not_pressed#
+		$LF
+		"$D85F#A_pressed#
+		$LF
+		"$D866#on_left_wall#
+		$LF
+		"$D86D#on_right_wall#
+		$LF
+		"$D872#A_not_pressed#
+		$LF
+		"$D877#up_pressed#
+		$LF
+		"$D881#down_pressed#
+		$LF
+		"$D88B#no direction or any opposing directions#
+		$LF
+		"$D89D#N+B#
+		$LF
+		"$D8BD#N+A#
+		$LF
+		"$D8CF#right_pressed#
+		$LF
+		"$D910#R+B#
+		$LF
+		"$D92F#R+A#
+		$LF
+		"$D941#left_pressed#
+		$LF
+		"$D983#L+B#
+		$LF
+		"$D9A2#L+A#
+		$LF
+		"$D9B4#down_pressed#
+		$LF
+		"$D9BD#D#
+		$LF
+		"$D9C9#D+B#
+		$LF
+		"$D9E8#up_pressed#
+		$LF
+		"$D9F1#U#
+		$LF
+		"$D9FD#U+B#
+		$LF
+		"$DA13#dpad_jump_table#
+		$LF
+		"$DA33#enemy_hp+dmg+pts#
+		$LF
+		"$DA63#Ryu: scrolling#
+		$LF
+		"$DA72#ryu_moved#
+		$LF
+		"$DAAC#no_scroll#
+		$LF
+		"$DAE0#scroll#
+		$LF
+		"$DB10#scrolled_to_start_of_level#
+		$LF
+		"$DB26#Nametable_updates#
+		$LF
+		"$DBCF#Handle_metatile#
+		$LF
+		"$DC37#Debug_lvl_select#disabled
+		$LF
+		"$DCA4#MCsub1#
+		$LF
+		"$DD8B#MCsub2#
+		$LF
+		"$DDB3#Musicruise_setup#
+		$LF
+		"$DEA2#Musicruise#
+		$LF
+		"$DF43#musicruise_data#DF43-E23E, 0x2FC bytes
+		$LF
+		$LF
+	]code
+]pre
+[div class=p 
+	[code 
+		"Ninja Gaiden 2 - The Dark Sword of Chaos (U).nes.F.nl 
+	]code
+	$LF
+]div
+[pre 
+	[code class=language-shell 
+		"$E242#main_loop#
+		$LF
+		"$E248#pause_stuff#
+		$LF
+		"$E270#gameplay#
+		$LF
+		"$E296#object_loop#
+		$LF
+		"$E2CB#not_enemy_or_bgcoll_disabled#
+		$LF
+		"$E2D5#inactive|done#
+		$LF
+		"$E2E0#paused#
+		$LF
+		"$E2E4#disabled_debug_inv#Disabled code was [A5 BF 49 80 85 BF]  (press select while paused to toggle)
+		$LF
+		"$E2ED#not_paused#
+		$LF
+		"$E30F#object_pointers#0x00-0x7F
+		$LF
+		"$E40F#object_pointers#0x80-0xC3
+		$LF
+		"$E497#Windmill_star#0x01
+		$LF
+		"$E4DA#Invincible_fire_wheel_rising#0x02
+		$LF
+		"$E4F9#IFW_running#0x06
+		$LF
+		"$E52C#Item_pickup_timeout#0x03
+		$LF
+		"$E546#Dead_enemy#0x04
+		$LF
+		"$E564#Enemy_explosion#0x05
+		$LF
+		"$E56D#enemy_spawn_IDs#
+		$LF
+		"$E59C#Grunt_spawn#0x10, 0x7E
+		$LF
+		"$E5BF#Grunt_action#0x11
+		$LF
+		"$E5D6#Sprinter_0#0x12
+		$LF
+		"$E5EF#Sprinter_1#0x2E
+		$LF
+		"$E5F9#Sprinter_2#0x13
+		$LF
+		"$E616#Sprinter_3#0x2F
+		$LF
+		"$E623#Sine_bat_spawn#0x14
+		$LF
+		"$E65C#Sine_bat_action#0x15
+		$LF
+		"$E672#Bird_spawn#0x16, 0x7C (large bat)
+		$LF
+		"$E688#Bird_action#0x17
+		$LF
+		"$E6BB#Hop_eye_0#0x18
+		$LF
+		"$E6DE#Hop_eye_1#0x1A
+		$LF
+		"$E70B#Hop_eye_n#0x30
+		$LF
+		"$E713#Hop_eye_2#0x1B
+		$LF
+		"$E729#Hop_eye_3#0x1C
+		$LF
+		"$E739#Hop_eye_4#0x1D
+		$LF
+		"$E754#Hop_eye_5#0x1E
+		$LF
+		"$E762#Bazooka_&_cannon_0#0x1F
+		$LF
+		"$E771#Bazooka_&_cannon_2#0x20
+		$LF
+		"$E780#Bazooka_&_cannon_1#0x21
+		$LF
+		"$E78E#Bazooka_&_cannon_3#0x22
+		$LF
+		"$E7A5#Bazooka_shell#0x23
+		$LF
+		"$E7E9#blob0#0x24 --two kinds of blobs: spitters and flippers, both with left/right facing spawn variants
+		$LF
+		"$E7ED#blob1#0x32
+		$LF
+		"$E80F#blob2#0x25
+		$LF
+		"$E832#blob3#0x26
+		$LF
+		"$E838#blob4#0x27
+		$LF
+		"$E83C#blob5#0x33
+		$LF
+		"$E85E#blob6#0x29
+		$LF
+		"$E864#blob7#0x28
+		$LF
+		"$E887#blob8#0x2A
+		$LF
+		"$E8AF#blob9#0x2B
+		$LF
+		"$E8BE#blobA#0x2C
+		$LF
+		"$E8D6#blobB#0x2D
+		$LF
+		"$E8F8#blobC#0x40
+		$LF
+		"$E920#blobD#0x41
+		$LF
+		"$E92F#blobE#0x42
+		$LF
+		"$E947#blobF#0x43
+		$LF
+		"$E96A#Common_projectile#0x3F
+		$LF
+		"$E973#B_heads_disc#0x3E
+		$LF
+		"$E994#Flame_spawn#0x44
+		$LF
+		"$E9B1#Flame1#0x34
+		$LF
+		"$E9C5#Flame2#0x45
+		$LF
+		"$E9FE#Crawler_spawn#0x46
+		$LF
+		"$EA21#Crawler_action#0x47 includes ground spider, red larvae
+		$LF
+		"$EA31#WallSpider, spawn#0x48
+		$LF
+		"$EA3F#WallSpider, repeat#0x4E
+		$LF
+		"$EA4A#WallSpider, waiting#0x49
+		$LF
+		"$EA5C#WallSpider, shooting#0x4A
+		$LF
+		"$EA7E#WallSpider, drop#0x4B
+		$LF
+		"$EA91#WallSpider, falling, seek ground#0x4C
+		$LF
+		"$EA98#_#this bit probably wouldn't be reachable without the "bullet transfer" bug since all (three) wall spiders spawn over pits
+		$LF
+		"$EAB2#WallSpider, on ground, seek wall/ryu#0x4D
+		$LF
+		"$EABE#Bomberhead clone1#0x35
+		$LF
+		"$EAD6#Bomberhead clone2#0x36
+		$LF
+		"$EAE5#Bomberhead clone3#0x37
+		$LF
+		"$EB0E#Bomberhead clone4#0x38
+		$LF
+		"$EB31#Bomberhead clone5#0x39
+		$LF
+		"$EB53#Rock_chucker_0#0x3A
+		$LF
+		"$EB6B#Rock_chucker_2#0x3B
+		$LF
+		"$EB7A#Rock_chucker_1#0x3C
+		$LF
+		"$EB88#Rock_chucker_3#0x3D
+		$LF
+		"$EBA0#Chucked_rock_0#0x4F
+		$LF
+		"$EBE6#Chucked_rock_1#0x50
+		$LF
+		"$EC14#PumpkinHead, init#0x5B
+		$LF
+		"$EC1D#PumpkinHead, repeat#0x5C
+		$LF
+		"$EC3C#PumpkinHead, walk&wait#0x5D
+		$LF
+		"$EC5B#PumpkinHead, spit loop#0x6F
+		$LF
+		"$EC65#PumpkinHead, spitting#0x70
+		$LF
+		"$EC92#PumpkinHead projectile#0x5E
+		$LF
+		"$ECCC#Malth clone, init#0x5F
+		$LF
+		"$ECF4#Malth, wait#0x60
+		$LF
+		"$ED14#Malth, throw#0x61
+		$LF
+		"$ED39#Malth, delay#0x62
+		$LF
+		"$ED44#Malthballs, init#0x63
+		$LF
+		"$ED7C#Malthballs, moving#0x64
+		$LF
+		"$ED9A#Explode_o_ball_0#0x65
+		$LF
+		"$EDC1#Explode_o_ball_1#0x66 --rising
+		$LF
+		"$EDD5#Explode_o_ball_2#0x67 --falling
+		$LF
+		"$EDE4#Explode_o_ball_3#0x68 --exploding
+		$LF
+		"$EE03#Ball_ejecta#0x69
+		$LF
+		"$EE42#Basaquer clone0#0x6A
+		$LF
+		"$EE55#Basaquer clone4#0x31
+		$LF
+		"$EE65#Basaquer clone1#0x6B
+		$LF
+		"$EE8C#Basaquer clone2#0x6C
+		$LF
+		"$EEAF#Basaquer clone3#0x6D --falling
+		$LF
+		"$EEBC#Basaquer projectile#0x6E
+		$LF
+		"$EEE2#pillbugman0#0x71
+		$LF
+		"$EEF0#pillbugman1#0x72
+		$LF
+		"$EF0F#pillbugman2#0x73
+		$LF
+		"$EF46#pillbugman3#0x74
+		$LF
+		"$EF60#trampoline_ninja_0#0x75
+		$LF
+		"$EF8A#trampoNinja_1#0x76
+		$LF
+		"$EF97#trampoNinja_2#0x77
+		$LF
+		"$EFBD#unused_0x35_bytes#0x79
+		$LF
+		"$EFDD#unused#0x7A
+		$LF
+		"$EFF2#alt sineBat spawn#0x7B
+		$LF
+		"$EFF7#alt bird spawn (bigBat)#0x7C
+		$LF
+		"$EFFC#alt sprinter spawn#0x7D
+		$LF
+		"$F001#alt grunt spawn#0x7E
+		$LF
+		"$F006#alt hopEye spawn a#0x7F
+		$LF
+		"$F00B#alt crawler spawn (red larvae)#0x80
+		$LF
+		"$F010#unused#0x81
+		$LF
+		"$F015#alt hopEye spawn b#0x82
+		$LF
+		"$F01A#alt hopEye spawn c#0x83
+		$LF
+		"$F01F#Dando the Cursed, init#0x78
+		$LF
+		"$F034#Dando the Cursed, repeat#0x87
+		$LF
+		"$F053#Dando the Cursed, creep along#0x84
+		$LF
+		"$F082#Dando the Cursed, rush#0x85
+		$LF
+		"$F0A0#Dando the Cursed, delay#0x86
+		$LF
+		"$F0AB#Dando wall shake#
+		$LF
+		"$F0C9#Baron Spider init#0x88
+		$LF
+		"$F0E8#Baron Spider, repeat#0x8E
+		$LF
+		"$F0F2#Baron Spider, up#0x89
+		$LF
+		"$F108#Baron Spider, flee down#0x93
+		$LF
+		"$F12A#Baron Spider, hopping down#0x8A
+		$LF
+		"$F139#Baron Spider, falling1#0x8B
+		$LF
+		"$F14F#Baron Spider, down#0x90
+		$LF
+		"$F165#Baron Spider, flee up#0x94
+		$LF
+		"$F17E#Baron Spider, falling2#0x91
+		$LF
+		"$F190#Baron Spider, spawn pets#
+		$LF
+		"$F1C2#Baron's spiders init#0x8D
+		$LF
+		"$F1FC#Baron's spiders#0x92 --in air, seek ground
+		$LF
+		"$F20F#Baron's spiders#0x8F --on ground, seek wall
+		$LF
+		"$F240#Funky Dynamite#0x95
+		$LF
+		"$F259#Funky Dynamite, ascend#0xC3
+		$LF
+		"$F275#Funky Dynamite, rising#0x96
+		$LF
+		"$F29C#Funky Dynamite, prepare to shoot#0x99
+		$LF
+		"$F2A7#Funky Dynamite, fly and shoot#0x97
+		$LF
+		"$F303#Funky Dynamite, drop#0x98
+		$LF
+		"$F326#Funky Dynamite, crouch&wait#0x9B
+		$LF
+		"$F33E#Funky Dynamite, launcher#
+		$LF
+		"$F35D#Funkyshot#0x9A
+		$LF
+		"$F39C#Naga Sotuva, init#0xA2
+		$LF
+		"$F3CA#Naga Sotuva#0x57
+		$LF
+		"$F3DF#Naga Sotuva, spawn hand#0x58
+		$LF
+		"$F42A#Naga Sotuva, hands in#0x59
+		$LF
+		"$F43D#Naga Sotuva, hands out#0x5A
+		$LF
+		"$F445#unused_0x43_bytes#0xAB --wacky ryu-launching effect
+		$LF
+		"$F476#unused#0xAC
+		$LF
+		"$F488#Ashtar, init#0x9D
+		$LF
+		"$F49E#Ashtar, repeat#0xA3
+		$LF
+		"$F4AD#Ashtar, delay1#0x9E
+		$LF
+		"$F4C1#Ashtar, delay2#0x9F
+		$LF
+		"$F4D7#Ashtar, delay3#0xA0
+		$LF
+		"$F4EA#Ashtar, phase in#0xA1
+		$LF
+		"$F50B#Ashtar, teleport&fire#
+		$LF
+		"$F53C#Ashtar's fireballs#0xA4
+		$LF
+		"$F58D#afb_xpos_offsets#
+		$LF
+		"$F595#afb_ypos_offsets#
+		$LF
+		"$F59D#afb_xspdlo_offsets#
+		$LF
+		"$F5A5#afb_xspdhi_offsets#
+		$LF
+		"$F5AD#afb_yspdlo_offsets#
+		$LF
+		"$F5B5#afb_yspdhi_offsets#
+		$LF
+		"$F5BD#Kelbeross, init#0xA5
+		$LF
+		"$F613#Kelbeross, slumber#0x51
+		$LF
+		"$F630#Kelbeross, awake#0x52
+		$LF
+		"$F670#Kelbeross, delay#0x53
+		$LF
+		"$F67B#Kelbeross, spitting#0x54
+		$LF
+		"$F699#Kelbeross, hop#0x55
+		$LF
+		"$F6B3#Kelberspittle#0x56
+		$LF
+		"$F6F1#Jaquio I, init#0xA7
+		$LF
+		"$F710#Jaquio I, repeat#0xA8
+		$LF
+		"$F71F#Jaquio I, shot delay#0xA9
+		$LF
+		"$F73B#Jaquio I, flame on#0xAA
+		$LF
+		"$F766#Jaquio I, move#
+		$LF
+		"$F78B#Wind_particles_spawn#0xAD
+		$LF
+		"$F799#Wind_particles_reset#0xAE
+		$LF
+		"$F7B5#Wind_particles_blow#0xAF
+		$LF
+		"$F7C8#wind_speeds#
+		$LF
+		"$F7D9#wind_positions#
+		$LF
+		"$F7EA#Jaquio II, init#0xB0
+		$LF
+		"$F81D#Jaquio II, dostuff#0xB2
+		$LF
+		"$F84B#Jaquio II, ceiling drips init#0xB5
+		$LF
+		"$F87C#drip x positions#
+		$LF
+		"$F884#drip y positions#
+		$LF
+		"$F88C#Ceiling drips, wait and drip#0xB6
+		$LF
+		"$F8AE#Jaquio II, spit#0xB4
+		$LF
+		"$F8EA#Jaquio III, init#0xB1
+		$LF
+		"$F952#j3_sprtid#
+		$LF
+		"$F954#j3_xpos#
+		$LF
+		"$F956#j3_ypos#
+		$LF
+		"$F958#j3_objid#
+		$LF
+		"$F95A#Jaquio III, head#0x8C
+		$LF
+		"$F976#Jaquio III, head, spit#0xBA
+		$LF
+		"$F9B2#Jaquio III, head dead#0xB3 --clear head & hands, spawn core
+		$LF
+		"$FA11#Jaquio III, core delay#0xBF
+		$LF
+		"$FA28#Jaquio III, spew delay#0xC0
+		$LF
+		"$FA3E#Jaquio III, spew#0xC1
+		$LF
+		"$FA6B#Jaquio III, spew spawn#0xC2
+		$LF
+		"$FAA7#Jaquio III, upper hand, init#0xB7
+		$LF
+		"$FABC#Jaquio III, upper hand, advance#0xBB
+		$LF
+		"$FAD6#Jaquio III, upper hand, retreat#0xBE activate lower hand when done
+		$LF
+		"$FAE9#Jaquio III, lower hand, init#0xB8
+		$LF
+		"$FAFE#Jaquio III, lower hand, advance#0xBC
+		$LF
+		"$FB18#Jaquio III, lower hand, retreat#0xBD activate upper hand when done
+		$LF
+		"$FB2B#Jaquio III, spitballs#0xB9
+		$LF
+		"$FB61#rts#unused 0x9C, 0xA6 would jump here
+		$LF
+		"$FB62#reset#
+		$LF
+		"$FBBB#unused_0x45_bytes#
+		$LF
+		"$FC00#PCMdata#
+		$LF
+		"$FFD1#unused_0x29_bytes#
+		$LF
+		$LF
+	]code
+]pre

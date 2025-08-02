@@ -1,8 +1,4 @@
-12
-[div class=p 
-	(youtube|v=axnOPbBt_qs)
-	$LF
-]div
+13
 [ul 
 	[li 
 		" Emulator: lsnes rr2-beta23
@@ -31,19 +27,17 @@
 ]ul
 [div class=p 
 	"During the 
-	[a class=intlink href=/2725M 
-		"previous TAS
-	]a
+	(__wikiLink|displaytext=previous TAS|href=/2725M)
 	", we managed to get the Moogle Kutan in our crew to save the world. We are pleased to announce that this time, we also managed to get Kurin with us. As a side effect, we saved more than two hours and a half over the previous TAS, achieving a final time of 32 minutes and 54 seconds using a new game breaking glitch involving 52 gameover in a row on the world map.
 	$LF
 ]div
-[h3 id=Gameoverglitch 
+[h3 id=GameoverGlitch 
 	" Gameover glitch
 	$LF
 ]h3
 [div class=p 
 	"On May 2015, a 
-	[a class=extlink href=https://www.youtube.com/watch?v=gAlIrkiqA_k rel=nofollow 
+	[a href=https://www.youtube.com/watch?v=gAlIrkiqA_k rel=noopener external nofollow 
 		"new ff6 glitch
 	]a
 	" was discovered, where dying 52 times in a row on the world map leads to odd consequences. Often the game will freeze, sometimes it will trigger glitched cutscenes.
@@ -63,105 +57,105 @@
 ]div
 [div class=p 
 	"The event pointer stack is stored starting 
-	[tt 
+	[code 
 		"$0594
-	]tt
+	]code
 	" and the size of the stack is stored in 
-	[tt 
+	[code 
 		"$E8
-	]tt
+	]code
 	" and 
-	[tt 
+	[code 
 		"$12E8
-	]tt
+	]code
 	" (backup). The memory after this stack is largely unused, the only addresses that are often written by the game are located at 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	". The game repeatedly stores into 
-	[tt 
+	[code 
 		"$0630
-	]tt
+	]code
 	" the horizontal scanline location, into 
-	[tt 
+	[code 
 		"$0631
-	]tt
+	]code
 	" the vertical scanline location and into 
-	[tt 
+	[code 
 		"$0632
-	]tt
+	]code
 	" the maximum of all 
-	[tt 
+	[code 
 		"$0631
-	]tt
+	]code
 	" values. We are not sure if these values are actually used by the game.
 	$LF
 ]div
 [div class=p 
 	"After the 51 gameover, 
-	[tt 
+	[code 
 		"$E8
-	]tt
+	]code
 	" contains 
-	[tt 
+	[code 
 		"0x99
-	]tt
+	]code
 	". At the 52nd gameover, the game writes the event pointer to 
-	[tt 
+	[code 
 		"$062D-$062F
-	]tt
+	]code
 	" (first call to event B2) then to 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	" (second call to event B2). Before the game executes event FE, the values in 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	" have changed and contains the some scanline location coordinates. The game loads those values as the current event pointer, and executes events starting this location. This is what is causing the glitch.
 	$LF
 ]div
 [div class=p 
 	"By conducting a lot of tests, we observed that address 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	" is dependent on the frame where the gameover is confirmed, the inputs pressed 3 frames before confirmation and the number of characters in the party.
 	$LF
 ]div
-[h4 id=Triggeringtheending 
+[h4 id=TriggeringTheEnding 
 	" Triggering the ending
 	$LF
 ]h4
 [div class=p 
 	"To trigger the game ending, one way is to set the event pointer to the address of the ending, which is located at 
-	[tt 
+	[code 
 		"$CA0F70
-	]tt
+	]code
 	" (just after the boss fight). However, the game will freeze if we jump there because it will try to move characters which are not present. Pointing after the post-Kefka dialogues does work, which was done in the present TAS (address 
-	[tt 
+	[code 
 		"$CA134E
-	]tt
+	]code
 	").
 	$LF
 ]div
 [div class=p 
 	"As expected, no value of 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	" comes near the values required to launch the ending sequence. Luckily, most of the values in 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	" actually point to RAM addresses, between 
-	[tt 
+	[code 
 		"$1700
-	]tt
+	]code
 	" and 
-	[tt 
+	[code 
 		"$2000
-	]tt
+	]code
 	". Here is a summary of what is present in these addresses:
 	$LF
 ]div
@@ -190,47 +184,47 @@
 ]pre
 [div class=p 
 	"Our goal is to write somewhere in RAM an event that will jump to the ending. A few events can do that: B2, B3, B6, B7, BD, BE, C0-CF, following by the destination address (e.g. 
-	[tt 
+	[code 
 		"B2 4E 13 00
-	]tt
+	]code
 	" jumps to 
-	[tt 
+	[code 
 		"$CA0000 + $00134E = $CA134E
-	]tt
+	]code
 	"). The values inside 
-	[tt 
+	[code 
 		"$0630-$0632
-	]tt
+	]code
 	" heavily depend on the number of characters in the party. Here is roughly which address we have access:
 	$LF
 ]div
 [ul 
 	[li 
 		" 1 character: 
-		[tt 
+		[code 
 			"$1700-$1900
-		]tt
+		]code
 		$LF
 	]li
 	[li 
 		" 2 characters: 
-		[tt 
+		[code 
 			"$1900-$1B00
-		]tt
+		]code
 		$LF
 	]li
 	[li 
 		" 3 characters: 
-		[tt 
+		[code 
 			"$1B00-$1D00
-		]tt
+		]code
 		$LF
 	]li
 	[li 
 		" 4 characters: 
-		[tt 
+		[code 
 			"$1D00-$1FFF
-		]tt
+		]code
 		$LF
 	]li
 ]ul
@@ -240,13 +234,13 @@
 ]div
 [div class=p 
 	"Then, for a very small time, we have access to a 1 character party (solo Terra) during Figaro castle. With this party, we can jump to part of the character data, gold, game time, steps and part of the inventory. Character data would have been very encouraging, but the only characters we can control are Terra and Locke, which are at the beginning of the section, outside our range. Like before, we cannot write the event code using the inventory, but we can use either one byte of the Gold or one byte of the step counter easily. The second problem was to write the destination address in RAM next to the event code, which is of the form 
-	[tt 
+	[code 
 		"XX 13 00
-	]tt
+	]code
 	" with XX being several values possible between 0x20 and 0x70. We couldn't manage to write these values, however we could make an intermediate jump to a much more friendly area in RAM where we can control values: the config menu. It is located starting 
-	[tt 
+	[code 
 		"$1D4D
-	]tt
+	]code
 	" and luckily, we have access to the Mithril Pike (id 1D), the Buckler (id 5A) and the Mithril Shield (id 5C).
 	$LF
 ]div
@@ -270,17 +264,17 @@
 ]div
 [div class=p 
 	"Event C1 has 3 arguments: t1 (2 bytes), t2 (2 bytes) and addr (3 bytes). The meaning of this event is: if the story bit t1 or the story bit t2 is true, then jump to 
-	[tt 
+	[code 
 		"$CA0000+addr
-	]tt
+	]code
 	". We manipulated t2 with the MithrilKnife and the Dirk so that the corresponding story bit is true. So the game jumps at 
-	[tt 
+	[code 
 		"$CA0000 + $5C1D5A = $261D5A
-	]tt
+	]code
 	", which is the RAM address 
-	[tt 
+	[code 
 		"$1D5A
-	]tt
+	]code
 	", in the middle of the colours of the windows.
 	$LF
 ]div
@@ -291,61 +285,61 @@
 [ul 
 	[li 
 		" 
-		[tt 
+		[code 
 			"5B
-		]tt
+		]code
 		" is a no argument event that does (almost) nothing. We couldn't write 
-		[tt 
+		[code 
 			"B2
-		]tt
+		]code
 		" on the first byte because the way the colours are stored implied that every other value must be below 7E.
 		$LF
 	]li
 	[li 
 		" 
-		[tt 
+		[code 
 			"B2 00 53 00
-		]tt
+		]code
 		" jumps to address 
-		[tt 
+		[code 
 			"$CA0000 + $005300 = $CA5300
-		]tt
+		]code
 		". This is the very end of the world destruction sequence that loads the World of Ruin maps. It was necessary to avoid a softlock during the game ending.
 		$LF
 	]li
 	[li 
 		" 
-		[tt 
+		[code 
 			"A9
-		]tt
+		]code
 		" triggers the game opening, because why not.
 		$LF
 	]li
 	[li 
 		" 
-		[tt 
+		[code 
 			"5C
-		]tt
+		]code
 		" is another dummy event like 
-		[tt 
+		[code 
 			"5B
-		]tt
+		]code
 		$LF
 	]li
 	[li 
 		" 
-		[tt 
+		[code 
 			"B2 4E 13 00
-		]tt
+		]code
 		" jumps to address 
-		[tt 
+		[code 
 			"$CA0000 + $00134E = $CA134E
-		]tt
+		]code
 		". This triggers the ending sequence.
 		$LF
 	]li
 ]ul
-[h3 id=Runcomments 
+[h3 id=RunComments 
 	" Run comments
 	$LF
 ]h3
@@ -367,13 +361,13 @@
 ]h4
 [div class=p 
 	"The inventory is sorted as described above during the two random fights to Figaro castle. After being solo Terra, two Tonics and 4 Echo Screen are bought to get Gold to 
-	[tt 
+	[code 
 		"xxxxA0
-	]tt
+	]code
 	". Then the remaining number of steps are performed to get the number 
-	[tt 
+	[code 
 		"xxxxC1
-	]tt
+	]code
 	" at the second fight in the world map.
 	$LF
 ]div
@@ -445,9 +439,7 @@
 ]div
 [div class=p 
 	"edit: Accepting for publication to the Vault, and to obsolete the current '
-	[a class=intlink href=/2725M 
-		"sketch glitch
-	]a
+	(__wikiLink|displaytext=sketch glitch|href=/2725M)
 	"' run.  Reason being, an issue was brought up in the thread concerning how this movie, initially (and similar to the 'sketch glitch' run) soft-locked at the end and didn't technically complete the game.  Keylie addressed this and made some adjustments to this run which allowed the complete ending to take place.  Therefore, for the sake of consistency, we've got to abide by this standard going forward.  And since the 'sketch glitch' run soft-locks, it now must be obsoleted by a run that doesn't.  
 	$LF
 ]div

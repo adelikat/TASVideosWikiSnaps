@@ -1,0 +1,649 @@
+6
+[div class=p 
+	"Simon was originally a tabletop or handheld memory game that many of us probably had as kids. Did this really need a GBA port??
+	$LF
+]div
+[h4 id=Objectives 
+	"Objectives
+	$LF
+]h4
+[ul 
+	[li 
+		" Aims for maximum score
+		$LF
+	]li
+	[li 
+		" Uses hardest difficulty (level 4)
+		$LF
+	]li
+	[li 
+		" Genre: Board game
+		$LF
+	]li
+]ul
+[div class=p 
+	"You earn one point per sequence you re-enter correctly. You can score a maximum of 31 points, after which the game declares "You Win".
+	$LF
+]div
+[h4 id=HowCanYouEvenGainOrLoseTimeInThisGame 
+	"How can you even gain or lose time in this game?
+	$LF
+]h4
+[div class=p 
+	"Besides pressing all the correct inputs as early as possible, what else is there to even optimize? Well, there are actually certain input sequences that lose small amounts of time. Let's say on your second turn, you have to re-enter the sequence green, red. That would require sending a Left input then an Up input on the very next frame. Now let's say the sequnce is green, green instead. Now you would have to input Left twice, but cannot do so one frame after the other like before, as the game will assume you've simply held the Left button once for two frames. Therefore, you must separate any identical subsequent inputs with a 1-frame gap. Not only would this be 1 frame lost for this turn, but all subsequent turns as well, for a total loss of 30 frames. This means, the earlier these duplicate subsequent inputs happen in the input sequence, the more costly they will be. In this TAS, we also aim to minimize frames lost in this manner by choosing a favorable input sequence.
+	$LF
+]div
+[h4 id=Rng 
+	"RNG
+	$LF
+]h4
+[div class=p 
+	"The input sequence for the game is set when pressing Start on the 
+	[em 
+		"Simon
+	]em
+	" title screen; you cannot manipulate the sequence mid-game by delaying input. Therefore, the only practical way to manipulate the input sequence is by waiting more frames on the main title screen. The question is, how could we quickly filter out what title screen start frame yields the fastest game? After all, that would be a lot of games to check. 
+	$LF
+]div
+[div class=p 
+	"Luckily, RNG is extremely predictable in this game. Let's say from the 1st start frame you would be given a sequence of 31 inputs. The 2nd start frame would have instead started with the last 30 inputs of the 1st start frame, plus one new one at the end. The 3rd start frame would then start with the last 30 inputs of the 2nd start frame plus one new one at the end, and so forth. This extremely simple pattern continues indefinitely. So with each frame you wait on the title screen, you're essentially "shifting" a predetermined sequence of inputs by one.
+	$LF
+]div
+[h4 id=TasingProcess 
+	"TASing Process
+	$LF
+]h4
+[div class=p 
+	"The first frame we can start from on the title screen is frame 602, so this will be our baseline test. Turns out, this one wastes a total of 104 frames due to duplicate subsequent inputs. This means we only need to determine the first 104 inputs in the list to see if any other start frames could be faster. Once you know the input list, you can calculate the finishing time of any start frame with a fairly simple Excel sheet.
+	$LF
+]div
+[div class=p 
+	"Remarkably, the fastest game after I processed each start frame through the input list was frame 602, the very first one. It accumulates 104 wasted frames from identical subsequent inputs, plus zero for no wait at the title screen. Start frame 638 on the other hand wasted the least number of frames from duplicate subsequent inputs at 69. However, it also had to wait 36 extra frames on the title screen for a total of 105 (one more than start frame 602!)
+	$LF
+]div
+[div class=p 
+	"Below is a table of the input list, the start frames they correspond to, and the end frames 
+	[em 
+		"only
+	]em
+	" for the games which were candidates for being fastest. 
+	$LF
+]div
+[ul 
+	[li 
+		" Input	Start	End	
+		$LF
+	]li
+	[li 
+		" L	602	21639
+		$LF
+	]li
+	[li 
+		" R	603
+		$LF
+	]li
+	[li 
+		" U	604
+		$LF
+	]li
+	[li 
+		" L	605
+		$LF
+	]li
+	[li 
+		" R	606
+		$LF
+	]li
+	[li 
+		" D	607
+		$LF
+	]li
+	[li 
+		" U	608
+		$LF
+	]li
+	[li 
+		" 	608
+		$LF
+	]li
+	[li 
+		" U	609
+		$LF
+	]li
+	[li 
+		" L	610
+		$LF
+	]li
+	[li 
+		" R	611
+		$LF
+	]li
+	[li 
+		" 	611
+		$LF
+	]li
+	[li 
+		" R	612
+		$LF
+	]li
+	[li 
+		" 	612
+		$LF
+	]li
+	[li 
+		" R	613
+		$LF
+	]li
+	[li 
+		" U	614
+		$LF
+	]li
+	[li 
+		" 	614
+		$LF
+	]li
+	[li 
+		" U	615	21643
+		$LF
+	]li
+	[li 
+		" L	616
+		$LF
+	]li
+	[li 
+		" D	617
+		$LF
+	]li
+	[li 
+		" U	618
+		$LF
+	]li
+	[li 
+		" D	619
+		$LF
+	]li
+	[li 
+		" R	620
+		$LF
+	]li
+	[li 
+		" L	621
+		$LF
+	]li
+	[li 
+		" D	622
+		$LF
+	]li
+	[li 
+		" L	623
+		$LF
+	]li
+	[li 
+		" 	623
+		$LF
+	]li
+	[li 
+		" L	624
+		$LF
+	]li
+	[li 
+		" 	624
+		$LF
+	]li
+	[li 
+		" L	625
+		$LF
+	]li
+	[li 
+		" D	626
+		$LF
+	]li
+	[li 
+		" U	627
+		$LF
+	]li
+	[li 
+		" L	628
+		$LF
+	]li
+	[li 
+		" U	629
+		$LF
+	]li
+	[li 
+		" 	629
+		$LF
+	]li
+	[li 
+		" U	630
+		$LF
+	]li
+	[li 
+		" D	631
+		$LF
+	]li
+	[li 
+		" 	631
+		$LF
+	]li
+	[li 
+		" D	632
+		$LF
+	]li
+	[li 
+		" L	633
+		$LF
+	]li
+	[li 
+		" D	634
+		$LF
+	]li
+	[li 
+		" 	634
+		$LF
+	]li
+	[li 
+		" D	635	21644
+		$LF
+	]li
+	[li 
+		" U	636
+		$LF
+	]li
+	[li 
+		" D	637
+		$LF
+	]li
+	[li 
+		" 	637
+		$LF
+	]li
+	[li 
+		" D	638	21640
+		$LF
+	]li
+	[li 
+		" U	639
+		$LF
+	]li
+	[li 
+		" L	640
+		$LF
+	]li
+	[li 
+		" D	641
+		$LF
+	]li
+	[li 
+		" R	642
+		$LF
+	]li
+	[li 
+		" 	642
+		$LF
+	]li
+	[li 
+		" R	643	21651
+		$LF
+	]li
+	[li 
+		" U	644
+		$LF
+	]li
+	[li 
+		" D	645
+		$LF
+	]li
+	[li 
+		" U	646
+		$LF
+	]li
+	[li 
+		" D	647
+		$LF
+	]li
+	[li 
+		" R	648
+		$LF
+	]li
+	[li 
+		" L	649
+		$LF
+	]li
+	[li 
+		" U	650
+		$LF
+	]li
+	[li 
+		" D	651
+		$LF
+	]li
+	[li 
+		" R	652
+		$LF
+	]li
+	[li 
+		" U	653
+		$LF
+	]li
+	[li 
+		" L	654
+		$LF
+	]li
+	[li 
+		" R	655
+		$LF
+	]li
+	[li 
+		" L	656
+		$LF
+	]li
+	[li 
+		" 	656
+		$LF
+	]li
+	[li 
+		" L	657
+		$LF
+	]li
+	[li 
+		" U	658
+		$LF
+	]li
+	[li 
+		" 	658
+		$LF
+	]li
+	[li 
+		" U	659
+		$LF
+	]li
+	[li 
+		" D	660
+		$LF
+	]li
+	[li 
+		" U	661
+		$LF
+	]li
+	[li 
+		" 	661
+		$LF
+	]li
+	[li 
+		" U	662
+		$LF
+	]li
+	[li 
+		" 	662
+		$LF
+	]li
+	[li 
+		" U	663
+		$LF
+	]li
+	[li 
+		" 	663
+		$LF
+	]li
+	[li 
+		" U	664
+		$LF
+	]li
+	[li 
+		" R	665
+		$LF
+	]li
+	[li 
+		" 	665
+		$LF
+	]li
+	[li 
+		" R	666
+		$LF
+	]li
+	[li 
+		" L	667
+		$LF
+	]li
+	[li 
+		" U	668
+		$LF
+	]li
+	[li 
+		" R	669
+		$LF
+	]li
+	[li 
+		" L	670
+		$LF
+	]li
+	[li 
+		" U	671
+		$LF
+	]li
+	[li 
+		" 	671
+		$LF
+	]li
+	[li 
+		" U	672
+		$LF
+	]li
+	[li 
+		" L	673
+		$LF
+	]li
+	[li 
+		" D	674
+		$LF
+	]li
+	[li 
+		" U	675
+		$LF
+	]li
+	[li 
+		" D	676
+		$LF
+	]li
+	[li 
+		" U	677
+		$LF
+	]li
+	[li 
+		" R	678
+		$LF
+	]li
+	[li 
+		" U	679
+		$LF
+	]li
+	[li 
+		" R	680
+		$LF
+	]li
+	[li 
+		" 	680
+		$LF
+	]li
+	[li 
+		" R	681
+		$LF
+	]li
+	[li 
+		" 	681
+		$LF
+	]li
+	[li 
+		" R	682
+		$LF
+	]li
+	[li 
+		" U	683
+		$LF
+	]li
+	[li 
+		" L	684
+		$LF
+	]li
+	[li 
+		" 	684
+		$LF
+	]li
+	[li 
+		" L	685
+		$LF
+	]li
+	[li 
+		" R	686
+		$LF
+	]li
+	[li 
+		" D	687
+		$LF
+	]li
+	[li 
+		" 	687
+		$LF
+	]li
+	[li 
+		" D	688
+		$LF
+	]li
+	[li 
+		" R	689
+		$LF
+	]li
+	[li 
+		" L	690
+		$LF
+	]li
+	[li 
+		" R	691
+		$LF
+	]li
+	[li 
+		" 	691
+		$LF
+	]li
+	[li 
+		" R	692
+		$LF
+	]li
+	[li 
+		" 	692
+		$LF
+	]li
+	[li 
+		" R	693
+		$LF
+	]li
+	[li 
+		" 	693
+		$LF
+	]li
+	[li 
+		" R	694
+		$LF
+	]li
+	[li 
+		" D	695
+		$LF
+	]li
+	[li 
+		" 	695
+		$LF
+	]li
+	[li 
+		" D	696
+		$LF
+	]li
+	[li 
+		" 	696
+		$LF
+	]li
+	[li 
+		" D	697
+		$LF
+	]li
+	[li 
+		" L	698
+		$LF
+	]li
+	[li 
+		" 	698
+		$LF
+	]li
+	[li 
+		" L	699
+		$LF
+	]li
+	[li 
+		" R	700
+		$LF
+	]li
+	[li 
+		" U	701
+		$LF
+	]li
+	[li 
+		" L	702
+		$LF
+	]li
+	[li 
+		" R	703
+		$LF
+	]li
+	[li 
+		" L	704
+		$LF
+	]li
+	[li 
+		" R	705
+		$LF
+	]li
+	[li 
+		" 	705
+		$LF
+	]li
+	[li 
+		" R	706
+		$LF
+	]li
+	[li 
+		" L	707
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Simon says claim this for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Simon says post some judging notes.
+	$LF
+]div
+[div class=p 
+	"This one was interesting to read about. The RNG being fixed upon going past the title screen does make for a simplified, albeit tedious, process to check for the fastest possible sequence. It makes for an interesting RNG manipulation challenge: how much time would one need to wait for the faster sequences to make up for waiting for said sequence? The answer for this version of Simon gives an interesting final result: just use the very first possible sequence despite all of the repeated inputs. Nice work on figuring that out!
+	$LF
+]div
+[div class=p 
+	"Simon says "Accepting to Standard".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

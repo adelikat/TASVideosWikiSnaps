@@ -1,0 +1,311 @@
+8
+[div class=p 
+	"Bad Apple, for Shiren GB1.
+	$LF
+]div
+[div class=p 
+	"The initial payload is rather simple, it simply switches the SRAM bank to 3, then proceeds to jump to $A006. This uses the following payload:
+	$LF
+]div
+[pre 
+	"; save file name
+	$LF
+	"ld hl,$5003
+	$LF
+	"ld [hl],l
+	$LF
+	"; rng bytes
+	$LF
+	"add hl,hl
+	$LF
+	"jp hl ; jump to $A006
+	$LF
+]pre
+[div class=p 
+	"The next payload is in SRAM, in bank 3. This game keeps a "replay" of the last room done. This is stored within bank 3 of SRAM. This gives some leeway towards writing a larger payload, but ultimately it's just barely good enough to write a better payload. Here's a tracelog of this "large" payload:
+	$LF
+]div
+[pre 
+	"A006:  01 8B 00  ld bc, $008B        A:01 F:00 B:28 C:01 D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792318
+	$LF
+	"A009:  44        ld b, h             A:01 F:00 B:00 C:8b D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792324
+	$LF
+	"A00A:  0B        dec bc              A:01 F:00 B:a0 C:8b D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792326
+	$LF
+	"A00B:  00        nop                 A:01 F:00 B:a0 C:8a D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792330
+	$LF
+	"A00C:  84        add a, h            A:01 F:00 B:a0 C:8a D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792332
+	$LF
+	"A00D:  84        add a, h            A:a1 F:00 B:a0 C:8a D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792334
+	$LF
+	"A00E:  07        rlca                A:41 F:10 B:a0 C:8a D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792336
+	$LF
+	"A00F:  07        rlca                A:82 F:00 B:a0 C:8a D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792338
+	$LF
+	"A010:  2B        dec hl              A:05 F:10 B:a0 C:8a D:cb E:08 H:a0 L:06 LY:2e SP:dfdd  Cy:56792340
+	$LF
+	"A011:  20 03     jr nz, $A016        A:05 F:10 B:a0 C:8a D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792344
+	$LF
+	"A016:  02        ld [bc], a          A:05 F:10 B:a0 C:8a D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792350
+	$LF
+	"A017:  00        nop                 A:05 F:10 B:a0 C:8a D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792354
+	$LF
+	"A018:  0B        dec bc              A:05 F:10 B:a0 C:8a D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792356
+	$LF
+	"A019:  07        rlca                A:05 F:10 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792360
+	$LF
+	"A01A:  07        rlca                A:0a F:00 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792362
+	$LF
+	"A01B:  00        nop                 A:14 F:00 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792364
+	$LF
+	"A01C:  84        add a, h            A:14 F:00 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792366
+	$LF
+	"A01D:  84        add a, h            A:b4 F:00 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792368
+	$LF
+	"A01E:  07        rlca                A:54 F:10 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792370
+	$LF
+	"A01F:  07        rlca                A:a8 F:00 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792372
+	$LF
+	"A020:  07        rlca                A:51 F:10 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792374
+	$LF
+	"A021:  84        add a, h            A:a2 F:00 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792376
+	$LF
+	"A022:  2B        dec hl              A:42 F:10 B:a0 C:89 D:cb E:08 H:a0 L:05 LY:2e SP:dfdd  Cy:56792378
+	$LF
+	"A023:  20 03     jr nz, $A028        A:42 F:10 B:a0 C:89 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792382
+	$LF
+	"A028:  02        ld [bc], a          A:42 F:10 B:a0 C:89 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792388
+	$LF
+	"A029:  00        nop                 A:42 F:10 B:a0 C:89 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792392
+	$LF
+	"A02A:  0B        dec bc              A:42 F:10 B:a0 C:89 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792394
+	$LF
+	"A02B:  00        nop                 A:42 F:10 B:a0 C:88 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792398
+	$LF
+	"A02C:  84        add a, h            A:42 F:10 B:a0 C:88 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792400
+	$LF
+	"A02D:  84        add a, h            A:e2 F:00 B:a0 C:88 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792402
+	$LF
+	"A02E:  84        add a, h            A:82 F:10 B:a0 C:88 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792404
+	$LF
+	"A02F:  84        add a, h            A:22 F:10 B:a0 C:88 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792406
+	$LF
+	"A030:  2B        dec hl              A:c2 F:00 B:a0 C:88 D:cb E:08 H:a0 L:04 LY:2e SP:dfdd  Cy:56792408
+	$LF
+	"A031:  20 03     jr nz, $A036        A:c2 F:00 B:a0 C:88 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792412
+	$LF
+	"A036:  02        ld [bc], a          A:c2 F:00 B:a0 C:88 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792418
+	$LF
+	"A037:  00        nop                 A:c2 F:00 B:a0 C:88 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792422
+	$LF
+	"A038:  0B        dec bc              A:c2 F:00 B:a0 C:88 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792424
+	$LF
+	"A039:  07        rlca                A:c2 F:00 B:a0 C:87 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792428
+	$LF
+	"A03A:  84        add a, h            A:85 F:10 B:a0 C:87 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792430
+	$LF
+	"A03B:  84        add a, h            A:25 F:10 B:a0 C:87 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792432
+	$LF
+	"A03C:  2B        dec hl              A:c5 F:00 B:a0 C:87 D:cb E:08 H:a0 L:03 LY:2e SP:dfdd  Cy:56792434
+	$LF
+	"A03D:  20 03     jr nz, $A042        A:c5 F:00 B:a0 C:87 D:cb E:08 H:a0 L:02 LY:2e SP:dfdd  Cy:56792438
+	$LF
+	"A042:  02        ld [bc], a          A:c5 F:00 B:a0 C:87 D:cb E:08 H:a0 L:02 LY:2e SP:dfdd  Cy:56792444
+	$LF
+	"A043:  00        nop                 A:c5 F:00 B:a0 C:87 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792448
+	$LF
+	"A044:  0B        dec bc              A:c5 F:00 B:a0 C:87 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792450
+	$LF
+	"A045:  00        nop                 A:c5 F:00 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792454
+	$LF
+	"A046:  84        add a, h            A:c5 F:00 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792456
+	$LF
+	"A047:  07        rlca                A:65 F:10 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792458
+	$LF
+	"A048:  84        add a, h            A:ca F:00 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792460
+	$LF
+	"A049:  07        rlca                A:6a F:10 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792462
+	$LF
+	"A04A:  07        rlca                A:d4 F:00 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792464
+	$LF
+	"A04B:  84        add a, h            A:a9 F:10 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792466
+	$LF
+	"A04C:  07        rlca                A:49 F:10 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792468
+	$LF
+	"A04D:  84        add a, h            A:92 F:00 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792470
+	$LF
+	"A04E:  2B        dec hl              A:32 F:10 B:a0 C:86 D:cb E:08 H:a0 L:02 LY:2f SP:dfdd  Cy:56792472
+	$LF
+	"A04F:  20 03     jr nz, $A054        A:32 F:10 B:a0 C:86 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792476
+	$LF
+	"A054:  02        ld [bc], a          A:32 F:10 B:a0 C:86 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792482
+	$LF
+	"A055:  00        nop                 A:32 F:10 B:a0 C:86 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792486
+	$LF
+	"A056:  0B        dec bc              A:32 F:10 B:a0 C:86 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792488
+	$LF
+	"A057:  00        nop                 A:32 F:10 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792492
+	$LF
+	"A058:  84        add a, h            A:32 F:10 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792494
+	$LF
+	"A059:  84        add a, h            A:d2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792496
+	$LF
+	"A05A:  84        add a, h            A:72 F:10 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792498
+	$LF
+	"A05B:  84        add a, h            A:12 F:10 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792500
+	$LF
+	"A05C:  84        add a, h            A:b2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792502
+	$LF
+	"A05D:  84        add a, h            A:52 F:10 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792504
+	$LF
+	"A05E:  2B        dec hl              A:f2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:01 LY:2f SP:dfdd  Cy:56792506
+	$LF
+	"A05F:  20 03     jr nz, $A064        A:f2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792510
+	$LF
+	"A064:  02        ld [bc], a          A:f2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792516
+	$LF
+	"A065:  00        nop                 A:f2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792520
+	$LF
+	"A066:  0B        dec bc              A:f2 F:00 B:a0 C:85 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792522
+	$LF
+	"A067:  07        rlca                A:f2 F:00 B:a0 C:84 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792526
+	$LF
+	"A068:  07        rlca                A:e5 F:10 B:a0 C:84 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792528
+	$LF
+	"A069:  24        inc h               A:cb F:10 B:a0 C:84 D:cb E:08 H:a0 L:00 LY:2f SP:dfdd  Cy:56792530
+	$LF
+	"A06A:  84        add a, h            A:cb F:10 B:a0 C:84 D:cb E:08 H:a1 L:00 LY:2f SP:dfdd  Cy:56792532
+	$LF
+	"A06B:  07        rlca                A:6c F:10 B:a0 C:84 D:cb E:08 H:a1 L:00 LY:2f SP:dfdd  Cy:56792534
+	$LF
+	"A06C:  07        rlca                A:d8 F:00 B:a0 C:84 D:cb E:08 H:a1 L:00 LY:2f SP:dfdd  Cy:56792536
+	$LF
+	"A06D:  84        add a, h            A:b1 F:10 B:a0 C:84 D:cb E:08 H:a1 L:00 LY:2f SP:dfdd  Cy:56792538
+	$LF
+	"A06E:  84        add a, h            A:52 F:10 B:a0 C:84 D:cb E:08 H:a1 L:00 LY:2f SP:dfdd  Cy:56792540
+	$LF
+	"A06F:  2B        dec hl              A:f3 F:00 B:a0 C:84 D:cb E:08 H:a1 L:00 LY:2f SP:dfdd  Cy:56792542
+	$LF
+	"A070:  20 03     jr nz, $A075        A:f3 F:00 B:a0 C:84 D:cb E:08 H:a0 L:ff LY:2f SP:dfdd  Cy:56792546
+	$LF
+	"A075:  02        ld [bc], a          A:f3 F:00 B:a0 C:84 D:cb E:08 H:a0 L:ff LY:2f SP:dfdd  Cy:56792552
+	$LF
+	"A076:  00        nop                 A:f3 F:00 B:a0 C:84 D:cb E:08 H:a0 L:ff LY:2f SP:dfdd  Cy:56792556
+	$LF
+	"A077:  2B        dec hl              A:f3 F:00 B:a0 C:84 D:cb E:08 H:a0 L:ff LY:2f SP:dfdd  Cy:56792558
+	$LF
+	"A078:  20 0B     jr nz, $A085        A:f3 F:00 B:a0 C:84 D:cb E:08 H:a0 L:fe LY:2f SP:dfdd  Cy:56792562
+	$LF
+]pre
+[div class=p 
+	"All this is actually rather simple: write a small payload at $A084 which writes in the next payload:
+	$LF
+]div
+[pre 
+	"di ; timer interrupt changes SRAM banks, so a di needs to happen before such
+	$LF
+	"ldh a,[c] ; c = $84, $FF84 holds joypad routine input byte
+	$LF
+	"ld [hl-],a ; writes backwards starting from $A0FE, only $A08B-$A09E have the actual next payload here
+	$LF
+	"push bc ; bc = $A084, the start of this routine
+	$LF
+	"jp nz,$0542 ; joypad routine, returns back to the pushed $A084, jump doesn't occur if no buttons are pressed
+	$LF
+]pre
+[div class=p 
+	"The next payload is another small payload which writes in the final payload as fast as it can. That next payload along with the final payload main payload is (mostly) the as ones in Red, with minor adjustments to deal with game specific details: 
+	[a href=https://tasvideos.org/9604S rel=noopener external nofollow 
+		"https://tasvideos.org/9604S
+	]a
+	$LF
+]div
+[div class=p 
+	"Actual movie is too big, what's submitted is a truncated movie, full movie can be found here: 
+	[a href=https://mega.nz/file/ttlQ3Q5I#ZcF4etI-2MdXm_R1jSxlaAyAem6nXnan_Ir1yWGpjHE rel=noopener external nofollow 
+		"https://mega.nz/file/ttlQ3Q5I#ZcF4etI-2MdXm_R1jSxlaAyAem6nXnan_Ir1yWGpjHE
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Replacing the submission with the full file.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": I discussed this with staff and we agreed to split movies with non-speed-oriented ACE into playarounds and non-playarounds. For speed-oriented ones it's quite clear, we just assign branch label according to whatever ACE is used for - in most cases for a "game end glitch". There's no ambiguity in that. But in the Alternative class we now have several goals that use ACE for something else:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		(__wikiLink|href=/6012M|implicitdisplaytext=6012M)
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|href=/2513M|implicitdisplaytext=2513M)
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|href=/6035M|implicitdisplaytext=6035M)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Playaround and glitchfest are kinda clear in what they aim for: maximizing entertainment through creative antics, and since it's ACE, manipulating game code for the same purpose too. But some movies don't do that, instead they just replay a video directly and nothing else.
+	$LF
+]div
+[div class=p 
+	"Initially it looked like a problem because 
+	(__wikiLink|href=/9565S|implicitdisplaytext=9565S)
+	" would have to compete with 
+	(__wikiLink|href=/3358M|implicitdisplaytext=3358M)
+	" for entertainment, which is a somewhat impossible challenge. We just treated a non-speed-oriented ACE movie as a playaround, so these two kinda 
+	[b 
+		"had
+	]b
+	" to compete. But then we'd have to reject that submission, which would be really bad. Because it'd imply that the very fact that somebody pulled off such a technical marvel is not good enough on its own to be published, which would in turn discourage people from trying, which is the worst kind of curation.
+	$LF
+]div
+[div class=p 
+	"A workaround would have been to put that movie into Playground, but even that wasn't considered good enough by staff. We talked about redefining entertainment instead, so less conventional goals could also reach Alternative without having to compete with the best of the best every time.
+	$LF
+]div
+[div class=p 
+	"Instead we decided to just accept that "Bad Apple" movie as a new branch based on payload being different. And yesterday I had an idea how to actually showcase their difference!
+	$LF
+]div
+[div class=p 
+	"So yeah if the goal of the movie is using payload to present something that isn't interactive, and therefore does not consist of entertaining gameplay antics, we just label it as "ACE", period. And when it does contain those antics, we assess how entertaining it is, because it's still the only way to judge such things. "ACE" alone would now be separate. And moreover, judging such payloads by our playaround standards would be a disservice, so if we want to encourage more of those technical marvels, we want to remove the entertainment requirement from them.
+	$LF
+]div
+[div class=p 
+	"So according to all of the above, I'm accepting this movie as just "ACE", because that goal is quite clear and the payload is non-trivial.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/inconsistent 
+		"inconsistent
+	]a
+	": Processing...
+]div

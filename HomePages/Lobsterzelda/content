@@ -1,0 +1,4282 @@
+17
+[div class=p 
+	"This page documents the behavior and parameters of Lua functions available for the 
+	(__wikiLink|displaytext=Dolphin|href=/EmulatorResources/Dolphin)
+	" emulator.
+	$LF
+]div
+[div class=p 
+	"Note that all builtin Lua classes that come with Dolphin use the colon operator to access member functions. For example, to frame advance, you would write emu:frameAdvance() and 
+	[b 
+		"NOT
+	]b
+	" emu.frameAdvance()
+	$LF
+	"Lua scripts execute from top to bottom one time, so to run a script on multiple frames, you need to put your code in a loop like this:
+	$LF
+]div
+[pre 
+	[code class=language-lua 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Alternatively, you could register a callback function which runs at the start of each frame like this:
+	$LF
+]div
+[pre 
+	[code class=language-lua 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	[b 
+		"Types and notation
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" [optional]
+		$LF
+		[ul 
+			[li 
+				" If the string [optional] appears in front of a parameter, that means that the parameter is not required, and will default to None if nothing is included.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" LuaColorString
+		$LF
+		[ul 
+			[li 
+				" Can be one of the following 2 String formats:
+				$LF
+			]li
+			[li 
+				" A String which has the format "0XRRGGBBAA", where RR, GG, and BB represent the hex values for red, blue and green in the color respectively, and AA is the hex value of the brightness. For example, "0X00FFFFFF" represents yellow, since it has max blue and max green. Note that this string is case-insensitive.
+				$LF
+			]li
+			[li 
+				" A string which the name of a specifically defined color. The following is a list of all currently defined colors (note that each one is case insensitive). Also, each string has their equivalent representation in the hex format described above specified after them: "BLACK" -> "0X000000ff", "BLUE" -> "0X0000ffff", "BROWN" = "0X5E2605ff", "GOLD" -> "0Xcdad00ff", "GOLDEN" -> "0Xcdad00ff", "GRAY" -> "0X919191ff", "GREY" -> "0X919191ff", "GREEN" -> "0X008b00ff", "LIME" -> "0X00ff00ff", "ORANGE" -> "0Xcd8500ff", "PINK" -> "0Xee6aa7ff", "PURPLE" -> "0X8a2be2ff", "RED" -> "0Xff0000ff", "SILVER" -> "0Xc0c0c0ff", "TURQUOISE" -> "0X00ffffff", "WHITE" -> "0Xffffffff", "YELLOW" -> "0Xffff00ff"
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" DataTypeString
+		$LF
+		[ul 
+			[li 
+				" A String which is used to specify what Data Type a function should use for a read or write. Each of these strings is case insensitive, and the characters ' ', '_', '-' and the empty string can all be substituted freely with each other in each String. The following is a list of valid names for DataTypeString, with  a definition of each data type appearing on the left side of each line, and the names which refer to the same type appearing on the right side of the line. Note that Lua does not support the Unsigned 64 bit integer type (so Signed 64 bit integers should be used instead).
+				$LF
+			]li
+			[li 
+				" Unsigned Byte: "u8", "unsignedByte", "unsigned8"
+				$LF
+			]li
+			[li 
+				" Unsigned 2-Byte Integer Type: "u16", "unsigned16"
+				$LF
+			]li
+			[li 
+				" Unsigned 4-Byte Integer Type: "u32", "unsigned32", "unsignedInt"
+				$LF
+			]li
+			[li 
+				" Signed Byte: "s8", "signedByte", "signed8"
+				$LF
+			]li
+			[li 
+				" Signed 2-Byte Integer Type: "s16", "signed16"
+				$LF
+			]li
+			[li 
+				" Signed 4-Byte Integer Type: "s32", "signed32", "signedInt"
+				$LF
+			]li
+			[li 
+				" Signed 8-Byte Integer Type: "s64", "signed64", "signedLongLong"
+				$LF
+			]li
+			[li 
+				" 4-Byte Floating Point Type: "float"
+				$LF
+			]li
+			[li 
+				" 8-Byte Floating Point Type: "double"
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" LuaFunction
+		$LF
+		[ul 
+			[li 
+				" A Lua function. Note that these will always refer to a Lua function which takes 0 arguments as input.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Note that all libraries below are listed in alphabetical order, and all functions within each library are also listed in alphabetical order.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-3684-0 
+					"bit
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-1 
+					"config
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-2 
+					"dolphin
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-3 
+					"emu
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-4 
+					"gc_controller
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-5 
+					"graphics
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-6 
+					"instruction_step
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-7 
+					"memory
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-8 
+					"OnFrameStart
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-9 
+					"OnGCControllerPolled
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-10 
+					"OnInstructionHit
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-11 
+					"OnMemoryAddressReadFrom
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-12 
+					"OnMemoryAddressWrittenTo
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-13 
+					"OnWiiInputPolled
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-14 
+					"registers
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-3684-15 
+					"statistics
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-3684-0 
+			[div class=p 
+				"A library for performing standard bitwise operations. To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"bit:bitwise_and
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" s64 bitwise_and(s64 inputArg1, s64 inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns bitwise AND of inputArg1 and inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:bitwise_and(17, 41) ==> Returns 1
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:bitwise_not
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" s64 bitwise_not(s64 inputArg)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the bitwise NOT of inputArg
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:bitwise_not(41) ==> Returns -42
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:bitwise_or
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" s64 bitwise_or(s64 inputArg1, s64 inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns bitwise OR of inputArg1 and inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:bitwise_or(17, 41) ==> returns 57
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:bitwise_xor
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" s64 bitwise_xor(s64 inputArg1, s64 inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the bitwise XOR of inputArg1 and inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:bitwise_xor(17, 41) ==> Returns 56
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:bit_shift_left
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" s64 bit_shift_left(s64 inputArg1, s64 inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the result of bit-shifting inputArg1 to the left by the number of bits specified by inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:bit_shift_left(16, 2) ==> Returns 64
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:bit_shift_right
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" s64 bit_shift_right(s64 inputArg1, s64 inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the result of bit-shifting inputArg1 to the right by the number of bits specified by inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:bit_shift_right(16, 2) ==> Returns 4
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:logical_and
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean logical_and(boolean inputArg1, boolean inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the logical AND of inputArg1 and inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:logical_and(true, false) ==> Returns false
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:logical_not
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean logical_not(boolean inputArg)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the logical NOT of inputArg
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:logical_not(false) ==> Returns true
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:logical_or
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean logical_or(boolean inputArg1, boolean inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the logical OR of inputArg1 and inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:logical_or(true, false) ==> Returns true
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"bit:logical_xor
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean logical_xor(boolean inputArg1, boolean inputArg2)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the logical XOR of inputArg1 and inputArg2
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" bit:logical_xor(true, true) ==> Returns false
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-1 
+			[div class=p 
+				"A library for getting and setting Dolphin's configuration values. Dolphin's config settings are layered, where a setting in a more specific layer can override the same setting listed in a more general layer (ex. if the setting "emulatorSpeed"-> 4.0 is defined at the LocalGame layer, and "emulatorSpeed" -> 6.0 is defined at the GlobalGame layer, then the value of emulatorSpeed that Dolphin will use when it tries to get the emulatorSpeed setting is 4.0, since LocalGame is less global than GlobalGame.
+				$LF
+			]div
+			[div class=p 
+				"The functions below provide ways to get the value of settings in a layer, set the value of settings in a layer, and get the overall value of a setting (i.e the value that Dolphin will actually use for the setting - which is the most-specific layer that has the setting defined).
+				$LF
+			]div
+			[div class=p 
+				"Every config setting has a system name, a section name, and a setting name (the actual name of the setting). The system names are pre-defined, but the user can create arbitrary section and setting names using these functions. Note that all system names, section names, setting names and type names are case-insensitive.
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"config:deleteConfigSettingFromLayer
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean deleteConfigSettingFromLayer(String settingType, String layerName, String systemName, String sectionName, String settingName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Deletes the specified config setting from the specified layer. settingType specifies the type of the setting, which can be either "BOOLEAN", "S32", "U32", "FLOAT", "STRING", or one of the enum types (ex. "TriState"). Returns true if this setting was deleted from the specified layer, and false if the setting was not deleted from the layer (which only happens when the setting wasn't in the layer to begin with. Note that the settingType, layerName, systemName, sectionName, and settingName need to all match with a specific setting in order for the setting to be deleted).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:deleteConfigSettingFromLayer("FLOAT", "Base", "GFX", "colorProps", "ColorSaturationRate") ==> Deletes the setting from the "Base" layer and returns true if a setting named "ColorSaturationRate" of type float was present in the "Base" layer in the system "GFX" and the sectionName "colorProps". Otherwise, returns false, and no setting is deleted (if this setting is present in a different layer, nothing happens to it - it needs to be in the specified layer in order to get deleted).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:deleteConfigSettingFromLayer("TextureFilteringMode", "Base", "GFX", "textureProps", "mainFilterSetting") ==> Deletes the setting from the "Base" layer and returns true if a setting named "mainFilterSetting" of type enum "TextureFilteringMode" was present in the "Base" layer in the system "GFX" and the sectionName "textureProps".  Otherwise, returns false, and no setting is deleted (if this setting is present in a different layer, nothing happens to it - it needs to be in the specified layer in order to get deleted).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:doesLayerExist
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean doesLayerExist(String layerName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if layerName is the name of a layer which is currently defined in Dolphin, and false otherwise. Note that some layers are only defined when doing certain actions. For example, the Netplay layer is only defined when the user is using Netplay. Otherwise, doesLayerExist("Netplay") will return false.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:doesLayerExist("Netplay") ==> Returns true when the user is using Netplay, and false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:getConfigEnumTypes
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" List<String> getConfigEnumTypes()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a list of all valid enum type names for config settings
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getConfigEnumTypes() ==> Returns { "CPUCore", "DPL2Quality", "EXIDeviceType", "SIDeviceType", "HSPDeviceType", "Region", "ShowCursor", "LogLevel", "FreeLookControl", "AspectMode", "ShaderCompilationMode", "TriState", "TextureFilteringMode", "StereoMode", "WiimoteSource" }
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:getConfigSetting
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" returnType getConfigSetting(String returnType, String systemName, String sectionName, String settingName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the value of the config setting (what Dolphin will find when it looks for the value of the config setting). This returns the value of the specified config setting in the most specific layer that it's defined in. returnType can be either "BOOLEAN", "S32", "U32", "FLOAT",  "STRING", or one of the enum types (ex. "TriState").
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getConfigSetting("U32", "Main", "Interface", "numberOfTriangles") ==> If "numberOfTriangles" is equal to 43 in "Base" and is equal to 65 in "LocalGame", then 65 will be returned, since LocalGame is more specific than Base.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getConfigSetting("TextureFilteringMode", "GFX", "textureProps", "mainFilterSetting") ==> If "mainFilterSetting" is equal to "DEFAULT" in the "Base" layer, and is equal to "NEAREST" in the "LocalGame" layer, then this function will return "NEAREST", since LocalGame is more specific than Base.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:getConfigSettingForLayer
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" returnType getConfigSettingForLayer(String returnType, String layerName, String systemName, String sectionName, String settingName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the value of the config setting at the specified layer for the specified systemName, sectionName, and settingName (or returns nil if the setting isn't defined at that layer). The return type of this function is equal to the parameter returnType, where returnType can be either "BOOLEAN", "S32", "U32", "FLOAT", "STRING" or one of the enum types (ex. "AspectMode")
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getConfigSettingForLayer("BOOLEAN", "LocalGame", "Main", "Interface",  "DebugModeEnabled") ==> Could return true.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getConfigSettingForLayer("AspectMode", "LocalGame", "GFX", "Settings", "AspectRatio") ==> Could return "ANALOG", if aspect ratio is in analog mode right now.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:getLayerNames_mostGlobalFirst
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" List<String> getLayerNames_mostGlobalFirst()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a list of all layer names, with the most global layer names first, and the most specific layer names last (more specific layer values override more global ones).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getLayerNames_mostGlobalFirst() ==> Returns {"Base", "CommandLine", "GlobalGame", "LocalGame", "Movie", "Netplay", "CurrentRun" }
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:getListOfValidValuesForEnumType
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" List<String> getListOfValidValuesForEnumType(String enumType)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a list of all valid enum strings for the specified enumType.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getListOfValidValuesForEnumType("AspectMode") ==> Returns { "AUTO", "ANALOGWIDE", "ANALOG", "STRETCH" }
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:getListOfSystems
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" List<String> getListOfSystems()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a list of all of the valid System values for config settings.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:getListOfSystems() ==> Returns { "Main", "Sysconf", "GCPad", "WiiPad", "GCKeyboard", "GFX", "Logger", "Debugger", "DualShockUDPClient", "FreeLook", "Session", "GameSettingsOnly", "Achievements" }
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:saveSettings
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void saveSettings()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Saves the settings to the config files, so they'll be loaded the next time Dolphin boots up. Note that most config functions save the settings to the config files right away, so this function is generally redundant/useless.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:saveSettings() ==> Now all settings are saved/written out to the config files, and will be loaded again the next time Dolphin boots up.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"config:setConfigSettingForLayer
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setConfigSettingForLayer(String settingType, String layerName, String systemName, String sectionName, String settingName, settingType newValue)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Sets the config setting at the specified layer for the specified systemName, sectionName and settingName equal to newValue. The type of newValue is specified by the settingType argument, which can have the values of "BOOLEAN", "S32", "U32", "FLOAT", "STRING", or one of the enum types (ex. "TriState")
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:setConfigSettingForLayer("U32", "LocalGame", "Main", "Interface", "SensorBarSensitivity", 45) ==> Sets the SensorBarSensitivity setting in the specified layer+systemName+sectionName to have the value of 45 (overwrites the setting in this layer if it already exists, or creates the setting in this layer if it didn't exist in this layer before).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" config:setConfigSettingForLayer("TriState", "LocalGame", "GFX", "Settings", "ManuallyUploadBuffers", "AUTO") ==> Sets the ManuallyUploadBuggers setting in the specified layer+systemName+sectionName to have the value of "AUTO" (overwrites this setting in the layer if it already exists, or creates the setting in this layer if it didn't exist in this layer before).
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-2 
+			[div class=p 
+				"A library for importing modules into scripts and shutting scripts down.
+				$LF
+			]div
+			[div class=p 
+				"This library is included by default, and therefore doesn't need to be imported.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"dolphin:exitDolphin
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void exitDolphin(int exitCode)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Terminates Dolphin with the exitCode specified by exitCode. Note that this function immediately closes the entire Dolphin application (without shutting anything down first).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" dolphin:exitDolphin(1) ==> Dolphin will terminate with an exit code of 1.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"dolphin:import
+				]b
+				[br 
+				]br
+				$LF
+				[b 
+					"dolphin:importModule
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void importModule(String moduleName, String moduleVersion)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" import() and importModule() are 2 names for the same exact function, which is why they're included together here. This function imports the module specified by moduleName, using the version specified by moduleVersion.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" Users almost certainly should NEVER call this function. It's generally used internally to import a builtin Dolphin library. All of the libraries which need a require( "X") statement in order to use them are actually Lua wrapper classes which internally call dolphin.importModule(), and then create functions around each API call for ease of use. For example, the bit Lua class imports the BitAPI internally. As such, you shouldn't be trying to import BitAPI if you already have require("bit") at the top of your program.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" dolphin:importModule("BitAPI", "1.0") ==> Imports the BitAPI module using version 1.0 of the API. See the note above for why almost no one should ever actually call this method.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"dolphin:shutdownScript_
+					[br 
+					]br
+					$LF
+				]b
+			]div
+			[ul 
+				[li 
+					" void shutdownScript()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Immediately ends the script that called this function. This will also unregister any callbacks that were set to run on various events by the script.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" dolphin:shutdownScript() ==> Causes the script to terminate.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-3 
+			[div class=p 
+				"A library for performing certain functions on movies, save states, and advancing frames.
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"emu:frameAdvance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void frameAdvance()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Advances to the next visual frame. This is called in a while(true) loop in order to advance the script to the next frame (otherwise, the script would never advance any frames, and would remain paused forever).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" emu:frameAdvance() ==> if the frame count was 14,000 before this function was called, then it will be 14,001 after this function finishes.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"emu:loadState
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void loadState(String saveStatePath)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Loads the savestate specified by saveStatePath.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" emu:loadState("myState.sav") ==> Loads the savestate from the file "MyState.sav"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"emu:playMovie
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void playMovie(String moviePath)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Starts playing the movie file specified by moviePath.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" emu:playMovie("MyMovie.dtm") ==> Starts playing inputs from the movie file "MyMovie.dtm"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"emu:saveMovie
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void saveMovie(String moviePath)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Saves the movie which is currently being recorded to the file specified by moviePath.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" emu:saveMovie("MyMovie.dtm") ==> Saves the inputs which are currently being recorded to the file "MyMovie.dtm"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"emu:saveState
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void saveState(String saveStatePath)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Saves a savestate to the file specified by saveStatePath.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" emu:saveState("MyState.sav") ==> Saves a savestate to the file "MyState.sav"
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-4 
+			[div class=p 
+				"A library for getting and setting inputs on the game cube controllers, and for checking what inputs were pressed. There are 2 types of GameCube controller buttons: digital buttons (which can be either true when pressed or false when not pressed) and analog buttons (which are an integer between 0-255).
+				$LF
+			]div
+			[div class=p 
+				"The following is a list of the valid names for all digital buttons for the API functions listed below:
+				$LF
+			]div
+			[div class=p 
+				""A", "B", "X", "Y", "Z", "L", "R", "Start", "Reset", "disc", "getOrigin", "isConnected", "dPadUp", "dPadleft", "dPadRight", "dPadDown"
+				$LF
+			]div
+			[div class=p 
+				"The following is a list of all analog buttons for the API functions listed below:
+				$LF
+			]div
+			[div class=p 
+				""analogStickX", "analogStickY", "cStickX", "cStickY", "triggerL", "triggerR"
+				$LF
+			]div
+			[div class=p 
+				"Note that L and R refer to whether or not the L and R triggers are pressed at all (i.e. if they've been pressed hard enough to "click"), while triggerL and triggerR refer to how much the triggers are pressed down.
+				$LF
+			]div
+			[div class=p 
+				"The default value for all digital buttons is false (except for isConnected, which defaults to true). The default value for triggerL and triggerR is 0, and the default value for analogStickX, analogStickY, cStickX, and cStickY is 128.
+				$LF
+			]div
+			[div class=p 
+				"The functions in this library queue up events to run when the gc controller is polled for input during the frame (all set_input calls run first, followed by all add_input calls, and finishing off with all probability_input calls. Items within each type run in the same order that they were queued (for items of the same type), and with the same values for each input poll during the frame). All the queued events are cleared at the start of the next frame, so each of these function needs to be called at the start of each frame that you want to use them during. Also, whether or not a probability event will be evaluate to true (will happen) or false (won't happen) is determined at the moment when you call the probability_input function - which means that if all inputs polled during a frame were originally equal, then all inputs polled after this library modifies your inputs will also be equal to each other (whatever those values are).
+				$LF
+			]div
+			[div class=p 
+				"Also, if you create a save state or save a movie after calling these functions while playing back or recording a movie, the resulting movie will have its inputs updated to match the actual inputs that occured (i.e. if A is set to pressed on frame 15,004 and was not pressed in the original movie, then if you save a new movie at frame 15,010, it will have A pressed).
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"gc_controller:addButtonComboChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addButtonComboChance(u64 portNumber, double probability, Dict<GCButton> gcButtonTable, boolean setUnspecifiedValuesToDefaults)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of setting the buttons to be pressed on the controller which are specified by the gcButtonTable. If setUnspecifiedValuesToDefaults is true, then any values not included in gcButtonTable will be set to their default values when the event executes. Otherwise, any values not specified by gcButtonTable will retain their current values.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addButtonComboChance(1, 50.0, {A = true, X = false}, true) ==> There is a 50% chance that A will be set to true and X will be set to false and all other buttons will be set to their default values on the next frame for controller 1.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:addButtonFlipChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addButtonFlipChance(u64 portNumber, double probability, String binaryButtonName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of flipping a binary button (from either true to false or false to true), specified by binaryButtonName. Probability is a number between 0.0 - 100.0, where 0.0 means the event will never happen, and 100.0 means there's an 100% chance the event will happen. These events happen AFTER any call to set_inputs or add_inputs. Whether or not the event will happen or not is determined at the moment that the event is added to queue (which means it will either happen each time input is polled for the controller for the frame, or it will happen no times when input is polled for the controller for the frame). This is true for all of the other probability functions, as well.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addButtonFlipChance(1, 76.4, "A") ==> There is a 76.4% chance that button A will have its current value flipped for controller 1 on the next frame (only applies for the next frame. To make it apply for the frame after that, you would need to call this again at the start of the next frame).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:addButtonPressChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addButtonPressChance(u64 portNumber, double probability, String binaryButtonName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of pressing the binary button specified by binaryButtonName (sets it to true).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addButtonPressChance(2, 31.2, "X") ==> There is a 31.2% chance that button X will be pressed on controller 2 on the next frame.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:addButtonReleaseChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addButtonReleaseChance(u64 portNumber, double probability, String binaryButtonName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of releasing the binary button specified by binaryButtonName (sets it to falas).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addButtonReleaseChance(1, 10.3, "Y") ==> There is a 10.3% chance that button Y will be released on controller 1 on the next frame.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:addControllerClearChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addControllerClearChance(u64 portNumber, double probability)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of clearing all values on the controller to their default values.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addControllerClearChance(3, 80.0) ==> There is an 80% chance that controller 3 will have all of its inputs set to their default values on the next frame.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:addOrSubtractFromCurrentAnalogValueChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addOrSubtractFromCurrentAnalogValueChance(u64 portNumber, double probability, String analogButtonName, u64 amountToSubtract, [optional] u64 amountToAdd)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of adding or subtracting from the current analog value specified by analogButtonName. If amountToAdd is not included, then amountToSubtract is treated as both the amount to add and the amount to subtract. amountToSubtract is the maximum amount that can be subtracted from the input, and amountToAdd is the maximum amount that can be added to the input (if the input goes below 0, it's set to 0, and if it goes above 255, it's set to 255).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addOrSubtractFromCurrentAnalogValueChance(1, 25.0, "cStickX", 43, 10) ==> There is a 25% chance that cStickX will be altered from its current value. If cStickX is altered, it will be altered by a random value between currentValue - 43 and currentValue + 10.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:addOrSubtractFromSpecificAnalogValueChance
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addOrSubtractFromSpecificAnalogValueChance(u64 portNumber, double probability, String analogButtonName, u64 baseValue, u64 amountToSubtract, [optional] u64 amountToAdd)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to run which has a chance of setting the button specified by analogButtonName to a random value between baseValue - amountToSubtract and baseValue + amountToAdd. If amountToAdd is not included, then amountToSubtract is treated as both the amount to add and the amount to subtract. amountToSubtract is the maximum that can be subtracted from the input, and amountToAd is the maximum amount that can be added to the input (if the input goes below 0, it's set to 0, and if it goes above 255, it's set to 255).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:addOrSubtractFromSpecificAnalogValueChance(1, 13.0, "analogStickX", 210, 30, 70) ==> There is a 13% chance that analogStickX will be altered from  its current value. If analogStickX is altered, it will be set to a random value between 180-255.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:add_inputs
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void add_inputs(u64 portNumber, Dict<GCButton> gcButtonTable)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to add the inputs referenced by gcButtonTable to the specified controller. Buttons not specified by gcButtonTable retain their current values. All calls to add_inputs happen in the order they were called in AFTER any calls to set_inputs and BEFORE any calls to probability button functions.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:add_inputs(1, {A = true, B = true, cStickX = 200}) ==> Sets controller 1 to have A and B pressed, cStickX set to 200, and all other buttons retain their current values.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:getControllerInputsForPreviousFrame
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" Dict<GCButton> getControllerInputsForPreviousFrame(u64 portNumber)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a dictionary which represents the buttons which were pressed on the controller on the previous frame (this assumes that the buttons pressed on a controller during multiple input polls during a frame are the same. Either way, this function is really returning the inputs that occured on the last controller poll, to be more precise).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:getControllerInputsForPreviousFrame(1) ==> Could return { A = true, B = false, X = true, Y = true, Z = false, L = true, R = true, Start = false, Reset = false, triggerL = 255, triggerR = 0, dPadUp = false, dPadDown = false, dPadLeft = false, dPadRight = false, disc = false, getOrigin = false, isConnected = true, analogStickX = 128, analogStickY = 255, cStickX = 128, cStickY = 128 }
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:isGcControllerInPort
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isGcControllerInPort(u64 portNumber)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if a GameCube controller was plugged into the specified port, and false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:isGcControllerInPort(1) ==> Returns true if a GameCube controller was plugged into port 1.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:isUsingPort
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isUsingPort(u64 portNumber)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if anything is plugged into the specified port, and false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:isUsingPort(1) ==> Returns true if anything was plugged into port 1.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"gc_controller:set_inputs
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void set_inputs(u64 portNumber, Dict<GCButton> gcButtonTable)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Queues an event to set the specified controller to have the inputs referenced by gcButtonTable (and any inputs not specified in gcButtonTable are set to their default values). portNumber is between 1-4. This happens before any call to add_inputs or any probability button functions are run for each input poll.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" gc_controller:set_inputs(1, {A = true, B = true, cStickX = 200}) ==> Sets controller 1 to have A and B pressed, cStickX set to 200, and all other buttons are set to their default values.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-5 
+			[div class=p 
+				"By default, all graphics are drawn directly over the game (in the same window as the game). However, when the user calls graphics:beginWindow(), it creates a new window, and any graphics calls that occur after the beginWindow call and before calling graphics:endWindow() will be drawn in this new window. Additionally, if the user calls graphics:beginWindow() again before closing the window, then it will create a nested subwindow inside of the current window (this can be repeated indefinitely to any depth). Unless a function listed below explicitly says otherwise, it can be called both when there are no extra windows on screen (besides the game window) and when there are extra windows on screen.
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"graphics:addButton
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addButton(String buttonName, int buttonId, LuaFunction callbackFunction, int width, int height)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Adds a button on the current window, with a label of buttonName, an associated ID value of buttonId, a width of width, and a height of height. When the button is clicked, the LuaFunction specified by callbackFunction will be called. Note that every button MUST have a unique button ID (since items with the same button ID are treated as the same object internally, which could cause undefined behavior if button IDs are reused elsewhere).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function MUST be called from inside of a window (after a call to graphics:beginWindow() and before the last call to graphics:endWindow()). Otherwise, an error will occur.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Creates a button in the most recently opened window/subwindow (defined as the last window/subwindow created by calling graphics:beginWindow()) which has a label of "Click me!", a width of 75 units, a height of 25 units, and a unique button ID of 42. When the button is clicked, myFunc will be called, and "Hello World!" will be printed to the screen.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:addCheckbox
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addCheckbox(String checkboxLabel, int uniqueCheckboxId)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Adds a checkbox on the current window with a label of checkboxLabel, and an associated unique checkbox ID of uniqueCheckboxId. Note that uniqueCheckboxId MUST be unique for each checkbox in the application. Otherwise, clicking on one checkbox will cause another checkbox with the same ID to also become clicked!
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function MUST be called from inside of a window.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Creates 2 checkboxes  with the labels "Ice Cream" and "Candy".  When the user clicks on the "Ice Cream" checkbox, the checkbox ID of 42 will register as being clicked, and when the user clicks on the "Candy" checkbox, the checkbox ID of 32 will register as being clicked.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:addRadioButton
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addRadioButton(String radioButtonLabel, int radioButtonGroupId, int radioButtonId)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Adds a radio button in the current window with a label of radioButtonLabel, a buttonId of radioButtonId, and a radio button group ID of radioButtonGroupID. radioButtonGroupId specifies a group of linked radio buttons (where only one can be clicked at a time), and a radio button group with that ID MUST be created by calling graphics:addRadioButtonGroup() BEFORE calling this function! Also, the radioButtonId must be unique within the specified radioButtonGroupId. Otherwise, clicking one radio button will cause the other radio button with the same radioButtonId to be clicked as well!
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function MUST be called from inside of a window.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:addRadioButton("Ice Cream", 34, 2) ==> Creates a radio button in the current window with a label of "Ice Cream", an associated radioButtonGroupID of 34, and a radioButtonID of 2.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:addRadioButtonGroup
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addRadioButtonGroup(int newRadioButtonGroupID)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Creates a radio button group with the associated radio button group ID in the current window. This MUST be called before graphics:addRadioButton() is called (which will then use the same radioButtonGroupID that was passed as the argument into this function).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function MUST be called from inside of a window.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Creates a radio button group with an ID of 55, and 3 associated radio buttons. When the "Strawberry" button is clicked, the other 2 buttons are unselected. The same thing happens when the "Chocolate" or "Vanilla" buttons are clicked.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:addTextBox
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void addTextBox(int textBoxId, String textBoxLabel)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Creates a text box with the associated textBoxId, and a label next to it of textBoxValue. The user can type characters into the inputted text box, which is what makes this different from the drawText() function, which just displays static text on the screen.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function MUST be called from inside of a window.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:addTextBox(42, "Enter your name here: ") ==> Creates a textbox in the last-opened window (the current window) with an ID of 42 and a label to the left of it of "Enter your name here:"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:beginWindow
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void beginWindow(String windowName)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Creates a new window on screen with the name specified by windowName. If a window is still open, this will create a new subwindow inside of the window. This window will become the "current window", which is where all future calls to draw or add buttons will put their items (it will remain this way until either a subwindow is opened, or the window is closed via graphics:endWindow()). Basically, beginWindow() is like pushing a window onto the stack, and endWindow() is like popping a window from the stack. Whichever window is at the top of the stack is the one where elements are placed when the various graphics calls are made (originally, the game screen is the only element on the stack - which isn't considered a real window that can be popped).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" There must be an equal number of calls to graphics:beginWindow() and graphics:endWindow() in a given frame. Otherwise, an error will occur (graphics:endWindow() effectively says that we're done adding components to the window, and it can now be processed internally).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:beginWindow("MyNewWindow") ==> Creates a new window on screen with the header "MyNewWindow"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:drawCircle
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void drawCircle(double centerX, double centerY, double radius, double borderThickness, LuaColorString outlineColor, [optional] LuaColorString fillColor)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Draws a circle on screen. The circle will have its center located at (centerX, centerY), where the coordinates are relative to the top-left edge of the currently open window (or the edge of the game screen, if no windows are currently open). The circle will have a radius specified by the radius parameter, and the thickness of the edge of the circle will be specified by borderThickness. outlineColor specifies what color to draw the outline of the circle (i.e. around the circumference). If fillColor isn't included, the the inside of the circle is clear/see-through. Otherwise, the circle will have an inner color specified by fillColor. To make a circle which is one solid color with no visible outline, set outlineColor and fillColor to the same value.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:drawCircle(145.0, 125.0, 40.0, 2.0, "Black", "Yellow") ==> Draws a circle with a center of (145.0 125.0), and a radius of 40.0. The circle will have a black outline with a thickness of 2.0, and the circle will have a yellow interior.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:drawLine
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void drawLine(double x1, double y1, double x2, double y2, double thickness, LuaColorString colorString)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Draws a line which starts at the coordinate (x1, y1) and ends at the coordinate of (x2, y2). The coordinates are relative to the top-left corner of the currently open window (or the edge of the game screen, if no windows are currently open). The line has a thickness specified by the thickness parameter, and a color specified by colorString.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:drawLine(34.0, 98.0, 534.0, 98.0, 2.0, "Black") ==> Draws a line segment whose 2 endpoints are (34.0, 98.0) and (534.0, 98.0). This line also has a thickness of 2.0, and a color of Black.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:drawPolygon
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void drawPolygon(ListOfPoints listOfPoints, double borderThickness, LuaColorString outlineColor, [optional] LuaColorString fillColor)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Draws a polygon on screen which is specified by listOfPoints (which is just a list of lists, where each sublist contains 2 doubles that represent the X and Y coordinate of a point. Thus, each sublist represents one point in the polygon, and a line is automatically drawn from the last point to the first point in order to complete the polygon). The coordinates of the points are relative to the top-left corner of the currently open window (or the edge of the game screen, if no windows are currently open). The polygon has a border thickness specified by borderThickness, and an outline color specified by outlineColor. If fillColor is not included, then the middle of the polygon will be clear. Otherwise, fillColor will be the color of the interior of the polygon. To make a polygon which is one solid color with no visible outline, set outlineColor and fillColor to the same value.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:drawPolygon( { {250.0, 399.0}, {450.0, 150.0}, {650.0, 150.0}, {850.0, 399.0} }, 2.0, "Black", "Red") ==> Draws a trapezoid on screen with coordinates of (250.0, 399.0), (450.0, 150.0), (650.0, 150.0) and (850.0, 399.0). The trapezoid has a 2.0 units-thick black border, and the interior of the trapezoid is red.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:drawRectangle
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void drawRectangle(double upLeftX, double upLeftY, double bottomRightX, double bottomRightY, double borderThickness, LuaColorString outlineColor, [optional] LuaColorString fillColor)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Draws a rectangle on screen whose upper-left-most point is at (upLeftX, upLeftY), and whose bottom-right-most point is at (bottomRightX, bottomRightY). The coordinates of the points are relative to the top-left corner of the currently open window (or the edge of the game screen, if no windows are currently open). This rectangle will have a border thickness specified by borderThickness, and an outline color specified by outlineColor. If fillColor is not included, then the middle of the rectangle will be clear. Otherwise, fillColor will be the color of the interior of the rectangle. To make a rectangle which is one solid color with no visible outline, set outlineColor and fillColor to the same value.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:drawRectangle(650.0, 730.0, 950.0, 430.0, 3.0, "black", "yellow") ==> Draws a rectangle whose top-left-most point is (650.0, 730.0) and whose bottom-right-most point is (950.0, 430.0). This rectangle has a 3.0 units-thick black border, and a yellow interior.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:drawText
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void drawText(double x, double y, LuaColorString textColor, String textContents)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Draws the text on screen specified by textContents. The text will have a color specified by textColor, and will be drawn at the coordinates (x, y). The coordinates of the text are relative to the top-left corner  of the currently open window (or the edge of the game screen, if no windows are currently open).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:drawText(55.0, 75.0, "Red", "Hello World!") ==> At the coordinates (55.0, 75.0), draws the String "Hello World!" on screen in red-colored letters.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:drawTriangle
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void drawTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double borderThickness, LuaColorString outlineColor, [optional] LuaColorString fillColor)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Draws a triangle on screen defined by the 3 points (x1, y1), (x2, y2), and (x3, y3). The coordinates of the points are relative to the top-left corner of the currently open window (or the edge of the game screen, if no windows are currently open). This triangle will have a border thickness specified by borderThickness, and an outline color specified by outlineColor. If fill color is not included, then the middle of the triangle will be clear. Otherwise, fillColor will be the color of the interior of the triangle. To make a triangle one solide color with no visible outline, set outlineColor and fillColor to the same value.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:drawTriangle( 460.0, 230.0, 660.0, 230.0, 560.0, 100.0, 15.0, "Black", "Red") ==> Draws a triangle on screen defined by the 3 points (460.0, 230.0), (660.0, 230.0) and (560.0, 100.0). The triangle has a 15.0 units-thick black border, and a red interior.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:endWindow
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void endWindow()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" This function changes the currently-open window to be one level higher up than it was before (to the parent window of the current window, or to the game screen if this was the  last open window). Basically, beginWindow() is like pushing a window onto the stack, and endWindow() is like popping a window from the stack. Whichever window is at the top of the stack is the one where elements are placed when the various graphics calls are made (originally, the game screen is the only element on the stack - which isn't considered a real window that can be popped).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" Every call to graphics:beginWindow() MUST have a matching call to graphics:endWindow() before the start of the next frame (since endWindow() specifies that we're finished adding components to whatever window/subwindow we're currently in).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"EXTRA WARNING:
+					]b
+					" This function may NOT be called when no windows are currently open. Otherwise, an error will occur.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:endWindow() ==> Changes the currently open window to its parent window/subwindow (or to the game screen, if this was the last opened window).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:getCheckboxValue
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean getCheckboxValue(int uniqueCheckboxId)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the value associated with the specified uniqueCheckboxId. If the checkbox is clicked, then the function returns true. Otherwise, it returns false.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:getCheckboxValue(42) ==> Returns true if the checkbox with the ID of 42 was currently pressed, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:getRadioButtonGroupValue
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int getRadioButtonGroupValue(int radioButtonGroupId)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the value associated with the specified radioButtonGroupId (which indicates which radio button in the group was clicked). This value defaults to 0, if none of the radio buttons have been clicked and setRadioButtonGroupValue() has never been called.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:getRadioButtonGroupValue(42) ==> Returns the value stored in the radioButtonGroupId with the ID of 42.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:getTextBoxValue
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" String getTextBoxValue(int uniqueTextBoxId)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the contents of the String which is currently typed into the textbox with the ID of uniqiueTextBoxId.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:getTextBoxValue(42) ==> If the user typed "Hello World!" into the textbox that was created with an ID of 42, then this function call will return "Hello World!"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:newLine
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void newLine(double verticalOffset)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Adds vertical space/padding below the last added element in the currently open window. After calling this function, the next item added to the window will be further down from what its original position would have been by verticalOffset units. This function is useful, since an element added to a window by default will be added directly below the last element in the window by a fixed amount.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function may NOT be called when no windows are currently open. Otherwise, an error will occur.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:pressButton
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void pressButton(int uniqueButtonId)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Runs the callback associated with the button references by uniqueButtonId (has the same effects as though the button was actually clicked by the user).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" graphics:pressButton(42) ==> Clicks the button with the associated ID of 42.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:setCheckboxValue
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setCheckboxValue(int checkboxId, boolean newValue)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Sets the checkbox with an ID of checkboxId to have the value specified by newValue. If newValue is true, then the checkbox is set to checked off. Otherwise, the checkbox is set to not being checked off.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now the checkbox labeled "Ice Cream" is set to be checked off.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:setRadioButtonGroupValue
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setRadioButtonGroupValue(int radioButtonGroupId, int newValue)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Sets the radio button group with the ID of radioButtonGroupId to have the value specified by newValue. Note that a radio button must exist in the radio button group with a radioButtonGroupId of newValue in order for that option to be selected. Otherwise, no option in the radio button group will be registered as selected.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now the radio button which is labeled "Chocolate" will be selected, and none of the other 2 radio buttons in the group will be selected.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"graphics:setTextBoxValue
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setTextBoxValue(int textBoxId, String newValue)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Sets the textbox with the ID of textBoxId to have the value specified by newValue.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now the textbox labeled "Enter your name here:" will start with having its contents be "John Smith"
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-6 
+			[div class=p 
+				"A library for stepping through a game's code one instruction at a time. Note that with the exception of the getInstructionFromAddress() function, all of these functions MUST be called from inside of an OnInstructionHit callback function, an OnMemoryAddressReadFrom callback function, or an OnMemoryAddressWrittenTo callback function. Otherwise, an error will occur.
+				$LF
+			]div
+			[div class=p 
+				"Also, in order to prevent an infinite loop, additional callbacks for OnInstructionHit, OnMemoryAddressReadFrom and OnMemoryAddressWrittenTo will be skipped over when these step functions are used (even if PC becomes equal to an OnInstructionHit callback address).
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"instruction_step:getInstructionFromAddress
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" String getInstructionFromAddress(int instructionAddress)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a human-readable representation of the instruction which is stored at instructionAddress in the game's code. Note that this is the only function in this library which can be called from anywhere anytime.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" instruction_step:getInstructionFromAddress(0x85005432) ==> ex. could return "addi r0, r1, r2"
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"instruction_step:setPC
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setPC(int newPcValue)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Sets PC to have the value specified by newPcValue.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" instruction_step:setPC(0X85005432) ==> Now PC is equal to 0X85005432, and the instruction at that address will be the next instruction executed by the game.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"instruction_step:singleStep
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void singleStep()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Executes the next instruction that the game would run (the instruction at the value of PC), and then returns.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" instruction_step:singleStep() ==> Now the next instruction has been executed by the game.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"instruction_step:skip
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void skip()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Skips execution of the next instruction. After this instruction executes PC will equal the original value of PC + 4, and the instruction at PC will not have been executed.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"WARNING:
+				]b
+				" This function alters the execution of gameplay, since it skips over a function. If you want the game to run the next instruction or run until it reaches the instruction at PC + 4, then use either singleStep() or stepOver() respectively.
+				$LF
+			]div
+			[ul 
+				[li 
+					" instruction_step:skip() ==> Now PC equals original value of PC + 4, and the instruction at address PC was not executed.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"instruction_step:stepOut
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void stepOut()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Executes code until the game returns from whatever function it was in when this function called. Note that if the frame-boundary is encountered before this function has ended, then the function will end immediately.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" instruction_step:stepOut() ==>When this function ends, the game will have returned from the function it was in when stepOut() was called.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"instruction_step:stepOver
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void stepOver()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Executes code until PC is equal to original PC value + 4. Note that if the instruction at address PC isn't a function call or jump call, then this will behave the same as singleStep(). If a function call is the current instruction, then this function will execute instructions until the function has returned. Note that if the frame-boundary is encountered before this function has ended, then the function will end immediately.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" instruction_step:stepOver() ==> Executes code until PC equals the original value of PC + 4
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-7 
+			[div class=p 
+				"A library for reading and writing values to memory.
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"memory:readFixedLengthString
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" String readFixedLengthString(int address, int numBytes)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" reads numBytes total bytes starting at the address specified by address. Each byte is treated as being a signed ASCII char, and the resulting String that is returned contains each byte/char in order, followed by the null terminator char ('\0')
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:readFixedLengthString(0X8D005320, 3) ==> If address 0X8D005320 contains the following bytes in order of increasing memory address of: 'H', 'e' 'l', 'l', 'o', then the String "Hel" will be returned (which is a null-terminated string. To be more precise, the sequence of chars in the returned string are: 'H', 'E', 'L', '\0')
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:readFrom
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" typeString readFrom(int address, DataTypeString typeString)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the data stored at the address specified by address. The data is returned as the type specified by typeString (for a definition of which Strings represent DataTypeString, see the top of this page).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:readFrom(0X8D004320, "S32") ==> Returns the value stored at 0X8D004320 as a 4-byte signed integer.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:readNullTerminatedString
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" String readNullTerminatedString(int address)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a String which starts at the address specified by address. Each byte is treated as being a signed ASCII character. The function keeps adding bytes to the end of the return String until the null-terminator character is encountered.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:readNullTerminatedString(0X8D004320) ==> If the sequence of bytes stored between 0X8D00430 and 0X8D00435 (in order) are the following: 'H', 'E', 'L', 'L', 'O', '\0', then the null-terminated String "Hello" will be returned by the function.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:readSignedBytes
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" Dict<int, int> readSignedBytes(int address, int numBytes)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a dictionary whose keys are addresses and whose values are the values at the corresponding address as a signed byte.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:readSignedBytes(0X8D004320, 4) ==> If the bytes stored at address 0X8d004320-0X8d004323 (as signed bytes) are the following: 45, 10, -54, 7, then the following dictionary will be returned: {0X8D004320 = 45, 0X8D004321 = 10, 0X8D004322 = -54, 0X8D004323 = 7}. Note that these are the same memory values as in the example below for readUnsignedBytes. The only difference is, we interpret the bytes as signed bytes here instead of unsigned bytes.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:readUnsignedBytes
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" Dict<int, int> readUnsignedBytes(int address, int numBytes)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a dictionary whose keys are addresses and whose values are the values stored at the corresponding address as an unsigned byte.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:readUnsignedBytes(0X8D004320, 4) ==> If the bytes stored at address 0X8D004320-0X8D004323 (as unsigned bytes) are the following: 45, 10, 201, 7, then the following dictionary will be returned: {0X8D004320 = 45, 0X8D004321 = 10, 0X8D004322 = 201, 0X8D004323 = 7}. Note that these are the same memory values as in the example above for readSignedBytes. The only difference is, we interpret the bytes as unsigned bytes here instead of signed bytes.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:writeBytes
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void writeBytes(Dict<int, int> addressToBytesDict)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" addressToBytesDict is treated as a mapping from address to address-value (as a byte). All of the bytes represented in addressToBytesDict are written out to memory.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"WARNING: The values in addressToBytesDict MUST be small enough to be contained within 1 byte. In other words, they must be between -128 to 255.  Values that are less than 0 are automatically written as signed bytes, and values greater than or equal to 0 are automatically written as unsigned bytes.
+					$LF
+				]b
+			]div
+			[ul 
+				[li 
+					" memory:writeBytes({0X8D004320 = -54, 0X8D004400 = 152}) ==> Writes the value -54 to 0X8D004320 (as a signed byte), and writes the value 152 to 0X8D004400 (as an unsigned byte).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:writeString
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void writeString(int address, String stringToWrite)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Writes the bytes of stringToWrite to the address specified by the address parameter. Each character is treated as a signed byte, and the null-terminator character is added to the end of the string (technically, all Lua strings end in the null terminator, so my code doesn't do anything special to add this in).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:writeString(0X8D004400, "Hello") ==> After this code runs, the bytes from 0X8D004400 to 0X8D004405 contain the following bytes (in order): 'H', 'e', 'l', 'l', 'o', '\0'
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"memory:writeTo
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void writeTo(int address, DataTypeString typeString, typeString newValue)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Writes the the value specified by newValue to the address specified by the address parameter. newValue is interpreted as being the type specified by typeString (to see a list of all valid DataTypeStrings, go to the top of this page). Each DataTypeString specifies an exact size of its parameter - which is the exact number of bytes that will be written by this function.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" memory:writeTo(0X8D004400, "U32", 98543) ==> if memory:readFrom(0X8D004400, "U32") is called immediately after running the writeTo call described here, then 98543 will be returned.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-8 
+			[div class=p 
+				"A library for registering functions which will be run at the start of each frame. If multiple functions are registered to run at the start of each frame, then the functions will execute each frame in the order that they were registered. Note that any registered OnFrameStart callbacks will be run before running global code (i.e. Lua code which is not in a registered callback function) which is still running at the start of each frame.
+				$LF
+			]div
+			[div class=p 
+				"This is a builtin library, so you don't need to put a require(X) statement at the top of your Lua script to use these functions.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"OnFrameStart:isInFrameStartCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isInFrameStartCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if this function was called from inside of an OnFrameStart callback which is currently being executed at the start of a frame, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" if OnFrameStart:isInFrameStartCallback() then ==> Only executes the code inside the if statement block if the isInFrameStartCallback() function was called from inside of a currently executing OnFrameStart callback right now.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnFrameStart:register
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int register(LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the function passed in as an argument to run at the start of each frame, and returns an int that can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now, myCallbackFunc() will run once at the start of each frame (which means "Hello World!" will be printed at the start of each frame), and funcRef can be used to unregister the function later on.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnFrameStart:registerWithAutoDeregistration
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void registerWithAutoDeregistration(LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the function passed in as an argument to run at the start of each frame. This function will automatically unregister when the only functions which are still running are all callbacks which were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers the myCallbackFunc() function to run at the start of each frame (will auto-deregister when only functions which have been registered with auto-deregistration are still running).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnFrameStart:unregister
+				]b
+				$LF
+			]div
+			[ul 
+				[li 
+					" void unregister(int functionReference)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Unregisters the OnFrameStart callback specified by functionReference, so that it will no longer run at the start of each frame. The value passed into this function must be the return result of OnFrameStart:register()
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now, the myCallbackFunc() won't run on the start of each frame anymore.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-9 
+			[div class=p 
+				"A library for registering functions which will be run each time a Game Cube Controller is polled. More specifically, the callbacks will be run right before input is read from or written to a movie/DTM file. If multiple functions are registered to run at the start of Game Cube Controller polls, then each callback will be executed in the order that they were registered.
+				$LF
+			]div
+			[div class=p 
+				"This is a builtin library, so you don't need to put a require(X) statement at the top of your Lua script to use these functions.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"OnGCControllerPolled:getCurrentPortNumberOfPoll
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int getCurrentPortNumberOfPoll()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the port number of the controller that is currently being polled (between 1-4).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function throws an exception if called from outside of an OnGCControllerPolled callback function.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" getCurrentPortNumberOfPoll() ==> If controller 2 was being polled when the callback function containing this line was triggered, then this function will return 2.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnGCControllerPolled:getInputsForPoll
+				]b
+				$LF
+			]div
+			[ul 
+				[li 
+					" Dict<GCButton> getInputsForPoll()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns a dictionary which represents the buttons pressed/not-pressed for the current controller (see the gc_controller tab for a list of valid GCButton values. This dictionary contains all valid GCButtons). The controller that inputs are returned from is the one that was being polled when the OnGCControllerPolled callback function was triggered. Note that a call to setInputsForPoll() will update the buttons pressed on the controller immediately, and will change the values returned by the next call to getInputsForPoll() (if the call changed the buttons pressed).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function throws an exception if called from outside of an OnGCControllerPolled callback function.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnGCControllerPolled:getInputsForPoll() ==> If the user held slightly up left on this frame while holding L and pressing A, then this function could return the following dictionary: {A = true, B = false, X = false, Y = false, Z = false, L = true, R = false, disc = false, isConnected = true, getOrigin = false, Start = false, Reset = false, triggerL = 255, triggerR = 0, dPadUp = false, dPadDown = false, dPadLeft = false, dPadRight = false, analogStickX = 68, analogStickY = 255, cStickX = 128, cStickY = 128}
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnGCControllerPolled:isInGCControllerPolledCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isInGCControllerPolledCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if called from inside of an OnGCControllerPolledCallback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnGCControllerPolled:isInGCControllerPolledCallback() ==> Returns true if called from inside of an OnGCControllerPolled callback function (while a GC controller is being polled), and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnGCControllerPolled:register
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int register(LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the callbackFunction to be run each time a GameCube controller is polled, and returns an identifier that can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Prints the controller number that's being currently polled (whenever a Game Cube controller is polled).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnGCControllerPolled:registerWithAutoDeregistration
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void registerWithAutoDeregistration(LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the callbackFunction to be run each time a GameCube controller is polled. This function will be automatically de-registered when the only callbacks that are still running are callbacks that were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Calls callbackFunc() each time a GameCube controller is being polled. This function will auto-deregister when the only callbacks that are still running are callbacks that were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnGCControllerPolled:setInputsForPoll
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setInputsForPoll(Dict<GCButton> newControllerInputs)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Sets the currently polled controller to have the value specified by newControllerInputs. Note that any values not specified in newControllerInputs will be set to their default value in the currently polled controller.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function throws an exception if called from outside of an OnGCControllerPolled callback function.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnGCControllerPolled:setInputsForPoll({A = true, B = true}) ==> Sets the currently-polled controller to have A and B pressed (and every other button on the controller is set to its default values. See the gc-controller tab for a list of default values for GC controller buttons).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnGCCOntrollerPolled:unregister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void unregister(int functionReference)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Unregisters the callback specified by functionReference, so it won't keep running whenever a GameCube controller poll occurs. functionReference should be the return value from calling OnGCControllerPolled:register().
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> CallbackFunc() checks at the start of each GameCube controller poll if we're currently polling controller 2. If we are, then we set controller 2 to just have the A and X buttons pressed, and all other buttons are set to their default values. After the call to OnGCControllerPolled:unregister(), callbackFunc() won't run anymore when a GameCube controller poll occurs.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-10 
+			[div class=p 
+				"A library for registering functions that will be run when a specific instruction address is reached by the game. When PC equals the same value that the callback was registered to run on, the callback will be run. If multiple functions are registered to run on the same instruction address, then each callback will be executed in the order that they were registered.
+				$LF
+			]div
+			[div class=p 
+				"This is a builtin library, so you don't need to put a require(X) statement at the top of your Lua script to use these functions.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"OnInstructionHit:getAddressOfInstructionForCurrentCallback
+				]b
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getAddressOfInstructionForCurrentCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the address of the instruction that triggered the current callback to run.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING: This function will throw an exception if called from outside of an OnInstructionHit callback function.
+						$LF
+					]b
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnInstructionHit:isInInstructionHitCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isInInstructionHitCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if called from inside of an OnInstructionHit callback function that is currently being run, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnInstructionHit:isInInstructionHitCallback() ==> Returns true if called from inside of a callback that was triggered to run when a specific instruction was hit.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnInstructionHit:register
+				]b
+				" 
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int register(unsigned int instructionAddress, LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the callbackFunction to run whenever the game hits the specified instructionAddress (when PC = instructionAddress, the callbackFunction is called). The function also returns a unique value that can be used to unregister the callback function later on.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc() to be called whenever PC equals 0X8D005432. funcRef can be used to unregister the callback from running again later on.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnInstructionHit:registerWithAutoDeregistration
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void registerWithAutoDeregistration(unsigned int instructionAddress, LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the callbackFunction to run whenever the game hits the specified instruction address (when PC = instructionAddress, the callbackFunction is called).
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc() to be called whenever PC equals 0X8D005432. This callback will automatically de-register when the only callbacks that are still running are ones which were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnInstructionHit:unregister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					"  void unregister(unsigned int instructionAddress, int functionReference)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Unregisters the callback specified by functionReference for the given instructionAddress. After this, the callback associated with functionReference won't run anymore when PC equals instructionAddress. Note that functionReference must be the return value of calling OnInstructionHit:register()
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now, callbackFunc() won't run anymore when PC equals 0X8D005432.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-11 
+			[div class=p 
+				"A Library for registering functions that will be run when a game reads from a memory address which is in between a specified start and end address. If multiple functions are registered to run for a certain memory address (i.e. the address is between the start and end range of multiple registered callbacks), then each callback will be executed in the order that they were registered (when that memory address is read from).
+				$LF
+			]div
+			[div class=p 
+				"This is a builtin library, so you don't need to put a require(X) statement at the top of your Lua script to use these functions.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"OnMemoryAddressReadFrom:getReadSize
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getReadSize()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the number of bytes that were read in the memory-read which triggered the currently-running OnMemoryAddressReadFrom callback.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will throw an exception if called from outside of a currently-executing OnMemoryAddressReadFrom callback.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressReadFrom:getReadSize() ==> Could return 1, 2, 4, or 8.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressReadFrom:getMemoryAddressReadFromForCurrentCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getMemoryAddressReadFromForCurrentCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the memory address that was read from to trigger the current OnMemoryAddressReadFrom callback function to run.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will throw an exception if called from outside of a currently-executing OnMemoryAddressReadFrom callback.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressReadFrom:getMemoryAddressReadFromForCurrentCallback() ==> Could return 0X8D005432
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressReadFrom:isInMemoryAddressReadFromCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isInMemoryAddressReadFrom()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if called from a currently-executing OnMemoryAddressReadFrom callback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressReadFrom:isInMemoryAddressReadFromCallback() ==> Returns true if called from inside of a currently-executing OnMemoryAddressReadFrom callback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressReadFrom:register
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int register(unsigned int memoryStartAddress, unsigned int memoryEndAddress, LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the specified callbackFunction to run when a memory address is read from between memoryStartAddress and memoryEndAddress. Note that if any byte that would be read from memory falls in between the start andend addresses, then the callback will be triggered. For example, if the startAddress is 0X8D004005 and the endAddress is 0X8D004010, and a 4-byte value is read starting at address 0X8D004004, then the callback will be triggered, since the 2nd byte of the number is read from address 0X8D004005. This function returns a unique identifier which can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will thrown an exception if memoryEndAddress is less than memoryStartAddress.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc() to run whenever a memory address between 0X8D004010 and 0X8D004025 is read from. funcRef can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressReadFrom:registerWithAutoDeregistration
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void registerWithAutoDeregistration(unsigned int memoryStartAddress, unsigned int memoryEndAddress, LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the specified callbackFunction to run when a memory address is read from which is between memoryStartAddress and memoryEndAddress. This function will be automatically de-registered when the only callbacks that are still running are callbacks which were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will thrown an exception if memoryEndAddress is less than memoryStartAddress.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc() to run whenever a memory address is read from between 0X8D004010 and 0X8D004025. This callback will automatically de-register when the only callbacks that are still running are ones which were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressReadFrom:unregister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void unregister(unsigned int memoryStartAddress, int functionReference)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Unregisters the callback specified by functionReference which was registered with the specified memoryStartAddress. Note that functionReference should be the return value of OnMemoryAddressReadFrom:register().
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now callbackFunc() won't be called again when a memory address between 0X8D004010 and 0X8D004025 is read from.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-12 
+			[div class=p 
+				"A Library for registering functions that will be run when a game writes to a memory address which is in between a specified start and end address. If multiple functions are registered to run for a certain memory address (i.e. the address is between the start and end range of multiple registered callbacks), then each callback will be executed in the order that they were registered (when that memory address is written to).
+				$LF
+			]div
+			[div class=p 
+				"This is a builtin library, so you don't need to put a require(X) statement at the top of your Lua script to use these functions.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:getMemoryAddressWrittenToForCurrentCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getMemoryAddressWrittenToForCurrentCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the memory address that was written to which triggered the current OnMemoryAddressWrittenTo callback function to run.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will throw an exception if called from outside of a currently-executing OnMemoryAddressWrittenTo callback.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressWrittenTo:getMemoryAddressWrittenToForCurrentCallback() ==> Could return 0X8D005432
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:getValueWrittenToMemoryAddressForCurrentCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned long long getValueWrittenToMemoryAddressForCurrentCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the value which was written to the memory address which triggered the current OnMemoryAddressWrittenTo callback function to run.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will throw an exception if called from outside of a currently-executing OnMemoryAddressWrittenTo callback.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressWrittenTo:getValueWrittenToMemoryAddressForCurrentCallback() ==> Would return 5432, if 5432 was written to the memory address which triggered the currently-executing OnMemoryAddressWrittenTo callback to run.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:getWriteSize
+				]b
+				$LF
+			]div
+			[ul 
+				[li 
+					" int getWriteSize()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the number of bytes that were written in the memory-write which triggered the currently-running OnMemoryAddressReadWrittenTo callback function to run.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will throw an exception if called from outside of a currently-executing OnMemoryAddressWrittenTo callback.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressWrittenTo:getWriteSize() ==> Could return 1, 2, 4, or 8.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:isInMemoryAddressWrittenToCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isInMemoryAddressWrittenToCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if called from a currently-executing OnMemoryAddressWrittenTo callback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnMemoryAddressWrittenTo:isInMemoryAddressWrittenToCallback() ==> Returns true if called from a currently-executing OnMemoryAddressWrittenTo callback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:register
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int register(unsigned int memoryStartAddress, unsigned int memoryEndAddress, LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the specified callbackFunction to run when a memory address is written to between memoryStartAddress and memoryEndAddress. Note that if any byte that would be written to memory falls in between the start and end addresses, then the callback will be triggered. For example, if the startAddress is 0X8D004005 and the endAddress is 0X8D004010, and a 4-byte value is written starting at address 0X8D004004, then the callback will be triggered, since the 2nd byte of the number is written to address 0X8D004005. This function returns a unique identifier which can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will thrown an exception if memoryEndAddress is less than memoryStartAddress.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc() to run whenever a memory address between 0X8D004010 and 0X8D004025 is written to. funcRef can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:registerWithAutoDeregistration
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void registerWithAutoDeregistration(unsigned int memoryStartAddress, unsigned int memoryEndAddress, LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the specified callbackFunction to run when a memory address is written to which is between memoryStartAddress and memoryEndAddress. This function will be automatically de-registered when the only callbacks that are still running are callbacks which were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" This function will thrown an exception if memoryEndAddress is less than memoryStartAddress.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc() to run whenever a memory address is written to between 0X8D004010 and 0X8D004025. This callback will automatically de-register when the only callbacks that are still running are ones which were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnMemoryAddressWrittenTo:unregister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void unregister(unsigned int memoryStartAddress, int functionReference)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Unregisters the callback specified by functionReference which was registered with the specified memoryStartAddress. Note that functionReference should be the return value of OnMemoryAddressWrittenTo:register().
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now callbackFunc() won't be called again when a memory address between 0X8D004010 and 0X8D004025 is written to.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-13 
+			[div class=p 
+				"A library for registering functions which will be run each time a Wiimote is polled. More specifically, the callbacks will be run right before wiimote input is read from or written to a movie/DTM file. If multiple functions are registered to run at the start of Wiimote polls, then each callback will be executed in the order that they were registered.
+				$LF
+			]div
+			[div class=p 
+				"This is a builtin library, so you don't need to put a require(X) statement at the top of your Lua script to use these functions.
+				$LF
+			]div
+			[div class=p 
+				[b 
+					"OnWiiInputPolled:isInWiiInputPolledCallback
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isInWiiInputPolledCallback()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if called from inside of a currently-executing OnWiiInputPolled callback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" OnWiiInputPolled:isInWiiInputPolledCallback() ==> Returns true if called from inside of a currently-executing OnWiiInputPolled callback function, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnWiiInputPolled:register
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" int register(LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers callbackFunction to be run each time a Wiimote is polled for input, and returns an identifier that can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Registers callbackFunc to run each time a wiimote is polled for input, and returns a unique identifier that can be used to unregister the callback later on.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnWiiInputPolled:registerWithAutoDeregistration
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void registerWithAutoDeregistration(LuaFunction callbackFunction)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Registers the callbackFunction to be run each time a Wiimote is polled for input. This function will be automatically de-registered when the only callbacks that are still running are callbacks that were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Calls callbackFunc() each time a Wiimote is being polled for input. This function will auto-deregister when the only callbacks that are still running are callbacks that were registered with auto-deregistration.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"OnWiiInputPolled:unregister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void unregister(int functionReference)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Unregisters the OnWiiInputPolled callback specified by functionReference, so that it will no longer run whenever a wiimote is polled. The value passed into this function must be the return result of OnWiiInputPolled:register()
+					$LF
+				]li
+			]ul
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[ul 
+				[li 
+					" ==> Now, the myCallbackFunc() function won't run whenever a wiimote is polled anymore.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-14 
+			[div class=p 
+				"A library for reading from and writing to registers.
+				$LF
+			]div
+			[div class=p 
+				"RegisterTypeString in the documentation below refers to a String representing a register. Currently supported values are: 
+				$LF
+			]div
+			[ul 
+				[li 
+					" "R0", "R1", ... , "R31"
+					$LF
+				]li
+				[li 
+					" "F0", "F1", ... , "F31"
+					$LF
+				]li
+				[li 
+					" "PC"
+					$LF
+				]li
+				[li 
+					" "LR" (register that stores where to return to when a function returns).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				"All register types can hold a maximum size of 4 bytes, except for the floating-point registers (F0-F31), which can hold a maximum size of 16 bytes.
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"registers:getRegister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" returnType getRegister(RegisterTypeString registerTypeString, DataTypeString returnType, [optional] unsigned int optionalOffset)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" This function takes as input a registerTypeString (representing which register to read from), a returnType (which specified the return type of the function, as described in the "DataTypeString" description at the top of this page), an an optional integer offset (in bytes) from the start of the register. The function returns the value stored in the specified register with the type specified by returnType. If optionalOffset is included, then we start reading from the register at an offset of optionalOffset total bytes from the start of the register. Otherwise, we start reading from the beginning of the register.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" If the size of the type referred to by returnType plus the optionalOffset is greater than the maximum size of the register, then this function will thrown an exception.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" registers:getRegister("R2", "S16", 2) ==> Returns the last 2 bytes of register R2 as a signed 2-byte integer.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"registers:getRegisterAsSignedByteArray
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" Dict<unsigned int, int> getRegisterAsSignedByteArray(RegisterTypeString registerTypeString, unsigned int arraySize, [optional] unsigned int optionalOffset)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" This function takes as input a registerTypeString representing which register to read from, an arraySize representing how many bytes to read, and an optional integer offset (in bytes) from the start of the register. The function returns a dictionary where the 1st key = 1, the 2nd key = 2, etc. and the associated 1st value is the 1st byte read from the register as a signed byte, and the 2nd value represents the 2nd byte read from the register as a signed byte, etc. If optionalOffset is included, then we start reading from the register at an offset of optionalOffset total bytes from the start of the register. Otherwise, we start reading from the beginning of the register.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" If arraySize + optionalOffset is greater than the maximum size of the register, then this function will thrown an exception.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" registers:getRegisterAsSignedByteArray("R3", 4) ==> Could return {1 = -30, 2 = 56, 3 = 120, 4 = 67}. Note that this represents the same bytes for R3 as shown in the example below for getRegisterAsUnsignedByteArray()
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"registers:getRegisterAsUnsignedByteArray
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" Dict<unsigned int, unsigned int> getRegisterAsUnsignedByteArray(RegisterTypeString registerTypeString, unsigned int arraySize, [optional] unsigned int optionalOffset)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" This function takes as input a registerTypeString representing which register to read from, an arraySize representing how many bytes to read, and an optional integer offset (in bytes) from the start of the register. The function returns a dictionary where the 1st key = 1, the 2nd key = 2, etc. and the associated 1st value is the 1st byte read from the register as an unsigned byte, and the 2nd value represents the 2nd byte read from the register as a signed byte, etc.  If optionalOffset is included, then we start reading from the register at an offset of optionalOffset total bytes from the start of the register. Otherwise, we start reading from the beginning of the register.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" If arraySize + optionalOffset is greater than the maximum size of the register, then this function will thrown an exception.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" registers:getRegisterAsUnsignedByteArray("R3", 4) --> Could return {1 = 226, 2 = 56, 3 = 120, 4 = 67}. Note that this represents the same bytes for R3 as shown in the example above for getRegisterAsSignedByteArray().
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"registers:setRegister
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setRegister(RegisterTypeString registerTypeString, DataTypeString writeType, writeType writeValue, [optional] unsigned int optionalOffset)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" This function takes as input a registerTypeString representing which register to write to, a DataTypeString specifying what data type writeValue will be (as described in the "DataTypeString" description at the top of this page), a writeValue, and an optional integer offset (in bytes) from the start of the register. The function interprets writeValue of being the type specified by writeType, and writes this value to the specified register. If optionalOffset is included, then we start writing to the register at an offset of optionalOffset total bytes from the start of the register. Otherwise, we start writing at the beginning of the register.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" If the size of the type referred to by writeType plus the optionalOffset is greater than the maximum size of the register, then this function will thrown an exception.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" registers:setRegister("R8", "U32", 512321) ==> Writes the value of 512,321 to register R8.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"registers:setRegisterFromByteArray
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" void setRegisterFromByteArray(RegisterTypeString registerTypeString, Dict<unsigned int, int> indexToByteDict, [optional] unsigned int optionalOffset)
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" This function takes as input a registerTypeString representing which register to write to, an indexToByteDict representing the bytes to write to the register, and an optional integer offset (in bytes) from the start of the register. The function writes the bytes specified by indexToByteDict in order to the specified register (in order of bytes with the lowest key in the dictionary to the byte with the highest associated key). If optionalOffset is included, then we start writing to the register at an offset of optionalOffset total bytes from the start of the register. Otherwise, we start writing at the beginning of the register. Note that each byte is written one-after-the-other (consecutively) to the register. Also, any negative numbers in the dictionary are written as signed bytes, and any non-negative numbers in the dictionary are written as unsigned bytes.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"WARNING:
+					]b
+					" If the number of elements in the dictionary + the optionalOffset is greater than the maximum size of the register, then this function will thrown an exception.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" 
+					[b 
+						"SECOND WARNING:
+					]b
+					" This function will throw an exception if indexToByteDict contains any values which can't be represented as a byte (i.e. any values < -128 or > 255).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" registers:setRegisterFromByteArray("R3", {1 = -65, 2 = 211, 3 = 40, 4 = 12}) ==> Will write the specified bytes (in order) to register R3. 1st byte is written as a signed byte, and the next 3 bytes are written as unsigned bytes.
+					$LF
+				]li
+			]ul
+		]div
+		[div class=tab-pane fade id=tabs-3684-15 
+			[div class=p 
+				"A library which returns various dolphin statistics.
+				$LF
+			]div
+			[div class=p 
+				"To use these functions, the following line 
+				[b 
+					"MUST
+				]b
+				" be included at the top of your Lua script:
+				$LF
+			]div
+			[pre 
+				[code class=language-lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+			[div class=p 
+				[b 
+					"statistics:getCurrentFrame
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getCurrentFrame()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the current frame number.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getCurrentFrame() ==> Would return 1503, if we're on the 1,503rd visual frame since emulation started.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getCurrentInputCount
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getCurrentInputCount()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the current input count.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getCurrentInputCount() ==> Would return 1503, if there have been 1503 input polls since emulation started.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getCurrentLagCount
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getCurrentLagCount()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the current lag count.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getCurrentLagCount() ==> Would return 4, if there have been 4 lag frames since emulation started.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getExRAMSize
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getExRAMSize()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the size of ExRAM (in bytes), or 0 if this isn't used by the game.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getExRAMSize() ==> Could return 67108864 (the value for a lot of games).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getFakeVMemSize
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getFakeVMemSize()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the size of FakeVMem (in bytes), or 0 if this isn't used by the game.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getFakeVMem() ==> Could return 33554432 (the value for a lot of games).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getL1CacheSize
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getL1CacheSize()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the size of L1Cache (in bytes), or 0 if this isn't used by the game.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getL1CacheSize() ==> Could return 262144 (the value for a lot of games).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getMovieLength
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getMovieLength()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the number of visual frames in the currently-active movie.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getMovieLength() ==> Could return 12000, if the currently-active movie is 12000 frames-long.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getRAMSize
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getRAMSize()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the size of RAM (in bytes).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getRAMSize() ==> Could return 25165824 (the value for most games).
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getRerecordCount
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getRerecordCount()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the number of re-records in the currently-active movie.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getRerecordCount() ==> Could return 2642, if there have been 2,642 re-records in the currently-active movie.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getTotalInputCount
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getTotalInputCount()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the total number of input polls that occur from emulation start up to the end of the currently-active movie.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getTotalInputCount() ==> Could return 10542, if there are 10,542 total input polls from emulation start up until the end of the DTM.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:getTotalLagCount
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" unsigned int getTotalLagCount()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns the total number of lag frames that occur from emulation start up to the end of the currently-active movie.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:getTotalLagCount() ==> Could return 143, if there are 143 total lag frames from emulation start up until the end of the DTM.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:isMovieActive
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isMovieActive()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if a movie is currently active, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:isMovieActive() ==> Returns true if a movie is currently playing back or being recorded, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:isPlayingInput
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isPlayingInput()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if a movie is currently being played back, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:isPlayingInput() ==> Returns true if a movie is currently playing back, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:isRecordingInput
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isRecordingInput()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if a movie is currently being recorded, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:isRecordingInput() ==> Returns true if a movie is currently being recorded, and returns false otherwise.
+					$LF
+				]li
+			]ul
+			[div class=p 
+				[b 
+					"statistics:isRecordingInputFromSaveState
+				]b
+				[br 
+				]br
+				$LF
+			]div
+			[ul 
+				[li 
+					" boolean isRecordingInputFromSaveState()
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" Returns true if a movie is currently being played or recorded which started from a save state (as opposed to the DTM starting from power-on).
+					$LF
+				]li
+			]ul
+			[ul 
+				[li 
+					" statistics:isRecordingInputFromSaveState() ==> Returns true if a movie is currently being played or recorded which started from a save state, and returns false otherwise.
+				]li
+			]ul
+		]div
+	]div
+]div

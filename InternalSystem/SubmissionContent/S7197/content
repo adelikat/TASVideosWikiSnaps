@@ -1,0 +1,1994 @@
+6
+[h2 id=Overview 
+	" Overview
+	$LF
+]h2
+[ul 
+	[li 
+		" This is an improved version of TAS Submission #4048.
+		$LF
+	]li
+	[li 
+		" By analyzing the order of items and the RAM destruction mechanism, the time was reduced by 29 seconds.
+		$LF
+	]li
+	[li 
+		" No playing piano is required.
+		$LF
+	]li
+	[li 
+		" Proper nouns are based on Pixel Remaster version.
+		$LF
+	]li
+]ul
+[div class=p 
+	"with my commentary
+	$LF
+	(youtube|v=Ur1WXNdL98o)
+	$LF
+]div
+[h2 id=AlterCaveFirstTime 
+	" Alter Cave (first time)
+	$LF
+]h2
+[h3 id=B3 
+	" B3
+	$LF
+]h3
+[div class=p 
+	"Pick up a total of two potions from each of the three goblins in the first goblin encounter. In theory, they can drop three potions, but there were no conditions available in the fastest run.
+	$LF
+]div
+[div class=p 
+	"Pick up a potion and a leather shield from the treasure box. You can only pick up the second leather shield, the other one is faster to buy than to pick it up.
+	$LF
+]div
+[h3 id=B2 
+	" B2
+	$LF
+]h3
+[div class=p 
+	"Pick up a potion from a treasure box.  At first glance, this seems like a waste of 6 steps, but it saves 177 frames per one exchange of items in battle. Picking up an item from a treasure box requires 6 steps round trip, or 96 frames, which is faster than exchanging items in battle.
+	$LF
+]div
+[div class=p 
+	"A treasure box of Antarctic Wind is too far away to save time, so I didn't take it.
+	$LF
+]div
+[div class=p 
+	"The Land Turtle battle was defeated in the same summation as TAS Submission #2992 (see below for details).
+	$LF
+]div
+[h2 id=AlterCaveSecondTime 
+	" Alter Cave (second time)
+	$LF
+]h2
+[div class=p 
+	"Pick up 2000 gil to buy a lot of stuff in Ur.
+	$LF
+]div
+[h2 id=VillageOfUr 
+	" Village of Ur
+	$LF
+]h2
+[h3 id=InitializeTheScriptPointer 
+	" Initialize the script pointer
+	$LF
+]h3
+[div class=p 
+	"In the previous TAS, instead of playing the piano to initialize the script pointer, I talked to someone. It's better to talk to people before shopping, to simplify the button operation.
+	$LF
+]div
+[h3 id=Shopping 
+	" Shopping
+	$LF
+]h3
+[div class=p 
+	"The basic policy is shown below.
+	$LF
+]div
+[ul 
+	[li 
+		" Fill the item slots as many as possible to reduce the number of times to exchange weapons in battle.
+		$LF
+	]li
+	[li 
+		" The quantity and whether or not it has "X" is more important than the name of the item.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The tool shop sells three kinds of items that don't have an "X", but it takes more than 177 x2 frames to get there and back, so I didn't use it. You don't actually need to go to the armor shop if you just want to fulfill the requirements, but you do for two reasons: to save time filling in the item slots, and to spend less money (leather shields are cheap).
+	$LF
+]div
+[div class=p 
+	"In the TAS, the order is "armor shop->magic shop->weapon shop->everywhere in the village where enemies appear" in order to reduce the number of steps and the number of enemy encounters in Ur. If you don't have a limit on the number of steps you can take and the villagers don't obstruct you, then "Weapons shop -> Armor shop -> Magic shop -> Alter Cave (third time)" is a much easier way to organize items.
+	$LF
+]div
+[h3 id=SortingItems 
+	" Sorting Items
+	$LF
+]h3
+[div class=p 
+	"In the TAS, the items are sorted in the following order before the battle.
+	$LF
+]div
+[pre 
+	"right hand:leather shield: 1
+	$LF
+	"left hand :leather shield: 1
+	$LF
+	" 0:Dagger           :12 |  1:Leather Shield   :11
+	$LF
+	" 2:(blank)          : 0 |  3:(blank)          : 0
+	$LF
+	" 4:(blank)          : 0 |  5:(blank)          : 0
+	$LF
+	" 6:(blank)          : 0 |  7:Longsword        : 1
+	$LF
+	" 8:(blank)          : 0 |  9:(blank)          : 0
+	$LF
+	"10:potion           : 1 | 11:(blank)          : 0
+	$LF
+	"12:(blank)          : 0 | 13:(blank)          : 0
+	$LF
+	"14:(blank)          : 0 | 15:(blank)          : 0
+	$LF
+	"16:Vest             : 3 | 17:Leather Armor    : 1
+	$LF
+	"18:(blank)          : 0 | 19:Bronze Bracers   : 4
+	$LF
+	"20:Leather Cap      : 5 | 21:(blank)          : 0
+	$LF
+	"22:Nunchaku         : 2 | 23:Poisona          : 4
+	$LF
+	"24:Staff            : 7 | 25:(blank)          : 0
+	$LF
+	"(All fields below are blank.)
+	$LF
+]pre
+[div class=p 
+	"You can manipulate the necessary variables during a battle by using the following item slots. You don't have to use the same order as above if you follow the conditions.
+	$LF
+]div
+[pre 
+	"right hand:Y: 1 
+	$LF
+	"left hand:Y : 1
+	$LF
+	"0~15: Y     : 1
+	$LF
+	"16:X        :3+ | 17:N       : 1
+	$LF
+	"18:N        : 1 | 19:N       :3+
+	$LF
+	"20:N        :3+ | 21:N       : 1
+	$LF
+	"22:N        : 2 | 23:Poisona :3+
+	$LF
+	"24:N        : 7 | 25:N       : 1
+	$LF
+	"26:W        : 1 | 27:N       : 1
+	$LF
+	"28~31:N     : 1
+	$LF
+]pre
+[h4 id=LegendOfKindOfItems 
+	" Legend of kind of items
+	$LF
+]h4
+[ul 
+	[li 
+		" Y: Items without "X".
+		$LF
+		[ul 
+			[li 
+				" Equipment, or materials that can be equipped.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" X: Items with "X"
+		$LF
+		[ul 
+			[li 
+				" Hand held equipment that cannot be equipped, Hand held equipment that can be equipped or magic orbs
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" N: Anything is OK
+		$LF
+	]li
+	[li 
+		" E: The ID of the item satisfies "bit7 == 0 && bit1 == 1".
+		$LF
+		[ul 
+			[li 
+				" The following items are available at the beginning of the game.
+				$LF
+			]li
+			[li 
+				" Nunchaku, staff, knife, dagger, leather cap, Vest, leather armor
+				$LF
+			]li
+			[li 
+				" Write the battle force termination flag.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" W: The ID of the item is not 0x20 to 0x5f. (Not dakuten ﾞ or handakuten ﾟ as a character).
+		$LF
+		[ul 
+			[li 
+				" Please note that leather shields should not be included among the items available at the beginning of the game.
+				$LF
+			]li
+			[li 
+				" If you initialized RAM before the FF3 game, anything is fine as long as it is not blank.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Poisona: Poisona only
+		$LF
+	]li
+]ul
+[h4 id=LegendOfItemQuantity 
+	" Legend of item quantity
+	$LF
+]h4
+[ul 
+	[li 
+		" 0, 1, 2: Set the quantity as specified.
+		$LF
+	]li
+	[li 
+		" 3+: 3 or more. 4 is faster to buy.
+		$LF
+	]li
+	[li 
+		" 7: 7 for TAS. If you initialized the RAM before the FF3 game, you can store 8.
+		$LF
+		[ul 
+			[li 
+				" Write the high byte of the pointer
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 id=ExplanationOfHowItemsAreSortedInTheTas 
+	" Explanation of how items are sorted in the TAS
+	$LF
+]h4
+[ul 
+	[li 
+		" The position of the dagger and the leather shield is to speed up the item exchange process.
+		$LF
+	]li
+	[li 
+		" Please equip both right and left hands. (The quantity must be 1).
+		$LF
+	]li
+	[li 
+		" Items without "X" are less restrictive, so potions and longswords are left in the process of being swapped. If you have any other consumables, you can do the same.
+		$LF
+	]li
+	[li 
+		" Make sure that the 16th item of Vest in the item slots has an X in it.
+		$LF
+	]li
+	[li 
+		" After the 17th item, it does not matter whether the item has "X" or not. 
+		$LF
+		[ul 
+			[li 
+				" the 17th item is a leather armor that satisfies the E requirement but you can use a dagger if it works in the item exchange process.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Buy 12 daggers and 12 leather shields. In order to reduce the number of times I have to buy items, I have bought 4 items 3 times each. As a result, I have very little money left.
+		$LF
+	]li
+	[li 
+		" It is also possible to use a longsword as a replacement instead of a leather shield. This was not quick because it required a combination of shopping for 10 units and removing equipment from some characters.
+		$LF
+	]li
+]ul
+[h3 id=EncountEnemies 
+	" Encount enemies
+	$LF
+]h3
+[div class=p 
+	"This method will not work in the outer world. You have to encounter enemies in the village or in the dungeon.
+	$LF
+]div
+[div class=p 
+	"If you did not initialize RAM before the start of the FF3 game, keep holding the start button and walk after the sorting before the last step, hold down "up, down, right, start,  B and A" while encountering enemies. The only direction you can move with this combination is east. The area where enemies appear in the inside of Ur is very narrow, so it is difficult to go east.
+	$LF
+]div
+[div class=p 
+	"If you initialized RAM before starting the FF3 game, there is no restriction on button input before movement.
+	$LF
+]div
+[div class=p 
+	"The following actions are taken in the battle.
+	$LF
+]div
+[ul 
+	[li 
+		" 1st person (first time): Use a knife as an item.
+		$LF
+	]li
+	[li 
+		" 2nd person: 
+		$LF
+		[ul 
+			[li 
+				" Keep exchanging weapons to fill all the item slots.
+				$LF
+			]li
+			[li 
+				" When finished, press B to return.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 1st person (second time): Press the B button to cancel once and output an invalid string in the command window.
+		$LF
+	]li
+	[li 
+		" 1st person (third time): Select the 4th command to terminate the battle.
+		$LF
+		[ul 
+			[li 
+				" In the previous TAS, it outputs an invalid string twice, but this time it only needs to be done once.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=AfterTheBattle 
+	" After the battle
+	$LF
+]h3
+[div class=p 
+	"If you did not initialize RAM before starting the FF3 game, the ending will start after waiting about 30 seconds. The script pointer is increased slowly from 0x07f8 to 0x0821 to move the people in the village in order.
+	$LF
+]div
+[div class=p 
+	"If you initialized RAM before starting the FF3 game, the ending will start immediately. This is because the pointer is 0x08f8 to 0x08f9 and the number of reads is small.
+	$LF
+]div
+[div class=p 
+	"At any rate, after the script system loads data 0xdd, the ending is started.
+	$LF
+]div
+[h2 id=RngInTheBattle 
+	" RNG in the battle
+	$LF
+]h2
+[div class=p 
+	"It is basically the same as the explanation in FF2.
+	$LF
+]div
+[h3 id=TotalSumOfZeropage 
+	" Total sum of Zeropage
+	$LF
+]h3
+[div class=p 
+	"When switching from the movement screen to the battle screen, the program saves the sum of the zeropage with a carry flag of address $0000-$00ff. The sum is the index to the RNG table in the battle, which determines the number of enemies and the result of the action.
+	$LF
+]div
+[div class=p 
+	"If the parameters of the sum and the party are the same, the result can be easily determined regardless of the elapsed time. The RNG table is prepared in two ways with bit1 of the sum.
+	$LF
+]div
+[div class=p 
+	"For the Goblin and Land Turtle battles, the reason for pressing multiple buttons just before the battle is to adjust the total sum. (The reason for the Killer Bee battle is different.)
+	$LF
+]div
+[h3 id=RngIndex 
+	" RNG index
+	$LF
+]h3
+[div class=p 
+	"The RNG index is used for memory addresses $0015, $0016, $0017. The initial value is the total sum of Zeropage, and it is added after RNG calculation. In FF3, the number of variables is increased to three, but $0016 is used as the basic variable.
+	$LF
+]div
+[div class=p 
+	"I have found that in battle with three Goblins, if bit1 of the sum = 0 and address $0016 is data 0xfd at the end of the battle, 3 potions will be dropped. It should be possible to adjust this depending on what you do during the fight, but I couldn't achieve it in the fastest way.
+	$LF
+]div
+[h2 id=UnusedTechniques 
+	" Unused techniques
+	$LF
+]h2
+[h3 id=OmissionOfConversation 
+	" Omission of conversation
+	$LF
+]h3
+[div class=p 
+	"I was able to skip the conversation if I could take out the enemy while he was in a narrow path to the east and west of Ur. I couldn't use it because of the number of steps and walking time.
+	$LF
+]div
+[h3 id=AnotherSortingOfItems 
+	" Another sorting of items
+	$LF
+]h3
+[div class=p 
+	"For the undocumented portions, Y:1 is used before X, and N:1 is used after X.
+	$LF
+]div
+[pre 
+	"14:EY      : 1 | 15:Y       : 1
+	$LF
+	"16:Y       : 1 | 17:X       : 1
+	$LF
+	"18:N       :3+ | 19:N       :3+
+	$LF
+	"20:N       : 1 | 21:N       : 2
+	$LF
+	"22:Poisona :3+ | 23:N       : 7
+	$LF
+	"24:N       : 1 | 25:W       : 1
+	$LF
+]pre
+[ul 
+	[li 
+		" EY satisfies E and Y simultaneously. Actual dagger only
+		$LF
+	]li
+	[li 
+		" The only thing that satisfies 13:Y:3+ is the longsword, and the amount of money required is tight.
+		$LF
+	]li
+	[li 
+		" It has a feature that the order of the item slots is one position in front of the previous one. When I tried to use it, I found it was not fast enough because it needs more operations.
+		$LF
+	]li
+]ul
+[pre 
+	" 6:Y       : 1 |  7:Y       :3+
+	$LF
+	" 8:EY      : 1 |  9:Y       : 1
+	$LF
+	"16:Y       :3+ | 17:Y       :3+
+	$LF
+	"18:Y       : 1 | 19:X       : 2
+	$LF
+	"20:Poisona :3+ | 21:N       : 7
+	$LF
+	"22:N       : 1 | 23:W       : 1
+	$LF
+]pre
+[ul 
+	[li 
+		" The placement of the items is quite high up, but since there are three Y:3+ items, it is necessary to go to the tool shop. So I didn't adopt it.
+		$LF
+	]li
+	[li 
+		" It's probably also limited by the cost.
+		$LF
+	]li
+]ul
+[h2 id=BugDescription 
+	" Bug description
+	$LF
+]h2
+[h3 id=OverflowTheItemInventory 
+	" Overflow the item inventory
+	$LF
+]h3
+[ul 
+	[li 
+		" Use an item without X to temporarily remove one item from the item slots.
+		$LF
+	]li
+	[li 
+		" Replace items that can be equipped on the next character to fill up the all item slots.
+		$LF
+	]li
+	[li 
+		" Cancel the action and write the temporarily disappeared item ID and quantity to the memory after the item slots.
+		$LF
+		[ul 
+			[li 
+				" Overwrite the item with ID 0 as an item and set the quantity to +1.
+				$LF
+			]li
+			[li 
+				" Next to the item field is the first character's job number (address $6100) and the ID of Onion Knight is 0, so the ID of the item is placed in the job number.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=InvalidLongStringInTheCommandNameBuffer 
+	" Invalid long string in the command name buffer
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/ram_after_setup.png 
+	]img
+	$LF
+]div
+[ul 
+	[li 
+		" The string in the battle is expanded by PC:$966a. The input data is the area from $7ad7 to 0x100 bytes, and the string is \0-terminated.
+		$LF
+	]li
+	[li 
+		" Normal strings such as "_たたかう\0" (0xff 0x99 0x99 0x8f 0x8c 0) and "_にげる\0" (0xff 0x9f 0x2c 0xb2 0xff 0) are 6 bytes including \0, but selecting an invalid job number will destroy the pre-written \0.
+		$LF
+	]li
+	[li 
+		" Data without \0 will be connected to the buffer for the item slots (address $7af5-$7b3b).
+		$LF
+	]li
+	[li 
+		" As the item slots fill up, there will be very little \0 inside the buffer, increasing the scope of RAM destruction.
+		$LF
+	]li
+]ul
+[h3 id=StringExpansionProcess 
+	" String expansion process
+	$LF
+]h3
+[div class=p 
+	"The meaning of the data is as follows.
+	$LF
+]div
+[ul 
+	[li 
+		" 0: End of string
+		$LF
+	]li
+	[li 
+		" 1: Newline
+		$LF
+	]li
+	[li 
+		" 2: Move the specified number of characters to the right from within the line
+		$LF
+	]li
+	[li 
+		" 3 to 0xff: Character
+		$LF
+		[ul 
+			[li 
+				" 0x29-0x5f: character with dankuten ﾞ or handakuten ﾟ
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"The following flow is written in simple C code.
+	$LF
+]div
+[pre 
+	"static uint8_t *pc_95e1(uint8_t *dest, uint8_t line_par_byte)
+	$LF
+	"{
+	$LF
+	"	uint8_t *const src = 0x7ad7;
+	$LF
+	"	uint8_t x = 0, y = 0;
+	$LF
+	"	while(src[x] != 0){
+	$LF
+	"		uint8_t chara = src[x];
+	$LF
+	"		if(chara == 1){ //new line
+	$LF
+	"			dest += line_par_byte * 2;
+	$LF
+	"			x += 1;
+	$LF
+	"			y = 0;
+	$LF
+	"			continue;
+	$LF
+	"		}else if(chara == 2){ //move to right
+	$LF
+	"			x += 1;
+	$LF
+	"			y += src[x];
+	$LF
+	"			x += 1;
+	$LF
+	"			continue;
+	$LF
+	"		}
+	$LF
+	"		if(
+	$LF
+	"			(chara >= 0x29 && chara < 0x3d) || 
+	$LF
+	"			(chara >= 0x42 && chara < 0x57)
+	$LF
+	"		){ //daku-ten
+	$LF
+	"			chara = remove_phonetic_mark(chara); //eg;ガ->カ, ば->は
+	$LF
+	"			dest[y - line_par_byte] = 0xc0; //dakuten ﾞ
+	$LF
+	"		}else if(
+	$LF
+	"			(chara >= 0x3d && chara < 0x42) ||
+	$LF
+	"			(chara >= 0x57 && chara < 0x60)
+	$LF
+	"		){ //handaku-ten
+	$LF
+	"			chara = remove_phonetic_mark(chara); //eg;ぱ->は
+	$LF
+	"			dest[y - line_par_byte] = 0xc1; //handakuten ﾟ
+	$LF
+	"		}
+	$LF
+	"		dest[y] = chara;
+	$LF
+	"		x += 1;
+	$LF
+	"		y += 1;
+	$LF
+	"	}
+	$LF
+	"	return dest;
+	$LF
+	"}
+	$LF
+	"void pc_9bad(void)
+	$LF
+	"{
+	$LF
+	"	uint8_t *dest = 0x7200;
+	$LF
+	"	for(uint8_t i = 0; i < 4; i++){
+	$LF
+	"		misc(i);
+	$LF
+	"		dest = pc_95e1(dest, 5);
+	$LF
+	"		dest += 5 * 2;
+	$LF
+	"	}
+	$LF
+	"}
+	$LF
+]pre
+[h3 id=BreakdownOfStringVariablesItemBuffersAndZeropageImages 
+	" Breakdown of string variables, item buffers, and Zeropage Images
+	$LF
+]h3
+[ul 
+	[li 
+		" $7400-$7403: string IDs for command window
+		$LF
+		[ul 
+			[li 
+				" Because this ID is invalid, $7ad7 and $7af5 are connected as a string.
+				$LF
+			]li
+			[li 
+				" This area was controlled so as not to destroy it.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" $7480-$756f: zeropage image $00-$df in the battle
+		$LF
+		[ul 
+			[li 
+				" Rewriting this area leads to the ending.
+				$LF
+			]li
+			[li 
+				" $74ec: Value to be returned to $006c after battle, script pointer enable flag
+				$LF
+			]li
+			[li 
+				" $74f3: Value to be returned to $0073 after battle, script pointer high byte
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" $7570-$757f: zeropage image $f0-$ff in the battle
+		$LF
+	]li
+	[li 
+		" $7ad7-$7adc: command name buffer + \0
+		$LF
+	]li
+	[li 
+		" $7af5-$7afc: Right hand left hand item ID and quantity
+		$LF
+		[ul 
+			[li 
+				" The right hand and left hand have four item slots before and after equipping,
+				$LF
+			]li
+			[li 
+				" Only projectile weapons can have a quantity greater than 2.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" $7afd-$7b3c: The item ID and quantity in the item slots. Same as $60c0-$60ff.
+		$LF
+	]li
+	[li 
+		" $7b3d-$7b40: Right hand, left hand, whether it has X or not (0:X, 1:None)
+		$LF
+	]li
+	[li 
+		" $7b41-$7b60: Whether items in the item slots have X or not.
+		$LF
+	]li
+	[li 
+		" $78d3: End of battle flag
+		$LF
+	]li
+]ul
+[div class=p 
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/sqf_fc.org-3.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/ram_before_setup.png 
+	]img
+	$LF
+]div
+[h3 id=MeaningToFillTheItemSlotsWithExchangedWeapons 
+	" Meaning to fill the item slots with exchanged weapons.
+	$LF
+]h3
+[div class=p 
+	"Since the exchanged weapon has ID:1, the item slots will contain one character followed by a newline. Also, since the exchanged weapon does not have an X, there will be up to 32 newlines after the item slots.
+	$LF
+]div
+[h3 id=HowToControl 
+	" How to Control
+	$LF
+]h3
+[div class=p 
+	"The large amount of data 1 in the item field is treated as a newline symbol, and the RAM is destroyed with a basic unit of 10 bytes per line. 
+	$LF
+]div
+[div class=p 
+	"The string expansion program writes one byte every 10 bytes in a row, using one Knife (0x1f: 1) or one Leather Shield (0x58: 1) with a total of 21 slots filled by the exchange. The addresses that can be written in this way are only multiples of 10.
+	$LF
+]div
+[pre 
+	"	y = 0;
+	$LF
+	"	//src = knife = 0x1f
+	$LF
+	"	dest[y] = 0x1f; y += 1
+	$LF
+	"	//src = 1 (qty)
+	$LF
+	"	dest += 5 * 2; y = 0;
+	$LF
+	"	//src = leather shield = 0x58
+	$LF
+	"	dest[y - 5] = 0xc1; dest[y] = 0x50; y += 1
+	$LF
+	"	//src = 1 (qty)
+	$LF
+	"	dest += 5 * 2; y = 0;
+	$LF
+]pre
+[div class=p 
+	"However, by using items whose quantity is 2, 3 or more, you can write addresses that are not multiples of 10.
+	$LF
+]div
+[pre 
+	"	//src = bronze bracers = 0x8b
+	$LF
+	"	dest[y] = 0x8b; y += 1;
+	$LF
+	"	//src = 4 (qty)
+	$LF
+	"	dest[y] = 4; y += 1;
+	$LF
+	"	//src = leather cap = 0x62
+	$LF
+	"	dest[y] = 0x62; y += 1;
+	$LF
+	"	//src = 5 (qty)
+	$LF
+	"	dest[y] = 5; y += 1;
+	$LF
+]pre
+[div class=p 
+	"The address and data to be written using this bug are the following 3 bytes.
+	$LF
+]div
+[ul 
+	[li 
+		" $74ec: 5 (non-zero value)
+		$LF
+	]li
+	[li 
+		" $74f3: 7
+		$LF
+	]li
+	[li 
+		" $78d3: 0x72 (bit7 == 0 && bit1 == 1)
+		$LF
+	]li
+]ul
+[div class=p 
+	"This is the content of the RAM just before the invalid string was loaded.
+	$LF
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/ram_after_setup.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"In the process of RAM corruption by invalid strings, important variables are written in the following steps.
+	$LF
+]div
+[div class=p 
+	"dest = $74e9
+	$LF
+]div
+[ul 
+	[li 
+		" $74e9: item #19 ID  (Bronze Bracers, 0x8b)
+		$LF
+	]li
+	[li 
+		" $74ea: item #19 qty (4)
+		$LF
+	]li
+	[li 
+		" $74eb: item #20 ID (Leather Cap, 0x62)
+		$LF
+	]li
+	[li 
+		" *$74ec*: item #20 qty (5)
+		$LF
+	]li
+	[li 
+		" $74ed: item #21 ID
+		$LF
+	]li
+	[li 
+		" (qty = 1, newline)
+		$LF
+	]li
+]ul
+[div class=p 
+	"dest = $74f3
+	$LF
+]div
+[ul 
+	[li 
+		" $74f3: item #22 ID (Nunchaku, 0x06)
+		$LF
+	]li
+	[li 
+		" (qty = 2, ID= 0xfd (Poisona) increases y to 0xfe)
+		$LF
+	]li
+	[li 
+		" $75f1: item #23 qty (3)
+		$LF
+	]li
+	[li 
+		" $75f2: item #24 ID (Staff, 0x0e)
+		$LF
+	]li
+	[li 
+		" *$74f3*: item #24 qty (7), Since y is 8 bits, y = 0.
+		$LF
+	]li
+	[li 
+		" $74f4: item #25 ID
+		$LF
+	]li
+	[li 
+		" (qty = 1, newline)
+		$LF
+	]li
+]ul
+[div class=p 
+	"dest = $74fd
+	$LF
+]div
+[ul 
+	[li 
+		" $74fd: item #26 ID (Dagger, 0x1f)
+		$LF
+		[ul 
+			[li 
+				" If a leather shield is placed here, ID 0x58 becomes "ピ" as a character, and address 0x74f8->0x0078 contains data 0xc1 (handakuten ﾟ).
+				$LF
+			]li
+			[li 
+				" address 0x0078 is a world map ID, if it is rewritten, the party will not return to Ur after the battle, the contents of address $07f8-$07ff will change, and the script pointer will not reach address $0021.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" (qty = 1, newline)
+		$LF
+	]li
+]ul
+[div class=p 
+	"dest = $78d1
+	$LF
+]div
+[ul 
+	[li 
+		" $78d1: item #16 ID (Vest, 0x72)
+		$LF
+	]li
+	[li 
+		" $78d2: item #16 qty (3)
+		$LF
+	]li
+	[li 
+		" *$78d3*: item #17 ID (Leather Armor, 0x73)
+		$LF
+	]li
+	[li 
+		" (qty = 1, newline)
+		$LF
+	]li
+]ul
+[h3 id=AfterRewritingTheVariables 
+	" After rewriting the variables
+	$LF
+]h3
+[div class=p 
+	"The first person's fourth command will be the end of everyone's command selection. If you choose it, the program will check the end-of-battle flag and terminate the battle.
+	$LF
+]div
+[div class=p 
+	"After the battle is over, the data of address $74ec is restored to address $006c. This is valid if it is a non-zero value. The data of address $74f3 will be restored to address $0073, and $07f8 will be the reference for the script pointer, along with the data from the conversation.
+	$LF
+]div
+[div class=p 
+	"The script will be executed slowly in order, and when the pointer reaches $0021, the address will contain data 0xdd. The 0xdd means to start the ending.
+	$LF
+]div
+[h3 id=OtherAnalysisData 
+	" Other analysis data
+	$LF
+]h3
+[div class=p 
+	"Ruby and Lua scripts are available for your reference.
+	$LF
+]div
+[div class=p 
+	[a href=https://gitlab.com/na6ko/tas_finalfantasy_iii rel=noopener external nofollow 
+		"https://gitlab.com/na6ko/tas_finalfantasy_iii
+	]a
+	$LF
+]div
+[h2 id= 
+	" 概要
+	$LF
+]h2
+[ul 
+	[li 
+		" TAS submission #4048 の改善版です.
+		$LF
+	]li
+	[li 
+		" アイテムの並びと RAM 破壊の仕組みを解析し、約29秒早くなりました.
+		$LF
+	]li
+	[li 
+		" ピアノ演奏はしません.
+		$LF
+	]li
+	[li 
+		" 任意コード実行とサブフレームリセットは使用していません.
+		$LF
+	]li
+]ul
+[div class=p 
+	(youtube|v=7984Z8B8A2k)
+	$LF
+]div
+[h2 id=1 
+	" 祭壇の洞窟 (1回目)
+	$LF
+]h2
+[h3 id=3 
+	" 地下3階
+	$LF
+]h3
+[div class=p 
+	"最初のゴブリン戦で3匹のゴブリンからポーションを2つ拾います. 理論上3つのポーションが落ちるようですが、最速プレイとしては利用できる条件ではありませんでした.
+	$LF
+]div
+[div class=p 
+	"宝箱からポーションとかわのたてを拾います. かわのたては2個目のみです. もう1個のかわのたては購入したほうが早いです.
+	$LF
+]div
+[h3 id=2 
+	" 地下2階
+	$LF
+]h3
+[div class=p 
+	"宝箱からポーションを拾います. 一見6歩無駄ですが、戦闘中のアイテム交換を 1回(177 frame)削減できます. 宝箱のための往復での6歩は 96 frame なのでとります.
+	$LF
+]div
+[div class=p 
+	"なんきょくのかぜは遠く時間削減ができないので取りませんでした.
+	$LF
+]div
+[div class=p 
+	"ランドタートル戦は TAS submission #2992 と同じ総和(詳細は後述)で倒しました. 手動操作では運が必要です.
+	$LF
+]div
+[h2 id=2_2 
+	" 祭壇の洞窟 (2回目)
+	$LF
+]h2
+[div class=p 
+	"ウルの村で大量の物資を購入するため 2000 ギルを拾得します.
+	$LF
+]div
+[h2 id=_2 
+	" ウルの村
+	$LF
+]h2
+[h3 id=_3 
+	" スクリプトポインタの初期化
+	$LF
+]h3
+[div class=p 
+	"前回の TAS ではピアノを弾いてスクリプトポインタを初期化していたのですが、その代わりにそこらへんの人と会話します. ボタン操作の簡略化のため、買い物前に会話するほうがいいです.
+	$LF
+]div
+[h3 id=_4 
+	" 買い物
+	$LF
+]h3
+[div class=p 
+	"基本方針は下記です.
+	$LF
+]div
+[ul 
+	[li 
+		" 戦闘中の武器交換回数をへらすためにアイテム欄はできるだけ埋める.
+		$LF
+	]li
+	[li 
+		" アイテムの名称より数量とXの有無のほうが重要.
+		$LF
+	]li
+]ul
+[div class=p 
+	"道具屋は X がつかないアイテムが3種類売ってるのですが、往復に 177 x2 frame 以上かかるので採用していません. 防具屋も実はいかなくても条件を満たせるのですが、アイテム欄を埋める時間の節約と消費金額が少なさ(装備できるかわのたてが安い)の2つの理由で行きます.
+	$LF
+]div
+[div class=p 
+	"TAS では歩数の都合でウルの村で敵と遭う都合とアイテム整理の操作削減のため「防具屋->魔法屋->武器屋->村内の敵が出る場所」の順番に行きます. 歩数の制限と村民たちの妨害がなければ、「武器屋->防具屋->魔法屋->祭壇の洞窟(3回目)」のほうがアイテム整理は楽です.
+	$LF
+]div
+[h3 id=_5 
+	" アイテム整理
+	$LF
+]h3
+[div class=p 
+	"TAS では戦闘前に下記の並びにしています.
+	$LF
+]div
+[pre 
+	"右手:かわのたて: 1
+	$LF
+	"左手:かわのたて: 1
+	$LF
+	" 0:ダガー          :12  1:かわのたて      :11
+	$LF
+	" 2:(空欄)          : 0  3:(空欄)          : 0
+	$LF
+	" 4:(空欄)          : 0  5:(空欄)          : 0
+	$LF
+	" 6:(空欄)          : 0  7:ロングソード    : 1
+	$LF
+	" 8:(空欄)          : 0  9:(空欄)          : 0
+	$LF
+	"10:ポーション      : 1 11:(空欄)          : 0
+	$LF
+	"12:(空欄)          : 0 13:(空欄)          : 0
+	$LF
+	"14:(空欄)          : 0 15:(空欄)          : 0
+	$LF
+	"16:ふく            : 3 17:かわよろい      : 1
+	$LF
+	"18:(空欄)          : 0 19:どうのうでわ    : 4
+	$LF
+	"20:かわのぼうし    : 5 21:(空欄)          : 0
+	$LF
+	"22:ヌンチャク      : 2 23:ポイゾナ        : 4
+	$LF
+	"24:つえ            : 7 25:(空欄)          : 0
+	$LF
+	"(以下すべて空欄)
+	$LF
+]pre
+[div class=p 
+	"戦闘中にアイテム欄を下記にすると必要な変数をうまく操作できます. 条件を守れば上記の並びと同じにしなくていいです.
+	$LF
+]div
+[pre 
+	"右手:Y     : 1 
+	$LF
+	"左手:Y     : 1
+	$LF
+	"0から15: Y : 1
+	$LF
+	"16:X       :3+ 17:N       : 1
+	$LF
+	"18:N       : 1 19:N       :3+
+	$LF
+	"20:N       :3+ 21:N       : 1
+	$LF
+	"22:N       : 2 23:ポイゾナ:3+
+	$LF
+	"24:N       : 7 25:N       : 1
+	$LF
+	"26:W       : 1 27:N       : 1
+	$LF
+	"28から31:N : 1
+	$LF
+]pre
+[h4 id=_6 
+	" アイテム種類の見方
+	$LF
+]h4
+[ul 
+	[li 
+		" Y: X がつかないもの
+		$LF
+		[ul 
+			[li 
+				" 装備できる手につける装備品, または消耗品
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" X: X がつくもの
+		$LF
+		[ul 
+			[li 
+				" 装備できない手につける装備品, 手につけない装備品, 魔法のオーブ
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" N: どれでも可能
+		$LF
+	]li
+	[li 
+		" E: ID の bit7 == 0 && bit1 == 1 のもの
+		$LF
+		[ul 
+			[li 
+				" 序盤で手に入るものは下記.
+				$LF
+			]li
+			[li 
+				" ヌンチャク,つえ,ナイフ,ダガー,かわのぼうし,ふく,かわよろい
+				$LF
+			]li
+			[li 
+				" 戦闘強制終了フラグを書き込む
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" W: ID で 0x20 から 0x5f ではないもの. (文字として濁音か半濁音ではないもの)
+		$LF
+		[ul 
+			[li 
+				" 序盤で手に入るものはかわのたてをいれてはいけないので注意
+				$LF
+			]li
+			[li 
+				" FF3 のゲーム前に RAM を初期化しているのなら条件外
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" ポイゾナ: ポイゾナのみ可
+		$LF
+	]li
+]ul
+[h4 id=_7 
+	" 数量の見方
+	$LF
+]h4
+[ul 
+	[li 
+		" 0,1,2: 指定通りの数量をいれてください.
+		$LF
+	]li
+	[li 
+		" 3+: 3個以上. 4個だと早く買えます.
+		$LF
+	]li
+	[li 
+		" 7: TAS では 7 個. FF3 のゲーム前に RAM を初期化しているのなら 8 個.
+		$LF
+		[ul 
+			[li 
+				" ポインタの上位バイトを書き込む
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h4 id=Tas 
+	" TAS での並びの解説
+	$LF
+]h4
+[ul 
+	[li 
+		" ダガーとかわのたてはアイテム交換を早くすませるためです.
+		$LF
+	]li
+	[li 
+		" 右手左手両方に装備をしてください. (数量は1が必須)
+		$LF
+	]li
+	[li 
+		" X がつかないアイテムは位置の制限が緩いので、ポーションとロングソードは位置交換の過程でそのままにしてます. もしほかに消耗品があれば同様の処置で構いません.
+		$LF
+	]li
+	[li 
+		" 16番のふくはかならず X がつくものをおいてください.
+		$LF
+	]li
+	[li 
+		" 17番以降は X の有無は関係ありません. 
+		$LF
+		[ul 
+			[li 
+				" 17番では E の条件をみたすかわよろいをおいていますが、アイテム交換の過程でうまくいくならダガーで構いません.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" ダガーとかわのたては12個ずつ買います. アイテム購入操作回数をへらすために 4 個単位で3回買っています. そのため残金がわずかです.
+		$LF
+	]li
+	[li 
+		" かわのたてのかわりにロングソードを交換品にすることも一応可能です. 10単位での買い物を組み合わせた上に、複数人から装備品を外す必要があり、早くありませんでした.
+		$LF
+	]li
+]ul
+[h3 id=_8 
+	" 敵に遭う
+	$LF
+]h3
+[div class=p 
+	"今回の方法は外では成功しません. 村の中かダンジョンで遭ってください.
+	$LF
+]div
+[div class=p 
+	"FF3 のゲーム前に RAM を初期化していない場合はアイテム整理後スタートボタンを押しながら移動して、最後の1歩は"上下右スタートBA" を押して敵に遭ってください. この組み合わせで移動できる方向は東だけです. ウル内部の敵がでてくる場所はせまく、東に移動しづらいです.
+	$LF
+]div
+[div class=p 
+	"FF3 のゲーム前に RAM を初期化している場合は移動前のボタン入力の制限はありません.
+	$LF
+]div
+[div class=p 
+	"戦闘では下記の行動です.
+	$LF
+]div
+[ul 
+	[li 
+		" 1人目(1度目): アイテムでナイフを使う
+		$LF
+	]li
+	[li 
+		" 2人目: 
+		$LF
+		[ul 
+			[li 
+				" アイテム欄をすべて埋めるために武器を交換し続ける
+				$LF
+			]li
+			[li 
+				" 終わったら B ボタンで戻る
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 1人目(2度目): B ボタンで一旦キャンセルし、コマンド欄に不正な文字列を出す
+		$LF
+	]li
+	[li 
+		" 1人目(3度目): 4番目のコマンドを選び戦闘強制終了
+		$LF
+		[ul 
+			[li 
+				" (前回のTASでは2度不正な文字列を出してましたが、今回は1度でいいです)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=_9 
+	" 戦闘後
+	$LF
+]h3
+[div class=p 
+	"FF3 のゲーム前に RAM を初期化していない場合は 30 秒程度待つとエンディングが始まります. これは pointer が 0x07f8 から 0x0821 まで順番に村内の人をゆっくり動かしているのが原因です.
+	$LF
+]div
+[div class=p 
+	"FF3 のゲーム前に RAM を初期化している場合はすぐにエンディングが始まります. こちらは pointer が 0x08f8 から 0x08f9 で読み込み数が少ないためです.
+	$LF
+]div
+[div class=p 
+	"どちらの場合でもスクリプトとして data 0xdd を読み込めばエンディングが始まります.
+	$LF
+]div
+[h2 id=_10 
+	" 戦闘時の乱数
+	$LF
+]h2
+[div class=p 
+	"基本的に FF2 での説明と同じです.
+	$LF
+]div
+[h3 id=Zeropage 
+	" Zeropage 総和
+	$LF
+]h3
+[div class=p 
+	"移動画面から戦闘画面に切り替わるときにプログラムは address $0000-$00ff の zeropage の carry 込みの総和を保存します. 総和は戦闘時の乱数 table への index となり、敵の数や行動の結果が決まります.
+	$LF
+]div
+[div class=p 
+	"総和とパーティのパラメータが同じであれば、経過時間は関係なしに容易に結果が確定できます. 乱数 table の中身は総和の bit1 で 2 通り用意されています.
+	$LF
+]div
+[div class=p 
+	"ゴブリン戦とランドタートル戦は戦闘直前にボタンを複数押すのは総和の調整のためです. (キラービー戦は別の理由)
+	$LF
+]div
+[h3 id=Index 
+	" 乱数 index
+	$LF
+]h3
+[div class=p 
+	"乱数 index は memory address $0015, $0016, $0017 に利用され、初期値は総和で、乱数計算後に都度加算されていきます. FF3 では変数が3つに増えましたが、基本は $0016 を利用しているようです.
+	$LF
+]div
+[div class=p 
+	"ゴブリン3匹では総和 bit1 = 0 で、戦闘終了時に address $0016 が data 0xfd の場合3個のポーションが落ちることがわかっています. 戦闘中の行動次第で調整できるはずですが、最速ではその実現は不可能でした.
+	$LF
+]div
+[h2 id=_11 
+	" その他見つかったが実用化されなかったもの
+	$LF
+]h2
+[h3 id=_12 
+	" 会話の省略
+	$LF
+]h3
+[div class=p 
+	"ウルの東西の細い道にある程度入った状態で敵を出せれば会話は省略できました. 歩数調整や徒歩時間の都合で使えませんでした.
+	$LF
+]div
+[h3 id=_13 
+	" 別のアイテムの並び
+	$LF
+]h3
+[div class=p 
+	"未記載分は X 以前は Y:1, X 以後は N:1
+	$LF
+]div
+[pre 
+	"14:EY      : 1 15:Y       : 1
+	$LF
+	"16:Y       : 1 17:X       : 1
+	$LF
+	"18:N       :3+ 19:N       :3+
+	$LF
+	"20:N       : 1 21:N       : 2
+	$LF
+	"22:ポイゾナ:3+ 23:N       : 7
+	$LF
+	"24:N       : 1 25:W       : 1
+	$LF
+]pre
+[ul 
+	[li 
+		" EY は E と Y を同時に満たすもの. 実質ダガーのみ.
+		$LF
+	]li
+	[li 
+		" 13:Y:3+ がロングソードのみで必要金額が厳しい.
+		$LF
+	]li
+	[li 
+		" アイテム欄の並びが1つ手前に来るのが特徴. 実際に使ってみたところは手数が多いらしく早くなかった.
+		$LF
+	]li
+]ul
+[pre 
+	" 6:Y       : 1  7:Y       :3+
+	$LF
+	" 8:EY      : 1  9:Y       : 1
+	$LF
+	"16:Y       :3+ 17:Y       :3+
+	$LF
+	"18:Y       : 1 19:X       : 2
+	$LF
+	"20:ポイゾナ:3+ 21:N       : 7
+	$LF
+	"22:N       : 1 23:W       : 1
+	$LF
+]pre
+[ul 
+	[li 
+		" アイテム欄がかなり手前に来るのだが、 Y:3+ が3種類いるので道具屋に行くことが必須となったので不採用.
+		$LF
+	]li
+	[li 
+		" おそらく金額の制限にもひっかかる.
+		$LF
+	]li
+]ul
+[h2 id=_14 
+	" バグの解説
+	$LF
+]h2
+[h3 id=_15 
+	" アイテム欄を溢れさせる
+	$LF
+]h3
+[ul 
+	[li 
+		" Xがつかないアイテムを使用してアイテム欄から一時的にアイテムを1つ消す
+		$LF
+	]li
+	[li 
+		" 次のキャラが装備できるアイテムをつけかえてアイテム欄を満タンにする
+		$LF
+	]li
+	[li 
+		" 行動をキャンセルして一時的に消えたアイテムIDと数量をアイテム欄以降のメモリに書き込む
+		$LF
+		[ul 
+			[li 
+				" アイテムとして ID が 0 のものを上書き、数量を +1 する
+				$LF
+			]li
+			[li 
+				" アイテム欄の次は最初のキャラのジョブ番号(addres $6100)でたまねぎ剣士の ID は 0 のため、ジョブ番号にアイテムの ID が入る
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=_16 
+	" コマンド名のための不正な長い文字列
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/ram_after_setup.png 
+	]img
+	$LF
+]div
+[ul 
+	[li 
+		" 戦闘中の文字列は PC:$966a により展開されます. 入力データは $7ad7 から 0x100 byte の領域で、文字列は \0 終端です.
+		$LF
+	]li
+	[li 
+		" _たたかう\0 (0xff 0x99 0x99 0x8f 0x8c 0), _にげる\0 (0xff 0x9f 0x2c 0xb2 0xff 0) などの正常な文字列は \0 を含めて 6 バイトですが、不正なジョブ番号を選ぶと、事前に書き込まれた \0 を破壊します.
+		$LF
+	]li
+	[li 
+		" \0 がないデータはアイテム欄のためのバッファ(address $7af5-$7b3b) に繋がります.
+		$LF
+	]li
+	[li 
+		" アイテム欄が埋まるとバッファ内部も \0 がほとんどなくなり、 RAM 破壊の範囲が広がります.
+		$LF
+	]li
+]ul
+[h3 id=_17 
+	" 文字列の展開処理
+	$LF
+]h3
+[div class=p 
+	"データの意味は下記になっています.
+	$LF
+]div
+[ul 
+	[li 
+		" 0: 文字列の終了
+		$LF
+	]li
+	[li 
+		" 1: 改行
+		$LF
+	]li
+	[li 
+		" 2: 行内から指定数右に移動
+		$LF
+	]li
+	[li 
+		" 3 から 0xff: 文字
+		$LF
+		[ul 
+			[li 
+				" 0x29-0x60: 濁音、半濁音記号付き文字
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"簡単な C のコードで書くと下記の流れです.
+	$LF
+]div
+[pre 
+	"static uint8_t *pc_95e1(uint8_t *dest, uint8_t line_par_byte)
+	$LF
+	"{
+	$LF
+	"	uint8_t *const src = 0x7ad7;
+	$LF
+	"	uint8_t x = 0, y = 0;
+	$LF
+	"	while(src[x] != 0){
+	$LF
+	"		uint8_t chara = src[x];
+	$LF
+	"		if(chara == 1){ //new line
+	$LF
+	"			dest += line_par_byte * 2;
+	$LF
+	"			x += 1;
+	$LF
+	"			y = 0;
+	$LF
+	"			continue;
+	$LF
+	"		}else if(chara == 2){ //move to right
+	$LF
+	"			x += 1;
+	$LF
+	"			y += src[x];
+	$LF
+	"			x += 1;
+	$LF
+	"			continue;
+	$LF
+	"		}
+	$LF
+	"		if(
+	$LF
+	"			(chara >= 0x29 && chara < 0x3d) || 
+	$LF
+	"			(chara >= 0x42 && chara < 0x57)
+	$LF
+	"		){ //daku-ten
+	$LF
+	"			chara = remove_phonetic_mark(chara); //eg;ガ->カ, ば->は
+	$LF
+	"			dest[y - line_par_byte] = 0xc0; //dakuten ﾞ
+	$LF
+	"		}else if(
+	$LF
+	"			(chara >= 0x3d && chara < 0x42) ||
+	$LF
+	"			(chara >= 0x57 && chara < 0x60)
+	$LF
+	"		){ //handaku-ten
+	$LF
+	"			chara = remove_phonetic_mark(chara); //eg;ぱ->は
+	$LF
+	"			dest[y - line_par_byte] = 0xc1; //handakuten ﾟ
+	$LF
+	"		}
+	$LF
+	"		dest[y] = chara;
+	$LF
+	"		x += 1;
+	$LF
+	"		y += 1;
+	$LF
+	"	}
+	$LF
+	"	return dest;
+	$LF
+	"}
+	$LF
+	"void pc_9bad(void)
+	$LF
+	"{
+	$LF
+	"	uint8_t *dest = 0x7200;
+	$LF
+	"	for(uint8_t i = 0; i < 4; i++){
+	$LF
+	"		misc(i);
+	$LF
+	"		dest = pc_95e1(dest, 5);
+	$LF
+	"		dest += 5 * 2;
+	$LF
+	"	}
+	$LF
+	"}
+	$LF
+]pre
+[h3 id=ZeropageImage 
+	" 文字列変数, アイテムバッファ, Zeropage Image の内訳
+	$LF
+]h3
+[ul 
+	[li 
+		" $7400-$7403: string IDs for command window
+		$LF
+		[ul 
+			[li 
+				" この ID が不正なため、 $7ad7 と $7af5 が文字列としてつながる.
+				$LF
+			]li
+			[li 
+				" この領域は破壊しないように制御した.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" $7480-$756f: zeropage image $00-$df in the battle
+		$LF
+		[ul 
+			[li 
+				" この領域の書き換えがエンディングにつながる
+				$LF
+			]li
+			[li 
+				" $74ec: 戦闘後 $006c に復帰させる値, script pointer enable flag
+				$LF
+			]li
+			[li 
+				" $74f3: 戦闘後 $0073 に復帰させる値, script pointer high byte
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" $7570-$757f: zeropage image $f0-$ff in the battle
+		$LF
+	]li
+	[li 
+		" $78d3: 戦闘終了フラグ
+		$LF
+	]li
+]ul
+[div class=p 
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/sqf_fc.org-3.png 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/ram_before_setup.png 
+	]img
+	$LF
+]div
+[ul 
+	[li 
+		" $7ad7-$7adc: command name buffer + \0
+		$LF
+	]li
+	[li 
+		" $7af5-$7afc: 右手左手の item ID と 数量
+		$LF
+		[ul 
+			[li 
+				" 右手左手は装備前、装備後で 4 つのアイテムスロットがある,
+				$LF
+			]li
+			[li 
+				" 数量を2以上にできるのは投擲武器のみ.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" $7afd-$7b3c: アイテム欄の item ID と数量. $60c0-$60ff と同じ.
+		$LF
+	]li
+	[li 
+		" $7b3d-$7b40: 右手左手の X の有無 (0:X, 1:なし)
+		$LF
+	]li
+	[li 
+		" $7b41-$7b60: アイテム欄の X の有無
+		$LF
+	]li
+]ul
+[h3 id=_18 
+	" 制御方法
+	$LF
+]h3
+[div class=p 
+	"アイテム欄に存在する大量の data 1 は改行記号として扱われ、1 行 10 byte を基本単位で RAM が破壊されていきます. 
+	$LF
+]div
+[div class=p 
+	"文字列展開プログラムは交換によって埋められた合計21スロットのナイフ1本(0x1f, 1) またはかわのたて1枚(0x58, 1)によって 10 byte ごとに 1 byte を連続して書くことになります. この方法で書き込めるアドレスは 10 の倍数だけです.
+	$LF
+]div
+[pre 
+	"	y = 0;
+	$LF
+	"	//src = knief = 0x1f
+	$LF
+	"	dest[y] = 0x1f; y += 1
+	$LF
+	"	//src = 1 (qty)
+	$LF
+	"	dest += 5 * 2; y = 0;
+	$LF
+	"	//src = leather shield = 0x58
+	$LF
+	"	dest[y - 5] = 0xc1; dest[y] = 0x50; y += 1
+	$LF
+	"	//src = 1 (qty)
+	$LF
+	"	dest += 5 * 2; y = 0;
+	$LF
+]pre
+[div class=p 
+	"しかし数量 2 や 3 以上を利用することによって 10 の倍数ではないアドレスも書き込むことができます.
+	$LF
+]div
+[pre 
+	"	//src = bronze bracers = 0x8b
+	$LF
+	"	dest[y] = 0x8b; y += 1;
+	$LF
+	"	//src = 4 (qty)
+	$LF
+	"	dest[y] = 4; y += 1;
+	$LF
+	"	//src = leather cap = 0x62
+	$LF
+	"	dest[y] = 0x62; y += 1;
+	$LF
+	"	//src = 5 (qty)
+	$LF
+	"	dest[y] = 5; y += 1;
+	$LF
+]pre
+[div class=p 
+	"今回のバグ利用で書き込みたいアドレスとデータは下記の 3 bytes です.
+	$LF
+]div
+[ul 
+	[li 
+		" $74ec: 5 (0 以外)
+		$LF
+	]li
+	[li 
+		" $74f3: 7
+		$LF
+	]li
+	[li 
+		" $78d3: 0x72 (bit7 == 0 && bit1 == 1)
+		$LF
+	]li
+]ul
+[div class=p 
+	"これは不正な文字列を読み込む直前の RAM の内容です.
+	$LF
+	[img class=embed mw-100 src=https://dev.upergrafx.com/tas_ff3/ram_after_setup.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"不正な文字列による破壊の過程で重要な変数は下記の手順で書き込まれます.
+	$LF
+]div
+[div class=p 
+	"dest = $74e9
+	$LF
+]div
+[ul 
+	[li 
+		" $74e9: item #19 ID  (どうのうでわ, 0x8b)
+		$LF
+	]li
+	[li 
+		" $74ea: item #19 qty (4)
+		$LF
+	]li
+	[li 
+		" $74eb: item #20 ID (かわのぼうし, 0x62)
+		$LF
+	]li
+	[li 
+		" *$74ec*: item #20 qty (5)
+		$LF
+	]li
+	[li 
+		" $74ed: item #21 ID
+		$LF
+	]li
+	[li 
+		" (qty = 1, 改行)
+		$LF
+	]li
+]ul
+[div class=p 
+	"dest = $74f3
+	$LF
+]div
+[ul 
+	[li 
+		" $74f3: item #22 ID (ヌンチャク, 0x06)
+		$LF
+	]li
+	[li 
+		" (qty = 2, ID= 0xfd (ポイゾナ) で y が 0xfe に増加)
+		$LF
+	]li
+	[li 
+		" $75f1: item #23 qty (3)
+		$LF
+	]li
+	[li 
+		" $75f2: item #24 ID (つえ, 0x0e)
+		$LF
+	]li
+	[li 
+		" *$74f3*: item #24 qty (7), y が 8 bit のため y = 0.
+		$LF
+	]li
+	[li 
+		" $74f4: item #25 ID
+		$LF
+	]li
+	[li 
+		" (qty = 1, 改行)
+		$LF
+	]li
+]ul
+[div class=p 
+	"dest = $74fd
+	$LF
+]div
+[ul 
+	[li 
+		" $74fd: item #26 ID (ダガー, 0x1f)
+		$LF
+		[ul 
+			[li 
+				" ここにかわのたてが入ると、ID 0x58 は文字として"ピ"となり、address 0x74f8->0x0078 に data 0xc1 (半濁音記号) が入ってしまう.
+				$LF
+			]li
+			[li 
+				" address 0x0078 は World map ID で書き換えると戦闘後にウルの村に戻らなくなり、address $07f8-$07ff の内容が変わってしまい、script pointer が address $0021 に到達しない
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" (qty = 1, 改行)
+		$LF
+	]li
+]ul
+[div class=p 
+	"dest = $78d1
+	$LF
+]div
+[ul 
+	[li 
+		" $78d1: item #16 ID (ふく, 0x72)
+		$LF
+	]li
+	[li 
+		" $78d2: item #16 qty (3)
+		$LF
+	]li
+	[li 
+		" *$78d3*: item #17 ID (かわよろい, 0x73)
+		$LF
+	]li
+	[li 
+		" (qty = 1, 改行)
+		$LF
+	]li
+]ul
+[h3 id=_19 
+	" 変数書き換えのあと
+	$LF
+]h3
+[div class=p 
+	"1人目のコマンドその4が全員のコマンド選択終了になります. それを選ぶとプログラムは戦闘終了フラグを参照し、戦闘を強制終了します.
+	$LF
+]div
+[pre 
+	$LF
+]pre
+[div class=p 
+	"戦闘強制終了後 address $74ec の内容は address $006c にコピーされます. これは 0 でなければ有効になります. address $74f3 の内容は address $0073 にコピーされて、会話した時の data と合わせて $07f8 が script pointer の参照先となります.
+	$LF
+]div
+[div class=p 
+	"script は順番にゆっくりと実行されていき、 pointer が $0021 になったとき、そのアドレスにはエンディング開始のデータ 0xdd が入り、エンディングが始まります.
+	$LF
+]div
+[h3 id=_20 
+	" その他解析資料
+	$LF
+]h3
+[div class=p 
+	"Ruby と Lua のスクリプトがありますのでご覧ください.
+	$LF
+]div
+[div class=p 
+	[a href=https://gitlab.com/na6ko/tas_finalfantasy_iii rel=noopener external nofollow 
+		"https://gitlab.com/na6ko/tas_finalfantasy_iii
+	]a
+	$LF
+]div
+[h2 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h2
+[div class=p 
+	"Pirohiko, Mimi-Hisakaki, LunaTsukinashi
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/arkiandruski 
+		"arkiandruski
+	]a
+	": Claimed.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/arkiandruski 
+		"arkiandruski
+	]a
+	": Good improvement. Accepting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing…
+]div

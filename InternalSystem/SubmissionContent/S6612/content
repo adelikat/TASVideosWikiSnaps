@@ -1,0 +1,136 @@
+7
+[ul 
+	[li 
+		" Arbitrary Code Execution
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		" Corrupts save data
+		$LF
+	]li
+	[li 
+		" Abuses opposite D-Pad presses (U+D/L+R)
+		$LF
+	]li
+	[li 
+		" Minor luck manipulation
+		$LF
+	]li
+	[li 
+		" Genre: Strategy
+		$LF
+	]li
+]ul
+[div class=p 
+	"I'm resubmitting this now that I have a significantly faster, more elegant route to arbitrary code. 
+	$LF
+]div
+[div class=p 
+	"I guess I've now made it a goal to achieve a save glitch win in as many Koei games as possible. 
+	$LF
+]div
+[div class=p 
+	"I use the same basic method in my L'Empereur TAS of a mid-frame reset to create a general pointing to controller input. However unlike L'Empereur, there is no single RAM address I can write to in order to trigger the ending. Instead, I perform rudimentary arbitrary code execution to jump to the ending by writing code to RAM.
+	$LF
+]div
+[ul 
+	[li 
+		" Through testing I found Scenario 5 allowed for the fastest route to the save corruption. The game's initial RNG seed is determined when you first press start during the intro sequence (beginning w/ the Koei logo's appearance), so I tested multiple seeds to get to my turn the fastest.
+		$LF
+	]li
+	[li 
+		" Controller input is at 0x6E, and I already have a general (Fei Shi) w/ address 0x6B6E. So it's just a matter of saving the game, sending Fei Shi to another province & resetting mid-frame to create a general w/ address 0x006E.
+		$LF
+	]li
+	[li 
+		" Beforehand, I reassign soldiers to fix the checksum of the future corrupted save. Note that the game designates generals with no soldiers as 0xFF, so setting a general to exactly 0 soldiers actually INCREASES the checksum. Here I balanced it out exactly.
+		$LF
+	]li
+]ul
+[div class=p 
+	"I went through trial and error of different methods of writing the code I need to the zero page but the method I came up with ended up being really simple. Like my last TAS, you instantiate entries in the general list by holding down the appropriate button combinations. Appointing a general as governor places them at the start of the linked general list. In order to write a specific value to the zero page, first you make a general w/ that value, appoint them General, then create a general representing the address and appoint them. This causes the previous general to be written to that address. There are some caveats:
+	$LF
+]div
+[ul 
+	[li 
+		" The value you're writing needs to also represent a writable RAM address, otherwise the general list will get obliterated.
+		$LF
+	]li
+	[li 
+		" Sometimes when appointing a glitched general, the resulting text message will contain a name string so long that it overflows over crucial data, which can crash the game.
+		$LF
+	]li
+	[li 
+		" Traversing some values when filling the general list will sometimes hit an infinite loop which can also crash the game.
+		$LF
+	]li
+]ul
+[div class=p 
+	"I reduced the number of actions I need to perform by having the controller input at $6E/$6F be part of the arbitrary code to be run. This new method only require me to appoint 3 glitch generals:
+	$LF
+]div
+[ul 
+	[li 
+		" $71AC
+		$LF
+	]li
+	[li 
+		" $006D - I can't directly instantiate this general because it traverses an infinite loop so to get him in the general list I instantiate another general that points to $006D. At this point $6D/$6E will contain AC 71. (The value in $6E gets replaced by PAD1 input on the next frame but it is still relevant)
+		$LF
+	]li
+	[li 
+		" $0006 - This is trickier, we can't just create a general $0006 because the current governor is at $6D. In order to connect to our previous general list we have to have 0x71 in $6E (PAD1 input). The list will continue to the $6E general, but we are forced to have 0x71 as the low byte. In other words, we need to have PAD1/PAD2 output point to some address $XX71 that contains 0x0006. There are a few, but I chose $F371.
+		$LF
+	]li
+]ul
+[div class=p 
+	"After selecting this general, I switch my input to $E037. When the $0006 is appointed governor, it is overwritten with the previous governor ($006D). $0006 is the virtual machine's program counter, so after this happens it begins reading code from that address. The value AC written there is the opcode for "call $XXXX", so the game then proceeds to call $E037 (ending function).
+	$LF
+]div
+[div class=p 
+	"I've been mulling this over for a while and can't think of any faster method to the ending. I looked for a way to write the address of the ending function directly into the program counter (only 2 steps) but got crashes with every possibility I tried. So 3 steps may be the minimum.
+	$LF
+]div
+[div class=p 
+	"In addition to this rudimentary ACE I've also written a full ACE bootstrap for a potential total-control TAS. The setup for it was around 10 minutes but using this new method I should be able to shave that down considerably. A simple demonstration of using it to draw custom graphics: 
+	[a href=https://www.youtube.com/watch?v=EKCj2jXPqIU rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=EKCj2jXPqIU
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": This submission is fairly similar to 
+	(__wikiLink|href=/4065M|implicitdisplaytext=4065M)
+	". No noted flaws in terms of execution. I don't see a lot of feedback here and L'Empereur didn't do that great post publication. I respect the work put into this, but there's just not much to actually watch.
+	$LF
+]div
+[div class=p 
+	"Accepting to Vault.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Pub.
+]div

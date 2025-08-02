@@ -1,0 +1,220 @@
+6
+[div class=p 
+	"I did a 
+	[a class=intlink href=/717M 
+		"vs 4 CPU player TAS
+	]a
+	" a long time ago. But why stop there? Might as well go all the way and beat 7 CPUs (max possible).
+	$LF
+]div
+[h4 id=Goals 
+	" Goals
+	$LF
+]h4
+[ul 
+	[li 
+		" 1 human player vs 7 CPUs.
+		$LF
+	]li
+	[li 
+		" Aims to win the game by fastest input (minimum input frames).
+		$LF
+	]li
+]ul
+[h4 id=Strategy 
+	" Strategy
+	$LF
+]h4
+[div class=p 
+	"The strategy in the 
+	[a class=intlink href=/717M 
+		"4 CPU TAS
+	]a
+	" of everyone double-landing on orange properties required manipulating 8 rolls after the end of input. Extending the same strategy to 7 CPUs is clearly not viable. So I changed the strategy.
+	$LF
+]div
+[div class=p 
+	"The new strategy has the following general idea:
+	$LF
+]div
+[ul 
+	[li 
+		" Get a light blue monopoly on the first turn, and set up hotels.
+		$LF
+	]li
+	[li 
+		" Have players land on the light blue monopoly.
+		$LF
+	]li
+	[li 
+		" Then get the orange monopoly on the second turn, and set up hotels.
+		$LF
+	]li
+	[li 
+		" Then have those same players land on the orange monopoly (after end of input, of course).
+		$LF
+	]li
+]ul
+[div class=p 
+	"This strategy has the upside of being much easier to manipulate, and also reducing the fastest completion time / RTA-ending time of the TAS (I'll get to that later). But you might be wondering: How do I get a light blue monopoly on the first turn? Seems impossible, doesn't it? Well, this is where Ollie comes in. Simply have Ollie land on one of the light-blue properties (Connecticut Avenue is the most convenient for this strategy), and then trade for it! Note that the trade has to occur before the player lands on the other light blue properties. So this TAS starts unusually with Ollie going first and the player going second.
+	$LF
+]div
+[div class=p 
+	"All the other CPU players will either:
+	$LF
+]div
+[ul 
+	[li 
+		" roll 9 to land on Connecticut (with hotel) followed by a 7, 9 or 10 to any orange property (with hotel), or
+		$LF
+	]li
+	[li 
+		" roll 8 to land on Vermont (with hotel) followed by a 11 to New York (with hotel).
+		$LF
+	]li
+]ul
+[div class=p 
+	"Note that Oriental/Vermont to St. James/Tennessee doesn't work, because that would leave them with $0 (not bankrupt according to the rules of the game).
+	$LF
+]div
+[div class=p 
+	"Because the roll that takes them to the orange properties occurs after the end of input, that has to be manipulated all together. So the strategy is for the 6 CPU players other than Ollie to have their rolls manipulated to be 7, 9, 10 or 11. For Ollie, the previous strategy of double-landing on orange properties applies (1+1 or 2+2 followed by 1+1 or any 3).
+	$LF
+]div
+[h4 id=ManipulatingTheEnding 
+	" Manipulating the ending
+	$LF
+]h4
+[div class=p 
+	"I used the Lua script 
+	[code 
+		"monopoly_7cpus_ending.lua
+	]code
+	" (link below) to find possible endings that work. Keeping in mind a "reasonable" TAS of everything but the ending places the RNGa index at around 18xxx, only the endings that have an initial RNGa index of >18900 are viable. But there is also the RNGb value which cycles independently of RNGa. Not all results have RNGa and RNGb values that work out.
+	$LF
+]div
+[h4 id=ManipulatingTheRunBeforeTheEnding 
+	" Manipulating the run before the ending
+	$LF
+]h4
+[div class=p 
+	"Now that I have possible endings, I used the Lua script 
+	[code 
+		"monopoly_7cpus_starting.lua
+	]code
+	" (link below) to manipulate the rest of the run.
+	$LF
+]div
+[div class=p 
+	"I already had a general strategy for manipulation: I just need the first Chance card to be "Go back 3 spaces" (to optimize getting New York quickly on the player's second turn), Ollie rolls 9 to get Connecticut which I trade for, I pick up the rest of the light blue properties and St. James (3+3 -> 1+1 -> non-double (ND) 8), 6 CPUs roll 9 or ND 8 (mostly 9). Second turn: Ollie rolls either 3 or 5, I pick up the rest of the orange properties (1+1 -> ND 4) and finish the run.
+	$LF
+]div
+[div class=p 
+	"There were some adjustments made to the Lua script, because it is not possible to determine which ending results are reasonable without optimizing the rest of the run!
+	$LF
+]div
+[div class=p 
+	"After playing with both scripts, I chose an ending which worked out relatively conveniently:
+	$LF
+]div
+[div class=p 
+	[code 
+		"RNGa: 19091, RNGb: 37, sum1: 10, sum2: 7, sum3: 11, sum4: 7, sum5: 10, sum6: 9, sum7: 2
+	]code
+	$LF
+]div
+[div class=p 
+	"Note: The RNGa and RNGb given are the indices, not the values themselves. "sum*" is the dice roll that the respective CPU player needs to roll at the beginning of their final turn. So the 3rd CPU player after me needs to roll 11 (thus must be situated on Vermont for the final turn) and Ollie needs to roll 2 (1+1) and so must be on Virginia Ave for the final turn for this ending to work. The program doesn't report Ollie's final roll but it is a 2 (1+1).
+	$LF
+]div
+[div class=p 
+	"Then I chose a result from the other script that has very few delay frames. However, I would need to "stitch" the two results together, so there is a bit of waiting as the run gets closer to the end of input.
+	$LF
+]div
+[div class=p 
+	"For those who examine the 
+	[code 
+		"monopoly_7cpus_starting.lua
+	]code
+	" script closely, you may have noticed that the script has a section where four CPU die rolls are manipulated all at once without any break in-between. That is the four CPUs who move after the player, who need to roll 9, 9, ND 8, 9 respectively (you can also see this happening in the video). Actually this is something I found completely by accident while trying more reasonable manipulations. Normally you would press Select (call player's own menu) to break the CPU die rolls to manipulate them but that costs a bit of time. For reference, the probability of all four rolls being 9, 9, ND 8, 9  is (4/36)^4 = 1/6561.
+	$LF
+]div
+[h4 id=LuaScriptsUsed 
+	" Lua scripts used:
+	$LF
+]h4
+[div class=p 
+	"monopoly_rng_monitor.lua: 
+	[a href=https://tasvideos.org/UserFiles/Info/638548875293857769 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638548875293857769
+	]a
+	$LF
+	"monopoly_rngvalues_cards.lua: 
+	[a href=https://tasvideos.org/UserFiles/Info/638548876573099359 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638548876573099359
+	]a
+	$LF
+	"monopoly_7cpus_starting.lua: 
+	[a href=https://tasvideos.org/UserFiles/Info/638548877920087482 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638548877920087482
+	]a
+	$LF
+	"monopoly_7cpus_ending.lua: 
+	[a href=https://tasvideos.org/UserFiles/Info/638548878630620764 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638548878630620764
+	]a
+	$LF
+]div
+[div class=p 
+	"For more information, see 
+	[a href=https://tasvideos.org/HomePages/FractalFusion/Source/Monopoly rel=noopener external nofollow 
+		"https://tasvideos.org/HomePages/FractalFusion/Source/Monopoly
+	]a
+	$LF
+]div
+[h4 id=WhatAboutFastestCompletionTimeRtaEndingTime 
+	" What about fastest completion time / RTA-ending time?
+	$LF
+]h4
+[div class=p 
+	"Even though this TAS aims for fastest input (as opposed to fastest completion time / RTA-ending time), I think this TAS is surprisingly not too far from the ideal fastest completion time. For one, the majority of CPU players go out in two die rolls, the minimum possible without trading or other trickery.
+	$LF
+]div
+[div class=p 
+	"It is theoretically possible to set up a light purple monopoly with hotels on the player's first turn, and only use that monopoly to bankrupt everyone, but this is far more difficult and requires having at least two CPU players go around the board maybe using Chance cards; I haven't explored it completely so I don't even know if it is feasible. TLDR: There is currently no evidence that the light purple monopoly hotel strategy is actually faster.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": After many years a new Monopoly tas has been submitted with the player destroying 7 computer players.  Many users including myself found this tas to be entertaining.  There are strategy alterations over the previous 
+	(__wikiLink|href=/717M|implicitdisplaytext=717M)
+	" publication with using a trade to get a property and using both blue and orange properties to get the CPUs to bankrupt.  Good optimization and routing.
+	$LF
+]div
+[div class=p 
+	"Accepting to Alternative with goal "7 CPUs".
+	$LF
+]div
+[div class=p 
+	"Congratulations!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

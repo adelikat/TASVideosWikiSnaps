@@ -1,0 +1,491 @@
+13
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"Another pokesub from me, this time on the Coin Case TAS. This run is ~40 seconds faster than the 
+	(__wikiLink|displaytext=previous TAS|href=/2565M)
+	" (accounting for the lack of a BIOS on the previous TAS).
+	$LF
+]div
+[h4 id=EmulatorUsedBizhawk242 
+	" Emulator used: Bizhawk 2.4.2
+	$LF
+]h4
+[ul 
+	[li 
+		" CGB in GBA is enabled for console verification.
+		$LF
+	]li
+]ul
+[h4 id=Categories 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		"Forgoes save data corruption
+		$LF
+	]li
+	[li 
+		"Executes arbitrary code
+		$LF
+	]li
+	[li 
+		"Heavy luck manipulation
+		$LF
+	]li
+]ul
+[h3 id=AboutTheRun 
+	" About the run
+	$LF
+]h3
+[h4 id=VersionChoice 
+	" Version Choice
+	$LF
+]h4
+[div class=p 
+	"Gold and Silver are mostly the same, the only relevant difference being that Silver’s title screen loads 2 frames slower. Silver was used in the previous TAS since the TID used was faster to manip on that version, however, this run manips a different TID, and Gold happens to be able to manipulate it faster.
+	$LF
+]div
+[h4 id=Route 
+	" Route
+	$LF
+]h4
+[div class=p 
+	"Most of the route pre-Coin Case is identical to my 
+	(__wikiLink|displaytext=glitchless submission|href=/6793S)
+	", with some differences:
+	$LF
+]div
+[ul 
+	[li 
+		"TID is manipulated to be F8F7; D8F7 also works, but F8F7 was much faster to manipulate.
+		$LF
+	]li
+	[li 
+		"Time is set to the default time, we don’t have to catch a Wooper here, so no need to set it to morning.
+		$LF
+	]li
+	[li 
+		"The player is named “J”. Purely an artistic choice, there is no extra cost to naming the character J.
+		$LF
+	]li
+	[li 
+		"Cyndaquil’s DVs are manipulated to be F8AF, nothing too different really, still does the job.
+		$LF
+	]li
+	[li 
+		"Cyndaquil is named “B”. Again, another artistic choice, with no extra cost.
+		$LF
+	]li
+	[li 
+		"Bellsprout is caught on Route 31. We need a filler Pokemon for the Coin Case and Bellsprout is the best since we have to encounter it anyways. It is not nicknamed, as its name will only appear 2 times in the run.
+		$LF
+	]li
+	[li 
+		"The Egg’s DVs are manipulated to be 3887. This is important later on for the ACE bootstrap.
+		$LF
+	]li
+	[li 
+		"Burn strats are completely avoided. Turns out it was actually a bit slower to use burns to save turns (loses ~3 seconds overall).
+		$LF
+		[ul 
+			[li 
+				"Russel’s level 6 Geodude is now taken out with two 1/39 non-crit Embers.
+				$LF
+			]li
+			[li 
+				"The Koffing from the last Rocket grunt is now taken out with a 1/39 non-crit and a high roll non-crit Ember.
+				$LF
+			]li
+			[li 
+				"Rival 2’s Croconaw is now taken out by three 1/39 Tackle crits and one 1/39 Tackle non-crit.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"Apparently, Amy & May's Ledyba can be KO'd by a Tackle crit, which saves a bit of time over Ember.
+		$LF
+	]li
+	[li 
+		"Tackle is swapped to the third slot on Rival 2. Tackle needs to be in the third slot for the ACE bootstrap to work, and switching moves in battle is a lot faster than out of battle.
+		$LF
+	]li
+	[li 
+		"Cut is taught to Bellsprout. Bellsprout has empty move slots, so it is fastest if we teach Cut to it.
+		$LF
+	]li
+	[li 
+		"Of course, since we’re just going to be glitching with the Coin Case, no need to catch Abra or get the bike, just go underground, defeat the 1 trainer in the way, then Coin Case away.
+		$LF
+	]li
+]ul
+[h4 id=CoinCaseGlitchImprovements 
+	" Coin Case Glitch Improvements
+	$LF
+]h4
+[div class=p 
+	"see also: 
+	(__wikiLink|displaytext=#4233: MrWint's GBC Pokémon: Silver Version in 30:39.49|href=/4233S)
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"The Coin Case glitch setup is pretty much the same until we reach party data. The previous TAS used a 
+	[code 
+		"ld hl,D900
+	]code
+	" and 
+	[code 
+		"jp hl
+	]code
+	" to jump to box names. This TAS instead uses a 
+	[code 
+		"ld hl,F86C
+	]code
+	" and 
+	[code 
+		"rst 30
+	]code
+	" to jump to box names. 
+	[code 
+		"rst 30
+	]code
+	" is really just a 1 byte call to 0030, which corresponds to:
+	$LF
+]div
+[pre 
+	"ld l,a
+	$LF
+	"pop de
+	$LF
+	"jp hl
+	$LF
+]pre
+[div class=p 
+	"The egg’s DVs are manipulated to correspond to 
+	[code 
+		"jr c,87
+	]code
+	" instruction, which will make a relative jump backwards to right before Quilava’s data (there are some other DVs that work too for this). Quilava’s species ID, which corresponds to a 
+	[code 
+		"sbc h
+	]code
+	" opcode, will be executed, and this will make 
+	[code 
+		"a = B9
+	]code
+	". This will make the 
+	[code 
+		"rst 30
+	]code
+	" jump to F8B9, which is a little before box names.
+	$LF
+]div
+[div class=p 
+	"Since we jump to the beginning of box names, we don’t have to scroll downwards to boxes 7-8 like the previous TAS. This, however, raises an issue, as we cannot plant our joypad input in the box 1 terminator, due to character restrictions. We can however plant our input in box 2’s terminator, so we can simply split the program into 3 box names. This is still much faster than scrolling down to boxes 7-8, so it’s an improvement nonetheless. The program is written like this:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 1
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"fa a6 ff
+			]td
+			[td 
+				"ld a,(ffa6)
+			]td
+			[td 
+				"Reads current joypad inputs into a
+			]td
+		]tr
+		[tr 
+			[td 
+				"fe 50
+			]td
+			[td 
+				"cp $50
+			]td
+			[td 
+				"We don’t want the terminator executed, so we eat it with a cp
+			]td
+		]tr
+		[tr 
+			[td 
+				"00 x4
+			]td
+			[td 
+				"nop x4
+			]td
+			[td 
+				"Slide down to box 2
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 2
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"aa
+			]td
+			[td 
+				"xor d
+			]td
+			[td 
+				"d stores last joypad input: find out differences to current input
+			]td
+		]tr
+		[tr 
+			[td 
+				"ea d0 f8
+			]td
+			[td 
+				"ld (f8d0),a
+			]td
+			[td 
+				"Write difference; will be executed as opcode later in the next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"aa
+			]td
+			[td 
+				"xor d
+			]td
+			[td 
+				"Restore current joypad input value
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"Copy current joypad input from a...
+			]td
+		]tr
+		[tr 
+			[td 
+				"d1
+			]td
+			[td 
+				"pop de
+			]td
+			[td 
+				"... to d (store it as last joypad input)
+			]td
+		]tr
+		[tr 
+			[td 
+				"f1
+			]td
+			[td 
+				"pop af
+			]td
+			[td 
+				"Restore a and f from the previous cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"(f8d0)
+			]td
+			[td 
+				"(any)
+			]td
+			[td 
+				"Execute opcode written earlier this cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Box 3
+				]b
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"Save a and f for next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"b6
+			]td
+			[td 
+				"or (hl)
+			]td
+			[td 
+				"Clears carry flag, needed for the jump
+			]td
+		]tr
+		[tr 
+			[td 
+				"d2 b9 f8
+			]td
+			[td 
+				"jp nc, f8b9
+			]td
+			[td 
+				"Loop back to right before Box 1; carry will never be set
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The input payload can be found 
+	[a href=https://pastebin.com/XKt0BEqT rel=noopener external nofollow 
+		"here
+	]a
+	". It’s fairly similar to MrWint’s payload, with a few improvements, namely putting our warp data next to the player’s coordinates, and using the game’s auto-input system to talk to Red, so we can simply let the game beat itself.
+	$LF
+]div
+[h3 id=NerdStuff 
+	" Nerd Stuff
+	$LF
+]h3
+[div class=p 
+	"I used the same lua in my Pokemon Silver TAS to make this TAS, it can be found 
+	[a class=intlink href=/Userfiles/Info/64200414251443809 
+		"here
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Also, for nerds, here is an encode using the lua: 
+	(youtube|v=RRRCW7BpviI)
+	$LF
+]div
+[div class=p 
+	"I also used a bot to find the needed trainer ID, my bot (which is heavily based on the RTA TID bot) can be found 
+	[a href=https://github.com/CasualPokePlayer/gb-rta-bruteforce/blob/master/src/rta/tid/GoldSilverTIDManip.java rel=noopener external nofollow 
+		"here
+	]a
+	".
+	$LF
+]div
+[h4 id=ConsoleVerification 
+	" Console Verification
+	$LF
+]h4
+[div class=p 
+	"Tikevin was able to console verify this TAS, the stream for it can be found 
+	[a href=https://youtu.be/5YjjL-cygXE rel=noopener external nofollow 
+		"here
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"As a note, since the run is just ~30 minutes, RTC almost never becomes an issue for console sync.
+	$LF
+]div
+[div class=p 
+	"Also, for publication, please use the Libretro GBC palette, that palette is the best.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": The execution in this run seems to be very good but there’s major problems with the goal.
+	$LF
+]div
+[div class=p 
+	"The run mimics the glitchless run with some minor route deviations until it gets the coin case to end the game. You look at bellsprout, then at the coin case, and then you’re at red and the game is over. It’s not a visually exciting glitch by game end glitch standards, nor are there any sort of lesser glitches leading up to that one. When discussing the submission with others, I realized the glitch had left such little of an impression on me that I forgot what it looked like and had to rewatch it to remind myself. You might as well just watch like 30 minutes of the glitchless run go “ok I’m done” and then skip to the end of the video. This is the kind of glitch that would make better for a neat youtube video solely dedicated to it than part of a dedicated TAS. The audience reaction wasn’t really great either and the 
+	(__wikiLink|displaytext=ratings on the published run|href=/Publications/Rate/2565)
+	" are less than stellar.
+	$LF
+]div
+[div class=p 
+	"Additionally it is conceptually similar to the save glitch branch. Ultimately both runs aim to use a glitch to directly trigger game end as quickly as possible. The difference between them is that the save glitch branch abuses a mid-save reset to beat the game much faster, whereas this one avoids mid-save resets and performs the coin case glitch (which is a form of Arbitrary Code Execution) a bit later into the game. While Coin Case Glitch is about 26 minutes longer, this is similar to 
+	(__wikiLink|displaytext=Super Mario Bros. 3|href=/6466S)
+	" where a much longer run was obsoleted by a much shorter one. The difference in runs here ultimately comes down to the precise “
+	(__wikiLink|displaytext=attack vector|href=/Forum/Posts/497802)
+	"” to perform the game end glitch, which imo is not an especially compelling difference for a casual audience. One could argue about the legitimacy of mid-save resets, but TASVideos has allowed them for a long time. While the specific method of save glitch used in TASes is hard to verify as being possible, it is known that one can reach game end through save glitch even in real time play. Additionally, save glitches are possible on all versions of Gen 2, meaning that the faster strategy is not locked out of versions.
+	$LF
+]div
+[div class=p 
+	"In my eyes this goal definition is quite flimsy. If the goal is no mid-save reset, what happens if a run that doesn’t use save glitches is faster than the save glitch branch? Would it obsolete both this run and the other? We also have never really made any distinction between mid-save reset and not before, especially when Arbitrary Code Execution enters the picture. If that’s not the goal, is the goal of this run to use specifically the coin case glitch? In that case, wouldn’t runs that use a similar game end glitch setup that isn’t the coin case be unable to obsolete this one?
+	$LF
+]div
+[div class=p 
+	"It seems the Pokemon RTA community has actually came to a similar conclusion, only listing any% and any% glitchless as major categories, whereas no save corruption is only listed under category extensions.
+	$LF
+]div
+[div class=p 
+	"For these reasons, I think allowing the previous Coin Case run to remain unobsoleted was a mistake, and we should correctly have it obsoleted by the save glitch branch. We may revisit this in the future if rules changes occur but for now...
+	$LF
+]div
+[div class=p 
+	"Rejecting and requesting that 
+	(__wikiLink|href=/2565M|implicitdisplaytext=2565M)
+	" be obsoleted by 
+	(__wikiLink|href=/3831M|implicitdisplaytext=3831M)
+	".
+]div

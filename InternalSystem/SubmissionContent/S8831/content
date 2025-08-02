@@ -1,0 +1,871 @@
+6
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1 (SubNesHawk core)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+]ul
+[div class=p 
+	"This run beats NES "Kaettekita! Gunjin Shogi: Nanya Sore!?" under a second with the DPCM exploit.
+	$LF
+]div
+[div class=p 
+	"Note: I don't know whether this movie syncs on a real console, but I think theoretically you can beat this game like this way on a real console.
+	$LF
+]div
+[div class=p 
+	"Note: There are no sound in the ending, possibly due to uninitialized RAM state (I will describe the details later).
+	$LF
+	"I also made 
+	(__wikiLink|displaytext=another movie|href=/UserFiles/Info/638402592738797547)
+	" for zero-initialized RAM, where the game plays sound correctly (
+	[a href=https://www.nicovideo.jp/watch/sm43247784 rel=noopener external nofollow 
+		"encode
+	]a
+	").
+	$LF
+	"I don't know much about initial RAM state, sorry.
+	$LF
+]div
+[h3 id=AboutTheGame 
+	" About the game
+	$LF
+]h3
+[div class=p 
+	""Kaettekita! Gunjin Shogi: Nanya Sore!?" is the only 
+	[a href=https://en.wikipedia.org/wiki/Gunjin_Sh%C5%8Dgi rel=noopener external nofollow 
+		"Gunjin Shogi
+	]a
+	" game for NES.
+	$LF
+	"There are five opponents, but all of them seem to have the same AI.
+	$LF
+	"When you win three times against each of them, the last opponent will appear. When you beat the last opponent, the ending starts.
+	$LF
+]div
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=DpcmExploit 
+	" DPCM exploit
+	$LF
+]h4
+[div class=p 
+	"In this game, you can easily cause a stack overflow by continuing to stall the input processing routine with subframe inputs.
+	$LF
+	"And, this game doesn't repurpose the stack page for other variables.
+	$LF
+	"So, the remaining problem is a setup for a credit warp.
+	$LF
+]div
+[div class=p 
+	"The ending routine is located at $E9B0. The goal is let the program counter jump there.
+	$LF
+	"It is possible by taking some detours, though it is difficult to directly write the address as a return address.
+	$LF
+]div
+[div class=p 
+	"First, when a NMI occurs, the stack grows as shown below (the NMI handler pushes A, X, Y registers in this order):
+	$LF
+]div
+[pre 
+	"+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+
+	$LF
+	"| Y | X | A | P | rti_addr |
+	$LF
+	"+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+
+	$LF
+]pre
+[div class=p 
+	"And, when the input processing routine stalls, there are more stuffs on the stack:
+	$LF
+]div
+[pre 
+	"+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+
+	$LF
+	"| 0xCA | 0xFD | player2_input | 0x54 | 0xFF | Y | X | A | P | rti_addr |
+	$LF
+	"+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+
+	$LF
+]pre
+[div class=p 
+	"So, when the stack overflows, you can let the program counter jump to $xxFD by overwriting the stack as below:
+	$LF
+]div
+[pre 
+	"+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+
+	$LF
+	"|  P   |       rti_addr       |
+	$LF
+	"+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+
+	$LF
+	"             ^
+	$LF
+	"             |
+	$LF
+	"+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--+
+	$LF
+	"| 0xCA | 0xFD | player2_input |
+	$LF
+	"+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"-+-
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--
+	[em 
+	]em
+	"--+
+	$LF
+]pre
+[div class=p 
+	"I let the program counter jump to $FD by setting player2_input to 0.
+	$LF
+	"$FD is the mirror variable of PPU_SCROLL x ($2005), and it's value is 0. This is 
+	[code 
+		" brk 
+	]code
+	" instruction.
+	$LF
+	"On IRQ/BRK, this game simply returns with 
+	[code 
+		" rti 
+	]code
+	". So, the program counter proceeds to $FF (note that 
+	[code 
+		" brk 
+	]code
+	" instruction skips the next byte).
+	$LF
+]div
+[div class=p 
+	"$FF is the mirror variable of PPU_CTRL ($2000), and it's value is 0x90. This is 
+	[code 
+		" bcc 
+	]code
+	" instruction.
+	$LF
+	"Its operand is fetched from $0100, and you can manipulate this while you are corrupting the stack.
+	$LF
+	"I write 0xF4 to $0100. So, the program counter branches to $F5 (note that the carry flag is false, because I copied 0xCA to the status register on the stack).
+	$LF
+]div
+[div class=p 
+	"$F5-$F8 is the input buffer. $F5-$F6 contains the edge inputs of player1/player2, and $F7-F8 contains the raw inputs of player1/player2.
+	$LF
+	"I write 
+	[code 
+		" 
+		"[0x20, 0xB0, 0xE9]
+		" 
+	]code
+	" here. This is 
+	[code 
+		" jsr $E9B0 
+	]code
+	".
+	$LF
+	"(This is possible because 0x20 is a "subset" of 0xE9, considering a byte as a bitset.)
+	$LF
+	"The game executes this code, and the program counter jumps to the ending routine.
+	$LF
+	"By the way, the ending routine never returns, so you don't have to worry about after the 
+	[code 
+		" jsr 
+	]code
+	" instruction.
+	$LF
+]div
+[div class=p 
+	"When you stall the input processing routine once, the stack will grow at most by 11 bytes. But, you can manipulate the consumed amount of the stack by adjusting the timing of NMI, using player2 inputs. (This game compares the inputs of player1/player2 separately, and the consumed CPU cycle differs slightly for each.)
+	$LF
+]div
+[h4 id=UninitializedRam 
+	" Uninitialized RAM
+	$LF
+]h4
+[div class=p 
+	"On boot, This game doesn't initialize RAM so much, and it reads some uninitialized RAM (even without DPCM exploit).
+	$LF
+	"In this run, I think the game reads the uninitialized RAM below:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$17
+			]td
+			[td 
+				"Some counter. Incremented by NMI handler without initialization.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$23
+			]td
+			[td 
+				"OAM DMA flag.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$2A
+			]td
+			[td 
+				"Input buffer. This will have no problem.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$2B
+			]td
+			[td 
+				"Input buffer.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F5
+			]td
+			[td 
+				"Input buffer.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F6
+			]td
+			[td 
+				"Input buffer.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F7
+			]td
+			[td 
+				"Input buffer. Read as "previous input" without initialization.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F8
+			]td
+			[td 
+				"Input buffer. Read as "previous input" without initialization.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$075D
+			]td
+			[td 
+				"Variable for audio driver, probably.
+			]td
+		]tr
+		[tr 
+			[td 
+				"$075E
+			]td
+			[td 
+				"Variable for audio driver, probably.
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Especially, $075D and $075E will be problematic. Probably these are variables for the audio driver, and they have initial value 0xFF on NesHawk. I think this is the reason of no sound in the ending.
+	$LF
+]div
+[h4 id=MemoryMap 
+	" Memory map
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"type
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$F5
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player1 edge input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F6
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player2 edge input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F7
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player1 raw input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$F8
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player2 raw input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$FC
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"mirror variable of PPU_SCROLL y ($2005)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$FD
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"mirror variable of PPU_SCROLL x ($2005)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$FE
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"mirror variable of PPU_MASK ($2001)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$FF
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"mirror variable of PPU_CTRL ($2000)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$E9B0
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"ending routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$FDBA
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"input processing routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$FF00
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"NMI handler
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Inputs are in ABSTUDLR format.
+	$LF
+]div
+[h3 id=Trivia 
+	" Trivia
+	$LF
+]h3
+[div class=p 
+	"This game has 
+	[a href=https://cah4e3.shedevr.org.ru/cheatsbase.php#842 rel=noopener external nofollow 
+		"a cheat
+	]a
+	" which jumps to the ending. But it's 
+	(__wikiLink|displaytext=slower|href=/UserFiles/Info/638402593442805940)
+	" than the DPCM exploit.
+	$LF
+]div
+[div class=p 
+	"This game has weird bugs. Sometimes an enemy piece appears from nothing, and sometimes even an ally piece changes into an enemy piece. (
+	[a href=https://www.youtube.com/watch?v=luC-aZw1izI rel=noopener external nofollow 
+		"example
+	]a
+	")
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": This looks really good, just like your last submission.  I didn't say this the last time, but this is proof that the emulator core is very accurate, as it mimics the DPCM hardware problem. I look forward to more of these runs. Great job.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

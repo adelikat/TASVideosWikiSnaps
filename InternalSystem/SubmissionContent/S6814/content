@@ -1,0 +1,152 @@
+6
+[h2 id=Baseball 
+	" Baseball
+	$LF
+]h2
+[h3 id=Objectives 
+	" Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		"Aims for fastest time
+		$LF
+	]li
+	[li 
+		"Manipulates luck
+		$LF
+	]li
+	[li 
+		"Makes epic use of input scripting
+		$LF
+	]li
+	[li 
+		"Genre: Sport
+		$LF
+	]li
+]ul
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"Baseball is Shigeru Miyamoto's masterful recreation of America's pastime. The game is rather primitive and has not aged very well, but it's still pretty famous because it was one of the first-ever NES games, and was apparently a big selling point for the system in North America. Still though, there's no reason to actually play it these days. If you have nostalgia for 8-bit baseball, just play RBI Baseball or Baseball Stars or something. They're still decent.
+	$LF
+]div
+[div class=p 
+	"As a big fan of men hitting balls with sticks, I always thought a TAS that aims to beat a baseball game as fast as possible would be a mildly amusing watch. Simply because if you know anything about baseball, you'd know how ridiculous the game depicted in this run is. These two pitchers are either the two greatest pitchers to ever live, or the offensive lineup these teams have shat out are crackheads who are addicted to swinging at every first pitch (and somehow always make contact, which always results in an out). It's ironic that when you think superhuman play in baseball, you think steroid abusers blasting 5000 homers in an inning, but superhuman play in baseball in a TAS sense is actually a monstrous crime against humanity.
+	$LF
+]div
+[div class=p 
+	"I'm not the first one to attempt TASing this game; that would be 
+	(__wikiLink|href=/6353S|implicitdisplaytext=6353S)
+	". This run is 9255 frames faster than that one. I give Captain Forehead credit since that run sparked my interest in creating this, even though it was not optimized enough to be published. This is also not my first TAS of this game; I made one that finished in 8:45 that I didn't submit, since I only really truly understood the randomness when I was well over halfway done, necessitating a v2.
+	$LF
+]div
+[h2 id=Mechanics 
+	" Mechanics
+	$LF
+]h2
+[h3 id=Setup 
+	" Setup
+	$LF
+]h3
+[div class=p 
+	"Baseball uses a frame-based RNG. My understanding is that this is the same as the other blackbox NES games. To put it simply, if you throw a pitch at frame whatever and the opposing batter doesn't swing, he will never swing on a pitch thrown on that particular frame, and you must find a different frame to throw the pitch. This also means that there is no way to manipulate the pitches thrown by the CPU once a plate appearance begins. So, to "manipulate" the luck, it isn't always optimal to go for the fastest out if it'll result in bad luck during the next plate appearance.
+	$LF
+]div
+[div class=p 
+	"I wait a few frames on the title screen before pressing start, to manipulate the game into giving me the home team. Then, I wait a few frames before selecting my team, in order to manipulate the game into giving me an optimal pitching matchup. I choose the Dodgers for no particular reason. I would've been fine with any team except the Yankees. The A's are the fixed CPU opponent with these frame choices, though it doesn't particularly matter which team is which.
+	$LF
+]div
+[h3 id=Pitching 
+	" Pitching
+	$LF
+]h3
+[div class=p 
+	"Before you actually start tossing any balls, it is very important to make sure the incredibly obnoxious animation of the pitcher shaking off the catcher does not play. It happens at complete random, and wastes significant time. I ran into lots of trouble making this run because of it; I'd spend close to an hour mapping out how an AB would go, finally settle on an optimal solution, only to have all my efforts go to waste because the pitcher decided to wag his head when the next batter is up. I did manage to avoid it for all 27 batters, but it was extremely monotonous stuff.
+	$LF
+]div
+[div class=p 
+	"You have 3 pitches in your arsenal. Pressing A throws a regular pitch, holding down and pressing A throws a fastball, and holding up and pressing A throws a slowball. Of course, there's no reason to use the latter in a TAS. The speed of the pitch is not terribly important in relation to the speed of the batted ball, so I use the first two pitches interchangeably, depending on which pitch gives me the best luck. You can move the pitch while it's thrown with left and right, but it's only really useful if you're going for strikeouts.
+	$LF
+]div
+[div class=p 
+	"The opposing batter's hitting power is randomly generated at the start of an AB, same with the frequency he'll swing at pitches. The hitting power isn't super important, but the swing frequency should be high, so you don't have to waste valuble time waiting for a frame where he'll finally take a hack at a pitch. The fastest way to record an out is to induce an extremely weak blooper that lands in the catcher's glove, but this is often not optimal since it'll result in poor RNG when you face the next batter. Often, my best solution was to induce contact to an infielder, who then throws to the first baseman. Even though this is not as fast, it's incredibly useful because the button press used to throw the ball after it's picked up can be delayed as many frames as you want to influence randomness against the next batter. There's no way to influence randomness when the opposing batter winds up hitting the ball directly into a glove, so it should only be done if you know in advance the randomness will be satisfactory against the next hitter.
+	$LF
+]div
+[div class=p 
+	"Also, if you have played this game, you'll know that the fielders are god-awful defensively. You can't control them, they run extremely slowly, and they often allow balls to slip right through them, as if they're the Invisible Man. Many of the defensive plays in this run that might seem a little loose are incredibly precise by this game's standards. But, I can't deny it, I lost my mind after watching an outfielder somehow miss a ball that narrowly grazes his feet or some shit. It would've made TASing this game a lot easier if these numbnuts had brains, or could dive for pitches or whatever. But maybe that's asking too much.
+	$LF
+]div
+[div class=p 
+	"When it came to selecting a frame to throw the pitch, I'm not going to sit and try out all frames by hand, because that's just way too monotonous. I used a sloppy input writer to go through all the frames within a certain point (usually like 20, because any more than that, you've probably just gotten horrible luck and should change the strat against the last batter) and throw a pitch on each one, then calculate if it results in contact by seeing if the ball's y-position increases. You still wind up with a lot of genuine hits or fouls using this method, so it still required some pruning, but it got the job done with some patience.
+	$LF
+]div
+[h3 id=Batting 
+	" Batting
+	$LF
+]h3
+[div class=p 
+	"Given that you have very little control over the pitches the CPU throws, batting is pretty tricky. For the most part, I do most of my manipulation for the batting segments on the third batter when I'm pitching, since that's the only time I can painlessly influence what the CPU will throw for the first pitch. The CPU pitcher can also waste time by shaking off the catcher, and it's tougher to get him not to do it, because you have no way to delay frames when batting. Thus, you just have to ensure your hit results in decent RNG. I used a similar input generator to pick out all the hits in the run, which was easier since the window to swing the bat is smaller.
+	$LF
+]div
+[div class=p 
+	"Most speedruns of Baseball rely on a home run to score the sole point of the game, as did the previous TAS. I opted to change the strategy to nab some outs along the way, so I start off the second inning with a double, use a sacrifice hit to move the runner to third, score the runner using a single, then hit into a double play to end the inning. If you're wondering if there's any relevance to picking the second inning, there actually is. If the game detects you're struggling long enough, putting a runner on base will drastically increase your chances of hitting a home run. So, for instance, had I attempted to do this in the sixth inning, my sacrifice hit would have left the yard. Since I'm trying to avoid a home run, I do this as soon as possible. I picked inning 2 over 1, because I was able to manipulate a quicker double there.
+	$LF
+]div
+[h4 id=OtherComments 
+	" Other comments
+	$LF
+]h4
+[div class=p 
+	"Well, thanks for reading this far. I concede that this run is probably not entertaining to watch, but if you're a fan of baseball you might get some laughs from seeing these two awful teams go at it. Also, it's nice to get a good run of a classic NES game.
+	$LF
+]div
+[div class=p 
+	"I think I did pretty well here, as evidenced by the fact that it's over 7 minutes faster than the best real-time run, but I would not be surprised if this could be improved, given the stiff mechanics of the randomness. I'm satisfied with the results of my scripts, however.
+	$LF
+]div
+[div class=p 
+	"If this run is accepted, I'll probably move on to some other NES baseball titles. Though, maybe one that features a mercy rule.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": So optimization appears to be a home run. The amount of manipulation used is quite high and the strategy used is solid as well.
+	$LF
+]div
+[div class=p 
+	"Too bad it strikes out on entertainment by being 90% outs. It is extremely repetitive and monotonous to watch.
+	$LF
+]div
+[div class=p 
+	"As slamo mentioned in the 
+	(__wikiLink|displaytext=previous submission for the game|href=/6353S)
+	", the Vault rules allow for sports games with game modes that have non-trivial speedruns. Since this is quite clearly non-trivial, this is acceptable.
+	$LF
+]div
+[div class=p 
+	"Accepting to Vault.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": 
+	[em 
+		"OH THAT'S A BASEBALL!
+	]em
+]div

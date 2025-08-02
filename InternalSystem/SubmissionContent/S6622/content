@@ -1,0 +1,361 @@
+19
+[div class=p 
+	"Isn't the tutorial optional?
+	$LF
+]div
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.4
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Executes arbitrary code
+		$LF
+	]li
+	[li 
+		" Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		" I copied this from gifvex's TCG1 comments
+		$LF
+	]li
+]ul
+[h2 id=AttemptAtNotHavingATodoDescribeThisMovieHere 
+	" Attempt at not having a TODO: describe this movie here
+	$LF
+]h2
+[div class=p 
+	[em 
+		"Pokémon Card GB2: GR-dan Sanjou!
+	]em
+	" is the Japan-only sequel to 
+	[em 
+		(__wikiLink|displaytext=Pokémon Trading Card Game|href=/6611S)
+	]em
+	". Team Great Rocket has stolen TCG Island's Pokémon cards and kidnapped the Club Masters, and you must travel to GR Island to put an end to their evil plans, by defeating them in Pokémon card duels.
+	$LF
+]div
+[div class=p 
+	"Blazephlozard needs a refresher on the rules, but his oddly-named deck ends the tutorial (and the game) a bit early.
+	$LF
+]div
+[div class=p 
+	"(Is that too stupid of a movie description?)
+	$LF
+]div
+[h2 id=Comments 
+	" Comments
+	$LF
+]h2
+[div class=p 
+	"I suggest checking out the TCG1 submission text, it probably explains some similar things better than I can. Simply put, a simultaneous Down+A input while viewing the board state (with the cursor as low as it legally should be) messes up the cursor's position, and can lead to jumping into unintended code. In the first game, most versions crash from these jumps; the US version usually ends up finishing the duel, or rarely, starts executing the duel status variables. (I should mention Up+A when the cursor is as high as it can be also causes bad jumps, but nothing useful has been found)
+	$LF
+]div
+[div class=p 
+	"This game handles it better at first, as it takes two executions of Down+A to reach bad things. The first execution just brings up a description of Grass Energy, aka card ID #1, a failsafe of sorts. But then it jumps to the deck edit information storage. Oopsies.
+	$LF
+]div
+[div class=p 
+	"gifvex discovered that the glitch can run your duel name in TCG2, and CasualPokePlayer on the Pokemon Speedruns Discord helped immensely with taking initiative, finding the credits function, and theorizing a plan to run the credits.
+	$LF
+]div
+[div class=p 
+	"Unlike TCG1, using our deck is not as good of an ACE option in this game. This is because all card IDs are now 2 bytes, one of which being a 00 or 01. So, it is impossible to write any good loads or jumps. Also, this game gives you NO spare cards at the start of the game, so, we would need to obtain more cards to be able to write anything meaningful. Luckily, this game's handling of the Down+A Glitch can send it into an area where many deck-edit-related values are temporarily stored and left behind. This can include your edited deck, but it also includes your deck's name. And that's 10 characters of relative freedom, enough to make a credits warp possible.
+	$LF
+]div
+[div class=p 
+	"Characters are 2 bytes long, with the first byte only having four possible options: 04 (increment B), 05 (decrement B), 0E (load the next byte into C), and 0F (rotate A rightward). For the second byte, we have access to opcodes 01-08, 10-6B, 6D-70, 77, and 78 (with restrictions on what the first byte is). Deleting a character from the name will remove its first byte, but leave its second byte, so the payload can finish off with an opcode normally absorbed by 0E. Generally, hirigana characters are 0E, katakana characters are 0F, English characters are 04, and I think only the energy symbols and No/Lv are 05. There are many exceptions for the punctuation symbols. I documented a lot of this here: 
+	[a href=https://pastebin.com/HEhbHeJp rel=noopener external nofollow 
+		"https://pastebin.com/HEhbHeJp
+	]a
+	$LF
+]div
+[div class=p 
+	"The plan to reach the credits is as follows:
+	$LF
+]div
+[ul 
+	[li 
+		" Use the Down+A Glitch to execute code starting at $D0D2, sliding to our deck name located at $D2E0
+		$LF
+	]li
+	[li 
+		" Place an E9 (jump to HL) byte into $D3xx, to be executed soon
+		$LF
+	]li
+	[li 
+		" Set HL = 314A (credits)
+		$LF
+	]li
+]ul
+[div class=p 
+	"When we reach $D2E0, register A is equal to D2. This makes it easy to get a D3 byte. But much more interestingly, D3 rotated rightward equals E9. And we have extremely easy access to rotating register A rightward. It's the perfect plan. I have absolutely no clue how we would have gotten an E9 in only a couple characters if not for this binary rotation being so close. So, more technically, the plan is this:
+	$LF
+]div
+[ul 
+	[li 
+		" Increment register A to D3, and put it somewhere where it can be read as the first part of an address (register B or D work well)
+		$LF
+	]li
+	[li 
+		" Rotate register A to E9, and put it in that address
+		$LF
+	]li
+	[li 
+		" Write 31 into register H, using opcode 21 "load yyxx into HL", with yy inevitably being 04/05/0E/0F
+		$LF
+	]li
+	[li 
+		" Write 4A into register L, using register C as a middleman (since 0E gives us easy access to register C)
+		$LF
+	]li
+	[li 
+		" Let execution slide to the planted E9, which jumps execution to 314A
+		$LF
+	]li
+]ul
+[div class=p 
+	"There are many variants to what the payload can be and what registers get used, but this is what the TAS ends up using, to minimize alphabet switches:
+	$LF
+]div
+[div class=p 
+	"Hirigana (default alphabet)
+	$LF
+]div
+[ul 
+	[li 
+		" 0E 4A
+		$LF
+		[ul 
+			[li 
+				" Register C = 4A
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Lowercase
+	$LF
+]div
+[ul 
+	[li 
+		" 04 3C
+		$LF
+		[ul 
+			[li 
+				" Increment A to D3
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 04 57
+		$LF
+		[ul 
+			[li 
+				" Register D = register A (D = D3)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Uppercase
+	$LF
+]div
+[ul 
+	[li 
+		" 0F 59
+		$LF
+		[ul 
+			[li 
+				" Rotate A rightwards (E9), register E = register C (E = 4A)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 04 12
+		$LF
+		[ul 
+			[li 
+				" Place A into address DE ($D34A = E9)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 04 21
+		$LF
+		[ul 
+			[li 
+				" Begin setting HL
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"Lowercase
+	$LF
+]div
+[ul 
+	[li 
+		" 04 31
+		$LF
+		[ul 
+			[li 
+				" Finish setting HL (HL = 3104)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 00 6B
+		$LF
+		[ul 
+			[li 
+				" Register L = register E (L = 4A)
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"In the end, the payload is 8 characters long, and only switches alphabets 3 times, which cut out a lot of lag frames. In particular, it uses an odd katakana character in the Uppercase alphabet to gain access to 0F while also preparing register E. Originally, it ended with 00 69 (register L = register C), but I realized that while I'm rotating A, I can make E = C, then use L = E which is in Lowercase (L = C is in Uppercase). Hope this stuff makes sense, haha.
+	$LF
+]div
+[div class=p 
+	"Inputting this naming is very complicated, and I can't say with 100% certainty that it is perfect due to how many options there are for moving the cursor around. A couple key techniques are of course using Start to warp the cursor to the bottom right, and using the bottom row to save horizontal inputs. The "Up/Down + Left/Right" technique mentioned in the TCG1 notes also applies here to move up/down every frame instead of every other frame. Overall, the amount of needed characters that are on the top or bottom rows is excellent, and almost every character's input enters the bottom row, either as a wraparound or a horizontal shortcut.
+	$LF
+]div
+[pre 
+	" Press B four times: 5 frames (B, x, B, x, B) (while moving to hirigana 4,3)
+	$LF
+	" づ: 4 frames (A, Start, Left, Up+A)
+	$LF
+	" s: 14 frames (Down, A, 7 lag, Start, Right, Down, Down+L, Down+R+A)
+	$LF
+	" _: 4 frames (Down+L, Right, Down, Right+A)
+	$LF
+	" ゥ: 14 frames (Start, L+A, 10 lag, Right, Down+A)
+	$LF
+	" C: 5 frames (Down, Left, x, Left, Down+A)
+	$LF
+	" R: 4 frames (Start, Down, Down+L, Right+A)
+	$LF
+	" h: 9 frames (Select, 6 lag, Start, Down+A)
+	$LF
+	" -: 5 frames (Left, Down, Left, Down, Down+R+A)
+	$LF
+]pre
+[div class=p 
+	"Also, I checked each possible step to stop and pause, to see if I could reduce lag frames. (No steps happened to be faster by a couple frames.) And by the way, this doesn't actually touch the game save in any way, like TCG1. Although, funnily enough, after these credits play, if you press Start it'll go back to the duel, and then you can play the credits again! Which is great, because the credits song is a masterpiece of slow and sad credits music. TCG1 has more fast and happy credits music, the two genres of credits music. Hmm... 
+	(__wikiLink|displaytext=Dynamite Headdy|href=/3599M)
+	" has both...
+	$LF
+]div
+[h2 id=ActualTcg2TasPlug 
+	" Actual TCG2 TAS plug
+	$LF
+]h2
+[div class=p 
+	"Hey, would you like to see the game actually played? Well, I'm not Japanese, so too bad! Luckily, someone Japanese did make one!
+	$LF
+]div
+[div class=p 
+	[a href=https://www.nicovideo.jp/watch/sm7256179 rel=noopener external nofollow 
+		"https://www.nicovideo.jp/watch/sm7256179
+	]a
+	" (Youtube mirror: 
+	[a href=https://www.youtube.com/watch?v=kzjuCRRaPHs rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=kzjuCRRaPHs
+	]a
+	" )
+	$LF
+]div
+[div class=p 
+	"There's quite a few reasons why a TCG2 TAS is not a project I want to take on, but having to do it in Japanese is one of the factors for sure. I also find the amount of deck edit options to be too giant, what with the 4 free decks you receive, the easy access to the Auto-Deck Machine, and the requirements some trainers have (specific type of energy, no trainers, 4 of a specific Pokemon, etc.). The idea that I could do an edit for a future duel within an edit, save it midway, and load it later, is just a little too much freedom to be able to get the run to a level of optimization I'd like. The RNG manipulation is more difficult as well, and the booster pack manipulation is extremely restrictive due to needing the ingredients for the Legendary Cards, as well as needing access to Scoop Up and Item Finders.
+	$LF
+]div
+[div class=p 
+	"The ability to use the Legendary Zapdos's Peal of Thunder to make every duel 1 turn on GR Island is both exciting and terrifying, as having such an over-reliance on a specific card (as well as the Scoop Ups) means you're basically required to do a deck edit for every single duel, or dig very very deep into your deck. I loved TCG1's optimization because of the ability to use Machop, or Staryu, or Rattata, maybe a DCE Ponyta, maybe a Nidoran/Farfetch'd. TCG2 is all Zapdos and Digger... But this guy did a fantastic job from the looks of it, and in 2009 no less! (What the hell, that's a year before p4wn3r's TCG1 TAS!)
+	$LF
+]div
+[h2 id=Screenshot 
+	" Screenshot
+	$LF
+]h2
+[div class=p 
+	"Well, being a 2 minute run with Japanese text, nothing seems too interesting... 6343 shows off the payload
+	$LF
+]div
+[div class=p 
+	[a href=https://i.imgur.com/qdMmIgF.png rel=noopener external nofollow 
+		"https://i.imgur.com/qdMmIgF.png
+	]a
+	$LF
+]div
+[div class=p 
+	"frame 6460 in english translation says "Have a practice duel with Sam?" frame 6464 in english translation says "If you ever need to relearn the basics, come at any time!" but I can't confirm what they are in japanese
+	$LF
+]div
+[div class=p 
+	[a href=https://i.imgur.com/WM5fDJy.png rel=noopener external nofollow 
+		"https://i.imgur.com/WM5fDJy.png
+	]a
+	$LF
+]div
+[div class=p 
+	[a href=https://i.imgur.com/kcqtvvL.png rel=noopener external nofollow 
+		"https://i.imgur.com/kcqtvvL.png
+	]a
+	$LF
+]div
+[div class=p 
+	"Please don't use the Gambatte palette for encoding, "VBA Accurate" was agreed upon for TCG1. Gambatte palette is really bad, orange turns into pink... (I still like Vivid...)
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": File replaced with a 4 frames improvement.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": This is another unexpected submission, especially so soon after that the prequel game got a game end glitch submission as well. The comparison between the two movies is unavoidable, for which I noticed a colder response for this submission, which is the result of various reasons. Yet, the movie itself is optimized and aims for fastest completion, so at least it's applicable for Vault.
+	$LF
+]div
+[div class=p 
+	"Accepting for Vault.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Pubs
+]div

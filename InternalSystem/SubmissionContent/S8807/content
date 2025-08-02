@@ -1,0 +1,258 @@
+7
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1 (SubNesHawk core)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Corrupts memory
+		$LF
+	]li
+	[li 
+		" 2 players (in order to manipulate the CPU stack)
+		$LF
+	]li
+]ul
+[div class=p 
+	"This run beats NES "SWAT: Special Weapons and Tactics (J)" under a second, using a glitch which stalls the input processing routine with subframe inputs.
+	$LF
+]div
+[div class=p 
+	"Note: I don't know whether this movie syncs on a real console, but I believe theoretically you can beat this game like this way on a real console.
+	$LF
+]div
+[h3 id=AboutTheGame 
+	" About the game
+	$LF
+]h3
+[div class=p 
+	""SWAT: Special Weapons and Tactics" is a strange 3-d dungeon RPG.
+	$LF
+	"You control a five member SWAT team, and you have to resque hostages from terrorists occupying a building.
+	$LF
+	"This game is 
+	[a href=https://gamefaqs.gamespot.com/nes/578474-swat-special-weapons-and-tactics/faqs/72064 rel=noopener external nofollow 
+		"notorious
+	]a
+	" for having many nasty bugs.
+	$LF
+]div
+[div class=p 
+	"This game was never released outside Japan.
+	$LF
+]div
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"This run uses a technique similar to the 
+	(__wikiLink|displaytext=SMB3 game end glitch|href=/7273S)
+	".
+	$LF
+	"I think this game is quite friendly to TAS which abuses the 
+	[a href=https://www.nesdev.org/wiki/Controller_reading#DPCM_conflict rel=noopener external nofollow 
+		"DPCM conflict
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"The input processing routine of this game has a code to workaround the DPCM conflict, and it loops until two consecutive inputs match.
+	$LF
+	"This means you can stall the routine infinitely with subframe inputs.
+	$LF
+	"And, this input processing routine is also called from NMI thread. So, you can let the CPU stack continue to grow and finally overflow.
+	$LF
+]div
+[div class=p 
+	"And, the input processing routine pushes values depending on your inputs. So, when the stack overflows, you can write any value as a return address.
+	$LF
+	"I write 0xC0C8 as a return address for 
+	[code 
+		"rts
+	]code
+	" on the stack. So, the program counter jumps to $C0C9. This code calls the ending routine and resets the game.
+	$LF
+]div
+[div class=p 
+	"This game processes a player1 input and a player2 input separately, and you can stall both of them.
+	$LF
+	"When you stall processing a player2 input, the program consumes a less amount of the stack, comparing for player1. (Because, the input processing routine is called with 
+	[code 
+		"jsr
+	]code
+	" for player1, but called with 
+	[code 
+		"jmp
+	]code
+	" for player2.)
+	$LF
+	"You can manipulate the stack pointer with this fact.
+	$LF
+]div
+[div class=p 
+	"Here is a memory map:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"type
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$02
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player1 raw input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$03
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player2 raw input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$04
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player1 edge input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"player2 edge input
+			]td
+		]tr
+		[tr 
+			[td 
+				"$C0C9
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"calls the ending routine, and resets the game
+			]td
+		]tr
+		[tr 
+			[td 
+				"$C6D5
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"ending routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$CAA9
+			]td
+			[td 
+				"code
+			]td
+			[td 
+				"input processing routine
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Inputs are RLDUTSBA format.
+	$LF
+]div
+[h3 id=Trivia 
+	" Trivia
+	$LF
+]h3
+[div class=p 
+	"This game is developed by Shouei System. On many games developed by this company (e.g. Hokuto no Ken series), you can also stall the input processing routines with subframe inputs. But, I haven't found a game on which you can easily let the stack overflow like this game.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": I'm glad that 
+	[a class=intlink href=/Users/Profile/TaoTao 
+		"TaoTao
+	]a
+	" made mention of the SMB3 "Game End Glitch", because that was exactly what this reminded me of. I saw the demo of that TAS on one of the GDQ events with 
+	[a class=intlink href=/Users/Profile/Dwango 
+		"Dwango
+	]a
+	", a number years ago.
+	$LF
+]div
+[div class=p 
+	"I used to not be a fan of memory corrupting glitches, but over the years I've learned to appreciate them more and more. This one...no exception, as it demonstrate good knowledge of the game and how to exploit it. I don't pretend to understand how this was accomplished, but I have certainly been exposed to many different game breaking techniques and I'm slowly getting there.
+	$LF
+]div
+[div class=p 
+	"Accepting!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Reuploading for clarity's sake. I know this run is heavily on the subframe side, which accounts for the weird calculations...but I just want to make sure the cycle count. just in case.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

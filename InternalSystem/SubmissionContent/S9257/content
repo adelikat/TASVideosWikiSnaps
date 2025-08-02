@@ -1,0 +1,993 @@
+6
+[div class=p 
+	(__wikiLink|displaytext=Kwirk|href=/372G)
+	" is a block-pushing puzzle game for Game Boy.
+	$LF
+	"This is a speedrun of the game's "Heading Out?" mode,
+	$LF
+	"which is a time attack of small puzzles, drawn randomly.
+	$LF
+	"The goal of this run is to clear all 120 unique floors of this mode as fast as possible.
+	$LF
+	"Besides solving each individual floor quickly,
+	$LF
+	"this requires manipulating RNG to access unplayed floors.
+	$LF
+]div
+[div class=p 
+	[a href=https://archive.org/details/kwirk-tas-headingout-allfloors-20240710/kwirk-tas-headingout-allfloors-20240710-tracker.mkv rel=noopener external nofollow 
+		[img alt=Video thumbnail, in floor 133, showing a tracker on the right side. class=embed mw-100 height=406 src=https://archive.org/download/kwirk-tas-headingout-allfloors-20240710/kwirk-tas-headingout-allfloors-20240710.thumbs/kwirk-tas-headingout-allfloors-20240710-tracker_000834.jpg width=720 
+		]img
+	]a
+	[br 
+	]br
+	$LF
+	[a href=https://archive.org/details/kwirk-tas-headingout-allfloors-20240710/kwirk-tas-headingout-allfloors-20240710-tracker.mkv rel=noopener external nofollow 
+		"(Link to video)
+	]a
+	$LF
+]div
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1
+		$LF
+	]li
+	[li 
+		" Clears every floor in Heading Out? mode at least once
+		$LF
+	]li
+	[li 
+		" Aims for fastest real time
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[div class=p 
+	"Suggested screenshot: frame 21507
+	$LF
+]div
+[h2 id=Comments 
+	" Comments
+	$LF
+]h2
+[div class=p 
+	"Kwirk has two game modes.
+	$LF
+	"Going Up? mode is the "adventure mode":
+	$LF
+	"you play 30 full-size floors in a fixed order
+	$LF
+	"across three difficulty levels, Easy, Average, and Hard.
+	$LF
+	"Heading Out? mode is the "time attack mode":
+	$LF
+	"you choose a difficulty level and a number of floors,
+	$LF
+	"and the game gives you that many mini-floors to play,
+	$LF
+	"with time-based scoring.
+	$LF
+	"The floors in Heading Out? mode are drawn randomly
+	$LF
+	"from a pool of 120,
+	$LF
+	"distributed over the three difficulty levels:
+	$LF
+	"30 in Easy, 50 in Average, and 40 in Hard.
+	$LF
+]div
+[div class=p 
+	"I started writing a Kwirk solver
+	$LF
+	"with the idea of applying it to Going Up? mode.
+	$LF
+	"This turned out to be harder than expected,
+	$LF
+	"as some of the floors are combinatorially complex.
+	$LF
+	"Luckily, 
+	(__wikiLink|href=/8905S|implicitdisplaytext=8905S)
+	" appeared and
+	$LF
+	"did Going Up? better than I would have,
+	$LF
+	"using a tuned solver and large amounts of computation and storage.
+	$LF
+]div
+[div class=p 
+	"That still leaves Heading Out? mode, which does not have a published TAS.
+	$LF
+	"The puzzles in Heading Out? are smaller, enough that
+	$LF
+	"my relatively simple solver could find
+	$LF
+	"optimal solutions for all of them.
+	$LF
+	"While the floors are smaller, there are more of them:
+	$LF
+	"120 compared to 30 in Going Up? mode.
+	$LF
+	"And while you can choose the difficulty and number of floors (from 1 to 99),
+	$LF
+	"the actual floors you get are randomly selected by the game.
+	$LF
+]div
+[div class=p 
+	"RTA runners play Heading Out? in
+	$LF
+	[a href=https://www.speedrun.com/kwirk?h=Heading_out_99_RMS-Easy&x=rklepn62-ql6gdov8.5le3g6mq rel=noopener external nofollow 
+		"a single segment of 10 or 99 floors
+	]a
+	",
+	$LF
+	"taking whatever floors the RNG gives them.
+	$LF
+	"(Which entails playing some floors more than once, in the 99-floor case.)
+	$LF
+	"For the TAS I decided to do something different:
+	$LF
+	(__wikiLink|displaytext=clear all 120 floors at least once|href=/Forum/Posts/527972)
+	",
+	$LF
+	"over multiple segments (allowing to re-seed the RNG between segments, at the cost of time).
+	$LF
+	"This is a new, invented category,
+	$LF
+	"but one I think is well-suited to a TAS.
+	$LF
+	"It adds another dimension to the optimization,
+	$LF
+	"because in addition to playing each floor optimally,
+	$LF
+	"you have to coax the RNG into giving you floors you haven't seen yet.
+	$LF
+]div
+[div class=p 
+	"The video encode attached to this submission has a tracker
+	$LF
+	"that shows which floors have been cleared so far.
+	$LF
+]div
+[h2 id=FloorSolver 
+	" Floor solver
+	$LF
+]h2
+[div class=p 
+	"The solver for individual floors is nothing very special.
+	$LF
+	"It is the typical breadth-first, 
+	[a href=https://en.wikipedia.org/wiki/Uniform_cost_search rel=noopener external nofollow 
+		"uniform cost search
+	]a
+	$LF
+	"kind of thing,
+	$LF
+	"with a reimplementation of the game rules
+	$LF
+	"and knowledge of
+	$LF
+	(__wikiLink|displaytext=the cost in frames of each action|href=/GameResources/GB/Kwirk#Movement)
+	", such as:
+	$LF
+	"9 frames to step into an empty tile,
+	$LF
+	"28 frames to push a block into a hole,
+	$LF
+	"12 frames to rotate a turnstile.
+	$LF
+	"As there is no randomness within floors,
+	$LF
+	"all solutions can be pre-computed as
+	$LF
+	(__wikiLink|displaytext=fixed move sequences|href=/GameResources/GB/Kwirk#HeadingOutSolutions)
+	".
+	$LF
+	"I am confident the per-floor solutions are optimal.
+	$LF
+]div
+[div class=p 
+	"The game counts "steps" as well as frames.
+	$LF
+	"This run tries to minimize real time (frames),
+	$LF
+	"not steps or in-game time.
+	$LF
+]div
+[h2 id=RandomFloorScheduling 
+	" Random floor scheduling
+	$LF
+]h2
+[div class=p 
+	"The floors in Heading Out? are
+	$LF
+	(__wikiLink|displaytext=internally numbered|href=/GameResources/GB/Kwirk#FloorNumbers)
+	$LF
+	"30–59 for Easy,
+	$LF
+	"60–109 for Average, and
+	$LF
+	"110–149 for Hard.
+	$LF
+	"Floor numbers 0–29 are used for Going Up? mode.
+	$LF
+]div
+[div class=p 
+	"The 
+	(__wikiLink|displaytext=RNG|href=/GameResources/GB/Kwirk#Rng)
+	" is seeded,
+	$LF
+	"at the start of each segment,
+	$LF
+	"with a frame counter mod 60.
+	$LF
+	"This means the only possible seeds are 0–59,
+	$LF
+	"and you can get any seed you want
+	$LF
+	"by waiting at the confirmation menu for up to 1 second.
+	$LF
+	"A complete schedule of floors is
+	$LF
+	(__wikiLink|displaytext=generated|href=/GameResources/GB/Kwirk#HeadingOutFloorSchedules)
+	$LF
+	"as soon as you hit Start.
+	$LF
+	"There is no way to affect the RNG while playing a segment,
+	$LF
+	"only between segments.
+	$LF
+	"In the video encode attached to this submission,
+	$LF
+	"you can see the constantly updating frame counter that is used to set the RNG seed (in gray),
+	$LF
+	"and the seed used for the current segment (in white).
+	$LF
+]div
+[div class=p 
+	"Each floor has a 50% random chance of being
+	$LF
+	(__wikiLink|displaytext=inverted|href=/GameResources/GB/Kwirk#HeadingOutInvertedFloors)
+	" (flipped vertically).
+	$LF
+	"This does not have much of an effect on gameplay or routing.
+	$LF
+	"The inverted version of a floor has essentially the same solution as the normal version,
+	$LF
+	"but it may be slightly faster or slower to solve,
+	$LF
+	"because inversion affects the shape of the passages
+	$LF
+	"into and out of the central puzzle area.
+	$LF
+]div
+[div class=p 
+	"It might seem that there are only 60 possible floor schedules
+	$LF
+	"per difficulty level,
+	$LF
+	"which is 
+	(__wikiLink|displaytext=what I thought at first|href=/Forum/Posts/529331)
+	".
+	$LF
+	"But there's an important complication.
+	$LF
+	"The game keeps track of the 20 most recently played floors,
+	$LF
+	"and will never repeat a floor that is in that set.
+	$LF
+	"This filter remains in effect across segments
+	$LF
+	"and even across difficulty levels,
+	$LF
+	"because the set of recently played floors is indexed
+	$LF
+	"relative to the start of the difficulty level.
+	$LF
+	"This means, for example, that if you have just cleared floor 35 (which is index 5 in Easy)
+	$LF
+	"and started a new segment,
+	$LF
+	"none of the next 20 floors can be
+	$LF
+	"35 (index 5 in Easy),
+	$LF
+	"65 (index 5 in Average), or
+	$LF
+	"115 (index 5 in Hard).
+	$LF
+	"Massaging the random floor generation algorithm
+	$LF
+	"with this cross-segment carryover
+	$LF
+	"is critical for getting long sequences of
+	$LF
+	"not-yet-played floors.
+	$LF
+]div
+[div class=p 
+	"But it's not simple to optimize.
+	$LF
+	"(If you think of it as a graph search problem,
+	$LF
+	"the 
+	[a href=https://en.wikipedia.org/wiki/Branching_factor rel=noopener external nofollow 
+		"branching factor
+	]a
+	" is about 181,
+	$LF
+	"because after clearing a floor you have the option of
+	$LF
+	"continuing in the current segment,
+	$LF
+	"or starting a new segment in one of 3 difficulty levels and one of 60 random seeds.)
+	$LF
+	"The route used in this run is the result of a computer search.
+	$LF
+	"In the end I turned to a
+	$LF
+	(__wikiLink|displaytext=genetic algorithm|href=/Forum/Posts/530388)
+	$LF
+	"to find the segment route shown below,
+	$LF
+	"which has 8 segments and 1 repeated floor.
+	$LF
+	"I am pretty happy with this route,
+	$LF
+	"but it has no proof of optimality.
+	$LF
+	"It may be possible to improve on this route,
+	$LF
+	"whether by using fewer segments,
+	$LF
+	"repeating no floors,
+	$LF
+	"repeating a 
+	[em 
+		"shorter
+	]em
+	" floor,
+	$LF
+	"getting more favorable inverted floors,
+	$LF
+	"or spending less time waiting for RNG seeds to roll around.
+	$LF
+]div
+[div class=p 
+	"Seed 42 in the Easy difficulty level is extremely lucky.
+	$LF
+	"On a freshly started game,
+	$LF
+	"seed 42 hits all 30 floors exactly once with no repeats.
+	$LF
+	"The route starts there, because it's hard to beat for efficiency.
+	$LF
+	"It only works when it's the first segment,
+	$LF
+	"and the history of recently played floors is empty.
+	$LF
+	"If you've already played a segment,
+	$LF
+	"the recently played floors filter will cause you to get
+	$LF
+	"a different sequence of floors
+	$LF
+	"that no longer covers all 30 possibilities cleanly.
+	$LF
+]div
+[h2 id=Route 
+	" The route
+	$LF
+]h2
+[div class=p 
+	"The route consists of 8 segments.
+	$LF
+	"Only 1 floor is repeated, floor 
+	[em 
+		"90
+	]em
+	" in the Average difficulty level.
+	$LF
+	"An "i" suffix means the inverted version of a floor.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Skill
+			]th
+			[th 
+				"Seed
+			]th
+			[th 
+				"# Floors
+			]th
+			[th 
+				"Floors
+			]th
+		]tr
+		[tr 
+			[td 
+				"Easy
+			]td
+			[td 
+				"42
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"32i, 35i, 55i, 46, 59, 45i, 49i, 58, 56, 33, 30i, 57, 48i, 31i, 47i, 51i, 37, 41, 38, 44i, 50i, 34i, 42i, 53, 43, 54i, 40i, 36, 52i, 39i
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hard
+			]td
+			[td 
+				"34
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"138i, 110i, 139, 113i, 146, 148i, 111i, 144i, 143, 140, 131, 142i, 136i, 149i, 112i, 147, 121, 129i, 127i, 141, 135i, 115i
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hard
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"128i, 123i, 145i, 117, 114i, 125, 119, 120, 133, 137
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hard
+			]td
+			[td 
+				"58
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"132, 122i, 126, 124i, 134i, 130, 118, 116
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"37
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"109i, 100, 106, 104i, 98i, 65i, 63i, 93, 90, 73i, 95i, 96
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"89i, 108, 71, 94, 87i, 102, 86, 92i, 80, 103i, 60i, 91, 97, 64, 62i
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"68, 82i, 83i, 74i, 99, 70i, 76, 84i, 101, 77, 67, 
+				[em 
+					"90
+				]em
+				", 69, 107, 105i
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"78, 75, 61i, 79, 88, 72, 85, 81i, 66i
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"There are
+	$LF
+	(__wikiLink|displaytext=routes with no repeats|href=/Forum/Posts/530388)
+	",
+	$LF
+	"but they are slower overall,
+	$LF
+	"because they require more segments.
+	$LF
+	"The scrolling animation between floors in a segment takes about 3.5 seconds,
+	$LF
+	"while starting a new segment (with the associated fanfares, menuing, etc.) costs around 11.5 seconds.
+	$LF
+	"For perspective, this route with 1 repeat is
+	$LF
+	(__wikiLink|displaytext=171 frames (2.9 seconds) faster|href=/Forum/Posts/530388)
+	" than the fastest route I found
+	$LF
+	"with no repeats.
+	$LF
+	"It's a small fraction of the overall time,
+	$LF
+	"but once you've optimized every individual floor,
+	$LF
+	"the only improvements can come from better routing.
+	$LF
+]div
+[div class=p 
+	"The sum of in-game times per segment is 23:39.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Skill
+			]th
+			[th 
+				"Seed
+			]th
+			[th 
+				"# Floors
+			]th
+			[th 
+				"In-game time
+			]th
+		]tr
+		[tr 
+			[td 
+				"Easy
+			]td
+			[td 
+				"42
+			]td
+			[td 
+				"30
+			]td
+			[td 
+				"4:30
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hard
+			]td
+			[td 
+				"34
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"5:37
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hard
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"2:34
+			]td
+		]tr
+		[tr 
+			[td 
+				"Hard
+			]td
+			[td 
+				"58
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"1:37
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"37
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"2:16
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"3:02
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"2:31
+			]td
+		]tr
+		[tr 
+			[td 
+				"Average
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"1:32
+			]td
+		]tr
+		[tr 
+			[td 
+				"total
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"23:39
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=FloorComments 
+	" Floor comments
+	$LF
+]h2
+[div class=p 
+	"I won't comment on every floor, just some of the more noteworthy ones.
+	$LF
+]div
+[h3 id=0142EasyFloor30i 
+	" 01:42 Easy floor 30i
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 30i before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-30i.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 30i is the shortest floor in Easy,
+	$LF
+	"with 26 steps and 240 frames.
+	$LF
+]div
+[div class=p 
+	"Perhaps surprisingly,
+	$LF
+	"it is not the shortest floor overall,
+	$LF
+	"which is rather floor 76 in Average.
+	$LF
+]div
+[h3 id=0425EasyFloor52i 
+	" 04:25 Easy floor 52i
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 52i before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-52i.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 52i is the longest floor in Easy,
+	$LF
+	"with 56 steps and 528 frames.
+	$LF
+]div
+[h3 id=0613HardFloor148i 
+	" 06:13 Hard floor 148i
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 148i before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-148i.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 148i is the longest floor in Hard,
+	$LF
+	"and the longest of the run overall,
+	$LF
+	"with 132 steps and 1239 frames.
+	$LF
+]div
+[h3 id=0740HardFloor131 
+	" 07:40 Hard floor 131
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 131 before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-131.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 131 is the shortest floor in Hard,
+	$LF
+	"with 34 steps and 318 frames.
+	$LF
+]div
+[h3 id=0953HardFloor141 
+	" 09:53 Hard floor 141
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 141 before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-141.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 141 is the only floor
+	$LF
+	"that is not sight-readable,
+	$LF
+	"by which I mean it violates a convention
+	$LF
+	"that is observed everywhere else in the game.
+	$LF
+	"In the initial configuration,
+	$LF
+	"the west spoke of the "T" turnstile
+	$LF
+	"covers a hole tile, which never happens in any other floor,
+	$LF
+	"whether in Going Up? or Heading Out? mode.
+	$LF
+	"Although you cannot see it at first,
+	$LF
+	"without that hole the floor is unsolvable.
+	$LF
+]div
+[div class=p 
+	"I know this because my
+	$LF
+	(__wikiLink|displaytext=map extraction script|href=/Forum/Posts/528014)
+	$LF
+	"did not handle this case correctly at first :)
+	$LF
+]div
+[h3 id=1855AverageFloor86 
+	" 18:55 Average floor 86
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 86 before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-86.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 86 is the longest floor in Average,
+	$LF
+	"with 128 steps and 1218 frames.
+	$LF
+]div
+[h3 id=2054QuickRestart 
+	" 20:54 quick restart
+	$LF
+]h3
+[div class=p 
+	[img alt=Heading Out? Level #2 15RMS. Start / End. class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-average-15.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"There are two consecutive segments
+	$LF
+	"that both have a difficulty level of Average
+	$LF
+	"and a floor count of 15;
+	$LF
+	"only the RNG seed is different.
+	$LF
+	"Because the difficulty level and number of floors is the same,
+	$LF
+	"we do not even have to
+	$LF
+	(__wikiLink|displaytext=enter the menus|href=/Forum/Posts/529194)
+	$LF
+	"between these two segments,
+	$LF
+	"just wait for the next RNG seed.
+	$LF
+	"This is not something the route optimizer was trained to look for,
+	$LF
+	"just a lucky coincidence.
+	$LF
+]div
+[h3 id=2158AverageFloor76 
+	" 21:58 Average floor 76
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 76 before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-76.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Floor 76 is the shortest floor in Average,
+	$LF
+	"and the shortest of the run overall,
+	$LF
+	"with 26 steps and 238 frames.
+	$LF
+]div
+[h3 id=2252AverageFloor90Repeated 
+	" 22:52 Average floor 90 repeated
+	$LF
+]h3
+[div class=p 
+	[img alt=Floor 90 before solving class=embed mw-100 height=288 src=https://www.bamsoftware.com/computers/tasvideos/kwirk-90.png width=320 
+	]img
+	$LF
+]div
+[div class=p 
+	"Here we repeat floor 90, which is the only repeated floor of the run.
+	$LF
+	"It is a pretty short floor, 41 steps and 388 frames.
+	$LF
+	"It was played for the first time at 16:56.
+	$LF
+]div
+[h2 id=Availability 
+	" Availability
+	$LF
+]h2
+[div class=p 
+	"My posts documenting the development of this run start at 
+	(__wikiLink|href=/Forum/Posts/527972|implicitdisplaytext=Forum/Posts/527972)
+	".
+	$LF
+]div
+[div class=p 
+	"My source code and notes are in a Git repository:
+	$LF
+]div
+[pre 
+	"git clone https://www.bamsoftware.com/git/kwirk.git
+	$LF
+]pre
+[h2 id=Thanks 
+	" Thanks
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/CasualPokePlayer 
+			"CasualPokePlayer
+		]a
+		" for help with 
+		[a href=https://github.com/TASEmulators/BizHawk/issues/1430#issuecomment-1987446287 rel=noopener external nofollow 
+			"memory savestates
+		]a
+		" and 
+		(__wikiLink|displaytext=video export|href=/Forum/Topics/25636)
+		" in BizHawk.
+		$LF
+	]li
+	[li 
+		" Bas van Westing for the 
+		[a href=https://github.com/basvanwesting/genetic-algorithm rel=noopener external nofollow 
+			"genetic-algorithm
+		]a
+		" crate I used in the route optimizer.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Re-uploading to correct any possible cycle count issues.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": I'm a big fan of solving tools that optimize game-play. This TAS is no exception.  You caught my attention, when you confirmed my 
+	(__wikiLink|href=/6148M|implicitdisplaytext=6148M)
+	" solutions with math...instead of my brute forcing scripts.  So naturally, I find your tools and efforts to have great strength, and I have complete confidence in this run. A lot times, I can't see the end coming, until the last moment. In my opinion, that is the sign of a true solution...where human effort can often be foreseen. On top of all this, finding that RNG seed is also important. I've observed a small group of members that really focus on finding that perfect seed. So, with all that said...I'm always cautious about saying that nothing else can be found, but it sure does look like you have clinched this game. Congratulations on excellent work! I look forward to your future submissions!
+	$LF
+]div
+[div class=p 
+	"Happily Accepting!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing. 
+	[a class=intlink href=/Users/Profile/Dimon12321 
+		"Dimon12321
+	]a
+	" is handling the encodes for this one.
+]div

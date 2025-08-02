@@ -1,0 +1,1435 @@
+7
+[h2 id=Boktai2SolarBoyDjangoAnyIn1344927 
+	"Boktai 2: Solar Boy Django - Any% in 1:34:49.27
+	$LF
+]h2
+[ul 
+	[li 
+		"Emulator used: BizHawk 2.9.1
+		$LF
+	]li
+	[li 
+		"BIOS used: gba_bios.bin
+		$LF
+	]li
+	[li 
+		"Takes intentional damage
+		$LF
+	]li
+	[li 
+		"Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		"Heavy resource management
+		$LF
+	]li
+	[li 
+		"Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		"Uses an in-game code
+		$LF
+	]li
+	[li 
+		"Uses warps
+		$LF
+	]li
+]ul
+[div class=p 
+	"Boktai has the distinction of being the only game series to use real UV technology. The GBA cartridges feature a physical solar sensor, which is a semiconductor photon diode that detects Ultraviolet, or UV radiation. UV is typically divided into three ranges based on the wavelength; UV-A, which is 315-400 nanometers, UV-B, which is 280-315 nm, and UV-C, which is 100-280 nm. UV-B/C exposure can be particularly dangerous to humans, with UV-C in particular seeing industrial uses as a germicide. The specific sensor used in the cartridge is the Hamamatsu Photonics G5842, which senses the range of 260-400nm, centred around 370nm. This means that it responds best to UV-A radiation, the upper bound of natural sunlight, and what is typically used in commercial blacklight LEDs. 
+	$LF
+]div
+[div class=p 
+	"None of this information poses any relevance to the movie, as the solar sensor function is emulated within mGBA and BizHawk. The game's native sensor range is represented as an integer between 0-255, with 255 representing total darkness and 0 representing maximum brightness. This is an ambiguous value as the maximum recognised ingame is clamped after initial system calibration and may otherwise be throttled below what the hardware is electronically capable of recognising, which may be as high as, to quote GBAtek, "Close to a tactical nuclear bomb dropped on your city". In emulation this expressed range is inverted, so for all intents and purposes, henceforth 0 will represent total darkness and 255 will represent maximum brightness. The specific ranges used to achieve a given value on the Sun gauge ingame can be seen on 
+	[a href=https://raphi.xyz/~raphi/boktai/sensor_graph rel=noopener external nofollow 
+		"this graph presented by Raphi.
+	]a
+	$LF
+]div
+[ul 
+	[li 
+		"Suggested screenshots: Frame 127112, Frame 324120
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Movie length: 339,806 frames
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Re-record count: 129,389
+		$LF
+	]li
+]ul
+[div class=p 
+	"The end of these comments will feature a comparison table between the time this TAS achieves, against my PB at the time of creation, which at the time was the RTA world record and has since been improved by 11 seconds by myself.
+	$LF
+]div
+[h3 id=ThanksContributors 
+	"THANKS/CONTRIBUTORS
+	$LF
+]h3
+[div class=p 
+	"Special thanks go to the members of the Boktai speedrunning community whose help enabled me to even dream of finishing this movie; xDrHellx for developing the Bok Interface tool which allowed me to test different loadouts and inventories in a sandbox environment, Raphi and Shenef for their diligent work in providing memory addresses and LUA scripts to monitor game events and information, and Coa1escence for thoroughly documenting the game's mechanics and figuring out how to apply the route's most critical RNG manip in an RTA environment, and helping me to reproduce it in the specific gamestate I found myself in during this movie. Special thanks also go to RetroEdit for helping to identify and report emulation inaccuracies regarding the solar sensor/GPIO, which will hopefully be fixed in a future release and make any improvements to this movie file a less stressful experience.
+	$LF
+]div
+[h3 id=GameMechanics 
+	"GAME MECHANICS
+	$LF
+]h3
+[div class=p 
+	"Boktai 2 is an action-RPG that can be described as "Metal Gear Solid-meets-Castlevania". The first game in the series was developed by Hideo Kojima and has a high emphasis on stealth mechanics. These mechanics still exist in Boktai 2 (Henceforth referred to as Zoktai) but there are very few rooms which force the player to avoid discovery. Zoktai instead plays more like a traditional RPG, with emphasis on gaining EXP to level up and improve stats, upgrading your gear such as weapons and armour, etc. Progression is entirely linear; no known methods exist to skip or otherwise play dungeons out of sequence, so we follow the natural order of Cathedral > Remains > Dark City > Aqueduct > Spiral Tower > Undead Zone.
+	$LF
+]div
+[div class=p 
+	"Combat features the use of three different weapon types; Swords, Spears and Hammers. Technically speaking, you can also use Unarmed at any point, and Gun towards the end of the game, but Unarmed is terrible and is only used once during the tutorial, while Gun is even more terrible and isn't even used in the movie. Sword is the weapon type used for combat whenever possible owing to its combination of having the highest attack speed of the weapon types, whilst still hitting relatively hard. Spears and Hammers are situationally used to solve puzzles where required, as Spears have a longer reach in order to hit levers that are normally out of range, and Hammers can break wooden blocks or operate rusted levers. Damage is further modified by a series of factors, and the full details of damage calculation can be viewed on 
+	[a href=https://docs.google.com/document/d/1FGIDmBzJ-Z96d3m5rLntOOBMHOcwhZJ_J3xxVCH-Vus/edit?tab=t.0 rel=noopener external nofollow 
+		"this sheet by Coa1escence.
+	]a
+	$LF
+]div
+[div class=p 
+	"Further game mechanics are explained in a 
+	[a href=https://docs.google.com/document/d/1ssoz0l0Mn_0WqlIPyarGZJV29x7_BGQ6Fw8WWiu0Ajs/edit?tab=t.0 rel=noopener external nofollow 
+		"separate sheet also made by Coa1escence.
+	]a
+	$LF
+	"Sub-sections relevant to the movie file include Item Drop Rates, Weapon Skill Progression, Solar Bank Interest, Energy Charging Rates, Perishable Items, Clocktower and Full Moon Dates, which will be expanded on as needed.
+	$LF
+]div
+[div class=p 
+	"Zoktai uses an isometric-style camera view, though the movement engine does not behave as it does in similar games that use strictly isometric movement, such as Megaman Battle Network. The four primary D-pad directions plus diagonals can be used, providing 8-way movement. Due to the isometric camera view, "North" is what the player sees as "up-right", with the other directions corresponding to the other respective diagonals. Room exits universally face north, east, south or west. Movement speed in Zoktai is dynamic, where your walking speed is a product of Django's AGIL stat, minus the Weight value of whatever armour is currently equipped. For instance, when gaining control in the movie, Django has an AGIL of 12 and a Weight of 5, resulting in a final value of 7. This value then falls into a Speed Category, which can be checked against the following table:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" 
+			]th
+			[th 
+				"Pixels per second
+			]th
+		]tr
+		[tr 
+			[th 
+				"Category 1 (34-99 Speed)
+			]th
+			[td 
+				"90
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 2 (25-33 Speed)
+			]th
+			[td 
+				"84
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 3 (17-24 Speed)
+			]th
+			[td 
+				"79
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 4 (9-16 Speed)
+			]th
+			[td 
+				"73
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 5 (0-8 Speed)
+			]th
+			[td 
+				"67
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 6 (-8 - -1 Speed)
+			]th
+			[td 
+				"61
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 7 (-16 - -9 Speed)
+			]th
+			[td 
+				"56
+			]td
+		]tr
+		[tr 
+			[th 
+				"Category 8 (-40 - -17 Speed)
+			]th
+			[td 
+				"50
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Thus we can see that Django initially begins at Category 5, moving 67 pixels per second. The highest reached in this movie is Category 2, as each new Category reached brings slightly diminishing returns, and the increase in speed from Category 2 to Category 1 does not outweigh the opportunity cost of investing the required stat points elsewhere.
+	$LF
+]div
+[div class=p 
+	"These rules cease to apply once reaching the Aqueduct scenario and gaining access to the Dash magic, which is used for movement whenever possible. Dash causes Django to run forwards based on the current Sun level for 16 frames, ignoring normal speed rules. At the maximum Sun value of 10, this dashing speed is approximately 50% faster than running at Category 1. The frame data for how long a dash lasts can vary depending on Sun level, but 10 is taken as the standard unless there is a specific reason to use something else.
+	$LF
+]div
+[h3 id=DjangoSStats 
+	"DJANGO'S STATS
+	$LF
+]h3
+[ul 
+	[li 
+		"VIT: Determines max Life. Max Life at the start of the game is set to 100, and is not raised at any point, as it is never required and saves no time to do so.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"SPRT: Determines max Energy. Max Energy at the start of the game is set to 150, and is used to fuel all enchantment attacks and is passively regenerated whilst outdoors and exposed to sunlight (See Energy Charging Rates in the previously-linked game mechanics document) or can be actively charged whilst exposed to sunlight by holding A. This stat is also not raised as it is not helpful, though can be potentially more useful than having higher max Life.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"STRG: Determines physical damage dealt. This is the primary stat of the run, and is maximised as quickly as possible. Higher STRG = enemies die in fewer hits = more time saved, and indirectly increases energy efficiency as fewer hits to kill enemies results in less energy spent. Every 2 points in STRG translates to 1 extra ATCK power, if a singular STRG point does not result in an ATCK increase, that STRG point is functionally doing nothing.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"AGIL: Determines movement speed and defense. This is the secondary stat of the run, and is raised to certain breakpoints as soon as possible based on the above table showing the movement speed Categories. Movie begins at Category 5, and ends at Category 2.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Status Points: Used to upgrade the above stats. Every time Django levels up, he gains 3 Status Points to assign. Stats are not always upgraded as soon as a levelup is reached, or even every 
+		[em 
+			"time
+		]em
+		" a levelup is reached, because it is not always faster to do so due to the menuing required.
+		$LF
+	]li
+]ul
+[h3 id=MovementTechAndTricksUsed 
+	"MOVEMENT TECH AND TRICKS USED
+	$LF
+]h3
+[ul 
+	[li 
+		"Input buffering: When chaining multiple weapon attacks together, there is a frame window that will cause the next attack to begin on the first actionable frame. Whenever possible, all attack inputs are performed on the first frame of the buffer window.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Wall grazing: When running in a strictly orthogonal direction on the D-pad, Django will graze against walls, reducing his movement speed. This is to be avoided as a general rule, but can be situationally useful to safely pass enemies stationed next to a corner, where aligning "perfectly" with the corner would result in contacting them on the frame you pass the corner joint.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Slope clipping: As well as the X and Y axis, Zoktai also uses a Z axis with different elevations connected either by an elevator, or by a slope. Movement on slopes behaves slightly differently to normal, but the biggest difference to exploit is that the top and bottom edges of slopes can be clipped across, saving several frames over crossing the entire tiles.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Camera scrolling: By holding the R button and using directional input, the camera can be scrolled away from Django's position. This is a situational mechanic which has no specific function in and of itself, but is very useful for the next entry.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Lag reduction: Zoktai is prone to experiencing lag when enough sprites are drawn onscreen at once. Certain actions are not performed on the first possible frame if it would result in a net loss of frames due to extra lag being generated, or a longer loading time on room transition. Camera scrolling is frequently used during combat and purifications in order to scroll sprites offscreen and reduce the lag being generated.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"RNG manipulation: Heavily exploited throughout the whole movie. The primary memory address to watch is 46B8, a 4-byte value in IWRAM commonly referred to as "RNG2". RNG2 is set to 833 on game boot, and progresses by variable amounts whenever sprites are drawn onscreen. This index caps at 1023 before overflowing to 0, creating 1024 distinct RNG addresses for random drops. (See 
+		[a href=https://docs.google.com/spreadsheets/d/1AmgzR6hBoJBR-XSX8VUG9ER2dpXtfJgua0FNJIa10yA rel=noopener external nofollow 
+			"Coa1escence's Drop/Spawn Rate table
+		]a
+		") The important thing to note is that all enemies have a Common drop table, and a Rare drop table. Based on the number of eligible RNG indexes, these have a 10.8% and a 1.2% from enemies respectively, and these values are not evenly distributed across the 1024 range, creating clusters that are more favourable to target for manips, as well as clusters that simply don't allow for a timely drop to be manipulated. Rare drops in particular very often require an extended manip carried across multiple rooms.
+		$LF
+	]li
+]ul
+[h3 id=EmulationDisclaimer 
+	"EMULATION DISCLAIMER
+	$LF
+]h3
+[div class=p 
+	"As noted above, RetroEdit was instrumental in helping to identify and report an issue with the emulation of the solar sensor function itself. In basic terms, rewinding within TAStudio would commonly cause desyncs with the reported sunlight level ingame, which to my understanding is an issue in how savestates are handled. The practical consequences of this are variable, up to and including full desyncs due to differing numbers of lag frames occurring, or RNG advancing differently than intended. These differences would not become apparent until replaying the movie from an earlier point, which presumably caused the "correct" savestate to be used from the point of divergence. Please note that while I took great efforts to ensure that this movie was optimised where possible, this emulation issue made optimising a few sections as tightly as I would have liked extremely impractical. Occasional compromises were made such as spending an extra couple of frames on Energy management in order to eliminate the possibility of a desync causing me to run out of Energy before a planned recharge. The final fight in particular is likely not fully optimised as these sensor desync issues may occur at any point during the fight owing to its unique mechanics. The vast majority of this movie is "well-optimised" in my opinion, but I ask for viewers to understand that I did the best that I could in these more difficult moments with the complications that the emulation presented.
+	$LF
+]div
+[h3 id=SystemSetup 
+	"SYSTEM SETUP
+	$LF
+]h3
+[div class=p 
+	"After booting the system, a frame-perfect A input is used to skip the initial informational screen that tells the player that the solar sensor only responds to UV radiation, and not general lightbulbs. The first screen seen is the Sensor Calibration screen, which is used to establish the baseline by which the game will judge that no UV is hitting the solar sensor. This screen is advanced as quickly as possible, causing a failed calibration. For all intents and purposes, this simply results in a "normal" calibration, where darkness and light are defined roughly correctly, and the game behaves as though no UV was present during calibration.
+	$LF
+]div
+[div class=p 
+	"The system time is then set, requiring the RTC setting in GBA Sync settings to be set to FALSE. The movie begins with a system time of 19:00PM, August 20th 2005. Multiple dates can be used for the run, but this is the quickest to initially set up. The only hard rule is to play at night-time, during the date of a full moon. That is, a 
+	[b 
+		"real-life full moon date.
+	]b
+	" See Full Moon Dates in the Game Mechanics sheet for a table showing all eligible full moon dates, these do match an actual lunar calendar that can be looked up online. Zoktai's day/night cycle uses four different states based on the hour of the day; Dawn, Day, Dusk and Night. Night is universally required for reasons that shall be expanded upon later.
+	$LF
+]div
+[div class=p 
+	"The following screen is a region selection, which is only useful for creating an offset to determine time of day against the system time set. This is not important to change, and thus the default selection is chosen.
+	$LF
+]div
+[h3 id=PasswordScreen 
+	"PASSWORD SCREEN
+	$LF
+]h3
+[div class=p 
+	"Upon starting a new game, a password is immediately used. Zoktai gives the player the option of entering a password gained upon completion of Boktai 1, which can offer stat bonuses and a different starting inventory based on how the player performed in their Boktai 1 playthrough. For this run, a password is used that corresponds to the "Dark Boy" title granted at the end of Boktai 1, which grants the modifictions of beginning with +2 STRG and AGIL, and having an extra Power Nut/Bearnut in the inventory. These are the two primary stats, and both items are used in the run, making this by far the most optimal choice for initial password. The combination of characters actually used does not match the password given to the player in Boktai 1, as the 24-character combination is very slow to enter. Instead, a random mish-mash of kanji that still outputs a correct answer for the Dark Boy title is used. I'm not fluent in Japanese, but to my understanding this password is the equivalent of just entering something like "aaaaaaaeeeeeeeooooaaaaa" for an English password. This password is the product of a script that pulled all possible password combinations from the game's code, which can be viewed on 
+	[a href=https://notabug.org/UvHCxXJp/bokpass rel=noopener external nofollow 
+		"this user's Notabug repository under the file "bokgen.txt"
+	]a
+	" 
+	$LF
+]div
+[div class=p 
+	"Django's name is then set, but this is not important so a 1-character name is simply used to reduce the # of text characters that need to be displayed during cutscenes. RTA timing begins on confirming the choice of name.
+	$LF
+]div
+[h3 id=Tutorial 
+	"TUTORIAL
+	$LF
+]h3
+[div class=p 
+	"The first couple of screens offer nothing special, other than manipulating the spiders' movement patterns on the third screen in order to pass without taking damage.
+	$LF
+]div
+[div class=p 
+	"The fourth screen features the first narrow ledge, requiring Django to press against and slide along the wall to pass, as far as we're aware there is no other way to traverse these gaps. I made my best attempt to optimise tucking against the wall at the nearest point to the ledge, but subpixel positioning could possibly result in saving a frame on some of these ledges at various points in the movie.
+	$LF
+]div
+[div class=p 
+	"At frame 5364, Django run into a mysterious figure who immediately owns him and steals his weapon, the Gun Del Sol. Despite Otenko's insistence that it's useless in the hands of a vampire as it can only be wielded by one of the Solar Child lineage, Django takes a shot to the face before the vampire escapes. This forms the main sub-plot of the game; retrieving the Gun Del Sol. It can be regained towards the end of the movie, but I choose to ignore it since as previously mentioned, it's the worst attacking option in the game. Django then continues on towards the city of San Miguel.
+	$LF
+]div
+[h4 id=TrapSkeleton 
+	"TRAP: SKELETON
+	$LF
+]h4
+[div class=p 
+	"Frame 10217 sees the first forced encounter of the run, attacking the Skeleton with bare hands results in Otenko telling Django that the undead cannot be fought without a weapon. In the room to the east, the Gladius is obtained, which Otenko states is still less than ideal as it doesn't hold the power of the sun, but is better than nothing.
+	$LF
+]div
+[div class=p 
+	"After obtaining the Gladius, a trick is used to hit the Skeleton from "behind" and then pass in front of it without being seen. Damage calculation in Zoktai always takes into account whether a target is being hit from behind (If it is treated as having a frontal/rear hitbox) but does not particularly care what your actual position is relative to the target; the only thing taken into consideration is which direction you are facing whilst dealing damage. After dealing two back-hits, running past the front of the Skeleton with a specific position/timing during its turning animation causes it to fail to see Django, then two more back-hits followed by a standard frontal hit are used to defeat it. LVL2 is reached, and Otenko then tells Django that the Skeleton will revive after some time as it was not destroyed using the power of the sun.
+	$LF
+]div
+[div class=p 
+	"In the following room, one of the run's few damage-boosts are used. Depending on Django's position when taking damage, favourable knockback can occur that saves time over walking. Taking damage for this timesave is a tradeoff that must always be calculated, as Life and Energy are both limited resources in Zoktai. There are plentiful opportunities to refill both, but it obviously wastes time to do so. 16 damage for this boost is around the upper limit that I'm willing to tolerate, as this doesn't cause me to have to take a Life refill that I otherwise wouldn't have done.
+	$LF
+]div
+[div class=p 
+	"The Leather Armor is ignored in the next room, which is typically a very time-efficient safety pickup in RTA runs, but serves no purpose in a TAS which will never take accidental damage.
+	$LF
+]div
+[h4 id=TrapZombie 
+	"TRAP: ZOMBIE
+	$LF
+]h4
+[div class=p 
+	"Frame 12854 sees the second forced tutorial encounter, which is advanced by switching to Unarmed to deal three hits to the Zombie as quickly as possible; this is the trigger for the cutscene, and is approximately 10 frames faster than dealing three hits with Sword, even after taking into account the frames needed to menu to and from Unarmed. The Sunflower girl Zazie appears and berates Django for trying to fight the undead without the power of the sun, and hooks him up with the Sol de Vice; a glove that allows him to imbue his weapons with elemental enchantments. She grants him with Element Sol, and we are now able to properly kill undead creatures. As soon as control is regained, I open the menu and make two changes; switching the Text Speed to Fast, and unequipping my current armour, the Cloth Armor. Text Speed is only relevant for lines of dialogue that cannot be manually advanced with B, which is a relatively small percentage, but this still saves time across the movie nonetheless. Unequipping the Cloth Armor raises Django's running speed from Category 5 to Category 4, a substantial increase. The Zombie then dies to two Sol hits from the front (Hitting an enemy's elemental weakness in Zoktai inflicts 400% damage) and Django advances to the city of San Miguel.
+	$LF
+]div
+[div class=p 
+	"One Ghoul is killed on the way to San Miguel, as it is an efficient source of EXP at this point and requires 0 extra frames of movement to kill.
+	$LF
+]div
+[h3 id=SanMiguel 
+	"SAN MIGUEL
+	$LF
+]h3
+[div class=p 
+	"Exposition dump happens in which Django learns of the game's doomsday prophecy, telling of how the Ancestor Piece sleeping underneath the city will awaken and devour the world. He also learns that the city's blacksmith has gone to the nearby Cathedral to investigate undead activity, and we decide to head on over there. Zazie also grants Django Element Flame, which is primarily used as a puzzle-solving element but has some uses in combat for the few enemies that have an elemental weakness to it.
+	$LF
+]div
+[div class=p 
+	"Sunlight is enabled for the first time before regaining control. This movie uses several different levels as appropriate, but the vast majority of the movie uses either "maximum" sunlight, or "no" sunlight. For maximum sunlight I use an arbitrarily high value of 220, and for no sunlight I use 1, to ensure that an integer is being read at all times. Having sunlight enabled before leaving the cutscene resulted in a shorter loading time, and even in an RTA setting is considered best practice as it avoids the possibility of rain randomly occurring upon leaving the cutscene, which causes additional lag.
+	$LF
+]div
+[div class=p 
+	"Django heads north-west towards the Cathedral, killing one more Ghoul along the way for extra EXP. Sunlight is disabled before reaching the screen with the Ghoul, as undead creatures die instantly when exposed to sunlight outdoors, and enemies that die to environmental damage do not grant EXP. This theme of disabling sunlight will continue on the following screens that contain Ghouls that must be killed for EXP.
+	$LF
+]div
+[h3 id=Cathedral 
+	"CATHEDRAL
+	$LF
+]h3
+[div class=p 
+	"Two Ghouls are immediately killed in order to reach LVL3, and I assign stat points as soon as possible. AGIL is raised to 17, raising Django's running speed from Category 4 to Category 3, and the remaining point is put into STRG, raising ATCK from 12 to 13.
+	$LF
+]div
+[div class=p 
+	"After reaching the cutscene in front of the Cathedral's main doors, I stop to kill the Crow. These are worth far less EXP per kill than the Ghouls (4 VS 12) but this EXP is still required for the route used, and is equivalent in terms of energy spent/attacks used, as Ghouls currently take three hits to kill.
+	$LF
+]div
+[div class=p 
+	"The Club is obtained after solving a block puzzle, granting access to the second weapon type; Hammers. These will almost never be used for combat, as the attack speed is too slow resulting in an overall DPS loss. One Ghoul is killed for EXP whilst backtracking.
+	$LF
+]div
+[div class=p 
+	"A short block puzzle is solved whilst using the new Hammer option to break some wooden blocks to progress, and a Power Nut is picked up from a nearby chest. A puzzle is then solved in the graveyard whilst avoiding the patrolling Grave Keeper, before entering the basement.
+	$LF
+]div
+[div class=p 
+	"Four Ghouls are killed for EXP to reach LVL4, and these points are immediately put into STRG. In the next room, damage is intentionally taken for RNG manipulation that is carried into the next room, where I choose to kill the Zombie guarding the door. It would typically be faster to avoid fighting this enemy, but Zombies have the Short Sword as their Rare drop, which is a direct upgrade for Django that will be used for the next two dungeons. My RNG2 value upon enemy death is 57, and the next eligible Rare drop index is 60. The easiest solution here is to time an enchanted sword slash, which progresses RNG by 4 on consecutive frames, forcing the RNG to the correct value on the frame the drop is generated.
+	$LF
+]div
+[div class=p 
+	"I stop at the Solar Station in the next room to fully recharge Energy. This is the primary method of gaining Energy if not outdoors and without access to a skylight, but this resource is very limited. On reaching the Solar Station my balance is 511, and refilling leaves me at 371. This is a persistent value across the movie which will slowly increment any time that sunlight is being read, which is very strictly limited for reasons that will become apparent later.
+	$LF
+]div
+[div class=p 
+	"The remaining puzzles before getting inside the Cathedral properly are not noteworthy, other than to say that switching to Sword to light some torches is marginally faster than using Hammer, despite the extra menuing.
+	$LF
+]div
+[h4 id=TrapSkeletons 
+	"TRAP: SKELETONS
+	$LF
+]h4
+[div class=p 
+	"This took more testing and work than I care to recall. A couple of methods for this room have been used in RTA runs, but the method here is absolutely the fastest, as well as more energy-efficient as two Skeletons are cleaved down together. Reaching the Skeleton on the north side before it walks out of range and turns around is extremely tight, but barely possible. LVL5 is reached after this trap, and the stat points are assigned after leaving the room and opening the menu to equip the Short Sword. I would have equipped the Short Sword for this trap, but weapons in Zoktai are level-locked, and the Short Sword requires LVL5 to equip.
+	$LF
+]div
+[div class=p 
+	"Knocking on the wall to lure the Ghoul onto the floor panel before picking up the Warp Leaf inside the chest is optimal, as it starts the Ghoul walking sooner.
+	$LF
+]div
+[div class=p 
+	"In the following room, there are a few different ways to handle the weapon-switches involved with lighting the torch and breaking the wooden blocks, and I'm fairly certain that the order I chose is optimal. There is a skylight in this room that can be used to refill Life and Energy, but I have enough resources to get by so I ignore it.
+	$LF
+]div
+[div class=p 
+	"One Ghoul is killed for EXP whilst backtracking towards the door I can now unlock. The room after the locked door contains a hidden item that must be obtained to progress to the end of the dungeon, which I ignore for now. This room will be visited three times, and obtaining this item on the first visit, whilst preferred in an RTA setting is not optimal in a TAS.
+	$LF
+]div
+[h4 id=TrapGhouls 
+	"TRAP: GHOULS
+	$LF
+]h4
+[div class=p 
+	"Another trap with many different possible solutions, but I'm quite happy with the method chosen in the movie. It's quite elegant to be able to cleave down a Ghoul and the Zombie together, and this is also required in order to manage my Energy efficiently enough to avoid a refill. The first hit avoiding the Ghoul is optimal, as the Zombie requires three hits and I would rather kill them both together to start moving as early as possible.
+	$LF
+]div
+[div class=p 
+	"The Short Spear is picked up on re-entering the main room, giving access to the third weapon type. Like the Hammer, this will primarily be used to solve puzzles and does not feature prominently in combat. Two Ghouls are killed for EXP whilst progressing to the next room. It is possible to kill more without spending extra frames on movement, but the extra EXP is not necessary to reach important levelups in time, and I do not have the Energy to spare on extra kills to begin with.
+	$LF
+]div
+[div class=p 
+	"The Spear is used to hit a distant lever, and I progress upstairs twice. Category 3 speed allows Django to pass over the trapdoors before they fully open and drop him to the previous floor, and a hint panel in the southeast side of the room is interacted with in order to make an upcoming puzzle solvable. I drop through the still-open trapdoor in order to backtrack faster.
+	$LF
+]div
+[div class=p 
+	"I continue to ignore the hidden chest on the second visit to the skylight room, as all of the possible spawn points require additional movement.
+	$LF
+]div
+[div class=p 
+	"Sunlight is enabled once getting outside to passively regain almost an entire bar of Energy. At 19 STRG, the lion statues take four enchanted hits to destroy instead of five. It's worth spending the frames to select Sol instead of using Flame for the sake of Energy efficiency, as Sol costs 5 Energy per use whilst Flame (and other elements) cost 10. After revealing the chest containing the Blue Crystal, I pick up an extra Warp Leaf from the nearby chest before going back inside.
+	$LF
+]div
+[div class=p 
+	"At frame 52470, I take an imperfect exit into the skylight room in order to manipulate a favourable spawn point for the chest containing the Red Crystal. This chest can appear in any of the eighteen skylights throughout the room, and cycles through all spots per-frame, starting in the northwest corner to northeast corner, then from the southwest corner to southeast corner. As long as the chest spawns in any of the three spots closest to the northwest corner, I can collect it without spending any additional frames on movement. I collect it from the second spot, which would ordinarily suggest that I could have exited the previous room a frame sooner, but as fellow runner Raphi discovered on investigation, the northwestern-most spot for whatever reason has its position skipped every other cycle, and entering the room any sooner than I did resulted in the chest appearing in the southeast corner, then progress along the south side as expected. This is the earliest I can possibly enter this room unless I'm able to save another 16~ frames before this point.
+	$LF
+]div
+[div class=p 
+	"The correct sequence of bookcases to interact with in the Library are always the same, and do not need to be interacted with in the specific order that I do, it's just the fastest way to solve the puzzle. Avoiding the poison spit from the Poison Spider was frame-perfect, and I finished this room significantly faster than in my first WIP file that played up to the end of this dungeon, as the RNG value I had upon entering changed the spiders' pathing and allowed me to take a perfectly straight line to leave the room.
+	$LF
+]div
+[div class=p 
+	"First playaround movement at frame 54992; I like to think that Django powers elevators by using his scarf like helicopter blades. Note that to ascend I use clockwise rotations, and to descend I use counter-clockwise rotations. Very important.
+	$LF
+]div
+[div class=p 
+	"There are a few different solutions for the following block puzzle, but I'm quite certain that the one chosen is the optimal solution simply because it requires minimal movement. An alternative method of solving these kinds of puzzles in Zoktai is to do whatever is required to set the room's puzzle flag to a "solved" state (in this case, lighting both lamps) and then leaving the room. On re-entering the room, the room will be in its "puzzle solved" state, which in this case involves the blocks being placed to allow Django to pass to the other side. This is not faster to do in this case, but is a nice curiosity nonetheless.
+	$LF
+]div
+[div class=p 
+	"I pick up a key and an extra Power Nut before leaving the room. You can choose to collect these chests on the return journey, but for whatever reason I found it to be a couple of frames faster overall to collect these chests on the way in. This was unintuitive based on the required movement paths, but I wasn't able to make the return collection faster.
+	$LF
+]div
+[div class=p 
+	"Second playaround movement at frame 57114; there's no way to speed this section up, so I may as well have a laugh. This also serves as a piece of pseudo-manipulation since if you had a movement script that could spin perfectly in RTA and simply guessed when to use each Spear thrust, you'd have a 75% chance to miss each torch and thus fail the puzzle.
+	$LF
+]div
+[div class=p 
+	"Two more Ghouls are killed on backtracking to the main room, and LVL6 is reached. I delay assigning these stat points until entering the upcoming boss fight, but it doesn't appear to make a difference when this menu is performed.
+	$LF
+]div
+[div class=p 
+	"Before entering the boss room, I partially refill to 85 Energy on the Solar Station, leaving 358 in my balance. I don't need more Energy than this to defeat the boss optimally.
+	$LF
+]div
+[h3 id=BossWhiteDuneyrr 
+	"BOSS: WHITE DUNEYRR
+	$LF
+]h3
+[div class=p 
+	"The first boss of the game is the Sky-Ruling Immortal, White Duneyrr, who takes the form of a giant moth. Like a moth, she is attracted to fire and so using Flame thrusts on the torch in the center of the room brings her to the ground where she can be hit. A precisely-placed thrust in the center of the torch's hitbox will light all four quadrants at once. This is also used in RTA play, but the position is very unforgiving. Much of this fight's mechanics are skipped by maintaining a stunlock by immediately re-lighting the torch after it gets extinguished after each cycle; Duneyrr automatically recoils after enough damage is dealt and begins flying again, but by re-lighting the torch she's never able to leave her central position. This prevents her from spawning adds periodically, which normally restrict your options as they harass you as well as causing huge amounts of lag. I use a combination of weapon/element types per cycle in order to maximise damage output per cycle and reduce the number of times I need to keep her locked down. Finding positions that allowed me to avoid taking damage on the pollen balls being spawned whilst still inflicting damage on the first frame possible each cycle was quite challenging, but I'm fairly sure that the attack strings in this fight are optimised. Room for improvement in this fight will be in the form of lag optimisation. The direction that the killing blow is delivered does actually make a substantial difference to the length of her death animation, and I choose down as it was consistently the fastest option. The difference can be up to multiple seconds, so this is absolutely not trivial. Ding LVL7 for defeating Duneyrr.
+	$LF
+]div
+[div class=p 
+	"If you're at all familiar with Boktai, you know that defeating an Immortal in combat isn't the end of it. They're immortal after all, so Django must now seal Duneyrr in the coffin, and physically drag it back to town for purification. Once the exposition-dump cutscene is over (Seals are breaking, the Ancestor Piece is waking up, oh no), I grab the coffin, assign my stat points to STRG and use a Power Nut. These massively speed up the process of dragging the coffin, as they set your coffin-dragging speed to match as though you have 99 STRG for 30 seconds. The coffin must be taken to a previously-unvisited room to solve a puzzle and grab a key to leave the dungeon, so this is very helpful.
+	$LF
+]div
+[div class=p 
+	"At frame 73589 I release and re-grab the coffin in order to place it on the central floor panel whilst being able to push the wooden block sooner. This wound up being slightly faster than any other reasonable solution that I tested. The following treasure room contains a variety of items, but the only one I'm interested in is the key in order to leave the dungeon. In RTA runs I would normally collect the Power Nut on the southwest side of the room, but this is not required when I can manipulate further Power Nut drops later. The west side of the room also has three chests containing weapons which are intended for use in forging once back in town, but these are pointless to collect when I already have the Short Sword, which is what those weapons would result in. (If lucky. More details on forging later)
+	$LF
+]div
+[div class=p 
+	"The return journey to town is uneventful, with the only notable event being my decision to only enable sunlight outdoors when it will not cause enemies to die before I leave the screen. Every time an enemy dies, 1 frame of lag is generated, so I avoid this whenever possible.
+	$LF
+]div
+[h3 id=DuneyrrPurification 
+	"DUNEYRR PURIFICATION
+	$LF
+]h3
+[div class=p 
+	"Purifications in Zoktai are generally much faster than in Boktai 1, the Immortals simply die very fast when exposed to maximum sunlight. Figuring out the optimal way to place the coffin into the piledriver took quite a bit of testing, and it's possible that I didn't find the optimal method. I'm quite happy with what is used in the movie, though.
+	$LF
+]div
+[div class=p 
+	"I deliberately avoid activating the fourth generator before starting the purification; the only requirement to begin a purification is that at least one of the generators is online, and the sunlight is active. It is possible to activate the fourth generator before starting, though the purification must be started quickly in order to avoid an additional dialogue from Otenko, but the time taken to perform the extra slash does not save more time than beginning the purification early and activating the fourth generator whilst the purification is in progress. The DPS on the boss is lower whilst only 3 generators are online, but this was still overall faster. Note that I can't activate the north + east generators in a single slash as I do with the south + west generators, because it's not possible for me to start the purification before Otenko talks.
+	$LF
+]div
+[div class=p 
+	"Once a purification has begun, it can't really be actively sped up as damage output is fixed to the strength of the sunlight, which is maxed during these events. The only thing that can be done is mitigate timeloss, which comes in the form of the Immortal escaping from the coffin or attempting to knock generators offline. I knock Duneyrr back into the coffin on the first possible frames, and use camera scrolling to reduce lag generated. Overall this camera scrolling saved 14 frames over my first WIP, which is actually quite substantial in what is otherwise a fixed-duration event. I also disable the sunlight at a specific point during the PURIFICATION COMPLETED! text in order to manipulate an upcoming RNG call.
+	$LF
+]div
+[div class=p 
+	"This was the end-point of my first WIP as I didn't want to progress deeper into the movie until I had a better understanding of how I was going to route and manipulate certain events. As such, I was able to watch over this first 80000~ frames and apply incremental improvements. Overall I managed to save 117 frames over my first draft after purifying Duneyrr.
+	$LF
+]div
+[h3 id=SanMiguel2 
+	"SAN MIGUEL 2
+	$LF
+]h3
+[div class=p 
+	"Big exposition dumps from the characters, then I leave town for the second dungeon. In RTA runs, this used to be when the smithing house was visited to forge a Short Sword before an RTA-viable manipulation was known. I already have the Short Sword in this movie too, so no reason to stick around.
+	$LF
+]div
+[h3 id=Remains 
+	"REMAINS
+	$LF
+]h3
+[div class=p 
+	"The second main dungeon of the movie, and the bane of my existence. I'll be glad to never see this place again. The vast majority of the movie's RNG manipulation is centred around this dungeon, and getting everything to work sequentially was a nightmare. The first RNG manip begins before the dungeon even loads; I mentioned above that I stopped the sunlight during the purification in order to manipulate an RNG call. When the Remains dungeon is loaded, the positions of three key items are also generated in the upcoming Remains Desert; three Stone Tablets that are required to open Remains B. These tablets correspond to memory addresses 0x203db6a, 0x203db6b and 0x203db6c, and thanks to a script developed by Raphi I was able to check on dungeon load which screens these tablets would spawn on. The desert is shaped like a grid, and these tablets will spawn in fixed positions on any of the eight sectors surrounding the central point. I managed to identify that having RNG2 at 782 after Remains loaded would give me an optimal spread for the tablets. An alternative combination of rooms can be used which is only a couple of seconds slower, but this is made less ideal by the fact that a second manipulation will take place during these desert screens, which would require me to take a longer movement path if that sub-optimal spread were used. This problem was one of the reasons I suspended progress on this movie until I better understood what the rest of the route would need to look like, and it's no exaggeration to say that runners like Raphi, Shenef and DrHell providing scripts and tools in this fashion reduced the timeframe for this movie by months. I initially didn't think I would have this movie completed until at least 2025, but scripts like these streamlined the process beyond what I dared imagine, as the alternative would have been needing to play through the entire dungeon before being able to see what the results were.
+	$LF
+]div
+[div class=p 
+	"Three Vampire Bats are killed on the first screen for EXP. I'm not entirely happy with this decision, but I had to rework this dungeon multiple times after making basic arithmetic errors with my EXP routing, which is embarrassing to admit when I was using a spreadsheet with formulas to track my EXP gain and when I would get critical levelups. These routing mistakes were doubly punishing since the bulk of the movie's RNG manipulation takes place here, so I was forced to find new manipulations based on the new RNG values I had each time.
+	$LF
+]div
+[h4 id=TrapVampireBats 
+	"TRAP: VAMPIRE BATS
+	$LF
+]h4
+[div class=p 
+	"The method chosen for this trap is likely not the most optimal kill pattern that can be taken, but enemy behaviour here is heavily RNG-dependent, so the same approach doesn't work across multiple seeds. Killing all enemies in four attacks, with only two frames of sub-optimal movement was the best I was able to manage here. This trap is also notable for showing the game's first major damage spike; Vampire Bats deal 52 damage to Django with no armour equipped, killing him from full Life in two hits. This tends to hold true for the rest of the game, and beyond the game's halfway point most enemies will kill Django in one hit if he has no armour equipped/VIT investment.
+	$LF
+]div
+[div class=p 
+	"At frame 88434, I use a "hybrid-refill" to gain resources optimally, and manipulate a random drop that I need. Three things are happening at once here; First I manually charge energy whilst the sun is active, refilling my Energy. Secondly, I disable the sunlight at a specific time in order to summon Moonbugs. This is the primary reason that a full moon date is selected for gameplay; if playing on the date of a full moon and it is Night time ingame, attempting to charge energy when the sun isn't active will instead summon lunar bugs that can be used to refill Life. These can be summoned infinitely as long as the correct date/time is being used, and since I am waiting in this position for the Yellow Slime to drop an item, this is the most productive opportunity to do this refill. Thirdly, the combination of Energy and Life refilling advances RNG2 to 917, which then causes one of the Yellow Slimes to drop its common drop; a Power Nut. Common drops are a 10.8% drop rate, and I need multiple of these drops across this dungeon.
+	$LF
+]div
+[div class=p 
+	"At frame 88942 I enter a room that has Solar Wind active; this is an uncommon mechanic only seen a couple of times throughout the movie, which interferes with Django's movement. The cliffs in this room are also sheer drops, and if pushed over the edge, Django dies instantly. The flame jets in this room also fire on periodic timers, which is influenced by the current Sun level, as is the speed at which the Solar Wind pushes Django. By manipulating RNG, I was able to force the wind to blow in a favourable direction, increasing Django's movement speed and enabling me to avoid taking damage on the flame jets. The same is true on the return journey through the room after the cutscene that grants Element Frost, though I was unable to apply Solar Wind effectively at the start of the return leg, so it was better to leave the sunlight off until reaching the floating platform again.
+	$LF
+]div
+[div class=p 
+	"The following few rooms are not particularly notable, other than to point out that I end the solar charge in the skylight before entering the next trap slightly prematurely, as I get the last couple of energy ticks passively whilst walking away from the skylight.
+	$LF
+]div
+[h4 id=TrapSword 
+	"TRAP: SWORD
+	$LF
+]h4
+[div class=p 
+	"A short trap gauntlet begins here, starting with the Sword. This is a relatively uneventful encounter in which I simply deal damage as quickly as possible. Sadly with Django's current stats it is completely impossible to get the kill before the Sword disappears and teleports, costing an extra couple of seconds. This used to be possible on an older RTA route which used extra STRG investment and had a stronger Short Sword through forging, but that route is an overall net timeloss and so missing a pre-teleport kill in this trap simply must be tolerated. Defeating the Sword raises Django to LVL8.
+	$LF
+]div
+[h4 id=TrapYellowSlimes 
+	"TRAP: YELLOW SLIMES
+	$LF
+]h4
+[div class=p 
+	"Another trap in which the combat in itself isn't notable, but I also manipulate a further two Power Nuts to drop here using a combination of timing and having the Sol enchant active on my weapon whilst attacking. Typically these slimes should be fought without an enchant active as they resist elemental damage, but this was necessary to force the Power Nut drops.
+	$LF
+]div
+[h4 id=TrapClayGolems 
+	"TRAP: CLAY GOLEMS
+	$LF
+]h4
+[div class=p 
+	"A much more eventful encounter. This trap is where good RTA paces go to die. It's always preferable to knock on the walls in order to force the golems to roll around and knock into each other, but their specific behaviour and pathing whilst rolling around is affected by RNG, and it's very easy for this trap to go VERY wrong. Worst-case scenario, the golems can kill each other and prevent you from gaining any EXP. Even if the player is able to get all the kills, it's still possible for the golems to collide with each other in such a way that they bounce apart too far to be hit at the same time, forcing a further timeloss. In the movie, this is obviously not an issue, and I was able to get a very optimal set of enemy collisions that allowed me to start damage as soon as possible, and cleave both sets of golems down together. However, I was not able to manipulate any random drops during this trap. Clay Golems drop Hammer-type weapons, and I need three Maces from this dungeon, which is the Clay Golems' rare drop, a 1.2% chance. This trap would have been an ideal time to receive at least one Mace, but the RNG2 index simply wasn't in a favourable position to force a drop without wasting many extra frames to align the index. This leaves me with only five more Clay Golems planned to be killed throughout this dungeon, and I must manipulate a 1~% drop from three of them, individually.
+	$LF
+]div
+[div class=p 
+	"At frame 97182, Django encounters his edgy brother, Sabata. Where Django is the Solar Child, Sabata is the Lunar Child, drawing his power from the moon. Some exposition occurs before selecting the second option of the text dialogue, prompting Sabata to teach Element Cloud to Django.
+	$LF
+]div
+[div class=p 
+	"After getting outdoors, one Vampire Bat is killed to reach LVL9. I'm not very happy with stopping to slash once for the sake of 5 EXP, but the route that I ended up going with (and this was the result of multiple revisions, bear in mind) simply does not work without this 5 EXP. Overall I would say this dungeon is the most improvable of the movie, but the required RNG manipulations made reworking this dungeon an absolute nightmare, especially with the persistent solar sensor desync issues in the core itself.
+	$LF
+]div
+[div class=p 
+	"The following puzzles are not particularly notable, but I assign my spare stat points into STRG whilst using a Power Nut in order to save a menu.
+	$LF
+]div
+[div class=p 
+	"At frame 102598, I make a pure mistake during the block push; Shenef pointed out to me, far after I was done with this dungeon, that I should have used a Power Nut in the middle of the block pushes as the 30-second timer for the buff persists all the way through the next block puzzle, which is when I used the Power Nut. I completely overlooked this fact and it was unfortunately not practical to implement this after the fact, as it would have altered RNG thereafter and obsoleted about 100,000 frames of work. This mistake will have cost no more than a couple of hundred frames, but I don't like that this time was left on the table.
+	$LF
+]div
+[div class=p 
+	"As it is, I pick up a Speed Nut from a chest before entering the room where I incorrectly used the next Power Nut, to solve a more complex version of the colour-block puzzle seen earlier. There are a few different solutions for this puzzle, and the one chosen in the movie was originally shown by another runner, beige. This solution proved to be 13 frames faster than the one used in RTA runs, with appreciably more difficult input strings. I still believe that the current "RTA solution" is competitive due to its ease of completion, but in a TAS environment I was happy to save this many frames over what would otherwise be a "fixed-length" puzzle.
+	$LF
+]div
+[div class=p 
+	"I stop to kill two Mummies in the next room for EXP; the time taken to get these kills is well worth the EXP gained, and I need to stop for an RNG manipulation in the next room anyway.
+	$LF
+]div
+[div class=p 
+	"At frame 105431, I enter the room where I get the first of the three Maces that I need. Firstly, I recharge Energy in the first skylight, stopping early after aligning the RNG2 index to the correct value, then I go downstairs and kill the Clay Golem for a Mace drop. This is a very efficient room, as I'm forced to take an Energy recharge either way, so using it to manipulate a drop on an EXP-rich enemy is the most productive thing that I can do here.
+	$LF
+]div
+[div class=p 
+	"Once getting outdoors at frame 106501, most of my missing Energy will be passively regained. I take two deliberate damage-boosts on the Yellow Slimes in order to move faster, though taking a damage-boost on the return journey was not faster. Before returning indoors, I take a short Energy recharge in order to align RNG2 once again for a manipulation in an upcoming room.
+	$LF
+]div
+[h4 id=TrapAxe 
+	"TRAP: AXE
+	$LF
+]h4
+[div class=p 
+	"Similarly to the Sword fight, I deal damage as quickly as possible, and also similarly, it's just not possible to get a pre-teleport kill. I use the downtime during the Axe's teleport to perform an additional sword slash in order to advance RNG2 by 4, before killing the Axe to reach LVL10. Three chests appear, with the middle one containing the item I've been manipulating RNG for since the outdoors screen; a tarot card known as The Tower. Tarot cards can be collected after most boss/miniboss fights in Zoktai, and have a variety of effects. The Tower has a drop rate of just under 4%, and is used to deal damage to all characters onscreen, but this will not be used for a very long time and will remain in my inventory for the majority of the movie. The second chest contains the Dynamite magic, which promptly explodes on Django and begins a cutscene. Thankfully, this doesn't actually inflict damage. Finally, I collect a key from the remaining chest before leaving.
+	$LF
+]div
+[div class=p 
+	"I kill two Clay Golems for EXP on my way to the next area, with the second golem dropping a Hammer. This is actually not one of the Maces that I need and was unplanned, but costs no extra time to collect, so I decided to leave this in as it's a funny quirk. I collect a Warp Leaf from a hidden chest before heading out into the Remains Desert.
+	$LF
+]div
+[h3 id=RemainsDesert 
+	"REMAINS DESERT
+	$LF
+]h3
+[div class=p 
+	"I mentioned at the start of the Remains section how this area is home to the Stone Tablet collection puzzle; this area is shaped like a 5x5 grid, where the central screen is the destination and the surrounding eight screens contain three Stone Tablets. Each screen has a fixed location for a Stone Tablet to spawn, but the three screens are chosen at random. Based on the memory addresses alluded to previously, I was able to begin the dungeon with an RNG value that placed the Stone Tablets on screens 6, 7 and 8, which is the south-west screen, south screen and south-east screen respectively. This is the most optimal spread of screens to need to visit, as it forces the shortest movement path, and I am able to combine an RNG manipulation for the second Mace that I need; after collecting the first tablet on the south-west screen, I take a partial Energy recharge to align RNG before entering the south screen, and kill the Clay Golem for the second Mace drop. I would want to kill this Clay Golem for EXP either way, so being able to get a drop at the same time and stay on the shortest possible path for tablet collection is ideal. The third tablet is collected on the south-east screen as normal, and I then take the shortest path to the central screen, which is not intuitive; entering new rooms in Zoktai typically puts Django on a fixed entry point, but this 5x5 desert grid has multiple entry points for each screen, with the middle screen in particular being the only one which forces Django to spawn on a fixed tile from any compass direction. Thus, although I "enter" the central screen from the corner-most point, Django actually spawns on the screen at the center of the south side, directly in front of where he needs to be. The Stone Tablets are placed, revealing the remainder of the dungeon known as Remains B, and I then take another partial Energy refill before going inside in order to align RNG2 for another manipulation in an upcoming room.
+	$LF
+]div
+[h3 id=RemainsB 
+	"REMAINS B
+	$LF
+]h3
+[div class=p 
+	"There is a hidden chest containing a Power Nut in the north-east corner of the first room which is typically taken in RTA runs if no random drops have been obtained, but I already manipulated every Power Nut that I need, so this is ignored.
+	$LF
+]div
+[div class=p 
+	"At frame 114474, I enter a room in which four torches must be lit in a particular order in order to open a staircase to the next floor. I also slash in particular spots in order to trigger the hidden Solar Bamboo, releasing some solar/lunar bugs which advance RNG2 for the final weapon manipulation I need; the next room features the last Clay Golem that I can kill in this dungeon, and is the only remaining chance for me to get the last Mace that I need. Using an extra un-enchanted slash whilst killing it, in conjunction with the previously-mentioned Energy recharge and hitting the Solar Bamboo in the previous room, forces the last Mace drop. I now have the materials that I need for the most critical manipulation of the movie to come at a later section. I kill the two Mummies before leaving the room to reach LVL11. This kill looks inelegant due to stopping and waiting for the Mummies to reach Django's position, but this EXP is non-negotiable, and is gained quickly enough in order to be worth the time taken.
+	$LF
+]div
+[div class=p 
+	"The following area features four puzzles that must be solved in order to gain entry to the boss's room, the first puzzle involving pushing some floating blocks using the Spear, and a combination of Cloud/Frost enchants. 
+	$LF
+]div
+[div class=p 
+	"After entering the second puzzle room, I take a full recharge on the Solar Station, leaving my balance at 264. Whilst solving the second puzzle, I open the menu to use the Speed Nut collected earlier. This provides 30 seconds of movement at Category 1, and is the most productive point that I can use this buff. A Warp Leaf is collected from a hidden chest in the north-west corner whilst solving the puzzle.
+	$LF
+]div
+[div class=p 
+	"I revisit the previous room to kill two more Mummies for EXP before progressing. This is probably the most dubious choice in the movie, but as mentioned previously, gaining the EXP that I do in the movie is non-negotiable, and I was not able to find a more productive source of EXP than this. Without these kills, I will not gain a critical levelup after finishing this dungeon, nor will I be the correct level at a later point in the movie to equip a stronger weapon when I need it. As it is, these kills 
+	[em 
+		"barely
+	]em
+	" qualify as being "worth the time", and so I'm only unhappy with how clunky this looks, not with how much time this actually costs. I will need to fully stop progress for a dedicated EXP grind at a later point, and the rate of EXP gained here is roughly equal to what I will need to gain during the EXP grind.
+	$LF
+]div
+[div class=p 
+	"The third puzzle features some satisfying movement! Turn all floor panels red, where the floor panels switch colour every time they are stepped on. I was not able to find a way to "skip" stepping on any panels, due to the way the room is structured. If the central hole in the panel layout was filled, it may be possible to use subpixel positioning to cross over the corner-point of two adjoining panels without actually stepping on them. But this hole being present forces Django to fully walk onto a panel in order to cross over a corner, and I do not see a way to avoid this.
+	$LF
+]div
+[div class=p 
+	"The fourth puzzle features a brief moment of randomly-directed Solar Wind upon room load, but once the first switch is hit, the wind moves in a fixed direction. I was able to get a favourable wind direction for the short moment that it matters, then the rest of the puzzle solution is standard movement.
+	$LF
+]div
+[h3 id=BossVampire 
+	"BOSS: VAMPIRE
+	$LF
+]h3
+[div class=p 
+	"I was expecting this fight to require heavy lag management, but surprisingly not. The two cycles of this fight can't really be sped up, as I need to wait for Sabata to generate black holes in the centre of the arena, all I can do is ensure that the Vampire is in range of the black hole when it becomes active so that I don't need to waste time pushing him in. Once he's trapped in the black hole, Sol enchant hits are used to deal heavy damage, and by starting damage as soon as possible I have time to deliver a sixth hit during the first cycle before he breaks out automatically. I CANNOT deal over 50% of his Life in the first cycle, or it will trigger a very slow attack in which he splits into a swarm of bats, wasting close to a minute. Thus I turn the Sol enchant off for the sixth hit, leaving him barely above 50%. The second cycle is similar to the first in that I can only ensure that he's inside the black hole once it becomes active, but during the active damage phase I must this time ensure that I DO deal six full hits of damage after starting at the earliest opportunity. The fight does not end during this second cycle without this sixth hit, and you do not normally have enough time to deal six hits per cycle during RTA play. Handling the fight in this manner allowed me to avoid using enchanted hits for minor damage throughout the rest of the fight, which is normally used to manage the boss's Life value and ensure the cycles occur correctly, but avoiding using the enchanted hits during this movie saved a lot of Energy to use in the following section instead, which is much more efficient. Defeating the Vampire raises Django to LVL12.
+	$LF
+]div
+[div class=p 
+	"The two brothers are finally able to get a good look at the Vampire's face and realise that he's their father, Red Ringo. Django gets glomped before Ringo escapes, and the ensuing coffin backtrack must be done as Sabata. This is functionally the same as using Django, as Sabata simply uses two Power Nuts to speed up the return journey, as Django did during Cathedral.
+	$LF
+]div
+[div class=p 
+	"At frame 130703 I re-enter the Remains Desert and take what I'm fairly sure is the fastest return path to Remains. It looks like a very strange path, but owing to how the screen transitions behave in this grid as mentioned earlier, this does wind up being faster than taking a "straight" path. A second Power Nut is used as the first buff is about to expire.
+	$LF
+]div
+[div class=p 
+	"The room entered at frame 132882 is incredibly laggy due to the number of objects onscreen, and I don't know of any method to avoid this. This room effectively operates at 50% speed whilst lagging, and simply must be tolerated.
+	$LF
+]div
+[h3 id=DjangoPurification 
+	"DJANGO PURIFICATION
+	$LF
+]h3
+[div class=p 
+	"Sabata activates the south and east generators before beginning the purification; it saves some time overall to activate the remaining two generators after beginning the purification since they can be activated with a single shot from Sabata's gun, the Gun Del Hel. Since Sabata uses the power of the moon, he is susceptible to sunlight in the same way as undead, so this purification functions as a damage-race to purify Django before Sabata dies. This is never a risk even in RTA play as long as Django is forced back into the coffin at early opportunities, and of course I ensure to do this on the first possible frame during this movie. The shots used appear to be late, but Django's hitbox activates relatively late after escaping the coffin, and I'm quite sure that all three hits are done first-frame. This purification thankfully required next to no lag management compared to the Duneyrr purification; there simply weren't many lag frames that occurred, and most of them were mitigated with positioning.
+	$LF
+]div
+[div class=p 
+	"Django is saved from fully transforming into a vampire, but the process is only halfway halted and the next section of the game must be played in Django's vampire form, known as Black Django. In this form, all of Django's elemental magic is sealed and he only has access to a handful of vampire powers that are gained at this point; Element Dark, Transform: Bat, Transform: Mouse, Transform: Wolf and Sleeping. Transform Wolf never sees a use in this movie, or indeed during RTA speedruns. It can be used to bite enemies from behind and drain their health, but there is no situation where this is the optimal play. Sleeping sees a single use very late into the movie, but for the most part I will be making use of Element Dark which is a direct counterpart to Element Sol only useable as Black Django, and Transform: Bat/Mouse in order to move into new locations and solve puzzles.
+	$LF
+]div
+[div class=p 
+	"After regaining control at frame 140515, a series of menus are performed. Firstly I assign stat points, chiefly raising AGIL to 25 which raises Django to Category 2, the fastest speed achieved in the movie; getting to Category 1 would require nine more points into AGIL, which is not worth it. Secondly, I unequip Element Cloud before overwriting the remaining equipped elements with Black Django's new vampire powers. Thirdly, I change by weapon equips by re-equipping the Gladius over the Short Sword, and equipping one of the Maces over the Club.
+	$LF
+]div
+[h3 id=ForgingKatanaManip 
+	"FORGING - KATANA MANIP
+	$LF
+]h3
+[div class=p 
+	"This is the most critical point of the movie's route; manipulating multiple weapon drops in the previous dungeon is for the sake of being able to perform two weapon forges here, to gain the weapon that will be used for the rest of the movie; the Katana. Detailed mechanics of the forging system in Zoktai can be viewed 
+	[a href=https://www.speedrun.com/boktai2/guides/r6n70 rel=noopener external nofollow 
+		"at this page
+	]a
+	" and I will attempt to explain the relevant points here.
+	$LF
+]div
+[div class=p 
+	"All weapons in Zoktai have a Rank that is separate from the listed Level requirement. For instance, the Short Sword I've been using requires LVL5 to equip, but is treated as a Rank 1 weapon, the same as all other Swords towards the lower end of the Level bracket. Starting from the LVL17 Sword, the Zweihander, weapons are treated as being Rank 2 or higher. Starting from Rank 2, all weapon forges have a chance to morph into a Rare weapon, which the game defines as "R-rank". The Katana is the R-2 Sword, that is to say all Rank 2 Sword forges that qualify for the Rare morph will become a Katana. 
+	$LF
+]div
+[div class=p 
+	"Obtaining this weapon is not simple, however. As the above guide details, the resulting weapon from a forge is dependent on the materials used. Same-type weapons will always result in the same type, whilst different-type weapons will always result in the remaining type. In other words, to craft a Sword you must either use Sword + Sword, or Spear + Hammer. Furthermore, the level of the materials is taken into account, where the resulting weapon is subject to the following calculation:
+	$LF
+]div
+[div class=p 
+	""Result level = (weapon A level + weapon B level) / 2 (rounded down) + r"
+	$LF
+]div
+[div class=p 
+	"To predict the results of this, it's easiest to consult a weapon list which can be seen 
+	[a href=https://docs.google.com/spreadsheets/d/1SwGed5NCuRyM_5inKH6q_VViV2dz6fxxDyhKT4MsSvo/edit?usp=sharing rel=noopener external nofollow 
+		"in this sheet.
+	]a
+	" 
+	$LF
+]div
+[div class=p 
+	"Let us assume that I'm using a Short Sword + Broadsword for the weapon forge. This is Sword + Sword, so a Sword will be created by this forge. Weapon A is the Short Sword, which is LVL5, and Weapon B is the Broadsword, which is LVL9. Using the above calculation, this creates a total of 14, which is then halved to create a value of 7. A final value of "r" is then added to this number, where "r" is +6 for a same-weapon-type forge, or will randomly be between -6 to +6 for a differing-weapon-type craft. Thus in the above calculation, "r" is 6 which is added to 7, for a final value of 13. The resulting weapon will be a Sword which does not exceed LVL13, which we can verify on the sheet will result in a Long Sword.
+	$LF
+]div
+[div class=p 
+	"In practice, this is much more complex in the movie since I do not have a chain of Swords to link into higher and higher levels. What I have is a bunch of Maces from the Clay Golems in the Remains dungeon. So what exactly is my route here? The Katana must be obtained with two forges; firstly, I use the Short Sword that I just unequipped, plus one of the two remaining Maces. A LVL5 Sword + a LVL9 Hammer will equal a Spear that cannot exceed LVL13. However! This is a differing-weapon-type craft, so it is subject to the random "r" value, which is anything from -6 to +6. ONLY a result of +6 will allow me to forge a LVL13 weapon here, which is effectively a 1-in-13 chance. Before entering the forge house, I activate the sun at a low brightness, which causes Black Django to take a couple of ticks of damage; as a vampire, he is now susceptible to the sunlight. These damage ticks advance RNG2 to 435 on room entry. From here, I select the weapons to use for the forge, and I un-select + re-select the second weapon. This advances RNG2 by 1, aligning me with receiving a +6 "r" value from this forge, resulting in a Lance, the LVL13 Spear.
+	$LF
+]div
+[div class=p 
+	"The first forge itself is almost totally uneventful, because actively playing the forging minigame almost invariably causes lag to occur every time a strike is delivered. I was able to use a novel solution for this first forge in which I only delivered 1 hit, on the last possible frame before the metal cooled too much and needed to be re-heated. This caused a pseudo-hit in which the game registered that a hit is delivered, but no animation actually plays. This prevented RNG2 from progressing, and also prevents the forge from being failed; if 0 hits are performed in a forge, you automatically receive a trash weapon. Since 1 hit is delivered, I instead receive the "correct" weapon, the Lance. Albeit, it's an abysmal Lance with an overall quality of -10 to its attack power due to 1 hit during the forge resulting in a very low score. Fortunately, the actual QUALITY of this weapon is irrelevant as it will immediately be used as material for a second forge, to get the Katana.
+	$LF
+]div
+[div class=p 
+	"Before starting the second forge, I use an enchanted Spear thrust to advance RNG2. My materials for this second forge are my final remaining Mace, plus the Lance I just forged. A LVL 9 Hammer + a LVL13 Spear will equal a Sword that cannot exceed LVL17. This is the lowest possible level for a Rank 2 Sword, which has a chance to morph into the Rare-2 Sword, the Katana! Once again, this is a differing-weapon-type forge, so the random "r" value can be anywhere from -6 to +6, which is why the Spear thrust before the second forge is required.
+	$LF
+]div
+[div class=p 
+	"However!! There is now an entirely new variable to worry about. I mentioned that the Rare-weapon forge is subject to another random check, this time a framecounter. The check for a Rare-weapon forge is largely dependent on Django's Weapon Skill level, but in the movie this is irrelevant as his Sword Weapon Skill is 7, which results in a bonus of 0%. All I have is the base chance for a Rare-craft, which is a flat 1%, expressed as a 4-frame window every 400 frames. As the "chance" for the Rare-craft increases, this frame window gets wider. Thankfully, this 4-frame window naturally aligned with me entering the second forge and selecting my material as soon as possible. Had I missed this window, I would have been forced to wait another 400~ frames before starting the forge, and equally I would not have been able to "save time" before this point unless I could reach this forge at least 400 frames sooner.
+	$LF
+]div
+[div class=p 
+	"This only confirms the ELIGIBILITY for the Rare-2 forge, the weapon I will actually get from the forge is still dependent on how the minigame is performed, and I now have ANOTHER variable to worry about during the forge; gaining the Katana's "SP" effect. Depending on how accurate your strikes are, all weapons of Rank 2 or higher have a chance to obtain an additional effect. This chance is equal to the # of "GREAT!" hits during the forge, multiplied by 3. Each of these "GREAT!" hits are a maximum 3-frame window based on the speed of the cursor, but due to using maximum sunlight for the forge these are all 2-frame windows. I'm forced to use maximum sunlight here in order to have time to deliver the # of hits required; since the SP calculation is # of "GREAT!" hits * 3, I can guarantee the SP effect by exceeding 33. By allowing the cursor's offset to slightly exceed the target point each round, I'm able to deliver an immediate hit and end each cycle sooner, gaining enough time for an extra cycle of hits. The Katana's SP effect is to increase the ATCK stat by 1 for every 8 AGIL, which in this case is 3 extra ATCK from my 25 AGIL stat. This is a very appreciable increase, as 1 ATCK is equal to 2 STRG, meaning the Katana's SP effect is like having an effective +6 STRG, hitting as though I'm two levels higher than I actually am. In addition, SP weapons don't suffer durability loss that forged weapons are typically subject to; they will gradually break over time, reducing in power and causing lag when these breakages occur. This never occurs for SP weapons, so it retains its full power across the whole movie.
+	$LF
+]div
+[div class=p 
+	"With all of that accounted for, there's only one more thing to worry about; the weapon that I get from the forge is also influenced by the RNG2 index when the forge ends. I would have loved to reduce the # of hits delivered during the second forge as each hit tends to generate lag, but without using this many hits I simply do not receive the Katana, even after hitting the correct 4-frame window. From the testing that I did here, I was only able to receive a Katana if all of the previously mentioned conditions were satisfied, AND the RNG2 value was 212 on finishing the second forge. There is VERY little that I can do once the forge has begun to alter the rate that RNG2 advances, the only change I was able to make was how quickly each cycle of hits is delivered; using two hits close together causes the spark animations to overlap, interrupting the RNG advancement. By getting the time for the extra cycle and finding a specific combination of these early-hits enabled me to finish on the correct RNG2 value and obtain the Katana SP, the weapon that will carry me for the rest of the movie.
+	$LF
+]div
+[div class=p 
+	"So to summarise:
+	$LF
+]div
+[ul 
+	[li 
+		"Manipulate four total weapon drops during early game, each a 1.2% chance
+		$LF
+	]li
+	[li 
+		"Hit a 1-in-13 Spear forge
+		$LF
+	]li
+	[li 
+		"Hit a second 1-in-13 Sword forge
+		$LF
+	]li
+	[li 
+		"Begin that Sword forge in a 4-frame window
+		$LF
+	]li
+	[li 
+		"Play the forge perfectly enough to guarantee an SP effect
+		$LF
+	]li
+	[li 
+		"Finish the forge at a specific RNG value
+		$LF
+	]li
+]ul
+[div class=p 
+	"And you too can obtain a Katana SP this early into the game. ez
+	$LF
+]div
+[h3 id=SanMiguel3 
+	"SAN MIGUEL 3
+	$LF
+]h3
+[div class=p 
+	"At frame 147595, I enter the coffin shop and buy a shiny new coffin for Black Django. There are several different coffins in Zoktai with various effects, but the only one I'm interested in is the Coffin Monster Elefan. This coffin has the distinction of being able to walk around independently of Django; other coffins will gradually begin to drag themselves back to an Immortal's hiding place if left alone for long enough while an Immortal is sealed inside it, but Elefan is manually controllable while Black Django is using Sleeping, with a couple of other crucial quirks that I'll highlight as relevant. I spend 160 of my money balance, leaving me with 340 remaining.
+	$LF
+]div
+[div class=p 
+	"At frame 148815, I re-enter the Piledriver screen and stop to farm EXP. As mentioned previously, weapons in Zoktai are level-locked, and the Katana requires LVL17 to equip, which Django is currently very far from reaching, so an EXP grind is completely unavoidable. Without one, I will not be able to equip the Katana for upcoming boss fights and instead be forced to use either the currently-equipped Gladius, which is very weak, or the Mace, which attacks very slowly. For this section I simply copy/pasted the same input string after being fairly sure I found the most optimal way to kill the Dark Roots directly in my path; these enemies respawn infinitely on screen reload, as long as both sets of roots haven't been cleared from the screen. They're worth 40 EXP each, so each visit to the screen is worth 80 EXP, and I was able to kill both roots with a single slash, which is far more precise than it looks, as their animation changes to attack Django when he crosses onto an adjacent tile, and this tends to make them very difficult to hit. Sunlight is turned on during the EXP grind to passively regain some Energy and eke out a couple more kill cycles, at the cost of some of Django's remaining Life. This grind causes me to reach LVL13, and LVL14.
+	$LF
+]div
+[div class=p 
+	"After finishing the EXP grind, I break two wooden blocks in order to progress, and I scroll the sprites offscreen as best I can in order to minimise lag when they break. The lag cannot be completely eliminated as multiple objects are breaking at once causing many sprites to appear, but I did save several frames here. One more Dark Root is killed for EXP whilst passing, before precisely passing the Yellow Slime on the corner, which would kill Black Django in one hit if collided with.
+	$LF
+]div
+[h3 id=DarkCity 
+	"DARK CITY
+	$LF
+]h3
+[div class=p 
+	"I skip picking up the chest in the second room, which is always taken in RTA play and contains a Sunscreen. This is vital for the final boss of the run in RTA, but is not required for a TAS. Some more Life is sacrificed for passive Energy, so that I have enough to kill the Bandit in the next room for EXP. I mentioned that Hammers are not ideal for combat due to their slower rate of attacking, but Black Django both attacks faster than Red Django, and deals extra knockback that prevents most enemies from being hit as quickly as the attack animations will allow. This creates a unique opportunity during this dungeon for the Mace to be an effective combat weapon, as the Gladius that I otherwise have is terrible, and I cannot yet equip the Katana. Most of the enemies that will be killed in this dungeon actually force short periods of downtime between hits, so the fact that I'm using a Hammer loses no time here, other than the frames taken to switch between weapon types.
+	$LF
+]div
+[div class=p 
+	"More Life is sacrificed for Energy until Django is critically low, then at frame 156591 a hybrid-refill is performed to gain enough Energy to tackle the upcoming obstacles, and gain enough Life to avoid dying.
+	$LF
+]div
+[div class=p 
+	"At frame 158707 I come to the first room which features kills that are not currently present in the RTA route. The upgraded mummies in this room, called Gusts, are extremely dangerous and difficult to work with. These enemies have no vision and instead detect Django through sound, so I walk into the centre of the room and wait for them to gather together before gradually knocking them towards the exit with the Mace. In a vacuum, each of these sets of Gust kills takes a lot of extra frames to perform, but they are worth 100 EXP each, making each set of 3 very EXP-rich compared to the sources of EXP that have come before. The exact value of taking these kills is somewhat dubious, but I do believe it at least matches the rate of EXP gained from taking a longer Dark Root grind in San Miguel, especially considering these enemies cost no Energy to kill and thus this EXP doesn't require stopping for a refill once extended long enough, as with the Dark Roots. Killing this first set of Gusts raises Django to LVL15, and I'm able to leave the room just before the death animations occur, which would otherwise cause lag to occur.
+	$LF
+]div
+[div class=p 
+	"At frame 160857 I stop at the nearby Solar Station to refill Energy completely. Energy refills at these stations at twice the rate of a manual refill whilst sunlight is maxed, and this avoids needing to sacrifice more Life, which is currently very strictly rationed. Station balance is down to 129 after finishing this refill.
+	$LF
+]div
+[div class=p 
+	"The room at frame 161489 features the second set of Gusts, and I'm able to spend the time in this room more productively by picking up a key from the chest whilst waiting for the Gusts to gather in the centre of the room after knocking on the wall to lure them. I am forced to use Transform: Bat in order to make no footstep noise after the wall-knock, which requires spending 10 Energy that isn't currently in the RTA route, but as in the above example I do believe that gaining this EXP is worth the time and (literal) Energy invested. Knocking the Gusts towards the exit is very difficult and temperamental, but can just about be managed, and I am once again able to leave the room before the death animations occur.
+	$LF
+]div
+[div class=p 
+	"Frame 163342 is another of these rooms, and this time I'm able to stop walking in a specific spot in order to force the Gusts forward, then knock them towards the staircase. There are only 2 enemies to kill this time for a total of 200 EXP gained, but very little extra distance is required for these.
+	$LF
+]div
+[div class=p 
+	"At frame 166556 I re-enter the room where the second set of kills took place, and this is a complete deviation from current RTA EXP routing, where I assume that taking an extra 3 Gust kills for 300 EXP is worth the detour. As above, I believe the route is justified, but this is perhaps the most dubious part of the EXP route as it requires a full detour from the intended path. I can only trust that my calculations and intuition were correct and that this 300 EXP wasn't better-gained on a longer Dark Root grind. Django reaches LVL16 after finishing these kills.
+	$LF
+]div
+[div class=p 
+	"After leaving this room, a trap must be passed over in order to reach a chest containing a key. Rather than completely avoiding the trap, I choose to trigger it with an early un-transform and get knocked back by the triggered flame jet after grabbing the key. Unfortunately, the key really doesn't seem to be possible to reach without a specific setup here, and I wasn't able to avoid transforming and just running onto the trap panel normally. This does save an appreciable number of frames though, and I was not expecting to only take 1 damage from the flame jet, making this an easy choice.
+	$LF
+]div
+[div class=p 
+	"Transforming into a bat in the next room to fly over the water puddle is absolutely required, and I was fortunate enough to get a perfect "un-transform damage boost" by getting damaged by a Vampire Bat the frame after I begin to un-transform, which skips the animation entirely.
+	$LF
+]div
+[div class=p 
+	"The room entered on frame 169264 features one of the most creative strats in the movie, one that also exists in RTA speedruns; using a combination of Django's footstep noises and wall-knocks, I'm able to lure the 3 Gusts into the skylight, then enable partial sunlight after grabbing the key from the chest. Exposing the Gusts to a full 10 bars of sunlight would instantly kill them and prevent me from gaining EXP, but the damage they take scales with the strength of the sun, and limiting their exposure to 9 bars of sunlight causes them to take 270 damage, bringing them to near-death. From there, a single attack whilst passing them kills them for almost no time invested, and Django reaches LVL17. This is the last enemy that will be killed before the upcoming boss fights, and so I am barely able to equip the Katana in time here, whilst also assigning my spare stat points into STRG.
+	$LF
+]div
+[div class=p 
+	"The next few rooms are uneventful, until I partially refill Energy on the Solar Station before entering the next miniboss. Station balance is down to 64 after this refill, and is now running very low.
+	$LF
+]div
+[h3 id=Cheyenne 
+	"CHEYENNE
+	$LF
+]h3
+[div class=p 
+	"This miniboss is very threatening during RTA runs, where a single mistake will often lead to instant death. Instead, the Katana demonstrates its power and Cheyenne dies in a few seconds of sustained damage. My first attack is timed to knock the axes that he throws out of the air, and I then attack until he dies. Having little to say about this fight makes a welcome change from how many RTA runs have died here. While waiting for the elevator to leave the room, I refill as much Energy as I can, at the cost of some Life.
+	$LF
+]div
+[div class=p 
+	"After leaving Cheyenne's room, I use the Warp Magic Square to teleport back to the start of the dungeon, then use it again to warp back to Cheyenne's room. This is not optional as I will need to return to this area later, and the warp is not active until this Warp Magic Square has been used. I actually forgot to do this during initial movie progress because in RTA play, we typically combine this warp with returning to San Miguel and crafting a Katana now that Cheyenne's weapon shop is available. I only realised the route difference after reaching the point much later in the movie where I needed to revisit this area. That was a fun mistake to realise I'd made.
+	$LF
+]div
+[div class=p 
+	"The next few rooms are just fundamental movement until getting back outdoors at frame 176532, which involves using Transform: Bat/Mouse to navigate through a short collection of branching paths. Before leaving the room, I enable sunlight to refill some more Energy at the cost of most of Django's remaining Life, bringing him down to a critically low level. I also push the wooden block into the hole to open the regular path through the room, as I will need to revisit this area later on.
+	$LF
+]div
+[h3 id=BossRedDurathror 
+	"BOSS: RED DURATHROR
+	$LF
+]h3
+[div class=p 
+	"Django encounters the second Immortal: The Earth-Ruling Immortal, Red Durathror. This fight is split into three phases, with the first phase spawning several Dark Roots and Durathror herself inside a flower bulb, all in random positions. The bulb spreads a dense pattern of thorns after a few seconds, but ten hits from the Katana imbued with Element Dark end the phase before she can use any attacks. Destroying Dark Roots during this phase does grant the standard 40 EXP per kill, but my route did not require this EXP and killing extra enemies would cause additional lag as well as costing Energy I can't spare, so I avoided this. Phase two sees five flower bulbs spawn in random locations, with Durathror being inside one of them. If left alone for long enough, all flower bulbs will release area-of-effect attacks and spawn adds, before disappearing and respawning in new locations. In order to find the real bulb, the player can either attack all of them until they find Durathror which is not exactly preferable, wait for one of the bulbs to vibrate indicating that it contains Durathror, or use Transform: Bat in order to reveal Durathror's position through echolocation. Alternatively, Django can just pre-cognitively know which is the correct bulb every time through the use of savestates, which I opt for. Phase three sees Durathror reveal herself entirely and alternate between summoning giant thorned roots that follow Django, and causing spiked balls to fall from the ceiling. Each cycle during this phase automatically ends after dealing enough damage to Durathror, so I use a combination of enchanted and unenchanted hits per cycle in order to maximise damage and end the fight in fewer cycles. Some camera scrolling is used to minimise lag throughout the fight, and some playaround movement is done during downtime, but not as much as I could have done; this particular section of the movie was one that I needed to rework a few times due to a combination of making minor changes due to the amount of Energy required later, and sensor emulation desyncs. There were no fewer than five iterations of this fight, all on different RNG seeds and thus all obsoleting previous playaround inputs. I got extremely frustrated with this by the end and just wanted to move on to making actual progress through the remainder of the movie. Killing Durathror raises Django to LVL18.
+	$LF
+]div
+[div class=p 
+	"As soon as I regain control, I assign my stat points into STRG. At first glance this looks like a mistake as I will open the menu again shortly to use an item, but it was recently discovered by beige that assigning stat points here saves a couple of seconds; coming up is a coffin-drag sequence which I cannot use Power Nuts to speed up, as Black Django can't benefit from Solar Fruits and instead receives a stomachache (Which is an actual debuff) causing me to have to drag the coffin at regular speed. Coffin-drag speed in Zoktai is variable, and is a product of the STRG stat plus the AGIL stat. After assigning these stat points, Django's STRG is 50 and his AGIL is 25 for a total of 75 points, which is the minimum value to increase his coffin-drag speed. This is overall faster than waiting for the next item use and doing both menus simultaneously.
+	$LF
+]div
+[div class=p 
+	"At frame 184982 I enter the first coffin puzzle room, and leave the coffin on a floor panel to trigger a floating platform. At this point, a minor trick can be used in which the stone block is pushed onto the floor panel while the coffin is still there, clipping the coffin on top of the block. It will smoke and disappear, which is a fail-safe intended for the coffin somehow ending up out-of-bounds, and typically results in it teleporting to the previous room. Instead, since this room's puzzle flag has been set to "solved" by pushing the stone block, the coffin teleports to the NEXT room, preventing Django from needing to drag it from the floor panel. This used to be used in RTA runs to save about 1 second, but as of beige's discovery of assigning stat points early to raise coffin-drag speed, this no longer saves time and I drag the coffin normally instead. It's a shame since this is about as close as the movie would get to showing something that looks "glitchy", but it just isn't faster.
+	$LF
+]div
+[div class=p 
+	"After solving the remaining coffin puzzles without incident, I use a Warp Leaf to leave the dungeon at frame 188124. This looks very odd as I'm leaving the coffin behind, but this is the primary utility of buying Coffin Monster Elefan; an intended side-effect of it being able to move under its own power is that when left alone for long enough, 
+	[b 
+		"it will walk back to town on its own.
+	]b
+	" The only reason I've dragged it this far is that solving the puzzles in these rooms is a necessary condition for the coffin to recognise that it has a viable path to return to town (It actually doesn't as there are further obstacles ahead, but that's beside the point) and as long as Django steps onto the bottom tile of the room's staircase, this room is treated as being "solved".
+	$LF
+]div
+[div class=p 
+	"After leaving the dungeon, I immediately open the menu and save the game before performing a soft-reset. My understanding is that game-reset sequences are not very common in TASing, but it saves a huge amount of time in Zoktai, even in RTA speedruns. The soft-reset function for this game is Start + Select + L + R, which I'm able to hold through the game creating a save file as the soft reset command won't actually be performed until the save file has been written to. This holds true on real hardware too, presumably as a safeguard against accidental save corruption.
+	$LF
+]div
+[div class=p 
+	"I set the system time to 18:00PM, September 19th 2005. This is the next full moon date after the initial date, and I can get away with starting at 18:00 instead of 19:00 this time because the length of the day/night cycles actually correlates to the time of year, with summer months having longer daylight hours. Any progression of date on soft-reset would cause the coffin to return to town, but using a future full moon date allows me to continue summoning moonbugs for Life refills when needed. Advancing the date by a month has the simultaneous effect of increasing my money balance; for every day that passes, a fixed percentage will be added to the balance. This percentage can vary randomly, but on new file creation is hard-coded to be 1.7% until the calendar day rolls over, and will be applied for up to 10 days in a row, compounding each time. Gaining <2% interest on a balance of 340 is negligible, but it is better than nothing and this isn't the only date-reset that will be performed, with future date-resets being eligible for a higher interest rate.
+	$LF
+]div
+[div class=p 
+	"Before entering the piledriver screen, sunlight is enabled for a brief moment to spend most of the already-very-low Life that Django has remaining for a tiny bit more Energy. This is absolutely required, as I must spend 5 Energy on killing a Dark Root to enter the piledriver screen, and 5 more Energy to knock a generator online in order to begin the purification. All in all, when this purification is started, Django has less than 5 Life and Energy remaining, barely reaching an important point without needing to stop for a manual refill somewhere.
+	$LF
+]div
+[h3 id=DurathrorPurification 
+	"DURATHROR PURIFICATION
+	$LF
+]h3
+[div class=p 
+	"After an anime moment that sees Django regaining his true form through the power of plot armour or something similarly banal, Django learns Transform in order to freely switch between his Red and Black forms, and Rising Sun in order to spend 100% of his Energy bar on summoning an explosion of light that grants temporary sunlight. This may sound useless when the sun level can be manually controlled, but it actually has a couple of uses later on. I'm also finally able to refill Energy at will again without spending Life. I equip Sol over Transform: Mouse and take a cathartic full Energy refill. This purification was mostly uneventful other than the standard lag-reduction where it was reasonable to achieve, and cutting some of the dodges on Durathror's attacks as closely as possible. Purifications in Zoktai go by really quickly when sunlight is maxed. Also of note is that all four generators are automatically online after the cutscene, despite only activating one as Black Django.
+	$LF
+]div
+[h3 id=SanMiguel3TarotCardCollection 
+	"SAN MIGUEL 3/TAROT CARD COLLECTION
+	$LF
+]h3
+[div class=p 
+	"During the ensuing cutscenes, Django gains access to Grow magic which will be used all of once, and a new game scenario begins. I talk to Violet in order to trigger Nero running away and starting the new objective, then I talk to Cheyenne to unlock the weapon shop. I'm not interested in actually buying anything from Cheyenne, but instead talking to him in order to receive the run's most valuable movement tool; the Dash magic. This increases Django's movement speed based on the current sunlight level, and can be used every 16 frames. The majority of the remainder of the movie will therefore use max sunlight as it helps Django physically move faster, but this will put the perishable items in my inventory on a strict timer; once items spoil they lose their intended effects and give Django a stomachache. I'm planning to use items that were in my initial inventory during the final dungeon, so there is now an impending countdown to reach the end of the game before losing access to my items.
+	$LF
+]div
+[div class=p 
+	"I pick up a Warp Leaf from a hidden chest before following Nero into the next dungeon Aqueduct, which I cannot access yet. Django runs into Ringo, who has regained lucidity and informs Django that the path into Aqueduct is sealed by a door that is held in place by the power of three Tarot Cards hidden throughout the previous dungeons; The Magician, The Hierophant and The Hermit. He also teaches Django the final primary element, Element Earth. I leave the dungeon in order to start finding the Tarot Cards.
+	$LF
+]div
+[div class=p 
+	"The screen outside Aqueduct now marks a significant departure from the RTA EXP route; in RTA it's typical to destroy the Dark Root blocking the entrance to the optional dungeon Treasury in order to change the enemies that appear on this screen. Currently, two Green Slimes spawn on this screen but if the Dark Root has been destroyed, two Gusts will appear instead. The RTA route involves using an infinitely-respawning Gust near the entrance to San Miguel in order to quickly gain EXP before moving on. This is unnecessary in the TAS route, and so I instead kill the Green Slime blocking the entrance to Aqueduct. I'd rather not have to stop to take this kill as the EXP is markedly worse and not worth the time taken, but damage-boosting through this Green Slime twice costs Life that I cannot spare, especially when it inflicts poison which continues to drain Life afterwards.
+	$LF
+]div
+[div class=p 
+	"The Cathedral is the first dungeon to be revisited, and I go straight to where The Magician is hidden, using the newly-acquired Grow magic to create new pathways. A Warp Leaf is used immediately after acquiring The Magician to leave the dungeon.
+	$LF
+]div
+[div class=p 
+	"At frame 207383 I re-enter the piledriver screen on the way back to Dark City and stop to kill all four Dark Roots. Clearing all roots at the same time prevents them from respawning for the remainder of the movie, and this is the optimal time to get rid of them.
+	$LF
+]div
+[div class=p 
+	"Upon re-entering Dark City, I take the Warp Magic Square that was previously triggered during the initial visit to the dungeon. This was where I realised I hadn't triggered it on the first draft and had to go back over 30,000 frames. Fun.
+	$LF
+]div
+[div class=p 
+	"Fundamental but very satisfying movement ensues for the next few rooms as I backtrack to where I originally left the coffin, then reach a new room at frame 210939. This room features a block puzzle requiring usage of all four primary elements on the blocks; Flame, Frost, Cloud and Earth. Technically this puzzle is possible to solve without using Earth, but it is not faster or more Energy-efficient to do so. I would love to be able to push both blocks onto their respective floor panel positions with the same Spear thrust, but this doesn't appear to be possible and the game only causes block movement if Django is considered on an adjacent tile to the block in question. I can however hit both with the same Frost thrust.
+	$LF
+]div
+[div class=p 
+	"In the next room, I stop to kill the three Gusts as I pass by. In contrast to the extended kill setups during the first visit to this dungeon as Black Django, Red Django can kill these enemies in one hit using Element Sol and hitting them in the back. Finding a way to hit all three Gusts before they turned around was very difficult, but I eventually managed to find something that works. This leaves me with critically low Energy, but the following outdoor screen provides just enough passive generation to be able to use Transform: Mouse to pass through the mousehole and find the second Tarot Card, The Hermit.
+	$LF
+]div
+[div class=p 
+	"This series of rooms is normally used in the RTA route for a short EXP grind as a specific series of room-transitions can force the Gusts to respawn at favourable times that minimise travel, but this isn't required for the TAS route, so I immediately use a Warp Leaf to leave.
+	$LF
+]div
+[div class=p 
+	"At frame 215310, LVL19 is reached and I take the last planned hybrid-refill of the movie, gaining enough Life for everything that will follow, and enough Energy to get by for the following sections.
+	$LF
+]div
+[div class=p 
+	"In Remains I go straight to where The Hierophant is hidden, taking a damage-boost on a Zombie along the way. This is the first instance of using Dynamite as it is required to destroy a wall and reveal a new pathway, this magic will be used a few more times where required. After obtaining The Heirophant I use another Warp Leaf to leave, and am now able to access Aqueduct.
+	$LF
+]div
+[h3 id=Aqueduct 
+	"AQUEDUCT
+	$LF
+]h3
+[div class=p 
+	"This dungeon is mercifully very short, as the bulk of the time spent in this scenario is intended for the Tarot Card collection. Sabata warns Django not to work with Ringo, after which Ringo owns Django and uses the Tarot Cards to break the seal on the Aqueduct's entrance. Sabata follows him inside, and Django gives pursuit.
+	$LF
+]div
+[h4 id=TrapPurpleSlimes 
+	"TRAP: PURPLE SLIMES
+	$LF
+]h4
+[div class=p 
+	"Dash towards them, then they die in two hits to the Katana. Whatever.
+	$LF
+]div
+[h4 id=TrapOctopi 
+	"TRAP: OCTOPI
+	$LF
+]h4
+[div class=p 
+	"Now this is a little more involved! I saved more time than I expected to here after discovering that Dashing to an adjacent panel to where the Octopi appear forces them to immediately surface and attempt to grab Django. I was able to start damage earlier than expected as a result, whilst very narrowly avoiding the rocks being fired. The Katana with Flame easily one-shots these.
+	$LF
+]div
+[h4 id=TrapSkeletonFencers 
+	"TRAP: SKELETON FENCERS
+	$LF
+]h4
+[div class=p 
+	"If there's one TRAP! sequence I'm not particularly happy with in the movie, it would be this one. There's just not a definitively fast way to deal with these when they start so far apart in the room. The best I can do is get intentionally seen at specific points and cause footstep noises on the grates in order to lure each enemy into the centre of the room. I'm certain this is faster than killing them all individually, but I still don't like how long this appears to take. Using Black Django for these kills is significantly faster because despite Skeletons being undead, they don't actually have a defined elemental weakness. Therefore, they take 25% increased damage from all elemental enchants, including Dark. Black Django is uniquely capable of crowd-controlling and killing the Skeleton Fencers together due to his hits causing knockback, and I am able to gradually push them towards the exit of the room whilst cleaving them all down simultaneously. Some extra frames are spent between hits as this was necessary to prevent them from jumping back to avoid the attacks. Defeating these enemies raises Django to LVL20, and I transform back to Red Django before moving on.
+	$LF
+]div
+[div class=p 
+	"I assign my stat points into STRG before stopping at the Solar Station before a partial refill, leaving a balance of 39 before entering the next boss fight.
+	$LF
+]div
+[h3 id=BossBlueDvalinn 
+	"BOSS: BLUE DVALINN
+	$LF
+]h3
+[div class=p 
+	"A long cutscene is followed by the third Immortal: the Sea-Ruling Immortal, Blue Dvalinn. This fight has less clear phase progression than the previous Immortals, though it is largely rendered obsolete by how quickly the fight is over. This fight will always begin with two tentacles spawning in random spots around the arena, and their position can be influenced by delaying how many frames before advancing the final textbox before the fight, as the bubble sprites in the water are advancing RNG. Fortunately, I had a favourable RNG seed without spending any additional frames, and was able to cleave both tentacles at once to double my damage output. The skylight in the centre of the arena allows me to refill Energy as needed, and can additionally be used to manipulate RNG. I use both to great effect here, taking a welcome Energy refill whilst manipulating another double-tentacle spawn. My damage output is also throttled per cycle in order to prevent getting unfavourable attacks during which Dvalinn's main body appears far out of range. After the second tentacle cycle, Dvalinn appears at close range and a few direct attacks finishes her off before she can begin an attack. This fight is a massive source of RNG time variance in RTA runs, and I'm very happy with the fight I was able to get here. Defeating Dvalinn raises Django to LVL21.
+	$LF
+]div
+[div class=p 
+	"I equip Earth over Flame, then immediately use a Warp Leaf to leave before returning to San Miguel.
+	$LF
+]div
+[h3 id=SanMiguel4 
+	"SAN MIGUEL 4
+	$LF
+]h3
+[div class=p 
+	"I begin by visiting the Clocktower, which can be used once every 24 hours to manually reset the system time. I need to teleport the coffin back to town, and this is significantly faster than using a soft-reset. The system time is simply advanced by a full month from its current setting, which requires only a right + up input. This is no longer a full moon date, but I no longer need access to moonbugs for Life refills, so there's no reason to spend extra frames setting a full moon date. This clock reset also gives a further ten day advancement on my money balance. I roll another poor interest rate, but I don't need a particularly high one in order to afford all the items I need.
+	$LF
+]div
+[div class=p 
+	"With my new balance, I go to Lita's item shop and stock up on inventory for the rest of the movie. In total I buy two Speed Nuts, six Solar Nuts, two Power Nuts and a Warp Leaf. I must sell one of my Earthly Nuts in order to make room for the Warp Leaf and I'm not really pleased with how inelegant this looks, but I don't think there's a better solution for the required inventory management here. I then go to the piledriver screen and begin the next purification.
+	$LF
+]div
+[h3 id=DvalinnPurification 
+	"DVALINN PURIFICATION
+	$LF
+]h3
+[div class=p 
+	"Another largely uneventful purification, other than noting that I'm using Element Earth which looks like an unusual choice. There is no actual benefit to using Sol during purifications other than it requiring 5 Energy per attack instead of 10, but Energy is virtually unlimited during purifications, and equipping Earth earlier saves me having to do a later menu for it, so it makes sense to use it here. Dvalinn is purified quickly, and I disable sunlight just before the event ends to set the RNG2 index for an upcoming manipulation.
+	$LF
+]div
+[div class=p 
+	"Django then proceeds north to a new screen and towards the final main dungeon of the game; Spiral Tower. He meets Sabata outside and is told that they must open their respective doors to the tower at the same time, with Sabata channelling darkness and Django channelling light. I delay starting Django's charge by 2 frames in order to manipulate RNG2 when the screen reloads; every time this front-of-Spiral Tower screen loads, a seed is set for an upcoming puzzle in Spiral Tower. In total, this seed is rolled four times before entering the dungeon, and this is the final roll that I actually care about for setting a good seed. Big thanks to Raphi for developing the LUA script showing the current RNG value's puzzle solution, and the spreadsheet showing what each RNG value's puzzle solution will actually display. I didn't know what the actual parameters for an "optimal solution" were before seeing the spreadsheet, and it made determining which seed to go with much easier.
+	$LF
+]div
+[h3 id=SpiralTower 
+	"SPIRAL TOWER
+	$LF
+]h3
+[div class=p 
+	"By far my favourite dungeon in the game, this is a very dynamic area filled with technical movement, puzzles and rapid switching between the brothers so that they can progressively unlock each other's locked doors. The first room features a Black Slime on a corner tile that I Dash straight past, but this thing can and does end RTA runs on the spot, as running past it on the corner is not actually consistent due to the game's movement system effectively making it pseudo-random whether Django will move by 1 or 2 pixels on the frame he rounds the corner. Contacting the Black Slime twice is death, or once if Dash is active whilst taking damage, as this forces Django to take automatic critical hits. Fortunately this is not a problem in a TAS, and I Dash past it trivially. Once getting outdoors, Django can either manually slide along the narrow passage, or transform into Black Django and then use Transform: Mouse to run along the narrow passage. I'm very sure that using Red Django here is faster since the alternative requires extra menuing, animation time and Energy usage. Django pushes a block for Sabata's path, then backtracks and falls through a trapdoor in order to activate a lever unlocking a door for Sabata, before using a magic circle to switch control to Sabata.
+	$LF
+]div
+[div class=p 
+	"On gaining control of Sabata, I open the menu and use a Speed Nut. Sabata's running speed is significantly slower than Django's owing to his heavy armour, and his personal movement magic, the Zero Shift, behaves very differently to Django's Dash. Zero Shift costs Energy for Sabata to use, and causes him to teleport forward a fixed distance. This distance is unaffected by the current sunlight level as Sabata is the Lunar Child, the only thing I care about regarding sun level is that at least 1 bar is displayed whilst Sabata is indoors, so that he can passively regenerate Energy. This is actually the thing I am least mechanically certain about both in this movie, and in Zoktai in general; as recently as this week a few of us observed that the conditions for Sabata to be able to refill Energy both indoors and outdoors do not appear to follow consistent rules. We're not certain if this is due to using the Japanese 1.0 release and something was patched in later revisions, but different runs have shown Sabata clearly requiring sunlight to be active whilst indoors VS not requiring sunlight indoors, to requiring no sunlight active whilst outdoors VS refilling Energy outdoors being impossible. Research is ongoing to determine why there are differences here, but the takeaway for the movie is that I followed the currently-understood strategy of having some sunlight enabled whilst indoors, and as far as I'm aware this cannot lose time if it turns out to not be required. I first noted that strange behaviour was happening here when I notified the others in a voice call that I was able to save time in this dungeon by charging Energy as Sabata whilst waiting for the outdoor elevators to move whilst sunlight was disabled, and was met with variations of "What?? How??" At the very least, I don't think any permutation of this behaviour caused me to lose time in this movie, as I was passively regaining Energy whilst indoors, and manually recharging Energy whilst outdoors which is the best-case scenario in both settings.
+	$LF
+]div
+[div class=p 
+	"Sabata's segments are largely just fundamental movement, with the added caveat that I use Zero Shift to reach the end of rooms slightly sooner, this generally saved several frames per room. Conventional wisdom is to not waste Energy on Zero Shifting whilst under the influence of a Speed Nut and instead save Energy for the end of the dungeon when Sabata has no more Speed Nuts, but after discovering I could manually charge Energy outdoors, I ended up with a massive Energy surplus and this was the most efficient way to spend the extra Zero Shifts.
+	$LF
+]div
+[div class=p 
+	"After switching back to Django, I move up a couple of floors and enter a room at frame 243173 containing a new enemy type; Cockatrices. These are very threatening and will kill Django quickly, but are also a very efficient source of EXP at 200-per and can be killed before they're able to react with Earth, which I equipped earlier for the Dvalinn Purification. I kill both Cockatrices to reach LVL22, then move upstairs to kill one more for a total of 600 EXP before going outside and triggering the elevator to reach the next miniboss. I assign my stat points into STRG and equip Transform: Mouse over Earth before entering the encounter.
+	$LF
+]div
+[h4 id=TrapSword_2 
+	"TRAP: SWORD+
+	$LF
+]h4
+[div class=p 
+	"A beefed up Sword that is killed faster than the original; Black Django using Element Dark shreds through this thing very quickly owing to his higher attack speed and Sword+ not having a recoil period after taking damage. Of note is that Element Dark also deals +50% damage when used at Night. Within the game's damage formula, this +50% uses the same flag as the "back-hit" multiplier, effectively allowing Element Dark to always hit enemies as though from behind. This does not stack with actually being behind the target, however. Defeating the Sword+ raises Django to LVL23, and I leave the room without transforming back to Red Django, as I need to take a detour in the next room and it was not faster to spend the time transforming between Red/Black in order to use Dash. 
+	$LF
+]div
+[div class=p 
+	"In the next room I use Transform: Mouse in order to pass through a mousehole and open a chest for a Bearnut, which I now have space for in the inventory after using a Speed Nut as Sabata. I now un-transform back to Red Django after leaving the mousehole and Dash through the next few rooms, before hitting a lever for Sabata's tower and using a magic circle to swap control back to Sabata.
+	$LF
+]div
+[div class=p 
+	"Sabata immediately Zero Shifts onto the new elevator before taking the aforementioned outdoors-Energy-recharge which we still don't fully understand the conditions for. I will certainly take the timesave it allows, though. I use the second Speed Nut as the elevator is about to dock, then proceed normally. Sabata goes upstairs and outdoors to kill a distant enemy and trigger an elevator for Django's tower, then heads back indoors and up to a new floor before killing a Ghoul that is literally carrying a key on its head. Sabata then goes outdoors and begins a maze-puzzle that requires both brothers to solve. I leave Sabata on a nearby magic circle that allows him to fire shots at the nearby lever which switches the layout of the raised platforms, which was recently suggested by beige as an improvement to how we previously handled this puzzle, using a further-off magic circle that required extra movement. I'm not entirely sure how we overlooked this for so long, but I'm glad to feature this route improvement in the movie.
+	$LF
+]div
+[div class=p 
+	"After switching control to Django, I Dash back to the new elevator, and take a partial Energy recharge to manipulate RNG2 for an upcoming drop. Django heads outdoors to the same puzzle that Sabata is in, and control rapidly switches back and forth between the two brothers to enable Django to reach the rusted lever that activates elevators in both brothers' towers. Django then heads back indoors to activate a lever that frees Sabata from the maze puzzle, before moving into the next room and skipping a puzzle with Rising Sun; a Gust is patrolling the west side of the room in an unreachable spot, with three levers can be triggered to drop bombs in fixed spots. Timing these bomb drops correctly causes the Gust to take enough damage to die, which spawns a chest containing a key. However, using Rising Sun at 10 sunlight instantly kills the Gust without needing to bother with the puzzle. There is ample time to refill Energy shortly, so this is well worth it.
+	$LF
+]div
+[div class=p 
+	"At frame 254061, Django reaches a noteworthy outdoors screen that involves using a floating platform to bypass flame jets. This is a very dangerous room, and until recently the accepted RTA method was to use Black Django and Transform: Bat, as getting hit by the flame jets in bat form would at least prevent Django from getting pushed off the platform to his death. I've recently started doing this screen as Red Django in order to save a slight amount of time, though this screen is now incredibly dangerous as a result. Finding a solution for this screen in this movie wasn't actually very straightforward, as the flame jet cycles are very difficult to avoid on the first leg, and completely impossible on the second leg, if no frames are wasted in movement. I realised after a while that I can simply disable sunlight on the second leg to alter the rate that the flame jets fire, as they follow the same rule as the Solar Wind room back in Remains. This does limit the Energy I can gain back during this room, but I still manage a very large refill during the first leg.
+	$LF
+]div
+[div class=p 
+	"At frame 255096, Django enters a new room and runs past a hint panel before switching control back to Sabata. This hint panel is the first half of the solution for the puzzle I set an RNG seed for before entering the dungeon; when Django next goes outdoors, he'll encounter a wide-open area with a statue, and an iron block that can be pushed around. The hint panel gives an incomplete set of instructions for where to push the block, notably providing a compass direction, and a number. Sabata has a similar hint panel in his tower, and the brothers' hint panel partially refer to each other. Django's hint panel will refer to either North or South, and Sabata's hint panel will refer to either East or West. In this movie, the puzzle solution I went with is East 1, South 2, which will display on Django's hint panel as South 1, and on Sabata's hint panel as East 2. This is the shortest possible solution for the puzzle, as South 1 will never appear due to it being the block's home row.
+	$LF
+]div
+[div class=p 
+	"After switching, Sabata goes back indoors and takes a new elevator, taking the opportunity for an Energy recharge as he does so. On the next floor I use a Power Nut for the upcoming block puzzle, then go outside and take another elevator whilst charging some more Energy. Sabata then goes back indoors and activates a lever to allow Django into his next puzzle room, before switching control.
+	$LF
+]div
+[div class=p 
+	"Django then moves into the compass puzzle room before transforming to Black Django and moving the iron block one space east and two spaces south of the statue, solving the puzzle and spawning the next miniboss.
+	$LF
+]div
+[h4 id=TrapAxe_2 
+	"TRAP: AXE+
+	$LF
+]h4
+[div class=p 
+	"A slightly longer fight than Sword+, but this still goes down very quickly to Element Dark. I actually cannot deal damage to Axe+ as quickly as possible, as dealing too much damage before it gets into range for a melee attack will automatically trigger an attack from it that will almost certainly kill Django, or otherwise deal damage that I cannot afford. The Axe+ dies shortly after teleporting whilst I whiff an attack to advance RNG2, Django reaches LVL24 and I time the transformation back to Red Django to advance RNG2 in a specific manner again before the cutscene triggers. I can't delay this transformation much longer than I do, otherwise the cutscene trigger interrupts the transformation from occurring. 
+	$LF
+]div
+[div class=p 
+	"When the room re-loads after the next cutscene, an RNG call is made for the chest that spawns containing a random tarot card, and with the RNG2 value I have, I get a second copy of The Tower. I also charge some Energy whilst waiting for the chest to spawn, but the RNG call has already been made and this does not influence what card appears in the chest. I now have two copies of The Tower in my inventory and two Bearnuts, which have appeared to do nothing for the whole movie other than waste inventory slots. Watch this space.
+	$LF
+]div
+[div class=p 
+	"Django then Dashes through a couple more rooms before reaching the final elevator to reach the top of Spiral Tower, an outdoors section. This is not in fact a boss area, and is just an adjoining screen to reach the other side of the previous floor. Before the elevator triggers, I open the menu, assign my stat points into STRG, equip a new set of enchants and use a Power Nut. Once outside, Solar Wind is active as well as a new mechanic not previously seen; Solar Walkways. Specific areas in Zoktai feature hidden walkways which act as shortcuts and only trigger when the sun is active. Due to what I assume is a bug, these walkways will disappear again if the sunlight is set to 9 or 10, and so 8 is the highest value that can be used with a walkway whilst maximising Dash speed. I managed to get a very favourable Solar Wind direction due to the extended menu in the previous screen extending the framecounter before reaching this screen, and I take the adjoining elevator back down into the previous floor.
+	$LF
+]div
+[div class=p 
+	"I Dash past a couple of ghosts known as Leys before triggering a lever to open the final door of Django's tower. All you need to know about these Leys are that they're awful, awful creatures. Their movement is very erratic and influenced by Django's movement, making them completely unpredictable. They will attempt to latch onto Django at which point they rapidly drain his Energy and inflict him with a curse that randomly scrambles the D-pad directions. This D-pad scramble is different every time, so there's no quick adjustment and something in my brain just doesn't know how to figure out what my new directions are quickly. Getting caught by these dreadful things in RTA runs invariably costs me 15-20 seconds waiting for the curse to go away. Thankfully, they're susceptible to sunlight, and die easily in one hit to Element Sol, so I kill two in a single slash and let the remaining two drift into the sunlight which kills them instantly. They also spawn solar bugs on death and I take the opportunity to collect one whilst waiting for the stone block to drop into its hole.
+	$LF
+]div
+[div class=p 
+	"At frame 261712, I enter Django's final puzzle room of the dungeon and enjoy the combination of Dashing and block-pushing movement whilst still under the Power Nut's influence. I drop a final floating block onto a floor panel with Cloud + Frost, and Django reaches the end of his half of the tower. Control then automatically switches back to Sabata.
+	$LF
+]div
+[div class=p 
+	"Sabata spends his remaining Energy on Zero Shifts here, as I do not have another Speed Nut. He goes upstairs twice to his top floor, and fires a long-distance shot to an offscreen lever, triggering his final door. He then goes back downstairs and Zero Shifts to the final door, with a cheeky little damage-boost on the final enemy capping off his half of the tower. Control then automatically switches back to Django, and I open the menu to equip Rising Sun over Frost, and manually refill to 100% Energy before entering the boss room. Before combat starts against the next boss, Django is given a text choice to either accept or reject an offer to join him and help end the world. The player can actually make this choice for real, and saying Yes causes an instant Bad Ending. No Game Over or do-overs or nothing, credits roll and back to title screen! GG. So don't do that, select option two.
+	$LF
+]div
+[h3 id=BossBlackDainn 
+	"BOSS: BLACK DAINN
+	$LF
+]h3
+[div class=p 
+	"The brothers finally confront the last of the Immortals: The Shadow Immortal, Black Dainn. This functions like a repeat of the Vampire fight in Remains, down to Sabata generating black holes in the centre of the room with Django distracting the boss until the black hole is fully formed. Dainn's attacks are far more threatening than Ringo's, the orbs of darkness that he spawns in particular will kill Django in one hit, no questions asked. Just like the first fight, there's not a lot that can be done to speed this fight up. Or so was believed for a long time. I realised some time ago that a very heavy hit can be dealt in the opening of this fight by using Rising Sun, since Dainn is weak to Sol and therefore takes damage from the sunlight explosion. At 10 sunlight, this hits him for over 1,500 damage, which in practice saves a cycle in the fight. This is nonetheless a pretty unintuitive action to take, as using Rising Sun costs an entire Energy bar, and running out of Energy in this fight is not a tempting prospect. However, with consumables to regain Energy this saves an appreciable amount of time, and is now regularly used in RTA runs. After using Rising Sun, I open the menu to replace Rising Sun with Cloud, then use two Solar Nuts to regain Energy. The rest of the first phase of the fight is playaround movement, and defending Sabata from the oncoming darkness orbs. After Dainn's second lunge he gets trapped in the black hole, and after three hits he knocks out Sabata and phase two begins. 
+	$LF
+]div
+[div class=p 
+	"Phase two sees Dainn separate from Ringo's body and move into a fixed position to launch his strongest attack; a storm of darkness orbs that fires towards wherever Django is currently standing. There is no way to survive getting hit by this attack in an RTA run, and getting hit is a significant risk as saving a further cycle in this fight is possible by getting as close as possible to Dainn whilst this attack is being used, which causes the orbs to miss completely whilst Django is able to stand and attack Dainn freely. The positioning for this is very precise however, and the player doesn't really get a chance to adjust after making a mistake, instead generally just dying on the spot if misjudging the spot. I actually had additional trouble with this spot in this movie, as I wanted to find a position that would allow me to start damage earlier and attack for longer, but these positions were consistently putting me 
+	[em 
+		"too
+	]em
+	" close to Dainn, and causing his hitbox to contact Django on taking damage and vibrating. I eventually found a spot I'm relatively happy with, as I was able to scroll the darkness orbs almost entirely offscreen to eliminate lag, with minimal re-positioning needed after Dainn moves following this attack. Dainn's next attack is summoning three large darkness orbs as in the first phase before disappearing underground to periodically attack from below. Once this attack triggers, the player has no option but to wait for 10~ seconds for Dainn to re-appear, and risking the close-range death in this phase is for the sake of ending the fight before this underground attack begins. During routing I was worried about being able to get this quick kill due to entering this fight two levels lower than normal, but I managed to catch this cycle comfortably enough and end the fight at the planned point. Defeating Dainn raises Django to LVL26, two levels at once.
+	$LF
+]div
+[div class=p 
+	"After defeating Dainn, I open the menu to replace Sol with Dynamite, then use my last Warp Leaf to leave. I then save the game and soft-reset in order to set the system clock one more time and teleport the coffin back to town. The final system time used for the movie is 19:00PM, 22nd July 2006, so basically this run took eleven months when you think about it.
+	$LF
+]div
+[h3 id=DainnPurification 
+	"DAINN PURIFICATION
+	$LF
+]h3
+[div class=p 
+	"The final purification of the movie, and appropriately the most dangerous. The darkness orbs that Dainn periodically spawns will kill Django in one hit as in the boss fight, and he takes considerably longer to die than in previous purifications. The overall formula is the same though, with pushing him back into the coffin at the first opportunity and taking the opportunity to do playaround movement with how close his attacks come to killing me. Cloud is used for the purification as I don't necessarily need to use Sol here, and I will need Cloud in the next area. Fun fact, yesterday I was on RTA WR pace and decided "Yeah, I did that in the TAS so I'm gonna do it here because it's faster", then very quickly got reminded of why I just take the small timeloss and use Sol for this purification in RTA since you can actually kill the darkness orbs easily. That run was good while it lasted.
+	$LF
+]div
+[div class=p 
+	"Lots of cutscene and exposition follows, before Django heads back towards Spiral Tower for the final dungeon; whereas Spiral Tower extends into the sky, a counterpart dungeon exists underneath it burrowing into the earth where the aforementioned Ancestor Piece is sealed; the Undead Zone. Now that Dainn has unlocked the Ancestor Piece's seal from the top of Spiral Tower, it is awakening and Django must re-seal it. Sabata uses his newly awakened Moon Beauty powers to open the door to Undead Zone, and Django heads inside.
+	$LF
+]div
+[h3 id=UndeadZoneB1 
+	"UNDEAD ZONE: B1
+	$LF
+]h3
+[div class=p 
+	"The final area of the run, acting as a series of floors each guarded by an elemental being. After entering B1, Django Dashes through a couple of rooms before coming to the first room that demands stealth from the player; being discovered by the Skeletons patrolling this floor will lock the exit to the current room and force Django to either defeat them, or exit/re-enter the room. I start by knocking on a wall to distract the Skeleton Fencers, then wait for them to move before Dashing past. I tried very hard to find an improvement to this room in the form of Dashing past a Skeleton Fencer as it reaches the corner of a tile and moving during its turning animation, but whilst I was able to avoid being seen, I was not able to avoid Django contacting the Skeleton Fencer on the frame he passed by and instantly dying. Their hitboxes simply appear to be too large. This might be possible with the correct combination of sub-pixel positioning and frame data, but I was not able to get this to work no matter what I did.
+	$LF
+]div
+[div class=p 
+	"At frame 288328 I pass by a Skeleton Fencer earlier than normally possible by hitting it in the back to stun it, then running past before it regains control. This prevents me needing to knock on a wall and wait for it to turn away, saving a couple of seconds.
+	$LF
+]div
+[div class=p 
+	"In the next room, I set Dynamite near the torch in order to unlock the door at the end of the room, skipping an intended puzzle whereby Django is supposed to use the floor panel once the Gust has walked far enough to get hit by a flame jet.
+	$LF
+]div
+[div class=p 
+	"At frame 289007 I use the same technique as before to hit a Skeleton Fencer in the back to stun it and allow Django to run past without being seen. Avoiding getting hit as I passed it on the corner required an odd set of movement quirks that look sub-optimal, but I was totally unable to pass this enemy safely with "perfect" movement.
+	$LF
+]div
+[div class=p 
+	"In the next room, a short block puzzle is completed and I then lower the sunlight level to 8 before leaving the room, as the following room features a Solar Walkway. I don't bother changing the sunlight level back to 10 before entering the next room, as the disappearing Solar Walkway would cause lag, and movement speed is not particularly relevant in the next room as I need to hit the Skeleton Fencer/Archer in the back as before to pass safely, and I need to wait for the Archer to get into range to be hit.
+	$LF
+]div
+[div class=p 
+	"At frame 290444, I enter a room featuring a series of floor panels surrounding a key. These panels are all traps that detonate the key once pressed, so I'm forced to equip Transform: Bat and switch to Black Django for this. I leave Cloud equipped, as that element will be needed for an upcoming fight.
+	$LF
+]div
+[div class=p 
+	"In the next room, I knock on a nearby wall to lure the Skeleton Archers away from guarding the exit, then Dash by at the first possible opportunity. I need to take a brief stop in the following room to wait for the Solar Walkway to appear, then continue on as normal. I grab a chest largely obscured by the stone block before pushing the block, reconnecting me to the start of the floor and make my way back to the entrance, where I can now open the door to the boss room. 
+	$LF
+]div
+[h4 id=TrapSandWorm 
+	"TRAP: SAND WORM
+	$LF
+]h4
+[div class=p 
+	"The boss of this floor is the Earth elemental, the Sand Worm. One of the major deviations from most existing RTA runs occurs here; the entire point of the TAS route picking up two copies of The Tower is to skip fights in this dungeon, with this being one of them. The Tower causes damage to all onscreen characters equal to Django's level * 8. The Sand Worm is comprised of multiple segments, and The Tower hits all of these for full damage! However, Django also takes damage from The Tower, and it's more than enough to kill him from full Life. The only way to mitigate this is by using a Bearnut, which prevents all damage for 15 seconds. I Dash into position to hit the Sand Worm with Cloud twice as soon as possible, then open the menu to use a Bearnut, then once again to use The Tower, instantly killing the Sand Worm. This is a very dangerous fight in RTA runs as once the Sand Worm burrows underground it moves randomly, and can just decide to move straight onto Django's position and fire a rock, instantly killing him. Even if this doesn't happen, the time it spends underground is random, so timeloss regularly occurs here just from waiting for it to do something. The timesave provided by The Tower can't be understated and I really wish there was a way to consistently get a copy in RTA, but that requires a soft-reset cycle which outweighs the time saved from shortening this fight. Defeating the Sand Worm raises Django's level twice, to LVL28.
+	$LF
+]div
+[h3 id=UndeadZoneB2 
+	"UNDEAD ZONE: B2
+	$LF
+]h3
+[div class=p 
+	"The second floor begins with assigning my stat points into STRG, and changing my enchant loadout to Flame, Earth and Dynamite. I'm not particularly happy with the result of the puzzle room starting at frame 294464, but I wasn't able to save any more time here despite trying. The RTA method is to use Dynamite on the first torch, as the time limit for lighting all torches is actually very strict and using Dynamite typically removes this pressure. However this makes little sense to do with TAS optimisation, so a "standard" puzzle solution is used which unfortunately makes the patrolling Skeleton Fencers much more un-cooperative. At least there's a funny attack from the second Skeleton Fencer as Django leaves the room. 
+	$LF
+]div
+[div class=p 
+	"The following rooms pass without comment until Django reaches a puzzle at frame 295759, which requires lighting both torches on the floating platforms in quick succession. With optimal movement I was able to catch an early cycle that I'm convinced can't really be improved on, and am quite happy with how this room went. I lower the sunlight level to 8 before leaving the room to activate Solar Walkways in the next room, then take the shortest path to avoid the Cockatrices and move on.
+	$LF
+]div
+[div class=p 
+	"The following room features a destructible wall that hides an armour that was used in RTA runs until very recently; the Garb of Darkness. However I've recently stopped collecting this armour as I realised that the listed damage increase for Element Dark doesn't stack with the Night-time damage increase, making it a boost to Django's defences only. And my policy at this point in Undead Zone is "Don't get hit", so taking time to pick up an armour is a no-go. That's obviously the case for the movie, where there's no chance of taking a large hit, so I just move on without collecting it as normal until reaching the next boss room. Before entering the boss room, I take a full Energy refill on the Solar Station, leaving my balance at 55.
+	$LF
+]div
+[h4 id=TrapLich 
+	"TRAP: LICH
+	$LF
+]h4
+[div class=p 
+	"The boss of this floor is the Cloud elemental, the Lich. This fight is notable for taking place in a darkened room, limiting Django's visibility to a frontal circle. The Lich is constantly spawning adds of some kind during this fight, first a couple of lightning orbs that loosely track Django, followed by a Skeleton Fencer, followed by lightning clouds after dropping below 50% Life. The danger of this fight cannot be overstated in RTA runs, where Django can barely survive taking a hit from the lightning orbs at maximum Life, and other sources of damage just kill him in one hit no matter what. Thankfully the fight goes by extremely quickly in this movie, where I'm able to manipulate a favourable movement pattern from the Lich that allows me to maintain very high uptime on attacking from behind, as well as killing the Skeleton Fencer before it even becomes active. I am forced to use two Solar Nuts mid-fight to regain Energy, this is simply a by-product of how much health the Lich has and how low my level is, and cannot be avoided. I take the opportunity to cut the lightning strikes as closely as possible whilst finishing off the Lich, and Django's level is raised twice, to LVL30.
+	$LF
+]div
+[h3 id=UndeadZoneB3 
+	"UNDEAD ZONE: B3
+	$LF
+]h3
+[div class=p 
+	"The third floor is relatively uneventful, featuring a lot of ice puzzles and requiring no Energy consumption whatsoever. Which is very convenient considering Django is currently at 0 Energy after killing the Lich, and the Solar Station is running very low. I start by activating a lever to the west which opens a new door, then use a slope clip to take an optimal path through an ice puzzle before continuing on and activating a new lever. Django Dashes through a couple more rooms before coming to a large room featuring a wide ice floor. 
+	$LF
+]div
+[div class=p 
+	"This is when Zoktai showcases the closest thing it has to a "skip"; I've actually not done some "required" rooms in this floor and the ice puzzle currently in front of me should be unsolvable. However, by setting Dynamite in a specific position and getting knocked onto the ice at a specific time, the ice-slide behaviour is interrupted, and Django is able to start new movement from an irregular spot. This allows him to reach the end of the puzzle earlier than intended, at the cost of taking a minor hit from the Dynamite. I lower the sunlight level to 1 for the detonation, as the Dynamite's power scales with sunlight level and I want to conserve as much Life as possible at this point. Django activates the lever in the middle of the room before looping back around to the first room of the floor.
+	$LF
+]div
+[div class=p 
+	"At this point, I choose to stop at the Solar Station as this is the smallest movement detour required to use one before the next boss, and there has been some extra time for Energy to accumulate inside it. The balance inside is 68 on reaching the Solar Station, and I leave it at 28. Balance is now running critically low, and there will not be time for major gains between visits from here. What to do?
+	$LF
+]div
+[div class=p 
+	"I proceed across a couple more ice puzzles, the second of which forces me to take a short wait in order to avoid getting hit by the Centipede, then continue on until I reach the boss room.
+	$LF
+]div
+[h4 id=TrapSerpent 
+	"TRAP: SERPENT
+	$LF
+]h4
+[div class=p 
+	"The boss of this floor is the Frost elemental, the Serpent. This is one of the most cathartic fights in the movie, as I absolutely despise this thing and how many runs it has killed. This is the second fight to feature a usage of The Tower, but I begin by setting a Dynamite and using three unenchanted attacks to the Serpent's head. This does negligible damage, but is required nonetheless for the upcoming quick kill. The Serpent submerges and the Dynamite detonates, forcing the Serpent to end its submerged phase and jump out of the water. We're not completely certain why this occurs, but it seems to be tied to attacks that cause noise, as using Transform: Mouse and pressing A to squeak achieves the same thing. Whatever the reason, this behaviour is very consistent and very helpful, as it skips an attack that invariably wastes a lot of time due to the downtime and lag generated. Once the Serpent is airborne, I open the menu to use a Bearnut + The Tower, and the Serpent is chunked for most of its remaining Life. As it lands close to Django's position, I use one Flame attack on its tail, the designated weak point, to finish it off. Similarly to the Sand Worm, an appreciable amount of time is saved from being able to use The Tower on these fights, probably to the tune of 15-20 seconds each. Django's level is raised twice, to LVL32.
+	$LF
+]div
+[div class=p 
+	"I use most of my remaining Energy to melt an ice block and leave the floor sooner.
+	$LF
+]div
+[h3 id=UndeadZoneB4 
+	"UNDEAD ZONE: B4
+	$LF
+]h3
+[div class=p 
+	"Upon entering the fourth floor, I visit the nearby Solar Station and withdraw all remaining available Energy; I'm able to refill for 47, and the Solar Station is now completely empty. Energy is still relatively low, and this floor requires a lot. Quite the problem!
+	$LF
+]div
+[div class=p 
+	"At frame 307933, I enter the first puzzle room and push a stone block into the gap in the floor. I then appear to slash thin air before lighting the floating block with Flame and opening my menu to assign stat points to STRG and change my enchants, replacing Flame with Cloud and Dynamite with Frost. Upon using Cloud to push the floating block north, Solar Bamboo breaks apart from the previous slash, releasing several solar bugs/moonbugs. I collect these for a small Energy refill before pushing the floating block east, then break the stone block underneath it. The iron block is pushed against the wall before finally using Earth to delete the floating block, enabling Django to reach the floor panel which unlocks a door.
+	$LF
+]div
+[div class=p 
+	"Django then Dashes through the next couple of rooms, including dodging a Stone Golem on a corner in nifty fashion. At frame 309876, I reach the next puzzle room and use two more slashes at the air to trigger a collection of Solar Bamboo, before switching to Spear and Frost to extinguish a couple of distant flames. I then open the menu to change my enchant loadout, replacing Earth with Sleeping and Cloud with Transform. The Solar Bamboo breaks to reveal a swarm of solar bugs, which Django collects after Transforming, then uses Sleeping to enter the Elefan Coffin and fire a ranged shot into the now-exposed lever. This is the only usage of a ranged attack in the movie, and is normally where usage of the Gun Del Sol would be forced, which can be collected from the chest that appears after purifying Dainn and taking to Smith for repair. However, the Elefan Coffin serves this purpose well enough and so Django simply never retrieves his precious heirloom during this run. Sad.
+	$LF
+]div
+[div class=p 
+	"I un-transform and Dash through the newly-opened door, including a corner-dodge around a Stone Golem that required an odd piece of movement in order to work without dying, before coming to another Solar Station. I open a hidden chest for a Solar Nut before using another slash at the air, revealing more Solar Bamboo. Whilst waiting for it to break, I withdraw the balance that has accumulated whilst progressing through this floor, which is 10, then charge the now-freed solar bugs, almost completely refilling my Energy. This is the last visit to a Solar Station that will be taken, and the balance has now run completely dry. Without the Solar Bamboo on this floor, I may not have had the ability to finish on this route, and without being able to collect this much passive Energy throughout the entire movie without my initial Solar Nuts and Bearnut surviving long enough to use in Undead Zone without perishing, I may have had to repeatedly reset these rooms to farm Solar Bamboo, particularly as manually fighting the Sand Worm and Serpent would have required far more Energy. 
+	$LF
+]div
+[div class=p 
+	"A few more rooms are passed uneventfully until frame 311769 when I reach a room with platform cycles. Unfortunately, it seems to be completely impossible to reach the first cycle which can be seen leaving as Django reaches it, but clearly I would need to reach it far sooner in order to catch it. So instead I do some playaround movement with Dashing whilst waiting for it to come back, then continue once I'm on the platform. Crossing the corner joint between the floating platform and the treasure chest platform at frame 312439 when I go to collect another Solar Nut should not have been possible, but I'll take it. I run through one more room containing Stone Golems before dashing straight into the final floor guardian of the dungeon.
+	$LF
+]div
+[h4 id=TrapLich_2 
+	"TRAP: LICH+
+	$LF
+]h4
+[div class=p 
+	"The boss of this floor is the Flame elemental, Lich+. In standard fashion by this point, taking damage from any source will kill Django in one hit here. I get into position to hit the boss from behind with Frost as soon as possible, whilst avoiding the explosions from the tracking flames the boss summons. Lava jets also spawn underneath Django's position whenever he hits the boss, which I dodge at the narrowest margin. Taking recoil damage from the stray flames interrupts the rhythm of my attacks, but also prevents Django from taking full damage from at least one lava jet. Once the Lich+ moves away, I follow it and get as close as possible in anticipation of its next attack, before opening the menu to use two Solar Nuts and regain Energy. Camera scrolling is then used to reduce lag whilst attacking as fast as possible whilst its next attack starts up; a ring of flames that rotates around the boss's position. There is a very small pixel window in which Django can stand inside the ring of fire without contacting the boss's hitbox. This is also exploited in RTA, albeit it generally requires a damage-boost costing most of Django's Life bar as attempting to eyeball the correct position manually is very easy to get wrong, and results in instant death if a mistake is made. From here I simply keep attacking, and re-open the menu once my Energy runs out to use two more Solar Nuts. As with the Lich fight, this is simply unavoidable due to the amount of health the boss has, and how many attacks are required. After a second refill, I'm able to end the fight before the rotational attack is finished, and Django is raised two levels, to LVL34. This is the final level I will reach before entering the final boss, and I open the menu once more to use my two remaining Solar Nuts to refill Energy, before assigning my last stat points into STRG, reaching 98, and equipping Enchant Dark over Sleeping.
+	$LF
+]div
+[h3 id=UndeadZoneB5 
+	"UNDEAD ZONE: B5
+	$LF
+]h3
+[div class=p 
+	"The final floor of the dungeon, and of the entire movie. Otenko warns Django that this is a point of no return, and indeed the player is incapable of backtracking once new screens are reached here. I move as fast as possible through the screens whilst cutscenes occasionally play showing the rest of the cast preparing the means to reseal the Ancestor Piece, including some screens that involve dodging enemies by very narrow margins. 
+	$LF
+]div
+[div class=p 
+	"At frame 320035, I lower the sunlight to 8 bars as the room before reaching the final boss features a Solar Walkway. Presumably this is here to ensure the player has access to sunlight before reaching the final boss, for reasons that will become apparent. My last action before entering the final chamber is to Transform into Black Django, and equip Element Dark, which will be used for the final fight. Otenko wishes Django good luck, and they go forth into a room of pure darkness. A heartbeat fills the air before a beast audibly stirs, and the chains of the seals around the city of San Miguel visibly break.
+	$LF
+]div
+[h3 id=FinalBossJormungandr 
+	"FINAL BOSS: JORMUNGANDR
+	$LF
+]h3
+[div class=p 
+	"Savvy readers will notice that the four Immortals of the story, Duneyrr, Durathror, Dvalinn and Dainn are characters from Norse mythology that nibble at the world tree, Yggdrasill. Those same readers will know that an appropriate doomsday beast from the same mythology is the great serpent, Jormungandr. This is the Ancestor Piece that the Immortals have been working to release, and Django must now subdue it. Otenko warns Django that Jormungandr can't even be damaged without the sunlight present, and acts as a conduit to allow the sun's rays to fill the chamber. 
+	$LF
+]div
+[div class=p 
+	"This flavour extends to the fight's mechanics, and Jormungandr is indeed invulnerable if the sunlight is off. This is problematic for two reasons; firstly because I'm doing this fight as Black Django, and so I'm on a timer to defeat Jormungandr before Django dies to sun exposure. And secondly because the sensor emulation desync issues previously alluded to were a constant and 
+	[b 
+		"major
+	]b
+	" problem while working on this fight. Due to savestates incorrectly being cached when working in TAStudio and the gamestate constantly snapping to the sunlight incorrectly being off, Jormungandr kept becoming invulnerable and ignoring what was supposed to be happening. The only way I could make real progress in this fight was to play the inputs of the fight from the starting point, every time I made a change. If this sounds like a massive nuisance, you're right. It was. Doubly so from the amount of manipulation this fight required.
+	$LF
+]div
+[div class=p 
+	"Jormungandr will always begin in a neutral state, giving Django a couple of seconds to start damage before it attempts to devour him. It will either appear close or far away, with close being preferred as it allows me to start damage sooner and gives a more favourable position for the second set of attacks. This is what I got without requiring any manipulation, which I was very happy about. Django must start damage by attacking one of Jormungandr's eyes, which will prompt it to immediately lunge at Django and devour him, ending the fight instantly. I'm able to time two attacks to prevent this lunge, instead allowing the lunge animation to begin before delivering a third hit. Three hits are required on an eye to cause Jormungandr's head to become stunned, so I time this third hit for when Jormungandr's head rears back next to its body, then stun it. Getting close to Jormungandr's body causes a tail to appear that rapidly swipes across the arena, which will instantly kill Django here. However, whilst Jormungandr is stunned, this tail does not appear, allowing me to close the distance and cleave the opposite eye and the main body at the same time. Once the opposite eye is also hit three times, Jormungandr's weak spot will appear; the tongue. The primary manipulation this fight required was ensuring that each time this weak point appeared, the head was positioned close enough to the body to allow me to cleave the tongue and body at the same time. Jormungandr's head moves randomly every time the opposite eye is hit, and getting such a position is very uncommon. I never rely on this occurring during RTA runs and consider myself very lucky if it happens once in a fight, instead it's more likely for Jormungandr's head to decide to drift into Django, which here would be an instant death.
+	$LF
+]div
+[div class=p 
+	"Cleaving the tongue and body at the same time inflicts enough damage across the five hits that the tongue stays out for so that an unfavourable attack which sees Jormungandr stand straight up with its head out of reach does not occur, instead at low-enough Life it will breath in and ready a black breath attack. I take this opportunity to take some distance so that the tail-swipe doesn't occur, and momentarily raise the sunlight to 10 bars in order to charge as much Energy as possible during downtime. This costs a significant portion of Django's remaining Life and puts me on an even shorter timer to finish the rest of the fight. Once the black breath attack begins, Django is able to ignore it and once again attack one of Jormungandr's eyes three times to start the second stun. This is one of the main perks of using Black Django for the fight; this black breath attack quickly kills Red Django, but Black Django is totally immune to it. I move into position to once again cleave the opposite eye with the main body, once again manipulating the hits so that Jormungandr's head both fails to connect with Django, and drifts close enough to the body so that when the tongue emerges, I can cleave both together. 
+	$LF
+]div
+[div class=p 
+	"Jormungandr's Life is now in a specific range to allow me to go straight into a third attack cycle; if its Life was much lower, it would raise its head up once again and use a hammer attack to stun Django. Instead, its head stays in place and it prepares to fire elemental beams from its eyes. I use this opportunity to immediately hit and eye three times and begin the third stun cycle, then move to the opposite side and repeat the process of cleaving the eye and body, then once again manipulating the head's behaviour to avoid Django and remain close enough to the body that the tongue can be cleaved with it when it re-emerges. This third cycle doesn't quite finish off Jormungandr, but the body remains vulnerable after the cycle finishes, so one final hit is delivered to finish it off, and I celebrate defeating the final boss by rapidly switching the sunlight on and off, to change the colour palette and ironically put Jormungandr back into its "immortal" state. 
+	$LF
+]div
+[div class=p 
+	"I deliberately choose not to say I "kill" Jormungandr here because after all, it's the Ancestor Piece, an Eternal. It's neither living, dead or even undead. As such, it re-awakens and devours Django, right as the cast are readying the reforged seals around the previous dungeons to seal it back into place. Zazie activates the piledriver for a final time, and the shadow of Ringo appears to be visible in the blinding light.
+	$LF
+]div
+[div class=p 
+	"Chains attach onto Jormungandr as it chews up Django, and a final 10-second quicktime event occurs, giving Django a final chance to channel enough sunlight to burn Jormungandr up from the inside. I turn on sunlight at the last possible moment and burn through Jormungandr's final Life bar at 10 sunlight, destroying it within two seconds. When this final Life bar ticks to zero and the screen flash occurs, this marks the RTA end-point for the run. Django emerges in a blast of brilliance, and Spiral Tower is lit up in a pillar of light that grows to encompass the entire city.
+	$LF
+]div
+[div class=p 
+	"The credits roll, and a short post-credits cutscene plays between Django and Lita that forces me to manually progress it before the final statistics screen. The movie's input file ends at frame 339806 after advancing the final textbox, and the final ingame statistics are displayed:
+	$LF
+]div
+[ul 
+	[li 
+		"PLAY TIME: 1:28:20  
+		$LF
+	]li
+	[li 
+		"ENERGY: 7,331  
+		$LF
+	]li
+	[li 
+		"PLAY SIDE: RED  
+		$LF
+	]li
+	[li 
+		"PLAY STYLE: SWORD  
+		$LF
+	]li
+]ul
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" 
+			]th
+			[th 
+				"Total IGT
+			]th
+			[th 
+				"Total RTA
+			]th
+		]tr
+		[tr 
+			[th 
+				"TAS
+			]th
+			[td 
+				"1:28:20
+			]td
+			[td 
+				"1:30:48.81
+			]td
+		]tr
+		[tr 
+			[th 
+				"RTA
+			]th
+			[td 
+				"1:41:27
+			]td
+			[td 
+				"1:47:48.63
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Well, this certainly was a long submission. From all this, I did pick up the details that I needed to know with your effort. As I expected, heavy RNG is key with RPG games. Watching your TAS, along side your WR, showed the expected "pulling-ahead" of your optimization.  I figured it would have been a lot more, but this game didn't have elements that I see in other RPGs that really slow down a human run. So I think this is a good thing. Well, great job on this and I congratulate you on this effort.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

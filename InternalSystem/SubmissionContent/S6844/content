@@ -1,0 +1,140 @@
+14
+[h3 id=AboutTheGame 
+	" About the Game
+	$LF
+]h3
+[div class=p 
+	"Fushigi no Dungeon: Fuurai no Shiren GB: Tsukikage Mura no Kaibutsu, translated as Mystery Dungeon: Shiren the Wanderer: The Monsters of Moonlight Village, is a roguelike game developed by Aquamarine and published by Chunsoft, apparently released back in 11/22/1996. The game follows Shiren the Wanderer, and his talking weasel Koppa. The game has also gotten some ports/re-releases on Windows and Android. And there really isn't anything I can say past that, the game was only released in Japan, and there's really not much info about this game. The 
+	[a href=https://www.speedrun.com/shiren_moonlightvillage rel=noopener external nofollow 
+		"RTA leaderboards
+	]a
+	" don't even have any runs on the Gameboy version. Luckily, this game is buggy so it won't matter for me.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[h4 id=EmulatorUsedBizhawk242 
+	" Emulator used: Bizhawk 2.4.2
+	$LF
+]h4
+[ul 
+	[li 
+		" CGB in GBA mode is enabled for console verification.
+		$LF
+	]li
+]ul
+[h4 id=Categories 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		"Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		"Executes arbitrary code
+		$LF
+	]li
+	[li 
+		"Some luck manipulation
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"The run is fairly short, so there isn't too much to comment on. The key exploit used is simply the L/R|U/D glitch. Essentially, the game doesn't handle L/R and U/D inputs correctly; often they will freeze the game, but sometimes they will cause ACE. This movie specifically uses the combination L/R/D to cause ACE at EDF0 (echo RAM for CDF0). I use my player name to store most of the payload, however, I simply don't have any bytes that can cause any jumps. That's where luck manipulation comes into play. The game stores 4 bytes for RNG at D601-D604. The game uses rTIMA (somewhat similar to rDIV, but much more restrictive for manipulation) for seeding the RNG, and uses a fairly complicated 
+	[a href=https://en.wikipedia.org/wiki/Linear-feedback_shift_register rel=noopener external nofollow 
+		"LFSR
+	]a
+	" to cycle through RNG. I only need 1 byte from this RNG though, so it isn't too hard to manipulate what I need.
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=SaveFileCreation 
+	" Save file creation
+	$LF
+]h4
+[div class=p 
+	"I need to create a save file to really do anything, which can be quickly done. It also needs to be the 3rd save file, the 1st one won't work. I hard reset once the save file is actually made. As a note, the game doesn't seem to have any soft reset, and going back through the main menu without resetting is much slower, and will simply not work for my purposes anyways (due to the game splashing FFs in a huge chunk of RAM I need to slide past). As a note, this reset is why I need to use the 3rd save file, as the game will load the 3rd save file's data by default, and will only load the other save files if they actually go into the game (which I don't want to do).
+	$LF
+]div
+[h4 id=RngManipNameAce 
+	" RNG Manip/Name/ACE
+	$LF
+]h4
+[div class=p 
+	"After the reset, I manipulate for an E9 (
+	[code 
+		"jp hl
+	]code
+	") byte to appear at D601. I don't particularly care how good the manip is though, you'll see why later. I then proceed to re-name myself, which will write the following code into memory:
+	$LF
+]div
+[pre 
+	"ld hl,7C17 ; credits location
+	$LF
+	"ld (bc),a ; bc = 2800
+	$LF
+]pre
+[div class=p 
+	"Afterwards, I need to flash the rename screen again. This will clear out a troublesome buffer of my name, leaving in some $88 bytes. I then just have to wait for a counter at CE0D to go down to $AA, which is a 
+	[code 
+		"xor d
+	]code
+	" opcode. This counter is why it doesn't particularly matter how long it takes to manipulate the E9 byte, as I will need to wait a bit before this counter will reach this value. This will make it so when the game executes the 
+	[code 
+		"ld (bc),a
+	]code
+	" in my name, a will equal $7C, which will allow for a bankswitch to the credits' bank. Once the counter reaches that value, I can press L/R/D, and that's all the input I need to do, as the ending goes on without any inputs. 
+	$LF
+]div
+[div class=p 
+	"Credits to ThunderAxe31 for telling me about this ACE exploit and helping in finding the credits.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": All right, I confirm that this is a game end glitch, as I can see from looking at the trace log. No cheats or debug codes are involved. Also, the game is considered properly beaten, as the credits sequence is performed in its entirety, including the fact that it's cleared when you press A button after the end. Then, the game freezes, probably because the credits routine was called from the menu instead than after beating the last dungeon, but this isn't an issue, as what it matters is the execution of the credits routine itself, not what happens after.
+	$LF
+]div
+[div class=p 
+	"The movie itself is very short and lacks visible action, so I understand why the reception was mixed and little. As such, accepting for the Vault.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": 
+	[del 
+		"Processing. Zinfidel is handling the encodes for this one.
+	]del
+	" We have a new publisher in our ranks!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Zinfidel 
+		"Zinfidel
+	]a
+	": Processing...
+]div

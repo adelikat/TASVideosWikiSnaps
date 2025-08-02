@@ -1,12 +1,6 @@
-40
+45
 [div class=p 
-	(listlanguages)
-	$LF
-]div
-[hr 
-]hr
-[div class=p 
-	[img class=embedright src=http://media.tasvideos.org/dw2.png 
+	[img class=embedright mw-100 src=https://files.tasvideos.org/gameresources/nes/dw2/dw2.png 
 	]img
 	$LF
 ]div
@@ -17,7 +11,7 @@
 [div class=p 
 	"We should emphasize that the computer, being a deterministic machine, has no concept of randomness. All it does is follow instructions. To simulate a stream of effectively random numbers, the computer uses a 
 	[em 
-		[a class=extlink href=http://en.wikipedia.org/wiki/Pseudorandom_number_generator rel=nofollow 
+		[a href=http://en.wikipedia.org/wiki/Pseudorandom_number_generator rel=noopener external nofollow 
 			"pseudo-random number generator
 		]a
 	]em
@@ -58,11 +52,11 @@
 	"This is where luck-manipulation comes in. Luck manipulation is the act of controlling random decisions through input so that the results occur in your favor.
 	$LF
 ]div
-[h2 id=WhatyouneedtoknowabouttheRNGinthegame 
+[h2 id=WhatYouNeedToKnowAboutTheRngInTheGame 
 	" What you need to know about the RNG in the game
 	$LF
 ]h2
-[h3 id=WhendoesthegamecycletheRNG? 
+[h3 id=WhenDoesTheGameCycleTheRng 
 	" When does the game cycle the RNG?
 	$LF
 ]h3
@@ -84,7 +78,7 @@
 		$LF
 	]li
 ]ul
-[h3 id=WhatseedvaluedoestheRNGuse? 
+[h3 id=WhatSeedValueDoesTheRngUse 
 	" What seed value does the RNG use?
 	$LF
 ]h3
@@ -122,7 +116,7 @@
 		$LF
 	]li
 ]ul
-[h3 id=WhichRNGdoesthegameuseforeachaction? 
+[h3 id=WhichRngDoesTheGameUseForEachAction 
 	" Which RNG does the game use for each action?
 	$LF
 ]h3
@@ -130,7 +124,7 @@
 	"Games sometimes run multiple RNGs, using them for different purposes. It is important to know which RNG is used for which actions in the game.
 	$LF
 ]div
-[h3 id=Whenistherandomvalueselected? 
+[h3 id=WhenIsTheRandomValueSelected 
 	" When is the random value selected?
 	$LF
 ]h3
@@ -150,7 +144,7 @@
 	"If a scenario appears where you can't manipulate an action that should be able to be manipulated, try searching backward (in the movie) until you discover when inputs can change the result.
 	$LF
 ]div
-[h3 id=TheRNGformula 
+[h3 id=RngFormula 
 	" The RNG formula
 	$LF
 ]h3
@@ -165,7 +159,7 @@
 [ul 
 	[li 
 		" 
-		[a class=extlink href=http://en.wikipedia.org/wiki/Linear_Congruential_Generators rel=nofollow 
+		[a href=http://en.wikipedia.org/wiki/Linear_Congruential_Generators rel=noopener external nofollow 
 			"Linear congruential generators
 		]a
 		".
@@ -173,7 +167,7 @@
 	]li
 	[li 
 		" 
-		[a class=extlink href=http://en.wikipedia.org/wiki/Linear_feedback_shift_register rel=nofollow 
+		[a href=http://en.wikipedia.org/wiki/Linear_feedback_shift_register rel=noopener external nofollow 
 			"Linear feedback shift registers
 		]a
 		".
@@ -182,7 +176,7 @@
 ]ul
 [div class=p 
 	"There are 
-	[a class=extlink href=https://en.wikipedia.org/wiki/List_of_random_number_generators rel=nofollow 
+	[a href=https://en.wikipedia.org/wiki/List_of_random_number_generators rel=noopener external nofollow 
 		"some popular RNG formulas
 	]a
 	", but games on older systems tend to implement their own. On the flip side, modern games tend to use the runtime library provided one.
@@ -196,7 +190,79 @@
 	"Less secure RNGs are often reversible, there is a formula to produce numbers in the exact opposite order. This is of limited use due to savestates, but the possibility exists none the less.
 	$LF
 ]div
-[h4 id=Tablesandprecomputation 
+[h4 id=LinearCongruentialGenerators 
+	" Linear congruential generators
+	$LF
+]h4
+[div class=p 
+	"The name of these kinds of functions is just a description in technical jargon of the steps involved. But it's very simple, so here's a full explanation:
+	$LF
+]div
+[ul 
+	[li 
+		" First, take the previous output 
+		[code 
+			"X[n]
+		]code
+		" (or the seed if there is none), multiply by a constant scaling factor 
+		[code 
+			"a
+		]code
+		", and add a constant 
+		[code 
+			"c
+		]code
+		". (An "affine" or "linear" transformation.)
+		$LF
+	]li
+	[li 
+		" Then, divide by the modulus 
+		[code 
+			"m
+		]code
+		". The remainder is the new output. (The remainder is said to be "congruent, mod m".)
+		$LF
+	]li
+]ul
+[div class=p 
+	"That's it. 
+	[code 
+		"X[n + 1] := (a*X[n] + c) % m
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"The forum post 
+	(__wikiLink|displaytext="Finding and predicting RNG in practice (how to)"|href=/Forum/Topics/19515)
+	" gives a detailed example of finding the address of a game's RNG, finding and disassembling the RNG function, and identifying the constants 
+	[code 
+		"a
+	]code
+	", 
+	[code 
+		"c
+	]code
+	", and 
+	[code 
+		"m
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"There's a mathematical quirk about LCGs with modulus parameters which are powers of 2 (which is common because it has near-zero computation cost, it's just a truncation) that can help you quickly identify when one is used: the generated numbers alternate odd and even.
+	$LF
+	"However, if the game devs noticed this, or they copied an implementation meant for cryptographic use, then they'd only use the most-significant bits outside the generator.
+	$LF
+	"(
+	[a href=https://en.wikipedia.org/wiki/Linear_congruential_generator#Advantages_and_disadvantages rel=noopener external nofollow 
+		"Further reading on English Wikipedia
+	]a
+	")
+	$LF
+]div
+[h4 id=TablesAndPrecomputation 
 	" Tables and precomputation
 	$LF
 ]h4
@@ -208,11 +274,19 @@
 	"Higher end random number generators may use amortized algorithms. This means that they do some operations to generate data for future numbers in bulk and then hand out the pregenerated data until it runs out. For example, the RNG may be reseeded once every million times it is invoked using expensive to collect data.
 	$LF
 ]div
-[h2 id=Luckmanipulation 
+[h3 id=FakeRng 
+	" Fake RNG
+	$LF
+]h3
+[div class=p 
+	"Games sometimes exhibit behavior that seems random, but is not tied to the RNG. Instead the behavior is tied to something that is close enough to randomness, such as the exact tick of the global game timer or the exact position of an entity.
+	$LF
+]div
+[h2 id=LuckManipulation 
 	" Luck manipulation
 	$LF
 ]h2
-[h3 id=Howtomanipulatetheseed 
+[h3 id=HowToManipulateTheSeed 
 	" How to manipulate the seed
 	$LF
 ]h3
@@ -221,7 +295,7 @@
 	$LF
 ]div
 [div class=p 
-	[img class=embedright src=http://www.fceux.com/web/help/taseditor/lib/dw-luck_manipulation.gif 
+	[img class=embedright mw-100 src=http://www.fceux.com/web/help/taseditor/lib/dw-luck_manipulation.gif 
 	]img
 	$LF
 ]div
@@ -259,7 +333,7 @@
 	"The GIF of Darkwing Duck on the right shows how delaying a frame each time causes a different drop.
 	$LF
 ]div
-[h3 id=AI 
+[h3 id=Ai 
 	" AI
 	$LF
 ]h3
@@ -275,7 +349,7 @@
 	"This also applies to flawed AI decisions that regard bad moves (to human players) as good moves. The only factor is the AI's insistence on making that move.
 	$LF
 ]div
-[h4 id=Otherissues 
+[h4 id=OtherIssues 
 	" Other issues
 	$LF
 ]h4
@@ -323,11 +397,11 @@
 		$LF
 	]li
 ]ul
-[h2 id=Tipsforluckmanipulation 
+[h2 id=TipsForLuckManipulation 
 	" Tips for luck manipulation
 	$LF
 ]h2
-[h3 id=Subdivisionofasequenceofevents 
+[h3 id=SubdivisionOfASequenceOfEvents 
 	" Subdivision of a sequence of events
 	$LF
 ]h3
@@ -343,7 +417,7 @@
 	"It is much easier to manipulate many outcomes, if there is a high degree for which controllable input can manipulate these outcomes one block at a time.
 	$LF
 ]div
-[h3 id=RNGmemoryaddress,andmonitoring 
+[h3 id=RngMemoryAddressAndMonitoring 
 	" RNG memory address, and monitoring
 	$LF
 ]h3
@@ -365,7 +439,7 @@
 ]div
 [div class=p 
 	"You need to find the RNG in memory first. See 
-	(__wikiLink|/MemorySearch|Memory Search)
+	(__wikiLink|href=/MemorySearch|implicitdisplaytext=Memory Search)
 	" for details. Then watch it in memory.
 	$LF
 ]div
@@ -375,9 +449,7 @@
 ]h2
 [div class=p 
 	"One of the prime examples of luck manipulation is the 
-	[a class=intlink href=/1482M 
-		"Dragon Warrior
-	]a
+	(__wikiLink|displaytext=Dragon Warrior|href=/1482M)
 	" movie. The player abuses luck in his movie of this game in different ways.
 	$LF
 ]div
@@ -399,38 +471,30 @@
 		$LF
 	]li
 ]ul
-[h2 id=Morereading 
+[h2 id=MoreReading 
 	" More reading
 	$LF
 ]h2
 [ul 
 	[li 
 		" Luck manipulation is one of the basic TAS-making techniques, listed at 
-		[a class=intlink href=/GameResources/CommonTricks 
-			"Common Tricks
-		]a
+		(__wikiLink|displaytext=Common Tricks|href=/GameResources/CommonTricks)
 		".
 		$LF
 	]li
 	[li 
 		" 
-		(__wikiLink|/ReverseEngineering|Reverse Engineering)
+		(__wikiLink|href=/ReverseEngineering|implicitdisplaytext=Reverse Engineering)
 		$LF
 	]li
 	[li 
 		" 
-		(__wikiLink|/AdvancedLuckManipulation|Advanced Luck Manipulation)
+		(__wikiLink|href=/AdvancedLuckManipulation|implicitdisplaytext=Advanced Luck Manipulation)
 		$LF
 	]li
 	[li 
 		" 
-		(__wikiLink|/RandomGenerators|Random Generators)
-		" lists the technical details of randomness generators in different games.
-		$LF
-	]li
-	[li 
-		" 
-		(__wikiLink|/Glossary|Glossary)
+		(__wikiLink|href=/Glossary|implicitdisplaytext=Glossary)
 		" lists other terms.
 	]li
 ]ul

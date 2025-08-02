@@ -1,0 +1,1137 @@
+11
+[div class=p 
+	"(note: I encoded 
+	[a class=intlink href=/UserFiles/Info/638231175272772393 
+		"a version of the input file
+	]a
+	" that performs some more inputs during the credits)
+	$LF
+]div
+[h4 id=GameObjectives 
+	" Game objectives
+	$LF
+]h4
+[ul 
+	[li 
+		"Aims for fastest time
+		$LF
+	]li
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Executes arbitrary code
+		$LF
+	]li
+	[li 
+		"Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		"Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		"Takes damage to save time
+		$LF
+	]li
+]ul
+[h4 id=VersionChoice 
+	"Version Choice
+	$LF
+]h4
+[div class=p 
+	"The Japanese version is used because it allows us to write a more effective ACE payload. There are way more Japanese characters than there are alphanumeric ones and they occupy the high values ($60 - $FF), which are very useful for our purposes. It might be possible to do this run on other versions but it would be a lot more delicate and definitely slower.
+	$LF
+]div
+[div class=p 
+	"In addition, the Japanese textboxes have fewer characters and the screen with the Nintendo and Capcom logos is skippable only on the Japanese version, making resets quicker (and there will be quite a few resets).
+	$LF
+]div
+[h2 id=SaveGlitch 
+	"The Save Glitch
+	$LF
+]h2
+[div class=p 
+	"This is the central glitch of this run, which allows us to skip almost all of the game. The idea behind it is pretty simple and also not terribly original: We reset the console during the saving process, thus creating a "hybrid" savefile, one part of which comes from the new file and the other part from the old file. The data that will go in the savefile is stored in addresses $C5B0 - $CAFF in WRAM (the GameBoy's working memory) and when you save, it gets copied one byte at a time to addresses $A010 - $A55F in SRAM (the save memory on the cartridge). This means that we can choose any point between $C5B0 and $CAFF to "splice" the savefile and create a file for which all the values before the splice are the same as in the new file and all the values after are the same as in the old file.
+	$LF
+]div
+[div class=p 
+	"At first, this doesn't seem too promising. For example, if we put the splice in the middle of the inventory, we couldn't just get new items that way. This is because if we want the hybrid file to have a certain item, at least one of the two files (old or new) needs to already have that item. We could duplicate an item and dual-wield it but that doesn't put us any closer to beating the game.
+	$LF
+]div
+[div class=p 
+	"There is however one point in the save data where a splice has a great impact: the Death Respawn Buffer. It determines where Link respawns after dying or savewarping and consists of 13 frames starting at address $C62B. The disassembly describes those bytes as follows:
+	$LF
+]div
+[pre 
+	[code class=language-<> 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"We're only interested in the first two bytes. They determine which screen Link will appear on. Since there are more than 256 screens in the game, they have to be put into different groups. The first byte then tells us what group the screen is from and the second byte tells us the address of the screen within that group. So, if we splice the file exactly between those two bytes, we can combine the group from the new save with the address from the old one, warping us to a completely new place!
+	$LF
+]div
+[div class=p 
+	"The screens in this game are categorized into 8 groups, although the last two are just duplicates of the previous two. We're left with these 6 groups:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/iRu4UEW.png title=Group 0 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/In1s3hQ.png title=Group 1 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/yh0NjeI.png title=Group 2 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/9N6q2FG.png title=Group 3 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/ZlB1PV2.png title=Group 4 
+	]img
+	$LF
+	[img class=embed mw-100 src=https://i.imgur.com/XPpY06c.png title=Group 5 
+	]img
+	$LF
+	"(Some screens in the last two groups are cut off because they are larger than 10x8 tiles)
+	$LF
+]div
+[div class=p 
+	"For the address, the high nibble denotes the row and the low nibble the column. So the screen we start the game at would be 0 8A. I will refer back to these images later when we actually do the warps.
+	$LF
+]div
+[h4 id=SaveDataProtections 
+	"Save Data Protections
+	$LF
+]h4
+[div class=p 
+	"So far I've pretended that we can just reset the console at any point in the saving process and the game won't take issue with it. In reality of course, developers aren't usually very fond of the save data getting corrupted, which could lead to the player losing all their progress if done accidentally. They therefore put safeguards in place to prevent this from happening. This game uses two such safeguards in the form of checks that are run on all files upon starting the game, as well as at other points:
+	$LF
+]div
+[ul 
+	[li 
+		"The first two addresses of the save data ($C5B0 and $C5B1) are a checksum. It is calculated by treating all the other addresses as two-byte words and simply adding them up. Upon booting the game, this checksum is calculated again and checked against the value that is actually stored in those two bytes.
+		$LF
+	]li
+	[li 
+		"The next 8 addresses ($C5B2 - $C5B9) are a verification string. It is checked against the string "Z21216-0".
+		$LF
+	]li
+]ul
+[div class=p 
+	"If either of these checks fails, the entire save data is deleted and then a backup, that was saved to a different location in SRAM before any of the addresses were overwritten, is loaded in its place.
+	$LF
+]div
+[div class=p 
+	"The second check is not a problem for us. It would be a problem if we tried to delete our file, then reset during the deletion process. But the way we're trying to do it, both the old and the new file will have the correct string in the right place, so there is literally nothing that can go wrong here.
+	$LF
+]div
+[div class=p 
+	"The first check it trickier. Since the checksum is calculated before the other addresses are overwritten, this means that our hybrid file will have the same checksum written at the beginning of the file as the new file, but the checksum that is calculated during boot-up will come partially from values of both files.
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/qE1U9f4.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"So it's our job to make sure those two different checksums just so happen to be the exact same. There are two important things to point out here:
+	$LF
+]div
+[ul 
+	[li 
+		"The addresses before the splice are identical between the new and hybrid files. This means that those addresses (which include the in-game clock) cannot be used to adjust the checksum.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"For the rest of the addresses, what really only matters is how they change between the two saves. For example, if we picked up some rupees before the first save, both the new and hybrid save would have those extra rupees. For it to make a difference we would have to pick them up after the first and before the second save.
+		$LF
+	]li
+]ul
+[div class=p 
+	"So in summary, we're looking for addresses that come after $C62B and are also highly volatile. Fortunately for us, the addresses pertaining to the Pirate Ship fit the bill:
+	$LF
+]div
+[pre 
+	[code class=language-<> 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/OlRLJf9.png title=Path the Pirate Ship takes; frame 0 pictured 
+	]img
+	$LF
+]div
+[div class=p 
+	"You won't actually see the Pirate Ship in this run but nevertheless the game keeps track of its position and for some reason even stores it in the save data. It moves one pixel every two frames and takes 1856 frames to do one full rotation. It only doesn't move during screen transitions, textboxes and menus.
+	$LF
+]div
+[div class=p 
+	"The Pirate Ship is very useful for adjusting the checksum but another part of the save data that can be used for that purpose is the inventory. The items in our inventory are stored in addresses $C68A - $C699. The only thing we can affect here is the parity of the slot the items are in. So if we move the sword from slot 0 to slot 2, that won't change anything because its value is still added to $C5B0. However, if we move it to slot 1, it will instead be added to $C5B1.
+	$LF
+]div
+[div class=p 
+	"There are two more addresses that we have a little bit of control over:
+	$LF
+]div
+[ul 
+	[li 
+		"$C65F and $C660 store a value called Gasha Maturity. This value continually increases as you play the game and when it crosses a certain threshold, a Gasha Nut can be harvested. Most importantly for our purposes, this value increases by 5 every time you do a screen transition.
+		$LF
+	]li
+	[li 
+		"C6AA is Link's health. This is pretty straightforward, we can reduce this value by 2 by taking half a heart of damage.
+		$LF
+	]li
+]ul
+[div class=p 
+	"To bring this all together I wrote 
+	[a class=intlink href=/UserFiles/Info/638209636235052914 
+		"a lua script
+	]a
+	" that takes as input the checksum for the second part of the save data of the old save, as well as the first possible frame within the Pirate Ship's rotation that you can save the game at for both the first and second save. (I arbitrarily labeled the frame where the ship is in the top-left corner as frame 0.) The script returns all possible times that you have to wait before the first and second save so that the checksum will be correct and the splice will work. It does this based on all possible configurations of the inventory. We can load the script before doing the second save and play around with extra screen transitions or taking damage to see how the values change. This probably all sounds rather confusing at this point but I will point out what parameters to use for the different wrong warps in the run, so you can play around with it yourself. When you see the script in action this should all become a lot more clear.
+	$LF
+]div
+[div class=p 
+	"With all this theory out of the way, we're finally ready to start the run.
+	$LF
+]div
+[h2 id=Run 
+	"The Run
+	$LF
+]h2
+[div class=p 
+	"We christen our hero ヌにゲゼテ. This will obviously be our ACE payload and will be explained later when it's relevant.
+	$LF
+]div
+[div class=p 
+	"With perfect text mashing the text speed doesn't matter. It only affects how fast yes/no prompts come up and there won't be any in this run, so we just leave it at 3 and start the game.
+	$LF
+]div
+[div class=p 
+	"The Pirate Ship starts moving as soon as we're in the game, so nothing we do in the intro matters as long as we make it to the first save in time. The only thing I had to pay attention to was keeping the Pirate Ship moving. During screen transitions and textboxes the in-game clock will keep moving but the Pirate Ship won't. Because the ship only moves when the parity of the clock is even, this means that if the ship doesn't move on the last possible frame before the transition/textbox and it also doesn't move on the first possible frame after, we just lost two frames. I checked all the transitions and textboxes in the run to make sure this doesn't happen.
+	$LF
+]div
+[div class=p 
+	"We spend around half the run watching the intro cutscene. Afterwards, we get the sword and, more importantly, the ability to save the game. We could now go beat the final boss but that's not actually the fastest way to beat the game. Instead, we enter Vasu's shop and save the game. Then we enter Maku Road, save, and reset the GameBoy. Vasu's shop is screen 2 EE and the entrance of Maku Road is screen 4 04, so this warps us to screen 4 EE, which is part of the Black Tower.
+	$LF
+]div
+[div class=p 
+	"The parameters for the script are 499, 743, 0xB4, and 0x9C. We see that we would have to wait a total of 862 frames for the warp to work. However, this is because we just barely take too long to get from the first save to the second. By doing 4 extra screen transitions, we can push the window for the second save back just enough so we make it in time. That way we only lose 286 frames plus the time it takes to do the transitions, for a total time loss of 482 frames.
+	$LF
+]div
+[div class=p 
+	"Unfortunately, we spawn in the wrong version of the Black Tower, so we have to leave and reenter so we can get the shovel. You might be wondering why we're getting the shovel given that we could get literally any item in the game instead. The answer is that in order to do ACE later we need to be able to load a lot of objects into the game's memory. The mighty shovel is the only item that can do that by itself.
+	$LF
+]div
+[div class=p 
+	"Right after that, we save, then leave the Black Tower, save again, and reset the console. The entrance to the Black Tower is screen 4 E7 and the exit is screen 1 76, which warps us to screen 1 E7, which is an out of bounds area south of the past overworld map. This area houses a well-known ACE exploit.
+	$LF
+]div
+[div class=p 
+	"The parameters for the script this time around are 157, 441, 0x6E and 0x45. Despite having more inventory options available due to the shovel, we get a bit unlucky here and have to lose 718 frames. The best we can do is take half a heart of damage to prevent a further 4 frames of time loss.
+	$LF
+]div
+[h2 id=ArbitraryCodeExecution 
+	"Arbitrary Code Execution
+	$LF
+]h2
+[div class=p 
+	"The glitch we use to beat the game occurs when you select a certain out of bounds tile on the map. Since you're not supposed to be able to select it, it has undefined behaviour, which ends up causing a jump to address $FAD5 in Echo RAM (which is just a copy of WRAM). You can read 
+	[a href=https://wiki.zeldahacking.net/oracle/Veran_Warp rel=noopener external nofollow 
+		"this article
+	]a
+	" for a more detailed explanation (only the first paragraph is relevant here).
+	$LF
+]div
+[div class=p 
+	"When this glitch was first 
+	(__wikiLink|displaytext=examined by sockfolder|href=/Forum/Posts/371540)
+	", they wrote the code to OAM (the GameBoy's sprite memory). However, this is very cumbersome because it only allows you to write one-byte instructions. This would be especially terrible with the limited tools we have available. The problem is that for most items we can dig up (namely rupees and hearts) we don't have a lot of control over their position. They always spawn in the middle of the tile, no matter where you dig, and they always fly the exact same distance. It might be possible to use fairies and enemies to write code here but even if this did work, it would be very slow because the drop rate for fairies and enemies from the ground is low.
+	$LF
+]div
+[div class=p 
+	"We will instead write our code to the high addresses of Echo RAM. Since Echo RAM is the same as WRAM, this means that our code has to go after address $DB00. The memory between $D000 and $DFFF is used for the objects that are currently loaded on screen. Each object occupies 0x40 bytes. The game distinguishes between 4 types of objects that are all loaded into separate slots from one another. This means that we have to pick one of those types and then spawn a lot of objects of that type until the last one we spawn holds the code that we want to execute. Let's go through the 4 object types in order:
+	$LF
+]div
+[ul 
+	[li 
+		"Items are loaded in slots $DX00 - $DX3F. These are things like bombs and seeds. This is actually the easiest type to use IF you have enough of those items (and it is in fact how real-time runs beat the game). However, we have precisely 0 of those items, which means this type is out of the question for us.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Interactions are loaded in slots $DX40 - $DX7F. These are things like the dirt that appears when you dig or the icon at the top of the screen that tells you what time period you are in. All of these disappear very quickly, making it impossible to spawn enough of them.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Enemies are loaded in slots $DX80 - $DXBF. Since the shovel can dig up enemies, we can actually use this type. However, the drop rate for enemies is low so this just turns out to be slower than the last option.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Parts are loaded in slots $DXC0 - $DXFF. This is a slightly confusingly named type of objects but it includes rupees, hearts and fairies, all of which can be spawned by the shovel and together have a much higher drop rate than enemies.
+		$LF
+	]li
+]ul
+[div class=p 
+	"So we will use part objects to write the code. The problem with rupees and hearts is, as already mentioned, that we don't have a lot of control over their position and the object's position is the only part of the data that we can use to write meaningful code. The fairy however is different: Its movement depends on RNG so we can manipulate its position to be whatever we want it to be (as long as that position is on screen).
+	$LF
+]div
+[div class=p 
+	"The RNG in this game is pretty annoying to manipulate in a TAS setting because it only advances when a random event happens. Luckily, the sword plays one of three random sounds when you swing it, so we can use that to manipulate RNG. In practice, manipulating the fairies movement was probably the most annoying part of the run but I was eventually able to write 
+	[a class=intlink href=/UserFiles/Info/638209644050588377 
+		"a full simulation
+	]a
+	" and brute-force all possible sword-slash-sequences that will result in a position that causes a jump to the filename.
+	$LF
+]div
+[div class=p 
+	"In summary, the plan is to spawn 11 part objects and then spawn a fairy as the 12th part in slot $DBC0 - $DBFF. Since we start executing code at $FAD5, in the middle of the 11th part which would cause a crash, we have to then collect the 11th part to free up that memory again. We then manipulate the fairy's position at $DBCA - $DBCD to be a jump to the filename at $C602 - $C606.
+	$LF
+]div
+[div class=p 
+	"Let's talk about the filename now. After we jump to it, the registers look like this:
+	$LF
+]div
+[pre 
+	[code class=language-<> 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"We can write all the values between $60 and $FF, as well as the two values $20 and $2D. Our goal is to trigger the credits cutscene. A cutscene can be triggered by writing to either $C2EF (Cutscene Index) or $CC04 (Cutscene Trigger). Since we can't write $04, we have to write to $C2EF. The credits cutscene is value $0A but the 
+	[a href=https://en.wikipedia.org/wiki/Bit_numbering rel=noopener external nofollow 
+		"MSb
+	]a
+	" is ignored, so value $8A will work as well.
+	$LF
+]div
+[div class=p 
+	"The first order of business is putting either $0A or $8A in the A register. Given the values in the registers, it's not possible to do that by using only one byte but there are 18 possibilities to do it with two bytes. Out of these, the combination ヌに (C6 75 = 
+	[a href=https://gbdev.io/gb-opcodes/optables/ rel=noopener external nofollow 
+		"ADD A, $75
+	]a
+	") was the fastest to type.
+	$LF
+]div
+[div class=p 
+	"The next character has to be ゲ (EA = LD (a16), A) and the fourth character has to be the low byte of the address we want to write to, i.e. ゼ (EF).
+	$LF
+]div
+[div class=p 
+	"For the last character, we have the choice between テ (C2) and ォ (E2). At first glance, テ seems like the obvious choice, being right next to セ. But at a second glance, you realize that the character we need is not セ but ゼ, meaning we have to add the dakuten and from there it's faster to go to ォ. But then a third glance reveals the left arrow in the bottom-left corner of the file name menu, which, unlike pressing the B-button, let's you go backwards in the filename without erasing the rightmost character. This means that we can type all the base characters and then add the dakuten to ケ and セ afterwards, making テ the faster choice after all.
+	$LF
+]div
+[div class=p 
+	"That's all the characters we have, so there was no room to write a return opcode. This means that the game continues to execute code after the filename, which could potentially cause a crash. I could have used the in-game clock to write the return opcode but that wasn't even necessary because one of the later addresses returns us to ROM anyway.
+	$LF
+]div
+[hr 
+]hr
+[hr 
+]hr
+[div class=p 
+	"Now that we understand what we have to do, we can return to the run. After the second wrong warp, the first thing we have to do is visit screen 1 E2. This screen corresponds to the magic map tile we have to select in order to trigger the ACE exploit and you can't select a tile on the map if you haven't visited its screen before. Starting from 1 E7 we have to simply walk 5 screens to the left. After that we're stuck in the wall, leaving us unable to perform the ACE setup so we have to save warp back to 1 E7.
+	$LF
+]div
+[div class=p 
+	"RNG rolls once every frame on the title screen so we can delay pressing start for the right amount of frames here until we reach the RNG seed that allows us to dig up the first part object in a row of 12 that ends with a fairy. In this case the delay was 0 frames (lucky me).
+	$LF
+]div
+[div class=p 
+	"We dig up 8 part objects and then a Rope. Ropes can drop fairies, which in this case turned out to be faster than digging it up. It also gives us more control over where the fairy spawns (digging it up would always make it spawn in the middle of the tile). We dig up two more hearts while walking up a bit so the Rope will charge at us when it's at the right Y-position. The Rope hits us and we dig up another rupee, the 11th part object. Then we hit the Rope straight up, which kills it and makes the fairy spawn in the right place. With the final boss of this run defeated, all that's left to do is picking up the rupee we just dug up and manipulating the fairy to move to the right place, then we open the map and select tile 1 E2, which is the last required input of the run. The game then runs the following code in RAM:
+	$LF
+]div
+[div class=p 
+	"(All numbers in hex. Addresses omitted are all 00 (NOP).)
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Name of the address
+			]th
+			[th 
+				"Value
+			]th
+			[th 
+				"Opcode
+			]th
+			[th 
+				"Comments
+			]th
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"AF = D500
+				[br 
+				]br
+				"BC = 038D
+				[br 
+				]br
+				"DE = CCDB
+				[br 
+				]br
+				"HL = FAD5
+			]td
+		]tr
+		[tr 
+			[td 
+				"FBC0
+				[br 
+				]br
+				"FBC1
+				[br 
+				]br
+				"FBC2
+			]td
+			[td 
+				"Enabled
+				[br 
+				]br
+				"ID
+				[br 
+				]br
+				"SubID
+			]td
+			[td 
+				"01
+				[br 
+				]br
+				"01
+				[br 
+				]br
+				"00
+			]td
+			[td 
+				"LD BC, 0001
+			]td
+			[td 
+				"Start of the fairy data
+				[br 
+				]br
+				"BC = 0001
+			]td
+		]tr
+		[tr 
+			[td 
+				"FBC4
+			]td
+			[td 
+				"State
+			]td
+			[td 
+				"02
+			]td
+			[td 
+				"LD (BC), A
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"FBC6
+				[br 
+				]br
+				"FBC7
+			]td
+			[td 
+				"Counter1
+				[br 
+				]br
+				"Counter2
+			]td
+			[td 
+				"CE
+				[br 
+				]br
+				"40
+			]td
+			[td 
+				"ADC A, 40
+			]td
+			[td 
+				"A = 15
+				[br 
+				]br
+				"Carry flag set
+			]td
+		]tr
+		[tr 
+			[td 
+				"FBC9
+			]td
+			[td 
+				"Angle
+			]td
+			[td 
+				"14
+			]td
+			[td 
+				"INC D
+			]td
+			[td 
+				"DE = CDDB
+			]td
+		]tr
+		[tr 
+			[td 
+				"FBCA
+				[br 
+				]br
+				"FBCB
+				[br 
+				]br
+				"FBCC
+			]td
+			[td 
+				"Y subpixel
+				[br 
+				]br
+				"Y pixel
+				[br 
+				]br
+				"X subpixel
+			]td
+			[td 
+				"DA
+				[br 
+				]br
+				"00
+				[br 
+				]br
+				"C6
+			]td
+			[td 
+				"JP C, C600
+			]td
+			[td 
+				"The jump to the filename
+			]td
+		]tr
+		[tr 
+			[td 
+				"C602
+				[br 
+				]br
+				"C603
+			]td
+			[td 
+				"byte 1
+				[br 
+				]br
+				"byte 2
+			]td
+			[td 
+				"C6
+				[br 
+				]br
+				"75
+			]td
+			[td 
+				"ADD A, 75
+			]td
+			[td 
+				"Start of the filename
+				[br 
+				]br
+				"A = 8A
+			]td
+		]tr
+		[tr 
+			[td 
+				"C604
+				[br 
+				]br
+				"C605
+				[br 
+				]br
+				"C606
+			]td
+			[td 
+				"byte 3
+				[br 
+				]br
+				"byte 4
+				[br 
+				]br
+				"byte 5
+			]td
+			[td 
+				"EA
+				[br 
+				]br
+				"EF
+				[br 
+				]br
+				"C2
+			]td
+			[td 
+				"LD (C2EF), A
+			]td
+			[td 
+				"Writes the credits cutscene to the Cutscene Index
+				[br 
+				]br
+				" 
+				[br 
+				]br
+				"End of the filename
+			]td
+		]tr
+		[tr 
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"From here it's just random data executed as code
+			]td
+		]tr
+		[tr 
+			[td 
+				"C608
+				[br 
+				]br
+				"C609
+				[br 
+				]br
+				"C60A
+			]td
+			[td 
+				"(always 01)
+				[br 
+				]br
+				"KidName byte 1
+				[br 
+				]br
+				"KidName byte 2
+			]td
+			[td 
+				"01
+				[br 
+				]br
+				"00
+				[br 
+				]br
+				"00
+			]td
+			[td 
+				"LD BC, 0000
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C611
+				[br 
+				]br
+				"C612
+				[br 
+				]br
+				"C613
+			]td
+			[td 
+				"(always 01)
+				[br 
+				]br
+				"FileIsLinkedGame
+				[br 
+				]br
+				"FileIsHeroGame
+			]td
+			[td 
+				"01
+				[br 
+				]br
+				"00
+				[br 
+				]br
+				"00
+			]td
+			[td 
+				"LD BC, 0000
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C620
+				[br 
+				]br
+				"C621
+				[br 
+				]br
+				"C622
+			]td
+			[td 
+				"TotalEnemiesKilled low byte
+				[br 
+				]br
+				"TotalEnemiesKilled high byte
+				[br 
+				]br
+				"PlaytimeCounter LSB
+			]td
+			[td 
+				"01
+				[br 
+				]br
+				"00
+				[br 
+				]br
+				"08
+			]td
+			[td 
+				"LD BC, 0800
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C623
+			]td
+			[td 
+				"PlaytimeCounter byte 2
+			]td
+			[td 
+				"4E
+			]td
+			[td 
+				"LD C, (HL)
+			]td
+			[td 
+				"Our in-game time is 19976 frames (decimal)
+			]td
+		]tr
+		[tr 
+			[td 
+				"C627
+			]td
+			[td 
+				"TotalRupeesCollected low byte
+			]td
+			[td 
+				"02
+			]td
+			[td 
+				"LD (BC), A
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C629
+			]td
+			[td 
+				"TextSpeed
+			]td
+			[td 
+				"02
+			]td
+			[td 
+				"LD (BC), A
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C62B
+				[br 
+				]br
+				"C62C
+				[br 
+				]br
+				"C62D
+			]td
+			[td 
+				"Group
+				[br 
+				]br
+				"Room
+				[br 
+				]br
+				"StateModifier
+			]td
+			[td 
+				"01
+				[br 
+				]br
+				"E7
+				[br 
+				]br
+				"00
+			]td
+			[td 
+				"LD BC, 00E7
+			]td
+			[td 
+				"Start of DeathRespawnBuffer
+			]td
+		]tr
+		[tr 
+			[td 
+				"C62F
+			]td
+			[td 
+				"Y
+			]td
+			[td 
+				"95
+			]td
+			[td 
+				"SUB L
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C630
+			]td
+			[td 
+				"X
+			]td
+			[td 
+				"78
+			]td
+			[td 
+				"LD A, B
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C634
+			]td
+			[td 
+				"linkObjectIndex
+			]td
+			[td 
+				"D0
+			]td
+			[td 
+				"RET NC
+			]td
+			[td 
+				"Carry flag is set, so no return here
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"C637
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"End of DeathRespawnBuffer
+			]td
+		]tr
+		[tr 
+			[td 
+				"C63A
+				[br 
+				]br
+				"C63B
+				[br 
+				]br
+				"C63C
+			]td
+			[td 
+				"MinimapGroup
+				[br 
+				]br
+				"MinimapRoom
+				[br 
+				]br
+				"MinimapDungeonMapPosition
+			]td
+			[td 
+				"01
+				[br 
+				]br
+				"E7
+				[br 
+				]br
+				"00
+			]td
+			[td 
+				"LD BC, 00E7
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"C63E
+			]td
+			[td 
+				"PortalGroup
+			]td
+			[td 
+				"FF
+			]td
+			[td 
+				"RST 38
+			]td
+			[td 
+				"This is set to FF at the beginning of the game
+			]td
+		]tr
+		[tr 
+			[td 
+				"0038
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"Start of some unused code that pops all the registers and then returns
+			]td
+		]tr
+		[tr 
+			[td 
+				"003B
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"E1
+			]td
+			[td 
+				"POP HL
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"003C
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"D1
+			]td
+			[td 
+				"POP DE
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"003D
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"C1
+			]td
+			[td 
+				"POP BC
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"003E
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"F1
+			]td
+			[td 
+				"POP AF
+			]td
+			[td 
+				"(SP) = 01F8
+			]td
+		]tr
+		[tr 
+			[td 
+				"003F
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"D9
+			]td
+			[td 
+				"RETI
+			]td
+			[td 
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"And from here we're back in ROM and the game keeps running normally. Since the map never closed properly, the background map, tileset, and palettes of the map screen are still loaded, which leads to some glitchy textures. The music volume also never got reset to the normal level, so the music will continue being more quiet than usual for the entire credits.
+	$LF
+]div
+[div class=p 
+	"After a while the screen goes black and the title card is supposed to load in. This doesn't happen however. The reason is that the background map for it is usually preloaded into addresses $9C00 - $9FFF at the end of the previous cutscene while the screen is still displaying the map in $9800 - $9BFF. Then at the beginning of the credits proper, the game just switches between the two. Since we never watched the previous cutscene, the second map is just filled with zeros and all we get is a unicoloured screen.
+	$LF
+]div
+[div class=p 
+	"The cutscene after that already uses all available sprite slots under normal circumstances, so the fact that we spawned some extra enemies leads to some of the sprites disappearing. Other than that the credits continue as expected and we reach the end screen without incident.
+	$LF
+]div
+[h2 id=SpecialThanks 
+	"Special Thanks
+	$LF
+]h2
+[div class=p 
+	[b 
+		"Stewmath
+	]b
+	" for creating the Oracles disassembly!
+	$LF
+]div
+[div class=p 
+	[b 
+		"Alyosha
+	]b
+	" for bringing subframe inputs to the GameBoy!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": 
+	[del 
+		"Correcting CycleCount value.
+	]del
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": 
+	[del 
+		"Replacing movie file with an actually fixed one.
+	]del
+	$LF
+]div
+[div class=p 
+	"Great job! I see there was an extensive research behind it, and it's also very optimized. Accepting as a new branch.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": SubGBHawk doesn't assign CGB flag, adding it manually.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": 
+	[del 
+		"Replacing movie file with a truly actually fixed one.
+	]del
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Hopefully this is the last time.
+]div

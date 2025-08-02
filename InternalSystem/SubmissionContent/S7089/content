@@ -1,0 +1,1711 @@
+9
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/4piv9xt.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Safari Hunt is a light gun shooter game on Sega Master System first released in 1986 integrated in the BIOS (version 2.4) alongside with Hang On for the first North America launch where the light phaser (light gun) was included in the package. Later on it was available in the compilation games 
+	[code 
+		"Hang On & Safari Hunt
+	]code
+	" and 
+	[code 
+		"Marksman Shooting / Trap Shooting / Safari Hunt
+	]code
+	".
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.5.2
+		$LF
+	]li
+	[li 
+		" Finish the first 3 rounds as fast as possible (first loop)
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"Safari Hunt is a shooting game with 3 repeating levels (lake, forest & jungle). Each level has 3 or 4 different types of target to shoot, the goal is to get enough points to be qualified for the next round, with 30 ammos or a time limit (2560 frames = ~43s). Round will be then over when all the 30 bullets are shot or time is out (the timer is not visible), and all targets have left the screen.
+	$LF
+]div
+[div class=p 
+	"This has an end screen after 69 rounds, the final screen has a funny message:
+	$LF
+	[br 
+	]br
+	[code 
+		"YOU ARE A WONDERFUL HUNT
+		$LF
+		[br 
+		]br
+		"LET'S GO TO THE REAL HUN
+		$LF
+		[br 
+		]br
+		"WITH A REAL GUN
+	]code
+	$LF
+]div
+[div class=p 
+	"I might do a TAS for all the 69 rounds in another submission, so this TAS should be a Vault tier as I want to show the results of my research and it can be a starting point for an 
+	[code 
+		"any% all rounds
+	]code
+	" run.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Lake 
+			]th
+			[th 
+				" Forest 
+			]th
+			[th 
+				" Jungle 
+			]th
+		]tr
+		[tr 
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/6VOsb2l.png 
+				]img
+				" 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/iXUGCSS.png 
+				]img
+				" 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/rc0zLOy.png 
+				]img
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=SpawnRoutine 
+	" Spawn routine
+	$LF
+]h3
+[div class=p 
+	"The game has 6 slots to spawn 6 targets at the same time on the screen. Each target type would be attributed to 1 or 2 specific slots (e.g. Duck slot 2 & 3). Only the first 5 slots are used for shootable targets, the 6th slot is used for some extra animation (e.g. splash animation for the fish).
+	$LF
+	"%% Addresses for the 6 slots in memory
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Slot Index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Addr 
+			]th
+			[td 
+				" 
+				[code 
+					"0x0530
+				]code
+				" 
+			]td
+			[td 
+				" 
+				[code 
+					"0x0560
+				]code
+				" 
+			]td
+			[td 
+				" 
+				[code 
+					"0x0590
+				]code
+				" 
+			]td
+			[td 
+				" 
+				[code 
+					"0x05C0
+				]code
+				" 
+			]td
+			[td 
+				" 
+				[code 
+					"0x05F0
+				]code
+				" 
+			]td
+			[td 
+				" 
+				[code 
+					"0x0620
+				]code
+				" 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Each slot contains all the information of the target spawn, depending on the type of target, some values have a different purpose.
+	$LF
+	[br 
+	]br
+	"Here are some useful address offsets common for each slots:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Offset 
+			]th
+			[th 
+				" Name 
+			]th
+			[th 
+				" Info 
+			]th
+		]tr
+		[tr 
+			[td 
+				" +0 
+			]td
+			[td 
+				" Type 
+			]td
+			[td 
+				" the number use to identify a target (e.g. 25 = duck) 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +7 
+			]td
+			[td 
+				" Y 
+			]td
+			[td 
+				" Y position from 0 to 192 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +9 
+			]td
+			[td 
+				" X 
+			]td
+			[td 
+				" X position from 0 to 256 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +12 
+			]td
+			[td 
+				" Height 
+			]td
+			[td 
+				" 16 pixels except for the bear & monkey (24) and the bat (8) 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +14 
+			]td
+			[td 
+				" Width 
+			]td
+			[td 
+				" 16 pixels except for the bear & panther (24) 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +15 
+			]td
+			[td 
+				" dY 
+			]td
+			[td 
+				" signed value to add to the Y position each frame 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +17 
+			]td
+			[td 
+				" dX 
+			]td
+			[td 
+				" signed value to add to the X position each frame 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +32 
+			]td
+			[td 
+				" direct type 
+			]td
+			[td 
+				" a number to set the direction (dY & dX) from a subroutine in the code 
+			]td
+		]tr
+		[tr 
+			[td 
+				" +33 
+			]td
+			[td 
+				" direction time 
+			]td
+			[td 
+				" the next time the direction will be changed 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The game will follow a spawn order from a table in memory for each level. This spawn table has a size of 20 bytes, for an index from 0 to 9, index+0 is the target type and index+1 is the next spawn time.
+	$LF
+	[br 
+	]br
+	"This how the current spawn is tracked in memory:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[code 
+			"0x0217
+		]code
+		" - current spawn index
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"0x0218
+		]code
+		" - next spawn time
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"0x0219
+		]code
+		" - spawn table ROM address (e.g. 
+		[code 
+			"0x1BDA
+		]code
+		" for lake level)
+		$LF
+	]li
+]ul
+[div class=p 
+	"At the beginning of each round, the first index would not spawn and the next spawn timer will be set to 16. For instance the first round starts with the index 0 but the very first spawn is for the index 1 after 16 frames.
+	$LF
+]div
+[div class=p 
+	"Each frame, the next spawn time is decreased, when this value reach zero:
+	$LF
+]div
+[ul 
+	[li 
+		" Current spawn index is increased by 1 (modulo 10)
+		$LF
+	]li
+	[li 
+		" Check the slot(s) associate with the target:
+		$LF
+		[ul 
+			[li 
+				" A slot is available, then set the target type in the slot and set the next spawn time
+				$LF
+			]li
+			[li 
+				" all slots are occupied, then 
+				[b 
+					"spawn is skipped
+				]b
+				" and the next target spawn time is set to 1
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" once the slot is setup, the spawn info (size, animation, …) is set with a random location for some target:
+		$LF
+		[ul 
+			[li 
+				" Location is not set and the 
+				[b 
+					"spawn is canceled
+				]b
+				", the current spawn time stays the same.
+				$LF
+			]li
+			[li 
+				" location is set from a subroutine.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=LuckManipulation 
+	" Luck Manipulation
+	$LF
+]h3
+[div class=p 
+	"Because of the simplicity of the light phaser, the shot action and the shot location can be use manipulate the luck. When the player presses the trigger, the game freezes during 1 frame in order to compute where the gunshot and the RNG (address: 
+	[code 
+		"0x01ED
+	]code
+	") is not updated during that frame. Depending on the location, the RNG may be different
+	$LF
+]div
+[div class=p 
+	[b 
+		"Target spawn location
+	]b
+	$LF
+]div
+[ul 
+	[li 
+		" Make sure the spawn location is set inside the screen (avoid spawn cancelation)
+		$LF
+	]li
+	[li 
+		" Choose a location where the target can exit the screen quickly after getting shot when it requires, usually at the end of the round or to avoid a spawn skipping
+		$LF
+	]li
+]ul
+[div class=p 
+	[b 
+		"Target spawn direction
+	]b
+	":
+	$LF
+	[br 
+	]br
+	"Manipulating the direction for some target (e.g. Ducks), we can keep them on the screen long enough to do some 
+	[b 
+		"spawn skipping
+	]b
+	" and make other targets with more points to spawn quicker.
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=Round1Forest 
+	" Round 1 - Forest
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Name 
+			]th
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/t0ctk5J.png 
+				]img
+				[br 
+				]br
+				"RABBIT 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/gbkIzdA.png 
+				]img
+				[br 
+				]br
+				"DUCK 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/y7hLJGr.png 
+				]img
+				[br 
+				]br
+				"FISH 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Type 
+			]th
+			[td 
+				" 24 
+			]td
+			[td 
+				" 25 
+			]td
+			[td 
+				" 26 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Points 
+			]th
+			[td 
+				" 1000 
+			]td
+			[td 
+				" 300 
+			]td
+			[td 
+				" 1000 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Slot index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 2 & 3 
+			]td
+			[td 
+				" 1 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Spawn Table (0x1BC6)
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Target 
+			]th
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" DUCK
+			]td
+			[td 
+				" FISH 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" RABBIT 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" RABBIT 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" FISH 
+			]td
+			[td 
+				" DUCK 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Time 
+			]th
+			[td 
+				" 64 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 96 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"We need to reach 10 000 as fast as possible, for that we want the fish and rabbits to spawn quicker since they give 1000 points and for that we want  2 ducks to always fly around so every other duck spawn would be skipped.
+	$LF
+	"Rabbit is the fastest target to exit the screen when spawn on the right and it allows to have 2 rabbit spawns in the row. The fish is the slowest to Spawn and despawn, it’s better to skip a fish spawn for a rabbit spawn.
+	$LF
+	"With a total of 6 rabbits and 3 fishes, we just need to get 4 ducks in order to have just above the minimum 10 000 points. We need 2 spawns of duck during the first level, it’s better to do right after a fish spawn, duck at index 9 has the smallest next spawn time of 64 frames instead of 88 or 96.
+	$LF
+]div
+[div class=p 
+	"Level Spawn
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Spawn 
+			]th
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" 
+				[b 
+					"FISH
+				]b
+				" 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" 
+				[b 
+					"RABBIT
+				]b
+				" 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"RABBIT
+				]b
+				" 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"FISH
+				]b
+				" 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"FISH
+				]b
+				" 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"RABBIT
+				]b
+				" 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"RABBIT
+				]b
+				" 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"FISH
+				]b
+				" 
+			]td
+			[td 
+				" DUCK 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"RABBIT
+				]b
+				" 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"RABBIT
+				]b
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Timer 
+			]th
+			[td 
+				" 16 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 96 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=Round2Forest 
+	" Round 2 - Forest
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Name 
+			]th
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/20vv6L2.png 
+				]img
+				[br 
+				]br
+				"PARROT (bird) 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/kj0R1JI.png 
+				]img
+				[br 
+				]br
+				"AMARDILLO 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/R6wixdZ.png 
+				]img
+				[br 
+				]br
+				"BEAR 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/HcjTXsk.png 
+				]img
+				[br 
+				]br
+				"APPLE 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Type 
+			]th
+			[td 
+				" 27 
+			]td
+			[td 
+				"  28 
+			]td
+			[td 
+				" 30 
+			]td
+			[td 
+				" 2 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Points 
+			]th
+			[td 
+				" 200 
+			]td
+			[td 
+				" 1000 
+			]td
+			[td 
+				" 2000 
+			]td
+			[td 
+				" 1000 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Slot index 
+			]th
+			[td 
+				" 2 & 3 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 0 
+			]td
+			[td 
+				" 4 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Spawn table (
+	[code 
+		"0x1BDA
+	]code
+	")
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Target 
+			]th
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" AMARDILLO 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" BEAR 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" AMARDILLO 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" BEAR 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" AMARDILLO 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Time 
+			]th
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 16 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"This level has the fastest spawn cycle: SUM = 664 frames. On top of that, there are apples that spawn independently from the target spawn routine. The main focus is to get as many apples as possible. 
+	$LF
+]div
+[div class=p 
+	"The strategy here is to get a lot of points so for the next round which has the slowest spawn (SUM = 768 frames), we can the remaining points while shooting all the 30 bullets as fast as possible. In this case we need 25200 points and it can be done with 8 apples, 2 bears, 2 armadillos and 5 parrots.
+	$LF
+]div
+[div class=p 
+	"Unless level 1, here we want to avoid having spawn skipping because the bears are slowest to exit the screen and we only want 2 of them before the end of the round, so we need to have all the spawn in order  to avoid the 3rd bear spawn. It’s also faster to have the first spawn at the beginning of the round.
+	$LF
+]div
+[div class=p 
+	"Level Spawn
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Index 
+			]th
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Target 
+			]th
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"BEAR
+				]b
+				" 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" 
+				[b 
+					"AMARDILLO
+				]b
+				" 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" 
+				[b 
+					"BEAR
+				]b
+				" 
+			]td
+			[td 
+				" PARROT 
+			]td
+			[td 
+				" 
+				[b 
+					"AMARDILLO
+				]b
+				" 
+			]td
+			[td 
+				" PARROT 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Time 
+			]th
+			[td 
+				" 16 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 16 
+			]td
+			[td 
+				" 16 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 88 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 88 
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=Round3Jungle 
+	" Round 3 - Jungle
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Name 
+			]th
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/yCGGDJm.png 
+				]img
+				[br 
+				]br
+				"SPIDER 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/29dn7Hj.png 
+				]img
+				[br 
+				]br
+				"BAT 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/eBoWJhn.png 
+				]img
+				[br 
+				]br
+				"MONKEY 
+			]td
+			[td 
+				" 
+				[img class=embed mw-100 src=https://i.imgur.com/FKYQM6K.png 
+				]img
+				[br 
+				]br
+				"PANTHER 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Type 
+			]th
+			[td 
+				" 29 
+			]td
+			[td 
+				" 31 
+			]td
+			[td 
+				" 33 
+			]td
+			[td 
+				" 34 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Points  
+			]th
+			[td 
+				" 100 
+			]td
+			[td 
+				" 500 
+			]td
+			[td 
+				" 300 
+			]td
+			[td 
+				" 2000 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Slot index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Spawn table
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Index 
+			]th
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Target 
+			]th
+			[td 
+				" BAT 
+			]td
+			[td 
+				" SPIDER 
+			]td
+			[td 
+				" MONKEY 
+			]td
+			[td 
+				" SPIDER 
+			]td
+			[td 
+				" BAT 
+			]td
+			[td 
+				" SPIDER 
+			]td
+			[td 
+				" MONKEY 
+			]td
+			[td 
+				" PANTHER 
+			]td
+			[td 
+				" BAT 
+			]td
+			[td 
+				" MONKEY 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Time 
+			]th
+			[td 
+				" 96 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 96 
+			]td
+			[td 
+				" 80 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 96 
+			]td
+			[td 
+				" 80 
+			]td
+			[td 
+				" 64 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"For this level we are shooting all the 30 bullets as fast as possible! The spider, the monkey and the bat are shot at the last moment to skip 5 targets and get a 2nd panther at the end. For the last panther, the spawn location has been manipulated to have a fast despawn on the right. 
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Index 
+			]th
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" 9 
+			]td
+			[td 
+				" 0 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 2 
+			]td
+			[td 
+				" 3 
+			]td
+			[td 
+				" 4 
+			]td
+			[td 
+				" 5 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" 7 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Target 
+			]th
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"PANTHER
+				]b
+				" 
+			]td
+			[td 
+				" BAT 
+			]td
+			[td 
+				" MONKEY 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" SPIDER 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" _-_ 
+			]td
+			[td 
+				" 
+				[b 
+					"PANTHER
+				]b
+				" 
+			]td
+		]tr
+		[tr 
+			[th 
+				" Time 
+			]th
+			[td 
+				" 16 
+			]td
+			[td 
+				" 96 
+			]td
+			[td 
+				" 80 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 64 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 1 
+			]td
+			[td 
+				" 96 
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[h4 id=ToolsUsed 
+	" Tools used
+	$LF
+]h4
+[ul 
+	[li 
+		" 
+		[b 
+			"Emulicius
+		]b
+		": Decompile to assembly & debugger, great tools and wrote in java (works anywhere)
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Lua Scripts
+		]b
+		": draw target hit boxes and generate some logs 
+		$LF
+	]li
+]ul
+[h4 id=ForNext 
+	" For next
+	$LF
+]h4
+[ul 
+	[li 
+		" look more in detail for the RNG to see how the shot location impact the value
+		$LF
+	]li
+	[li 
+		" look at how target hit box behind an obstacle work (tree, bush, ...)
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/GoddessMaria 
+		"GoddessMaria
+	]a
+	": Jugding...
+]div

@@ -1,0 +1,366 @@
+10
+[div class=p 
+	"This submission improves 
+	(__wikiLink|displaytext=ShesChardcore's run|href=/7800S)
+	" by 228 frames, due to a route change and micro-optimizations.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.8.0
+		$LF
+	]li
+	[li 
+		" best ending
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"To achieve the best ending, you have to earn $131,072 (0x20000 in hex).
+	$LF
+	"For this purpose, you can consider various methods, and the fastest route is not so obvious. I used a slot machine (and a video poker to manipulate RNG).
+	$LF
+]div
+[div class=p 
+	"RNG of this game is quite different from the one of 
+	(__wikiLink|displaytext=GB version|href=/3005G)
+	".
+	$LF
+	"RNG has a "RNG index" and a "RNG table".
+	$LF
+	"Every time RNG generates a random number, it increments RNG index. And, RNG index is also incremented at each frame while you are staying at the casino hole.
+	$LF
+	"And, every time RNG generates a random number, it "scrambles" RNG table.
+	$LF
+	"Consequently, it is not so easy to manipulate RNG as GB version.
+	$LF
+]div
+[div class=p 
+	"I read the game code, and wrote 
+	[a href=https://github.com/taotao54321/CaesarsPalaceNesUtil/blob/6f075b322b97d2c8d0155bd5b45b39bdd1d127cc/examples/tas.rs rel=noopener external nofollow 
+		"a solver
+	]a
+	" to achieve the best ending.
+	$LF
+	"I found a 3-step solution which uses a video poker and a slot machine. According to my solver, it is a unique 3-step solution.
+	$LF
+	"But I'm not sure whether it is fastest, due to losses for cursor movement. There are also many 4-step solutions, and some of them use only slot machines. (
+	[a href=https://tasvideos.org/UserFiles/Info/638093479634127031 rel=noopener external nofollow 
+		"example
+	]a
+	")
+	$LF
+]div
+[div class=p 
+	"Here is a RAM map:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Type
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$18
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"PPU scroll x
+			]td
+		]tr
+		[tr 
+			[td 
+				"$19
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"PPU scroll y
+			]td
+		]tr
+		[tr 
+			[td 
+				"$A7
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"money ($100 units)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$A8
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"money ($25 units)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$A9
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"money ($10 units)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$AA
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"money ($5 units)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$AB
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"money ($1 units)
+			]td
+		]tr
+		[tr 
+			[td 
+				"$04EA
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"cursor x
+			]td
+		]tr
+		[tr 
+			[td 
+				"$04EB
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"cursor y
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0531
+			]td
+			[td 
+				"u8[5]
+			]td
+			[td 
+				"video poker: cards
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0551
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"RNG index
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0621
+			]td
+			[td 
+				"u24le
+			]td
+			[td 
+				"buffer for money/prize calculation
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0664
+			]td
+			[td 
+				"u8[4]
+			]td
+			[td 
+				"slot machine: final reel values
+			]td
+		]tr
+		[tr 
+			[td 
+				"$067A-$0773
+			]td
+			[td 
+				"u8[250]
+			]td
+			[td 
+				"RNG table
+			]td
+		]tr
+		[tr 
+			[td 
+				"$077E
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"money ($25500 units)
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Here is a ROM bank #6 map (bank ID is 0-indexed):
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$82F2
+			]td
+			[td 
+				"slot machine routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$8E7F
+			]td
+			[td 
+				"roulette routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$95F6
+			]td
+			[td 
+				"wheel of fortune routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$9C67
+			]td
+			[td 
+				"blackjack routine
+			]td
+		]tr
+		[tr 
+			[td 
+				"$A657
+			]td
+			[td 
+				"poker routine
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Here is a ROM bank #7 map:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$F922
+			]td
+			[td 
+				"RNG routine
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"By the way, you can 
+	[a href=https://tasvideos.org/UserFiles/Info/638092320158533560 rel=noopener external nofollow 
+		"get a royal flush
+	]a
+	" in the video poker, and the game says you can earn $400,000 by a royal flush.
+	$LF
+	"But actually, the prize of video poker is treated as a unsigned 16bit value and it overflows (400000 mod 65536 = 6784):
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://gist.githubusercontent.com/taotao54321/a10ba5101e7e5b23144d1658fe037a5a/raw/7f6ca9566bc22f92a05f10182a9fde3ce90b6634/RoyalFlush.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Thanks to ViGadeomes for the review once again, accepting over 
+	(__wikiLink|href=/4944M|implicitdisplaytext=4944M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

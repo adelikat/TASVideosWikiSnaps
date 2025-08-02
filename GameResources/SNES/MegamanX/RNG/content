@@ -1,0 +1,170 @@
+34
+[div class=p 
+	"The MMX RNG is a repeating sequence of 43534 16-bit integers used for randomness in MMX-MMX6, MM7 and Rockman & Forte. The sequence starts with the hex value 0xD37 (3383) and uses the following function (in pseudo-code) to get the next RNG value in sequence: 
+	$LF
+]div
+[pre 
+	[code class=language-Lua 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[ul 
+	[li 
+		" "mod 256" means to take the value 
+		[a href=https://en.wikipedia.org/wiki/Modulo rel=noopener external nofollow 
+			"modulo
+		]a
+		" 256; that is, to take the remainder upon dividing by 256.
+		$LF
+	]li
+	[li 
+		" "
+		[a href=https://en.wikipedia.org/wiki/Floor_and_ceiling_functions rel=noopener external nofollow 
+			"floor
+		]a
+		"( 3*current_rng/256 )" means to take the largest integer that is less than or equal to 3*current_rng/256.
+		$LF
+	]li
+]ul
+[div class=p 
+	"For more information, see the following Lua script may be used to monitor and/or disassemble aspects of the RNG and how it is used:
+	$LF
+]div
+[div class=p 
+	[a href=https://tasvideos.org/UserFiles/Info/638585240848962683 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638585240848962683
+	]a
+	$LF
+]div
+[div class=p 
+	"An ASM version of the RNG subroutine as it appears in the Rockman X (J) ROM is shown at the bottom of this page.
+	$LF
+]div
+[h4 id=RngAddresses 
+	" RNG Addresses
+	$LF
+]h4
+[div class=p 
+	"For X-X3, the RNG is stored in the following address:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Game
+			]th
+			[th 
+				"X
+			]th
+			[th 
+				"X2
+			]th
+			[th 
+				"X3
+			]th
+		]tr
+		[tr 
+			[td 
+				"RNG Address
+			]td
+			[td 
+				"0xBA6
+			]td
+			[td 
+				"0x9D6
+			]td
+			[td 
+				"0x9D6
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=AboutAutoCallsToTheRng 
+	" About auto-calls to the RNG
+	$LF
+]h4
+[div class=p 
+	"In MMX-MMX3, the game auto-calls the RNG routine once per frame (usually) without using its value. So if a frame cycles the RNG more than once, then the RNG was used for something important. Note: The auto-call always occurs during the frame first before any other RNG calls. The documentation will not make reference to this auto-call (i.e. "first RNG value" refers to the first RNG call after the auto-call).
+	$LF
+]div
+[div class=p 
+	"Dragging down a wall to create dust sprites will run the RNG once per dust sprite.
+	$LF
+]div
+[h4 id=AboutBossActions 
+	" About boss actions
+	$LF
+]h4
+[div class=p 
+	"Boss actions are typically determined through two factors: The RNG value (
+	[a href=https://en.wikipedia.org/wiki/Modulo rel=noopener external nofollow 
+		"modulo
+	]a
+	" some power of 2) and one of:
+	$LF
+]div
+[ul 
+	[li 
+		" Previous action (ex: Penguin, Eagle, Mandrill)
+		$LF
+	]li
+	[li 
+		" Distance (ex: Armadillo, Octopus, Mammoth)
+		$LF
+	]li
+	[li 
+		" Something else
+		$LF
+	]li
+]ul
+[div class=p 
+	"Actions are typically given in the game code as tables. The exact form of the table in ROM varies per boss. For consistency purposes, the tables for transition between actions will be given in the following format (using Chill Penguin as an example):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The previous action is indicated on the left (with a short gloss for context). The top row is the RNG value modulo a power of 2 (usually 16 or 32), with A=10, B=11, etc. The table in the bottom right then indicates the number of the next action determined by the previous action and the RNG value. Action numbers always correspond to the value of the "action" address in RAM (0xE6A, 0xEAA, 0xF2A, etc., depending on the enemy slot used in RAM).
+	$LF
+]div
+[div class=p 
+	"For distance-based Maverick bosses, the next action depends on the horizontal distance between the player and the boss (on either the left or the right), based on three intervals: Near (0-79 pixels), Mid (80-127 pixels) and Far (128 or more pixels). (Fortress bosses may have other types of distance determination, which may be both horizontal and vertical.)
+	$LF
+]div
+[h4 id=BossRngSubpages 
+	" Boss RNG subpages
+	$LF
+]h4
+[div class=p 
+	"Due to the size of the pages, the following information is split into multiple pages:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		(__wikiLink|displaytext=X1 Maverick boss RNG|href=/GameResources/SNES/MegamanX/RNG/X1Mavericks)
+		$LF
+	]li
+	[li 
+		" 
+		(__wikiLink|displaytext=X1 Other boss RNG|href=/GameResources/SNES/MegamanX/RNG/X1OtherBosses)
+		$LF
+	]li
+]ul
+[h4 id=RngSubroutineInAssemblyLanguage 
+	" RNG subroutine in assembly language
+	$LF
+]h4
+[div class=p 
+	"The RNG subroutine as it appears in the Rockman X (J) ROM:
+	$LF
+]div
+[pre 
+	[code class=language-asm 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre

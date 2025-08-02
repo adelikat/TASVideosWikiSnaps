@@ -1,0 +1,184 @@
+7
+[h2 id=Burgertime 
+	"BurgerTime
+	$LF
+]h2
+[div class=p 
+	"BurgerTime is a port of a 1982 arcade game developed by Data East. In this game you control Peter Pepper and try to walk over the burger ingredients to make burgers in each of 6 stages while avoiding the clutches of your enemies.
+	$LF
+]div
+[h3 id=TimeLapseEncode 
+	" Time-lapse encode
+	$LF
+]h3
+[div class=p 
+	"This run is very long and a large chunk of it is repetitive. as such I don't really expect people to be interested in sitting through the full thing at normal speed.
+	$LF
+]div
+[div class=p 
+	(youtube|v=d6EbTB642IQ)
+	$LF
+]div
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.3.2
+		$LF
+	]li
+	[li 
+		" Reach the kill screen
+		$LF
+	]li
+]ul
+[h2 id=AboutTheGoal 
+	" About the Goal
+	$LF
+]h2
+[div class=p 
+	"It can be a bit difficult to figure out the end goal for some of the arcade style games, but unlike some other arcade ports on the NES BurgerTime has a kill screen. As you might expect the stage counter is a single byte, and with how the kill screen works this results in the game having 256 stages. with 6 basic stages this means we will be playing through 42 full loops plus 4 more stages.
+	$LF
+]div
+[div class=p 
+	"The difficulty level slowly increases until you get to the 5th loop. I don't fully understand the enemy AI, but it is clear that there is a base speed which has 3 possible values. The slowest speed is used for stages 1-11, middle for 12-23, and the highest for 24-255. When the stage counter wraps to 0 it is back to the slowest speed for the last level.
+	$LF
+]div
+[div class=p 
+	"As for the kill screen it looks like your starting position is based on the stage number, but the stages just increment and don't refer to the stage number. When the stage number wraps to 0 things go a tiny bit glitchy, but it is still a functional "stage 4". When it wraps back to 1 however you are on to a "stage 5", but you are spawned in the starting position for stage 1. On stage 5 this is a black area off the stage, you can turn, but you can't move and the enemies can't get to you. You are soft-locked.
+	$LF
+]div
+[h2 id=Controls 
+	" Controls
+	$LF
+]h2
+[ul 
+	[li 
+		" D-PAD - move up, down, left, or right
+		$LF
+	]li
+	[li 
+		" A, B - use pepper
+		$LF
+	]li
+	[li 
+		" select - select 1 or 2 players
+		$LF
+	]li
+	[li 
+		" start - pause
+		$LF
+	]li
+]ul
+[h2 id=Strategies 
+	" Strategies
+	$LF
+]h2
+[div class=p 
+	"If you walk across the top bun any ingredients it falls on will cascade downward. You still have to get the top bun all the way to the bottom, so the top bun is the only one worth focusing on, the other ingredients will fall into place.
+	$LF
+]div
+[div class=p 
+	"If you walk across a bun it will fall 1 level. If you trap an enemy on a bun it will fall 3 levels. If you trap 2 enemies on a bun it will fall 5 levels. Trapping enemies, and often even using pepper to do so can be useful strategies.
+	$LF
+]div
+[h2 id=Tricks 
+	" Tricks
+	$LF
+]h2
+[div class=p 
+	"I discovered (too long into making this tas causing me to start over) that because of how the ladder animation works it is possible to traverse ladders quickly. The animation was written so that you initially move up (for example) several pixels, then holding up references a table that lists how many pixels to move. There are negative values in the table though, so you end up with a nice ladder climb stutter step. If you let go of up it resets the index though, so you can climb ladders very quickly by tapping up and always moving up with the highest value.
+	$LF
+]div
+[div class=p 
+	"General movement is a bit confusing (even to me), but effectively there is a cool-down of sorts (at 0x43F), so only certain frames allow movement. Generally (but not always I've found) inputs during the cool-down have no effect. The movement in this run, especially in the X direction looks pretty jerky because my movement script made use of the cool-down information.
+	$LF
+]div
+[div class=p 
+	"Ladder boosting: I found that in both the X and Y direction you could skip the cool-down at most intersections by changing directions. Intersections have 2 pixels of margin on each side, meaning if you approach a ladder and stop 2 pixels short an up input will snap you to the ladder. This gives us a tiny boost at most intersections since you can tap up for 1 frame to snap in the direction you're going, but then go back to pressing forward. By "changing" directions you skip some cool-down time.
+	$LF
+]div
+[div class=p 
+	"Skewed hitboxes: the buns look like they're centered, but if you pay attention to the X coordinates they are definitely skewed to the left (starting at say 0x26 and going to 0x38 for example). This has a couple of implications. First if you are walking right across a bun and an enemy is walking at you there is time for you to walk right and trap the enemy on the very edge. The opposite is not true though. Heading left you will drop the bun before the enemy is on it, or the enemy will kill you before you get all the way across. Additionally if the bun is lined up on a ladder and an enemy is coming up or down that ladder there is space for you to stand on the left side, but not drop the bun until the enemy is on it. This does not work on the shorter right side.
+	$LF
+]div
+[h2 id=Lag 
+	" Lag
+	$LF
+]h2
+[div class=p 
+	"There is quite a bit of lag in this game, and I'm not sure there is much I can do to manipulate it. I was afraid I wasn't going to be able to copy the inputs forward from the 5th (hardest) loop, but it turned out I basically could with some exceptions. There were a few places as well as screen transitions where lag differences resulted in inserting or deleting a couple of frames here or there. When I got close to 1M points the extra life calculation seemed to break and start awarding extra lives every time the score changed, each time costing 2 lag frames. After 1M points the first time around I had to re-adjust the whole loop, updating both the player score and the high score takes more time. Since the high score sticks at a high value when the score wraps it means subsequent score updates cost fewer frames than they had back on the 5th loop.
+	$LF
+]div
+[h2 id=Improvements 
+	" Improvements
+	$LF
+]h2
+[div class=p 
+	"I did spend quite a bit of time trying different strategies to find quick ways to finish levels, but my search was by no means exhaustive. Improved routing could result in a faster time, especially if it was in the 5th loop since it would be multiplied by nearly 40.
+	$LF
+]div
+[div class=p 
+	"I'm not sure much could be done about the lag, but with such a laggy game it is hard to rule out as a source of improvements.
+	$LF
+]div
+[h2 id=ThanksTo 
+	" Thanks to:
+	$LF
+]h2
+[ul 
+	[li 
+		" my Twitch chat for the ideas and encouragement
+		$LF
+	]li
+	[li 
+		" The TASMania team
+		$LF
+	]li
+]ul
+[h4 id=Screenshots 
+	" Screenshots:
+	$LF
+]h4
+[div class=p 
+	"48, 366888, 523731, 526742
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Updating with trimmed file
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": The movie seems to be optimized.
+	$LF
+]div
+[div class=p 
+	"The choice of aiming for kill screen was brought up in the thread as while our rules do prefer the furthest possible definition of completion for endless games, it significantly hurt entertainment aspects. This is still acceptable so there's only one place for it to go.
+	$LF
+]div
+[div class=p 
+	"Accepting to Vault.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Publishing.
+]div

@@ -1,0 +1,686 @@
+7
+[div class=p 
+	[b 
+		"Genre:
+	]b
+	" Adventure
+	$LF
+]div
+[div class=p 
+	[b 
+		"Summary
+	]b
+	" (values in frames)
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Chapter
+			]th
+			[th 
+				"Prev TAS
+			]th
+			[th 
+				"This TAS
+			]th
+			[th 
+				"Seg Diff
+			]th
+			[th 
+				"Total Diff
+			]th
+		]tr
+		[tr 
+			[td 
+				"Start   
+			]td
+			[td 
+				"424      
+			]td
+			[td 
+				"612      
+			]td
+			[td 
+				"+188     
+			]td
+			[td 
+				"+188
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Prologue
+			]td
+			[td 
+				"8582     
+			]td
+			[td 
+				"8591     
+			]td
+			[td 
+				"-179     
+			]td
+			[td 
+				"+9
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"1       
+			]td
+			[td 
+				"12702    
+			]td
+			[td 
+				"12677    
+			]td
+			[td 
+				"-34      
+			]td
+			[td 
+				"-25
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"2       
+			]td
+			[td 
+				"26619    
+			]td
+			[td 
+				"26388    
+			]td
+			[td 
+				"-206     
+			]td
+			[td 
+				"-231
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"3       
+			]td
+			[td 
+				"48155    
+			]td
+			[td 
+				"47541    
+			]td
+			[td 
+				"-383     
+			]td
+			[td 
+				"-614
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"4       
+			]td
+			[td 
+				"58013    
+			]td
+			[td 
+				"57812    
+			]td
+			[td 
+				"+413     
+			]td
+			[td 
+				"-201
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"5       
+			]td
+			[td 
+				"63334    
+			]td
+			[td 
+				"62419    
+			]td
+			[td 
+				"-714     
+			]td
+			[td 
+				"-915
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"6       
+			]td
+			[td 
+				"67364    
+			]td
+			[td 
+				"64160    
+			]td
+			[td 
+				"-2289    
+			]td
+			[td 
+				"-3204      
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"This is an improvement of 53.64 seconds over the 
+	(__wikiLink|displaytext=previous movie|href=/3191M)
+	". 36.93 of these seconds came simply from ending input earlier, while 3.15 seconds were lost from the Game Boy Color bootup screen at the start (which the previous movie did not have). Therefore, the time saved through actual gameplay is around 19.86 seconds. The bulk of this time save comes from many dispersed minor optimizations throughout including more efficient movement, dialogue mashing, lag reduction, better RNG, and even minor route changes.
+	$LF
+]div
+[div class=p 
+	[b 
+		"General Movement
+	]b
+	$LF
+]div
+[div class=p 
+	"Due to the game's "3D" perspective, left or right-facing doorways are positioned at a slant; the hitbox of these doorways actually extends further into the room at the rear of the doorway compared to the front. Therefore, it is faster to go through these doorways at the top versus the bottom, wherever possible. Similarly, at the top of the large staircases in the mansion, the hitboxes extends further up at the sides than the middle, hence why I hug the sides when going down.
+	$LF
+]div
+[div class=p 
+	"It is not possible to initiate any menuing action while the screen is scrolling. Attention was paid to either limit screen scroll or maybe reduce some lag if there is some brief down time due to scrolling.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Dialogue
+	]b
+	$LF
+]div
+[div class=p 
+	[em 
+		"Most
+	]em
+	" of the time, the optimal way to mash through dialogue is to alternate pressing the Start and A buttons, beginning with Start. I know of one instance in the Prologue where Start can skip through an entire set of dialogue while A will not. There is one dialogue bubble in Chapter 3 that you must press A for. Because of a few inconsistencies like these, I thoroughly combed through each individual dialogue bubble to find the fastest way through each, which added up considerably over the run.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Interactable Object Lag
+	]b
+	$LF
+]div
+[div class=p 
+	"When you come within range of an object you can interact with, it will appear in the banner at the bottom of the screen. 
+	[b 
+		"Every time something loads into this banner, it will actually generate 1-2 frames of lag
+	]b
+	", which adds up to a lot over the course of the run! Therefore, these interaction hitboxes were avoided wherever it resulted in a net gain.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Prologue
+	]b
+	$LF
+]div
+[div class=p 
+	"Most of the time save came from skipping dialogue in the opening cutscene. Pressing Start instead of A at Fred's dialogue skips over Velma and Daphne's dialogue right to Dr. Jekyll.
+	$LF
+]div
+[div class=p 
+	"When the gameplay starts, the Prologue basically runs on a fixed event timer where 61.33 seconds must pass before the cutscene of the Ghost Thief walking plays. This timer will freeze during menuing, dialogue, character selection, pausing, loading, or lag. Therefore, it is imperative to reduce all of these as much as possible. Since this chapter is ultimately on a fixed timer, we should take whatever zany path is requied to avoid all unnecessary object interaction hitboxes possible (ex. 0:58, exiting the library). The "event timer" is located at Main RAM address 0x0B29.
+	$LF
+]div
+[div class=p 
+	"At 1:59, we move Fred to cancel the automatic screen scroll for the Ghost Thief's appearance to save a good couple frames.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chapter 1
+	]b
+	$LF
+]div
+[div class=p 
+	"More efficient movement, dialogue mashing, and lag reduction in general.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chapter 2
+	]b
+	$LF
+]div
+[div class=p 
+	"More efficient movement, dialogue mashing, and lag reduction in general.
+	$LF
+]div
+[div class=p 
+	"Q: At 6:51, why didn't you use the key to unlock the lockbox first and then grab the note? Grabbing the note first places it in your inventory before the key, meaning it will take longer to select the key.
+	$LF
+	"A: The reason this is actually slower is because the note's interaction hitbox extends well into the lockbox's interaction hitbox, meaning that while the note is there, you will have to walk a bit farther to interact with the lockbox compared to if the note is already collected.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chapter 3
+	]b
+	$LF
+]div
+[div class=p 
+	"This chapter encounters the only RNG in the run: the room in the lab with the 4 doors. The following two tables break down the possible outcomes for the 1st time going through the doors and for the 2nd time when the robot follows you. There are essentially only four patterns for each. The numbers in parentheses (+XXf) tell how many frames slower that pattern is compared to the fastest.
+	$LF
+]div
+[div class=p 
+	"1ST ROUND
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Action    
+			]th
+			[th 
+				"Fastest
+			]th
+			[th 
+				"Fast(+16f)
+			]th
+			[th 
+				"Slow(+37f)
+			]th
+			[th 
+				"Slowest(+53f)
+			]th
+		]tr
+		[tr 
+			[td 
+				"Door Chosen
+			]td
+			[td 
+				"1,2,3,4 
+			]td
+			[td 
+				"1,2,3,4    
+			]td
+			[td 
+				"1,2,3,4    
+			]td
+			[td 
+				"1,2,3,4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"1st Exit   
+			]td
+			[td 
+				"3       
+			]td
+			[td 
+				"4          
+			]td
+			[td 
+				"2          
+			]td
+			[td 
+				"1
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"2nd Enter  
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3          
+			]td
+			[td 
+				"1          
+			]td
+			[td 
+				"4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"2nd Exit   
+			]td
+			[td 
+				"1       
+			]td
+			[td 
+				"2          
+			]td
+			[td 
+				"4          
+			]td
+			[td 
+				"3
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"3rd Enter  
+			]td
+			[td 
+				"3       
+			]td
+			[td 
+				"4          
+			]td
+			[td 
+				"2          
+			]td
+			[td 
+				"1
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"3rd Exit   
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3          
+			]td
+			[td 
+				"1          
+			]td
+			[td 
+				"4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"2nd Choose 
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3          
+			]td
+			[td 
+				"1          
+			]td
+			[td 
+				"4             
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"As the above table shows, the door you select initially has no bearing on what follows, so always select door 1 as it is the fastest. When initiating the auto-sequence for the 2nd round, I take my labcoat off higher up on the screen so Shaggy & Scooby can just run right towards the door instead of right then up. This saved a handful of frames.
+	$LF
+]div
+[div class=p 
+	"2ND ROUND
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Action  
+			]th
+			[th 
+				"Fastest
+			]th
+			[th 
+				"Fast(+3f)
+			]th
+			[th 
+				"Slow(+114f)
+			]th
+			[th 
+				"Slowest(+115f)
+			]th
+		]tr
+		[tr 
+			[td 
+				"1st Enter
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3         
+			]td
+			[td 
+				"1           
+			]td
+			[td 
+				"4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"1st Exit 
+			]td
+			[td 
+				"3       
+			]td
+			[td 
+				"4         
+			]td
+			[td 
+				"2           
+			]td
+			[td 
+				"1
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"2nd Enter
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3         
+			]td
+			[td 
+				"1           
+			]td
+			[td 
+				"4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"2nd Exit 
+			]td
+			[td 
+				"3       
+			]td
+			[td 
+				"4         
+			]td
+			[td 
+				"2           
+			]td
+			[td 
+				"1
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"3rd Enter
+			]td
+			[td 
+				"1       
+			]td
+			[td 
+				"2         
+			]td
+			[td 
+				"4           
+			]td
+			[td 
+				"3
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"3rd Exit 
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3         
+			]td
+			[td 
+				"1           
+			]td
+			[td 
+				"4
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Choose   
+			]td
+			[td 
+				"2       
+			]td
+			[td 
+				"3         
+			]td
+			[td 
+				"1           
+			]td
+			[td 
+				"4              
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Overall, this better understanding of the RNG and resulting patterns allowed me to save about 3 seconds over the previous movie.
+	$LF
+	"Q: You come out of door 2 when exiting the secret room both times. How does this factor into things?
+	$LF
+	"A: It doesn't. No matter what door you enter the secret room from, you will always exit from door 2.
+	$LF
+]div
+[div class=p 
+	"At the very end of the chapter (around 11:49), I talk to the Mad Scientist as far left as possible. This does not lose frames as we must wait for the screen to scroll anyway. This ends up saving time because Shaggy & Scooby will later walk all the way to the left to turn off the machine.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chapter 4
+	]b
+	$LF
+]div
+[div class=p 
+	"Every time we enter the mansion and have to head straight for the leftmost door on the 2nd floor, we save 13 frames over the previous movie because it is for some reason that much faster to take the left staircase versus the right.
+	$LF
+]div
+[div class=p 
+	"In the largest routing change, we pour soap into the washer now (13:53) instead of in Chapter 5. This will cut out the time spent walking left from the soap container to the suds and then right again.
+	$LF
+]div
+[div class=p 
+	"We switch from Shaggy & Scooby to Fred at a different point compared to the previous movie, too. Compare the screen positions when we change to Fred at 15:01, and then at 16:02 when we go back to Shaggy & Scooby. The screen has automatically jumped all the way to the left so we no longer lose time waiting for the screen to scroll here. 
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chapter 5
+	]b
+	$LF
+]div
+[div class=p 
+	"More efficient movement, dialogue mashing, and lag reduction in general. Also, since the suds are already in the washer this time, we gain all the time we lost in Chapter 4 back plus more.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Chapter 6
+	]b
+	$LF
+]div
+[div class=p 
+	"More efficient movement and dialogue mashing. After the towel is thrown down the chute, we actually don't need to mash through any of the subsequent dialogue to get to the credits. Input is ended much earlier for a HUGE time cut.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Acknowledgement:
+	]b
+	" A big, BIG thank you to Birth for authoring the previous movie and providing the basis for this one. Going off a completed product made it easier to find improvements and get the project done faster :)
+	$LF
+]div
+[div class=p 
+	[b 
+		"Suggested Screenshot:
+	]b
+	" Frame 18693 (Cheese!!)
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/1EXnssJ.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Accepting over 
+	(__wikiLink|href=/3191M|implicitdisplaytext=3191M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Fixed cycle count.
+]div

@@ -1,0 +1,204 @@
+9
+[div class=p 
+	"The DOS platform has its own share of quirks.
+	$LF
+]div
+[div class=p 
+	"One thing that is unique is that many games run at the clock rate of the system, meaning they run as fast as the system allows. This was frequently a problem when playing games designed for 8086 (and on occasion even games designed for a 286 on a 386).
+	$LF
+]div
+[div class=p 
+	"Another unique thing is that the concept of "frames" is much different than on consoles. For instance, in a given screen mode the display may refresh at 70.09 Hz (about 701 times in ten seconds) but keyboard input may be sampled hundreds of times a "frame" (JPC-RR "samples" using fixed rate of 15 000 times per second). Different screen modes may have different frame rates and different games may implement different methods of sampling input devices leading to a wide variety of different behavior between games.
+	$LF
+]div
+[h2 id=MouseSensitivityCurve 
+	" Mouse sensitivity curve
+	$LF
+]h2
+[div class=p 
+	"Different games may have different mouse sensitivity curve. Here's the curve from one game (might or might not apply to other games):
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Motion
+			]th
+			[th 
+				"Ratio(units/mickey)
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"2-11
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"12-15
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"16-19
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"20-23
+			]td
+			[td 
+				"5
+			]td
+		]tr
+		[tr 
+			[td 
+				"24-27
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[td 
+				"28-31
+			]td
+			[td 
+				"7
+			]td
+		]tr
+		[tr 
+			[td 
+				"32-35
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"36-39
+			]td
+			[td 
+				"9
+			]td
+		]tr
+		[tr 
+			[td 
+				"40-
+			]td
+			[td 
+				"10
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Motion is number of mickeys reported in single mouse motion packet.
+	$LF
+]div
+[div class=p 
+	"Ratio is the ratio between number of units mouse pointer moves (units may not be pixels and might not even be linear) and number of mickeys reported in single mouse motion packet.
+	$LF
+]div
+[h2 id=Segmentation 
+	" Segmentation
+	$LF
+]h2
+[div class=p 
+	"If one just watches fixed values, one can rely on fixed addresses. However, if one needs to chase pointers, one needs to take segmentation and possibly paging into account.
+	$LF
+]div
+[h3 id=RealModeSegmentation 
+	" Real mode segmentation
+	$LF
+]h3
+[div class=p 
+	"Real mode segmentation is very simple. The physical address is 16 * segmentnumber + offset. One complication is that if segment number is greater than 61440 (0xF000), then physical address can exceed 1MiB boundary. What happens in this case depends on if A20 line is enabled or disabled.
+	$LF
+]div
+[ul 
+	[li 
+		" If A20 line is enabled, the computed physical address is the real physical address.
+		$LF
+	]li
+	[li 
+		" If A20 line is disabled, then the real physical address is computed address minus 1MiB (for addresses that are at least 1MiB). Therefore FFFF:0010 maps to physical address 0. However, no accesses to addresses that wrap in memory should occur.
+		$LF
+	]li
+]ul
+[h3 id=ProtectedModeSegmentation 
+	" Protected mode segmentation
+	$LF
+]h3
+[div class=p 
+	"Protected mode segmentation is more complicated. Each segment can have its own base address. Base address of currently loaded segments is stored in hidden CPU registers. For other segments, it is stored in GDT or LDT. If segment number / 4 is even, it is in GDT. If its odd, its in LDT. The entry number in GDT or LDT is segment number / 8.
+	$LF
+]div
+[div class=p 
+	"The physical address of GDT is stored in register called GDTR. There is also special segment register LDTR which stores segment that currently acts as LDT (LDT is a segment). Being segment register, it has hidden associated base address register.
+	$LF
+]div
+[div class=p 
+	"Each GDT and LDT can contain up to 8192 entries. The first entry of GDT, which would correspond to selectors 0-3, is unused because selectors 0-3 are null selectors (pointing nowhere). However, first entry of LDT corresponds to selectors 4-7 can be used.
+	$LF
+]div
+[div class=p 
+	"Each entry in GDT/LDT is 8 bytes in size and is little-endian. The most important stuff there for memory watching is base address. It is split into two parts. Low 24 bits are in bits 16-39 and high 8 bits are in bits 56-63.
+	$LF
+]div
+[h2 id=Paging 
+	" Paging
+	$LF
+]h2
+[div class=p 
+	"Some games in addition to segmentation also use paging, making chasing pointers even more complicated. It can not be active in real mode, only in protected mode.
+	$LF
+]div
+[div class=p 
+	"The way to recognize that paging is going on is to look at value of CR0 register. If it has bit 31 set, then paging is enabled.
+	$LF
+]div
+[div class=p 
+	"The process of getting physical address for address that already has been trough segmentation (has its segment base added) is as follows (assuming the page leads anywhere):
+	$LF
+]div
+[ul 
+	[li 
+		" Read upper 20 bits of register CR3
+		$LF
+	]li
+	[li 
+		" Read doubleword (32-bits) at <upper 20 bits of CR3><bits 22-31 of address>00.
+		$LF
+	]li
+	[li 
+		" Read doubleword (32-bits) at <upper 20 bits of previous value><bits 12-21 of address>
+		$LF
+	]li
+	[li 
+		" The physical address is <upper 20 bits of previously read value><bits 0-11 of address>
+		$LF
+	]li
+]ul
+[div class=p 
+	"If the raw read 32-bit value in steps 2 or 3 is even, then the address is invalid.
+]div

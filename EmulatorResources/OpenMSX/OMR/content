@@ -1,0 +1,120 @@
+5
+[div class=p 
+	"The .omr format is the movie format used by the 
+	(__wikiLink|displaytext=openMSX|href=/EmulatorResources/OpenMSX)
+	" emulator.
+	$LF
+]div
+[div class=p 
+	"The format is a gzipped XML file.
+	$LF
+]div
+[div class=p 
+	"The .xml file is a rather complex file that stores an initial savestate and several other savestates for rewind capability (similar to the "greenzone" in taseditor and tastudio), as well as all input event data. The savestates includes the exact specification of the used hardware (system configuration).
+	$LF
+]div
+[div class=p 
+	"Relevant details for tasvideos:
+	$LF
+]div
+[ul 
+	[li 
+		" Rerecord count
+		$LF
+		[ul 
+			[li 
+				" Found in replay->serial->replay->reRecordCount
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Start type
+		$LF
+		[ul 
+			[li 
+				" Found in replay->serial->snapshots
+				$LF
+			]li
+			[li 
+				" If the first item tag has a scheduler->currentTime/time tag with a value other than 0, the movie starts from savestate
+				$LF
+			]li
+			[li 
+				" Otherwise it starts from power-on
+				$LF
+			]li
+			[li 
+				" There is no notion of starting from "sram" for this format. If any SRAM would be used, the movie would desync if the exact SRAM file (stored outside of the OMR file on the host system) isn't available.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Region
+		$LF
+		[ul 
+			[li 
+				" MSX2 and later systems have a video chip that allows to switch between NTSC and PAL timing (effectively meaning 60 or 50 frames per second). The chip's default value is NTSC, but the used BIOS may switch it to another value shortly after power up. A game is free to change it as well.
+				$LF
+			]li
+			[li 
+				" We currently do not support this notion, and if there is any savestate in the replay that has the videochip set on PAL, the timing is assumed to be PAL throughout.  
+				$LF
+			]li
+			[li 
+				" The value can be found in replay->serial->item->config->device->palTiming
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Movie length
+		$LF
+		[ul 
+			[li 
+				" Find in in the file the replay->serial->events->item tag where the type attribute has a value of EndLog
+				$LF
+			]li
+			[li 
+				" The event tag before that is the last user input event
+				$LF
+			]li
+			[li 
+				" Inside this tag the actual value is in StateChange->time->time
+				$LF
+			]li
+			[li 
+				" The value is the number of internal "ticks".  Can be converted to seconds by dividing by 3579545 and then by 960
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" System
+		$LF
+		[ul 
+			[li 
+				" Can be found in a tag matching snapshots>item>config>config>children>item>children>item with a descendant name with a value of "type"
+				$LF
+			]li
+			[li 
+				" A sibling of this tag with a name of data will contain the system value
+				$LF
+				[ul 
+					[li 
+						" In openMSX 18.0 and later, it can be found in snapshots>item>config>config>msxconfig>info with a descendnt name named "type" instead. This is also where the system value is stored.
+						$LF
+					]li
+				]ul
+			]li
+			[li 
+				" Can be SVI, Coleco, SG-1000 or one of the MSX variants: MSX, MSX2, MSX2+, MSXturboR
+				$LF
+			]li
+			[li 
+				" We currently do not differentiate between MSX variants so all will report as MSX for the system
+			]li
+		]ul
+	]li
+]ul

@@ -1,0 +1,686 @@
+9
+[div class=p 
+	"Undertale is a 2D role-playing game created by indie developer Toby Fox. Undertale has three main endings: Neutral, True Pacifist, and Genocide. This TAS achieves the Neutral ending, which is the shortest of the main endings and is considered the standard ending to the game. In this ending, the player must defeat Photoshop Flowey and leave the underground.
+	$LF
+]div
+[div class=p 
+	"For the TAS to sync, you must uncheck Runtime > Prevent writing to disk and check Runtime > Time tracking > clock_gettime(). You may also need to install extra dependencies by entering this command into a terminal:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"sudo apt-get install libopenal1:i386 libssl1.0.0:i386 libglu1-mesa:i386
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS v1.3.4 (32-bit)
+		$LF
+	]li
+	[li 
+		" Plays on version v1.001
+		$LF
+	]li
+	[li 
+		" Reaches the Neutral ending
+		$LF
+	]li
+	[li 
+		" Avoids taking damage, unless it saves time
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"This TAS features heavy usage of glitches and RNG manipulation as well as a surprising amount of movement optimization for how simple the movement mechanics are.
+	$LF
+]div
+[div class=p 
+	"The first third of the run focuses primarily on movement optimization and RNG manipulation. Then about a third of the way into the run, we pick up an item called the Punch Card and use this item throughout the next third of the run to trigger glitches that skip a significant portion of the story-related content. Finally, at around two-thirds into the run, we enter the Asgore fight, the first of the two final bosses. From there, the remainder of the run focuses on completing these boss fights optimally, with significant RNG manipulation in portions of the Photoshop Flowey fight to save time.
+	$LF
+]div
+[h3 id=TricksUsed 
+	" Tricks Used
+	$LF
+]h3
+[h4 id=WallHumping 
+	" Wall Humping
+	$LF
+]h4
+[div class=p 
+	"Wall humping is a movement technique where the player oscillates between facing up and facing down each frame. This technique is performed by holding Up and Down simultaneously while against the bottom side of a wall. This can be useful in certain circumstances such as when you are moving left or right but need to be facing up or down. In rooms where the player is in contact with and between two horizontal walls, this technique will cause the player to move at double speed, as the two walls both move the player simultaneously.
+	$LF
+]div
+[h4 id=MenuBuffering 
+	" Menu Buffering
+	$LF
+]h4
+[div class=p 
+	"Menu buffering is a movement technique where the player opens the menu and presses an arrow key on the same frame. This type of movement does not count as a step for random encounters and is not considered movement by blue lasers. Although menu buffering causes the player to move at half speed (alternating between the menu buffer and closing the menu), this technique can save time in certain circumstances where additional steps are not desirable.
+	$LF
+]div
+[h4 id=Wallclips 
+	" Wallclips
+	$LF
+]h4
+[div class=p 
+	"Wallclips refer to the ability of the player to clip into vertical walls by one movement pixel when entered from the top or bottom. This can save time in some circumstances due to shortening the distance traveled and can allow movement after certain events one frame earlier than normal. Note that it is not possible to menu buffer while wallclipping.
+	$LF
+]div
+[h4 id=PunchCardExploitPce 
+	" Punch Card Exploit (PCE)
+	$LF
+]h4
+[div class=p 
+	"Although the punch card can be used to trigger many different exploits, PCE refers specifically to a glitch where the player menu buffers onto a cutscene trigger, uses the punch card from the item menu, then closes the punch card to regain movement in the cutscene. The reason this glitch happens is because there is one frame between using the punch card from the item menu and the punch card opening where the player has full control, and it is during this one frame that the cutscene trigger is activated. Because most cutscenes only lock movement at the very start of the cutscene, the punch card's own ability to unlock movement after being closed is enough to skip the entire cutscene.
+	$LF
+]div
+[div class=p 
+	"There is a variation of PCE called PCE slide where instead of menu buffering onto the cutscene trigger, the player uses the one frame of full control to walk onto the cutscene trigger, which also triggers the cutscene.
+	$LF
+]div
+[h4 id=WrongWarpWw 
+	" Wrong Warp (WW)
+	$LF
+]h4
+[div class=p 
+	"In Undertale speedrunning, wrong warping refers to entering a room and being placed at the default location in that room rather than the door the player entered from. When the player touches a room transition, the variable global.interact is normally set to 3. Then once the player reaches the next room, the game checks if global.interact is set to 3 and if it is, the game runs the code that places the player at the appropriate door marker. However, if global.interact is not 3, the player is not moved from the default location in the room. This default location is manually assigned per room by the game developer and is often closer to the middle of the room than the door marker is. There are several methods of triggering a wrong warp, all of which achieve the same result: setting global.interact to 0 (the value for full player control) while transitioning to the next room.
+	$LF
+]div
+[h4 id=TextStorageOverflow 
+	" Text Storage/Overflow
+	$LF
+]h4
+[div class=p 
+	"Text storage (also called overflow) is a type of glitch where the player regains movement while text is on the screen. This can be useful in different ways, as some text can be used to set global.interact to 0 upon closing the textbox. Sometimes text storage saves time simply by being able to mash the text while moving. When text storage is used to wrong warp, this is known as an overflow wrong warp (OWW).
+	$LF
+]div
+[h4 id=ChoicerOverflow 
+	" Choicer Overflow
+	$LF
+]h4
+[div class=p 
+	"Choicer overflow in the context of Undertale speedrunning refers to a glitch that involves using multiple choicers at once to advance text beyond its normal limits. Choicers are types of textboxes that give the player a choice between two different options. These choicers use a variable called global.msc. When a textbox is created, the object creating the textbox assigns a value to global.msc, which is then used to lookup which set of text to display. Then if the set of text includes a choicer, global.msc is incremented by 1, which normally contains the post-choicer text, if any, as well as potentially other code that accompanies the selected choice. If another choicer is then activated, the value global.msc is incremented a second time and the corresponding set of text is displayed. This can be done repeatedly to advance global.msc to a particular value, as long as there are enough choicers available.
+	$LF
+]div
+[h4 id=PunchCardAdvancePca 
+	" Punch Card Advance (PCA)
+	$LF
+]h4
+[div class=p 
+	"Punch Card Advance is a glitch where the punch card is opened and closed while text is on the screen. When this is done, the one frame of full player control that normally happens immediately after using the punch card is delayed until after the text is closed. The reason this happens is because this is how text created from the menu returns control to the player after the text is closed. PCA can be used to allow text that normally doesn't return control to the player to do so. There is a variant of PCA called Special PCA (SPCA) where text that has been PCA'd is left open while transitioning to another room. When this is done, the frame when control is returned to the player happens in the next room, which can allow certain cutscenes to be skipped if the cutscenes lock movement at the start of the room. Text created from the menu can also enable SPCA even if this text is opened during the room transition fadeout.
+	$LF
+]div
+[h4 id=PersistenceGlitch 
+	" Persistence Glitch
+	$LF
+]h4
+[div class=p 
+	"The persistence glitch is the newest type of glitch in Undertale speedrunning. Rooms have a property called persistence, which saves the state of each object in the room. This property is set when entering a battle and then unset once the player returns. However, by leaving the room on the frame before a battle starts, the room persistence is never unset. This glitch is used in the mad dummy fight to trigger the post-battle cutscene without finishing the fight.
+	$LF
+]div
+[h4 id=RngManipulation 
+	" RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"Undertale's RNG is determined by a seed that advances each time RNG is called. By calling RNG a different number of times, different outcomes can be achieved. Text calls RNG twice per character per frame and so changing how many frames text is displayed is the most common method of RNG manipulation. RNG is manipulated for various reasons such as getting particular attacks and determining which step count random encounters will occur on. One thing to note is that the function randomize() is called upon loading into the game and this function sets the RNG seed based on the system time. However, after this initial seed, RNG is no longer affected by system time until the save file is reloaded or the game is restarted.
+	$LF
+]div
+[h3 id=AreaComments 
+	" Area Comments
+	$LF
+]h3
+[h4 id=Ruins 
+	" Ruins
+	$LF
+]h4
+[div class=p 
+	"Ruins is the first section of the game and is known as the most RNG-heavy part of the game. RNG manipulation is used throughout the Ruins and for the most part this is accomplished by delaying clearing text by a frame or two. While this does lose a small amount of time each time it's done, the various timesaves afforded by manipulating RNG more than make up for the few frames lost in the process. We begin with the first Flowey encounter where the speed of the friendliness pellet is RNG manipulated to be as fast as possible. Although we could also RNG manipulate the angle, this is unnecessary as the angle can also be controlled by the player's position when the pellet is fired. A few rooms later, the first glitch in the run is performed. By interacting with the label next to the last switch, we can get text storage on Toriel's dialogue. However, we can't get to the next room until we close Toriel's text, so we interact with the broken switch while closing Toriel's text to get text storage on the switch's text, which we can use to wrong warp into the next room. After a few more rooms, Toriel finally leaves us alone and we're free to progress at our own pace. We grab a monster candy to use for later.
+	$LF
+]div
+[div class=p 
+	"Next up are a few rooms with random encounters. Random encounters work by generating a random number when you enter the room and then generating a random encounter once you take more steps than this random number. For the first two rooms, we can manipulate this random number to be greater than the number of steps we take and avoid the encounters entirely. The third room can't have a step counter high enough to skip the encounter so we instead manipulate the step counter to be as high as possible and then use menu buffering to cross the rest of the room without advancing the step counter.
+	$LF
+]div
+[div class=p 
+	"There is another glitch in the three rock room. By getting an encounter at the right moment, we're able to move during the cutscene when we'd normally be unable to move. Then we interact with the rock twice as it comes to the end of its sliding animation, giving us text storage to allow wrong warping into the next room. This is also the first instance of text corruption, where certain text is replaced with other text assigned later. The encounter was RNG manipulated to be an encounter we can spare right away, both for saving time and because if the encounter were fled from, we'd be unable to clear the corrupted text in the overworld, resulting in a softlock.
+	$LF
+]div
+[div class=p 
+	"There is an RNG manipulation in the Napstablook fight to get the faster of two attacks. We take damage during this fight as our HP at the end of Ruins changes Toriel's text, which is used to manipulate RNG without losing any time. We also take damage at the very end of the battle to show off a visual glitch that doesn't save or lose time. The invulnerability from getting hit is stored across battles, so our soul will be flashing at the start of the next battle. After Napstablook, there are a few more rooms to RNG manipulate to get no encounters and then we reach Toriel's house. We progress through the various cutscenes, staying on the bottom when leaving the hallway to the right because the bottom room transition can be hit 1 frame faster. We then interact with Toriel in her chair, moving right for a frame after interacting with her and answering the right option for all her questions.
+	$LF
+]div
+[div class=p 
+	"Once we go downstairs, we begin RNG manipulating for the Toriel fight. The fastest way to progress through this fight involves cancelling attacks as fast as possible. Certain attacks have one or two hands that move across the screen, and running into these hands ends the attack immediately and damages us slightly. The bottom hand is slower than the top hand but deals less damage, so we route an optimal combination of top and bottom hands to maximize the number of hands. Any attack will end the turn once we're at 3hp so we get hit by a different, faster attack. We then use the Monster Candy to recover hp to be able to run into more hands at the cost of extending the battle by one turn. By the end of the battle, we will have cancelled 13 attacks. We proceed through the next few cutscenes and exit the Ruins.
+	$LF
+]div
+[h4 id=Snowdin 
+	" Snowdin
+	$LF
+]h4
+[div class=p 
+	"Snowdin is similar to Ruins in that RNG manipulation is the focus along with a few occasional glitches. Near the start of Snowdin, there's a movement optimization known as "gamer pixel" where you slide across the wall collision on the top side of the small bridge to stop a pixel further to the left than normal. This causes Sans to stop his walking animation earlier, saving 4 frames. After this cutscene, we enter Box Road. Here, we must interact with the save point to heal (we're still at 2hp from Toriel) and then interact with the box to retrieve the Tough Glove. We need the Tough Glove so we can get the Stick out of our weapon slot and use it to spare Doggo. The fastest way to interact with the box is to face upwards, which we cannot do without letting go of Right for one frame. We equip the Tough Glove in the next room, as there is a step counter in this room and we will be menu buffering at the end of this room anyway. We RNG manipulate this encounter to be as late as possible and then leave the room without getting the encounter.
+	$LF
+]div
+[div class=p 
+	"After a few more rooms, we come across the word search puzzle room. This is where we perform a glitch called giasfclfebrehber warp, named after the nonsensical word in the word search list. In order to perform a giasfclfebrehber warp, we must interact with Sans as we enter the room transition and then close the text to wrong warp into the next room. Next is Dog Marriage Skip, which is a glitch that involves getting an encounter on the same step we enter the Dogi cutscene trigger. There are a few routes for this room, including leaving the room to reset the step counter and menu buffering from the switch to the Dogi trigger. Menu buffering is faster so this is what we do. After entering the random encounter, we flee and then walk out of the room before the Dogi cutscene progresses further.
+	$LF
+]div
+[div class=p 
+	"After pressing a few switches and getting through a cutscene, we arrive to the room where we'll perform the next glitch in the run. By interacting with the sign and then stepping on the switch on the next frame, we can regain movement during the cutscene, saving a significant amount of time. We then use this cutscene to wrong warp into the next room, saving a few additional frames. We answer "No" both times Papyrus asks if we understand the rules and then move on.
+	$LF
+]div
+[div class=p 
+	"The ice puzzle room is solved using Masochist 2. This is a faster solution than the Masochist Ice Puzzle strat that saves 7 frames. This solution also sets up to skip the cutscene at the end of the ice puzzle. Then we arrive to the Greater Dog room, where we Ignore the dog and then run into the dog attacks that were RNG manipped, cancelling each attack. Ignore gives more attacks but a faster post-battle cutscene, saving time over the standard strat of using the stick and then sparing.
+	$LF
+]div
+[div class=p 
+	"We then proceed to the next room, get through the cutscene, and enter Snowdin town. We interact with the sign as we enter the igloo to gain text storage and use it to OWW into the Papyrus boss room. The strategy for the Papyrus boss fight is to take damage and let Papyrus capture us three times, and then Papyrus will offer us a chance to skip his fight, which we'll gladly accept as doing the full version of the fight costs a significant amount of time.
+	$LF
+]div
+[h4 id=Waterfall 
+	" Waterfall
+	$LF
+]h4
+[div class=p 
+	"Near the beginning of Waterfall, we execute a glitch called Sea-Grass Skip (SGS). This skip is performed by using an item after triggering the cutscene where Undyne sees Frisk moving in the grass. Then by closing this text, we regain movement. We do a faster version where we use the item twice to allow a few extra frames of movement. We then do a giasfclfebrehber goblin warp (goblin warp meaning a blind wrong warp) off the save point so we can wrong warp into the next room. While waiting for the flower bridge to form, we drop the stick, which both manipulates RNG and makes inventory management faster later on. This RNG manipulation is immediately used in the next room to set the encounter steps as low as possible so we can grind out the encounter at the door and leave the door to skip the encounter. This is the first instance of a scripted encounter skip, where a scripted encounter (in this case a scripted Aaron) is given a much lower step count than later encounters, so by skipping Aaron, the next encounter will have a high enough step count that we will be able to leave the room without getting the encounter. We then manipulate RNG again during the next flower bridge cutscene to get a maximum step count for the next encounter, which we will menu buffer past.
+	$LF
+]div
+[div class=p 
+	"We then arrive to the Spears 1 segment, where Undyne chases you and throws spears at you. There is some RNG in this section, but due to the RNG manips in the previous room, there isn't much we can do to manipulate this RNG without losing time. For the most part we are able to move optimally, and at one point we turn around for a frame to allow us to take a faster path through the next set of spears and save time overall. We reach the end of Spears 1, get through the cutscene, and proceed to the next room.
+	$LF
+]div
+[div class=p 
+	"This next section is a major shift in gameplay compared to the first third of the run. We acquire the Punch Card item, which will be the main way to perform glitches for the rest of the game. Punch Cards have three intended uses: trading three of them for a free Nice Cream, powering up punching attacks in battle, and looking at the card outside of battle. The last effect is by far the most useful for us, as when you look at the Punch Card, the menu closes for a frame before the Punch Card appears. During this one frame, we can activate a cutscene, interact with an object, or even hit a room transition. Then the Punch Card opens on the next frame, allowing us to close the Punch Card and regain movement.
+	$LF
+]div
+[div class=p 
+	"After we pick up the Punch Card, we do a wrong warp into the next room and eat the Nice Cream during the room transition. This puts the Punch Card in the first slot, saving one frame whenever we need to menu buffer down and use the Punch Card. The next room has random particles generating nearby, which means we can manipulate RNG by taking a different path through the room. We use this to manipulate the length of the pre-battle cutscene with the exclamation mark, which can last from 15-20 frames.
+	$LF
+]div
+[div class=p 
+	"We wrong warp into the Onionsan room and PCE Onionsan's trigger and then proceed through the room, PCEing other triggers and wrong warping into the next room. The Shyren encounter is actually an event trigger and not a random encounter, so we PCE the trigger and interact with the sign to gain text storage to wrong warp into the next room.
+	$LF
+]div
+[div class=p 
+	"We proceed through the next few rooms, meeting up with Monster Kid and PCEing cutscene triggers as necessary, and wrong warping where it saves time. In the room with the castle in the background, we hold Right+Up+Down to move double speed through this room. This is because there is wall collision both above and below the player and holding both Up and Down causes both wall collision objects to activate their collision code, both of which slide the player along the wall. This causes the player to move twice per frame, resulting in double movement speed.
+	$LF
+]div
+[div class=p 
+	"In the next room, we interact with Monster Kid as soon as we can, which starts a timer. There's nothing we can do to speed up this timer, so while we're waiting, we show off a couple interesting-looking glitches with the umbrella object. Once the cutscene timer ends, we overflow Monster Kid with the punch card so we don't have to wait for him to finish talking.
+	$LF
+]div
+[div class=p 
+	"After a couple rooms, we reach the Spears 2 section. Unlike the Spears 1 section, this section has minimal RNG and can be completed optimally with no RNG manipulation. We begin by PCEing the first trigger and then continuing on while the cutscene plays out. Immediately following this cutscene, a flag will be set that will prevent us from opening our menu. Before this happens, we get item text on the screen so that we can OWW with it at the end of this section.
+	$LF
+]div
+[div class=p 
+	"As the chase sequence begins, Undyne will try to spawn spears underneath the player. Because the game tries to predict where we're going, we can manipulate where the spears will spawn. The easiest way to do this is to hold an arrow key in the direction of a wall, in which case the game tries to spawn spears in that direction. This results in an open pathway in the opposite direction. We continue through this section in this way, using wallclips to save a couple extra frames of movement. Once we reach the end, we use the text to OWW, we proceed to the right until we activate the next cutscene trigger, then we turn around to progress to the next section.
+	$LF
+]div
+[div class=p 
+	"We proceed to the right and overflow the save point, using the text to OWW and then save in the Mad Dummy room. We then overflow an item in the room and use the text to gain movement on Mad Dummy. We manipulate the camera to continue the cutscene as quickly as possible, then once Mad Dummy spawns at the top of the screen, we start walking down to the bottom of the screen. This sets us up to execute the persistence glitch to skip Mad Dummy. The persistence glitch can be used to store the state of a room by exiting that room on the same frame that a battle starts. Then by dying to the fight, we're able to return to the room in the state that we left it. Since we left the room right before the fight, the game assumes that we have completed the fight. Normally this would be true, but in our case it allows us to skip the fight entirely, only spending two turns to die to Mad Dummy.
+	$LF
+]div
+[div class=p 
+	"In addition to Mad Dummy Skip, we also set up Bagel Storage at this time. Bagel Storage is opening a punch card as you leave a room to set it as persistent, which allows us to use the punch card upon returning to the room. We use this punch card to regain movement during Napstablook's text. Then by timing when we clear Napstablook's text, we can double overflow the Astronaut Food container so that we have two textboxes with choicers open at once. Having two choicers open at once would normally crash the game, but in this case one of the textboxes has a choicer on the second textbox so we're able to leave it open. These textboxes with choicers will be stored in the persistent room and recalled later, allowing us to use choicer overflow on whatever the last piece of text we encountered was.
+	$LF
+]div
+[div class=p 
+	"After storing the two choicers in the persistent room (performed by simply leaving them open as we exit the room), we then proceed to the left in the next area. We overflow the duck, allowing us to reach the next choicer in the list, the Ancient Artifact. This sets our global.msc value to be the value of the Ancient Artifact text (257). Once we return to the persistent room and use the two choicers, we advance our global.msc value further to the lab fridge (258), then to the lab fridge choice (259) which gives us the noodles, then using the choicer spawned by the lab fridge text, we overflow one more time to the burnt pan text (260). This gives us the Burnt Pan much earlier than usual, which will allow us to use the pan on Undyne to save time. This is known as Early Early Burnt Pan (EEBP). Overall, this route saves about 5 seconds.
+	$LF
+]div
+[div class=p 
+	"Here is a list of what text we use in what order:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Text
+			]th
+			[th 
+				"Choicer
+			]th
+			[th 
+				"global.msc
+			]th
+		]tr
+		[tr 
+			[td 
+				"Duck text
+			]td
+			[td 
+				"Duck choicer
+			]td
+			[td 
+				"254 → 255
+			]td
+		]tr
+		[tr 
+			[td 
+				"Duck choice
+			]td
+			[td 
+				"Overflowed second duck choicer
+			]td
+			[td 
+				"255 → 256
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ancient Artifact text
+			]td
+			[td 
+				"Ancient Artifact choicer
+			]td
+			[td 
+				"256 → 257
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ancient Artifact choice
+			]td
+			[td 
+				"First stored choicer
+			]td
+			[td 
+				"257 → 258
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lab fridge text
+			]td
+			[td 
+				"Second stored choicer
+			]td
+			[td 
+				"258 → 259
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lab fridge choice
+			]td
+			[td 
+				"Lab fridge choicer
+			]td
+			[td 
+				"259 → 260
+			]td
+		]tr
+		[tr 
+			[td 
+				"Burnt pan text
+			]td
+			[td 
+				"Burnt pan choicer
+			]td
+			[td 
+				"260 → 261
+			]td
+		]tr
+		[tr 
+			[td 
+				"Burnt pan choice
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"261
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"At the end of this sequence, we will have the Instant Noodles in slot 2 and the Burnt Pan in slot 3.
+	$LF
+]div
+[div class=p 
+	"The next few rooms are relatively straightforward. In the room where we encounter Temmie, we overflow the sign near the start of the room so we can use the text to regain movement during the pre-battle cutscene, saving a small amount of time. We don't need the Instant Noodles so we use them here to regain movement a second time before the encounter. We then arrive to the room where Undyne confronts us. We perform a minor camera manip by moving all the way to the right side of this room. We then overflow the echo flower and regain movement during the cutscene, and then wait for Undyne to drag Monster Kid away and progress the cutscene before moving to where the door will unlock. We open item text and use this text to OWW into the next room and then wrong warp into the bridge room.
+	$LF
+]div
+[div class=p 
+	"Here, we PCE the trigger and then perform an SPCA during the wrong warp to leave the room. This unlocks movement in the next room where movement would normally be locked. We then use the text from this cutscene to OWW into the next room. The next skip is known as Onedyne. Normally the player is expected to watch a long cutscene before fighting Undyne, and then a chase sequence begins where you have to constantly flee from Undyne. During casual gameplay, Undyne usually is able to catch the player 4 times in total. However, with Onedyne, we are able to get through this section while only being caught by Undyne once.
+	$LF
+]div
+[div class=p 
+	"We PCE both of Undyne's triggers, skipping both the long cutscene and the first Undyne encounter. We then set up a PCA on the text that appears from the second trigger. This text is unique in that it can't be closed by the player but automatically closes on its own after 30 frames. With the PCA, this text can be used to perform an OWW. This OWW skips the second Undyne encounter. After entering the hallway with the "Welcome to Hotland" sign, we stop at a particular location and let Undyne catch us. By stopping early, we are able to exit the room without being caught by Undyne again, which leaves us with only one Undyne encounter.
+	$LF
+]div
+[div class=p 
+	"Once we're in the Undyne fight, we begin attacking her with the Burnt Pan. The reason is that the first phase can be triggered to end early if Undyne is below a certain damage threshold. At LV1 with the Burnt Pan, we can hit this threshold with three quads and good damage rolls. We are then able to flee on turn 4, which saves three turns over the strat without the Burnt Pan, which flees from Undyne on turn 7. We also take intentional damage at the end of this fight, which will be used at a later point.
+	$LF
+]div
+[div class=p 
+	"After fleeing, we continue to the right, PCEing one more trigger for the cutscene where Undyne falls down, and continue into Hotland.
+	$LF
+]div
+[h4 id=Hotland 
+	" Hotland
+	$LF
+]h4
+[div class=p 
+	"Hotland is one of the most glitch-heavy segments in the game due to all the puzzles and cutscenes there are to skip. We begin by PCEing the lab cutscene and wrong warping into the next room. We continue through the next couple rooms and kill Vulkin, allowing us to save a turn on Asgore.
+	$LF
+]div
+[div class=p 
+	"Throughout Hotland, there will be frequent notifications and phone calls from Alphys, which are usually not skippable because the trigger for these events is solid. However, we can save one frame if we wallclip during these phone notifications due to being able to move one frame earlier after closing the text. We do this on the phone notification immediately after Vulkin and then one more phone call a bit later.
+	$LF
+]div
+[div class=p 
+	"In the floor 1 vent room, we PCE the vents to regain movement while flying through the air, which allows us to reach the end of the room faster, skipping the encounter and two phone calls and wrong warping into the next room. The burnt pan would normally be picked up by going to the room to the bottom right of this vent room, so EEBP saves time by being able to take a shorter path through this room.
+	$LF
+]div
+[div class=p 
+	"The next room includes a trick called Beowulf Skip. By using the punch card as we get hit by the lasers down to 1hp, we're able to move while the lasers are shut off. We then clear Alphys' text and wrong warp into the next room, making sure to advance the phone call to the last set of textboxes but no further. This is to set up another trick later.
+	$LF
+]div
+[div class=p 
+	"In the East/West puzzle room, we take a faster cycle on the vent than most RTA runners do and PCE the vent to enter the next room without solving the puzzles. We then PCE the vents as we enter the Cooking Minigame room. In this room, we get text storage on the text and then PCA this text. We then use the stored text to regain movement once we hit the next trigger for the Alphys call. Since there was active text during the whole process, the PCA now applies to the Alphys phone call. The reason this is done is because hitting this trigger removes our ability to use the menu. We then use the PCA to regain movement on the second trigger and leave the room.
+	$LF
+]div
+[div class=p 
+	"We then make a short detour to floor 1, where entering the bridge room gives us our menu back. After this, we return to floor 2, using the punch card to skip the elevator animation. Once we reach floor 2, we proceed to the left and RNG manipulate the pre-encounter animation to take as few frames as possible using text opened during the room transitions. We flee from the encounter and continue to the left.
+	$LF
+]div
+[div class=p 
+	"In the triple switch room, we use the punch card to hit the third switch, which we're normally not supposed to be able to do as we're supposed to be interrupted. This causes a strange-looking glitch where we receive a phone call from Alphys every frame. We mash this text to reduce lag as we proceed into the next room.
+	$LF
+]div
+[div class=p 
+	"On the jump tile puzzle, we simply PCE the vents to skip the puzzle entirely, storing text off the last vent to wrong warp into the next room. We then activate the mouse hole and wrong warp into the Royal Guards room, where we PCE the Royal Guards and clear their text at the right time to double our movement speed, since part of the normal cutscene pushes us to the right.
+	$LF
+]div
+[div class=p 
+	"The next trick is called Sirius Skip and utilizes the same phone call we received in the floor 1 lasers room while at 1hp. If we get hit by those lasers and don't clear the phone call, it will appear again in the News Room as long as we're at 1hp. We take advantage of this by wrong warping into the News Room and opening our menu on the transition, then using the punch card to regain movement on this first phone call followed by using the punch card again to regain movement on the cutscene trigger. We then use this text to regain movement on the vent (as the trigger once again removes our menu) and we use the vent to go out of bounds. Finally, we use Mettaton's text to OWW into the next room.
+	$LF
+]div
+[div class=p 
+	"After another detour to floor 1 to get our menu back, we proceed to floor 3, where we reach the North/South puzzle room. In this room, we once again use the punch card to regain movement on the vents, but with a twist. We switch to the cell phone and use text storage to move on each vent after the first one. The cell phone takes one less frame to activate than item text and saves back the time lost to menuing down. After proceeding through the room, we get out of bounds and are able to leave through the back of the door, interacting with the closed door as we leave to wrong warp into the next room.
+	$LF
+]div
+[div class=p 
+	"We then proceed into Muffet's room and PCE the first trigger. By leaving the text open, this prevents any additional triggers in this room, allowing us to skip Muffet. We then utilize an interesting movement technique on the webs by walking straight down into diagonal collision, which moves us at our normal speed rather than the slower speed of the webs. We use the text from earlier to wrong warp into the next room.
+	$LF
+]div
+[div class=p 
+	"In the musical room, we PCE the trigger and exit the room. This removes our menu so we'll need to head back to floor 1 to get it back. However, if we go back now, we won't be able to return to the same floor as the plot flag has not yet been updated. So we instead head up into the Core Transition room and watch the first cutscene, setting the plot flag to an appropriate value so we can return later. We then head down to floor 1 to recover our menu once again and return to the start of the Core.
+	$LF
+]div
+[div class=p 
+	"We begin the Core by skipping the scripted Madjick encounter and wrong warping into the first lasers room. We menu buffer through the blue lasers and PCE the phone call at the end of the room and use this call to OWW into the next room. In this next room, we're unable to PCE the phone calls so we mash through the text and proceed to the next room.
+	$LF
+]div
+[div class=p 
+	"The second lasers room uses a slight variation on the standard RTA strat. In this room, we PCE the first phone call trigger and then instead of using PCA on this phone call, we PCE the second trigger and use the second phone call to OWW out of the room.
+	$LF
+]div
+[div class=p 
+	"With a couple more wrong warps, we reach the Core puzzle room. This puzzle is one of three ways to unlock the end of Core and is the fastest of the three. The strat here is to use the punch card to interact with the puzzle multiple times, giving us extra shots so we can "solve" the puzzle faster. Once this is completed, we use the puzzle cutscene to wrong warp out of the room.
+	$LF
+]div
+[div class=p 
+	"The next thing we need to do is reach the end of the Core. Normally, players are expected to proceed forward through the Core to reach the end. However, there is a faster route called Snowie Core, where we wrong warp backwards to the beginning of Core and take the now-unlocked elevator to the end. Once we do this, we reach Mettaton's boss room, where we unceremoniously PCE his trigger and skip his entire fight.
+	$LF
+]div
+[div class=p 
+	"In the next hallway, we PCE Alphys' trigger and then wrong warp into the Long Elevator. We use the punch card on the elevator panel to avoid having to sit through the Long Elevator cutscene and exit with a wrong warp into New Home.
+	$LF
+]div
+[h4 id=NewHome 
+	" New Home
+	$LF
+]h4
+[div class=p 
+	"New Home is the final main area of the run and consists mainly of story encounter with little in between. Upon entering New Home, we need to get two keys: one from the left side and one from the right side. We start off by going to the right hallway first. By going right first, the first two story encounters will spawn in the right hall. If we went left first, the first two story encounters would spawn in the left room. Because we can skip the second encounter in the right hall and the first encounter in the left room, going right first is faster.
+	$LF
+]div
+[div class=p 
+	"For the first story encounter, we use text storage to gain movement, interact with the key from below, and use the text from the key to continue moving towards the door on the other side. This also requires RNG manipulation to get the pre-battle cutscene to be as long as possible, giving us enough time to reach the key. After the encounter, we enter the door and wrong warp back out into the hall. We then use text storage to skip the next encounter by leaving the room before we enter the battle. We return to the right hallway and wrong warp back out before proceeding to the left.
+	$LF
+]div
+[div class=p 
+	"In the left room, we get text storage on the bookshelf text and then close this text as we interact with the chair and move left into the third encounter trigger. This lets us regain movement on the third encounter cutscene and also gives us text storage that we can use to regain movement again for the second half of the cutscene. This allows us to skip the encounter entirely. We then proceed to the key and wrong warp back out.
+	$LF
+]div
+[div class=p 
+	"Other than one encounter in the basement that we can wrong warp past, the rest of the encounters are not skippable. However, we can PCE the triggers and then store item text to move during the pre-encounter cutscenes. In the final hallway, we switch to the cell phone text to save an input for each encounter.
+	$LF
+]div
+[div class=p 
+	"We finish off New Home and the punch card segment by PCEing the Sans trigger and wrong warping past Asgore's cutscenes into Asgore's final boss room.
+	$LF
+]div
+[h4 id=AsgoreAndFlowey 
+	" Asgore and Flowey
+	$LF
+]h4
+[div class=p 
+	"The Asgore fight is pretty straightforward. There is no RNG and Asgore dies in 9 attacks with the burnt pan at LV4. Since we are at 1hp, we cannot take any hits during this battle. At the end of the battle, Asgore has a long set of dialogue that can be skipped twice as fast as most of the other text in this game. Following this text, we select "FIGHT" and kill Asgore. Flowey then appears, finishes off Asgore's soul, and steals the six human souls. Normally, Flowey would close the game here. However, it is slightly faster to close the game manually rather than wait for Flowey to close it, since the autosave happens before the window actually closes.
+	$LF
+]div
+[div class=p 
+	"The Flowey fight has a few phases with RNG but is otherwise mostly just a matter of waiting for the turns to end. The fight is divided into six "soul" phases followed by a final phase. The first three phases have nothing particularly noteworthy. After the third phase, however, we begin taking damage. This is because we need to manipulate RNG for the fourth phase (the book phase) and getting hit by Flowey's attacks shakes the screen randomly, which advances RNG.
+	$LF
+]div
+[div class=p 
+	"In the book phase, the ACT button is always the fourth word to spawn in the second row. Each row has an alarm that's set at a fixed value for the first word and then randomly for each one afterwards. Additionally, each time that one of the alarms is triggered (when a word spawns), 5 frames are added to all alarms. So the strategy for minimizing the amount of time this phase takes is to minimize the number of words that spawn while also minimizing the time it takes for the words in the second row to spawn. Effectively, this means that we should RNG manipulate the second row alarms to be as low as possible and RNG manipulate all other row alarms to be high enough that no extra words spawn.
+	$LF
+]div
+[div class=p 
+	"In total, 17 words spawned before the ACT button, which is the minimum possible amount. The row 2 alarms were RNG manipulated to 2 frames slower than perfect. Additionally, the ACT button was RNG manipulated to spawn from the right side, which is 2 frames faster than the left side.
+	$LF
+]div
+[div class=p 
+	"The pan phase isn't notable in terms of saving time, but there is an invisible hitbox that we dodge in order to not get hit during this phase. This hitbox was due to an unused second frame for the pan sprite that is tilted upwards. The sprite was unused, but the hitbox still exists.
+	$LF
+]div
+[div class=p 
+	"Following the pan phase is the only part of the game that was recorded in realtime. In this section, we're taking damage to RNG manipulate the gun phase, which involves getting damaged at different points in the fight and in different amounts. A methodical approach would have worked here, but it turned out to be more efficient to just play the game in realtime while taking damage to change RNG.
+	$LF
+]div
+[div class=p 
+	"In the gun phase, there are targets that spawn in waves of three. The first two targets of each wave spawn based on your position plus or minus a random amount horizontally and vertically and the third target is the same with an extra fixed amount of distance added in the horizontal and vertical directions the player is moving, with no component added if the player is not moving in that direction. The fastest way to complete this section is to ensure that the gun doesn't turn past a certain small angle range. Within this range, the gun takes the shortest amount of time to point towards the next target. Outside of this range, the gun takes an increasingly large amount of time to point towards the next target based on the size of the angle. RNG manipulation is a major part of this phase, but so is planning and positioning the soul in exactly the right spot. This phase was performed perfectly, with no frames lost.
+	$LF
+]div
+[div class=p 
+	"Immediately after the gun phase is completed, there is normally a long cutscene leading into the final phase of Photoshop Flowey. However, the autosave for the final phase of Flowey happens as soon as the screen flashes following the completion of the gun phase. By reloading, we skip this entire cutscene and get straight to the final phase.
+	$LF
+]div
+[div class=p 
+	"In the final phase, each FIGHT button always spawns at the same time interval and stays on the screen for a fixed amount of time. Due to this, the only time it's necessary to hit the FIGHT button as soon as possible is on the final hit. We take advantage of this for RNG manipulating the damage rolls by simply waiting to hit the FIGHT button. Additionally, there are several points where the player's attack power increases. At these points, we delay hitting the FIGHT button until the next hit will be in the higher damage range. With a combination of RNG manipulation and this technique of delaying attacks for higher damage ranges, we are able to complete the fight two turns faster than the casual method of spamming the FIGHT button and one turn faster than the standard RTA speedrun strat of delaying the attacks to be in the higher damage ranges. The RTA strat is known as Flowey Quick Kill, so this method can be called Flowey Quicker Kill.
+	$LF
+]div
+[div class=p 
+	"Following the final attack, we wait through the cutscene up until the point where Flowey tries to kill us with the friendliness pellets. By staying on top of the pellets' hitboxes, we're able to get hit on the first possible frame. We then reload as soon as we hit the next autosave point, saving us from having to wait through the screen fading from white to black. On the final choice screen, we're able to move the soul before we can actually see it, so we move on top of the FIGHT button spawning location so we can hit it as soon as possible. We reload one last time and touch the exit door to end the run.
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[h4 id=FutureOptimizations 
+	" Future optimizations
+	$LF
+]h4
+[div class=p 
+	"Undertale has an incredibly active speedrunning community and so new strats are found fairly regularly. It became a running joke at how many times the Neutral TAS had to be partially redone thanks to a new strat here or a frame save there. The main reason new optimizations can't just be dropped into the TAS is because it would change RNG. Even if the optimization doesn't call RNG a different number of times, simply saving a frame is enough to change the RNG seed once the game is reloaded, which happens multiple times throughout the run. One example of such a frame save is that it was discovered relatively late in the development of the TAS that it's possible to begin pressing the keys for a new room before the room is actually loaded, potentially causing these inputs to be a frame earlier. This was implemented in the Hotland portion of the run where most of these inputs would be, but it's also possible that this could save a frame or two earlier in the run as well.
+	$LF
+]div
+[div class=p 
+	"In terms of specific optimizations, there was one recent optimization discovered where by killing Temmie instead of Vulkin, an optimal Undyne fight would only require two quad attacks rather than three. This means one of the attacks can be completed faster, saving some time. Another specific optimization is in New Home, where the strategy to skip the second encounter was later retimed after the completion of the TAS and was found to be slower than another similar strat by approximately 12 frames. The strat performed in the TAS was originally timed to be faster but neglected to take into account the timeloss from the extra room transition.
+	$LF
+]div
+[div class=p 
+	"Finally, one additional future time save is in the frames lost due to RNG manipulation. Although these were optimized throughout the run, it's always possible to perform the RNG manipulations at the cost of fewer frames. Full optimization of RNG manipulations would likely require significant planning and scripting.
+	$LF
+]div
+[div class=p 
+	"It's also likely that major timesaves will be found at some point in the future. Several major new strats have been implemented just in the one year span of creating this TAS, saving nearly 2 minutes in total. Given the current pace of new discoveries, there are likely several major strats left to be found in the run.
+	$LF
+]div
+[h4 id=ExtraMaterial 
+	" Extra material
+	$LF
+]h4
+[div class=p 
+	"Alternate movie file that advances through the post-credits text (for encoding): 
+	[a class=intlink href=/Userfiles/Info/74233588421291788 
+		"userfiles/info/74233588421291788
+	]a
+	$LF
+]div
+[div class=p 
+	"Premiere video with live commentary:
+	$LF
+	(youtube|v=3gx5T9cX-Mw)
+	$LF
+]div
+[div class=p 
+	"Encode with OSD frame count and input display:
+	$LF
+	(youtube|v=gr2So8S7Qtw)
+	$LF
+]div
+[div class=p 
+	"Four Cycle Mad Dummy, the previous TAS-only strat requiring heavy RNG manipulation and pixel-perfect movement (never seen in a full game TAS):
+	$LF
+	(youtube|v=keX7vbY8iHk)
+	$LF
+]div
+[h4 id=Screenshots 
+	" Screenshots
+	$LF
+]h4
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/CO9KDjN.png 
+	]img
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/3Py6Ksk.png 
+	]img
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/0K5UPh4.png 
+	]img
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/kOI0shM.png 
+	]img
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/5EHPfPu.png 
+	]img
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/bbRwa0w.png 
+	]img
+	$LF
+]div
+[h4 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h4
+[div class=p 
+	"Special thanks go to the following people who have helped with routing or glitch hunting during the creation of this TAS:
+	$LF
+]div
+[ul 
+	[li 
+		"colinator27
+		$LF
+	]li
+	[li 
+		"I'm an issue
+		$LF
+	]li
+	[li 
+		"Jean Poilu
+		$LF
+	]li
+	[li 
+		"Radu
+		$LF
+	]li
+	[li 
+		"RichConnerGMN
+		$LF
+	]li
+	[li 
+		"duuuuude5
+		$LF
+	]li
+	[li 
+		"willyjwillyj
+		$LF
+	]li
+	[li 
+		"fixylol
+		$LF
+	]li
+	[li 
+		"Shayy
+		$LF
+	]li
+	[li 
+		"mrlink2k
+		$LF
+	]li
+	[li 
+		"svool_gsviv
+		$LF
+	]li
+	[li 
+		"Geo
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Judging...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Optimization looks very good. I'm particularly impressed at the level of RNG manipulation in this run, all the way from the very beginning to the very end. Well done!
+	$LF
+]div
+[div class=p 
+	"Accepting as a new branch for fastest completion.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Finally got dumping to work in WSL2, so processing...
+]div

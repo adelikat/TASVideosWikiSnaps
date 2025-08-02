@@ -1,0 +1,36 @@
+1
+[h3 id=Rng 
+	" RNG
+	$LF
+]h3
+[div class=p 
+	"In Legend of Kage, the randomness function does not actually take samples
+	$LF
+	"of player input, or any other volatile data. Legend of Kage has a function
+	$LF
+	""UpdateRandom" at address $A4E5, that simply multiplies the value of RndSeed
+	$LF
+	"(memory address $0F) by 5 and adds 11. It uses the memory address $0E as a temporary, but it does not use its prior value.
+	[br 
+	]br
+	$LF
+	"The function is called contiguously in an infinite loop by the main program.
+	$LF
+	"It's also called manually each time a sample of the RndSeed is taken.
+	$LF
+]div
+[div class=p 
+	"The actual randomness of it comes from the fact that depending on the duration of the NMI (in number of CPU cycles), a different number of iterations of the UpdateRandom function is called. The more time the NMI takes, the less time
+	$LF
+	"elapses after the NMI before the next NMI occurs, and thus, the less iterations
+	$LF
+	"the UpdateRandom function experiences between the two NMIs.
+	$LF
+]div
+[div class=p 
+	"The duration of the NMI is influenced by 
+	[em 
+		"everything
+	]em
+	" the game does, including the music, checking for collisions, checking for input, etc. This makes the randomness in Legend of Kage extremely volatile, and extremely non-portable between different emulators. Differences between timings of memory accesses, timings of CPU instructions, timings of DMA transfers, timings of NMI trigger, all timing differences can throw the randomness off.
+]div

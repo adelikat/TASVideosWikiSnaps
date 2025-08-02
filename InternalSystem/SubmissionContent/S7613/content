@@ -1,0 +1,3216 @@
+12
+[div class=p 
+	"This is Donkey Kong Country for the Gameboy Color, released in 2000, completed as quickly as possible. This video highlights the unique physics and exploits present in this version of the game to traverse a familiar levelset in potentially unfamiliar ways. The emulator used is BizHawk 2.6.2 with Gambatte core, and the goal is to defeat K. Rool from a new file (any%). The original document, written in LaTeX and compiled to a PDF, is available here: 
+	[a href=https://drive.google.com/file/d/1KjmLqxJ_sOY89qQUhjphrlvQ7DPGtd_B/view?usp=sharing. rel=noopener external nofollow 
+		"https://drive.google.com/file/d/1KjmLqxJ_sOY89qQUhjphrlvQ7DPGtd_B/view?usp=sharing.
+	]a
+	$LF
+]div
+[h3 id=Intro 
+	" Intro
+	$LF
+]h3
+[div class=p 
+	"Starting sometime in early 2021 I came back to my childhood Donkey Kong Country game, the 8-bit Gameboy Color remake of the original. As strange as this game probably seems to everyone who grew up with the original Super Nintendo version, or even the Gameboy Advance port, I have many fond memories of the Gameboy Color game and I always enjoyed it. I spent about 3 months running the game RTA on emulator and keyboard, and after achieving a run to be proud of I decided to start making a TAS. I had found some interesting possibilities and wanted to put some strats together to see what would come of it. I remember one of the first inspirations being that I found that it was possible to roll off the tires in Mine Cart Madness but it was quite difficult, and I wanted to see what the speedrun could look like if I could put these kinds of strats together. I had never made a TAS before, my only experience was some messing around with Celeste's TAS tools. I had no idea what I was getting into.
+	$LF
+]div
+[div class=p 
+	"What began as an experiment to find cool strats turned into a project to make a masterpiece. For over a year I worked on this thing. There were a couple long breaks, but I legitimately put hundreds of hours into it. My first draft of the TAS which defeated K. Rool was fast, but there were many suboptimal strats and the bosses and autoscrollers were boring. I couldn't settle for a mediocre video, I had to make it 
+	[em 
+		"perfect
+	]em
+	". I went back, discovered new tech, saved every frame I could find and tried to make every idle moment interesting. In this document I'd like to share all the frame data and tech I've found, as well as some detailed commentary about each level. Some of the information here can be relevant to RTA runners as well. I hope you enjoy the video, and find the information useful and interesting as well.
+	$LF
+]div
+[h3 id=BasicFrameData 
+	" Basic Frame Data
+	$LF
+]h3
+[div class=p 
+	"A note about units:
+	$LF
+	"Lengths are stored in two separate bytes measuring pixels and subpixels. There are 256 subpixels per pixel. For position in the level which requires more than 256 pixels, another byte is used to store superpixels. When I started working on this TAS I made the decision to keep my subpixel and pixel addresses separate and measure as a sort of a 256-decimal. This has the advantage of making the significant figure easier to see and reference, but the disadvantage of making computations and comparisons harder. Furthermore, with the subpixel value unsigned, to read leftwards and upwards speeds you have to add the negative pixel value to the positive subpixel value, making them harder to think about. In hindsight I probably should have switched to using subpixel only measurement, but I got set in my ways. In this document I primarily give measurements as pixel_subpixel, these units will be denoted with an underscore to separate the place values. In the following table I will give measurements in these units as well as in pixels as a rounded decimal, and pure subpixels, to make them easier to think about for anyone who prefers those units.
+	$LF
+]div
+[div class=p 
+	"I included a lot of values for anyone who is curious, but some are not super relevant so I highlighted the important ones in bold. Animal buddy speed and acceleration values are the same as the Kongs' when not mentioned. For some reason, Expresso and Winky also get their speeds set to 0 when they land from a jump.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Measurement
+			]th
+			[th 
+				"pixels_subpixels
+			]th
+			[th 
+				"pixels decimal
+			]th
+			[th 
+				"subpixels only
+			]th
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Walk Speed
+				]b
+			]td
+			[td 
+				[b 
+					"1_51
+				]b
+			]td
+			[td 
+				[b 
+					"1.20
+				]b
+			]td
+			[td 
+				[b 
+					"307
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Run & Air Speed
+				]b
+			]td
+			[td 
+				[b 
+					"2_0
+				]b
+			]td
+			[td 
+				[b 
+					"2.00
+				]b
+			]td
+			[td 
+				[b 
+					"512
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ground Accel.
+			]td
+			[td 
+				"0_128
+			]td
+			[td 
+				"0.50
+			]td
+			[td 
+				"128
+			]td
+		]tr
+		[tr 
+			[td 
+				"Air Accel.
+			]td
+			[td 
+				"0_64
+			]td
+			[td 
+				"0.25
+			]td
+			[td 
+				"64
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ice Accel.
+			]td
+			[td 
+				"0_16
+			]td
+			[td 
+				"0.06
+			]td
+			[td 
+				"16
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Roll Speed
+				]b
+			]td
+			[td 
+				[b 
+					"2_193
+				]b
+			]td
+			[td 
+				[b 
+					"2.75
+				]b
+			]td
+			[td 
+				[b 
+					"705
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Roll Boost Per Hit
+				]b
+			]td
+			[td 
+				[b 
+					"0_144
+				]b
+			]td
+			[td 
+				[b 
+					"0.56
+				]b
+			]td
+			[td 
+				[b 
+					"144
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Crawl Speed
+				]b
+			]td
+			[td 
+				[b 
+					"1_0
+				]b
+			]td
+			[td 
+				[b 
+					"1.00
+				]b
+			]td
+			[td 
+				[b 
+					"256
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"DK Jump Speed
+			]td
+			[td 
+				"-6_0
+			]td
+			[td 
+				"-6.00 
+			]td
+			[td 
+				"-1536
+			]td
+		]tr
+		[tr 
+			[td 
+				"DK Jump From Roll
+			]td
+			[td 
+				"-6_128
+			]td
+			[td 
+				"-6.50
+			]td
+			[td 
+				"-1664
+			]td
+		]tr
+		[tr 
+			[td 
+				"Diddy Jump Speed
+			]td
+			[td 
+				"-6_36
+			]td
+			[td 
+				"-6.14 
+			]td
+			[td 
+				"-1572
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Diddy Jump From Roll
+				]b
+			]td
+			[td 
+				[b 
+					"-6_164
+				]b
+			]td
+			[td 
+				[b 
+					"-6.64
+				]b
+			]td
+			[td 
+				[b 
+					"-1700
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Jump From Tire Speed
+			]td
+			[td 
+				"-8_64
+			]td
+			[td 
+				"-8.25
+			]td
+			[td 
+				"-2112 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bounced By Tire Speed
+			]td
+			[td 
+				"-5_0
+			]td
+			[td 
+				"-5.00
+			]td
+			[td 
+				"-1280
+			]td
+		]tr
+		[tr 
+			[td 
+				"Stomp Enemy Speed
+			]td
+			[td 
+				"-7_0
+			]td
+			[td 
+				"-7.00
+			]td
+			[td 
+				"-1792
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Gravity Accel. (Normal)
+				]b
+			]td
+			[td 
+				[b 
+					"+0_128
+				]b
+			]td
+			[td 
+				[b 
+					"+0.50
+				]b
+			]td
+			[td 
+				[b 
+					"+128
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Gravity Accel. (Floating)
+				]b
+			]td
+			[td 
+				[b 
+					"+0_80
+				]b
+			]td
+			[td 
+				[b 
+					"+0.31
+				]b
+			]td
+			[td 
+				[b 
+					"+80
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Terminal Fall Speed
+				]b
+			]td
+			[td 
+				[b 
+					"+7_255
+				]b
+			]td
+			[td 
+				[b 
+					"+8.00
+				]b
+			]td
+			[td 
+				[b 
+					"+2047
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"DK Swim Horizontal Speed
+			]td
+			[td 
+				"1_0
+			]td
+			[td 
+				"1.00
+			]td
+			[td 
+				"256
+			]td
+		]tr
+		[tr 
+			[td 
+				"DK Swim Down Speed
+			]td
+			[td 
+				"+1_69
+			]td
+			[td 
+				"+1.27
+			]td
+			[td 
+				"+325
+			]td
+		]tr
+		[tr 
+			[td 
+				"DK Water Jump Speed
+			]td
+			[td 
+				"-2_69
+			]td
+			[td 
+				"-2.27
+			]td
+			[td 
+				"-581
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Diddy Swim Horizontal Speed
+				]b
+			]td
+			[td 
+				[b 
+					"1_51
+				]b
+			]td
+			[td 
+				[b 
+					"1.20
+				]b
+			]td
+			[td 
+				[b 
+					"307
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Diddy Swim Down Speed
+				]b
+			]td
+			[td 
+				"+
+				[b 
+					"1_134
+				]b
+			]td
+			[td 
+				[b 
+					"+1.52
+				]b
+			]td
+			[td 
+				[b 
+					"+390
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Diddy Water Jump Speed
+				]b
+			]td
+			[td 
+				[b 
+					"-2_7
+				]b
+			]td
+			[td 
+				[b 
+					"-2.03
+				]b
+			]td
+			[td 
+				[b 
+					"-519
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Water Downwards Base Speed
+			]td
+			[td 
+				"+0_128
+			]td
+			[td 
+				"+0.50
+			]td
+			[td 
+				"+128
+			]td
+		]tr
+		[tr 
+			[td 
+				"Water Horizontal Accel.
+			]td
+			[td 
+				"0_16
+			]td
+			[td 
+				"0.06
+			]td
+			[td 
+				"16
+			]td
+		]tr
+		[tr 
+			[td 
+				"Water Vertical Accel.
+			]td
+			[td 
+				"0_32
+			]td
+			[td 
+				"0.12
+			]td
+			[td 
+				"32
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Enguarde Speed
+				]b
+			]td
+			[td 
+				[b 
+					"1_240
+				]b
+			]td
+			[td 
+				[b 
+					"1.94
+				]b
+			]td
+			[td 
+				[b 
+					"496
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Enguarde Stab Speed
+				]b
+			]td
+			[td 
+				[b 
+					"3_127
+				]b
+			]td
+			[td 
+				[b 
+					"3.50
+				]b
+			]td
+			[td 
+				[b 
+					"895
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Enguarde Accel.
+				]b
+			]td
+			[td 
+				[b 
+					"0_16
+				]b
+			]td
+			[td 
+				[b 
+					"0.06
+				]b
+			]td
+			[td 
+				[b 
+					"16
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rambi Ground Speed
+			]td
+			[td 
+				"2_148
+			]td
+			[td 
+				"2.58
+			]td
+			[td 
+				"660
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rambi Ground Accel.
+			]td
+			[td 
+				"0_96
+			]td
+			[td 
+				"0.38
+			]td
+			[td 
+				"96
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rambi Jump Speed
+			]td
+			[td 
+				"-6_38
+			]td
+			[td 
+				"-6.15
+			]td
+			[td 
+				"1574
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rambi Stomp Enemy
+			]td
+			[td 
+				"-4_0
+			]td
+			[td 
+				"-4.00
+			]td
+			[td 
+				"-1024
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rambi Buck Vertical Speed
+			]td
+			[td 
+				"-3_128
+			]td
+			[td 
+				"-3.50
+			]td
+			[td 
+				"-896
+			]td
+		]tr
+		[tr 
+			[td 
+				"Winky Ground Speed
+			]td
+			[td 
+				"2_128
+			]td
+			[td 
+				"2.50
+			]td
+			[td 
+				"640
+			]td
+		]tr
+		[tr 
+			[td 
+				"Winky Jump Speed
+			]td
+			[td 
+				"-7_128
+			]td
+			[td 
+				"-7.50
+			]td
+			[td 
+				"-1920
+			]td
+		]tr
+		[tr 
+			[td 
+				"Winky Bounce Speed
+			]td
+			[td 
+				"-8_0
+			]td
+			[td 
+				"-8.00
+			]td
+			[td 
+				"-2048
+			]td
+		]tr
+		[tr 
+			[td 
+				"Expresso Ground Speed
+			]td
+			[td 
+				"3_0
+			]td
+			[td 
+				"3.00
+			]td
+			[td 
+				"768
+			]td
+		]tr
+		[tr 
+			[td 
+				"Expresso Jump Speed
+			]td
+			[td 
+				"-6_128
+			]td
+			[td 
+				"-6.50
+			]td
+			[td 
+				"-1664
+			]td
+		]tr
+		[tr 
+			[td 
+				"Expresso First Flap
+			]td
+			[td 
+				"-3_227
+			]td
+			[td 
+				"-3.89
+			]td
+			[td 
+				"-995
+			]td
+		]tr
+		[tr 
+			[td 
+				"Expresso Subsequent Flap
+			]td
+			[td 
+				"-1_22
+			]td
+			[td 
+				"-1.09
+			]td
+			[td 
+				"-278
+			]td
+		]tr
+		[tr 
+			[td 
+				"Expresso Flying Gravity
+			]td
+			[td 
+				"+0_80
+			]td
+			[td 
+				"+0.31
+			]td
+			[td 
+				"+80
+			]td
+		]tr
+		[tr 
+			[td 
+				"Expresso Flying Terminal Fall
+			]td
+			[td 
+				"+1_233
+			]td
+			[td 
+				"+1.91
+			]td
+			[td 
+				"+489
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rope Climbing Speed
+			]td
+			[td 
+				"1_91
+			]td
+			[td 
+				"1.36
+			]td
+			[td 
+				"347
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rope Climbing Speed (B Held)
+			]td
+			[td 
+				"1_194
+			]td
+			[td 
+				"1.76
+			]td
+			[td 
+				"450
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rope Climb Accel.
+			]td
+			[td 
+				"0_64
+			]td
+			[td 
+				"0.25
+			]td
+			[td 
+				"64
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Rope Jump Horizontal Speed
+				]b
+			]td
+			[td 
+				[b 
+					"5_0
+				]b
+			]td
+			[td 
+				[b 
+					"5.00
+				]b
+			]td
+			[td 
+				[b 
+					"1280
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rope Jump Vertical Speed
+			]td
+			[td 
+				"-3_243
+			]td
+			[td 
+				"-3.95
+			]td
+			[td 
+				"-1011
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Mine Cart Carnage Base Speed
+				]b
+			]td
+			[td 
+				[b 
+					"3_0
+				]b
+			]td
+			[td 
+				[b 
+					"3.00
+				]b
+			]td
+			[td 
+				[b 
+					"768
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Mine Cart Madness Base Speed
+				]b
+			]td
+			[td 
+				[b 
+					"2_136
+				]b
+			]td
+			[td 
+				[b 
+					"2.53
+				]b
+			]td
+			[td 
+				[b 
+					"648
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"Steel Barrel Speed
+			]td
+			[td 
+				"4_0
+			]td
+			[td 
+				"4.00
+			]td
+			[td 
+				"1024
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=MemoryAddresses 
+	" Memory Addresses
+	$LF
+]h3
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Meaning
+			]th
+			[th 
+				"Comments
+			]th
+		]tr
+		[tr 
+			[td 
+				"0802
+			]td
+			[td 
+				"Status
+			]td
+			[td 
+				"2-byte HEX value denoting current state of the player, see "Status Table."
+			]td
+		]tr
+		[tr 
+			[td 
+				"0811
+			]td
+			[td 
+				"X Subspeed
+			]td
+			[td 
+				"Display as 2-byte to show subpixel only value.
+			]td
+		]tr
+		[tr 
+			[td 
+				"0812
+			]td
+			[td 
+				"X Speed
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"0813
+			]td
+			[td 
+				"X Subposition
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"0814
+			]td
+			[td 
+				"X Position
+			]td
+			[td 
+				"Display as 2-byte to show pixel only value.
+			]td
+		]tr
+		[tr 
+			[td 
+				"0815
+			]td
+			[td 
+				"X Superposition
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"0818
+			]td
+			[td 
+				"Gravity
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"081A
+			]td
+			[td 
+				"Y Subspeed
+			]td
+			[td 
+				"Display as 2-byte to show subpixel only value.
+			]td
+		]tr
+		[tr 
+			[td 
+				"081B
+			]td
+			[td 
+				"Y Speed
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"081C
+			]td
+			[td 
+				"Y Subposition
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"081D
+			]td
+			[td 
+				"Y Position
+			]td
+			[td 
+				"Display as 2-byte to show pixel only value.
+			]td
+		]tr
+		[tr 
+			[td 
+				"081E
+			]td
+			[td 
+				"Y Superposition
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"0825
+			]td
+			[td 
+				"Animation Timer
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"082E
+			]td
+			[td 
+				"Extend
+			]td
+			[td 
+				"The sixth bit (64) counts the extended roll "credit." Other bits seem to hold other information (for example, 5 = "inside barrel cannon").
+			]td
+		]tr
+		[tr 
+			[td 
+				"0832
+			]td
+			[td 
+				"Speed Lock
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"0836
+			]td
+			[td 
+				"Stamina
+			]td
+			[td 
+				"This value is inverted, 0 denotes full stamina and 10 is empty.
+			]td
+		]tr
+		[tr 
+			[td 
+				"0474
+			]td
+			[td 
+				"Camera Front
+			]td
+			[td 
+				"X position of the right side of screen.
+			]td
+		]tr
+		[tr 
+			[td 
+				"0300
+			]td
+			[td 
+				"RNG LSFR
+			]td
+			[td 
+				"3 bytes.
+			]td
+		]tr
+		[tr 
+			[td 
+				"031B
+			]td
+			[td 
+				"Bananas
+			]td
+			[td 
+				"When viewed as a HEX variable, displays the banana count in decimal.
+			]td
+		]tr
+		[tr 
+			[td 
+				"031C
+			]td
+			[td 
+				"Bananas Counting
+			]td
+			[td 
+				"This holds bananas as they move towards the counter. If this value is nonzero when hitting a level transition, it causes a "banana block."
+			]td
+		]tr
+		[tr 
+			[td 
+				"031D
+			]td
+			[td 
+				"Lives
+			]td
+			[td 
+				"When viewed as a HEX variable, displays the life count in decimal.
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=StatusTable 
+	" Status Table
+	$LF
+]h2
+[div class=p 
+	"The "status" of the game is stored in memory variable 0800 in 4 bytes. The first 2 bytes seem to store general information like whether we're in a level or on the overworld, while the second 2 bytes describe the status of the player. Below is a list of many relevant values of 0802 as 2-byte hex and what states they correspond to. There are other states relating to the overworld, the Kong Family, various menus and loading screens, and even Funky's Fishing and Crosshair Cranky, but these are less important so I didn't include them here.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Status
+			]th
+			[th 
+				"Meaning
+			]th
+		]tr
+		[tr 
+			[td 
+				"4956
+			]td
+			[td 
+				"Level Entry
+			]td
+		]tr
+		[tr 
+			[td 
+				"4AA8
+			]td
+			[td 
+				"Boss Entry
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"4AFF
+				]b
+			]td
+			[td 
+				[b 
+					"Standing/Walking/Running
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"4CFF
+				]b
+			]td
+			[td 
+				[b 
+					"Jumping
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"4D4D
+			]td
+			[td 
+				"Ducking
+			]td
+		]tr
+		[tr 
+			[td 
+				"4D94
+			]td
+			[td 
+				"DK Hand Slap
+			]td
+		]tr
+		[tr 
+			[td 
+				"4E0F
+			]td
+			[td 
+				"DK Hand Slap Late
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"4E29
+				]b
+			]td
+			[td 
+				[b 
+					"Rolling
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"4EF8
+				]b
+			]td
+			[td 
+				[b 
+					"Crawling
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"4F5F
+			]td
+			[td 
+				"Dead Roll
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"4FAB
+				]b
+			]td
+			[td 
+				[b 
+					"Swimming
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"5058
+			]td
+			[td 
+				"Rambi
+			]td
+		]tr
+		[tr 
+			[td 
+				"5183
+			]td
+			[td 
+				"Rambi Jumping
+			]td
+		]tr
+		[tr 
+			[td 
+				"521D
+			]td
+			[td 
+				"Expresso
+			]td
+		]tr
+		[tr 
+			[td 
+				"5325
+			]td
+			[td 
+				"Expresso Jumping
+			]td
+		]tr
+		[tr 
+			[td 
+				"536C
+			]td
+			[td 
+				"Expresso Flying
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"53DC
+				]b
+			]td
+			[td 
+				[b 
+					"Enguarde
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"54BF
+			]td
+			[td 
+				"Winky
+			]td
+		]tr
+		[tr 
+			[td 
+				"55C7
+			]td
+			[td 
+				"Winky Jumping
+			]td
+		]tr
+		[tr 
+			[td 
+				"564C
+			]td
+			[td 
+				"Dead (Damage)
+			]td
+		]tr
+		[tr 
+			[td 
+				"566D
+			]td
+			[td 
+				"Dead (Pit)
+			]td
+		]tr
+		[tr 
+			[td 
+				"5690
+			]td
+			[td 
+				"Dead
+			]td
+		]tr
+		[tr 
+			[td 
+				"56A8
+			]td
+			[td 
+				"Dead Late
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"56C3
+				]b
+			]td
+			[td 
+				[b 
+					"Spinning
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"5753
+			]td
+			[td 
+				"Krusha Knockback
+			]td
+		]tr
+		[tr 
+			[td 
+				"5765
+			]td
+			[td 
+				"Barrel Holding/Walking
+			]td
+		]tr
+		[tr 
+			[td 
+				"5863
+			]td
+			[td 
+				"Barrel Jumping
+			]td
+		]tr
+		[tr 
+			[td 
+				"58B7
+			]td
+			[td 
+				"Barrel Picking Up
+			]td
+		]tr
+		[tr 
+			[td 
+				"58EC
+			]td
+			[td 
+				"Barrel Throwing
+			]td
+		]tr
+		[tr 
+			[td 
+				"5953
+			]td
+			[td 
+				"Barrel Putting Down
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"59B0
+				]b
+			]td
+			[td 
+				[b 
+					"Rope Climbing
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"5BCC
+				]b
+			]td
+			[td 
+				[b 
+					"Barrel Cannon
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"5C02
+				]b
+			]td
+			[td 
+				[b 
+					"Rope Swinging
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"63E6
+				]b
+			]td
+			[td 
+				[b 
+					"Mine Cart Riding
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"64A6
+				]b
+			]td
+			[td 
+				[b 
+					"Mine Cart Jumping
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"6554
+			]td
+			[td 
+				"Steel Barrel Riding
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"670D
+				]b
+			]td
+			[td 
+				[b 
+					"Level Exit
+				]b
+			]td
+		]tr
+		[tr 
+			[td 
+				"6728
+			]td
+			[td 
+				"Victory/Defeat Fanfare
+			]td
+		]tr
+		[tr 
+			[td 
+				"6F10
+			]td
+			[td 
+				"Level Complete
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=Tech 
+	" Tech
+	$LF
+]h2
+[div class=p 
+	"Although this game may seem like a janky port to those unfamiliar, it actually has some pretty complicated movement mechanics. I discovered most of the following techniques myself while TASing. Many of these mechanics are useful for RTA running, and the rest are interesting for understanding how many puzzle pieces have to be put together to make the movement as fast and fluid as possible.
+	$LF
+]div
+[h4 id=CharacterDifferences 
+	" Character Differences
+	$LF
+]h4
+[div class=p 
+	"DK and Diddy are more balanced in this game than in the other two versions of it. They have the same running speed and initial rolling speed. DK has a bigger hitbox and can stomp Klump, Krusha and curled-up Army. He also has the hand slap attack and holds barrels over his head. Diddy is smaller, jumps slightly higher, and maintains slightly more speed during rolls. He holds barrels in front of him like a shield. For some reason DK also swims much slower than Diddy in all directions except up, where his water jump produces slightly more initial upwards speed. Diddy's advantages are small, but enough to make him the optimal choice throughout most of the run. However, DK has a few specific uses in the TAS, and RTA runners should not fear losing Diddy as much in this game because Donkey is generally not that bad.
+	$LF
+]div
+[h4 id=BasicRollingAndJumping 
+	" Basic Rolling and Jumping
+	$LF
+]h4
+[div class=p 
+	"Like all DKC games, the fastest way to travel in this game is rolling. Rolls in this game are incredibly overpowered - they are much faster than running or jumping, last a very long time, and the speed and duration are greatly increased when rolling through enemies. For this reason, the general strategy for this game is to spend as much time rolling as possible, and roll through as many enemies as possible. Since the duration of a roll is very long, it's usually best to land early and roll immediately. It's possible to roll through barrels in this game without releasing B as long as right (or left) is also held. However, there are many interesting nuances and limitations to rolling, which are covered in the next 8 sections.
+	$LF
+]div
+[div class=p 
+	"The other basic move is of course jumping. You can jump out of any roll even if you're in the air, and even casual players know that roll-jumping is the most effective way to achieve great mobility options while maintaining control. After jumping, your vertical speed immediately begins to increase at the rate of gravity each frame, giving you a simple parabolic jump arc. However, holding jump keeps gravity at a lower value, causing you to jump higher.
+	$LF
+]div
+[h4 id=SpeedLock 
+	" Speed Lock
+	$LF
+]h4
+[div class=p 
+	"Rolls normally decelerate every frame, but during the first few frames of the roll your speed does not change. The horizontal deceleration is 0_1 (1 subpixel) speed per frame, which is small but significant over the course of long rolls. Rolls also fall at the rate of gravity, but your vertical speed also does not change at the beginning of the roll. This is what allows you to "float" over gaps when you roll off a ledge. Rolling off flat platforms locks your vertical speed at 0_0, while rolling off slopes can cause the roll to slant donwards with a vertical speed of +0_64 or +0_128. Flat platforms can be slightly sloped or curved at the end, allowing slanted rolls, and either type of roll can be beneficial depending on the situation.
+	$LF
+]div
+[div class=p 
+	"Speed lock lasts for 15 frames for DK, and 20 frames for Diddy. Horizontally, this causes Diddy's roll to go about half a pixel further for a full, normal roll. However, the vertical effect means that Diddy can float longer after rolling off platforms, which means he can cross wider gaps, and spend more time rolling during roll-jumps.
+	$LF
+]div
+[h4 id=DeadRollsAndStamina 
+	" Dead Rolls and Stamina
+	$LF
+]h4
+[div class=p 
+	"If you let a roll expire on the ground without jumping out of it, this is called a "rollover." Sometimes when you rollover you can get a 10 frame penalty where you can't move or jump, this is called a "dead roll." Whether or not a dead roll occurs depends on a variable I call "stamina." You begin each level with full stamina, and when you rollover your stamina is depleted. Each frame spent walking or standing still recovers 1 stamina up to the maximum of 10, at which point it is fully recovered. If you rollover before recovering all 10 stamina you get a dead roll for 10 frames, and then your stamina is fully depleted again.
+	$LF
+]div
+[div class=p 
+	"On flat ground, it's slightly faster on average to connect rolls with 10 walking frames than with 1 frame jumps (which move faster but last about 27 frames). Stamina does not have to be recovered immediately nor sequentially. Therefore, many levels present the challenge of finding the best places to recover stamina between rollovers, since there may be a more advantageous location to take the walking frames instead of immediately after the rollover. Since stamina is reset between level and bonus transitions, it's not necessary to recover it before exiting.
+	$LF
+]div
+[h4 id=ExtendedRolls 
+	" Extended Rolls
+	$LF
+]h4
+[div class=p 
+	"Rolls normally last for 47 frames unless canceled (usually by jumping), but they can be extended. On the final frame of the roll, the game checks to see if one of the extend conditions is met, and if so then the roll continues into an extended roll until canceled or the next end frame, where the process is repeated. The most natural way to extend rolls is by hitting enemies - this gives you a speed boost of 0_144 per hit and the roll will be extended as long as B is held through the entire roll. For DK, extended rolls gain an extra 41 frames, while for Diddy extended rolls gain and extra 43 frames.
+	$LF
+]div
+[div class=p 
+	"Rolls can be extended multiple times, each adding another 41 or 43 frames. However, another enemy must be hit after each extended roll starts in order to get another extension. A roll that's extended into a double or triple roll gets named as such, after that I call it a "megaroll" and then a "gigaroll."
+	$LF
+]div
+[h4 id=BoxBoost 
+	" Box Boost
+	$LF
+]h4
+[div class=p 
+	"Throughout the game there is treasure hidden in the ground, both in visible item boxes which can be broken open by landing on them from a high place, and in hidden troves which can be unveiled this way and with DK's hand slap. If you roll onto hidden treasure from a high enough place you can break open the treasure, but instead of getting put into the "spinning" state as if you had jumped on it, you instead get a boosted and extended roll as if you had rolled through an enemy.
+	$LF
+]div
+[h4 id=ExtendedRollStorage 
+	" Extended Roll Storage
+	$LF
+]h4
+[div class=p 
+	"After rolling through an enemy or getting a box boost, you gain a "credit" telling the game to extend the roll at the next end frame if B remains held since the start of the roll. However, if you jump out of the roll, or release B and rollover, this credit is not reset and the extended roll can be stored and used later. You can only have up to one extended roll credit, hitting enemies when you already have one does not give extras, this applies both to normal and stored extended rolls.
+	$LF
+]div
+[h4 id=LedgeExtend 
+	" Ledge Extend
+	$LF
+]h4
+[div class=p 
+	"If you're in the air on the end frame of a roll, it gets extended automatically. I call this a "ledge extend" since it can often be abused to extend rolls by simply timing them to fall off a small ledge on the end frame. Although ledge extends do not require an extension credit, they will consume one if you have one.
+	$LF
+]div
+[h4 id=Reverse 
+	" Reverse
+	$LF
+]h4
+[div class=p 
+	"You can change the direction of a roll by simply pressing in the opposite direction. This can be useful for stalling or for simply changing directions when necessary. This also resets the speed of the roll to the starting speed, which is usually undesirable for boosted rolls, but long rolls which have been extended using storage or ledges will lose so much speed over time that it can be beneficial to sacrifice 1 frame of rolling backwards in order to reset the speed. Reversing does not affect speed lock or change the camera, but it does consume your extension credit if you have one. Therefore it's necessary to reverse after the end frame if you need the extension.
+	$LF
+]div
+[h4 id=CameraLock 
+	" Camera Lock
+	$LF
+]h4
+[div class=p 
+	"When starting a roll, the camera moves forward and locks in place, positioning you towards the back of the screen. However, "forward" is defined by whichever direction you're facing (or turning towards) before starting the roll. By pressing left for 1 frame before pressing right and B, you can lock the camera behind you, putting the Kong at the front of the screen. Since most entities spawn based on the camera's position and not the Kong's position, this can be used to manipulate entities to spawn later in any situation where it would be beneficial. For example, this can be used to stop Zingers or Mincers from getting in the way, or to prevent Kritters from jumping out of the way so you can roll through them. It can also be used to re-position ropes and moving platforms, sometimes making cycle skips possible. It can even be used to simply reduce lag frames. The one significant exception to this manipulation is Mini-Necky, for some reason he seems to shoot based on the player's position rather than the camera's. However, it seems to be barely possible to manipulate him with the camera in a couple critical locations.
+	$LF
+]div
+[div class=p 
+	"The first application I found for this tech was to delay the rope above the K in Forest Frenzy to allow jumping over the gap without waiting. I found a total of 3 RTA uses of this tech before I started working on the TAS. Originally I though this would be a niche mechanic with a few uses, I had no idea how overpowered it would turn out to be. At the cost of a small slowdown for 1 frame, you can manipulate spawns to create much more favorable routes. The TAS currently abuses camera locking over 80 times, up to 8 times in some levels.
+	$LF
+]div
+[h4 id=GravityGlitch 
+	" Gravity Glitch
+	$LF
+]h4
+[div class=p 
+	"During normal platforming, gravity can be one of two values: 128 or 80. This represents downwards acceleration per frame in subpixels while airborne. 128 is standard gravity, while low gravity occurs after pressing A to jump and while holding the initial A press during the jump, and also during the "spinning" state 56C3 after bouncing off enemies or being shot out of a barrel cannon. If A is released during the jump, it's not possible to regain low gravity by re-pressing A in midair.
+	$LF
+]div
+[div class=p 
+	"If you hold A through an entire jump, the gravity variable will not be properly reset to 128 and can get stuck at 80 after landing. You can then release A and it will persist while walking and through the next roll, causing this roll to be more floaty than usual. This can be useful for setting up rolls to cross extra wide gaps, or for connecting descending platforms with a single roll. Since it requires a maximum height jump to set up (and therefore spends lots of frames in the air and not on the ground rolling), it has a cost associated with it. However, in situations like jumping out of pits or waiting on moving platforms, this cost can reduced or negated.
+	$LF
+]div
+[div class=p 
+	"Gravity glitch does not only apply to rolls. It's possible to run off a platform with gravity glitch active and fall slower, although this isn't really useful at all. Normal jumps can also have their upwards starting speed increased by 48 = 128 - 80 if gravity glitch is active, indicating that jumps are essentially applying gravity on the first frame. Since the Kongs are automatically put into the "spinning" state with low gravity after bouncing enemies, holding jump does not affect how high they bounce, and it's not possible to get gravity glitch after landing from spinning even if A is held the entire time. Landing from spinning also sets your speed to 0. However, holding jump can cause Rambi and Winky to bounce higher off enemies. Interestingly, gravity glitch applies to mine carts as well, causing them to fall down off the tracks slower.
+	$LF
+]div
+[h4 id=SwitchGlitch 
+	" Switch Glitch
+	$LF
+]h4
+[div class=p 
+	"If you exit a level from standing, you can press select on the exact same frame that you touch the exit and switch Kongs during the fadeout. This saves the 31 frames of switching, although it can sometimes generate a few extra lag frames during the level exit. It's not possible to do it in water levels or at the end of bosses.
+	$LF
+]div
+[h4 id=KrushaRoll 
+	" Krusha Roll
+	$LF
+]h4
+[div class=p 
+	"When you go into an extended roll, your hit priority changes from your rolling hit priority to your jumping hit priority for some reason. For Diddy this is a pure nerf since it means he can't roll through Klump during extended rolls. For DK on the other hand it's a pure buff since it means he can now roll through curled-up Army, and strangely enough, green Krusha.
+	$LF
+]div
+[h4 id=KrushaKlip 
+	" Krusha Klip
+	$LF
+]h4
+[div class=p 
+	"When getting bounced off Krusha, you get put into the "Krusha knockback" state 5753 where you are invulnerable and follow a fixed backwards trajectory for 20 frames. By turning around before getting knocked back, the trajectory can be turned to the forward direction and you can clip through him during the invulnerability frames. The Krusha knockback state also occurs when getting bounced off Klump (as Diddy), curled-up Army, and bosses.
+	$LF
+]div
+[h4 id=BBuffer 
+	" B Buffer
+	$LF
+]h4
+[div class=p 
+	"If you press and hold B during the "spinning" state 56C3, you will roll the moment you touch the ground. The spinning state occurs after bouncing enemies or getting shot out of barrel cannons, hence the name "bounce buffer" or "barrel buffer." In the rare situation that you need to run after coming out of spinning, you have to press B before bouncing or entering the barrel cannon, and hold it until you land in order to not get a B buffer. You can also buffer rolls out of rollovers if you have full stamina.
+	$LF
+]div
+[h4 id=BananaBlock 
+	" Banana Block
+	$LF
+]h4
+[div class=p 
+	"After touching a level exit, the "level exit" state 670D usually only lasts for 1 frame, but if bananas are being collected and moving towards the counter, this state lasts until the bananas are counted which delays the level exit and loses time. There are a few situations where bananas are tactically positioned near exits, and it's faster to avoid them to prevent this from happening.
+	$LF
+]div
+[h4 id=EnguardeMechanics 
+	" Enguarde Mechanics
+	$LF
+]h4
+[div class=p 
+	"Enguarde is much faster than the Kongs in water levels, so he's pretty important to the run. He's the only animal buddy that appears in the TAS, and he's used in all 4 water levels. Repeated stabbing is the fastest way to travel horizontally, but there are some strange technicalities with this mechanic.
+	$LF
+]div
+[div class=p 
+	"The cooldown of the stab depends on the animation timer, but this timer is reset at the end of the stab rather than at the beginning. Since the animation timer typically goes through a 5-frame cycle with Enguarde, this means that the cooldown varies within a 5-frame interval, which turns out to be between 28 and 32 frames. Since the animation timer resets after the stab ends, that means that if the next stab is started immediately it will have a 32 frame cooldown, but it can be started any time within the next 5 frames and it will still end at the same time. Since 32 is not divisible by 5, this means the phase of the animation timer can be offset by stabbing, and it can also be offset by turning around. This can be useful to manipulate the animation timer during vertical sections to set up the next stab to have a short cooldown.
+	$LF
+]div
+[div class=p 
+	"Stabbing gives Enguarde an initial speed of 3_127, which decelerates by 0_16 each frame to his base speed of 1_240, which is maintained until the cooldown is reached, regardless of if left or right is pressed. However, if you press A or B to stab without having left or right pressed on the frame before, you can cause Enguarde to enter a state which I call "slow lock." During this state he decelerates to 1_207 instead, at which point he is free to move. If the next stab is initiated immediately after the cooldown ends he will remain in slow lock, which means that a long sequence of perfect stabs stuck in slow lock can lose a lot of distance. This is usually easy to fix by simply pressing left or right before starting a stab sequence, but if you stab immediately after spawning out of the box, you get slow locked for one cycle and must delay the next stab by at least 1 frame to break slow lock.
+	$LF
+]div
+[h4 id=NeckyRng 
+	" Necky RNG
+	$LF
+]h4
+[div class=p 
+	"Necky and Master Necky are the only instances of RNG in the entire game (not including Funky's Fishing and Crosshair Cranky, of course). The random number generator is stored at address 300 in 3 bytes as a linear shift feedback register (LSFR) which generates on every frame of the overworld. The RNG sits still during most levels which is great because it means that saving time anywhere does not disrupt the boss pattern. The exceptions are during the Necky bosses where it generates once each boss attack phase to choose a position, and during water levels where this memory address seems to be repurposed entirely. In these levels it ceases to be an LSFR and instead takes other values, but after exiting the level it resumes its function from whatever value it ended at. Changing the movement in water levels does seem to change this address, even if the level is completed in the same amount of time. Therefore, assuming perfect overworld movement, Necky's pattern is determined by Coral Capers, and Master Necky's pattern is determined by Poison Pond. Perfect overworld movement is actually easy to achieve RTA since you can hold directions to move and hold A to enter levels immediately.
+	$LF
+]div
+[div class=p 
+	"I realized afterwards that the victory fanfare might start sooner if you get a low position on the last phase. I got the high position on Necky's Nuts and the victory fanfare starts 20 frames after the last hit, but I got the low position in Necky's Revenge and the victory fanfare takes only 13 frames to start. If this is indeed the case, then some RNG manipulation could speed up this boss by a few frames, but while I was working on it I was under the impression that it made no difference so I just took whatever pattern I got.
+	$LF
+]div
+[h2 id=Levels 
+	" Levels
+	$LF
+]h2
+[h4 id=11JungleHijinxs 
+	" 1-1 Jungle Hijinxs
+	$LF
+]h4
+[div class=p 
+	"The first level of the game - although this level is pretty straightforward to beat, it actually turns into a pretty complex roll puzzle to optimize. I went back and improved this level several times after discovering new tech or noticing a new route. This level includes a variety of tech and is a good introduction to the type of movement seen throughout the rest of the run.
+	$LF
+]div
+[div class=p 
+	"The major routing decision in this level is to take the first DK barrel. My original route for this level skipped the DK barrel and played the first three levels with Donkey, but once I realized how slowly he swims I knew I had to have Diddy in front before Coral Capers. This DK Barrel turns out to be the fastest one to take of the 6 we pass in the first 3 levels. We need to keep DK in front here to roll through the Klumps, but we can conveniently switch glitch him out at the end of the level to save a few frames with Diddy in the next two levels.
+	$LF
+]div
+[h4 id=12RopeyRampage 
+	" 1-2 Ropey Rampage
+	$LF
+]h4
+[div class=p 
+	"In contrast to the first level, Ropey Rampage is a pretty straightforward level with an obvious route that's easy to optimize. Army is usually not a problem for Diddy to roll through because we can hit him before he curls up. We take the bonus in the middle of the level which warps us past a big portion of it. The bananas acquired on the way into the bonus cause us to get banana blocked for 28 frames which delays the fadeout, but this is unavoidable. Turning left after rolling off the ledge in the bonus saves 1 frame in this bonus only, for some reason.
+	$LF
+]div
+[h4 id=13ReptileRumble 
+	" 1-3 Reptile Rumble
+	$LF
+]h4
+[div class=p 
+	"This level kicks off a trend found throughout the cave levels in this game: they are some of the most complicated levels to TAS. The first factor contributing to this difficulty is the curvy platforms. These make it so that a small difference in position, sometimes even just a few subpixels, can cause you to land, fall off, or need to jump a frame earlier or later. This causes subsequent changes to position, causing the route to diverge, which means that a small change early in the level can require a long re-syncing process and can gain or lose several frames over the rest of the level.
+	$LF
+]div
+[div class=p 
+	"Another issue in cave levels is the crawlspaces, which can't really be skipped in this game. Crawlspaces have a barrier blocking rolling, if you would pass the barrier on the next frame then instead you don't move at all. Since roll speeds are typically over 2 px/f, this means you can be 2 or more pixels behind the barrier, and therefore 2 pixels behind the optimal position after jumping into the crawlspace. Since crawl speed is 1 px/f, this would lose 2 frames. To mitigate this we sometimes need to slow down a little to control our position without sacrificing time. Usually the best way to do this is to time stamina recovery walk frames, since we need to recover that stamina at some point anyways.
+	$LF
+]div
+[div class=p 
+	"The megaroll at the end is an RTA strat that's possible with both Kongs, the camera lock isn't necessary but it lets us hit the last Kritter. It's about a 2-3 frame window to hit the roll, it has to be done from the right side of the tire.
+	$LF
+]div
+[h4 id=14CoralCapers 
+	" 1-4 Coral Capers
+	$LF
+]h4
+[div class=p 
+	"The original route waited until this level to pick up DK, the reason being that this is the first floating DK barrel in the game, and taking a floating DK barrel avoids the animation of picking up and throwing it. However, DK swims so slow that he loses about a full second before reaching the barrel. This alone means that we pretty much need Diddy before entering this level. This combined with the discovery of switch glitch causes this route to save about 100 frames over the DK route.
+	$LF
+]div
+[div class=p 
+	"There isn't much going on in the rest of the level, once we grab Enguarde we just mob to the end, stabbing optimally and taking corners as tight as possible. In this game the fastest routes around the Croctopi are all the opposite directions of what they are in the other versions of the game.
+	$LF
+]div
+[h4 id=15BarrelCannonCanyon 
+	" 1-5 Barrel Cannon Canyon
+	$LF
+]h4
+[div class=p 
+	"Another relatively straightforward level, but I always slapped myself on the forehead when I found frames to save, which happened quite a lot. There's still even a saveable frame that I know of. After the first barrel cannon shortcut we need to run a few frames to the edge of the tree before rolling, so we need to hold B through the entire barrel cannon sequence in order to avoid getting a B buffer upon landing.
+	$LF
+]div
+[h4 id=1BVeryGnawtySLair 
+	" 1-B Very Gnawty's Lair
+	$LF
+]h4
+[div class=p 
+	"This is a pretty boring boss, just hit him on the first frame he becomes vulnerable. I messed around with some moonwalking here but kept the idle movement simple, saving the more interesting stuff for later.
+	$LF
+]div
+[div class=p 
+	"Gnawty has only one real tech: you can get a quick kill on him. Normally when you get the final hit he goes through his defeat animation of panting and falling over before the victory fanfare starts. However, if you get the last hit before he leaves the ground, the victory fanfare will start immediately. This can be done consistently RTA, it's a 5 frame window to hit, and it saves an additional 166 frames. Since we're just hitting him on the first possible frame in the TAS anyways, there's nothing special we have to do to optimize this.
+	$LF
+]div
+[h4 id=21WinkySWalkway 
+	" 2-1 Winky's Walkway
+	$LF
+]h4
+[div class=p 
+	"This level was lengthened in the GBC version, and I personally like the extra gameplay. This level has many short and sloped platforms at various heights, requiring precise rolls and jumps to connect them. No rolls are greater than doubles here, but there is some usage of extended roll storage. This level went through several iterations of optimization and it feels to me like the first level that truly "looks like a TAS."
+	$LF
+]div
+[h4 id=22MineCartMadness 
+	" 2-2 Mine Cart Madness
+	$LF
+]h4
+[div class=p 
+	"The way to go fast in this level is to jump up the uphills and off the downhills. Uphills slow you down and downhills speed you up. Jumping preserves your current speed, but unfortunately landing resets your speed, which means you can't bunnyhop to keep speed.
+	$LF
+]div
+[div class=p 
+	"This level only went through a couple optimization passes, and was one of the first levels I finished. I found out later that gravity glitch actually applies to the mine cart and I was inadvertently already using it, but I could probably save a few more frames by paying closer attention to the effect it has in certain spots.
+	$LF
+]div
+[div class=p 
+	"This level is pretty much my only opportunity to collect the KONG letters without losing time, so we get them here to show off the KONG sequence. The K and O are in the way of the optimal path, and the N and G can be collected or skipped for free. This level is also the only chance to hear the entire loop of the Mine Cart Madness song, which actually appears in 5 levels in this game since it replaces Misty Menace. I think it's pretty funny that the level has been optimized exactly to the point where the cadence gets cut off at the final note.
+	$LF
+]div
+[h4 id=23BouncyBonanza 
+	" 2-3 Bouncy Bonanza
+	$LF
+]h4
+[div class=p 
+	"The second cave level in the game, this one is no simpler than Reptile Rumble. This level has many curved platforms and any changes to the movement usually require redoing the rest of the level, possibly gaining or losing some frames. There are a lot of rollovers in this level, and we have to properly set our X pixel to jump optimally through the crawlspaces. We actually take the top route in this game since the crawlspace is shorter and there are Kritters to roll through. There is a sneaky stamina recovery right before jumping onto the pushable tire to go up there. We use gravity glitch on the last gap to spend slightly more time rolling in order to clear it 1 frame faster than without. Gravity glitch makes this jump considerably easier RTA.
+	$LF
+]div
+[div class=p 
+	"We manage to roll through every single Kritter in this level. All the Kritters are red except the turquoise one at the beginning and the green one after Winky.
+	$LF
+]div
+[h4 id=24StopGoStation 
+	" 2-4 Stop & Go Station
+	$LF
+]h4
+[div class=p 
+	"The only level that's skippable in all three versions of the game, this level is just as short and uneventful as its counterparts. We only need to press left for a single frame at the beginning to enter the warp. In this game we can't roll through the Rock Krocs, so it's actually optimal to jump up high to touch the stop barrel near the end to prevent having to jump over them later. I originally hit the second to last stop barrel instead of the last one, but found a new route using the last one instead which is 5 frames faster.
+	$LF
+]div
+[h4 id=25MillstoneMayhem 
+	" 2-5 Millstone Mayhem
+	$LF
+]h4
+[div class=p 
+	"This level is an interesting and technical roll puzzle, we need to find the best ways to chain together rolls and maintain speed through extensions. There is a complex stamina recovery route, plus multiple uses of other roll tech to go as fast as possible. In this game it's possible to bounce through the Millstones but not to roll through them, however this ends up not being used in the TAS. Some of the camera locks are used to set up the Millstones' positions so we can jump lower over them and spend less time in the air, but one is used to position the moving platform, and another before the lag pit mostly just for lag reduction.
+	$LF
+]div
+[h4 id=2BNeckySNuts 
+	" 2-B Necky's Nuts
+	$LF
+]h4
+[div class=p 
+	"I had to TAS this boss twice since his pattern changed after I optimized Coral Capers, but it's a pretty short and straightforward boss. To go fast, all we have to do is hit him on the first frame he becomes vulnerable. For idle movement, this level is the first demonstration of what I call "infinite rolling," where we repeatedly make ourselves airborne on the end frame of each roll using the tire in order to ledge extend over and over again. Again, the idle movement here was meant to just be one flavor, I didn't want to go crazy and do everything when we're still at a pretty early point in the run.
+	$LF
+]div
+[div class=p 
+	"There may be frames to save here by getting a different pattern by manipulating the RNG address in Coral Capers. I'm not sure if the first 4 phases matter but it seems that getting a low position on the last phase might save a few frames. I got kind of an ugly pattern here, he appears in the same spot on 4 out of 5 phases, but I dealt with it.
+	$LF
+]div
+[h4 id=31VultureCulture 
+	" 3-1 Vulture Culture
+	$LF
+]h4
+[div class=p 
+	"Another straightforward level, the main timesave here was realizing that instead of jumping clear over the Mini-Neckys that we should instead jump over the nut and roll through them. Even though we sometimes have to release right and slow down a bit, the boosted rolls are so much faster that they save time, about 54 frames across the level. Camera locking is used only once at the beginning to put a Necky further away, which allows us to cover more distance after bouncing on him, keeping the barrel cannon speed for longer. Every barrel cannon except one is fired immediately or as soon as it's pointed in the right direction. Gravity glitch is used to get the roll to connect to the O platform without having to jump out of it, preserving this boosted roll for longer.
+	$LF
+]div
+[h4 id=32TreeTopTown 
+	" 3-2 Tree Top Town
+	$LF
+]h4
+[div class=p 
+	"The second barrel cannon level, this one is all about launching from the barrel cannons as early as possible. At the very beginning of the level we rollover, recover 3 stamina, and don't recover the rest until after the star barrel. We stall the roll under the K for 2 frames in order to ledge extend it. There is a brief camera lock right before the second bonus barrel which allows us to shoot the barrel cannon immediately instead of having to wait for the cycle. Near the end, there is a long camera locked roll through three Kritters which begins by using a stored extension. It would be faster to reverse to reset the speed before hitting the first Kritter, but this generates a lot of extra lag for some reason which ends up losing more frames than it saves.
+	$LF
+]div
+[h4 id=33ForestFrenzy 
+	" 3-3 Forest Frenzy
+	$LF
+]h4
+[div class=p 
+	"This level went from being a boring autoscroller to a really fun dance level, where the movement is synced to the music. Unfortunately the tempo is at an awful ratio to the framerate, it's approximately 33.625 frames per beat or about 107 beats per minute, which means the beats have to be rounded in a certain way. Fortunately some of the movement works well with this tempo, for example switching sides on the rope takes only 31 frames. The funny climbing moves are done by alternating up and down every frame to "smooth slide," or alternating up or down with neutral every frame or two frames to "twitch slide."
+	$LF
+]div
+[div class=p 
+	"It turns out there were a lot of ways to cut autoscrolling sections and save time here. This level has the most time save of any level in the TAS, at over 4.5 seconds. There are several camera manipulations used to skip or shorten autoscrolling sections. The camera lock used to delay the rope by the K and jump straight over the pit is the first application of camera locking I ever discovered, it's an RTA strat I call "The K Roll." At the double rope section with the Zinger, we can jump off the first rope to push the camera forward to spawn in the second rope early, saving about 48 frames. After jumping off vertical ropes (not swinging ropes), your speed is set to 5_0 and decreases at the normal rate of air acceleration (0_64 per frame), regardless of what direction is held. This means you can hold the opposite direction for up to 12 frames to change the camera without losing speed. This, as well as gravity glitch, is used after the O to position the Kritters so we can roll straight through them.
+	$LF
+]div
+[div class=p 
+	"Finally, the skip at the end to bounce off the Neckys and go straight to the end without entering the bonus barrel is the biggest "TAS strat" time save in the entire run. The bonus would be fast if it weren't for the fact that it's a "find the item" game where you have to wait for the item to stop and then go through the defeat animation. Although this skip is pretty easy in the other versions of the game, the Neckys are positioned poorly in this version and simply holding right does not work, the final Necky just spawns too late and is too slow to catch. In order to make this skip possible I had to find the exact camera positions where each Necky spawns, then turn left to turn the camera around at precise positions to delay the spawns of specific ones to create a bounce chain. I spent an entire day trying to find this and almost gave up, thinking it was impossible, until I finally managed to reach that last bird and make it to the end. In total this saves about 221 frames over taking the bonus, more than 3.5 seconds.
+	$LF
+]div
+[h4 id=34TempleTempest 
+	" 3-4 Temple Tempest
+	$LF
+]h4
+[div class=p 
+	"This level has a lot of long platforms and several opportunities to get long extended rolls. We get our first true gigaroll here, starting with the box boost through the N and completing all 5 cycles. There are also a few extremely precise tricks: The roll over the pit with the Zinger in it is precise to 209 subpixels (about 0.8 pixels), and being able to jump up to the platform before the giga without bouncing on the tire requires rolling a certain distance over it without losing too much height, which feels random whether the game gives it to you or not. We again route our stamina recovery frames to line ourselves up to the correct positions for both of these maneuvers.
+	$LF
+]div
+[h4 id=35OrangUtanGang 
+	" 3-5 Orang-utan Gang
+	$LF
+]h4
+[div class=p 
+	"What started as an Expresso level turned into one of the craziest camera locking levels in the TAS, using camera locks to hit every single rollable enemy in the level. This level holds the record for most camera locks, tied with Blackout Basement at 8. Due to the camera techniques, the steel barrel route in this level is just barely slower than without. The Expresso route is about 33 frames slower, assuming you damage boost off the Kritter and into the giga, which is an RTA strat. If you get a fresh B press after landing and run into him while holding B, the roll buffers after taking damage.
+	$LF
+]div
+[h4 id=36ClamCity 
+	" 3-6 Clam City
+	$LF
+]h4
+[div class=p 
+	""Cycle City" is all about routing around the Clambo bullets without slowing down. It's the shortest water level in the game, it looks cool but it's not very complicated. The turning back and forth is not a camera manipulation, but instead done to manipulate the animation timer to reduce the cooldown of the first stab, which saves a couple frames throughout the level.
+	$LF
+]div
+[h4 id=3BBumbleBRumble 
+	" 3-B Bumble B Rumble
+	$LF
+]h4
+[div class=p 
+	"Not much to optimize here, just hit the boss on the first frame she becomes vulnerable. In this level we have the barrel to play with, so I decided to design the movement around "twitching" back and forth by alternating left and right on every frame. For the first two phases, we set the barrel up like a bomb in the location where the boss will be, then roll into it and pick it up in one frame to hit her. In the third phase we hold the barrel and run around twitching with it, and in the final phase we assault the bee with the barrel over and over until the final hit. I was stuck for a while on what to do with this boss, but I think I came up with something entertaining in the end.
+	$LF
+]div
+[h4 id=41SnowBarrelBlast 
+	" 4-1 Snow Barrel Blast
+	$LF
+]h4
+[div class=p 
+	"Welcome to the first level with ice physics! In these levels ground acceleration/deceleration is reduced from 0_128 to 0_16, but this only applies to walking, not while rolling or in the air. This means you slow down much less after rollovers and so it is much faster to walk for 10 frames immediately after rolling instead of jumping out of rolls or recovering stamina later. This level also has a fair bit of lag, and so camera locks are used in several places before entering barrel cannons just to reduce lag.
+	$LF
+]div
+[h4 id=42SlipslideRide 
+	" 4-2 Slipslide Ride
+	$LF
+]h4
+[div class=p 
+	"The only level in the game with its own unique song is unfortunately also the only other level in the game with a warp barrel, so we don't get to hear much of this great tune. You can check out a Donkey Kong Land run if you want to hear it. After exiting the warp barrel, we see that ice physics also apply while running in the air. Jumping off ropes gives 5_0 speed which is quite a lot. It's possible to turn around for up to 12 frames after jumping off the ropes without losing speed. This can be used to manipulate the camera, but here it's only done for swag. At the end, jumping off the rope is slightly faster than rolling under.
+	$LF
+]div
+[h4 id=43IceAgeAlley 
+	" 4-3 Ice Age Alley
+	$LF
+]h4
+[div class=p 
+	"This level got many revisions and improvements, it's quite a complicated level to route based on the curvy platforms of varying heights, tricky enemy positions, and of course ice physics. It is completely impossible to take Expresso across the gap with 2 swinging ropes so he's totally useless here, but that's fine because rolling is faster anyways. Once again this level contains lots of sliding stamina recovery and many camera locks, including one of only two situations in the game where camera locking is effective against Mini-Necky. The Mini-Necky right before the star barrel seems to be only (barely) possible to hit if we approach him with a camera locked roll. I'm aware that it's possible to save about 6 more frames by hitting the Klaptrap with an uppercut instead of jumping up and landing on him.
+	$LF
+]div
+[h4 id=44CroctopusChase 
+	" 4-4 Croctopus Chase
+	$LF
+]h4
+[div class=p 
+	"This boring underwater autoscroller is not any more interesting in this game, although I tried to keep the movement fresh by bouncing to the music and twiddling during the vertical sections. Version 1 of the TAS did not include Enguarde because I was not able to save time with him during RTA testing, but after testing him with TAS tools and finding out he saved about 140 frames I started working on Version 2. Fortunately we still have another water level before the next RNG boss, so changing the RNG seed in this level did not mess up the Master Necky pattern because Poison Pond put it back.
+	$LF
+]div
+[h4 id=45TorchlightTrouble 
+	" 4-5 Torchlight Trouble
+	$LF
+]h4
+[div class=p 
+	"This is the shortest and least complicated cave level, but it's still a challenge to optimize. Squawks does not create any lag that I know of, so he's not specifically avoided for any reason besides that bouncing off the box to unlock him is slow. There aren't many enemies to roll, but there aren't any long rolling sections either since platforms are covered by oil drums, Krushas and Mincers. We get an extended roll after hitting the third Klump but don't have anywhere to spend it until after the N. Near the end of the level there is a Krusha blocking the way but we can precisely set up a Krusha klip to pass through the Mincer during I-frames and roll off the ledge in a 1-frame, 1-pixel window. This saves us from having to switch to DK in this level.
+	$LF
+]div
+[h4 id=46RopeBridgeRumble 
+	" 4-6 Rope Bridge Rumble
+	$LF
+]h4
+[div class=p 
+	"The first bonus here saves about 33 frames, while the second bonus is about a second slower than doing the section normally and waiting on the tires. However, by doing a long camera locked roll we can reach the final tire and bounce across without waiting, saving at least another second. The first part of this level is just chaining rolls together, and even though the platforms are curved there is generally only one path so there aren't too many candidates for the optimal route. In the second part of the level we zig-zag around the tires to reach and bounce off them optimally. Note that in this game you can't roll off tires (only off the edges of platforms which tires are placed on), and that your Y-speed will continue to increase while on top of them as if you were falling. This is why you suddenly fall like a rock when you roll over them.
+	$LF
+]div
+[div class=p 
+	"After the set of 4 bananas near the beginning, we don't collect any more bananas until the end. We jump over the last banana in order to set up switch glitch and also avoid getting banana blocked, the final banana picked up gets collected just in time.
+	$LF
+]div
+[h4 id=4BReallyGnawtyRampage 
+	" 4-B Really Gnawty Rampage
+	$LF
+]h4
+[div class=p 
+	"We can take damage during the last phase of the boss to skip his attack cycle and have him immediately become vulnerable again. In the first version of this TAS I almost skipped taking the damage boost here because switching to Donkey, getting hit, and collecting another DK barrel lost almost all the time that the damage boost saved. However, I found that you don't need to wait for him to start jumping, you can take damage immediately after scoring the fourth hit. This combined with the discovery of switch glitch caused the damage route to save around 140 frames. We spend the short duration of the fight monkeying around with DK but don't worry, he'll be back for more.
+	$LF
+]div
+[h4 id=51OilDrumAlley 
+	" 5-1 Oil Drum Alley
+	$LF
+]h4
+[div class=p 
+	"This is one of the most technical levels in the TAS. This level holds the record for most enemies hit by rolls at 25, tied with Misty Mine, although the tie is broken by the 3 box boosts taken here. We grab gravity glitch at the start to score a long extended roll through the first four Kritters. The twiddle off the first rope is just swag, but the second twiddle while jumping under the K is a camera manipulation to stall Gnawty so we can roll through him. Although Rambi runs slightly faster on average than the Kongs can roll, we're able to use camera tricks to plow through the Mankys which causes Diddy to be about 138 frames faster in this level. In one section we use 4 camera locks plus a turned-around jump in a row.
+	$LF
+]div
+[h4 id=52TrickTrackTrek 
+	" 5-2 Trick Track Trek
+	$LF
+]h4
+[div class=p 
+	"The longest and most boring level in the game becomes our second chance to mess with idle movement, this time we have a small, slow moving platform to play with. The first half of the level is spent dancing with movement synced to the music. The music is exactly 64 frames per beat, or 56.25 BPM. The big roll to the midway platform is position-and-frame perfect and took a few hours to find, there is an invisible wall blocking us to the right and gravity glitch plus a sloped roll is required to reach an exact position. However, it's possible to wait a little longer for the platform to go further right and under the invisible wall, to a position where the strat is RTA viable. The second half of the level is spent monkeying around with infinite rolls and other "twitchy TAS movement." I generally try to avoid as many sound effects as possible so that the music can be heard in all its 8-bit glory, since sound effects use up one of the audio channels which cancels the long bass note, but I get a little more relaxed with it in the second half in the interest of fun movement. I made sure to show off Diddy's ducking and idle animations near the end. Turning around at the exit not only looks funny, but also saves 1 lag frame.
+	$LF
+]div
+[h4 id=53ElevatorAntics 
+	" 5-3 Elevator Antics
+	$LF
+]h4
+[div class=p 
+	"This is a very fast paced and technical cave level with many tricks on display including some camera locks and gravity glitches. Bouncing on Slippas under crawlspaces allows us to travel further at air speed. It's necessary to hit Klump with fresh rolls as Diddy, otherwise he will bounce you off if you hit him during an extended roll (it's the reverse scenario which makes Krusha rolls possible with DK). During the big zig-zag elevator sequence, we time when we turn to look at the third elevator shaft so that the platform is in place to catch us as soon as possible so we can roll earlier.
+	$LF
+]div
+[h4 id=54PoisonPond 
+	" 5-4 Poison Pond
+	$LF
+]h4
+[div class=p 
+	"The final Enguarde level consists of mostly just straight sections dodging Mincers, the reason I had so much time save on this level is because when I first TASed it I got tired of writing Enguarde movement and decided to just play out the rest RTA. You can see this happen in Version 0, my movement goes from perfect and robotic to sloppy and human halfway through the level. Furthermore, after finishing TASing it properly I had gotten "slow locked" during a long stab sequence which lost quite a bit of time.
+	$LF
+]div
+[div class=p 
+	"There is a slightly laggy section in the middle of the level but otherwise no lag frames. To keep the movement interesting here I played Funky's Fishing and tried to hit every fish I could which didn't lose time, I got a grand total of 19!
+	$LF
+]div
+[h4 id=55MineCartMadness 
+	" 5-5 Mine Cart Madness
+	$LF
+]h4
+[div class=p 
+	"Unlike in the first mine cart level where the fastest route requires jumping to preserve speed, the fastest way to travel in this level is to jump as little as possible. When jumps are requires, the optimal times to press and hold A seem to vary in a nonlinear fashion with no discernible pattern. I found jump timings through some trial and error, just trying numerous options and picking the one that gave the most distance. Although you can't affect your position in the air, holding left or right will change your X speed value. This speed carries over for one frame when entering the cart, so it's important to hold right to get speed before landing in the cart. Gravity glitch in the mine cart is possible here again, and it's used once at the beginning. It's important to jump over the last two bananas before entering the bonus in order to not get banana blocked. The rolls off the tire platforms are only possible by landing on the edge, you need to press B before stepping on the tire, and they allow you to roll into Krash which saves even more time. This trick was one of the original inspirations for making this TAS in the first place.
+	$LF
+]div
+[h4 id=56BlackoutBasement 
+	" 5-6 Blackout Basement
+	$LF
+]h4
+[div class=p 
+	"This level has lots of long empty platforms, it holds the record for most rollovers at 19. It also has the tied record for most camera locks with Orang-utan Gang, at 8. It's important to get extended rolls to travel as far as possible, which usually means getting right up close to the enemies before rolling. We use a camera lock to position the first Kritter slightly further back, making this roll through him go just far enough to reach the second Kritter, extending and boosting it again. After the Enguarde token, gravity glitch is used to get the roll to reach the tire platform. The next triple roll must be positioned perfectly so that we reach the first end frame immediately before hitting the last Kritter, allowing us to get the extension into the third roll. Through all the small platform sections and moving platform sections there are different possible routes and it took some trial and error to find the fastest route. Entering the bonus to get and ride the steel barrel is almost the same speed, only about 8 frames slower if you exit the level normally, but more time is lost setting up switch glitch since the Klaptrap will be in a less favorable position.
+	$LF
+]div
+[h4 id=5BBossDumbDrum 
+	" 5-B Boss Dumb Drum
+	$LF
+]h4
+[div class=p 
+	"We have another chance to mess around with Donkey here, the movement is focused on slow walking/running by alternating left or right and neutral each frame to control speed, as well as moonwalking, all while dodging the boss's attacks. DK only saves about 56 frames here, which is enough to make him worth it since we can switch glitch him in at the end of the previous level. All we have to do to optimize this level is stomp the second enemy in each phase on the first frame when it spawns. After we stomp the first enemy and are in the "spinning" state we can collide with the second enemy anywhere and it will get stomped, we don't need to be on top of it. We can't use switch glitch to get rid of DK yet, but it's okay because we'll be using him later.
+	$LF
+]div
+[h4 id=61TankedUpTrouble 
+	" 6-1 Tanked Up Trouble
+	$LF
+]h4
+[div class=p 
+	"This was basically the last level I worked on before releasing Version 1. This level was a nightmare to TAS because it's extremely laggy, I have to make fun idle movement while also avoiding lag which is all trial and error. Lag frames are hard to control and small differences can cause them to change. My "no optimization" run of this level had 70 lag frames which got reduced to 11 and I'm very happy with how it turned out. After finishing the level, saving time anywhere in the first 5 worlds could desync the lag frames and mess up all my progress, meaning I either had to just sacrifice some lag frames (which can snowball into a lot) or redo most of the level. Therefore, while working on Version 2 my process became: save frames somewhere, check if this level synced, and if it didn't then go back and look for more time save. Fortunately I managed to get it to re-sync eventually, which is when I decided to move on to World 6 and wrap up Version 2.
+	$LF
+]div
+[div class=p 
+	"There is a camera manipulation before the midway platform, we roll forward to spawn in the Kritter early so that he will move out of the way, allowing us to land next to him and roll through him. The only other real routing here is staying away from laggy areas to reduce lag as much as possible.
+	$LF
+]div
+[div class=p 
+	"DK loses about 11 frames here since he has to wait longer before jumping off the platforms, but we're going to need him in Manic Mincers, so we keep him through this level and don't swap him out at the end. It's nice that he gets some screen time during an autoscroller to show off his moves. In contrast to Trick Track Trek, I tried to hit every enemy, oil tank and banana here. A couple oil tanks have to be skipped in the interest of saving lag frames, though. For some reason DK's minimum ducking time is only 17 frames compared to Diddy's 22, so he can duck dance faster. I made sure to include a lot of DK hand slaps as well, and show off his ducking and idle animations at the end.
+	$LF
+]div
+[h4 id=62ManicMincers 
+	" 6-2 Manic Mincers
+	$LF
+]h4
+[div class=p 
+	"There were several route options to compare and choose between in this level. First we have to decide at the beginning of the level whether to use DK, Diddy or Rambi. The Rambi option is the slowest by around 2 seconds. We can get Diddy for free by using switch glitch in the previous level. However DK turns out to be fastest at the beginning of this level since we can exploit the Krusha roll glitch to plow through the Krushas by hitting them during extended rolls. During the long empty section under the star barrel we keep a stored extended roll which we space perfectly so that it extends right before hitting the next Krusha. We also reverse the roll for one frame after it extends to reset the speed, and ledge extend it again before reaching the pit.
+	$LF
+]div
+[div class=p 
+	"The next routing decision comes at the moving platform after the N. Rambi can take a damage boost to bypass the second Mincer, but this isn't enough to make up for the time he loses earlier. DK cannot roll under the Mincer, so our options are to either damage boost through, switch to Diddy, or wait it out. Damage boosting is fastest by about 13 frames but this time is lost when we eventually reach Necky and are forced to pick up a DK barrel, losing about 40 frames to unlocking our buddy (buddy unlocks usually take 31 frames, but it seems to take longer here for some reason). The next fastest option is switching to Diddy and doing the skip, this saves about 3 frames over keeping DK and waiting. That makes this the only place in the run where we switch Kongs without using switch glitch. DK still saves enough time in the beginning of the level to make up for the switching time here. At the end of the level we get a hexakill through the Gnawtys, making this the fastest boosted roll in the run, achieving 5_205 speed after the last hit.
+	$LF
+]div
+[h4 id=63MistyMine 
+	" 6-3 Misty Mine
+	$LF
+]h4
+[div class=p 
+	"This level is basically hitting lots of enemies and extending lots of rolls, the route is pretty straightforward overall. The first rope can be skipped by bouncing off the Gnawty, it's fastest to hit him with an uppercut. The bonus saves about 2 seconds. This level has a unique tech which I call the "dead roll bounce" where a roll ends on a tire which is able to cancel the dead roll frames in some way. I haven't figured out exactly how it works though, it just seems to work here. Camera locking at the end causes the first Slippa to spawn twice so we get a pentakill for a lot of speed.
+	$LF
+]div
+[h4 id=64NeckyNutmare 
+	" 6-4 Necky Nutmare
+	$LF
+]h4
+[div class=p 
+	"The Gameboy Color's unique level! This level is a mix of different entities and obstacles, as well as an interesting mix of tech. There is a unique tech which I call the "barrel crawl," by picking up the barrel and entering the crawlspace we can delay crawl speed and also block the bullet from the Mini-Necky. The barrel is automatically thrown when we enter, but we still get to travel further through the crawlspace at running speed. This turns out to save exactly 0 frames due to the time taken picking up the barrel, but I think it looks cooler than doing it normally. By camera locking through the next gap and optimizing our position entering the crawl space we're barely able to get through and have exactly 1 frame to jump over the nut, saving 40 frames. This is the only other place in the run where camera locking works against Mini-Necky. Unfortunately, we can't do it through the next crawlspace because the Mini-Necky is positioned higher up. It's slightly faster to go up top over the N than to take the barrel cannons below the map. At the end, it's slightly faster to use gravity glitch to roll under the Neckys instead of bouncing off them.
+	$LF
+]div
+[h4 id=65LoopyLights 
+	" 6-5 Loopy Lights
+	$LF
+]h4
+[div class=p 
+	"The Klaptraps in this level react to A presses, not jumps. This means you can press A while still in the air to make them jump. Therefore the routing in this level is mostly about deciding whether to go over each Klaptrap, or to jump in front of them and press A before landing to make them jump again and then roll under. You can also use pause buffering to jump without the Klaptrap jumping, but this means not moving for 2 frames which is slower. We make sure to roll under the Klaptrap at the end, since there is a banana above him which would banana block us.
+	$LF
+]div
+[h4 id=66PlatformPerils 
+	" 6-6 Platform Perils
+	$LF
+]h4
+[div class=p 
+	"We save the best for last! This level is an absolute gauntlet of tech, including multiple uses of nearly every main trick in the game. This level holds the record for most gravity glitches at 6 (excluding autoscrollers), for connecting rolls between platforms and crossing gaps. After hitting the second Army we actually release B to rollover in order to fall down to the moving platform and prepare to roll off it. On many of the moving platforms it's faster to run for a few frames instead of rolling immediately. It was hard to find the best places to roll and it's probably possible to find more frames here. We can Krusha klip through all 3 Krushas to avoid having to pick up any barrels, this is also faster than doing the "suicide jump" over the first one. The area around the second Krusha is quite laggy so we turn around and look away from the lag in order to reduce it. We need to stall for a moment at the end to refresh our roll in order to not get bounced back by the Klump.
+	$LF
+]div
+[h4 id=6BNeckySRevenge 
+	" 6-B Necky's Revenge
+	$LF
+]h4
+[div class=p 
+	"In this boss we combine different idle movements used throughout the other boss stages to create fun movement, including slow running, moonwalking, twitching and infinite rolling. Optimizing him is pretty straightforward, just hit him on the first frame he becomes vulnerable. As mentioned before, I didn't know if the pattern mattered so I just took what I got, but at least we got the low position on the final phase this time.
+	$LF
+]div
+[h4 id=7BGangPlankGalleon 
+	" 7-B Gang-Plank Galleon
+	$LF
+]h4
+[div class=p 
+	"This boss actually has some nontrivial optimizations. During the first and third cannonball phases there would be another cannonball firing at the end if you go to the far end of the stage away from K. Rool, but by going towards him we prevent this cannonball from spawning which causes him to throw his crown earlier and end the cycle faster. This doesn't seem to work during the second phase if you try to run away from him. After the fake victory fanfare, the camera has to scroll over to a specific location before the kredits start, but by turning at an exact moment after getting the seventh hit we can position the camera to be in the correct location, starting the kredits immediately. Finally at the end we use dead roll tech to release input earlier and save TAS frames! Dead rolls don't cancel speed, you continue moving once it ends, so we can first burn our stamina, then precisely position a roll and release inputs to coast into a dead roll and then skid into K. Rool, taking damage and allowing DK to score the last hit. He even punches him in the face before he goes down. Good job Donkey! The Cranky cutscene and real credits scroll automatically with no inputs so the TAS is legitimately finished after this roll.
+	$LF
+]div
+[h2 id=LevelDataTable 
+	" Level Data Table
+	$LF
+]h2
+[div class=p 
+	"I collected some info about what the TAS does in each level, which I find interesting. Only frames and framesave are counted for boss levels, other stats aren't tracked.
+	$LF
+]div
+[ul 
+	[li 
+		"Frames (seconds): The time spent in each level, assuming a framerate of 59.7275 Hz. This is measured in IL timing, from the A press to enter the level to the frame when the exit is touched or victory fanfare starts (for bosses), so overworld movement is not counted here.
+		$LF
+	]li
+	[li 
+		"Framesave Since v.0: The amount of frames saved since the first ever completed version of the TAS. I kept pretty complete records of this, but didn't track all the lag frame adjustments. In the end I just opened both versions and computed the time differences between levels so the lag frame adjustments are here as well.
+		$LF
+	]li
+	[li 
+		"Enemies Rolled: The number of enemies rolled in each level. The number added is box boosts, since they function like rolling through enemies. In water levels, fish stabbed by Enguarde are counted here, even though they don't boost our speed, and they aren't added to the total.
+		$LF
+	]li
+	[li 
+		"Rollovers: The number of times a roll ends without extending or jumping out of it, consuming stamina or in a few instances getting a dead roll.
+		$LF
+	]li
+	[li 
+		"Camera Locks: The number of times a camera locked roll is performed. The number added represents a camera manipulation via another means, usually turning around while standing or jumping.
+		$LF
+	]li
+	[li 
+		"Gravity Glitches: The number of times gravity glitch is used to get a floaty roll. It's used a lot in the platform autoscrollers during the idle movement so only the nontrivial uses are tracked. Mine Cart Carnage is also not tracked since it's used on most of the jumps in this level.
+		$LF
+	]li
+]ul
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Frames (Seconds)
+			]th
+			[th 
+				"Framesave Since v.0
+			]th
+			[th 
+				"Enemies Rolled
+			]th
+			[th 
+				"Rollovers
+			]th
+			[th 
+				"Camera Locks
+			]th
+			[th 
+				"Gravity Glitches
+			]th
+		]tr
+		[tr 
+			[td 
+				"Jungle Hijinxs
+			]td
+			[td 
+				"1474 (24.68)
+			]td
+			[td 
+				"-42
+			]td
+			[td 
+				"13 + 1
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ropey Rampage
+			]td
+			[td 
+				"1538 (25.75)
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Reptile Rumble
+			]td
+			[td 
+				"1674 (28.03)
+			]td
+			[td 
+				"21
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Coral Capers
+			]td
+			[td 
+				"3281 (54.93)
+			]td
+			[td 
+				"146
+			]td
+			[td 
+				"(6)
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Barrel Cannon Canyon
+			]td
+			[td 
+				"1907 (31.93)
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"4 + 1
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Very Gnawty's Lair
+			]td
+			[td 
+				"687 (11.50)
+			]td
+			[td 
+				"-2
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Winky's Walkway
+			]td
+			[td 
+				"2366 (39.61)
+			]td
+			[td 
+				"22
+			]td
+			[td 
+				"17
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mine Cart Carnage
+			]td
+			[td 
+				"4943 (82.76)
+			]td
+			[td 
+				"29
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"lots
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bouncy Bonanza
+			]td
+			[td 
+				"3327 (55.70)
+			]td
+			[td 
+				"97
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"6 + 1
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Stop & Go Station
+			]td
+			[td 
+				"585 (9.79)
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Millstone Mayhem
+			]td
+			[td 
+				"3168 (53.04)
+			]td
+			[td 
+				"40
+			]td
+			[td 
+				"15 + 1
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Necky's Nuts
+			]td
+			[td 
+				"1464 (24.51)
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Vulture Culture
+			]td
+			[td 
+				"3561 (59.62)
+			]td
+			[td 
+				"57
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tree Top Town
+			]td
+			[td 
+				"3194 (53.48)
+			]td
+			[td 
+				"49
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Forest Frenzy
+			]td
+			[td 
+				"5548 (92.89)
+			]td
+			[td 
+				"272
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"2 + 5
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"Temple Tempest
+			]td
+			[td 
+				"3601 (60.29)
+			]td
+			[td 
+				"49
+			]td
+			[td 
+				"21 + 1
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Orang-utan Gang
+			]td
+			[td 
+				"2239 (37.49)
+			]td
+			[td 
+				"43
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Clam City
+			]td
+			[td 
+				"2603 (43.58)
+			]td
+			[td 
+				"29
+			]td
+			[td 
+				"(7)
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Bumble B Rumble
+			]td
+			[td 
+				"2890 (48.39)
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Snow Barrel Blast
+			]td
+			[td 
+				"3674 (61.51)
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Slipslide Ride
+			]td
+			[td 
+				"921 (15.42)
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"swag
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Ice Age Alley
+			]td
+			[td 
+				"2675 (44.79)
+			]td
+			[td 
+				"170
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Croctopus Chase
+			]td
+			[td 
+				"6821 (114.20)
+			]td
+			[td 
+				"143
+			]td
+			[td 
+				"(3)
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Torchlight Trouble
+			]td
+			[td 
+				"1777 (29.75)
+			]td
+			[td 
+				"12
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Rope Bridge Rumble
+			]td
+			[td 
+				"2545 (42.61)
+			]td
+			[td 
+				"166
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"9
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Really Gnawty Rampage
+			]td
+			[td 
+				"1014 (16.98)
+			]td
+			[td 
+				"140
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Oil Drum Alley
+			]td
+			[td 
+				"3111 (52.09)
+			]td
+			[td 
+				"83
+			]td
+			[td 
+				"25 + 3
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"7 + 2
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Trick Track Trek
+			]td
+			[td 
+				"15176 (254.09)
+			]td
+			[td 
+				"109
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"10
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"1 + lots
+			]td
+		]tr
+		[tr 
+			[td 
+				"Elevator Antics
+			]td
+			[td 
+				"3404 (56.99)
+			]td
+			[td 
+				"91
+			]td
+			[td 
+				"15
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"4 + 1
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Poison Pond
+			]td
+			[td 
+				"3696 (61.88)
+			]td
+			[td 
+				"223
+			]td
+			[td 
+				"(19)
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Mine Cart Madness
+			]td
+			[td 
+				"4794 (80.26)
+			]td
+			[td 
+				"38
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Blackout Basement
+			]td
+			[td 
+				"3418 (57.23)
+			]td
+			[td 
+				"42
+			]td
+			[td 
+				"16
+			]td
+			[td 
+				"19
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"Boss Dumb Drum
+			]td
+			[td 
+				"2596 (43.46)
+			]td
+			[td 
+				"31
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tanked Up Trouble
+			]td
+			[td 
+				"9017 (150.97)
+			]td
+			[td 
+				"87
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"2 + 1
+			]td
+			[td 
+				"lots
+			]td
+		]tr
+		[tr 
+			[td 
+				"Manic Mincers
+			]td
+			[td 
+				"3313 (55.47)
+			]td
+			[td 
+				"29
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"13
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Misty Mine
+			]td
+			[td 
+				"3463 (57.98)
+			]td
+			[td 
+				"78
+			]td
+			[td 
+				"25
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Necky Nutmare
+			]td
+			[td 
+				"3330 (55.75)
+			]td
+			[td 
+				"77
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"Loopy Lights
+			]td
+			[td 
+				"3685 (61.70)
+			]td
+			[td 
+				"27
+			]td
+			[td 
+				"5
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"7
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Platform Perils
+			]td
+			[td 
+				"3442 (57.63)
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"21
+			]td
+			[td 
+				"6
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[td 
+				"Necky's Revenge
+			]td
+			[td 
+				"1967 (32.93)
+			]td
+			[td 
+				"42
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				"Gang-plank Galleon
+			]td
+			[td 
+				"7876 (131.87)
+			]td
+			[td 
+				"128
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				[b 
+					"Grand Totals
+				]b
+			]td
+			[td 
+				[b 
+					"141765
+				]b
+			]td
+			[td 
+				[b 
+					"2661
+				]b
+			]td
+			[td 
+				[b 
+					"348 + 7
+				]b
+			]td
+			[td 
+				[b 
+					"192
+				]b
+			]td
+			[td 
+				[b 
+					"85 + 10
+				]b
+			]td
+			[td 
+				[b 
+					"23
+				]b
+			]td
+		]tr
+	]tbody
+]table
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Cutting off ~17000 frames of blank input, and judging!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Awesome job on this, you're very familiar with this game and it shows. I appreciate you trying to make the idle sections as entertaining as possible as well. Really impressive first TAS, and I hope we see more from you. Accepting!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

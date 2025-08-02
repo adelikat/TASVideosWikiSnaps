@@ -1,8 +1,4 @@
-9
-[div class=p 
-	(youtube|v=0s3Q-JF1YfE)
-	$LF
-]div
+11
 [h3 id=Introduction 
 	" Introduction
 	$LF
@@ -40,7 +36,7 @@
 	" Objectives
 	$LF
 ]h3
-[h4 id=Savecorruption 
+[h4 id=SaveCorruption 
 	" Save corruption
 	$LF
 ]h4
@@ -52,13 +48,13 @@
 	"This movie wants to corrupt the save to have a Cyndaquil with no string terminator in its nickname. All this requires is a reset after Cyndaquil's data saves and before its nickname's terminator saves, but BizHawk movies are only designed to reset on frame boundaries. The subframe precision required can still be found with the equal frame lengths setting. A Game Boy frame completes every 70224 cycles while the LCD is on but the time between is arbitrary while the LCD is off. The default setting syncs frame boundaries to frame completions, yet EFLs have a frame boundary every 70224 cycles regardless of when frames complete. Over the course of this movie, the Game Boy frame timing is shifted relative to the EFL frame boundary with the variable lengths of LCD off periods. This allows a reset between when the L and the terminator in Cyndaquil are written to the save data.
 	$LF
 ]div
-[h4 id=1500or<DAY> 
+[h4 id=1500OrDay 
 	" 15 00 or <DAY>
 	$LF
 ]h4
 [div class=p 
 	"see also: 
-	[a class=extlink href=https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310 rel=nofollow 
+	[a href=https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310 rel=noopener external nofollow 
 		"https://forums.glitchcity.info/index.php?topic=7706.msg203310#msg203310
 	]a
 	$LF
@@ -69,9 +65,9 @@
 ]div
 [div class=p 
 	"Once the text engine reads the $15 $00, code execution begins at $cd52 and the address that follows the $15 $00 is on the stack. That address is the location of the last loaded Pokemon data. One step up after the mart window places 
-	[tt 
+	[code 
 		"ret nz
-	]tt
+	]code
 	" at $cd70, memory of pointers for the background map, which is reached without issue and sends execution to the Pokemon data. The manipulated trainer ID and DV bytes in Cyndaquil's data there are interpreted as the instructions below. This is enough to jump into the memory for box names where more values can be controlled. The box names require a couple lower bytes in addresses to be character values, and the number of entry points from here is already limited.
 	$LF
 ]div
@@ -93,28 +89,28 @@
 	"jp hl
 	$LF
 ]pre
-[h4 id=Arbitrarycodeexecution 
+[h4 id=ArbitraryCodeExecution 
 	" Arbitrary code execution
 	$LF
 ]h4
 [div class=p 
 	"see also: 
-	(__wikiLink|/4233S|4233S)
+	(__wikiLink|href=/4233S|implicitdisplaytext=4233S)
 	$LF
 ]div
 [div class=p 
 	"This movie uses a modified version of MrWint's box names that execute code input from the joypad. Aside from address changes between the games and setups, there are two small changes: 
-	[tt 
+	[code 
 		"or [hl]
-	]tt
+	]code
 	" is used to reset the carry flag and the 
-	[tt 
+	[code 
 		"jp nc
-	]tt
+	]code
 	" jumps before the first of the two boxes. I thought 
-	[tt 
+	[code 
 		"or [hl]
-	]tt
+	]code
 	" was faster to input before I learned the mechanics below, but it's the same, yet the higher value still contributes to the checksum. The jump before the first box is fast to input and does not cause any issues with a clever box name there. That box is covered after the two primary boxes. Note it is faster to scroll the list to boxes before they are named, and hold to scroll as opposed to press -> release a bunch is break even for Box 4 and faster for Box 5 and up.
 	$LF
 ]div
@@ -159,14 +155,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"aa
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"xor d
-				]tt
+				]code
 			]td
 			[td 
 				"d stores last joypad input: find out differences to current input
@@ -174,14 +170,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"ea a1 fb
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"ld [$fba1], a
-				]tt
+				]code
 			]td
 			[td 
 				"Write difference; will be executed as opcode later in the cycle
@@ -189,14 +185,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"aa
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"xor d
-				]tt
+				]code
 			]td
 			[td 
 				"Restore current joypad input value
@@ -204,14 +200,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"f5
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"push af
-				]tt
+				]code
 			]td
 			[td 
 				"Copy current joypad input from a...
@@ -219,14 +215,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"d1
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"pop de
-				]tt
+				]code
 			]td
 			[td 
 				"... to d (store it as last joypad input)
@@ -234,14 +230,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"f1
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"pop af
-				]tt
+				]code
 			]td
 			[td 
 				"Restore a and f from the previous cycle
@@ -249,14 +245,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"50 ($fba1)
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"(any)
-				]tt
+				]code
 			]td
 			[td 
 				"Execute opcode written earlier this cycle
@@ -277,14 +273,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"f5
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"push af
-				]tt
+				]code
 			]td
 			[td 
 				"Save a and f for next cycle
@@ -292,14 +288,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"b6
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"or [hl]
-				]tt
+				]code
 			]td
 			[td 
 				"Clears carry flag, needed for the jump
@@ -307,14 +303,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"fa a4 ff
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"ld a, [$ffa4]
-				]tt
+				]code
 			]td
 			[td 
 				"Reads current joypad inputs into a
@@ -322,14 +318,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"d2 95 fb
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"jp nc, $fb95
-				]tt
+				]code
 			]td
 			[td 
 				"Loop back to Box 4; carry will never be set
@@ -339,25 +335,25 @@
 ]table
 [div class=p 
 	"Box 4 has two more goals in addition to high values for the checksum. The 6th character is where Box 6 loops back to, because it was fast to input. However, the string terminator opcode is 
-	[tt 
+	[code 
 		"ld d, b
-	]tt
+	]code
 	" and the box name program relies on d to store the last joypad input. The 5th character is where the 
-	[tt 
+	[code 
 		"15 00
-	]tt
+	]code
 	" setup used in this movie jumps to, because of the limited entry point options. The slide into Box 5 needs to avoid an unsafe opcode from 
-	[tt 
+	[code 
 		"xor d
-	]tt
+	]code
 	". With the initial values of a=$02 and d=$c5 (from 
-	[tt 
+	[code 
 		"ld d, b
-	]tt
+	]code
 	") the result would be 
-	[tt 
+	[code 
 		"rst $00
-	]tt
+	]code
 	", an instruction that resets the game. Box 4 is named in such a way where both jump locations interpret different instructions to satisfy those goals.
 	$LF
 ]div
@@ -389,14 +385,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"f6 fe
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"or $fe
-				]tt
+				]code
 			]td
 			[td 
 				"Sets a to $fe
@@ -404,14 +400,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"f6 fe
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"or $fe
-				]tt
+				]code
 			]td
 			[td 
 				" 
@@ -419,14 +415,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"50
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"ld d, b
-				]tt
+				]code
 			]td
 			[td 
 				"Sets d to $c5
@@ -462,14 +458,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"fe f6
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"cp $f6
-				]tt
+				]code
 			]td
 			[td 
 				"Preserves a
@@ -477,14 +473,14 @@
 		]tr
 		[tr 
 			[td 
-				[tt 
+				[code 
 					"fe 50
-				]tt
+				]code
 			]td
 			[td 
-				[tt 
+				[code 
 					"cp $50
-				]tt
+				]code
 			]td
 			[td 
 				"Preserves d
@@ -689,21 +685,15 @@
 ]div
 [div class=p 
 	"For what concerns the branching, there are two separate aspects to take in account: similarity between games and similarity between movies. Since Pokémon Crystal is a Gen II Pokémon game, it can obsolete and be obsoleted by Pokémon Gold and Silver, even though the glitch abused in this movie is only available in Crystal. Since the 
-	[a class=intlink href=/2565M 
-		"current fastest-completion movie
-	]a
+	(__wikiLink|displaytext=current fastest-completion movie|href=/2565M)
 	" features much unique and entertaining contents, it shouldn't be obsoleted by this submission; however I have to note that we have an 
-	[a class=intlink href=/2504M 
-		"obsoleted movie
-	]a
+	(__wikiLink|displaytext=obsoleted movie|href=/2504M)
 	" with the "save glitch" label, and even though it's much longer and uses a different glitch, its movie goal is the same as the one for this submission, so the obsoletion chain will be changed in order for this submission to obsolete it.
 	$LF
 ]div
 [div class=p 
 	"The audience reception was vastly positive, so this submission is accepted for Moons as an improvement of the 
-	[a class=intlink href=/2504M 
-		"published "save glitch" movie
-	]a
+	(__wikiLink|displaytext=published "save glitch" movie|href=/2504M)
 	" .
 	$LF
 ]div

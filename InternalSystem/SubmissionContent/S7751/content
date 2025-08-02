@@ -1,0 +1,1055 @@
+18
+[div class=p 
+	"Heavy Shreddin’ is an auto-scroller snowboarding game on the NES. Even though the game seems simple, there are many complexities in optimizing the speed. This Tool-Assisted Speedrun uses frame perfect input to complete the game as quickly as possible, hear memorable congratulating words from the most apathetic lady in video game history, and receive the sweet champion’s trophy in 17:18.61.
+	$LF
+]div
+[div class=p 
+	"This TAS saves 817 frames compared to the previous submission. It is also tantalizingly close (4 subpixels away) from saving a frame in the first level, but I couldn’t find any subpixels left to save. If anyone wants to beat my time, this is probably the way to go. This is my first TAS ever and I tried to optimize it as much as possible, but there are probably still some mistakes. See the future work section for more info.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#Faq 
+					" FAQ
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#GameMechanics 
+					" Game mechanics
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#FrameCycles 
+							" Frame cycles
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Movement 
+							" Movement
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#HorizontalMovement 
+									" Horizontal movement
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#VerticalMovement 
+									" Vertical movement
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#OptimalVerticalMovement 
+									" Optimal vertical movement
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#EndOfTheLevel 
+							" End of the level
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Tucking 
+							" Tucking
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Jumping 
+							" Jumping
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#ToeGrabMuleKickHandPlant 
+									" Toe grab/Mule kick/Hand plant
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#MidAir360 
+									" Mid air 360
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#QuickestJumpFirstFrameMidAir360 
+									" Quickest jump: first-frame mid air 360
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#LongestMidAir360 
+									" Longest mid air 360
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#ShortestMuleKick 
+									" Shortest mule kick
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#DoubleFirstFrameMidAir360 
+									" Double first-frame mid air 360
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#Ducking 
+							" Ducking
+							$LF
+						]a
+						[ul 
+							[li 
+								[a href=#ShortDuck 
+									" Short duck
+									$LF
+								]a
+							]li
+							[li 
+								[a href=#MovementOptimisation 
+									"Movement optimisation
+									$LF
+								]a
+							]li
+						]ul
+					]li
+					[li 
+						[a href=#FrameCyclesManipulation 
+							" Frame cycles manipulation
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Halfpipe 
+							" Halfpipe
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Obstacles 
+					" Obstacles
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#TreesRocksSlalomGates 
+							" Trees/Rocks/Slalom gates
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#FrozenPond 
+							" Frozen pond
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Logs 
+							" Logs
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Waterfall 
+							" Waterfall
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#WideMoguls 
+							" Wide moguls
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#WideRavines 
+							" Wide ravines
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Cliffs 
+							" Cliffs
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#FutureWork 
+					" Future work
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#LagFrame 
+							" Lag frame
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Collisions 
+							" Collisions
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#RamAdressesList 
+					" RAM adresses list
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#PossiblyRelevantRamAddresses 
+							" Possibly relevant RAM addresses
+							$LF
+						]a
+					]li
+				]ul
+			]li
+		]ul
+	]div
+]div
+[h2 id=Faq 
+	" FAQ
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		[b 
+			"Why does your character move so weirdly?
+		]b
+		$LF
+	]li
+]ul
+[div class=p 
+	"Pressing Up or Down every 2 frames is the optimal way to move sideways and saves a ton of time, but creates some janky animations during side-to-side movement. A few times, I press Up and Down at the same time during drifting. This has the same effect as pressing only Up, but it triggers a different janky animation, which I found fun to watch.
+	$LF
+]div
+[div class=p 
+	"Also, I sometimes synchronize my movement to dance to the rad music to make the TAS more entertaining, when it doesn’t cost any speed.
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Do you untuck sometimes?
+		]b
+		$LF
+	]li
+]ul
+[div class=p 
+	"Before certain obstacles (wide ravines and cliffs), I need to synchronize frame parity cycles to perform advanced techniques by briefly untucking. While this loses a few subpixels, it more than makes up for it.
+	$LF
+]div
+[div class=p 
+	"The character also automatically untucks during the scripted halfpipe sections.
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Did you go right through that obstacle?
+		]b
+		$LF
+	]li
+]ul
+[div class=p 
+	"Collisions are super janky in this game, and it’s the only mechanic I have not fully cracked. However, I do drift by obstacles as closely as possible to try to create stressful or funny moments, to various degrees of success.
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Why does your character turn blue?
+		]b
+		$LF
+	]li
+]ul
+[div class=p 
+	"Going through a snow machine’s jet changes your character’s color for the rest of the challenge. This does not affect anything except the visuals.
+	$LF
+]div
+[h2 id=GameMechanics 
+	" Game mechanics
+	$LF
+]h2
+[h3 id=FrameCycles 
+	" Frame cycles
+	$LF
+]h3
+[div class=p 
+	"The first thing to know about this game is that various actions can only be performed on certain frames during specific cycles. For example, horizontal speed and horizontal movement are computed every frame, button input can be registered every 2 frames, collisions are registered on a 4 frames cycle, jumping is on an 8 frames cycle, and vertical movement can be performed every 2, 4, 8 or 16 frames, depending on the movement.
+	$LF
+]div
+[div class=p 
+	"These cycles seem to be mostly independent, and therefore need to be synchronized properly to perform certain advanced techniques described below. The game does not have RNG per se, but synchronizing those cycles is the closest thing to it.
+	$LF
+]div
+[div class=p 
+	"Most mentions of those frame cycles in the document below will be as “a frame that allows it (every X frame)” or “a certain frame (every X frame)”.
+	$LF
+]div
+[h3 id=Movement 
+	" Movement
+	$LF
+]h3
+[h4 id=HorizontalMovement 
+	" Horizontal movement
+	$LF
+]h4
+[div class=p 
+	"The game has a “speed target” value that switches between 3 values during gameplay: 256 (during untucked state and the halfpipe sequences), 448 (during jumping, ducking and tucked drifting state) and 512 (during tucked state). See below for more information about the character’s states. The character’s speed always goes toward the speed target value by 2 per frame, whether the current speed is above or below the speed target.
+	$LF
+]div
+[div class=p 
+	"Some specific situations set a specific speed amount no matter what the speed target value is, like cliffs or performing a hand plant.
+	$LF
+]div
+[div class=p 
+	"Note that the speed target is set before the character speed during the frame, and therefore, any modification of the speed target affects the character’s speed on the same frame.
+	$LF
+]div
+[div class=p 
+	"For example, if the character has a max speed of 512 and starts jumping, the speed will decrease by steps of 2, to 510, 508, until reaching a stable speed of 448 after 32 frames. Once landed, the character can start tucking, in which case the speed will start increasing again by 2 per frame towards 512.
+	$LF
+]div
+[div class=p 
+	"The speed is the value of horizontal subpixels the character moves in a single frame. A pixel is divided into 256 subpixels. The top speed of 512 therefore moves the character by exactly 2 pixels per frame.
+	$LF
+]div
+[div class=p 
+	"Slopes do not affect movement or speed in any way.
+	$LF
+]div
+[h4 id=VerticalMovement 
+	" Vertical movement
+	$LF
+]h4
+[div class=p 
+	"When untucked, pressing Up or Down on a frame that allows it (every 4 frames) will change the facing angle in the next frame. There seems to be 5 facing axes per quadrant: horizontal, 22 degrees, diagonal, 68 degrees, and vertical. The facing angle of the current frame will affect the vertical position according to the chart below. This means that if the facing angle changes on a frame where the vertical position would change, then the new facing angle is the one that is considered.
+	$LF
+]div
+[div class=p 
+	"Since the untucked state has such a low speed, you want to avoid spending time in it, and this type of vertical movement is not used in this TAS, except during the scripted halfpipe sections.
+	$LF
+]div
+[div class=p 
+	"When tucked, you can either press Up or Down to drift (lowering your horizontal speed target). Doing so will affect the vertical position every 2 frames.
+	$LF
+]div
+[div class=p 
+	"Because all vertical movement is based on frame cycles, there is no vertical position's subpixel data.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Character's state
+			]th
+			[th 
+				"vertical position’s frame cycle length
+			]th
+		]tr
+		[tr 
+			[td 
+				"tucked, horizontal
+			]td
+			[td 
+				"will not change
+			]td
+		]tr
+		[tr 
+			[td 
+				"tucked, pressing up or down
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"untucked, horizontal
+			]td
+			[td 
+				"will not change
+			]td
+		]tr
+		[tr 
+			[td 
+				"untucked, 22 degrees
+			]td
+			[td 
+				"16
+			]td
+		]tr
+		[tr 
+			[td 
+				"untucked, diagonal
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"untucked, 68 degrees
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"untucked, vertical
+			]td
+			[td 
+				"2
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=OptimalVerticalMovement 
+	" Optimal vertical movement
+	$LF
+]h4
+[div class=p 
+	"Knowing this, the optimal way to move vertically is to keep tucked, and press Up or Down and releasing it every other frame. This will activate and deactivate the tucked drifting state every frame, making the horizontal speed alternate between 254 and 256 (losing effectively 1 subpixel every frame, and therefore losing 1 horizontal pixel every 256 frames of drifting), and allowing for maximal vertical movement.
+	$LF
+]div
+[h3 id=EndOfTheLevel 
+	" End of the level
+	$LF
+]h3
+[div class=p 
+	"The end of a level is triggered when reaching a certain horizontal position (always position 49 in the chunk). Since the character’s top speed is 512, you need to save 512 subpixels to save a single frame.
+	$LF
+]div
+[div class=p 
+	"Here are the ending subpixels values for each level on this TAS.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Subpixels that can be lost before losing a frame
+			]th
+			[th 
+				"Subpixels to save in order to save a frame
+			]th
+		]tr
+		[tr 
+			[td 
+				"Widowrun
+			]td
+			[td 
+				"510
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"Blackout
+			]td
+			[td 
+				"134
+			]td
+			[td 
+				"380
+			]td
+		]tr
+		[tr 
+			[td 
+				"Liftoff
+			]td
+			[td 
+				"228
+			]td
+			[td 
+				"286
+			]td
+		]tr
+		[tr 
+			[td 
+				"Kamikaze
+			]td
+			[td 
+				"298
+			]td
+			[td 
+				"216
+			]td
+		]tr
+		[tr 
+			[td 
+				"Serpent
+			]td
+			[td 
+				"76
+			]td
+			[td 
+				"438
+			]td
+		]tr
+		[tr 
+			[td 
+				"Harikari
+			]td
+			[td 
+				"112
+			]td
+			[td 
+				"402
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"As you can see, the first level is tantalizingly close to being a frame shorter. Four subpixels corresponds to moving a single pixel up and down. If I could understand the collision mechanics better to allow for a single obstacle in the whole level to be avoided by a single pixel farther, or find a route that allowed for a single pixel less of vertical movement, it would save a frame. However, as much as I tried, I could not find any additional subpixel save in this level.
+	$LF
+]div
+[h3 id=Tucking 
+	" Tucking
+	$LF
+]h3
+[div class=p 
+	"Tucking is when your character leans forward, and allows for maximum speed.
+	$LF
+]div
+[div class=p 
+	"If your character is not already tucking, pressing Right will activate the tucking state on the next frame allowing it to happen (every 2 frames). If your character is already tucking, pressing Left will deactivate the tucking state on the next frame allowing it to happen (every 2 frames). This means that pressing Right on an odd frame will activate the tucking state on the next frame, and that pressing Right on an even frame will activate the tucking state 2 frames after.
+	$LF
+]div
+[div class=p 
+	"Note that any mentions of odd/even in this document refer to the frame cycle's parity. Since this frame cycle can be shifted (see Frame cycles manipulation section below), it does not refer to the total frame counter.
+	$LF
+]div
+[h3 id=Jumping 
+	" Jumping
+	$LF
+]h3
+[div class=p 
+	"Pressing A will activate the jumping state on the next frame allowing it to happen (every 2 frames). This means that pressing A on an odd frame will activate the jumping state on the next frame, and that pressing A on an even frame will activate the jumping state 2 frames after.
+	$LF
+]div
+[div class=p 
+	"If the character is on a slope, pressing A will start, on the very next frame, the process of aligning the character’s snowboard horizontally, which can take up to 5 frames depending on the angle of the slope. During this alignment period, the character is still in his previous state (normally tucked) and the speed will not decrease. On the very frame that the board is horizontal, the jumping state can begin. It will begin on this very frame if the frame is even, or on the next frame if it is odd.
+	$LF
+]div
+[div class=p 
+	"For this reason, jumping while on a slope does not change anything about the jump itself, it will simply have the effect of virtually delaying your A press by up to 5 frames.
+	$LF
+]div
+[div class=p 
+	"Once the character begins this jumping state, the speed target is set to 448 and the character speed changes accordingly. Two frames later, the character’s sprite changes, and reaches what I call “jumping state B”. If the character is in “jumping state B” on a certain frame (every 8 frames), then on the next frame the jump will proceed to the next state, which I’ll call “jumping state C”. "Jumping state C" is shown by the character changing sprite again. Therefore, the character can be stuck in “jumping state B” for 1, 3, 5 or 7 frames, depending on where you are in this specific cycle when the jump was started. A longer jump means that more frames are spent at a lower speed or 448. In other words, not all jumps are equal, and certain jumps lose less time.
+	$LF
+]div
+[div class=p 
+	"The “jumping state C” will see a sprite change on frame 1, 9, 33, 41 and 49, and lasts for a total of 56 frames. On frame 55, the character is ready for a new input (which can be buffered), like pressing A for another jump, or pressing Right to get back to a tucking state. However, such input will only be processed after the jump, on frame 57.
+	$LF
+]div
+[div class=p 
+	"During jumping states A (2 frames), B (1, 3, 5 or 7 frames), and on the first 22 frames of jumping state C, we can input a directional input to perform a trick jump. Pressing Right will perform a mid air 360, pressing Up will perform a toe grab, pressing Left will perform a mule kick, and pressing Down will perform a hand plant.
+	$LF
+]div
+[h4 id=ToeGrabMuleKickHandPlant 
+	" Toe grab/Mule kick/Hand plant
+	$LF
+]h4
+[div class=p 
+	"The trick jump will start on frame 23 of "jumping state C", no matter when the directional input was pressed. You therefore need to add the number of frames from jumping states A, B and C to the following numbers.
+	$LF
+]div
+[div class=p 
+	"A mule kick trick will last 82 frames, can accept new input on frame 81 and will return to a normal state on frame 83
+	$LF
+]div
+[div class=p 
+	"A toe grab trick will last 106 frames, can accept new input on frame 105 and will return to a normal state on frame 107.
+	$LF
+]div
+[div class=p 
+	"A hand plant trick will last 139 frames, can accept new input on frame 138 and will return to a normal state on frame 140. However, on frame 34 of the hand plant, the character’s speed will be automatically set to 2 (weirdly not 0) until the normal state is reached on frame 140.
+	$LF
+]div
+[div class=p 
+	"Because the mid air 360 allows for shorter jumps, the only moment when those tricks are performed during the TAS are during the halfpipe section, which forces them.
+	$LF
+]div
+[h4 id=MidAir360 
+	" Mid air 360
+	$LF
+]h4
+[div class=p 
+	"This trick is special, and will start as soon as the Right direction is pressed instead of waiting until frame 23 of jumping state C. The duration of the mid air 360 varies depending on which jumping state you are in (A, B or C), how long you’ve been jumping, as well as the frame’s parity.
+	$LF
+]div
+[div class=p 
+	"The good news is that if you manage to press Right on the very first frame of jumping state A (the frame right after pressing A), then not only every jump will be the same length regardless of the position in the jumping frame cycle (there will be no jumping state B waiting period at all), but the length of that jump will also be 6 frames faster than a regular jump with the shortest jumping state B period, spending less time at lower speed, and saving 0.75 frame on the TAS once the jump is completed and the character is back to full speed. This does not seem a lot, and you would be correct in saying so, but it stacks over time.
+	$LF
+]div
+[div class=p 
+	"Note that the Right direction needs to be pressed on the very first frame after pressing A for the maximum 6 frames time save, and any delay, even by a single frame, will lower the time save. The only exception is if the jump was on its way to be a shortest normal jump already (if the “jumping state B” period was already going to be 1 frame long), then the Right direction can be pressed on the first three frames of the jump for the maximum 6 frames time save. For humans out there wanting to speedrun the game, know that there is no time loss if you manage to press Right in the first 200-300 ms after pressing A, so aiming for quick mid air 360 is the way to go to save a few frames here and there.
+	$LF
+]div
+[h4 id=QuickestJumpFirstFrameMidAir360 
+	" Quickest jump: first-frame mid air 360
+	$LF
+]h4
+[div class=p 
+	"The quickest jump can be performed by pressing A, and pressing Right on the first frame when the jumping state is activated. The exact timing depends on the frame counter’s parity and if the character is on a slope or not, but the input can be buffered. The frame on which to press Right can be identified as the frame when the character’s horizontal speed lowers to 510.
+	$LF
+]div
+[div class=p 
+	"This jump will last for 53 frames. On frame 52, we can press Right again (can be buffered), and on frame 54, the speed target will be set back to 512 and the character’s speed will increase. Once the character is back to top speed, they will be 13.25 pixels behind (compared to 14.75 to 16.25 pixels for a normal jump).
+	$LF
+]div
+[div class=p 
+	"Note that you should not perform any other trick, jump, turns, drifts or duck before the character is back to top speed of 512, or else there will be an avoidable time loss.
+	$LF
+]div
+[h4 id=LongestMidAir360 
+	" Longest mid air 360
+	$LF
+]h4
+[div class=p 
+	"Depending on when you activate the mid air 360 by pressing Right, you can control the length of your jump very precisely. However, the longest mid air 360 jump is the one with the longest “jumping state B” period. This is performed by pressing A on a specific frame (every 8 frames), and pressing Right exactly 31 frames after that.
+	$LF
+]div
+[div class=p 
+	"This jump will last for 77 frames. On frame 76, we can press Right again (can be buffered), and on frame 78, the speed target will be set back to 512 and the character’s speed will increase. After the character is back to full speed, they will be 19.25 pixels behind.
+	$LF
+]div
+[div class=p 
+	"This jump, if every frame cycle is perfectly aligned, and when performed perfectly, can barely make it across a wide ravine.
+	$LF
+]div
+[h4 id=ShortestMuleKick 
+	" Shortest mule kick
+	$LF
+]h4
+[div class=p 
+	"The shortest long jump after the longest mid air 360 is the mule kick jump with the shortest “jumping state B” period. This is performed by pressing A on a specific frame (every 8 frames), and pressing Left at most 25 frames after that.
+	$LF
+]div
+[div class=p 
+	"This jump will last for 108 frames. On frame 107, we can press Right again (can be buffered), and on frame 109, the speed target will be set back to 512 and the character’s speed will increase. After the character is back to full speed, they will be 26.75 pixels behind (compared to 28.25 pixels for a mule kick jump with the longest “jumping state B” period).
+	$LF
+]div
+[div class=p 
+	"This trick is never used in the TAS, since every obstacle needing a jump can be performed with a mid air 360, either long or short.
+	$LF
+]div
+[h4 id=DoubleFirstFrameMidAir360 
+	" Double first-frame mid air 360
+	$LF
+]h4
+[div class=p 
+	"If we can land in the middle of the jump, then the quickest way to make a longer jump is to perform a first-frame mid air 360, and press A on frame 52 (the frame where the character’s sprite touches the ground) and Right on frame 53 to perform another first-frame mid air 360. Note that any delay between both jumps will cause an avoidable time loss.
+	$LF
+]div
+[div class=p 
+	"This jump will last for 107 frames. On frame 106, we can press Right again (can be buffered), and on frame 108, the speed target will be set and the character’s speed will increase. After the character is back to full speed, they will be 26.5 pixels behind (compared to 26.75 to 28.25 pixels for a mule kick jump). All that effort to save a quarter of a pixel, was it really worth it?
+	$LF
+]div
+[div class=p 
+	"This trick is used to cross the waterfalls.
+	$LF
+]div
+[h3 id=Ducking 
+	" Ducking
+	$LF
+]h3
+[div class=p 
+	"Pressing B will activate the ducking state on the next frame that allows it (every 2 frames). Ducking works similarly to jumping. The difference is that the “ducking state B” is on a 4-frames cycle, while “jumping state B” is on an 8-frames cycle. Therefore, the “ducking state A” will last for 2 frames, then the “ducking state B” will last for 1 or 3 frames, depending on the position in the frame cycle. After that, the “ducking state C” will last for 84 frames. In other words, there are 2 types of ducking (as opposed to 4 types for jumping), a short one and a long one.
+	$LF
+]div
+[div class=p 
+	"The “ducking state C” will see a sprite change on frame 1, 5, 9, 69, 73, 77 and 81, and lasts for a total of 84 frames. On frame 83, the character is ready for a new input (which can be buffered), like pressing Right to get back to a tucking state. However, such input will only be processed after the duck, on frame 85.
+	$LF
+]div
+[div class=p 
+	"Like the jump, if the character is on a slope, pressing B will start, on the very next frame, the process of aligning the character’s snowboard horizontally, which can take up to 5 frames depending on the angle of the slope, but won’t affect the speed. On the very frame that the board is horizontal, the ducking state can begin. It will begin on this very frame if the frame is even, or on the next frame if it is odd.
+	$LF
+]div
+[h4 id=ShortDuck 
+	" Short duck
+	$LF
+]h4
+[div class=p 
+	"The quickest duck can be performed by pressing B on a specific frame that comes every 4 frames. This duck will last for 87 frames. On frame 86, we can press Right again (can be buffered), and on frame 88, the speed target will be set and the character’s speed will increase. After the character is back to full speed, they will be 21.75 pixels behind (compared to 22.25 pixels for a long duck).
+	$LF
+]div
+[h4 id=MovementOptimisation 
+	"Movement optimisation
+	$LF
+]h4
+[div class=p 
+	"If the duck is not performed on a slope, when the board is already horizontal, then you can press either Up or Down on the same frame as pressing B to move a single pixel vertically without losing any additional speed. This is done on a few occasions during the TAS to save a couple of subpixels here and there.
+	$LF
+]div
+[h3 id=FrameCyclesManipulation 
+	" Frame cycles manipulation
+	$LF
+]h3
+[div class=p 
+	"The previous techniques depend on various frame cycles. Here is how you can manipulate them, and synchronize them to perform optimal outcomes. Let’s analyze jumping as a case study, which has 2 different frame cycles involved.
+	$LF
+]div
+[div class=p 
+	"The first one is the input cycle, which is a 2-frames cycle. It decides when you can press A to activate the jump. This frame cycle can be shifted by untucking. Every frame spent untucked shifts this cycle. Therefore, untucking for an even number of frames will not affect the parity of this cycle.
+	$LF
+]div
+[div class=p 
+	"The second cycle is the “jumping state B” cycle, which is an 8-frames cycle. This cycle can also be shifted by untucking. However, since this cycle is longer, it will also be affected if the character is untucked for even numbers of frames.
+	$LF
+]div
+[div class=p 
+	"You can untuck for a single frame by pressing Left and Right on the same frame. Since the speed drops when untucked, it is optimal to only untuck for single frames when synchronizing the frame cycles to keep your speed up.
+	$LF
+]div
+[div class=p 
+	"While pressing Left and Right on the same frame is not possible on a normal NES controller, this TAS does perform this technique since it is technically faster. However, it only saves a few dozen subpixels here and there, and there are no places currently in this TAS where those subpixels amount to an additional frame saved. In other words, a different TAS not resorting to pressing Left and Right on the same frame (and therefore would only untuck for 3 frames instead of 1 to shift the input cycle’s parity) would be exactly as long.
+	$LF
+]div
+[div class=p 
+	"The last thing to optimize on during a jump is the fact that your character moves at 512 subpixels, or 2 whole pixels, per frame. This means that if you want to jump at the very last pixel before colliding, you have a 1 over 2 chance of bypassing this pixel in a single frame of movement. The only way to synchronize this is to deliberately lose speed. Thankfully, I was very lucky during this TAS and I only had to do this once, and the amount of lost speed was so minimal compared to the amount of time saved that it was totally worth it.
+	$LF
+]div
+[h3 id=Halfpipe 
+	" Halfpipe
+	$LF
+]h3
+[div class=p 
+	"If you were like me and played the game as a child, you could never understand how to properly build up speed in the halfpipe. This section is here to answer your prayers.
+	$LF
+]div
+[div class=p 
+	"On the halfpipe, the horizontal speed is fixed at 256, but the maximum vertical position the character reaches on each side is set by the halfpipe speed parameter. Every 8 frames, the halfpipe speed either raises by 1 or decreases by 1 (though it can’t get lower than 0 or higher than 56). The halfpipe speed will raise if the character presses either Up or Down, the direction depending on your character’s angle. If the wrong direction or no direction is pressed, the halfpipe speed will decrease.
+	$LF
+]div
+[div class=p 
+	"The direction you need to press is the direction towards which the character is turning (not the direction that the character is facing). This means that if the character is turning left towards facing up, you need to press Up. If the character is turning right towards facing down, even if the character itself is still facing at an up angle, you need to press Down. In other words, as soon as the character’s sprite starts deviating from the vertical axis (actually a few frames before that moment), you need to switch directions.
+	$LF
+]div
+[div class=p 
+	"This halfpipe speed can get higher without affecting anything on screen. I still do not understand the exact effect of the halfpipe speed on the vertical position, but the higher the halfpipe speed, the higher the position. A halfpipe speed of 22 is needed for the jump prompt to appear. It is possible to reach a halfpipe speed of 2 on the first up ramp (which does not affect anything on screen yet), 9 on the second, 18 on the third and 29 on the fourth, activating the jump prompt on horizontal position 493.
+	$LF
+]div
+[div class=p 
+	"However, this is not the quickest way, since having a higher halfpipe speed on ramps two and three make the back and forth trip longer. It is better to have halfpipe speeds of 0 on the first ramp, 4 to 6 on the second, 12 to 14 on the third, and 22 on the fourth. This will make the prompt appear on horizontal position 477, saving 8 frames.
+	$LF
+]div
+[div class=p 
+	"To do so, you need to start pressing Down between horizontal chunk positions 22 and 38, and release it after position 62, then press Up between position 70 and 126, and press Down starting on position 134.
+	$LF
+]div
+[div class=p 
+	"After the prompt appears, make sure to keep pressing the proper direction between the prompts to make sure that the halfpipe speed does not decrease too much, so that the next prompt appears.
+	$LF
+]div
+[h2 id=Obstacles 
+	" Obstacles
+	$LF
+]h2
+[div class=p 
+	"The game has many obstacles. This section will only concentrate on what the TAS does differently than the intended casual strategy. Note that every obstacle where the intended strategy is to jump over it (hay bales, rivers, …), a first-frame mid air 360 is used.
+	$LF
+]div
+[h3 id=TreesRocksSlalomGates 
+	" Trees/Rocks/Slalom gates
+	$LF
+]h3
+[div class=p 
+	"Those obstacles can, in some situations, push your character up without losing speed. This is used throughout the TAS to save a few subpixels here and there. I do not understand how to optimize this effect, but I am using it whenever possible. Figuring out how to optimize this might be our best shot at saving a frame in level 1.
+	$LF
+]div
+[h3 id=FrozenPond 
+	" Frozen pond
+	$LF
+]h3
+[div class=p 
+	"While the intended strategy is to duck to avoid losing your balance, it is quicker to jump over it with a first-frame mid air 360.
+	$LF
+]div
+[h3 id=Logs 
+	" Logs
+	$LF
+]h3
+[div class=p 
+	"While the intended strategy is to jump over them, it is quicker to just avoid them with careful movement.
+	$LF
+]div
+[h3 id=Waterfall 
+	" Waterfall
+	$LF
+]h3
+[div class=p 
+	"The waterfalls actually have a small snow island in the middle of it. They are the only occasion to use the aforementioned double first-frame mid air 360 and save a quarter of a pixel each time, compared to the shortest mule kick.
+	$LF
+]div
+[h3 id=WideMoguls 
+	" Wide moguls
+	$LF
+]h3
+[div class=p 
+	"Sometimes, the moguls are set up in a wide patch. The intended way is to perform a longer jump like a mule kick. There is an area in the middle of the patch where the moguls split up (around vertical position 77-78) where your character can go farther before hitting the obstacle. It is technically possible to jump over the moguls from this position by performing a mid air 360 (but not a first-frame mid air 360).
+	$LF
+]div
+[div class=p 
+	"However, the best way to jump over this obstacle is through the bottom. At the bottom 7 or 8 pixels of the screen (depending on the frame cycles affecting collisions), you can jump over the obstacle using a first-frame mid air 360, saving the maximum amount of time.
+	$LF
+]div
+[h3 id=WideRavines 
+	" Wide ravines
+	$LF
+]h3
+[div class=p 
+	"This obstacle has the most complex strategy of the whole TAS, and the one of which I personally am the proudest. The intended strategy here is to perform a longer jump like a mule kick. However, it turns out that the longest mid air 360 can barely make it across this ravine. To do so, you need to have a perfect input parity cycle, a perfect jumping state cycle, and have your character’s movement be on an even value of horizontal position (since the character moves at 2 pixels per frame). This has a 1 in 16 chances of happening randomly. On top of that, it requires two almost frame perfect input: pressing A within a 2 frame window, and pressing Right half a second later within another 2 frames window.
+	$LF
+]div
+[div class=p 
+	"This is why you can see the character untuck briefly before those obstacles. I am synchronizing the frame cycles to perform this trick, saving about 3-4 frames every time.
+	$LF
+]div
+[h3 id=Cliffs 
+	" Cliffs
+	$LF
+]h3
+[div class=p 
+	"This obstacle sounds simple. The intended strategy is to let your character fall, and hold Up to align your board horizontally on the landing frame. However, your character slows down during the first frames of the fall, before the speed is manually fixed at 510. It is therefore best to jump as late as possible. On top of that, on vertical position 22 or 23 (the 2 top positions), you seem to be able to jump later than usual, therefore losing much less speed.
+	$LF
+]div
+[div class=p 
+	"Depending on if your character’s horizontal position is even or odd, your speed will drop to 240 or 242. Your speed can also drop an additional 2 depending on the input frame cycle’s parity, but this can be synchronized by untucking for an odd amount of frames. This is why the character sometimes untucks right before a cliff, in order to save 14-16 subpixels.
+	$LF
+]div
+[div class=p 
+	"There is a single cliff in the last level where I do not go to the top vertical position. This loses a significant amount of subpixels during the fall. However, it saves time overall since it avoids a huge vertical movement to the top of the screen and back down again. Also, it is impossible to be on the top of this cliff, and get back all the way down to vertical position 112 for the next halfpipe obstacle without slowing down in a big way.
+	$LF
+]div
+[h2 id=FutureWork 
+	" Future work
+	$LF
+]h2
+[h3 id=LagFrame 
+	" Lag frame
+	$LF
+]h3
+[div class=p 
+	"Frame 58708 is a lag frame with an unknown cause. If left untouched, the character will not move during this frame, which would lose a full frame.
+	$LF
+]div
+[div class=p 
+	"I found that if I untuck right before the lag frame and tuck back 2 frames later, the character will still move forward through the lag frame, losing only 8 subpixels instead of 512. I have no clue why this happened.
+	$LF
+]div
+[h3 id=Collisions 
+	" Collisions
+	$LF
+]h3
+[div class=p 
+	"To this day, I still cannot understand the mechanics of how you collide with obstacles and faint and/or die. Understanding collisions could save a single frame in level 1, and maybe allow for new techniques and optimisations. Maybe we could even dream of clipping through certain obstacles!
+	$LF
+]div
+[div class=p 
+	"I noticed that there is a death flag on address $0060, that indicates if you are dead or not. Since death can take some time to register on screen if you’re in the middle of certain actions, this is the quickest way I have found to check your death status.
+	$LF
+]div
+[div class=p 
+	"There is also a collision flag that seems to be on address $0022, and the object type you’re colliding with seems to be on address $0061. Note that object type 9 seems to be a collision that moves your character, without killing him. The collision flag is set depending on your character’s position 2 frames prior, and seems to be on a 4-frames cycle to decide if the collision flag is set on or off. However, deciding which frame on this 4-frames cycle will activate the collision seems to vary for every object. It also seems to depend on your character’s state (jumping vs tucking). I could not figure out what exactly triggers the collision flag or not.
+	$LF
+]div
+[div class=p 
+	"If the collision flag is set, then there are another set of conditions that are tested (probably if the character is in a safe state related to the object type, like ducking or jumping). If those conditions are met, then on the next frame, the death flag ($0060) is set to something other than 0, and your character dies. This process can be delayed by certain obstacles like the ducking rope. The death delay timer seems to be on address $00A0, during which the ducking action must be performed to avoid death.
+	$LF
+]div
+[div class=p 
+	"I haven’t tested all the obstacles either. I am missing parts of the puzzle here.
+	$LF
+]div
+[h2 id=RamAdressesList 
+	" RAM adresses list
+	$LF
+]h2
+[ul 
+	[li 
+		" Horizontal speed: $0065-$0066
+		$LF
+	]li
+	[li 
+		" Horizontal speed target: $0067-$0068
+		$LF
+	]li
+	[li 
+		" Horizontal position: $0044-$0045
+		$LF
+	]li
+	[li 
+		" Horizontal subpixel position: $0069
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Vertical position (collisions): $0004
+		$LF
+	]li
+	[li 
+		" Vertical position (graphics): $002F
+		$LF
+	]li
+	[li 
+		" Half-pipe speed: $0091
+		$LF
+	]li
+]ul
+[div class=p 
+	"- Vertical position (graphics) position seems to be set first, and then affect Vertical position (collisions).
+	$LF
+]div
+[ul 
+	[li 
+		" Key press: $0026
+		$LF
+	]li
+	[li 
+		" Vertical scrolling: $0042-$0043
+		$LF
+	]li
+	[li 
+		" Slope angle: $0033
+		$LF
+	]li
+	[li 
+		" Score: $00AB-$00AC
+		$LF
+	]li
+	[li 
+		" Add to score: $0072
+		$LF
+	]li
+	[li 
+		" On screen timer: $006B-$006C
+		$LF
+	]li
+	[li 
+		" Frame counter: $0023
+		$LF
+	]li
+]ul
+[h3 id=PossiblyRelevantRamAddresses 
+	" Possibly relevant RAM addresses
+	$LF
+]h3
+[ul 
+	[li 
+		" Penalty flag (out of gate): $00A1
+		$LF
+	]li
+	[li 
+		" Next frame’s character sprite index / cutscene timer: $00C8
+		$LF
+	]li
+	[li 
+		" Character state?: $007E
+		$LF
+	]li
+	[li 
+		" Character sprite’s state?: 00B6, $00C5
+		$LF
+	]li
+	[li 
+		" Character angle?: $0078-$0079-$007A-$007B
+		$LF
+	]li
+	[li 
+		" Air time/jump status?: $007C
+		$LF
+	]li
+	[li 
+		" Tucked time?: $007D
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Death flag?: $0060
+		$LF
+	]li
+	[li 
+		" Collision detector?: $0022
+		$LF
+	]li
+	[li 
+		" Collision object type?: $0061
+		$LF
+	]li
+	[li 
+		" Death flag timer?: $00A0
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Replaced movie file with 312 frames of blank input cut off (thanks Spikestuff) and judging!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Awesome work cutting 16 seconds off of what looks like an autoscroller. I also want to say, for your first submission, the amount of research you put into this game is really impressive. That's the kind of thing we like to see, and hopefully we see more from you! Accepting as an improvement to the 
+	(__wikiLink|displaytext=current publication|href=/2183M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

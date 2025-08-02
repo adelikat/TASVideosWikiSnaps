@@ -1,0 +1,142 @@
+8
+[div class=p 
+	"This tool, written by 
+	[a class=intlink href=/Users/Profile/sgrunt 
+		"sgrunt
+	]a
+	" for use in 
+	(__wikiLink|displaytext=encoding|href=/EncodingGuide/Legacy)
+	" in conjunction with 
+	[code 
+		"mencoder
+	]code
+	", takes a raw RGB24 video stream on 
+	[code 
+		"stdin
+	]code
+	", removes duplicate frames, and writes the resulting stream to 
+	[code 
+		"stdout
+	]code
+	" and the associated timecodes to a specified file.
+	$LF
+]div
+[h3 id=Usage 
+	" Usage
+	$LF
+]h3
+[div class=p 
+	"Usage is:
+	$LF
+]div
+[pre 
+	"dedup <outfile> <fpsnum> <fpsden> <width> <height> 
+	"[<max consecutive dup frames>]
+	$LF
+]pre
+[div class=p 
+	"where:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[code 
+			"<outfile>
+		]code
+		" is the time code file to be written;
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<fpsnum>
+		]code
+		" and 
+		[code 
+			"<fpsden>
+		]code
+		" are the numerator and denominator of the frame rate of the input stream;
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<width>
+		]code
+		" and 
+		[code 
+			"<height>
+		]code
+		" are the dimensions of the video stream; and
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<max consecutive dup frames>
+		]code
+		" is the maximum number of consecutive duplicate frames that will be removed from a stream. If not specified, the default value is 20, which tends to be a good trade off between disk space and usability.
+		$LF
+	]li
+]ul
+[div class=p 
+	[code 
+		"mencoder
+	]code
+	" can produce a raw RGB24 output with:
+	$LF
+]div
+[pre 
+	"mencoder -nosound -of rawvideo -ovc raw -vf format=rgb24,scale <input/output files>
+	$LF
+]pre
+[div class=p 
+	"and can read a raw RGB24 input with:
+	$LF
+]div
+[pre 
+	"mencoder -demuxer rawvideo -rawvideo format=rgb24:w=<width>:h=<height>:fps=<fps> <input/output/codec settings>
+	$LF
+]pre
+[div class=p 
+	"This is best used in conjunction with pipes or FIFOs to avoid having to write large raw files to disk.
+	$LF
+]div
+[h3 id=ExampleLogoCombining 
+	" Example: logo-combining
+	$LF
+]h3
+[pre 
+	"mkfifo dedupin
+	$LF
+	"mkfifo dedupout
+	$LF
+	"mencoder -nosound -of rawvideo -ovc raw -vf format=rgb24,scale logo.avi raw.avi -sub subtitle.srt -subpos 98 -subalign 2 -o dedupin &
+	$LF
+	"dedup times.txt <fps> <width> <height> 20 <dedupin >dedupout &
+	$LF
+	"mencoder -demuxer rawvideo -rawvideo format=rgb24:w=<width>:h=<height>:fps=<fps> dedupin -ovc x264 -x264encopts crf=0:fullrange=on -sws 9 -o in.avi
+	$LF
+]pre
+[div class=p 
+	"(Note that sound will need to be extracted from 
+	[code 
+		"raw.avi
+	]code
+	" and delayed by hand, perhaps with 
+	[code 
+		"sox
+	]code
+	", for encoding purposes.)
+	$LF
+]div
+[h3 id=Code 
+	" Code
+	$LF
+]h3
+[pre 
+	[code class=language-c 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre

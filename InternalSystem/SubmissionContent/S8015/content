@@ -1,0 +1,238 @@
+6
+[h3 id=Summary 
+	"Summary
+	$LF
+]h3
+[h4 id=Goals 
+	" Goals:
+	$LF
+]h4
+[ul 
+	[li 
+		" Optimises real time
+		$LF
+	]li
+	[li 
+		" Genre: Puzzle
+		$LF
+	]li
+]ul
+[div class=p 
+	"Dr. Sudoku is a GBA game that offers a variety of sudoku puzzles to solve. This TAS solves the 1000 puzzles that the normal mode has to offer. The "original mode" is a mode where you make your own sudoku puzzles, so it isn't addressed in this run. While this might seem simple at first glance (and let’s be honest, very boring to watch), this is a surprisingly complex TAS to optimise. The challenges and algorithms behind the creation of this TAS can be pretty interesting, since it pretty much consists of solving 1000 NP-hard travelling salesman problems.
+	$LF
+]div
+[div class=p 
+	"Note that the video linked with this submission corresponds to an earlier version of the TAS, which has different solving paths for many puzzles, but takes the same number of frames to solve. The only exception are puzzles (10,19) and (13,9) which are both a single frame longer in the video.
+	$LF
+]div
+[h3 id=OriginOfTheTas 
+	" The origin of the TAS
+	$LF
+]h3
+[div class=p 
+	"In 2022, Twitch streamer TheBreadghost was (and to this day, still is) undertaking the GBA Challenge, in which one tries to beat every GBA game that was released in North America. In the course of this challenge, he spent around 191 hours playing Dr. Sudoku. During his streams, g0goTBC noticed that there were no websites that had the solutions for this game’s puzzles, and thought of a clever way of sharing those: what if he made a TAS so that people could quickly find solutions in a concise video?
+	$LF
+]div
+[div class=p 
+	"After laughing about how ridiculous that idea was for a while, he actually decided to start this project. He quickly found out that the real challenge of this TAS isn’t in solving the sudoku puzzle itself, but in figuring out the exact order in which to input each missing number in the sudoku grid in the least amount of frames.
+	$LF
+]div
+[div class=p 
+	"For this, he coded a basic UI that allowed for manually importing the sudoku puzzles. A script would then solve the sudoku puzzle itself, and interactively show relevant information to help figuring out the shortest input order for that particular puzzle. He would use this UI to manually plan the shortest path, which was the longest and toughest part. After 74 solved puzzles, g0goTBC got bored with it, and the project went dormant for a few months. Here's a WIP that was made around that time, showing the results for the first 50 puzzles: 
+	[a href=https://www.youtube.com/watch?v=XoqlHzjwk80 rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=XoqlHzjwk80
+	]a
+	$LF
+]div
+[div class=p 
+	"Fast forward in time to December 2022, Lightmopp reached out to g0goTBC to work on a new TAS together, and that’s when the Dr. Sudoku project came back from limbo. Lightmopp brought in new ideas on how to continue the project using scripts to automate the parts that were done manually, mainly importing the puzzles from the game and solving the shortest input path. After a few weeks of coding and another few weeks of computation, the Dr. Sudoku TAS was finally done.
+	$LF
+]div
+[h3 id=ControlsOfTheGame 
+	" The Controls of the Game
+	$LF
+]h3
+[div class=p 
+	"Once you start a puzzle, the D-pad is used to move the cursor onto a tile to fill, and then the A button selects it. At this point, a prompt opens to select the digit to put in that tile, with the cursor starting on the last selected digit (5 if none was previously chosen). As before, the D-pad is then used to select the desired digit in the prompt, and the A button selects it. Note that after selecting the digit, no input will be accepted on the next frame. Wrapping around the screen is also allowed both on the board and in the digit selection prompt.
+	$LF
+]div
+[div class=p 
+	"Here's the thing that poses the biggest challenge in this process: the game does not accept diagonal inputs. Therefore, selecting a digit in the prompt takes an additional frame if the desired digit is not in the same row or column as the last selected digit. Because of this, simply minimising time spent going around to the board to reach all the tiles is typically not enough to give the fastest solution to a puzzle. This makes routing especially difficult.
+	$LF
+]div
+[h3 id=SoHowWasTheTasMade 
+	" So how was the TAS made?
+	$LF
+]h3
+[h4 id=ExtractingThePuzzlesFromTheGame 
+	" Extracting the puzzles from the game
+	$LF
+]h4
+[div class=p 
+	"First, we needed to extract the puzzles’ information in a machine readable format, which would normally be done by loading each puzzle on screen and manually typing in all 81000 numbers and blank spaces. Instead, this step was done by taking automatic snapshots of the emulator window and using image recognition to detect the digits on the board. While we still had to manually load each of the 1000 puzzles on screen in the game, the whole process only took a few hours.
+	$LF
+]div
+[h4 id=SolvingThePuzzles 
+	" Solving the puzzles
+	$LF
+]h4
+[div class=p 
+	"Using standard sudoku solving techniques, we built a solver to get the solution of every puzzle. Here are the techniques used to solve every puzzle in this game.
+	$LF
+]div
+[ul 
+	[li 
+		" Elimination by having the same digit in the same row, column or box
+		$LF
+	]li
+	[li 
+		" Naked singles / doubles
+		$LF
+	]li
+	[li 
+		" Hidden singles / doubles / triples (2 puzzles in the entire game require the recognition of hidden triples)
+		$LF
+	]li
+	[li 
+		" Pointing pairs
+		$LF
+	]li
+]ul
+[div class=p 
+	"As it turns out, all the puzzles in Dr. Sudoku can be solved without some of the most advanced techniques, such as X-wings (even though we did implement it in our solver).
+	$LF
+]div
+[div class=p 
+	"Although the part of solving a sudoku puzzle may seem complex since it is the hardest part of a casual playthrough, it takes little to no time to compute. Therefore, this part of the code didn’t have to be thoroughly optimised.
+	$LF
+]div
+[h4 id=RoutingThePuzzles 
+	" Routing the puzzles
+	$LF
+]h4
+[div class=p 
+	"This is by far the part that takes the longest time to compute, and is the hardest to solve. Indeed, for each puzzle, we have a set number of digits to enter, and going from each digit’s input spot to another digit’s input spot takes a certain amount of frames. Obviously, every digit needs to be entered once. The more mathematically savvy of us can already see that this is a Travelling Salesman Problem, a very famous NP-hard problem. And it turns out we needed to solve 1000 of them. No biggies!
+	$LF
+]div
+[div class=p 
+	"For those that are familiar with the Travelling Salesman Problem, you already know how hard it can be to find an exact solution to the routing of a path that passes by every point in a given set. It is worth noting that using an algorithm to find an optimal solution using dynamic programming works in the order of (2^n * n^2), where n is the number of squares to pass through. With the hardest puzzles having close to 60 spaces to solve, you would essentially need to test 41 billion billion cases in order to find an optimal path. With a supercomputer at our disposal, if we’re lucky enough, we should complete the TAS a little bit before our sun dies.
+	$LF
+]div
+[div class=p 
+	"With that in mind, we chose the k-opt method, which was quick enough to implement and gave us a good shot at finding the best minimum possible. Our first implementation of k-opt saved 178 frames over g0goTBC’s manual solutions in the first 74 puzzles. The code was executed on all 1000 puzzles (which took a few days of computation), after which we had a first version of the TAS. This first version beat the game in 494 608 frames (about 2h18)
+	$LF
+]div
+[div class=p 
+	"However, for 2 of the levels (1-48 and 2-10), g0goTBC's original solution was faster by 1 frame, and Lightmopp was not having it and needed to prove the ineptitude of humans and the superiority of machines once and for all. Fueled by this slightly worrying new motivation, a second implementation of the algorithm was made which saved 989 frames over the first, which is the final submitted version, taking 493 619 frames (2:17:44) to beat the game.
+	$LF
+]div
+[h3 id=SoWhatExactlyIsKOpt 
+	" So what exactly is k-opt?
+	$LF
+]h3
+[div class=p 
+	"Suppose that we have a specific first guess for the order in which the tiles can be travelled. This guess might not necessarily be optimal. We can represent the route by a graph connecting the tiles together in the order in which they are filled. We can improve on that solution by switching k vertices around in an attempt to produce a new, better solution.
+	$LF
+]div
+[div class=p 
+	"An example of a 2-opt iteration can be found on the Wikipedia page of the Travelling Salesman Problem: 
+	$LF
+	[img class=embed mw-100 src=https://upload.wikimedia.org/wikipedia/commons/f/f2/Showing_a_step_of_the_two-opt_heuristic.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"Now, our particular problem is not a closed loop. While the starting point of our graph is always the same, we don’t have to get back to the origin. Because of this, we always include the end point in the possible permutations when we switch our k vertices. Another way of putting it is that we can cut our path in (k+1) pieces, and we can rearrange those pieces in any order we want, as well as reverse their direction. We then need to compute the length of all those rearrangements, and see if any one is lower than our initial path. For information, there are approximately 300 000 possible rearrangements for a 4-opt optimisation of a typical puzzle from this game, which takes a few minutes to compute.
+	$LF
+]div
+[h3 id=HowDidWeImplementKOpt 
+	" How did we implement k-opt?
+	$LF
+]h3
+[div class=p 
+	"In our k-opt implementation, we take a single path and look at all the possible rearrangements using k vertices. We then apply a single modification, the one giving the biggest improvement over the current route (we pick one in case of a tie). Then, we run the k-opt optimisation on this new path all over again. While there are ways to apply multiple compatible path rearrangements at the same time, we did not find it a consistent way to apply it effectively.
+	$LF
+]div
+[div class=p 
+	"The first implementation of the algorithm took the nearest neighbour path as our initial guess. The nearest neighbour path starts at the origin, then goes to the nearest point, then to the nearest available (not visited yet) point from there and so on. From that initial guess, we ran the k-opt iteratively for k = 2 to 4. This means that we did all possible 2-opt optimisations, then from there, all possible 3-opt optimisations, and then all possible 4-opt optimisations. Each puzzle’s path took about 10-20 minutes to compute.
+	$LF
+]div
+[div class=p 
+	"The second implementation added a number of purely random paths to the nearest neighbour solution before applying the k-opt algorithm. On each of those initial guesses, we applied 2-opt, and then 3-opt optimisations until no improvement could be made. With this, each puzzle’s path took about an hour to compute. Note that we tried applying a final 4-opt on the best solution of each puzzle, but this never saved a single frame, so it is not recommended.
+	$LF
+]div
+[div class=p 
+	"Note that for every single puzzle, the second implementation algorithm always performed either equally or better than any other implementation that we could think of if the number of random guesses was 200 or more. This means that despite the random nature of the second implementation, it is clearly the superior one, as long as we perform enough random guesses.
+	$LF
+]div
+[h3 id=ButHowGoodAreTheSolutions 
+	" But how good are the solutions?
+	$LF
+]h3
+[div class=p 
+	"We first ran the algorithm with 100 random guesses for each puzzle to get a baseline. We then ran the algorithm again with another 100 random guesses and compared both results. The second iteration was faster than the first one on 19 puzzles, while the first one was faster than the second one on 26 other puzzles. In other words, going from 100 to 200 random guesses saved 19 frames.
+	$LF
+]div
+[div class=p 
+	"While we were happy with the results, it felt like we were so close to the theorical minimum that we wanted to be absolutely sure that our solutions would truly be unbeatable. We therefore ran a third iteration on all puzzles, this time with 500 random guesses, which took a few weeks of non-stop computation on multiple machines, and even destroyed one of them. This third iteration was never beaten by the first two, and only saved 2 additional frames in the end. You read correctly: only 2 frames were saved by a month of parallel computation on multiple machines.
+	$LF
+]div
+[div class=p 
+	"However, there are 4 puzzles out of 1000 where the optimal path was found only a single time out of our first 500 initial guesses (700 if you count the first 2 iterations). This means that we were incredibly lucky to find them, and that there might be a puzzle that could have a path that is one frame faster which we weren’t quite lucky enough to find. Therefore, we can conclude that this TAS might still not be perfect. This is expected, since an analytical proof of its perfection would take an immense amount of brain work and computation, and we only have terrible old laptops and very low patience level at our disposal.
+	$LF
+]div
+[div class=p 
+	"However, we can also safely conclude that if we didn’t reach the theoretical minimum, we cannot be more than a handful of frames away. Considering that we gained almost a thousand frames over our original strategies, and that we successfully created a 2h+ long TAS, we can be proud of how close we are to the ultimate goal. Saving additional frames would need either brand new algorithms, or a significant bump in the computing power that’s available to us.
+	$LF
+]div
+[div class=p 
+	"Are a few frames that might not exist worth it for a 2h17 TAS? Are there people around here that didn’t watch this TAS but would actually watch it if only it was a fraction of a second shorter? Am I losing sleep over it?
+	$LF
+]div
+[div class=p 
+	"Yes to all three, obviously, but that’s a story for another day.
+	$LF
+]div
+[h3 id=ExternalResources 
+	" External resources
+	$LF
+]h3
+[div class=p 
+	"The script that was used for the making of this TAS: 
+	[a href=https://github.com/g0goTAS/dr-sudoku-router rel=noopener external nofollow 
+		"https://github.com/g0goTAS/dr-sudoku-router
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": These submission notes are incredibly informative on the traveling salesman problem and k-opt implementation that wouldn't feel out of place in a computer science lecture. The Python scripts used to figure out the most optimal sudoku paths is also very understandable thanks to the comments in them.
+	$LF
+]div
+[div class=p 
+	"The end result definitely shows through the methodical yet speedy end result. A lot of the movement seems counterintuitive until the viewer realizes that the digit selection is also subject to the Traveling Salesman problem. This is most apparent with solutions that don't immediately fill in the top-left blank that the cursor starts on for every puzzle. Little routing choices like that one found by the scripts show how strong the solutions ended up.
+	$LF
+]div
+[div class=p 
+	"The game doesn't have any credits sequence after completing the final puzzle so the end point on the last puzzle completed message is sufficient. Accepting to standard.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

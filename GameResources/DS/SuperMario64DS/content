@@ -1,65 +1,93 @@
-20
-[div class=toc 
-	[ul 
-		[li 
-			[a href=#MemoryaddressesforSuperMario64DS(USA,v1.0) 
-				"Memory addresses for 
-				[tt 
-					"Super Mario 64 DS (USA, v1.0)
-				]tt
-				$LF
-			]a
-		]li
-		[li 
-			[a href=#Informationsabouttheaddressesgiven 
-				"Informations about the addresses given
-				$LF
-			]a
-		]li
-		[li 
-			[a href=#Maximumspeeds 
-				"Maximum speeds
-				$LF
-			]a
-		]li
-		[li 
-			[a href=#GlitchesandTricks 
-				" Glitches and Tricks
-				$LF
-			]a
-		]li
-	]ul
+35
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#MemoryAddressesForSuperMario64DsUsaV10 
+					"Memory addresses for 
+					[code 
+						"Super Mario 64 DS (USA, v1.0)
+					]code
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#AddressesOffsetFromAnObjectSBase 
+							"Addresses offset from an object's base
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#OtherAddresses 
+							"Other Addresses
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#MoreInformationsAboutTheAddressesGiven 
+					"More informations about the addresses given
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#FixedPointNumbers 
+					"Fixed-point numbers
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#MaximumSpeeds 
+					"Maximum speeds
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#GlitchesAndTricks 
+					" Glitches and Tricks
+					$LF
+				]a
+			]li
+		]ul
+	]div
 ]div
-[h3 id=MemoryaddressesforSuperMario64DS(USA,v1.0) 
+[h3 id=MemoryAddressesForSuperMario64DsUsaV10 
 	"Memory addresses for 
-	[tt 
+	[code 
 		"Super Mario 64 DS (USA, v1.0)
-	]tt
+	]code
 	$LF
 ]h3
 [div class=p 
-	"Side note : The DS framerate is around 60 FPS, but most of this game runs at 30 FPS, which means that almost every sort of timer will decrease every 2 frames. Also, the input given by the player is counted when the actual game frame finishes, not when it lags.
+	"Side note : The DS framerate is around 60 FPS, but most of this game runs at 30 FPS by having a lag frame after every in-game frame (except the star select screen and the title screen), which means that almost all important addresses will update every 2 frames. Also, the input given by the player is counted when the actual game frame finishes, not during the lag itself.
 	$LF
 ]div
 [div class=p 
-	"Unfortunately, most of the interesting information is not at a fixed address; it changes as you move from one area to another. The address that refers to the player base is 0x02097490. This address holds a 4-byte pointer to the base of most of the interesting addresses.
+	"Every object, including the player, has a base address. The attributes of an object, such as its position and speed, are stored at consistent offsets from the base, so we will list those offsets here. The object list is stored as a doubly linked list, so each object also stores the next object's base and the previous object's base. The address 
+	[b 
+		"0x02097490
+	]b
+	" holds a 4-byte pointer to the player's base address, which is also the start of the object list. The player's base actually has only two possible values, one used in the castle grounds and one used everywhere else.
 	$LF
 ]div
-[div class=p 
-	"For instance, in the castle grounds when you first start the game, 0x02097490 holds 0x02169718. But once you get into the castle, 0x02097490 holds 0x0217AB38.
+[h4 id=AddressesOffsetFromAnObjectSBase 
+	"Addresses offset from an object's base
 	$LF
-]div
-[hr 
-]hr
-[div class=p 
-	"These are the addresses that have been decoded so far:
-	$LF
-]div
+]h4
 [table 
 	[tbody 
 		[tr 
 			[th 
-				"Address
+				"Object
+			]th
+			[th 
+				"Offset
 			]th
 			[th 
 				"Size (bytes)
@@ -70,54 +98,136 @@
 		]tr
 		[tr 
 			[td 
-				"base + 0x08
+				"Player
+			]td
+			[td 
+				"0x08
 			]td
 			[td 
 				"1
 			]td
 			[td 
-				"Which character you are playing as (Mario: 0, Luigi: 1, Wario: 2, Yoshi: 3)
-				[br 
-				]br
-				"(Putting a cap will set this value to the character of the cap)
+				"Which character's cap you're wearing (Mario=0, Luigi=1, Wario=2, Yoshi=3)
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0x5C, 0x60, 0x64
+				"All
+			]td
+			[td 
+				"0x0C
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Object ID. A number that indicates what type of object it is.
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"0x50
 			]td
 			[td 
 				"4
 			]td
 			[td 
-				"Character's X, Y and Z positions
+				"Pointer to the previous object. Subtract 0x50 from the value here to get the previous object's base. 0 if it's the first object (the player).
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0x8E
+				"All
+			]td
+			[td 
+				"0x54
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"Pointer to the next object. Subtract 0x50 from the value here to get the next object's base. 0 if it's the last object.
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"0x5C, 0x60, 0x64
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"X, Y and Z positions
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"0x8C
 			]td
 			[td 
 				"2
 			]td
 			[td 
-				"Facing angle
+				"Facing pitch angle
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0x94
+				"All
+			]td
+			[td 
+				"0x8E
 			]td
 			[td 
 				"2
 			]td
 			[td 
-				"Motion angle
+				"Facing yaw angle
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0x98
+				"All
+			]td
+			[td 
+				"0x92
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Motion pitch angle
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"0x94
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Motion yaw angle
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"0x98
 			]td
 			[td 
 				"4
@@ -128,52 +238,94 @@
 		]tr
 		[tr 
 			[td 
-				"base + 0x6ED
+				"All
+			]td
+			[td 
+				"0xA4, 0xA8, 0xAC
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"X, Y and Z speeds (Y speed is always set to -32768 on the ground)
+			]td
+		]tr
+		[tr 
+			[td 
+				"All
+			]td
+			[td 
+				"0xCC
 			]td
 			[td 
 				"1
 			]td
 			[td 
-				"Y run timer (max is 30)
-				$LF
+				"Room reference (unsigned, more explanation below)
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0xA4
+				"Clam
+			]td
+			[td 
+				"0x16E
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Clam's timer (unsigned). When the clam is rendered, the timer is set to 0 and will increase by 1 every two frames while the clam is rendered. When the timer reaches 151 or more, getting close to the clam will open it and the timer will restart to 0, and the clam will close again when it reaches 151 or more.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player
+			]td
+			[td 
+				"0x370
 			]td
 			[td 
 				"4
 			]td
 			[td 
-				"X Velocity
+				"This address has to do with what mode you're in (walking/jumping/swimming/crouching/etc.)
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0xA8
+				"Player
+			]td
+			[td 
+				"0x391
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Air/Ground state. This value holds 1 when you're on the ground and 0 when you're in the air.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player
+			]td
+			[td 
+				"0x640
 			]td
 			[td 
 				"4
 			]td
 			[td 
-				"Y Velocity (To prevent players from doing Vertical Speed Conservation, the value it holds is always -32678 when on the ground)
+				"3-dimensional speed. Used for swimming and flying.
 			]td
 		]tr
 		[tr 
 			[td 
-				"base + 0xAC
+				"Player
 			]td
 			[td 
-				"4
-			]td
-			[td 
-				"Z Velocity
-			]td
-		]tr
-		[tr 
-			[td 
-				"base + 0x644
+				"0x644
 			]td
 			[td 
 				"4
@@ -184,75 +336,10 @@
 		]tr
 		[tr 
 			[td 
-				"base + 0x706
+				"Player
 			]td
 			[td 
-				"1
-			]td
-			[td 
-				"Water state. When in the water or when the game thinks so, this address holds a value of 1. If not, the value it holds is 0.
-			]td
-		]tr
-		[tr 
-			[td 
-				"base + 0x370, 374, 378
-			]td
-			[td 
-				"4
-			]td
-			[td 
-				"These addresses have to do with what mode you're in (walking/jumping/swimming/crouching/etc.)
-			]td
-		]tr
-		[tr 
-			[td 
-				"0x02096750
-			]td
-			[td 
-				"4
-			]td
-			[td 
-				"RNG. Understandable if shown as Hexadecimal
-			]td
-		]tr
-		[tr 
-			[td 
-				"0x0217A11E
-			]td
-			[td 
-				"1
-			]td
-			[td 
-				"SSL Pillar counter (also used for some other counts in the game)
-			]td
-		]tr
-		[tr 
-			[td 
-				"0x02151D14
-			]td
-			[td 
-				"4
-			]td
-			[td 
-				"Koopa the Quick's speed in Bomb-Omb Battlefield
-				$LF
-			]td
-		]tr
-		[tr 
-			[td 
-				"0x02167F84
-			]td
-			[td 
-				"4
-			]td
-			[td 
-				"Koopa the Quick's speed in Tiny Huge Island
-				$LF
-			]td
-		]tr
-		[tr 
-			[td 
-				"0x0217B1D4
+				"0x69C
 			]td
 			[td 
 				"2
@@ -263,27 +350,50 @@
 		]tr
 		[tr 
 			[td 
-				"0x02176464
+				"Player
 			]td
 			[td 
-				"4
-			]td
-			[td 
-				"Water level in the basement. Not fully tested, useful for hacking the 30 stars door skip to be easier.
-			]td
-		]tr
-		[tr 
-			[td 
-				"base + 0xCC
+				"0x6E3
 			]td
 			[td 
 				"1
 			]td
 			[td 
-				"Character's room reference. This address is unsigned and links the character to the main room currently loaded.
+				"Mid-air slide timer. The timer starts from 0 and increases by 1 for every two frames your character is in mid-air and above a floor during a butt slide, belly slide, or slide kick.
 				[br 
 				]br
-				"When unloading the main room you're supposed to currently be in and loading another one instead, you will need to cheat this value to keep the character alive to avoid softlocking.
+				"The timer will reset back to 0 if your character lands on a floor during the slide or after the timer reaches 30, at which point it will enter the falling state. Seems to have other purposes too.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player
+			]td
+			[td 
+				"0x6ED
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Y run timer. The timer is set to 30 when you've successfully charged Y run and will decrease by 1 every two frames while you're running with Y held (can be preserved during any other state).
+				[br 
+				]br
+				"While running, if you release Y or hold neutral, the timer will reset to 0 instantly.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player
+			]td
+			[td 
+				"0x706
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Water state. When in the water, this address holds a value of 1, else it will hold 0.
 			]td
 		]tr
 	]tbody
@@ -309,24 +419,153 @@
 		]tr
 		[tr 
 			[td 
-				"base - 0x12C, 0x128, 0x124
+				"Player's base - 0x12C, 0x128, 0x124
 			]td
 			[td 
 				"4
 			]td
 			[td 
-				"camera X, Y and Z positions
+				"Camera X, Y and Z positions
 			]td
 		]tr
 		[tr 
 			[td 
-				"base - 0x3A
+				"Player's base - 0x3A
 			]td
 			[td 
 				"2
 			]td
 			[td 
-				"camera up/down angle
+				"Camera up/down angle
+			]td
+		]tr
+		[tr 
+			[td 
+				"Player's base - 0x3C
+			]td
+			[td 
+				"2
+			]td
+			[td 
+				"Camera left/right angle
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=OtherAddresses 
+	"Other Addresses
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Size (byte)
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x02096750
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"RNG (hexadecimal)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02099100
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"Frame counter associated to RNG. The RNG will be set to the value that this address is holding when you enter a new area.
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02097454
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Coin counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02097408
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Red coin counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0208FCE5
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Health points
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x020973EC
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"Lives counter
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217A11E
+			]td
+			[td 
+				"1
+			]td
+			[td 
+				"SSL Pillar counter (also used for some other counters in the game)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02092780
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"Next object's unique ID (hexadecimal)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x02176464
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"Water level in the basement. Not fully tested, useful for hacking the 30 stars door skip to be easier.
 			]td
 		]tr
 	]tbody
@@ -336,32 +575,138 @@
 	]br
 	$LF
 ]div
-[h3 id=Informationsabouttheaddressesgiven 
-	"Informations about the addresses given
+[h3 id=MoreInformationsAboutTheAddressesGiven 
+	"More informations about the addresses given
 	$LF
 ]h3
 [div class=p 
-	"Angles are 2-byte values that use the full range from 0 to 65535 and then wrap (so an angle of 65535 is almost the same as an angle of 0). The character's facing angle controls what angle the character is drawn on the screen (relevant for glitchy longjumps, kicks, crouch, yoshi's tongue, etc.); the character's motion angle controls what direction the character is moving. When you're going in a straight line then the two angles are the same; when you're turning quickly (or some other things such as redirected jumps), the model angle lags behind the motion angle.
+	"Angles are 2-byte values that use the full range from 0 to 65535 and then wrap (so an angle of 65535 is almost the same as an angle of 0). The character's facing angle controls what angle the character is drawn on the screen (relevant for long jumps, kicks, crouching, yoshi's tongue, etc.); the character's motion angle controls what direction the character is moving. When you're going in a straight line, the two angles are the same; when you're turning quickly on the ground or holding a different direction than forwards during a jump for example, the motion angle becomes different than the facing angle.
 	$LF
 ]div
 [div class=p 
-	"Koopa the Quick's maximum speed is 98,304 but it becomes 196,108 when you finish the race (if you finish before him). Though, it will become 98,304 again if you go close to him, even after finishing the race.
+	"Despite the speed address displaying really high numbers when shown as integers, it stays the most accurate way to show it because of how little it can vary in many situations.
 	$LF
 ]div
 [div class=p 
-	"Y run is set as 30 as soon as you can run fast, even if you're still standing holding Y. The Y run timer only decreases when you're running/walking and you can conserve it by doing a move. Even crouching keeps it. If the Y run timer eventually reaches 0 and that you want to keep the speed as long as possible, you need to press no-direction for 6 frames, then pressing forward again for 2 frames, then pressing no-direction for 6 frames, etc. This is only useful if you are heading to go straight forward.
+	"The Y run timer only decreases when you're running/walking and you can conserve it by doing a move. Even crouching keeps it. If the Y run timer eventually reaches 0 and that you want to keep the speed as long as possible, you need to press no-direction for 6 frames, then pressing forward again for 2 frames, then pressing no-direction for 6 frames, etc. (and at the end press a backwards direction instead of forward, and then press no-direction again) This is only useful if you want to go straight forwards or close to.
 	$LF
 ]div
 [div class=p 
-	"The Random Number Generator (RNG) is set to the frame counter when entering a new area. Therefore it has limited manipulations which means that you need to be lucky and hope you get a good RNG when entering a level. The way to manipulate it is to delay the entrance to a level, or try to save frames earlier to get a larger choice.
+	"Also, while using Y run, the maximum acceleration is 122880, as well as the deceleration, therefore you can almost instantly get to a speed of 0 when running, and turn around at will.
 	$LF
 ]div
-[h3 id=Maximumspeeds 
+[div class=p 
+	"The Random Number Generator (RNG) is set to a specific frame counter when entering a new area (mentioned in the board). Therefore we can manipulate it by delaying the entrance to a level (during the star select screen because the game runs at 60 FPS there so we lose half the time with delays), but multiple levels have objects that call the RNG by simply being rendered on the screen, without necessarily having to interact with the player, for example the fishes in JRB. The RNG manipulation is still very limited though, therefore it's common that a few frames will have to be lost on star select delays before a heavy RNG star (such as some 100 coin stars). Here is a 
+	[a href=https://www.youtube.com/watch?v=Ll4yzgVvcfg rel=noopener external nofollow 
+		"more detailed explanation of the RNG in SM64DS
+	]a
+	$LF
+]div
+[div class=p 
+	"The Room reference address is unsigned and links the character to the main room currently loaded. When unloading the room you're supposed to currently be in and loading another one instead (all of that with cheats), you will need to cheat the value that this address holds to a certain number linked to the new cheated room to keep the character alive (works with any object too). There doesn't need to be another room in the map for this to work though, you can cheat a room fictionally. This address works with objects too (deriving from the object's base), so you can keep objects alive even when they're from a different room. Be aware though, because cheating too many rooms to be loaded can create in-game lag, and your movie could desync when trying to play it back without cheats.
+	$LF
+]div
+[div class=p 
+	"There are specific addresses linked to rooms. Those addresses are all 1 byte signed, and if set to 1 the room is loaded, and 0 if the room is not loaded.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Room reference
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x0217BB70
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BB7C
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BB88
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BB94
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BBA0
+			]td
+			[td 
+				"4
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BBAC
+			]td
+			[td 
+				"5
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BBB8
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0217BBC4
+			]td
+			[td 
+				"7
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=FixedPointNumbers 
+	"Fixed-point numbers
+	$LF
+]h3
+[div class=p 
+	"The game represents non-integer numbers using 
+	[a href=https://en.wikipedia.org/wiki/Fixed-point_arithmetic rel=noopener external nofollow 
+		"fixed-point 20.12 numbers
+	]a
+	" (20 integer bits and 12 fractional bits). For example, the number 1.5 is represented by 0x00001800. However this page will consider these numbers as signed 32-bit integers, so 0x00001800 will be interpreted as 6144. To get the "real value" in fixed-point units (fxu), divide by 0x1000 or 4096.
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[h3 id=MaximumSpeeds 
 	"Maximum speeds
 	$LF
 ]h3
 [div class=p 
-	"Note that the maximum speed for a move does not mean you cannot get a higher speed while doing that move. In fact, you can get a higher speed than the maximum speed in some instances. For example, if you jump immediately after doing a long jump, you will notice that your speed is much higher than the maximum speed for a jump. In that case, you will need to check about the no-input trick further below.
+	"Note that the maximum speed for a move does not mean you cannot get a higher speed while doing that move. In fact, you can get a higher speed than the maximum speed in some instances. For example, if you jump immediately after doing a long jump with full speed, you will notice that your speed during the jump is much higher than the maximum speed for a jump. In that case, you will need to check about the no-direction trick further below.
 	$LF
 	"Also, the maximum speed when you're sliding, regardless of the move you are in, is 409,600.
 	$LF
@@ -370,78 +715,181 @@
 	"Here are listed the maximum speeds of every character for every move :
 	$LF
 ]div
-[ul 
-	[li 
-		"Common to everyone
-		$LF
-		[ul 
-			[li 
-				"Butt Slide / Slip : 196,608
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Character
+			]th
+			[th 
+				"Walk
+			]th
+			[th 
+				"Run
+			]th
+			[th 
+				"Y run
+			]th
+			[th 
+				"Jumping/Falling
+			]th
+			[th 
+				"Long Jump
+			]th
+			[th 
+				"Swim
+			]th
+			[th 
+				"Slidekick/Dive
+			]th
+			[th 
+				"Butt Slide/Slip
+			]th
+		]tr
+		[tr 
+			[td 
+				"Mario
+			]td
+			[td 
+				"36,860
+			]td
+			[td 
+				"147,440
+			]td
+			[td 
+				"176,921
+			]td
+			[td 
+				"121,638
+			]td
+			[td 
+				"221,160
+			]td
+			[td 
+				"65,536
+			]td
+			[td 
+				"163,840
+			]td
+			[td 
+				"196,608
 				$LF
-			]li
-			[li 
-				"Slidekick / Dive : 163,840
+			]td
+		]tr
+		[tr 
+			[td 
+				"Luigi
+			]td
+			[td 
+				"32,760
+			]td
+			[td 
+				"131,040
+			]td
+			[td 
+				"157,242
+			]td
+			[td 
+				"108,108
+			]td
+			[td 
+				"196,560
+			]td
+			[td 
+				"98,304
+			]td
+			[td 
+				"163,840
+			]td
+			[td 
+				"196,608
 				$LF
-			]li
-		]ul
-	]li
-]ul
-[ul 
-	[li 
-		"Mario
-		$LF
-		[ul 
-			[li 
-				"Walking : 36,860 . Running : 147,440 . Y running : 176,921 . Jumping : 121,638 . Backflip / Sideflip : 121,638 . Longjump : 221,160 . Swimming : 65,536
+			]td
+		]tr
+		[tr 
+			[td 
+				"Yoshi
+			]td
+			[td 
+				"32,760
+			]td
+			[td 
+				"131,040
+			]td
+			[td 
+				"157,242
+			]td
+			[td 
+				"108,108
+			]td
+			[td 
+				"196,560
+			]td
+			[td 
+				"58,976
+			]td
+			[td 
+				"163,840
+			]td
+			[td 
+				"196,608
 				$LF
-			]li
-		]ul
-	]li
-]ul
-[ul 
-	[li 
-		"Luigi
-		$LF
-		[ul 
-			[li 
-				"Walking : 32,760 . Running : 131,040 . Y running : 157,242 . Jumping : 108,108 . Backflip / Sideflip : 108,108 . Longjump : 196,560 . Swimming : 98,304
+			]td
+		]tr
+		[tr 
+			[td 
+				"Wario
+			]td
+			[td 
+				"30,720
+			]td
+			[td 
+				"122,880
+			]td
+			[td 
+				"147,450
+			]td
+			[td 
+				"101,376
+			]td
+			[td 
+				"184,320
+			]td
+			[td 
+				"42,592
+			]td
+			[td 
+				"163,840
+			]td
+			[td 
+				"196,608
 				$LF
-			]li
-		]ul
-	]li
-]ul
-[ul 
-	[li 
-		"Yoshi
-		$LF
-		[ul 
-			[li 
-				"Walking : 32,760 . Running : 131,040 . Y running : 157,242 . Jumping : 108,108 . Backflip / Sideflip : 108,108 . Longjump : 196,560 . Swimming : 58,976
-				$LF
-			]li
-		]ul
-	]li
-]ul
-[ul 
-	[li 
-		"Wario
-		$LF
-		[ul 
-			[li 
-				"Walking : 30,720 . Running : 122,880 . Y running : 147,450 . Jumping : 101,376 . Backflip / Sideflip : 101,376 . Longjump : 184,320 . Swimming : 42,592
-				$LF
-			]li
-		]ul
-	]li
-]ul
-[h3 id=GlitchesandTricks 
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"While doing a backflip or a sideflip, if you try to hold a direction to go full speed, the speed oscillates between 63488 and 57344. This happens because the speed is capped when going backwards (the facing angle is reversed in a sideflip). In fact, if you try to jump or long jump backwards (with POSITIVE speed), the cap happens too. The cap only happens when you're moving backwards compared to your facing angle but with forwards speed. If you start by jumping forwards and hold backwards while skipping the exact speed of 0, you will start moving backwards but with negative speed, and the speed is never capped when it's negative.
+	$LF
+	[br 
+	]br
+	$LF
+]div
+[h3 id=GlitchesAndTricks 
 	" Glitches and Tricks
 	$LF
 ]h3
+[div class=p 
+	"Here is a more comprehensive list of glitches: 
+	[a href=https://docs.google.com/spreadsheets/d/1SAEzEpXE3MtWZkC_rsKSNvtrAM6q8Q2fNmAnQnShMKw rel=noopener external nofollow 
+		"Tostipedia
+	]a
+	$LF
+]div
 [ul 
 	[li 
 		"Here is a more detailed explanation about why portals happen and how to manage to do them : 
-		[a class=extlink href=https://www.youtube.com/watch?v=4IVgXx-ZDHc rel=nofollow 
+		[a href=https://www.youtube.com/watch?v=4IVgXx-ZDHc rel=noopener external nofollow 
 			"Integer Overflow Portal Explanation
 		]a
 		$LF
@@ -449,7 +897,7 @@
 ]ul
 [ul 
 	[li 
-		"Heaven's portal: When you do a slidekick, dive or long jump into a glitchy corner (meaning the character slightly enters the wall), if you do it with a certain angle and while moving downwards, the character is sent upwards to the ceiling above them. Most of the places where you can do a heaven's portal have no in-course ceiling, therefore the ceiling above the character is the hard-coded limit, which is very high. The trick can also be done by going into a wall with high speed. Heaven's portals can be used to do major skips (e.g. Moat Skip) or reach stars faster.
+		"Heaven's portal: When you do a slidekick, dive or long jump into a glitchy corner (meaning the character slightly enters the wall), if you do it with a certain angle and while moving downwards, the character is sent upwards to the ceiling above them. Most of the places where you can do a heaven's portal have no in-course ceiling, therefore the ceiling above the character is the hard-coded limit, which is very high. The trick can also be done by going into a wall with high speed while in a slidekick. Heaven's portals can be used to do major skips (e.g. Moat Skip) or reach stars faster.
 		$LF
 	]li
 ]ul
@@ -461,44 +909,86 @@
 ]ul
 [ul 
 	[li 
-		"Deathwarp clip : This also works by glitching into a corner, but in some instances you can be sent downwards (to the death barrier) instead of upwards (to the ceiling above). Can be useful to skip entering rooms in the castle.
+		"Deathwarp clip : This also works by glitching into a corner, but in some instances the glitch happens while you have upwards speed, therefore you will be sent downwards (to the hard-coded death barrier). Can be useful to exit the castle quickly from the character's room.
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Corner clipping: Some glitchy corners allow you to go through the wall instead of sending you into a portal, for example the characters' room right corner.
+		"Corner clipping: Some glitchy corners let the character gain a lot height during a long jump, a slidekick or a dive with a precise angle, thus getting to the ceiling very quickly. If the ceiling at the top is slanted, in some instances you will be able to clip through the wall by the top and get out of bounds with sometimes precise speed manipulation needed. Examples of those are the corner used for 8 star door skip in the character's room, and the pillars at the side of the mirror on the castle 2nd floor.
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Star cancel glitch: When you eat a star as Yoshi, it is possible to skip the celebration for getting the star, that forces you to exit the level. After eating the star if you bounce on a fly guy or spindrift, land on a shell, or grab an owl, then you will be able to move around with the star in your mouth. If you walk/run, stand still long enough for the landing animation to finish, or start swimming, then you will do the celebration for the star as usual. However, if you jump out of the landing animation then you will not start the celebration, and can thus delay it indefinitely.
+		"Free movement transition glitch: The normal behavior during a transition is that you have absolutely no control over the character (moves, angles, state), the speed address holds 0, and the position is being forced to certain coordinates on a certain axis (doesn't have to be the regular X, Y or Z axes). However, by eating a coin early before the transition but late enough that the character doesn't start running before it, you will actually be able to run even if the transition has started, and you can control the character freely during the transition. However, you are still being forced to the same coordinates on the same axis, so you will only be able to truly move on a plane (the plane of which the axis is perpendicular to) no matter what your angle is. This also works with a 100-coin star (or any star that doesn't make you exit the course in secret stages), and you will actually get the star dance during the transition even if you've already started to be moved, and you won't be forced to any coordinate during the star dance animation, but it will resume once that animation ends, and you can move freely during it.
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"No-direction trick: This trick works by not pressing any direction while doing any sort of jump. When doing so, the character's speed will aim to go to 0 by decreasing/increasing (depending on the situation) by 2048, until it reaches 0. It's useful to do it while the character's speed is above maximum speed, since the speed goes down slower than if you pressed any direction. It works with all movement except punches, kicks, dives and slidekicks since their speed doesn't decrease in the same way and/or is locked.
+		"Star cancel: This trick allows you to skip the celebration after collecting a star. On top of gaining time, this allows you to skip the star text boxes if the star cancelled is the 1st, 3rd, 8th, 12th, 30th, 50th or 80th. There are a few ways to cancel a star:
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Direction reset: When pressing the opposite direction from the direction the character is facing while in the air, their speed starts decreasing until it becomes negative (which means the character is actually moving in the opposite direction from the direction they are facing). However, if the speed becomes exactly 0 while decreasing the speed, it will increase (positive numbers) even if you're moving in the opposite direction of the way you're facing. If the direction is backwards (being more than a 16384 angle difference from the facing angle) and you keep pressing the direction while landing, then the character will instantly turn when landing.
+		[ul 
+			[li 
+				"Backwards star licking: Some stars (such as HMC Metal-Head Wario Can Move) are positioned close to a void that kills the player. If Yoshi eats the star with high enough backwards speed (often with a sideflip), he can collect the star while falling into the void, and die instead of collecting the star normally. This saves time in most places since the void is often close enough to the star vertically and the death animation is faster than the normal celebration. In addition, you can do the same thing with stars that are positioned close to a loading zone that doesn't act like a painting (such as THI Pluck the Piranha Flower with the pipe), and enter a new area within the level instead of actually dying. Precise timing is needed for that though, because if the star falling animation starts too early, the loading zone will be bypassed and the celebration won't be cancelled, and if it stars too late, the transition will interrupt Yoshi from getting onto the ground.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		[ul 
+			[li 
+				"Mid-air walk: By having a fly guy, a spindrift, an owl or a shell next to a star, you can eat the star, cancel the star dance with the object (bouncing on the fly guy or the spindrift, grab the owl or get onto the shell) and keep the star in your mouth. The only way to get the star dance after that is to start walking, stand still, or enter the water. By continuously jumping (if needed), getting near a death barrier makes the star cancel possible by doing the following: jump towards the edge of the floor, wait for the character to start falling vertically (not the actual falling state's model) and press a direction. This will make you walk mid-air for 2 frames, thus the star falling animation happens. This is also possible with loading zones that don't act like a painting, but as before, it's needed to press a direction mid-air with specific timing to get the transition and the star at the same time.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		[ul 
+			[li 
+				"Travelling star: By doing the same method mentioned just above to get the star in your mouth without getting the star dance, you can afterwards actually spit out the star towards the loading zone. If that loading zone doesn't act like a painting, then you can simply run towards it and lick the star before getting into the loading zone. However, with loading zones that act like a painting (works for other loading zones too), you will require to perform the free movement transition glitch and collect the star during the transition. It will still be counted as long as you get it before the sceren becomes completely white. This method is useful for TTM and SL, as the transitions act like paintings.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"No-direction trick: This trick works by not pressing any direction while doing any sort of jump. When doing so, the character's speed will aim to go to 0 by decreasing/increasing (depending if your speed in positive or negative) by 2048, until it reaches 0. It's useful to do it while the character's speed is above maximum speed, since the speed goes down slower than if you pressed any direction. It works with all moves except punches, kicks, dives and slidekicks since their speed doesn't decrease in the same way.
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Frame sliding: While walking up a slope you'll notice that your speed decreases every frame. To avoid this, simply press backwards and no-direction every other frame to keep the speed you had. if you don't have enough space to do a slidekick recover (or a kick in a case of a quite flat slope) then this can be useful. It can also be used to preserve a little Y run for each time you do it, and as entertainment for a run (e.g. using it during Moat Skip in any% since there is a lot of straight running).
+		"Direction reset: By pressing a backwards direction compared to the character's facing angle while in the air, the speed starts decreasing until it gets close to 0. If your speed gets past 0, it becomes negative and you simply start moving in the opposite direction of your motion angle. However, if the speed reaches 0 (can be achieved by pressing neutral right before the speed is supposed to become negative if needed), any direction that you will press resets your motion angle to that direction instantly, and the speed becomes positive. 
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Glitchy long jump: Usually, when you do a long jump, it is necessary that the character is facing the same direction he is moving in order to get a long jump with the highest speed. However, while walking, if you turn very fast so that the model angle lags behind the motion angle, by using a specific direction with the touchscreen you can do long jumps with top speed where model angle and motion angle are completely different. Here is a more detailed explanation of this trick: 
-		[a class=extlink href=https://youtu.be/1tOC5HVSY9w rel=nofollow 
+		"Landing model reset: Normally when landing, the character's motion angle is set to their facing angle. However, if they differ by more than 16384 units, then the facing angle is set to the motion angle instead. This can be done by turning a lot in the air, or by doing a direction reset. 
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Frame sliding: By pressing backwards and then neutral when running, the character's facing and motion angles are locked, as well as the speed (unless it's higher than the maximum running speed beforehand, in which case it's set to that instantly). This can be useful to go in a straight line strictly (which is not always possible while running normally, even with L and forwards held) and keep the facing angle lagged behind the motion angle to redirect faster afterwards if needed. This can also be used to get up slopes since your speed is locked, however it's only faster to do it in specific situations, like when you can start doing it with maximum speed and if it's on a very steep slope.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Glitchy long jump: Usually, when you do a long jump, it is necessary that the character is facing roughly the same direction he is moving in order to get a long jump with the highest speed. However, while walking, if you turn very fast so that the facing angle lags behind the motion angle and long jump by pressing B and R at the same time (to not crouch), by using a specific direction with the touch screen during the long jump you can keep high speed even if the facing and motion angles are completely different. You can even reach top speed with the straight backwards direction if the difference is higher than 8192. Here is a more detailed explanation of this trick: 
+		[a href=https://youtu.be/1tOC5HVSY9w rel=noopener external nofollow 
 			"Glitchy Long Jump Explanation
 		]a
 		$LF
@@ -506,7 +996,13 @@
 ]ul
 [ul 
 	[li 
-		"Delayed long jump: By running and pressing R you can slide for up to 16 frames while maintaining the speed you were running at. This can be useful for preserving Y run.
+		"Sideways long jump: Glitchy long jumps can be useful for going up slopes. In particular, some slopes are too steep to long jump up, but you can long jump down them. The player's facing angle is used to determine whether you can long jump, so by creating a significant difference between your motion angle and facing angle, you can face slightly downhill to be able to long jump while moving uphill. This is especially fast in some cases because you can land immediately and long jump repeatedly, staying above 240k speed.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Delayed long jump: By running and pressing R you can slide for up to 16 frames (or longer on some floor types) while maintaining the speed you were running at. This can be useful for preserving Y run when you need to travel a bit farther than 1 long jump since the timer doesn't decrease when you are crouching. However, when you start crouching your motion angle is set to your facing angle, so it's impossible to do a glitchy long jump like this.
 		$LF
 	]li
 ]ul
@@ -520,7 +1016,7 @@
 	[li 
 		[ul 
 			[li 
-				"Before reading these tricks, it is important to note that when doing a punch, your speed will decrease by 2048 every frame if you're on the ground. If you're in the air, the speed becomes locked. When doing a kick, you're not affected by the floor (if it's a moving floor, you are not affected by its movement), and the kick will keep the speed you had until you reach the ground. Also, after a kick you can instantly run after landing. Same with a punch, but your speed will be sent to 0 after the animation finishes. Therefore, punches and kicks are useful for being faster than running in some instances.
+				"Before reading these tricks, it is important to note that when doing a punch, your speed will decrease by 2048 every frame if you're on the ground. If you're in the air, the speed becomes locked. When doing a kick, you're not affected by the floor (if it's a moving floor, you are not affected by its movement), and the kick will keep the speed you had until you reach the ground. Also, after a kick you can instantly run after landing. Same with a punch, but your speed will be set to 0 after the animation finishes. Therefore, punches and kicks are useful for being faster than running in some instances.
 				$LF
 			]li
 		]ul
@@ -530,7 +1026,7 @@
 	[li 
 		[ul 
 			[li 
-				"Kick trick: By pressing and holding B when you do an air move, if you press A (and don't release B) immediately when you land, you will do a kick. It usually isn't possible to kick while in the landing animation, and this lets you preserve speed from a long jump for example.
+				"Kick trick: By pressing and holding B when you do an air move, if you press A (and don't release B) immediately when you land, you will do a kick. It usually isn't possible to kick while in the landing animation, and this lets you conserve speed from a long jump for example.
 				$LF
 			]li
 		]ul
@@ -550,7 +1046,7 @@
 	[li 
 		[ul 
 			[li 
-				"Slow Y kick : When doing punches, if your kick is done with only A and while on the ground, your vertical speed will slowly increase and then slowly decrease.
+				"Slow vertical acceleration kick : After doing 2 consecutive punches, if your kick is done with only A held and not B and while on the ground, you will do a kick different than the regular kick, your vertical acceleration will be much smaller. However the initial vertical speed for that kick is set lower so this doesn't give any vertical advantage, but it can give a horizontal advantage.
 				$LF
 			]li
 		]ul
@@ -560,11 +1056,7 @@
 	[li 
 		[ul 
 			[li 
-				"Regular kick trick : when doing punches, if the last kick is done by pressing A and B at the same time, you will never do a 
-				[tt 
-					"Slow Y kick
-				]tt
-				". You can also do a regular kick instead of the 2nd punch, which is very useful.
+				"Regular kick trick : After doing a punch, if you hold A and B at the same time, you will do a regular kick.
 				$LF
 			]li
 		]ul
@@ -574,7 +1066,7 @@
 	[li 
 		[ul 
 			[li 
-				"No slowdown kick : When kicking something from far away (you have a few frames window to do that though), you won't slow down when hitting that thing.
+				"No slowdown kick : When kicking something from far away, you won't slow down when hitting that thing. The window is pretty specific though.
 				$LF
 			]li
 		]ul
@@ -584,7 +1076,7 @@
 	[li 
 		[ul 
 			[li 
-				"No slowdown punches : When punching something (excepted bricks), even if you're very close to the ennemy you want to hit, you have a 2 frame window to do a punch or a regular kick, and it will cancel the hitting sprite, so you won't slowdown. This trick doesn't work with bricks.
+				"No slowdown punches : When punching something (except bricks) from far away, you won't slow down when hitting that thing. The window is pretty specific though.
 				$LF
 			]li
 		]ul
@@ -592,19 +1084,13 @@
 ]ul
 [ul 
 	[li 
-		"No bonk trick : When doing a dive or a longjump, you would usually bonk when reaching a wall. Though, if your speed is less than 66K, you won't bonk. If you're playing as Mario, you can wallkick after that. For a dive, you need to have a really low speed dive, and that's only possible with triple jumps, slope jumps, and sideflips, because they are the only moves that allow you to dive at any speed.
+		"No bonk trick : When doing a dive or a long jump, you would usually have a damaging bonk when reaching a wall. Though, if your speed is less than 65536, you will get the regular jump behavior instead. If you're playing as Mario, you can wall jump after that, and with any other character you will get the regular jump bonk. For a dive, you need to have a really low speed dive, and that's only possible with triple jumps, slope jumps, and sideflips, because they are the only moves that allow you to dive at any speed.
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Y run: This is a feature of the game. If you stand still and hold Y, after almost one second you will be able to run extremely fast (even faster than the max run speed) and with insane acceleration for a short period of time. There is a timer that starts at 30 and decreases by 1 every 2 frames, though only while you are on the ground. This means just running normally it will last for one second exactly, but with lots of air time it can last for an entire star. Y run can be useful when you have to go through doors, since you can run fast immediately instead of slowly building up speed from 0. Also, with the touchscreen, you can instantly decrease your speed to a value you want instead of slowly decreasing. This can be used to turn faster by reaching 0 speed quickly.
-		$LF
-	]li
-]ul
-[ul 
-	[li 
-		"Air Reset
+		"Air reset
 		$LF
 	]li
 ]ul
@@ -622,9 +1108,9 @@
 	[li 
 		[ul 
 			[li 
-				"Dive reset: When doing a dive onto the ground, if you let your speed reach 0 (by letting it slowly decrease or grabbing something) you will automatically recover in a standing up animation. While in the air, you can't decrease speed during a dive, so the game assumes you're on ground after doing this animation. However, while doing a sideflip, wall jump, or triple jump (very hard with a triple jump), if you get the right amount of negative speed, you can do a dive that sets your speed to exactly 0. Thus, the standing up animation will play in mid-air as soon as you do the dive. After the animation finishes, you will be able to move for 1 frame, allowing you to jump, backflip, or kick. This trick allows us to reach new heights, as it allows infinite height gain as Mario using a wall. Here is a video explanation: 
-				[a class=extlink href=https://www.youtube.com/watch?v=LYE3pbvhlcE rel=nofollow 
-					"Dive Reset Explanation
+				"Dive reset: When doing a dive onto the ground as Mario, Luigi or Wario, if you let your speed reach 0 (by letting it slowly decrease or grabbing something) you will automatically recover in a standing up animation. While in the air, you can't decrease speed during a dive, so the game assumes you're on ground after doing this animation. However, while doing a sideflip, wall jump, or triple jump (very hard with a triple jump), if you get the right amount of negative speed, you can do a dive that sets your speed to exactly 0. Thus, the standing up animation will play in mid-air as soon as you do the dive. After the animation finishes, you will be able to move for 2 frames, allowing you to jump, backflip, or kick. This trick allows us to reach new heights, as it allows infinite height gain as Mario using a wall. 
+				[a href=https://www.youtube.com/watch?v=LYE3pbvhlcE rel=noopener external nofollow 
+					"Here is a more detailed explanation
 				]a
 				$LF
 			]li
@@ -635,7 +1121,7 @@
 	[li 
 		[ul 
 			[li 
-				"Spit reset: After spitting out something as Yoshi, there are 2 frames when Yoshi switches from the spitting animation to the walking animation where you can jump, spit, backflip, or even long jump if you are travelling fast enough.
+				"Spit reset: After spitting something out as Yoshi, there are 2 frames when Yoshi switches from the spitting out animation to the walking animation where you can jump, spit, backflip, or even long jump if you are travelling fast enough.
 				$LF
 			]li
 		]ul
@@ -655,7 +1141,7 @@
 	[li 
 		[ul 
 			[li 
-				"Throw reset: After throwing an egg or another object, there will be 2 frames when the character switches back from the throwing animation to the walking animation where you can do the same moves as recalled before.
+				"Eat reset: The same, except it's only possible by eating a coin (not an enemy).
 				$LF
 			]li
 		]ul
@@ -663,34 +1149,57 @@
 ]ul
 [ul 
 	[li 
-		"Sky Wall Kicks : Usually when doing wallkicks, it happens in situations where the walls you wallkick with are opposite (180°). But it's also possible to do it with walls that are a bit less than 90° by slowing speed to 0 and redirecting to the other wall in order to gain height (e.g. : used in Tall, Tall, Mountain).
-		$LF
+		[ul 
+			[li 
+				"Throw reset: After throwing an egg (as Yoshi) or another object, there will be 2 frames when the character switches back from the throwing animation to the walking animation where you can do the same moves as recalled before.
+				$LF
+			]li
+		]ul
 	]li
 ]ul
 [ul 
 	[li 
-		"Igloo clip : In Snowman's Land, the igloo's outside loading zone is a bit out of the actual igloo. By having the perfect position you can reach the trigger without having to crawl to access it. Example : 
-		[a class=extlink href=https://www.youtube.com/watch?v=bbgs4hVcfg4&t=32s rel=nofollow 
-			"SL 100+Reds TAS where Igloo clip is used
+		[ul 
+			[li 
+				"Falling off a ledge: The landing animation for most moves takes 4 frames (from when you touch the ground until when you are able to walk again). The end of this animation allows you jump or do other moves as above. You can end the landing animation midair by falling off a ledge during those 4 frames. You can delay the end of the animation even more by holding neutral.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Wide angle wall jumps : Usually when doing wall jumps, it happens in situations where the walls you work with are facing each other. But it's also possible to do it with walls that are a lot wider than that (90° walls for example) by doing directions resets before every wall jump. You can either slow down right away during the wall jump and eventually reach a speed of 0, or if your motion angle is good enough, you can go towards the wall you want to jump off and hold backwards as soon as your speed is about to be set to 15616, and eventually reach a speed of 0. For example, this is used in 
+		[a href=https://www.youtube.com/watch?v=ATxmVEo7-io rel=noopener external nofollow 
+			"TTM Scale the Mountain
 		]a
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"SSL pillar glitch: If you start walking onto a pillar in Shifting Sand Land with quite high speed (running speed is sufficient), depending of your position and motion angle, you can upwarp a little, or sometimes you can lose all your speed while on the shell.
+		"Igloo clip: In Snowman's Land, the igloo's outside loading zone extends a little out of the actual igloo. By jumping onto a precise spot you can reach the trigger without having to crawl to access it. Example : 
+		[a href=https://www.youtube.com/watch?v=bbgs4hVcfg4&t=32s rel=noopener external nofollow 
+			"Old SL 100+Reds TAS where Igloo clip is used
+		]a
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Fast pole grabbing: When jumping or sideflipping, if your speed is less than 40961 when grabbing a pole you will be able to jump or climb the pole instantly. Normally, you would have a second where you can't do anything, as there is a short animation. With Yoshi and Luigi (only useful to do alternate pole jumps with them) you can manipulate the speed to be negative since any negative speed makes the trick work, e.g -108108. If you are jumping off the pole, hold backwards, and just before reaching a speed of 0, press no direction so that then if you press backwards again, your speed will become negative instead of going to 0 and becoming positive.
+		"SSL pillar glitch: If you start walking onto a pillar in Shifting Sand Land with quite high speed (running speed is sufficient), depending of your position and motion angle, you can upwarp a little, or sometimes you can lose all your speed, especially while on the shell.
 		$LF
 	]li
 ]ul
 [ul 
 	[li 
-		"Grate upwarp glitch: In Goomboss Battle, if you jump under the grate with a precise position and an angle to the left, there is a glitchy spot where you can hang at the very edge and cannot move at all if you stay hanging. If you manage to have the perfect position and perfect angle you will not hang on the grate, and instead enter the wall. This means a failsafe occurs and you are sent up to the edge of the grate, in a landing state.
+		"Fast pole grabbing: When jumping or sideflipping, if your speed is less than 40961 when grabbing a pole you will be able to jump or climb the pole instantly. Normally, you would have a second where you can't do anything and your facing angle altered, as there is a short animation. You can manipulate the speed to be negative since any negative speed is below 40961, so you can get as mcuh backwards speed as you want. If you are jumping off the pole, hold backwards, and just before reaching a speed of 0, press neutral so that then if you press backwards again, your speed will become negative instead of going to 0 and becoming positive.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Grate upwarp glitch: In Goomboss Battle, if you jump under the grate with a precise position and an angle to the left, there is a glitchy spot where you can hang at the very edge and cannot move at all if you stay hanging. If you manage to have the perfect position and perfect angle you will not hang on the grate, and instead enter the wall. This means a failsafe occurs and you are sent upwards to the edge of the grate, in a landing state.
 		$LF
 	]li
 ]ul
@@ -702,7 +1211,38 @@
 ]ul
 [ul 
 	[li 
-		"NPC clipping: This works by talking to a bunny or a Toad that is close to a wall while you are between it and the wall. The game pushes you out of the NPC, making you go through walls with the right position.
+		"NPC clipping: This works by talking to a bunny or a Toad that is close to a wall while you are between it and the wall. The game pushes you out of the NPC, making you go through walls with the right position and timing.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Block clip: Blocks are only loaded when on camera, so by manipulating the camera by zooming and putting it out of bounds, you can unload a block for long enough to clip through it. This is useful to activate switch stars that normally require Wario (
+		[a href=https://www.youtube.com/watch?v=xMTANWKkpl4 rel=noopener external nofollow 
+			"like in BBH
+		]a
+		"), and also to simply get out of bounds by being clipped out of the block at the side after succesfully clipping in from the top, especially in HMC.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Pause clip: You can also unload objects by getting them off camera by pausing, but only in courses in which the camera zooms far out when you pause. This is primarily used to get inside The Secret Under the Moat as any character and to use cannons without opening the lid. 
+		[a href=https://www.youtube.com/watch?v=rBDJpKpITLM rel=noopener external nofollow 
+			"More explanation here
+		]a
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Star text skips: After collecting 1, 3, 8, 12, 30, 50, and 80 stars, a textbox appears. These textboxes can be skipped by either cancelling the star celebration, or by spawning a 100-coin star at the same time as another star, and then pressing an input on the first possible frame after collecting the 100-coin star (you have to choose to NOT save).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Walk underwater (using a shell with Yoshi): To perform this trick, you have to be Yoshi. Eat a shell and quickly run near the water surface and spit out the shell in such a way that it stands on the water surface instead of travelling forwards, which can be done by having it touch the surface of the water the first frame after being spat out (easier after jumping). If you enter the swimming animation before riding the shell, you will stay in the swimming state, meaning that you will bypass water checks completely. If you were to close to the surface so that riding the shell upwarped you onto the water, you can get off the shell later and get underwater. You get rid of the swimming state if you get off the shell and start walking or wait until you stand still.
 		$LF
 	]li
 ]ul

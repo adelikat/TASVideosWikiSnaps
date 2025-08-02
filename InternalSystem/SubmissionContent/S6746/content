@@ -1,0 +1,925 @@
+32
+[h3 id=Introduction 
+	" Introduction
+	$LF
+]h3
+[div class=p 
+	"Meet MAT, a young boy destined to exit Prof. Elm's lab from the opposite side, struggle to send mail through the glitch city postal system, and instantly beat the legendary Red. Seems legit.
+	$LF
+]div
+[h4 id=EmulatorUsedBizhawk241 
+	" Emulator used: Bizhawk 2.4.1
+	$LF
+]h4
+[ul 
+	[li 
+		" SubGBHawk was used for this movie, as it requires a 
+		[b 
+			"very
+		]b
+		" precise subframe reset (~60 μs)
+		$LF
+	]li
+	[li 
+		" CGB in GBA is enabled, as to conform to RTA standards, and for theoretical future console verification.
+		$LF
+	]li
+]ul
+[h4 id=Categories 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		"Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		"Heavy glitch abuse
+		$LF
+	]li
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Corrupts memory 
+		$LF
+	]li
+	[li 
+		"No luck manipulation
+		[a id=r1 
+		]a
+		[sup 
+			"[
+			[a href=#1 
+				"1
+			]a
+			"]
+		]sup
+		$LF
+	]li
+	[li 
+		"Attempts to send mail through the glitch city postal system
+		$LF
+	]li
+]ul
+[pre 
+	$LF
+]pre
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[h4 id=SaveCorruption 
+	" Save Corruption
+	$LF
+]h4
+[div class=p 
+	"see also: 
+	(__wikiLink|displaytext=#6108: gifvex's GBC Pokémon: Crystal Version "save glitch" in 04:12.68|href=/6108S)
+	$LF
+]div
+[div class=p 
+	"You may recall that Crystal stores a 16-bit checksum for the main save, for detecting corruption and loading the backup save when needed. You may also recall that this checksum is very weak,
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	" simply being the sum of all the bytes in the main save data. Cleared save data has a checksum of $0000, which can be reached with box names. However, in this movie, box names cannot be used, so it is not possible to raise the checksum enough to overflow $ffff to $0000.
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	" This movie opts to save sometime before going into the lab, then collide with that save's checksum. This movie specifically wants to zero out Cyndaquil's moves, which only has a ~1/16 ms window to work with. SubGBHawk makes this fairly easy to do, thankfully.
+	$LF
+]div
+[h4 id=Type0xd1Corruption 
+	" Type 0xD1 Corruption
+	$LF
+]h4
+[div class=p 
+	"see also: 
+	[a href=https://glitchcity.info/wiki/AttackDex/C:000 rel=noopener external nofollow 
+		"https://glitchcity.info/wiki/AttackDex/C:000
+	]a
+	$LF
+]div
+[div class=p 
+	"Move 0x00 has the glitch type 0xD1 on the move list screen. This type's name is sourced from $8091, which is in VRAM. VRAM is subject to locking, where all reads return 0xFF and writes have no affect. Viewing this type will cause a buffer overflow and will corrupt the map, but with the right VRAM timing and with some string buffers filled, it will be terminated before the corruption crashes the game, leaving us with a glitched lab, and most importantly, the walls are now gone and we can now go into map 0xFF00.
+	$LF
+]div
+[h4 id=GlitchMap0xff00Corruption 
+	" Glitch Map 0xFF00 Corruption
+	$LF
+]h4
+[div class=p 
+	"see also: 
+	[a href=https://www.youtube.com/watch?v=1VZzcQ_fGUU rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=1VZzcQ_fGUU
+	]a
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"A quick run down of the relevant parts of the video, Gen 2 marks "no connection" by setting wMapGroup to $FF, wMapNumber is whatever was on the last map connection. Upon a S/Q, wMapNumber for "no connection" is set to $00.
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	" Map 0xFF00 is not a valid map, and causes massive corruption in our items, badges, money, etc. due to a buffer overflow of its map objects (it has 36 map objects, the maximum typically allowed is 15). However, it is sourced entirely in ROM, meaning it causes consistent corruption, and that corruption happens to allow us to quickly do item underflow. However, typically this map causes a crash. This can be avoided though, by simply entering the map from the north side of the lab, which will immediately transport us to map 0x071C,
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	" after the corruption.
+	$LF
+]div
+[h4 id=ItemUnderflow 
+	" Item Underflow
+	$LF
+]h4
+[div class=p 
+	"Item underflow is very simple, if there somehow happens to be an item with x255 quantity, and you toss any tossable
+	[a id=r6 
+	]a
+	[sup 
+		"[
+		[a href=#6 
+			"6
+		]a
+		"]
+	]sup
+	" item that is above that x255 item, then the game will simply copy the x255 item to the slot above it along with decreasing the item count. You can repeat this until 00 underflows to 255, then you can access items below the main items pocket, which allows for effective creation of any item.
+	$LF
+]div
+[h4 id=ItemCreation 
+	" Item Creation
+	$LF
+]h4
+[div class=p 
+	"To understand how this item creation works, you need to understand how Gen 2 structures the pockets used to store items. The player gets 5 pockets for storing items. They are the TM/HMs Pocket, the Main Items Pocket, the Key Items Pocket, the Balls Pocket, and the PC.
+	[a id=r7 
+	]a
+	[sup 
+		"[
+		[a href=#7 
+			"7
+		]a
+		"]
+	]sup
+	" These pockets are lined up in RAM in that order, but they do not all share the same structure. The TM/HMs pocket allocates a byte for each TM/HM, and the value in that byte determines how much of that TM you have. Which TM is simply assumed based on where the byte is. The Main Items, Balls, and PC share the same structure, the first byte is the item ID, and the second byte is the quantity. The Key Items pocket, however, is different, forgoing the quantity byte, as Key Items don't have quantities. However, if say an item that does use a quantity ends up in the Key Items pocket, then it will take the item ID of the next item as its quantity.
+	[a id=r8 
+	]a
+	[sup 
+		"[
+		[a href=#8 
+			"8
+		]a
+		"]
+	]sup
+	" Item creation simply abuses these structural differences, now that with item underflow we effectively have x255 items in the Main Items pocket, we can swap a main item into the Key Items Pocket (remember, the Key Items Pocket is right below the Main Items Pocket), with the quantity of that main item becoming an item in the Key Items Pocket now... Well, actually that's what the initial submission did, the Balls Pocket happens to be misaligned relative to the Main Items Pocket, making quantities Item IDs and Item IDs quantities.
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Item Tossing
+		]b
+	]dt
+	[dd 
+		"One input per frame. Left/Right decrease/increase the toss count by 10, Up/Down increase/decrease the toss count by 1, all respectively. Toss counts will wrap around accordingly. The same directional cannot be pressed twice in a row. Different directions (e.g. Up/Right) cannot be pressed on the same frame.
+		$LF
+	]dd
+]dl
+[div class=p 
+	"In this movie, PP Ups are tossed to specifically create Music Mail,
+	[a id=r9 
+	]a
+	[sup 
+		"[
+		[a href=#9 
+			"9
+		]a
+		"]
+	]sup
+	" for the purpose of the first payload.
+	$LF
+]div
+[h4 id=WrongPocketTm22 
+	" Wrong Pocket TM22
+	$LF
+]h4
+[div class=p 
+	"see also: 
+	[a href=https://glitchcity.info/wiki/TMHMDex/C:213 rel=noopener external nofollow 
+		"https://glitchcity.info/wiki/TMHMDex/C:213
+	]a
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"Recall that the TM/HM pocket's structure is different than the Main Items/Balls/PC. As a note, the game allows the player to store TMs/HMs in the PC, meaning all TMs/HMs have item IDs to be compatible with the PC. So, what happens if you use a TM/HM in a pocket that allows the player to use items? The game goes past the valid pointers and interprets some asm instructions as pointers, some allowing for ACE. This is typically not used in speedruns, as 0x1500 ACE is faster most of the time, but with the corrupted item pack and the game conveniently giving us TM22, this is faster.
+	$LF
+]div
+[div class=p 
+	"TM22 is used specifically because of its pointer, $d106.
+	[a id=r10 
+	]a
+	[sup 
+		"[
+		[a href=#10 
+			"10
+		]a
+		"]
+	]sup
+	" This points to wCurItem, which slides down to two fully controllable bytes, wItemQuantityChangeBuffer and wItemQuantityBuffer... well, post-initial submission I realized from 
+	[a href=https://www.youtube.com/watch?v=oDMVArOnEAk rel=noopener external nofollow 
+		"this video
+	]a
+	" I have another mostly controllable byte: wCurItemQuantity (and this label is a lie, it's just the position the item is in the pocket). I pretend to toss 233 items, and put TM22 into the 37th slot create the bootstrap. This bootstrap will jump into the mail buffer, which has enough space for the first payload.
+	$LF
+]div
+[pre 
+	";af = $0600
+	$LF
+	";bc = $0007
+	$LF
+	";de = $d078
+	$LF
+	";hl = $d106
+	$LF
+	$LF
+	"dec h ; wCurItemQuantity, h = $d0
+	$LF
+	"~~~
+	$LF
+	"jp hl ; wItemQuantityChangeBuffer
+	$LF
+]pre
+[div class=p 
+	"This jumps to $d006, which is in the middle of the mail buffer.
+	[a id=r11 
+	]a
+	[sup 
+		"[
+		[a href=#11 
+			"11
+		]a
+		"]
+	]sup
+	$LF
+]div
+[h4 id=ArbitraryCodeExecution 
+	" Arbitrary Code Execution
+	$LF
+]h4
+[div class=p 
+	"see also: 
+	(__wikiLink|displaytext=#4233: MrWint's GBC Pokémon: Silver Version in 30:39.49|href=/4233S)
+	[br 
+	]br
+	$LF
+	"see also: 
+	(__wikiLink|displaytext=#6108: gifvex's GBC Pokémon: Crystal Version "save glitch" in 04:12.68|href=/6108S)
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"This movie uses MrWint's joypad to opcode payload, but it has been modified to work with mail. Refer to his submission for how it works. Note, the first 2 bytes of wTempMail will be overwritten by item swaps, so another item swap is used to turn them into harmless opcodes. There is another catch, f cannot be maintained for the input opcode, due to the position of the written opcode. The following mimics gifvex's submission:
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Mail Message
+		]b
+	]dt
+	[dd 
+		"Very similar to box names.
+		[a id=r12 
+		]a
+		[sup 
+			"[
+			[a href=#12 
+				"12
+			]a
+			"]
+		]sup
+		" One input every 2 frames. The same button cannot be pressed two inputs in a row (or it's a hold). Directionals can be pressed consecutively if a new button or directional is also pressed. Example: Up 2 can be done in two inputs with UP -> UP|LEFT. Priority for two directionals at once is UP > DOWN > LEFT > RIGHT. If A and a direction are input together, A is processed then the cursor moves. The same is true for Start; Start is processed then the cursor moves.
+		[a id=r13 
+		]a
+		[sup 
+			"[
+			[a href=#13 
+				"13
+			]a
+			"]
+		]sup
+		" Where the cursor moves when pressing Up/Down on UPPER/lower/DEL/END depends on where those slots are entered; Start defaults to the right side. Start and A cannot be used together, nor Start and Select.
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Thanks to MrWint for the format:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes
+			]th
+			[th 
+				"Instruction
+			]th
+			[th 
+				"Comment
+			]th
+		]tr
+		[tr 
+			[td 
+				"($effb)
+			]td
+			[td 
+				"(any)
+			]td
+			[td 
+				"Execute opcode written last cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"00 x6
+			]td
+			[td 
+				"nop x6
+			]td
+			[td 
+				"Slides back down to the mail buffer
+			]td
+		]tr
+		[tr 
+			[td 
+				"ea cd 75
+			]td
+			[td 
+				"ld (75cd),a
+			]td
+			[td 
+				"Does nothing
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"Save a and f for next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"f0 a4
+			]td
+			[td 
+				"ldh a,($ffa4)
+			]td
+			[td 
+				"Reads current joypad inputs into a
+			]td
+		]tr
+		[tr 
+			[td 
+				"aa
+			]td
+			[td 
+				"xor d
+			]td
+			[td 
+				"d stores last joypad input: find out differences to current input
+			]td
+		]tr
+		[tr 
+			[td 
+				"ea fb ef
+			]td
+			[td 
+				"ld ($effb),a
+			]td
+			[td 
+				"Write difference; will be executed as opcode later in the next cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"aa
+			]td
+			[td 
+				"xor d
+			]td
+			[td 
+				"Restore current joypad input value
+			]td
+		]tr
+		[tr 
+			[td 
+				"f5
+			]td
+			[td 
+				"push af
+			]td
+			[td 
+				"Copy current joypad input from a...
+			]td
+		]tr
+		[tr 
+			[td 
+				"d1
+			]td
+			[td 
+				"pop de
+			]td
+			[td 
+				"... to d (store it as last joypad input)
+			]td
+		]tr
+		[tr 
+			[td 
+				"7f
+			]td
+			[td 
+				"ld a,a
+			]td
+			[td 
+				"Filler, does nothing
+			]td
+		]tr
+		[tr 
+			[td 
+				"f1
+			]td
+			[td 
+				"pop af
+			]td
+			[td 
+				"Restore a and f from the previous cycle
+			]td
+		]tr
+		[tr 
+			[td 
+				"fe 4e
+			]td
+			[td 
+				"cp $4e
+			]td
+			[td 
+				"Line break is $4e, which is a bad opcode, cp makes it taken as data
+			]td
+		]tr
+		[tr 
+			[td 
+				"a7
+			]td
+			[td 
+				"and a
+			]td
+			[td 
+				"Clears carry flag, needed for the jump
+			]td
+		]tr
+		[tr 
+			[td 
+				"d2 fb ef
+			]td
+			[td 
+				"jp nc, $effb
+			]td
+			[td 
+				"Loop back to written opcode; carry will never be set
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The second payload can be found 
+	[a href=https://pastebin.com/raw/f8h7MEB2 rel=noopener external nofollow 
+		"here
+	]a
+	". It largely does the same thing as gifvex's payload, although I also have to set wTileUp to something with collision,
+	[a id=r14 
+	]a
+	[sup 
+		"[
+		[a href=#14 
+			"14
+		]a
+		"]
+	]sup
+	" or else I won't be able to warp.
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[h4 id=Intro 
+	" Intro
+	$LF
+]h4
+[ul 
+	[li 
+		"Save data is cleared for morality reasons. This isn't really needed as we collide with valid save data anyways, but it conforms to RTA standards, and breaking the 4 minute barrier by forgoing this clear would be a very shallow victory.
+		$LF
+		[ul 
+			[li 
+				"Minor note, the above was said when the submission was barely sub 4, now it's 3:55. Regardless, the same message is true, forgoing wiping save data doesn't actually provide any actual game-play related time save, so it shouldn't be considered real time save.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"Options are not set as text can print at the fast speed when A or B is held anyway.
+		$LF
+	]li
+	[li 
+		"Unlike most glitch runs, the trainer ID is not manipulated. The TID is not used (and can't be used) for the bootstrap, and the trainer ID does not affect collision.
+		$LF
+	]li
+	[li 
+		"The player is selected to be the boy. The choice of boy and girl does not affect collision, and the boy has a shorter default name.
+		$LF
+	]li
+	[li 
+		"The default name MAT is chosen. The player name does not affect collision, and the player name is not seen enough to warrant naming him a 1 character name.
+		$LF
+	]li
+]ul
+[h4 id=NewBarkTown 
+	" New Bark Town
+	$LF
+]h4
+[ul 
+	[li 
+		"Mom is talked to directly to avoid the exclamation point animation that plays if the player tries to walk past. It is a couple frames faster to do this.
+		$LF
+	]li
+	[li 
+		"The game is saved right outside the house to setup collision.
+		$LF
+	]li
+	[li 
+		"Cyndaquil is chosen as it is the closest starter to the player. Its DVs do not matter for ACE or collision, so they are ignored. As you can guess by now, the nickname does not affect collision, so no nickname is given.
+		$LF
+	]li
+	[li 
+		"The game is saved inside the lab, but it is reset before Cyndaquil's moves are written. The save is delayed by some frames to line up the IGT for checksum collision.
+		$LF
+	]li
+	[li 
+		"The Aide cutscene is taken, as it will fill up two string buffers, which greatly prevents move 0x00 from crashing the game from its corruption.
+		[a id=r15 
+		]a
+		[sup 
+			"[
+			[a href=#15 
+				"15
+			]a
+			"]
+		]sup
+		$LF
+	]li
+	[li 
+		"Move 0x00's type is viewed from the moves list. With the right VRAM timing, this causes the map to become corrupted, allowing entry to map 0xFF00.
+		$LF
+	]li
+]ul
+[h4 id=GlitchCity 
+	" Glitch City
+	$LF
+]h4
+[ul 
+	[li 
+		"Cyndaquil's held item was corrupted, and needs to be taken off before item underflow is done.
+		$LF
+	]li
+	[li 
+		"HP Up is moved to the top of the item list, tossed, then PP Up x255 is then tossed 6 times for item underflow.
+		$LF
+	]li
+	[li 
+		"Music Mail is created and used to store the first payload.
+		$LF
+	]li
+	[li 
+		"After swapping TM22 to the 37th slot, the pocket is swapped to the Main Items pocket, where I pretend to toss 233 items, then swap TM42, then the pocket is swapped back to the Balls Pocket, where TM22 is used.
+		$LF
+	]li
+	[li 
+		"Auto input takes over and talks to Red, completing the run.
+		$LF
+	]li
+]ul
+[h3 id=SuggestedScreenshots 
+	" Suggested Screenshots
+	$LF
+]h3
+[div class=p 
+	"Frame 11595: 
+	[a href=https://i.imgur.com/S0kUe0C.png rel=noopener external nofollow 
+		"https://i.imgur.com/S0kUe0C.png
+	]a
+	[br 
+	]br
+	$LF
+	"Frame 11751: 
+	[a href=https://i.imgur.com/AlE7wtk.png rel=noopener external nofollow 
+		"https://i.imgur.com/AlE7wtk.png
+	]a
+	[br 
+	]br
+	$LF
+	"Frame 11762: 
+	[a href=https://i.imgur.com/NZuRmlt.png rel=noopener external nofollow 
+		"https://i.imgur.com/NZuRmlt.png
+	]a
+	[br 
+	]br
+	$LF
+	"Frame 13995: 
+	[a href=https://i.imgur.com/umFPqiM.png rel=noopener external nofollow 
+		"https://i.imgur.com/umFPqiM.png
+	]a
+	[br 
+	]br
+	$LF
+]div
+[h3 id=ILikeFootnotes 
+	" I like footnotes
+	$LF
+]h3
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" Technically, there is some luck manipulation in the form of getting the right VRAM timing, but it is minor if anything.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" For the time and with the GBC's capabilities, it was a good enough checksumming system, but it is a joke compared to anything today.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" From testing, the most I could raise the checksum was to the $dxxx range.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" This isn't actually too relevant, since the north map connection would be 0xFF00 anyways, but it makes it clear why we will 
+	[b 
+		"always
+	]b
+	" get map 0xFF00 upon a S/Q, which I do anyways for checksum collison.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	" Map 0x071C is actually 
+	[a href=https://gunnermaniac.com/pokeworld2?map=2308 rel=noopener external nofollow 
+		"this
+	]a
+	" room, but the player enters way outside of the room.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	" If an item is in the wrong pocket, e.g. a TM in the Main Items pocket, the game does not let you toss it, and such item underflow does not work with such items.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=7 
+	]a
+	[a href=#r7 
+		"7
+	]a
+	"]
+	" The PC isn't technically a "pocket" per se, but it is functionally similar to a pocket, so it will be referred to as such for simplicity.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=8 
+	]a
+	[a href=#r8 
+		"8
+	]a
+	"]
+	" Note that you can't actually toss anything in the Key Items pocket for the reason listed in footnote #6.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=9 
+	]a
+	[a href=#r9 
+		"9
+	]a
+	"]
+	" Music Mail and Mirage Mail are the fastest to obtain, but Music Mail is used due to "? received x Mail" textbox, saving 1 frame over the Mirage Mail.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=10 
+	]a
+	[a href=#r10 
+		"10
+	]a
+	"]
+	" This pointer is derived from the wCurItem in 
+	[a href=https://github.com/pret/pokecrystal/blob/63798d56d05cf87ada77bd26727ea7725630b0b2/engine/items/item_effects.asm#L229 rel=noopener external nofollow 
+		"this line
+	]a
+	".
+	[br 
+	]br
+	$LF
+	"[
+	[a id=11 
+	]a
+	[a href=#r11 
+		"11
+	]a
+	"]
+	" wTempMail - wTempMailMessageEnd is $d002 - $d022
+	[br 
+	]br
+	$LF
+	"[
+	[a id=12 
+	]a
+	[a href=#r12 
+		"12
+	]a
+	"]
+	" Main difference is that the first input 
+	[b 
+		"can
+	]b
+	" be A B START or SELECT.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=13 
+	]a
+	[a href=#r13 
+		"13
+	]a
+	"]
+	" This is true for box names too, I am noticing that gifvex's TAS did not use this tech within their TAS. Likely was an oversight.
+	[br 
+	]br
+	$LF
+	"[
+	[a id=14 
+	]a
+	[a href=#r14 
+		"14
+	]a
+	"]
+	" $FF was chosen for the collision value as it could easily be obtained by reading $FF00 (a disabled register).
+	[br 
+	]br
+	$LF
+	"[
+	[a id=15 
+	]a
+	[a href=#r15 
+		"15
+	]a
+	"]
+	" The correct corruption can technically happen without using the Aide cutscene, but it would take too long to get the right VRAM timing, and it would not be entertaining in my opinion.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": File replaced with a 
+	[del 
+		"839 vblanks
+	]del
+	" 257 frames improvement.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": File replaced with a version that correctly returns to Mt. Silver after the credits, at cost of 7 additional frames.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": The ending is performed as expected, including the cutscene where Red disappears into nothingness and the credits getting rolled.
+	$LF
+]div
+[div class=p 
+	"There are some aspects I want to note about the initialization of the save file. Before starting the game, this movie uses an input combination for clearing the save data. Secret input combinations are forbidden for use, as they are considered as in-game cheats, unless they are mentioned on the official game manual, which is the case here.
+	$LF
+]div
+[div class=p 
+	"It is normally not required to wipe out the SRAM of a game, or otherwise overwriting uninitialized bytes. However, Pokémon Gen II games have an unique quirk, for which I considered to be a good practice to use the built-in functionality for formatting the save file. The fact is that most Game Boy games (as well as many other consoles) are usually programmed to consider the SRAM as properly empty or formatted if it consists of 0xFF bytes, in its entirety or in specific SRAM addresses. This is the reason why our emulators are programmed to initialize the SRAM of Game Boy games as 0xFF bytes, as in many cases it proved to avoid unintended game behaviors, even though on real console the initial data of these bytes is always random and unpredictable (this is probably also why most games use a basic checksum for save file validity). However, Pokémon Gen II games are an exception, as there are strong evidences pointing out that these games instead consider the save data as empty when it's made of 0x00 bytes. In particular, the built-in functionality for formatting the save file does overwrite the whole SRAM to 0x00 bytes, as opposed to 0xFF for Pokémon Gen I games. This is why I consider that it should be required to format the save data during the movie, as it clears any doubts about the validity of the save glitch performed. On a side note, wiping the save data shouldn't be required if the save glitch doesn't rely on reading uninitialized bytes, however for this movie I confirm that it desyncs if the SRAM is kept to be 0xFF bytes.
+	$LF
+]div
+[div class=p 
+	"Accepting for obsoleting the published 
+	(__wikiLink|displaytext=Pokémon Crystal "save glitch"|href=/3831M)
+	" movie.
+	$LF
+]div
+[div class=p 
+	"Note for the publisher: the movie length displayed in the submission is incorrect, as the site's movie parser still needs to be updated for reading the CycleCount value of SubGBHawk movies. The correct timing for this submission should be 3:55.59. Also note that BizHawk 2.4.2 doesn't correctly count the cycles for SubGBHawk movies that feature hard resets, so the latest dev build should be used for that instead. I already corrected the CycleCount value for this movie, though. It should be 988133805.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Publishing. Time got fixed.
+]div

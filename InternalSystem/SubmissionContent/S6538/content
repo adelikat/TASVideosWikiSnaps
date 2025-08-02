@@ -1,0 +1,216 @@
+8
+[ul 
+	[li 
+		"Major skip glitch
+		$LF
+	]li
+	[li 
+		"Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Abuses opposite D-Pad presses (U+D/L+R)
+		$LF
+	]li
+	[li 
+		"Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		"Genre: Strategy
+		$LF
+	]li
+]ul
+[div class=p 
+	"I have a feeling this will be too boring to be published but I had a lot of fun with it. This is my first time doing something this technical & I took the game apart quite a bit.
+	$LF
+]div
+[div class=p 
+	"This TAS uses a mid-frame reset to corrupt the save file in a way that it can be used to trigger the game's ending as quickly as possible. 
+	$LF
+]div
+[div class=p 
+	"There is an array of Officers beginning at 
+	[b 
+		"6005
+	]b
+	". Each officer is part of a linked list: the first attribute of each Officer is a 16-bit pointer to another Officer (or null, if they're the last in the list), which are dereferenced one after the other in order to loop through officer lists. By resetting in the space between the low and high byte being overwritten by new save data, I can create a glitched pointer which causes incorrect data in the officer array to be interpreted as an officer.
+	$LF
+]div
+[div class=p 
+	"The other issue is that the game has a checksum for sensing corrupt files, so we have to bypass it by making sure that the corrupt file sums to the same value as the original save. This is easier to resolve if the glitch is performed on an officer with a lower RAM adress (
+	[b 
+		"60XX-62XX
+	]b
+	"), because all of these officers belong to France, so it limits the amount of changes that can randomly happen to relevant RAM during any AI turns.
+	$LF
+]div
+[div class=p 
+	"Scenario 4 is chosen because all of Napoleon's relatives become player-controlled, which allows me to execute the glitch in a single in-game month.
+	$LF
+]div
+[div class=p 
+	"The route is as follows:
+	$LF
+]div
+[div class=p 
+	"NATIONAL PHASE:
+	$LF
+]div
+[ul 
+	[li 
+		" Deploy Jerome to Bordeaux, & send Dombrowski to Paris. This is done to ensure that both Mobrogue and Dombrowski are in player-controlled cities.
+		$LF
+	]li
+]ul
+[div class=p 
+	"CITY PHASE, PART 1:
+	$LF
+]div
+[ul 
+	[li 
+		" BORDEAUX: Save the game, then give a speech - by sheer coincidence this caused game RAM to go up exactly how much I needed it to match the checksum (51).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" PARIS: Move four officers to another city. The purpose of this is to cause Ney's "next officer" stat to change from 
+		[b 
+			"61F4
+		]b
+		" (Lannes) to 
+		[b 
+			"67C1
+		]b
+		" (Dombrowski).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" CITY 3: Save the game, then mid-frame reset so that the officer pointer is now 
+		[b 
+			"61C1
+		]b
+		" - This creates a glitched officer starting at Mobrogue's men/horses stat.
+		$LF
+	]li
+]ul
+[div class=p 
+	"CITY PHASE, PART 2:
+	$LF
+]div
+[ul 
+	[li 
+		" BORDEAUX: Assign 156 men to Mobrogue. Because the RAM address we're writing to is shared by the glitched officer, this causes a new officer to appear in Paris at 
+		[b 
+			"9C
+		]b
+		", which contains PAD1/PAD2 input.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" PARIS: Rest, triggering the random Ball event, & perform input on PAD1/PAD2 equivalent to 
+		[b 
+			"6FE5
+		]b
+		". The Ball is a random event that assigns a random amount of morale, training and experience to each officer in the city.
+		$LF
+	]li
+]ul
+[div class=p 
+	"At this point our officer list contains:
+	$LF
+]div
+[div class=p 
+	[b 
+		"61C1
+	]b
+	" -> 
+	[b 
+		"009C
+	]b
+	" -> 
+	[b 
+		"6FE5
+	]b
+	" -> ???? (keeps following values until it finds zero)
+	$LF
+]div
+[div class=p 
+	"What we want from the ball is to have the glitched officer at 
+	[b 
+		"6FE5
+	]b
+	" to be assigned exactly 3 experience, because its experience stat is located at 
+	[b 
+		"6FEB
+	]b
+	" (game state) and 3 is the flag for the game ending. 
+	$LF
+]div
+[div class=p 
+	"Because we are randomly assigning stat boosts to some critical memory regions, we also have to make sure the event we manipulate doesn't crash the game in the process.
+	$LF
+]div
+[div class=p 
+	"IMPROVEMENTS:
+	$LF
+]div
+[div class=p 
+	"There could possibly be a route in which the AI commander performs an action that fixes the checksum exactly for us, preventing me from having to take a turn to do it; however it already took me a really long time testing RNG branches to even come up with this & that's way too complex to work out unless I find some way to automate the testing process. I am happy with this run for now.
+	$LF
+]div
+[div class=p 
+	"Because all we need is a link leading to 
+	[b 
+		"9C
+	]b
+	", there could very well be a faster solution that traverses some less obvious path through the RAM data, but I searched for a while & this was the only one I could find that worked. I haven't gone very far in investigating the Japanese release but there could very well be an exclusive solution.
+	$LF
+]div
+[div class=p 
+	"I can almost certainly perform this same type of glitch on other Koei games, although some of the ones I've looked at use dual checksums which complicate the bypass process.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Optimization appears fine though it can be hard to tell due to the nature of the glitch.
+	$LF
+]div
+[div class=p 
+	"This game has multiple different scenarios that change starting conditions and other mechanics. However, all scenarios share the same ending so I think only one variant of this branch needs to exist. I do not see the need for this save glitch to be replicated in other scenarios, but I could be wrong. In my opinion other scenarios would best be represented if they do not use this glitch and are entertaining enough to be accepted to Moons.
+	$LF
+]div
+[div class=p 
+	"Audience response was fairly mixed. There were some people that felt the TAS was boring and others that were very entertained. There was 84% support in the votes (12 yes, 3 meh, 1 no). I personally felt the TAS was a little dull but I'm not super against the movie. I could see this movie being moons but if ratings swing the other way I could easily see this being sent to Vault later on.
+	$LF
+]div
+[div class=p 
+	"Accepting to Moons.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

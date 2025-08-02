@@ -1,0 +1,274 @@
+6
+[div class=p 
+	"Enduro is a symbolic journey through life via the media of a race.
+	$LF
+]div
+[div class=p 
+	"The results are insignificant and what really counts is competing.
+	$LF
+]div
+[div class=p 
+	"Of particular importance are the lessons to be learned concerning one’s self from the various encounters you experience along the way.
+	$LF
+]div
+[div class=p 
+	"There is no victor or loser in this test of endurance.
+	$LF
+]div
+[div class=p 
+	"The only thing that really matters is that you make a commitment to begin the long and trying trek.
+	$LF
+]div
+[div class=p 
+	"This 
+	[del 
+		"game
+	]del
+	" TAS is then dedicated to all of the “Life Riders” who have started out on the solitary trip to find their own individual limits.
+	$LF
+]div
+[div class=p 
+	"Last, but not least, may we sincerely congratulate you on a perfect run.
+	$LF
+]div
+[h2 id=Game 
+	"The Game
+	$LF
+]h2
+[div class=p 
+	"Enduro Racer was originally a 1986 Sega Arcade game. It was later released on various home consoles including the Master System. The arcade and master system versions are entirely different games. 
+	$LF
+]div
+[div class=p 
+	"This TAS completes the English (non - Japanese) version of the game as fast as possible in real time. I’ve also made a TAS of the Japanese version, which is currently published on TASvideos, but wanted to TAS the English version for completeness to show off a TAS of both versions as on 
+	[a href=https://www.speedrun.com/enduro_racer rel=noopener external nofollow 
+		"https://www.speedrun.com/enduro_racer
+	]a
+	" 
+	$LF
+]div
+[div class=p 
+	"The Japanese Master System version differs significantly from the other regions. The non-Japanese versions only have 5 courses, which repeat, whereas the Japanese version has 10 unique courses.  Unlike the Japanese version, the upgrades jump up in cost halfway through the game when the courses repeat. Luckily, there are more enemy cars to compensate for this jump.
+	$LF
+]div
+[div class=p 
+	"Much of the tech will be the same as the Japanese version, so I have repeated most of that submission text below, aside from the different strategies, which I’ll mention at the bottom.
+	$LF
+]div
+[h3 id=UpgradeSystem 
+	"Upgrade System
+	$LF
+]h3
+[div class=p 
+	"Every time you pass an opponent you receive 1 point. These can be used to buy upgrades. Some upgrades such as handling and tyre are useless in a TAS because I can just steer carefully and avoid rough terrain.
+	$LF
+	"The most useful upgrade is engine, as it increases your top speed by 33%. A downside to engine is that it costs 10 points, which is difficult to achieve in a single race without heavy manipulation.
+	$LF
+	"Another theoretically useful upgrade is acceleration. This would save some time at the start of each race, but is overshadowed by engine’s usefulness.
+	$LF
+	"Another possible upgrade is suspension. This makes you leave ramps at full speed rather than having to time a down press to remain at full speed. This is useless for the vast majority of the run, but could be theoretically useful to end inputs early (as you could just ride a few ramps with no input to the end). Even though this is theoretically faster with TAS timing, it is once again overshadowed by the engine upgrade.
+	$LF
+]div
+[h2 id=GameTimeVsRealTime 
+	" Game Time vs Real Time
+	$LF
+]h2
+[div class=p 
+	"I chose to optimize for real time for one simple reason. The in game time is broken as heck.
+	$LF
+	"Take for example level 1. My timer starts at 60 and ends at 29. This means that my total seconds is 31 for the level, which the game calculates correctly.
+	$LF
+	"However, the game flips the centiseconds incorrectly for the final calculations, and essentially takes my timer value of 29.xx and gives me a time of 31.xx (same centisecond value). This means that finishing with the clock reading a high 29, will give me a high 31 and finishing with a low 29 (slower race) will give me a low 31.
+	$LF
+	"As a result, for every race it is best to finish with the clock just about to tick over to the next second, giving you a race time of xx.01. So essentially every level’s in game time is on a frame rule of 60 frames.
+	$LF
+	"While my final TAS aims for real time, it does optimize for game time as a secondary goal. But my real time TAS does not obtain the best possible game time.
+	$LF
+]div
+[h2 id=RamValues 
+	"RAM Values
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0322
+			]td
+			[td 
+				"Speed (Maj)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0321
+			]td
+			[td 
+				"Speed (Min)
+			]td
+		]tr
+		[tr 
+			[td 
+				"031A,0302,0318,0316
+			]td
+			[td 
+				"Race progress (position)
+			]td
+		]tr
+		[tr 
+			[td 
+				"040D
+			]td
+			[td 
+				"Y (Height off the ground)
+			]td
+		]tr
+		[tr 
+			[td 
+				"0372
+			]td
+			[td 
+				"Opponents passed
+			]td
+		]tr
+		[tr 
+			[td 
+				"0353
+			]td
+			[td 
+				"Opponent spawn timer
+			]td
+		]tr
+		[tr 
+			[td 
+				"0392,0391
+			]td
+			[td 
+				"Timer
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=TricksAndTechniques 
+	"Tricks and Techniques
+	$LF
+]h2
+[h3 id=OpponentManipulation 
+	"Opponent manipulation
+	$LF
+]h3
+[div class=p 
+	"0x372 tracks the number of opponents you have passed. 0x353 is a timer that will tick down 128 frames before another opponent can appear. The timer begins once opponent “n” leaves the screen and opponent “n+1” will not appear until the timer reaches 0. The timer for the first car will begin once the course is 6% complete, this then ticks down 128 frames until the first opponent appears. No opponents can appear after the course is 96% complete.
+	$LF
+	"The opponents spawn position depends on where you are in the track and it partially depends on RNG. The easiest way to manipulate RNG is to use up presses on player 1 as this has no in-game effect (apart from negating left and right presses). By using up to manipulate RNG, you can usually choose between 2 starting positions of the opponent. The only way to obtain more possible starting positions is to encounter your opponent on a different part of the track by getting the other RNG pattern on the previous opponent(s) or by sacrificing real time.
+	$LF
+	"As the engine upgrade costs 10 points, you need to have passed an average of 10 cars per level after every level. Some tracks (such as track 5) are very treacherous, which makes it easy to pass opponents quickly. As a result, it’s possible to pass 11 cars on track 5. Some other tracks have ramps cause the opponents to go in the air and stay on screen for longer. These tracks make it very difficult to reach the goal of 10 passes.
+	$LF
+]div
+[div class=p 
+	"Most of my time completing this TAS was spent attempting to get the engine upgrade ready for level 2. Unfortunately, I could not manipulate the cars to make this possible. I had it close to 10 points, but was having to lose too much real time slowing down to make it worth it. The way to squeeze out more cars is to slow down during the 128 frame cool down timer, then speed up for when you are actually trying to pass the car. This ended up being too slow, and didn’t quite reach 10 points anyway.
+	$LF
+]div
+[div class=p 
+	"I also messed with using an extra purchase of acceleration, but I decided to just stick to engine upgrades instead. This gives me a huge buffer, meaning I don’t have to pass as many cars. For the 8 engine upgrades I buy, I need 130 points in total. I make sure to get exactly 130 points throughout the game since each extra point you get costs 8 frames due to ticking down on the totals screen.
+	$LF
+]div
+[h3 id=RampTech 
+	"Ramp Tech
+	$LF
+]h3
+[div class=p 
+	"When jumping over a ramp you will lose 25% of your speed. You can avoid this by having a suspension upgrade or by pressing down while going over the ramp. If you are pressing down shortly after leaving the ramp, you will lose 25% of your speed. These 2 speed losses can compound to make your new speed (0.75)^2 = 0.5625 times your old speed (a low of 44% of your speed). Obviously keeping your full speed is desired in the majority of cases, unless you are slowing down to manipulate cars, or not pressing down due to ending inputs early.
+	$LF
+]div
+[h3 id=SuperJumps 
+	"Super Jumps
+	$LF
+]h3
+[div class=p 
+	"After reaching the peak of your jump from a ramp, you can press the buttons 1 or 2 to partially reset your y-velocity. The results of this seem inconsistent. Sometimes this is more effective than others in RTA.
+	$LF
+]div
+[div class=p 
+	"Although this is difficult to pull off RTA, there’s a very easy method to optimize it in TAS. You should alternate mashing the 2 and 1 buttons. This will cause some periodic lag, which is speed dependant. At the full engine upgrade, the game will consistently lag every 4 frames at full speed. You can negate this lag by pressing down the frame beforehand. This means you can have a 1 or 2 press every frame, resulting in the slowest possible falling speed. You can often span over 20% of the course off a single ramp in this method, but it is only used to that extent in the game time TAS, as each ramp gives you a 1 frame boost in real time.
+	$LF
+]div
+[h3 id=Lag 
+	"Lag
+	$LF
+]h3
+[div class=p 
+	"A note on lag is that it won’t affect real time or game time, so it is not often necessary to reduce it. The way that the game deals with lag is to make you move twice as far in the frame before, then not at all during the lag frame.
+	$LF
+]div
+[h3 id=InGameTimeOptimization 
+	"In game time optimization
+	$LF
+]h3
+[div class=p 
+	"As mentioned previously, the in game time essentially runs on a 1 second frame rule. But there are a few strategies to always hit the .01 centisecond mark without sacrificing real time.
+	$LF
+]div
+[div class=p 
+	"The main method for manipulating IGT is ramps. After leaving a ramp optimally (by pressing down while going over it), you will retain your regular speed through the air. However, while in the air the game time runs half as fast. This essentially means that you should spend as much time as possible in the air to optimize game time. Using this strategy (as in my IGT TAS), allows you to get faster times than my real time TAS. The only reason that I don’t spend more time in the air in the real time TAS is that every ramp gives you a 1 frame time save in real time (but results in your IGT running at regular speed for a few frames).
+	$LF
+]div
+[h3 id=GameCrash 
+	"Game Crash
+	$LF
+]h3
+[div class=p 
+	"The level won’t end until you’re touching the ground. This can be used to exceed the finish line by using a super jump. This usually results in a game crash, but results can vary. Often the game will hard lock, or it will reset. If a reset occurs, there will sometimes be garbled graphics post-reset. 
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": On old TASVideos we would just say this entire version is superseded by the Japanese one, because the second (harder) loop is almost identical to the corresponding Japanese version levels in optimal play, and the first (easier) loop is, well, easier, therefore it's not worth a showcase.
+	$LF
+]div
+[div class=p 
+	"Now we're a bit more mindful, because we don't want to keep only the best of the best of the best to fight for viewers respect for the entire TAS phenomenon, but rather we want to fight for TASer motivation and contribution, because the process itself is more fun without killjoy rejections.
+	$LF
+]div
+[div class=p 
+	"If the game had an ending after the first loop in this version, it would be enough for this version to co-exist IMO, and no further play would be needed, because as mentioned, that second loop is mostly identical with the Japanese one. But we do want the ending to occur, so this identical part is acceptable as long as the first loop remains necessarily different.
+	$LF
+]div
+[div class=p 
+	"Accepting as another version of the game.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Removed "english version" from branch label because both versions are in english. We'll need to come up with some other definition to distinguish this from the japanese one in version title overrides.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

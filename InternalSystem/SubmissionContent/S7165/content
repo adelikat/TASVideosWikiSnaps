@@ -1,0 +1,820 @@
+12
+[h3 id=SramGenerationMovie 
+	" SRAM Generation Movie
+	$LF
+]h3
+[div class=p 
+	(__wikiLink|displaytext=SRAM Generation Movie and Notes|href=/Userfiles/Info/72383502725437755)
+	$LF
+]div
+[h3 id=EmulationSettingsBothSramGenerationSubmission 
+	" Emulation Settings (Both SRAM Generation & Submission)
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 1.12.1 (Dynarec, GlideN64, HLE)
+		$LF
+	]li
+	[li 
+		" Video resolution: 800x600
+		$LF
+	]li
+]ul
+[h3 id=Goal 
+	" Goal
+	$LF
+]h3
+[div class=p 
+	"The goal of this category is to beat the game as fast as you can, but without entering any levels or their respective lobbies early. To give a more technical description of both limitations:
+	$LF
+]div
+[ul 
+	[li 
+		" Lobby Early: A player must not enter any of the 8 lobby maps without turning in the respective keys to open that lobby through K-Lumsy (eg. You cannot enter Caves Lobby without turning in Key 5)
+		$LF
+	]li
+	[li 
+		" Level Early: A player must not enter a level without clearing the level’s B-Locker. As such, we do not use any methods that would allow us early access to the level portals earlier than intended (clipping out of bounds, abusing kong hitboxes to place a kong’s arms to hit the portal when the B-Locker’s collision hitbox normally blocks it)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Also, this category bans Golden Banana duplication
+	$LF
+]div
+[h3 id=CleanSramVsDirtySram 
+	" Clean SRAM vs Dirty SRAM
+	$LF
+]h3
+[div class=p 
+	"After a lot of thought on this one, there were three main drawbacks of using clean cart for this category:
+	$LF
+]div
+[ul 
+	[li 
+		" The clean cart route is arguably less entertaining from a trick standpoint
+		$LF
+	]li
+	[li 
+		" The ruleset of No Levels Early prevents quick acquisition of fairies in a similar way to the Any% TAS. Since you can’t enter any levels earlier than normal, it’s likely that MMM would be delayed until after Factory, a decent amount into the run. This delays and reduces any benefit of Main Menu Moves to the point of where the TAS would forgo MMM and look towards collecting the 100 fastest Golden Bananas that use as few moves as possible, essentially serving as a softban of MMM. 
+		$LF
+	]li
+	[li 
+		" As the clean cart TAS would likely not use MMM, it would need to purchase a number of moves to beat the game and collect some Golden Bananas that are worth buying a move to acquire. This, on top of not getting some of the cutscene-related benefits of MMM, mean a lot of extra cutscenes that are quite lengthy.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Additionally, whilst not as important, this TAS also aligns itself as an improvement to the “LOTAD” that was completed in June 2017.
+	$LF
+]div
+[h3 id=PrimaryGlitchesUsed 
+	" Primary Glitches Used
+	$LF
+]h3
+[dl 
+	[dt 
+		[b 
+			"Main Menu Moves (MMM)
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Buckle up for this one, because this glitch has many effects that affect this run!
+	$LF
+]div
+[div class=p 
+	"Main Menu Moves (MMM) enables the player to carry through a moveset from one place to a story file. This uses another glitch called Intro Story Glitch (ISG).
+	$LF
+]div
+[div class=p 
+	"The game has two ways of determining that the Intro Story has started, first is the timer that happens in the background of the Intro Story to control the fadeouts between maps. 7 frames later, the game sets a boolean value to state that the Intro Story has started and that pressing A will stop the timer. If you press A during that 7-frame gap, you can return back to the main menu before it allows you to stop the timer.
+	$LF
+]div
+[div class=p 
+	"As such, we can have the timer run when it shouldn’t, and therefore have fadeouts in places where we deem advantageous. These fadeouts will only occur after a certain time has been passed (since starting the Intro Story) and whilst a cutscene is playing.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Fadeout #
+			]th
+			[th 
+				"Time
+			]th
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"0:55.0
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"1:25.1
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"2:36.0
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"3:01.0
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"3:25.0
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"4:26.0
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The main fadeout we need is the final fadeout, which enables us to transition back to DK’s Treehouse from an arbitrary point. We use this to transition from the Main Menu to a game file without passing through the file percentage screen. In intended gameplay, if we have a moveset stored in memory (from a boss fight, for example), the game normally tries to prevent us from carrying over that moveset to a file by writing the moveset saved to the file to memory, overwriting the old moveset, at the point of opening the file percentage screen. By transitioning from the Main Menu to the game file without passing through the file percentage screen, this safeguard is bypassed.
+	$LF
+]div
+[div class=p 
+	"However, MMM does not only contain the final fadeout, and we need to cancel prior fadeouts in order to watch more cutscenes without being faded into Intro Story. A fadeout can only be cancelled if we start a fade (by playing a cutscene after a certain time) and then interrupt that fade with a DK Transition (The spinning transition with the DK logo). If we fail to cancel a fadeout, then we’ll be pulled into the Intro Story.
+	$LF
+]div
+[div class=p 
+	"MMM also allows the transferral of temporary flags that have been set after exiting a title demo. These include the temporary flags used to indicate whether we have watched the long version of the boss introduction cutscenes. If these are carried through to the file, upon fighting the boss in the file, the short version of the cutscene will play instead.
+	$LF
+]div
+[div class=p 
+	"With this knowledge, you would expect that getting a fadeout out of the bosses in the main menu would fade you into Intro Story, however, the game changes the mode we’re in during these bosses. The mode it sets us to dictates that any fadeout leads us back to the main menu no matter what. As such, a fade into Intro Story is prevented. However, we do need to enter a multiplayer match shortly after each fade from a boss to get rid of some strange effects that would prevent us watching any additional boss cutscenes in the Main Menu amongst other things.
+	$LF
+]div
+[div class=p 
+	"Because the game transitions from the Main Menu to the game file in an unintended way, the game doesn’t change the game mode from 5 (Main Menu) to 6 (Adventure Mode). As such, the game places some restrictions on us that would normally only occur whilst in the Main Menu:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"The start button is disabled
+		]b
+		". Since this button is disabled, there is no way to enter the pause menu at all. This means we cannot exit levels via the pause menu but instead have to exit via the DK Portal in every world.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Autosaving does not occur
+		]b
+		". This means that we cannot reset for the entire run as our file will return to the state it was in before heading back into the main menu in the “Main Menu Moves” process. In a positive sense, this does reduce lag a little during loading zones, but not by much.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Taking any damage is preventrd unless the damage taken exceeds the health that we have
+		]b
+		". The fungi boss gives us two melons. The only damage source which takes more than 8 points of health are pits/fluid surfaces which instantly kill the player such as the acid in Castle Lobby.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"The Helm Timer is automatically turned off
+		]b
+		". Due to the way we exit Helm, the timer would otherwise run whilst we’re fighting K Rool. This stops this and reduces some lag.
+		$LF
+	]li
+]ul
+[dl 
+	[dt 
+		[b 
+			"Movement Optimisation
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Donkey Kong 64 boasts a wide variety of methods that the player can travel through the world. Not only are there five kongs to play with, but each kong has a number of ways to move about. Each movement method travels at differing speeds. Here is the best way to move as each kong.
+	$LF
+]div
+[div class=p 
+	"NOTE: Sometimes other methods of movement are faster under certain conditions. Varying conditions will also affect the speed of every method presented below, whether for better or worse:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Kong
+			]th
+			[th 
+				"Movement Method
+			]th
+			[th 
+				"Avg. Velocity on flat ground
+			]th
+			[th 
+				"Notes
+			]th
+		]tr
+		[tr 
+			[td 
+				"DK
+			]td
+			[td 
+				"Rolling
+			]td
+			[td 
+				"192.92
+			]td
+			[td 
+				"Holding neutral after hitting peak until decelerating to 150 velocity is the fastest. Wiggling the stick during acceleration can increase the rate of acceleration
+			]td
+		]tr
+		[tr 
+			[td 
+				"Diddy
+			]td
+			[td 
+				"Cartwheel Jump Aerial
+			]td
+			[td 
+				"150
+			]td
+			[td 
+				"Avg. velocity asymptotes to 150 the longer the cartwheel jump aerial chain lasts. If you cartwheel on the first frame of hitting the ground, you carry on the chain.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Lanky
+			]td
+			[td 
+				"Entering Orangstand Jump
+			]td
+			[td 
+				"157.35
+			]td
+			[td 
+				"Enter Orangstand from walking, and jump as soon as possible sets the speed to 170 speed. When you touch the ground, keep in orangstand and neutral for 3 frames then exit orangstand and have a non-neutral stick in order to optimise the speed.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tiny
+			]td
+			[td 
+				"Long Jump Roll Cancel
+			]td
+			[td 
+				"149.46
+			]td
+			[td 
+				"Rolling out of a long jump sometimes generates a speed greater than 140. With specific stick positions held, it can get to 150 speed (but no higher). This isn’t consistent at all and isn’t fully understood what dictates whether a roll gains any speed or not. This TAS performs these cancels whenever there is a stick position which produces an increase in speed, but when a stick position like this doesn’t exist, this TAS sticks to long jumping.
+			]td
+		]tr
+		[tr 
+			[td 
+				"Chunky
+			]td
+			[td 
+				"Long Jump Spin Cancel
+			]td
+			[td 
+				"149.43
+			]td
+			[td 
+				"See notes for Tiny Kong
+			]td
+		]tr
+	]tbody
+]table
+[dl 
+	[dt 
+		[b 
+			"Phase Swimming, Falling & Walking
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	[em 
+		"Formerly known as “Swim through Walls”, “Fall through Walls” and “Walk through Walls”
+	]em
+	$LF
+]div
+[div class=p 
+	"The camera’s viewpoint angle in memory is offset from the player’s angle by 180*, truncated to mostly lie within the 0 > 360* boundaries. Exiting first person on the US version of the game causes an error where the kong angle is set as the camera viewpoint angle plus 180* without truncation afterwards. When a kong’s original facing angle lies between 0 >180*, this addition results in the end facing angle being over 360*, granting us the 
+	[b 
+		"“Phase State”
+	]b
+	".
+	$LF
+]div
+[div class=p 
+	"Having the phase state causes errors in collision, enabling the player to pass through walls. The angle is normally truncated within a frame, however there are some exceptions which prevent this truncation as long as a certain state is preserved. Including:
+	$LF
+]div
+[ul 
+	[li 
+		" Swimming in a way where the kong doesn’t turn at all
+		$LF
+	]li
+	[li 
+		" Falling
+		$LF
+	]li
+	[li 
+		" Walking in a way where you alternate the stick between neutral and non-neutral every frame
+		$LF
+	]li
+]ul
+[dl 
+	[dt 
+		[b 
+			"Lag Clips
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Donkey Kong 64 is a very laggy game at times, extremely noticeable in Creepy Castle and various other parts of the game (This is the worst I have seen it get if you abuse a few glitches). To combat this, the developers scale up the distance a player travels between frames based on the lag present:
+	$LF
+]div
+[div class=p 
+	"distance = 1/6 x kongSize x velocity x (amountOfLagFramesBetweenVisualFrames + 1)
+	$LF
+]div
+[div class=p 
+	"Lag is the easiest to affect out of the three of the variables in order to increase the distance travelled in a frame. If this distance is sufficiently high enough, it allows the player to travel through walls 
+	$LF
+	"A number of things can increase lag in Donkey Kong 64 that are utilised in this run:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Throwing up to 4 oranges and getting all thrown oranges to explode at the same time by colliding into each other
+		]b
+		".
+		$LF
+		[ul 
+			[li 
+				" Benefits: Usable pretty much everywhere, four oranges tend to do a good job at lagging the game enough
+				$LF
+			]li
+			[li 
+				" Drawbacks: Oranges are a limited resource, and are better spent using on dance skips (each dance skip saving up to 5s)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 
+		[b 
+			"Loading a map chunk
+		]b
+		$LF
+		[ul 
+			[li 
+				" Benefits: Not a limited resource, can provide a severe amount of lag which opens up the option for clipping through very thick walls
+				$LF
+			]li
+			[li 
+				" Drawbacks: The spike is usually very brief, to an extent where the game’s failsafe for lag boost can sometimes negate any lag boost acquired
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 
+		[b 
+			"Tagging after TBS
+		]b
+		$LF
+		[ul 
+			[li 
+				" Benefits: Not a limited resource
+				$LF
+			]li
+			[li 
+				" Drawbacks: Requires a tag barrel, similar spike duration issues to chunk loading, sometimes lag is insufficient to produce a lag clip
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[dl 
+	[dt 
+		[b 
+			"Dance Skips
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When you touch a Golden Banana, it plays a cutscene for 150 frames. However, this and the resulting “dance” animation can be cancelled if you are damaged into the Golden Banana or you are too far off the ground for the game to feel safe enough to pull you into the cutscene/animation. In an ideal world, each dance skip would save all 150 frames, however the setup and time lost to the damage animation negates some of that timeloss.
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Tag Barrel Storage
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When you enter a tag barrel, the game puts you in a movement state which locks the kongs movement until after you have tagged from the tag barrel. However, by crouching, and then uncrouching 1 frame before entering the tag barrel, this movement write is overwritten with the uncrouch, which maintains control of the kong whilst in the tag barrel. This has a wide array of benefits within the run:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Fast Tags
+		]b
+		": Since you can move during a tag barrel, this gives the opportunity for the player to move to their desired location with the new kong whilst they are changing kongs.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Origin Warps
+		]b
+		": After tagging, the kong's stored coordinates are set to 0,0,0 for a brief period of time. If you grab a tree/ladder/mushroom during this period, the kong is warped to the map origin (0,0,0). This spot is usually not useful, except in Fungi where it takes you relatively close to the Giant Mushroom area.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Spawn Snagging
+		]b
+		": I'll explain this more indepth later but since spawn snagging is entirely camera based, keeping the camera locked on the tag barrel can prevent the a Banana loading when we don't want it to.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Telegrabbing
+		]b
+		": When you grab up from a ledge, the kongs new y value is calculated as such: y_new = (y_actual * 2) - y_stored. With tag barrel storage, we can set the stored y value to be 0, therefore enabling us to double our y value by grabbing up on a ledge as long as there is a floor above.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Blueprint Stealing
+		]b
+		": Each Kong has 1 blueprint per level and 1 kasplat. When a kasplat drops a blueprint, it can only be picked up by the kong designated by the blueprint. However the flag is set several frames after the blueprint is picked up, and is set for the kong you currently are. So, if you tag a kong in between the grab and the flag set, you gift that blueprint to the new kong, allowing you to collect multiple blueprints from one kasplat. However, a blueprint isnt properly collectable during TBS (possibly for this reason), however, taking a warp or playing an instrument reverts this and allows you to pick up the blueprint.
+		$LF
+	]li
+]ul
+[dl 
+	[dt 
+		[b 
+			"Spawn Snagging
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"A lot of golden bananas are locked behind a puzzle. Upon the puzzle's completion, the Golden Banana appears and is ready to be collected. The initial assumption may be that they are just spawned into the world when they are ready to be collected. However, this is wrong (you're not thinking in DK64 logic). The Golden Banana is always there however intangible until the puzzle is complete. However, it only becomes intangible once the chunk where the Golden Banana is contained is loaded. Before that it is tangible. Therefore, if you prevent the chunk from loading before you grab the banana, you can grab the banana early. Since chunk loading is entirely camera based, you can grab a Golden Banana early just with some minor camera manipulation. 
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Moonkicks
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"The kong's aerial attack has a lower gravity compared to most elements of their moveset. If you interrupt a kong's aerial attack with a different move early enough into the aerial attack, the lower gravity is persisted.
+	$LF
+	"What makes DK's kick so special is that DK's kick has a non-zero initial y velocity, meaning that DK will start to ascend from the kick, however having a higher kick due to the lower gravity. This can help a lot with getting to places that are otherwise inaccessible.
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Crash Climb
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"DK's height gaining trick is a vision of grace. Diddy's best height gaining trick is much different. After a certain period of time after a Chimpy Charge has been initiated, Diddy will start to slow down. If Diddy banks into a wall during the slowdown, nothing special will happen. However, if you press A one frame before the bonk whilst Diddy is slowing down, he will not only jump, but also be able to crouch in mid air, allowing for another Chimpy Charge. During a Chimpy Charge, Diddy's y velocity doesn't change, and is unaffected by gravity. As such, Diddy can ascend higher than DK's moonkick.
+	$LF
+]div
+[h3 id=RunOtherBitsWhichMayNeedExplaining 
+	" The Run: Other bits which may need explaining
+	$LF
+]h3
+[dl 
+	[dt 
+		[b 
+			"Intro
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"We do MMM here to grant us all the moves in the game excluding the fairy camera (This cannot be acquired with MMM). We also complete all of the training barrels to grant us various abilities (diving with Z, orange throwing, barrel throwing and spawning vines). Orange barrel is done after MMM to give us 20 oranges, which would have been 0 if we did it prior to MMM.
+	$LF
+]div
+[div class=p 
+	"After completing orange barrel, we void out to warp to outside the treehouse. This skips a short cutscene and some movement. We then head to the exit of Training Grounds and to K. Lumsy to open Jungle Japes to spawn the first Golden Banana. Once the banana is obtained, we head to Jungle Japes.
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Jungle Japes
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"MMM doesn't grant us any of the kongs, so we are going to have to free them as we go along. Whilst you can free all kongs via Kut Out, this is only accessible in Creepy Castle, which is the last level in the game, otherwise known as "not an option". As such, all kongs are going to have to be freed in the intended manner.
+	$LF
+]div
+[div class=p 
+	"We do the Golden Banana in front of Diddy first as this spawns the 3 coconut switches to free Diddy. Doing this early enables us to hit those switches whilst doing other things.
+	$LF
+	"The last switch is interrupted by entering the BBlast course. This is to skip the free Diddy cutscene. Since we are re-entering Japes later in the run, we save the banana awarded to us for freeing Diddy for the revisit.
+	$LF
+	"Since Diddy has a GB in the cavern, we fight Army Dillo as Diddy. Whilst it is slower to do so (purely from the aspect of moving to the key being slower as Diddy), it's better to collect the Cave GB now rather than later
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"To Aztec
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"After turning in Key 1, we need to head up to Aztec. This can be done with going the conventional path, however, with a telegrab, you can telegrab up to Aztec saving around 8s. During the TBS section, we do a ceiling kick, using the sloped walls of DK Isles to provide a ceiling. Normally with TASes you’d use a skid-jump backflip to reach the ledge in question. However, a backflip caps your airbourne speed after the telegrab to 70, whereas a moonkick caps it at 140. As such, we need the moonkick to move onto land after the telegrab.
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Angry Aztec
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"The Aztec route revolves around two aspects, needing to collect enough Golden Bananas to enter Factory, and freeing both of the kongs who are caged there.
+	$LF
+	"For Tiny, the game expects you to Chimpy Charge a button near her cage to raise some platforms to charge the letters. However, you can just use a backflip or moontail to get on top of them. The game doesn’t allow you to just start spelling KONG though as it is waiting for an event to make the K active. There are two events which do this: pressing the platform button, and hitting the wrong letter. Since we’re collecting the Golden Banana when we enter the room, hitting O first is fastest. As such, the TAS spells out OKONG.
+	$LF
+]div
+[div class=p 
+	"For Tiny’s Golden Banana in the temple, we use the torch to push us out of bounds. This is an example of how poor the collision is with Donkey Kong 64, a facet that you will be seeing a lot of throughout this run. Some dance skips use two oranges instead of one, like the dance skip for Tiny’s Golden Banana in the temple. This is because throwing two oranges within 3 frames causes the two oranges to explode on each other. As such, after throwing the second, if you do a long jump into the explosion, you get damaged backwards without needing a wall. The big downside to this is that this takes two oranges when oranges are a very tight resource within the run.
+	$LF
+]div
+[div class=p 
+	"After Tiny’s 5-Door Temple (Otherwise known as “The temple that used to scare everyone when they were a kid”), we collect headphones. Collecting headphones refills the instrument energy for the kong you are playing as. Whilst the Instrument does come in handy for playing the kong’s instrument on an instrument pad, this doesn’t actually require instrument energy to use. The reason why instrument energy is used is primarily to play the instrument off the pad. Since an instrument play causes a cutscene, we can use that cutscene to override a longer cutscene.
+	$LF
+]div
+[div class=p 
+	"When freeing Lanky, we collect the golden banana normally instead of dance skipping it. The reason for this is that the golden banana cutscene is shorter than the free Lanky cutscene. As such, we spend less time watching cutscenes and also get a bonus of saving an orange.
+	$LF
+]div
+[div class=p 
+	"For the sound matching game in Llama Temple, you may notice that we take some breaks inbetween shots. This isn’t an optimisation issue, but rather that the game only allows 4 projectiles loaded that haven’t collided with a wall at any one time. As such, we have to carefully plan out the route that we take for this puzzle to shorten the amount of time we are waiting.
+	$LF
+]div
+[div class=p 
+	"There are two items that we need to collect inside the “Lava Room” in Llama Temple: Lanky’s Blueprint and Tiny’s Golden Banana. Going from the Lava Room back to the tag barrel and then back to the Lava Room in the conventional way takes a really long time, so instead we use Tag Barrel Storage. Since we’ll be collecting Lanky’s Blueprint under Tag Barrel Storage, we need to take a warp to allow it to be collectable. After collecting the Blueprint, we go out of bounds and close enough to the tag barrel to re-activate it tagging Tiny in the process. Since we were out of bounds when we tagged Tiny, we remain out of bounds and so can head straight for the Lava Room for her Golden Banana.
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"To Factory
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When heading to Factory, there’s a few things we need to do. We need to turn in Key 2, we need to collect 2 Golden Bananas for Lanky near K. Lumsy, and collect Tiny’s Instrument Golden Banana’s on top of K. Rool’s ship. Without Tag Barrel Storage, the fastest method would be to collect the items in that order. However, it’s around 1s faster to perform Tag Barrel Storage as Tiny, head to the monkeyport at the back and grab her golden banana, then tag the high warp 4 and head down to tag lanky to do his section. 
+	$LF
+]div
+[div class=p 
+	"Before entering Factory, you may have noticed a strange sound being played a few times. This is the homing ammo sound and if you have watched 
+	[a href=https://www.youtube.com/watch?v=QKsRNoLyXO8&t=2598s&ab_channel=Bismuth rel=noopener external nofollow 
+		"Bismuth’s video on the Any% TAS
+	]a
+	", you may know a little about this. This was originally thought to be a weird sound glitch that activated when you pressed all 4 DPad directions simultaneously 4 times. At the point of me TASing this, that was still thought to be the case. Around 2-3 months after this (when I was TASing Japes 2), I looked into the code and figured out what this was. This was part of a 
+	[a href=https://www.youtube.com/watch?v=B-7r_RAffQo&feature=emb_title&ab_channel=Ballaam rel=noopener external nofollow 
+		"developer cheat code that allows you to lower the price of entry into a level if you are the right kong
+	]a
+	". For Factory, you need to be Tiny to lower the price. Since TASVideos doesn’t like developer codes being used in a run, but this was used before it was known to be a developer code (only done for the purpose of entertainment), and didn’t have any lasting effect on the run I consulted MemoryTAS on the issue. Her ruling is linked here: 
+	[a href=https://imgur.com/lrhTvsp rel=noopener external nofollow 
+		"Ruling
+	]a
+	$LF
+]div
+[dl 
+	[dt 
+		[b 
+			"Frantic Factory
+		]b
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When we free chunky, we play Tiny’s instrument. As explained earlier, this is to override a longer cutscene (Free Chunky) with a shorter one (Tiny Instrument), we also use the lag from tagging to clip out of bounds to shorten the distance to our next destination.
+	$LF
+]div
+[div class=p 
+	"Mad Jack is a very complex boss. Rather than explain it in text, I have made a video which summarises how Mad Jack works in terms of RNG: 
+	[a href=https://www.youtube.com/watch?v=vzFjWcX2jXs&ab_channel=Ballaam rel=noopener external nofollow 
+		"Video
+	]a
+	". After the Mad Jack fight, we use Tag Barrel Storage to perform a spawn snag to grab the “Number Game GB” early, the next Tag Barrel Storage after this is to perform another spawn snag to grab “Piano Game GB”
+	$LF
+]div
+[div class=p 
+	[b 
+		"To Be Continued
+	]b
+	$LF
+]div
+[h3 id=MakingTheTas 
+	" Making the TAS
+	$LF
+]h3
+[div class=p 
+	"This TAS was made with assistance from 
+	[a href=https://github.com/Isotarge/ScriptHawk rel=noopener external nofollow 
+		"ScriptHawk
+	]a
+	$LF
+]div
+[h3 id=Thanks 
+	" Thanks
+	$LF
+]h3
+[div class=p 
+	"With thanks to the following people:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Isotarge
+		]b
+		" - Making a large portion of ScriptHawk, help with Dive Barrel 55
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"RingRush
+		]b
+		" - Help with Dive Barrel 55, Orange Barrel phasewalk and a tonne of other tricks
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Kiwikiller67
+		]b
+		" - Route ideas
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"2dos
+		]b
+		" & 
+		[b 
+			"Zorulda
+		]b
+		" - Reveal Stream
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"HorhayTheDragon
+		]b
+		" - Helm Slope climb ideas
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"My Wife, Court
+		]b
+		" - Eternal inspiration and motivation
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": 
+	[del 
+		"WHO'S JUDGING DANKEY KANG?
+	]del
+	" Not me anymore. Resetting to new.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Judging...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Optimization seems very good. Pre-existing save data does seem justifiable, given it allows for a more entertaining movie due to more glitches and less cutscenes. Goal seems reasonable, a bit similar to "all levels" with an added restriction that all the levels are played in their "intended" order. There was some talk with staff about improving the branch name, but it was decided in the end that "no levels early" was the best that represents the goal. Great audience support too!
+	$LF
+]div
+[div class=p 
+	"Also, to address a minor point noted in this submission, use of a "developer code" was done for this TAS. However, the extent that this was used was purely cosmetic, which is allowed by the movie rules, as it does not impose any gameplay changes nor skip any content. As long as this is kept to purely cosmetic use, it is allowable for future submissions.
+	$LF
+]div
+[div class=p 
+	"Accepting to Moons.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Zinfidel 
+		"Zinfidel
+	]a
+	": Processing...
+]div

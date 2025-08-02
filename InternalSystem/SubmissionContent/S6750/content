@@ -1,0 +1,856 @@
+13
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk-2.3.2
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+]ul
+[div class=p 
+	"This TAS is faster than the fastest known TAS by 100 seconds.
+	$LF
+]div
+[h3 id=AboutTheGame 
+	" About the game
+	$LF
+]h3
+[div class=p 
+	"Fire Emblem: Thracia 776 (ファイアーエムブレム　トラキア776) is the fifth game of the serie, originally released through the Nintendo Power (japanese only flash cartridge service) before receiving a proper ROM cartridge the following year (only in Japan). There are a few minor differences between the two versions but nothing important as far as this TAS is concerned. The story takes place during the events of Fire Emblem: Genealogy of the Holy War, with Leif trying to retake Manster and liberate northern Thracia.
+	$LF
+]div
+[div class=p 
+	"Though this time Leif is in a bit of a hurry and he doesn't mind leaving for dead teammates (even when said teammates came to rescue him in the first place) for the sake of escaping faster.
+	$LF
+]div
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=SpecificFeaturesOfThisGame 
+	" Specific features of this game
+	$LF
+]h4
+[div class=p 
+	"This game has several unique features compared to other Fire Emblem games. The most notables ones for this TAS being :
+	$LF
+]div
+[ul 
+	[li 
+		" Fatigue: Doing an action (Fight, Dance, Steal) with any unit increases his Fatigue by 1 (or between 1 or 5 for Staves, depending of the Staff used). An unit with a Fatigue greater than their maximum HP cannot be deployed in the next chapter. Fatigue is reseted to 0 when not deploying the unit or giving him a Stamina Drink. Leif isn't affected by this mechanic.
+		$LF
+	]li
+	[li 
+		" Rescue/Capture: An unit can rescue an ally if his BLD is higher than that of the ally (mounted units are treated as 20 BLD ones), and will have his STR, MGC, SKL, SPD and DEF halved if the rescued unit's BLD is more than half of the rescuer's one (or more than BLD + 5 if the rescuer is mounted). You can also capture an enemy unit by winning a battle against him (with STR, MGC, SKL, SPD and DEF halved). The same penalties apply than if it was an ally, and you can trade items with him. The enemy tends to prioritize capturing over attacking, and no battle occurs if the attacked target is unharmed.
+		$LF
+	]li
+	[li 
+		" Escape Maps: In some chapters you must escape with your army, and once Leif Escapes any other unit left will be lost (you get one opportunity to get back the units lost in chapter 21x, which is also an Escape Map).
+		$LF
+	]li
+	[li 
+		" Minimum deployement: In addition to the maximum number of units you can deploy, there is also a minimum number, presumably to prevent cheeses in Escape Maps. If you don't have enough units available, everyone will be deployed regardless of their Fatigue.
+		$LF
+	]li
+	[li 
+		" MOV growth: Most characters have a movement growth rate (usually between 1% and 3%), movement which can go up to 20. Needless to say it can be very useful early on when you don't have access to the Warp Staff yet, or for Escape Maps. A pop up message appears after the level up to say to the movement was increased.
+		$LF
+	]li
+	[li 
+		" Movement Stars: About half of the cast have "Movement Stars" (between 1 and 5), which give them a (number of stars x 5%) chance to move again once per turn (not taking dance into account). In particular Leif and Lara both have 1 Movement Star. Starting from chapter 7, any character will also lose his ability to re-move if he Seizes or Escapes, and the only way to get back this ability is to end the turn normally (i.e. by not Seizing the throne or Escaping, which isn't common from chapter 7 onward) or getting danced by Lara.
+		$LF
+	]li
+	[li 
+		" Staves: All the Staves have a (60 + 4 x SKL)% accuracy, meaning that any unit with less than 10 SKL can miss when using a Staff (you still get the Exp and the Weapon Exp from it, and it doesn't cost a Staff use). Status like Sleep last forever and can only be cured with a Restore Staff. 
+		$LF
+	]li
+	[li 
+		" Battle Accuracy: Hit cannot go higher than 99% and lower than 1%, so every attack can either hit or miss and is subject to the RNG.
+		$LF
+	]li
+	[li 
+		" Critical Rates: When two units are fighting, both of them can only have a maximum critical rate of 25% for the first round of combat (so if the critical rate should be higher than that, it is reduced to 25%). After that, if one of the unit has an extra round of combat (because his Attack Speed is higher by 4 or more than the opponent's one), then it's critical rate for this round of combat will be the expected critical rate (i.e. the one displayed in the battle summary) multiplied by the Pursuit Coefficient of the unit (can go from 0 to 5).
+		$LF
+	]li
+	[li 
+		" Critical hit damage: The critical hit damage formula is ( (ATK x2) - DEF), as opposed to the ( (ATK - DEF) x 3) in the later games.
+		$LF
+	]li
+	[li 
+		" Deployment order: Unlike later games, you can't choose where your deployed units will spawn, as it depends only on when you deployed them for the last time. Since for some chapters the units are separated into several groups (chapters 18, 19, 20, 21x, 24, Final), a big part of the planning for this TAS was to find in which way I had to deploy my units in order to have them at the right spot at the right time, given the other constraints (Lafiya and Sara must often be deployed as part of the strategy, there is a minimum and maximum number of units to deploy, ...).
+		$LF
+	]li
+]ul
+[h4 id=Rng 
+	" RNG
+	$LF
+]h4
+[div class=p 
+	"This is the last Fire Emblem game to use a 1 RN system, meaning that what is displayed on screen are the true odds (except for critical rates).
+	$LF
+]div
+[div class=p 
+	"Each time the RNG is reseted, the game randomly picks 1 seed out of the 64 available and use it to get the 55 first RNs, the following ones are calculated with the formula RN#(N) = (RN#(N-55) - RN#(N-24)) modulo 100
+	$LF
+]div
+[div class=p 
+	"The RNG is often reseted, in particular at the start of each chapter and each time you check the stats of any unit. Checking an unit stat costs at least ~50 frames, so most of the micro optimization of this TAS was to find the best compromise between checking the stats and burning RNs.
+	$LF
+]div
+[div class=p 
+	"There are two efficient ways to burn RNs, the first one is to watch the battle summary (right before the battle), as it will "simulate" the battle and so it will burn the RNs accordingly, the other one is to move an unit to a diffrent place to force the game to burn RNs to dertermine the path to take (slower but more accurate). There are also some oddities that can burn 1 RN at a time, but none of them were usuable apart from one with the Bragi's Blade in the Final chapter.
+	$LF
+]div
+[div class=p 
+	"Since you must always watch the battle summary before doing an actual battle, some RNs strings for a particular battle may be inaccessible because you can't "sync" the RNs with them (i.e. after the simulation from the battle summary, the RNs are right where you want them to be). The more complex the battle (several attacks, several skills involved), the more likely you are to not be able to sync the RNs with a specific string.
+	$LF
+]div
+[h4 id=NotableCharacters 
+	" Notable characters
+	$LF
+]h4
+[ul 
+	[li 
+		" Leif: The lord of the game, he must reach the end of every map to Seize/Escape. Since you can't really warp him in Escape Maps (or else you would lose the warper and the Warp Staff), it is important for him to get a high mobility through his 3% MOV growth.
+		$LF
+	]li
+	[li 
+		" Safiya: The only Staff user who can use the Warp Staff early on. She needs 60 Weapon Exp to reach A-rank Staff but thanks to her personnal Hammerne Staff she can get 10 Weapon Exp per turn, which is fast enough by the time you get the Warp Staff at the end of chapter 7.
+		$LF
+	]li
+	[li 
+		" Lara: A Thief who can later be promoted as a Dancer
+		$LF
+	]li
+]ul
+[h3 id=RoutePlanning 
+	" Route Planning
+	$LF
+]h3
+[h4 id=ParagonMode 
+	" Paragon Mode
+	$LF
+]h4
+[div class=p 
+	"The game was played on Paragon Mode, which doubles the amount of Exp you get from battles. It has no other effect, so as far as this TAS is concerned, it only reduces the amount of grinding needed.
+	$LF
+]div
+[h4 id=DifferencesWithThePreviousTas 
+	" Differences with the previous TAS
+	$LF
+]h4
+[div class=p 
+	"There is a TAS in 55:47 in Nicovideo done by さらさら of pretty good quality 
+	[a href=https://www.nicovideo.jp/watch/sm16251835 rel=noopener external nofollow 
+		"https://www.nicovideo.jp/watch/sm16251835
+	]a
+	$LF
+]div
+[div class=p 
+	"I made one major route difference, which is to not recruit Schroff in chapter 16A (and by extension Amalda in chapter 19).
+	$LF
+]div
+[div class=p 
+	"Pros:
+	$LF
+]div
+[ul 
+	[li 
+		" Faster chapter 10 (I don't need to get the Rescue Staff)
+		$LF
+	]li
+	[li 
+		" Faster chapter 15 (I don't need to use Warp)
+		$LF
+	]li
+	[li 
+		" Faster chapter 16A (I can complete it with only 1 Warp use instead of 2 Warp + 1 Rescue, no Schroff to recruit)
+		$LF
+	]li
+	[li 
+		" Faster chapter 19 (3 Rescue instead of 4, no Amalda to recruit)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Cons:
+	$LF
+]div
+[ul 
+	[li 
+		" Slower Final chapter (less units who can fight, less Movement Stars units)
+		$LF
+	]li
+	[li 
+		" Less units to work with in chapter 20
+		$LF
+	]li
+	[li 
+		" I must get a Stamina Drink for Safiya (stole one in chapter 12x)
+		$LF
+	]li
+	[li 
+		" Slighlty slower chapters 17A, 21, 22 and 24 since I must dance/use Movement Stars animation to use 2 Warp in one turn
+		$LF
+	]li
+	[li 
+		" Slighlty slower chapter 21x (everyone must Escape)
+		$LF
+	]li
+]ul
+[div class=p 
+	"While it's very hard to say how much time is saved from this new route alone, it's probably somewhere between 60 and 70 seconds.
+	$LF
+]div
+[div class=p 
+	"Here is the (approximate) comparison level by level. Keep in mind that Level-ups/Staves usage cost time and may not happen in the same chapter in both TAS
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[td 
+				"Chapter
+			]td
+			[td 
+				"Time saved (s)
+			]td
+		]tr
+		[tr 
+			[td 
+				"1
+			]td
+			[td 
+				"7
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"2x
+			]td
+			[td 
+				"17
+			]td
+		]tr
+		[tr 
+			[td 
+				"3
+			]td
+			[td 
+				"-8
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"5
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"6
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"7
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"8
+			]td
+			[td 
+				"-9
+			]td
+		]tr
+		[tr 
+			[td 
+				"9
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"10
+			]td
+			[td 
+				"36
+			]td
+		]tr
+		[tr 
+			[td 
+				"11
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"12
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"12x
+			]td
+			[td 
+				"-2
+			]td
+		]tr
+		[tr 
+			[td 
+				"13
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"14
+			]td
+			[td 
+				"1
+			]td
+		]tr
+		[tr 
+			[td 
+				"15
+			]td
+			[td 
+				"26
+			]td
+		]tr
+		[tr 
+			[td 
+				"16A
+			]td
+			[td 
+				"41
+			]td
+		]tr
+		[tr 
+			[td 
+				"17A
+			]td
+			[td 
+				"6
+			]td
+		]tr
+		[tr 
+			[td 
+				"18
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"19
+			]td
+			[td 
+				"37
+			]td
+		]tr
+		[tr 
+			[td 
+				"20
+			]td
+			[td 
+				"-10
+			]td
+		]tr
+		[tr 
+			[td 
+				"21
+			]td
+			[td 
+				"-8
+			]td
+		]tr
+		[tr 
+			[td 
+				"21x
+			]td
+			[td 
+				"-9
+			]td
+		]tr
+		[tr 
+			[td 
+				"22
+			]td
+			[td 
+				"-3
+			]td
+		]tr
+		[tr 
+			[td 
+				"23
+			]td
+			[td 
+				"9
+			]td
+		]tr
+		[tr 
+			[td 
+				"24
+			]td
+			[td 
+				"-10
+			]td
+		]tr
+		[tr 
+			[td 
+				"Final
+			]td
+			[td 
+				"-27
+			]td
+		]tr
+		[tr 
+			[td 
+				"Total
+			]td
+			[td 
+				"100
+			]td
+		]tr
+	]tbody
+]table
+[h4 id=OutlinesOfTheStrategy 
+	" Outlines of the strategy
+	$LF
+]h4
+[div class=p 
+	"Prior to chapter 8, Leif must Seize/Escape without the help of the Warp Staff so the more movement he has the better it is. The aim was to fight as little as possible while still reaching the following thresholds:
+	$LF
+]div
+[ul 
+	[li 
+		" 5 SKL at Level 4 (35% growth rate, to proc 3 out of 3 times)
+		$LF
+	]li
+	[li 
+		" 4 MGC at Level 5 (10%, 4/4)
+		$LF
+	]li
+	[li 
+		" 6 BLD at Level 11 (15%, 1/10)
+		$LF
+	]li
+	[li 
+		" 11 MGC at Level 14 (10%, 11/12)
+		$LF
+	]li
+	[li 
+		" 19 MOV at Level 14 (3%, 12/12)
+		$LF
+	]li
+	[li 
+		" 16 STR at Level 17 (35%, 12/16)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Safiya also has some thresholds to reach, mostly related to her Fatigue:
+	$LF
+]div
+[ul 
+	[li 
+		" 25 HP at Level 10 (35%, 4/7)
+		$LF
+	]li
+	[li 
+		" 30 HP at Level 20 (35%, 9/17)
+		$LF
+	]li
+	[li 
+		" BLD proc at the Level 16, 17 or 18 level-up (2%, 1/3)
+		$LF
+	]li
+]ul
+[div class=p 
+	"The most efficient way to clear Escape Maps is just to fast forward with Leif while carrying someone, while leaving behind units without Movement Stars. I don't have an unlimited amount of units to spare and I need some competent units for the Final chapter, so it doesn't apply for chapters 19 and 21x which are a little bit different than the other Escape Maps.
+	$LF
+]div
+[div class=p 
+	"Getting several of these stats at once, as well as a critical hit and/or a Movement Star proc, is a rare event. So rare in fact that there is only one RNs string not too far in a seed (i.e. not too many RNs too burn) that fulfill the Movement Star condition (and it happens that said string also work with a 5% crit), and only 2 with a low % crit (the previous string, as well as a 2% crit string a little farther away in another seed), so I will often use them.
+	$LF
+]div
+[h3 id=ChapterByChapterComments 
+	" Chapter by chapter comments
+	$LF
+]h3
+[div class=p 
+	"Most enemy stats (apart from some bosses) are slighlty randomized at the start of a chapter (including MOV) right after the RNG is reseted, and since there are 64 different seeds, it means there are only 64 different sets of stats possible. Some strategies require some specific stats to work (like low enough to be OHKO or an extra point of MOV).
+	$LF
+]div
+[h4 id=Chapter1 
+	" Chapter 1
+	$LF
+]h4
+[div class=p 
+	"The second soldier must have 6 MOV and 3 or less LUK, the boss must have 1 or less LUK (2 seeds possible)
+	$LF
+	"With my Turn 1 formation, if the first soldier is still alive and the second one happens to have 6 MOV, the later will attack Leif in close combat for some reason (usually he will always attack from a distance, thus wasting some time with the Light Brand animation). The boss must be killed with a critical hit, and Leif must get a MGC, MOV and Movement Star proc, which is only possible with the 5% crit string, which is why Leif must have 5 SKL and the boss must have 1 LUK at most (else the attack will have less than a 5% critical rate).
+	$LF
+]div
+[h4 id=Chapter2 
+	" Chapter 2
+	$LF
+]h4
+[div class=p 
+	"The boss must have the minimum amount of HP and MGC, as well as not too much Avoid (1 seed possible)
+	$LF
+	"There are 6 seeds with a 31 HP/1 MGC boss, but out of them, only one works with the 66% hit string.
+	$LF
+]div
+[h4 id=Chapter2x 
+	" Chapter 2x
+	$LF
+]h4
+[div class=p 
+	"While this chapter isn't mandatory, not visiting it would actually take a lot of time since I would have to wait several turns in chapter 2 for the pirates to destroy a house (they are really slow at doing it). So it's more efficient to do it to get some MOV level-ups, as well as killing Shiva in the way to prevent him from spawning in chapter 7.
+	$LF
+]div
+[h4 id=Chapter3 
+	" Chapter 3
+	$LF
+]h4
+[div class=p 
+	"One specific kid must be saved to get the Warp Staff at the end of chapter 7. This is the only place where I can kill Tanya so that I can get Dagdar instead of her at the end of chapter 8, and he is far more useful than her (high stats, Movement Stars). The soldier near Dagdar didn't attack him on Turn 2 because he would have dealt any damage.
+	$LF
+]div
+[h4 id=Chapter4 
+	" Chapter 4
+	$LF
+]h4
+[div class=p 
+	"The Light Brand must be in the closest chest, the second soldier must have enough BLD to capture Macha (2 seeds possible)
+	$LF
+	"First of a serie of 4 Escape Maps. Nobody can keep up with Leif's mobility, so nobody is gonna escape appart from Lara since she will be useful later on. She has 3 BLD so Leif must have at least 6 BLD in order to carry her without any movement penalty. The only reason I must get back the Light Brand is because of the chapter 10 boss.
+	$LF
+]div
+[h4 id=Chapter5 
+	" Chapter 5
+	$LF
+]h4
+[div class=p 
+	"The exit of the map will not open until you open the door to the arena. Leif must face a precarious enemy phase while still getting the usual MOV level-up.
+	$LF
+]div
+[h4 id=Chapter6 
+	" Chapter 6
+	$LF
+]h4
+[div class=p 
+	"I purchased 6 Door Keys (precious in this game) as that's just the amount I will need.
+	$LF
+]div
+[h4 id=Chapter7 
+	" Chapter 7
+	$LF
+]h4
+[div class=p 
+	"If Shiva was still alive, he and his men would have spawn in this map and block my path.
+	$LF
+]div
+[h4 id=Chapter8 
+	" Chapter 8
+	$LF
+]h4
+[div class=p 
+	"Safiya got the Life Ring from chapter 1 to help manage her Fatigue (else she can't reach 25 HP in time). Since I previously unequipped Marty, he will walk to to shop to try to buy a weapon, thus getting closer to Halvan who is then able to recruit him.
+	$LF
+]div
+[h4 id=Chapter9 
+	" Chapter 9
+	$LF
+]h4
+[div class=p 
+	"I left behind my 3 non Movement Stars units + Callion who is the least useful of the remaining ones. Robert rescued Leif and then Escapes with him so that Leif kept his Movement Stars ability at the start of the next chapter.
+	$LF
+]div
+[h4 id=Chapter10 
+	" Chapter 10
+	$LF
+]h4
+[div class=p 
+	"This boss is a pain to kill and the reason why I had to get back the Light Brand. His avoid is so high that I can't get (in a reasonnable amount of time) an RNs string with a crit + MOV + Movement Stars proc, which is why I had to kill an extra enemy in chapter 8 (I need 19 MOV for chapter 13).
+	$LF
+]div
+[h4 id=Chapter11 
+	" Chapter 11
+	$LF
+]h4
+[div class=p 
+	"This boss is unkillable and will leave on the next enemy phase after you tried to hit him, so Ronan was sent and then immediatly throw his weapon to force the armor to capture him without a fight.
+	$LF
+]div
+[h4 id=Chapter12 
+	" Chapter 12
+	$LF
+]h4
+[div class=p 
+	"Mareeta appears (and is automatically recruited) at the end of Turn 1 and is kinda important to recruit a character later on (both of them being Movements Stars characters with combat abilities), so it was the perfect time to repair the broken Warp Staff thanks to Safiya peronnal Staff. Salem may use his Sleep Staff during the enemy phase, and he was manipulated to not do so.
+	$LF
+]div
+[h4 id=Chapter12x 
+	" Chapter 12x
+	$LF
+]h4
+[div class=p 
+	"Some enemies may or may not move during the enemy phase, based only on the RNG. 
+	$LF
+]div
+[h4 id=Chapter13 
+	" Chapter 13
+	$LF
+]h4
+[div class=p 
+	"With 19 MOV, Leif has just enough mobility to Escape on Turn 1 with Lara, thus dodging a very long enemy phase. Robert helped to give Lara to Leif, and everyone else was a non Movement Stars unit.
+	$LF
+]div
+[h4 id=Chapter14 
+	" Chapter 14
+	$LF
+]h4
+[div class=p 
+	"Some key units must not have an extra point of movement, the enemy turn order must be favorable to reduce the length of the enemy phase (very few number of seeds possible)
+	$LF
+	"There can't be more than 50 enemy units at the same time in a chapter, so it's actually beneficial to not kill enemies in order to prevent reinforcements to appear. The Dracoknights at the end each have a 70% to move each turn, and there is no quick RNs string available to have only one of them moving, so I went for 2 instead.
+	$LF
+]div
+[h4 id=Chapter15 
+	" Chapter 15
+	$LF
+]h4
+[div class=p 
+	"Since I don't need to recruit Schroff, I can go directly to the right arrow and I don't have to visit the church in the middle (which would cost 1 Warp usage).
+	$LF
+]div
+[h4 id=Chapter16a 
+	" Chapter 16A
+	$LF
+]h4
+[div class=p 
+	"For the same reason, I can warp Leif direclty to boss (after dancing him to recover his Movement Stars ability).
+	$LF
+]div
+[h4 id=Chapter17a 
+	" Chapter 17A
+	$LF
+]h4
+[div class=p 
+	"Spent one extra turn in order to recruit Sarah (I had to repair my Warp Staff anyway), but she is pretty much mandatory as the fastest to recruit Movement Stars unit who can use the Rescue Staff in chapter 19. I got a Warp Staff and a Rescue Staff from the houses.
+	$LF
+]div
+[h4 id=Chapter18 
+	" Chapter 18
+	$LF
+]h4
+[div class=p 
+	"Warp Leif, kill the boss, Seize. Leif must have 16 STR to kill him in one turn.
+	$LF
+]div
+[h4 id=Chapter19 
+	" Chapter 19
+	$LF
+]h4
+[div class=p 
+	"I have just enough units to group gather the south units into 3 groups, which allows me to rescue them with the 3 uses of the Rescue Staff from chapter 17A. I was very short on Movement Stars unit (and I want Lara to keep her ability for the furst turn of the next chapter) but I managed to do it by playing around the Rescue/Transfer mechanics.
+	$LF
+]div
+[h4 id=Chapter20 
+	" Chapter 20
+	$LF
+]h4
+[div class=p 
+	"The left side Armor must have 6 MOV to be able to open the door one Turn 1 (7 seeds possible)
+	$LF
+	"It's faster here to prevent the reinforcements from appearing by blocking the squares where they spawn than using a strategy similar to chapter 14. I put 2 Armors to sleep to help me in this task (since their squares are close to the boss and his bodyguards, they are very inconveninent to block with my own units), while the third and last use was to prevent the Armors in the northeast cell to waste animation time every turn. The boss can't be killed in the first three turns, but I am not in a hurry because only some reinforcements from Turn 12 onward can be prevented by killing him. I had a very nice RNs string to get a BLD level-up for Safiya (she needed to repair the Warp Staff at some point in this chapter).
+	$LF
+]div
+[h4 id=Chapter21 
+	" Chapter 21
+	$LF
+]h4
+[div class=p 
+	"Leif can't be warped next to the boss so Dean is sent first instead.
+	$LF
+]div
+[h4 id=Chapter21x 
+	" Chapter 21x
+	$LF
+]h4
+[div class=p 
+	"I must deploy 8 units but I only had 5 non Movement Stars units and I wanted everyone but Leif to keep their Movement Stars ability. I found a way to do so with a Rescue/Transfer trick similar to chapter 19, but it was only possible thanks to Safiya getting this extra point of BLD to carry Sarah.
+	$LF
+]div
+[h4 id=Chapter22 
+	" Chapter 22
+	$LF
+]h4
+[div class=p 
+	"Same as chapter 21.
+	$LF
+]div
+[h4 id=Chapter23 
+	" Chapter 23
+	$LF
+]h4
+[div class=p 
+	"Warp Leif, kill boss, Seize.
+	$LF
+]div
+[h4 id=Chapter24 
+	" Chapter 24
+	$LF
+]h4
+[div class=p 
+	"I recruited Galzus with Mareeta as he can kill the boss instead of Leif and is very useful for the Final chapter (both for his stats and for his weapons). It also allows me to not have Lara in the same group than Leif, which would have made my Final chapter strategy impossible.
+	$LF
+]div
+[h4 id=FinalChapter 
+	" Final chapter
+	$LF
+]h4
+[div class=p 
+	"The 2 Armors in the top left room must have 7 STR (1 seed possible)
+	$LF
+	"I had 15 units to work with, including 7 without a Movement Stars ability on Turn 1 (the 5 usuals + Leif + Cyas), which lead to 3 groups of 3 people and 3 groups of 2. To clear each room on Turn 1, I needed to have 4 actions per group (open the door, kill 2 enemies, place an unit in the center of the room), which wasn't possible with my army (I would need 1 more guy to have his Movement Stars ability basically). 
+	$LF
+	"However I came with an alternative strategy which made good use of the excess of actions I can get from Lara's group thanks to her Dance + Movement Stars, putting her in Cyas' group so that he could solo clear the room and Warp the third guy (Dagdar) to an otherwise unclearable room. After being warped, any Movement Stars unit can kill the two enemies and occupy the center with his two actions. The top left room was chosen for this because the guys here can be so weak (11 Atk both) that they won't try to attack him on enemy phase, saving some time. This led to the least reliable round of combat of the whole TAS, with dodging a 83% attack (Berserk Sword) followed by a 8% Hit 7% Crit, to then proc a 5% Movement Stars (so a 1 in 21000 chance of success...).
+	$LF
+]div
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[div class=p 
+	"I don't think you can go faster with any less units. My final army consists mainly of automatically recruited units, with the only ones who cost some sort of time to recruit/keep being Safiya/Lara (mandatory), Dagdar (instead of Tanya), Mareeta (needed for Galzus, I must repair the Warp Staff at some point anyway), Sarah (mandatory for chapter 19) and Galzus (I pretty much can't kill the final boss without him or his weapons).
+	$LF
+	"In retrospect, it might be possible to kill the chapter 10 boss with a crit and still get a MOV level-up and a Movement Stars proc (so I wouldn't need the extra level-up against the Warrior in chapter 8), but I would need to have EVEN MORE SKL, which would be tedious given the other low % stats I must get every time.
+	$LF
+	"Other than that, better micro management (I think my keys management could have been slighlty better for example), though it would still be limited by the time you have to wait for seeds management.
+	$LF
+]div
+[h3 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" さらさら obviously, for his nice TAS with a lot of good ideas and strategies
+		$LF
+	]li
+]ul
+[h3 id=SuggestScreenshot 
+	" Suggest screenshot :
+	$LF
+]h3
+[div class=p 
+	"frame 86268 or 183184
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": Judging
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Memory 
+		"Memory
+	]a
+	": So optimization appears good.
+	$LF
+]div
+[div class=p 
+	"The run is decently entertaining. I don't get a ton out of fire emblem but I could see some fun strategies.
+	$LF
+]div
+[div class=p 
+	"However the main point of controversy was the usage of a cheat code to unlock a sort of Easy Mode. While normally easy mode could be acceptable, the usage of a code changes things. I wanted to verify that a run that uses a code to unlock an easier difficulty could be acceptable to Moons. If the run was sufficiently unique, I would say yes. However, the usage of a cheat would bar it from being qualified as fastest completion as far as legitimacy (and Vault) is concerned.
+	$LF
+]div
+[div class=p 
+	"However, in this case it sounds like the differences amount to very little. 
+	(__wikiLink|displaytext=The author's estimate of 2 minutes 30 seconds of extra fights|href=/Forum/Posts/497337)
+	" doesn't sound like that much at all. In that case the fact that a cheat is used is a bit more extra baggage as opposed to a run that doesn't use it. There wasn't any actively positive feedback in regards to using the code, only some assumptions based on the author's initial assertions.
+	$LF
+]div
+[div class=p 
+	"As such, rejecting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Re-Judging Underway.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Due to rule changes where entertainment is not a factor this is being re-judged.  This tas uses an in-game code that unlocks an option to play on "Elite Mode" that gives characters twice the experience by giving all characters the innate Paragon skill.  There are no other in-game codes in this game that could be used to further reduce the time of the tas.  This code is also the only in-game code.  The previous judge noted the optimization looks good too.  This makes the game eligible to Standard now. 
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard with goal "Elite Mode".
+	$LF
+]div
+[div class=p 
+	"Good Job!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

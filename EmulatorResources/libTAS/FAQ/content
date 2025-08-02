@@ -1,5 +1,46 @@
-2
-[h4 id=Thegameisveryslow! 
+6
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#GameIsVerySlow 
+					" The game is very slow!
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#WhyDidMySavestatesDisappearAfterIRestartTheGame 
+					" Why did my savestates disappear after I restart the game?
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#GameSoftlocksAtStartupAfterAShortTime 
+					" The game softlocks at startup/after a short time
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ICanTUseSavestatesOtherTools 
+					" I can't use savestates/other tools
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#HowDoIReportACrashSoftlockProblem 
+					" How do I report a crash/softlock/problem?
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h4 id=GameIsVerySlow 
 	" The game is very slow!
 	$LF
 ]h4
@@ -7,7 +48,7 @@
 	"Using an OpenGL software driver makes the game run very slowly, but it is necessary for being able to use savestates. Indeed, if we use hardware acceleration, we cannot save the state of the GPU inside savestates, so loading savestates often results in a crash. Nethertheless, fast-forward skips most OpenGL rendering functions, so you should get a decent framerate with fast-forward enabled.
 	$LF
 ]div
-[h4 id=WhydidmysavestatesdisappearafterIrestartthegame? 
+[h4 id=WhyDidMySavestatesDisappearAfterIRestartTheGame 
 	" Why did my savestates disappear after I restart the game?
 	$LF
 ]h4
@@ -15,43 +56,43 @@
 	"Savestates are invalid after restarting the game, because part of the game state is different at each execution. This includes memory layout, processes/threads identifiers, file identifiers, and in general any communication protocol to the outside (X server connection, sockets, etc.). It may be possible to get savestates valid upon game restart, but it would require a lot of work and I don't feel it is worth right now.
 	$LF
 ]div
-[h4 id=Thegamesoftlocksatstartup/afterashorttime 
+[h4 id=GameSoftlocksAtStartupAfterAShortTime 
 	" The game softlocks at startup/after a short time
 	$LF
 ]h4
 [div class=p 
 	"They are many reasons why a game would softlock when launching with the tool, but many games softlock because they are waiting in a loop for time to advance (without drawing or sleeping). The best way to check this is to set 
-	[tt 
+	[code 
 		"Runtime > Debug > Uncontrolled time
-	]tt
+	]code
 	" before starting the game. It will disable the deterministic timer and will let the game access to real time. If the game does not softlock anymore, then we are likely witnessing this scenario. However, we cannot keep this setting because it makes input recording/playback highly non-deterministic.
 	$LF
 ]div
 [div class=p 
 	"There is a setting which tries to overcome this softlock, under menu 
-	[tt 
+	[code 
 		"Runtime > time tracking
-	]tt
+	]code
 	". Basically, it increases the time when a specific function, that asks for current time, has been called a certain number of times. Either you find the right function to check, starting by 
-	[tt 
+	[code 
 		"main thread
-	]tt
+	]code
 	", by trial-and-error until the game does not softlock anymore, or you can look at the debug log by enabling 
-	[tt 
+	[code 
 		"Runtime > Debug Logging > Print Categories > Time Get
-	]tt
+	]code
 	", and see which function is continuously called by the game.
 	$LF
 ]div
 [div class=p 
 	"Checking an item under 
-	[tt 
+	[code 
 		"Runtime > time tracking > main thread
-	]tt
+	]code
 	" affects sync, but it won't lower the determinism of the game execution. Checking an item under 
-	[tt 
+	[code 
 		"Runtime > time tracking > secondary thread
-	]tt
+	]code
 	", however, may make the game non-deterministic.
 	$LF
 ]div
@@ -59,13 +100,30 @@
 	"If this doesn't solve the softlock, then you gather information about it as explained below
 	$LF
 ]div
-[h4 id=HowdoIreportacrash/softlock/problem? 
+[h4 id=ICanTUseSavestatesOtherTools 
+	" I can't use savestates/other tools
+	$LF
+]h4
+[div class=p 
+	"Disable Wayland. On Ubuntu, this can be done on the password screen in the lower right corner. Select Ubuntu on Xorg.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/D0n2Zb9.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"<how to on WSL?>
+	$LF
+]div
+[h4 id=HowDoIReportACrashSoftlockProblem 
 	" How do I report a crash/softlock/problem?
 	$LF
 ]h4
 [div class=p 
 	"You can open an 
-	[a class=extlink href=https://github.com/clementgallet/libTAS/issues rel=nofollow 
+	[a href=https://github.com/clementgallet/libTAS/issues rel=noopener external nofollow 
 		"issue
 	]a
 	" with the following information:
@@ -94,21 +152,21 @@
 	]li
 	[li 
 		" If you encounter a crash or a softlock, can you launch the game with 
-		[tt 
+		[code 
 			"Start and attach gdb
-		]tt
+		]code
 		", and reach that point. Then on the console you should have a gdb prompt "
-		[tt 
+		[code 
 			"(gdb) 
-		]tt
+		]code
 		"" if the game crashed, or press 
-		[tt 
+		[code 
 			"Ctrl-C
-		]tt
+		]code
 		" if the game softlocked to get one. Then enter 
-		[tt 
+		[code 
 			""thread apply all bt"
-		]tt
+		]code
 		" and paste the result in the github issue.
 		$LF
 	]li

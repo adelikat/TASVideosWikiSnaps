@@ -1,0 +1,827 @@
+4
+[div class=p 
+	"Snakebird is a puzzle game from 2015, which can very loosely be described as a snake with gravity. This TAS features non-intended solutions due to the use of two tricks.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: libTAS v1.4.6
+		$LF
+	]li
+	[li 
+		" Genre: Puzzle
+		$LF
+	]li
+	[li 
+		" Optimize realtime, not puzzle best solutions
+		$LF
+	]li
+]ul
+[div class=p 
+	"Because most of the solutions are executed during the level fadein, I've provided an 
+	[a class=intlink href=/UserFiles/Info/638760098233332313 
+		"alternate movie
+	]a
+	" and encode to see the whole solutions:
+	$LF
+]div
+[div class=p 
+	(youtube|v=4QfdmfWh0lw)
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[div class=p 
+	"The goal of the game is to complete 6 particular levels (star levels), to unlock the last level of the game. Completing a level unlocks all nearby levels, so one must complete levels in a path to access all 6 star levels.
+	$LF
+]div
+[div class=p 
+	"The level enter and exit animations take a lot of time, so routing must first prioritize the optimal number of levels done.
+	$LF
+]div
+[div class=p 
+	"Two main routes are possible:
+	$LF
+]div
+[ul 
+	[li 
+		" taking one path to stars 2, 3 and 4, and another path to stars 1, 6 and 5
+		$LF
+	]li
+	[li 
+		" taking one path to stars 2, 3, 4, 5, 6, and another path to star 1
+		$LF
+	]li
+]ul
+[div class=p 
+	"Now we choose the path by looking at the length of individual level solutions. It appears that the second route is faster.
+	$LF
+]div
+[h3 id=Tricks 
+	" Tricks
+	$LF
+]h3
+[div class=p 
+	"Two main tricks are used to greatly speedup solutions:
+	$LF
+]div
+[h4 id=DoubleMove 
+	" Double move
+	$LF
+]h4
+[div class=p 
+	"It is possible to move a snakebird twice in a single step, by using both the mouse and keyboard inputs at the same time. This saves some time, but it also have a very strong effect: gravity is only applied after the second move. This lets us do solutions that would normally be impossible with only single moves.
+	$LF
+]div
+[h4 id=DeathCancel 
+	" Death cancel
+	$LF
+]h4
+[div class=p 
+	"When a level has multiple snakebirds, the goal is to lead each of them to the exit. When a snakebird dies, the game triggers an undo move to forbid us from continuing the level. However, the undo is not triggered immediately! During that short time, we can take control of another snakebird and move it (only working using mouse). When the game triggers the undo, it will be applied to that last move. At the end, the snakebird that initially died is not longer in the level, and we can complete the level with the remaining snakebirds.
+	$LF
+]div
+[div class=p 
+	"This has the consequence that we only need one snakebird to reach the exit. This is a little more restrictive however: the snakebird that reaches the exit must be the last one. If the last snakebird is one that needed to die, death cancel trick cannot be performed because there is no snakebird left.
+	$LF
+]div
+[h3 id=RealtimeOptimization 
+	" Realtime optimization
+	$LF
+]h3
+[div class=p 
+	"The goal of this run is realtime, so there are a few cases where the shortest solution is not the fastest:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"animations
+		]b
+		": when snakebirds or blocks are falling, the game is paused and we cannot move. Sometimes longer solutions have less fall time. This is also the case for teleporters which have a very long animation.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"fruit glitch
+		]b
+		": during the level fadein, the fruits are appearing one at a time. If we move too fast and move to a fruit before it has appeared, it will glitch the level: we will be able to move freely, but the exit will be inaccessible. In a few levels, we change the solution so that picking fruits are delayed.
+		$LF
+	]li
+]ul
+[h3 id=Solver 
+	" Solver
+	$LF
+]h3
+[div class=p 
+	"Finding solutions for levels was performed by modifying an 
+	[a href=https://github.com/apocalyptech/snakebirdsolver rel=noopener external nofollow 
+		"existing solver
+	]a
+	" by apocalyptech, for the purpose of this TAS:
+	$LF
+]div
+[ul 
+	[li 
+		" Implements double moves
+		$LF
+	]li
+	[li 
+		" Changes the victory condition to account for death cancel
+		$LF
+	]li
+	[li 
+		" Optimizes for solution cost (accounting for fall and teleporter animations) in addition to solution length
+		$LF
+	]li
+	[li 
+		" General speed and memory improvements
+		$LF
+	]li
+]ul
+[div class=p 
+	"See 
+	[a href=https://github.com/clementgallet/snakebirdsolver/tree/speedrun rel=noopener external nofollow 
+		"souce code
+	]a
+	".
+	$LF
+]div
+[h3 id=Levels 
+	" Levels
+	$LF
+]h3
+[div class=p 
+	"We show all the solutions used in this TAS. Moves are described by their direction (U for Up, R for Right, L for Left, D for Down), one or two letters for single and double moves. When multiple snakebirds are present, they are indicated by their colour (R for Red, G for Green, B for Blue).
+	$LF
+]div
+[div class=p 
+	"Two numbers are indicated for the length: the number of moves (single or double) and the evaluated cost by the solver (in move units). Sometimes, the solution used in the TAS is not the best one in terms of number of moves. In that case, the best solution is also indicated, and comments are present why the best solution was not used.
+	$LF
+]div
+[div class=p 
+	"Stages are listed in the order they are completed in the run.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				" Stage 
+			]th
+			[th 
+				" TAS solution 
+			]th
+			[th 
+				" Length (cost) 
+			]th
+			[th 
+				" Best solution 
+			]th
+			[th 
+				" Length 
+			]th
+			[th 
+				" Comments 
+			]th
+		]tr
+		[tr 
+			[td 
+				" 0 
+			]td
+			[td 
+				" RR RD RR UU RR RR DD RR RR RU RU LL LL UL UU 
+			]td
+			[td 
+				" 15 (15) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 1 
+			]td
+			[td 
+				" U LL LU RD RR DR UU UL UU 
+			]td
+			[td 
+				" 9 (9) 
+			]td
+			[td 
+				" UL UL LU RR RR UU UL UU 
+			]td
+			[td 
+				" 8 
+			]td
+			[td 
+				" longer solution avoids more falls 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 2 
+			]td
+			[td 
+				" LL LL L UR RR RR RR RU  LL LU UU 
+			]td
+			[td 
+				" 11 (12.75) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 3 
+			]td
+			[td 
+				" UL DD RU UR RD RR RU LL UU 
+			]td
+			[td 
+				" 9 (10.375) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 5 
+			]td
+			[td 
+				" UU LL UR RU RU U 
+			]td
+			[td 
+				" 6 (6.875) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" star1 
+			]td
+			[td 
+				" G:LD RR UU B:DD D G:UL B:RU RU R:LU UU B:LL UL G:LL LU LL LL B:LL L G:LL L LL R:LD B:DD R:LD DD G:LU U 
+			]td
+			[td 
+				" 27 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" No full solution could be computed so no cost 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 4 
+			]td
+			[td 
+				" DD LD RR DD LL LD RR U RU UL LU UR RR UU 
+			]td
+			[td 
+				" 14 (14.875) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 21 
+			]td
+			[td 
+				" UR RU UL DD LD LD DR RU UU UL UL UU LU RU R 
+			]td
+			[td 
+				" 15 
+			]td
+			[td 
+				" RD DL LU UR RU RU UL D LL LU UU UU RR 
+			]td
+			[td 
+				" 13 
+			]td
+			[td 
+				"  Fruit glitch. We grab top right fruit first 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 43 
+			]td
+			[td 
+				" B:UL DR RR RD R:UL DD B:DL LL UR R:RR UL LL B:RR UU UU 
+			]td
+			[td 
+				" 15 (17.25) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" star2 
+			]td
+			[td 
+				" LD LD DL LU UL LL UU RU UR RR RD DR DD LD DL LL LU UL UU RR DD RR UU LU UR RD DR DR RR RR 
+			]td
+			[td 
+				" 30 (30) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 42 
+			]td
+			[td 
+				" G:L UR R:RR G:DD LL RR R:RU 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" G:DD LL UU RR R:RR UR 
+			]td
+			[td 
+				" 6 
+			]td
+			[td 
+				" Fruit glitch. We move Red close to the exit first 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 41 
+			]td
+			[td 
+				" B:RR DL G:DD B:LU RR UU UU 
+			]td
+			[td 
+				" 7 (9.875) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 25 
+			]td
+			[td 
+				" G:UU U B:LU UL G:UR RU UU LU UU UR 
+			]td
+			[td 
+				" 10 (12.5) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 28 
+			]td
+			[td 
+				" B:UL G:UR UL B:UU UL G:LU B:UU LD G:UU LL L DR B:RU UU 
+			]td
+			[td 
+				" 14 (15.75) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" star3 
+			]td
+			[td 
+				" B:UL LD R G:U LL U R:LU RR G:LL L LL LU B:DD G:UL LL LU U 
+			]td
+			[td 
+				" 17 (25.375) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 26 
+			]td
+			[td 
+				" R:R B:DR R:UL LD B:U R:RU RU B:UR RR RR R:RU RR UR 
+			]td
+			[td 
+				" 13 (17.875) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 27 
+			]td
+			[td 
+				" R:LL G:UR RU R:UU UL UR U UR UU U UL LL LD DD G:LD RR RR 
+			]td
+			[td 
+				" 17 (20.75) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 40 
+			]td
+			[td 
+				" B:UL LL LD LU UR G:UU RR UU B:RD RU RU RU L UL LU UR RR G:UU B:RR RR 
+			]td
+			[td 
+				" 20 (23.25) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" star4 
+			]td
+			[td 
+				" G:UR R:UU UL G:UU R:UR DL LU UL G:RR R:UU 
+			]td
+			[td 
+				" 10 (12.625) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 24 
+			]td
+			[td 
+				" B:UU LL UU R:LU U B:UR RD DD R:RR RU 
+			]td
+			[td 
+				" 10 (14.25) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 37 
+			]td
+			[td 
+				" R:UL LD G:UU LD LD R:RR UR G:DD R:RR R 
+			]td
+			[td 
+				" 10 (11.75) 
+			]td
+			[td 
+				" R:UL D G:DR RU RR R:DD G:RR 
+			]td
+			[td 
+				" 7 
+			]td
+			[td 
+				" Avoiding teleporter is faster 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 36 
+			]td
+			[td 
+				" G:UR R:RD G:RR R:RR DR UU RU G:UU R:RR RU 
+			]td
+			[td 
+				" 10 (11.75) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 33 
+			]td
+			[td 
+				" LL LU U UL LU UR RR R DR RD DL DD LU UU UR UL LL LL UU UR 
+			]td
+			[td 
+				" 20 (20) 
+			]td
+			[td 
+				" LL LL UR RD DL LL LU LL LL LU U UR 
+			]td
+			[td 
+				" 12 
+			]td
+			[td 
+				" Avoiding teleporter is faster 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 34 
+			]td
+			[td 
+				" G:LL LU UL B:RD G:LU 
+			]td
+			[td 
+				" 5 (7.25) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" star5 
+			]td
+			[td 
+				" R:RU B:UR UU R:UU B:U R:UL UR B:RD DD R:RR 
+			]td
+			[td 
+				" 10 (13.625) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 30 
+			]td
+			[td 
+				" B:UU U RR U 
+			]td
+			[td 
+				" 4 (4) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 14 
+			]td
+			[td 
+				" R:UU B:RR R:LL LL LU U 
+			]td
+			[td 
+				" 6 (9.125) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" 17 
+			]td
+			[td 
+				" G:UU R:UL G:UL R:L LU R 
+			]td
+			[td 
+				" 6 (9) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" star6 
+			]td
+			[td 
+				" B:UL LL UU G:UL B:UL UL LU U UR RR RU G:LL LL R:DD B:UR U 
+			]td
+			[td 
+				" 16 (21) 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+			[td 
+				" 
+			]td
+		]tr
+		[tr 
+			[td 
+				" end 
+			]td
+			[td 
+				" B:L G:RU RR R:U G:UU R:LD G:LL R:R B:UR RU G:LU R RR B:UR RR G:RR B:RR UR RU LD LD RR R R:R B:RR 
+			]td
+			[td 
+				" 25 (34.375) 
+			]td
+			[td 
+				" G:RU RR R:UL G:UU R:UU G:LD R:RR B:UU G:LL UR RR B:UR RR G:UR RR B:UR RR RR UU G:RR R:UU G:RR 
+			]td
+			[td 
+				" 22 
+			]td
+			[td 
+				" longer solution avoids more falls 
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=Thanks 
+	" Thanks
+	$LF
+]h3
+[div class=p 
+	"Huge thanks to apocalyptech for the existing solver. Also thanks to speedrunners Calvin304 and Imanex who did a lot of work on this game
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Accepting.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

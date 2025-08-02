@@ -1,43 +1,67 @@
-7
-[div class=toc 
-	[ul 
-		[li 
-			[a href=#MemoryAddresses 
-				"Memory Addresses
-				$LF
-			]a
-		]li
-		[li 
-			[a href=#Tricks 
-				"Tricks
-				$LF
-			]a
-		]li
-	]ul
+8
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#BizhawkLuaScript 
+					"BizHawk Lua Script
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#InformationDetails 
+							"Information details
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#TricksAndGameMechanics 
+					"Tricks and game mechanics
+					$LF
+				]a
+			]li
+		]ul
+	]div
 ]div
 [div class=p 
 	"In this page, Mini-Turbo (or, power-slide turbo boost) is abbreviated as MT.
 	$LF
 ]div
-[h2 id=MemoryAddresses 
-	"Memory Addresses
+[h2 id=BizhawkLuaScript 
+	"BizHawk Lua Script
 	$LF
 ]h2
 [div class=p 
-	"The pointer to these values is at 0x217ACF8 (USA version) or 0x217D028 (EUR version).
+	[a href=https://tasvideos.org/UserFiles/ForUser/Suuper rel=noopener external nofollow 
+		"Here
+	]a
+	" is a Lua script for BizHawk that displays lots of useful information for tool-assisted speedruns and a few extra features.
+	$LF
+]div
+[div class=p 
+	"Many of the values displayed are fixed-point 20.12 values in-game, but read and displayed as regular integers by the Lua script. This means that a displayed value of 4096 is actually a 1.0 in-game. To convert between the two, divide by (or multiply by) 4096. So when the game multiplies some value by a fixed-point 20.12 value that is displayed by the Lua script as 2048, it is actually multiplying by 0.5.
+	$LF
+]div
+[h3 id=InformationDetails 
+	"Information details
+	$LF
+]h3
+[div class=p 
+	"Below is a description of what each piece of information dispalyed on the bottom screen (by the above Lua script) means.
 	$LF
 ]div
 [table 
 	[tbody 
 		[tr 
 			[th 
-				"Short Description
-			]th
-			[th 
-				"Offset
-			]th
-			[th 
-				"Size
+				"Name
 			]th
 			[th 
 				"Explanation
@@ -46,16 +70,19 @@
 		]tr
 		[tr 
 			[td 
-				"X, Y, Z pos
+				"Boost
 			]td
 			[td 
-				"+0x80, 84, 88
+				"The total number of frames left from all boost sources.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"MT
 			]td
 			[td 
-				"4 bytes
-			]td
-			[td 
-				"Your kart's location
+				"The number of frames left for your MT boost, followed by the MT charge timer. The charge timer shows when you can press left or right to charge a MT while drifting. When it shows 1 or lower you can charge your MT.
 				$LF
 			]td
 		]tr
@@ -64,267 +91,501 @@
 				"Speed
 			]td
 			[td 
-				"+0x2A8
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"Your speedometer. Watch the difference in position too.
+				"Your kart's speedometer. This is usually the primary factor controlling how fast you move, but is not the only one. Hence it is not your "real" speed.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Maximum Speed
+				"real
 			]td
 			[td 
-				"+0xD0
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"Your speed cannot exceed this value. PRB locks it; otherwise it increases when you jump off an uphill slope or angle your kart downwards in the air
+				"The 2D difference between your karts X and Z axis location this frame and the previous frame.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Boost Timer
+				"Y Sp
 			]td
 			[td 
-				"+0x238
+				"Vertical speed. You move up by this amount each frame. (other things can also affect upward movement)
+				$LF
+			]td
+		]tr
+		[tr 
+			[th 
+				"Your kart's current maximum speed. If this is more than 
+				[code 
+					"Speed
+				]code
+				", you can accelerate. If it is less, then 
+				[code 
+					"Speed
+				]code
+				" immediately decreases to match 
+				[code 
+					"Max Sp
+				]code
+				".
+				$LF
+			]th
+		]tr
+		[tr 
+			[td 
+				"Turn loss
 			]td
 			[td 
-				"4 bytes
-			]td
-			[td 
-				"How many frames remain for your current boost.
+				"If you are on the ground and not drifting, your kart's forward speed is decreased by an amount roughly proportional to the absolute value of 
+				[code 
+					"Turn loss
+				]code
+				". It quickly goes up when you turn left on the ground and quickly goes down when you turn right on the ground. If you are not pressing left or right, it decreases by ~10%.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"MT Time
+				"wall
 			]td
 			[td 
-				"+0x30C
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"How many frames you must wait before the next MT charge level.
+				"Only appears on-screen, next to turn loss, if you are being slowed down by touching a wall. Your current max speed will be multiplied by this amount before being compared to current speed. This will be lower if you are moving more directly towards the wall.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Angle Facing
+				"air
 			]td
 			[td 
-				"+0x236
-			]td
-			[td 
-				"2 bytes
-			]td
-			[td 
-				"The direction you are facing.
+				"Only appears on-screen, next to turn loss, if you are being slowed down by being in the air. This will only apply if you are in the air without hopping, for at least 5 frames. Your current speed will be multiplied by this amount before being used to calculate movement. Goes up when fast falling and goes down if your movement direction does not match the direction your kart is facing.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Drift Angle
+				"Ground/Air
 			]td
 			[td 
-				"+0x388
-			]td
-			[td 
-				"2 bytes
-			]td
-			[td 
-				"Add this to Angle Facing to get the direction your kart is trying to go.
+				"Tells if you are on the ground or not. The number in parenthesis is the number of frames you have been in the air continuously.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Vertical Angle
+				"X, Z, Y
 			]td
 			[td 
-				"+0x234
-			]td
-			[td 
-				"2 bytes
-			]td
-			[td 
-				"The up/down angle of your kart in the air.
+				"Your kart's "primary" location in 3D space.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Turning Loss
+				"Delta
 			]td
 			[td 
-				"+0x2D4
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"Tells you how much speed you are sacrificing by turning. Only takes effect on the ground and when not drifting. (Does not affect the Speed value.)
+				"The difference between your kart's current location and its location on the previous frame.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Grip
+				"Collision
 			]td
 			[td 
-				"+0x240
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"Tells you how slippery the road is. A value of zero would mean that turning is impossible. (Regular road is always the same, other roads depend on your kart choice.)
+				"How much your kart was pushed by collision. (by floors, walls, objects)
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Air
+				"Hitbox
 			]td
 			[td 
-				"+0x3DD
-			]td
-			[td 
-				"1 byte
-			]td
-			[td 
-				"0 means you are on the ground.
+				"The difference between your kart's "primary" location and the center of your kart's hitbox. This can change depending on your kart's orientation if you are not on flat ground. The hitbox rotates around the primary location, at a distance of just over one hitbox radius.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Spawn Point
+				"Angle
 			]td
 			[td 
-				"+0x3C4
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"Tells you where lakitu will drop you. Set when you fall off the course.
+				"This is a 16-bit integer (-32,768 to 32,767) representing the direction your kart is facing. Also called "facing angle".
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Direction Sine, Cosine
+				"Drift angle
 			]td
 			[td 
-				"+0x60, 70
-			]td
-			[td 
-				"4 bytes
-			]td
-			[td 
-				"(20.12 Fixed Point value) The sine and cosine of the angle at which you are moving. The game uses these values to determine your movement.
+				"Shown to the right of 
+				[code 
+					"Angle
+				]code
+				", after the plus sign. (
+				[code 
+					"Angle
+				]code
+				" + 
+				[code 
+					"Drift angle
+				]code
+				" = total) This value is added to 
+				[code 
+					"Angle
+				]code
+				" to determine the direction your kart is trying to go. It goes up/down while drifting on the ground and gradually returns to 0 when on the ground and not drifting.
 				$LF
 			]td
 		]tr
 		[tr 
 			[td 
-				"Target Sine, Cosine
+				"Delta
 			]td
 			[td 
-				"+0x50, 58
+				"The difference between your kart's current 
+				[code 
+					"Angle
+				]code
+				" or 
+				[code 
+					"Drift angle
+				]code
+				" and the angles from the previous frame, displayed in the same format.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Movement
 			]td
 			[td 
-				"4 bytes
+				"A 3D vector representing the direction of your kart's speed in 3D space. Displayed as X, Z, Y. Multiplied by 
+				[code 
+					"Speed
+				]code
+				" (after speed is modified by turn loss, air speed, etc) to get the X, Z, and Y distances to move by. (There are other things affecting 3D movement too.) The numbers in parenthesis are the 2D (X/Z) magnitude of the movement vector and its equivalent 16-bit angle.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Target
 			]td
 			[td 
-				"(20.12 Fixed Point value) Direction Sine/Cosine will approach these values by some percentage (dependent on Grip) each frame. These are the values changed by your angle.
+				"A 3D vector essentially representing the direction your kart is trying to go. 
+				[code 
+					"Movement
+				]code
+				" will change by some percentage towards 
+				[code 
+					"Target
+				]code
+				" each frame (while touching a collision surface like floor or wall). The percentage depends on 
+				[code 
+					"Surface grip
+				]code
+				".
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Pitch
+			]td
+			[td 
+				"Your kart's angle up/down from fast falling or slow falling.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Surface grip
+			]td
+			[td 
+				"The percentage by which 
+				[code 
+					"Movement
+				]code
+				" moves toward 
+				[code 
+					"Target
+				]code
+				" each frame. This is 3500 (or ~0.85) on regular road which makes 
+				[code 
+					"Movement
+				]code
+				" closely track 
+				[code 
+					"Target
+				]code
+				". It is lower on off-road or slippery roads, meaning it takes longer for changes in 
+				[code 
+					"Target
+				]code
+				" (and, therefore, changes in 
+				[code 
+					"Angle
+				]code
+				") to be reflected in 
+				[code 
+					"Movement
+				]code
+				".
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"sp
+			]td
+			[td 
+				"Surface speed. Your max speed is multiplied by this value. Changes depending on if you are on regular road of off-road.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"normal
+			]td
+			[td 
+				"Surface normal. This really can be ignored since other values should show everything you need. Or just use it to know when you've moved onto a slope. This is the 3D normal vector of the floor you have most recently touched. Look up "normal vector" if you do not know what that means.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"steep
+			]td
+			[td 
+				"The grade (steepness) of the floor you have most recently touched. 0 means flat ground, 1 means a 45 degree angle slope.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"bounce
+			]td
+			[td 
+				"Only shows up if it is not zero. There are 3 types of bounces. Each is a 3D vector that gets added to your kart's movement for the current frame. You can get bounces from touching walls in certain situations, or touching enemies or pinball obstacles.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"f0
+			]td
+			[td 
+				"Something related to your kart's orientation. Can be useful for wall-assisted super bounces, but exactly what it does is unknown.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Distance to ghost
+			]td
+			[td 
+				"The 2D difference between your karts X and Z axis location and the location of the ghost.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Distance to nearest object
+			]td
+			[td 
+				"The 2D difference between your karts X and Z axis location and the "nearest" "object". It will also tell you the shape of the hitbox, if it is known. For boxy and cylindrical hitboxes, the X/Z/Y distances or Horizontal/Vertical distances will be shown underneath. Note that not all object types are supported and some are only partially supported.
+				$LF
+			]td
+		]tr
+		[tr 
+			[td 
+				"Checkpoint number
+			]td
+			[td 
+				"The most recent checkpoint you've touched. Followed in parenthesis by the key checkpoint ID of the most recently triggered key checkpoint. Checkpoint number determins where you will respawn if you go out of bounds.
 				$LF
 			]td
 		]tr
 	]tbody
 ]table
 [div class=p 
-	"The pointer for the last Key Checkpoint you activated is at 0x21661B4 (either USA or EUR (?)). Offset is +0x620. (1 byte) This is useful when doing shortcuts that require going forward a bit first, such as the shortcuts on Rainbow Road.
+	"There is also some information on the top screen relating to floors and walls. If you click the "View collision" button on the pop-up window that the Lua script creates, it will draw a representation of your kart, nearby surfaces, and the nearest object over the top screen. Your kart hitbox is spherical, except when checking collision with boxy objects. If the nearest object is boxy, a box outline will also be drawn around your kart indicating its hitbox for that boxy object.
 	$LF
 ]div
 [div class=p 
-	[a class=extlink href=http://pastebin.com/1veqsLTs rel=nofollow 
-		"Here
-	]a
-	" is a lua script for DeSmuME that displays all the values listed above.
+	"The Lua script may show a list of items, repreenting surfaces you are touching, with the form [number]: [f or w or ?], [p or n] [number].
 	$LF
 ]div
-[h2 id=Tricks 
-	"Tricks
+[ul 
+	[li 
+		"The first number is the ID of a surface.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"The second piece tells if it is a floor (f), wall (w) or something else (?).
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"The third piece tells if it has pushed you (p) or not (n). It may also show "behind", indicating you're touching it but not being pushed because your hitbox was behind the surface prior to movement for this frame.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"The last number tells how far it pushed you, or if it did not push you how far [in the direction it would have pushed you] your kart moved anyway. If this movment is 820 or greater, the surface will not push you. You must get pushed for the surface to have its normal effects.
+		$LF
+	]li
+]ul
+[div class=p 
+	"When the visual collision viewer is turned on, there are several things drawn on the screen.
+	$LF
+]div
+[ul 
+	[li 
+		"Your kart's hitbox is a blue circle. Your kart's hitbox is actually a sphere.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"The white line on the blue circle represents your 
+		[code 
+			"Movement
+		]code
+		" vector. A green line represents the surface normal vector of the floor you're on. A red line represents the surface normal vector of a surface you are touching but not pushed by.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"White triangles represent floors (and other non-wall surfaces). Orange triangles (generally will appear as lines with the 2D top-down view) are walls you are not touching, and yellow ones are walls you are touching.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Any surface you are touching is filled in. A red fill means it has not pushed you. A green fill means it is the floor you are "most on", which is the one controlling the slope of the floor your kart is on.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"The nearest object, if it has a hitbox the script knows how to draw. This will be cyan color. Boxy objects will also have a white wireframe. Spherical objects will have a white circle on them (and a white circle on your kart hitbox) indicating relative depth from the current perspective. If the white circles do not overlap, you are not touching the object.
+		$LF
+	]li
+]ul
+[h2 id=TricksAndGameMechanics 
+	"Tricks and game mechanics
 	$LF
 ]h2
 [ul 
 	[li 
-		"Prolonged Rocket Boost (PRB): A well-known glitch: If you keep using MTs fast enough that your boost timer never reaches 0, you can drive offroad without losing any speed. This can also be done with a boost pad instead of the starting boost.
+		"Prolonged Rocket Boost (PRB): If you get a start boost and keep using MTs fast enough that your boost timer never reaches 0, you can drive offroad without losing any speed. This can also be done with a boost pad instead of the starting boost.
 		$LF
 		[ul 
 			[li 
 				"Using a mushroom boost will set a different boost timer. When this timer hits 0 PRB will be lost.
 				$LF
 			]li
-			[li 
-				"PRB prevents Maximum Speed from going above top boosting speed; therefore, it can be useful to lose PRB in order to gain speed from hopping up steep slopes.
-				$LF
-			]li
 		]ul
 	]li
 ]ul
 [ul 
 	[li 
-		"Fast fall: When making a large jump, it is usually beneficial to hold up. Not doing so could cause you to slow down when your boost wears out. This happens because pressing up increases your Maximum Speed, keeping it above current speed even after your boost wears out. (This can sometimes be combined with hopping uphill to get better speed boosts upon landing.)
-		$LF
-	]li
-]ul
-[ul 
-	[li 
-		"Starting Turn: Turning while not drifting slows you down. However, there is one frame before you start moving when pressing left/right will change Turning Loss without actually turning your kart. By pressing left/right on this frame, and then the other direction the next frame, you can turn a bit without losing any speed.
-		$LF
-	]li
-]ul
-[ul 
-	[li 
-		"Lap Timer Bug: Mario Kart DS allows you to have a lap time that is not an interval of 1/60th of a second (1 frame). However, this partial-frame time is NOT used as the starting time of your next lap's timer. Thus, any "time" between the finish line and your position the frame after crossing it is not counted. See 
-		[a class=extlink href=https://youtu.be/4ZlHvn3SSYY rel=nofollow 
-			"this video
-		]a
-		" for a demonstration of this effect.
-		$LF
-	]li
-]ul
-[ul 
-	[li 
-		"Driving into the air: Normally, drifting into the air (e.g., going off a ramp) slows you down. To prevent this slow-down, drive off while your Drift Angle is 0, or as close to it as possible. This can't always be done, but is very easy to do in places like GCN Luigi Circuit when driving off the boost pads.
-		$LF
-	]li
-]ul
-[ul 
-	[li 
-		"Tight/Wide Drifting: When using a kart that does not have good drifting abilities, pressing outside (left on a right drift or vice versa) near the start of a drift will cause you to turn more inside than pressing neutral (neither left or right). In the case of ROB's BLS kart, this effect lasts 10 frames. Each frame reduces the strength of the effect.
+		"Increasing maximum speed: Fast falling and hopping from uphill slopes increase your maximum speed. This of course means you are in the air and cannot accelerate. However maximum speed does not return to its normal value immediately upon landing, so you can keep some of this speed for a short time on the ground or hop again to take it into the air. PRB prevents these increases to maximum speed.
 		$LF
 		[ul 
 			[li 
-				"Note that this does not happen on the first frame after landing. In order to charge a MT as fast as possible while turning tight, do not press outside to start the charging on the first frame possible; wait 1 frame so that pressing outside will turn you inside.
+				"The amount of the increase from hopping from an uphill slope depends on your kart's orientation relative to the slope. If you face more directly upward, you gain more speed. This continues to apply in the air, so turning in the air can increase or decrease max speed.
 				$LF
 			]li
 		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Fast fall: When making a large jump, it is usually beneficial to hold up. Not doing so could cause you to slow down when your boost wears out. This happens because pressing up increases your maximum speed 
+		[code 
+			"Max Sp
+		]code
+		", keeping it above current speed even after your boost wears out. Fast falling also increases your 
+		[code 
+			"air
+		]code
+		" speed multiplier, if you did not jump with the R button. (Air speed multiplier does not apply during jumps.)
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Starting Turn: Turning while not drifting slows you down through 
+		[code 
+			"Turn loss
+		]code
+		". However, there is one frame before you start moving when pressing left/right will change 
+		[code 
+			"Turn loss
+		]code
+		" without actually turning your kart. By pressing left/right on this frame, and then the other direction the next frame, you can turn a bit without losing any speed.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Lap Timer Bug: Mario Kart DS allows you to have a lap time that is not an interval of 1/60th of a second (1 frame). However, this partial-frame time is NOT used as the starting time of your next lap's timer. Thus, any "time" between crossing the finish line and the end of the frame is not counted. This means it is usually best to have one frame where you are just slightly before the finish line and then cross it on the next frame.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Driving into the air: Normally, drifting into the air (e.g., going off a ramp) slows you down. To prevent this slow-down, drive off while your drift angle is near 0. This can't always be done, but is very easy to do in places like GCN Luigi Circuit when driving off the boost pads. This slowdown is a result of 
+		[code 
+			"air
+		]code
+		" loss and depends on the difference between 
+		[code 
+			"Target
+		]code
+		" and 
+		[code 
+			"Movement
+		]code
+		". The reason having drift angle slows you down is that 
+		[code 
+			"Target
+		]code
+		" ignores drift angle while in the air.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Tight/Wide Drifting: Pressing outside (left on a right drift or vice versa) in a drift soon after a hop will cause you to turn more inside than pressing neutral (neither left or right). In the case of ROB's BLS kart at boost speed, this effect lasts 10 frames. Each frame reduces the strength of the effect. The strength of this effect depends on your kart's current speed. It is much smaller when not boosting. It also depends on hopping, so a slip drift will not have this effect.
+		$LF
+		[ul 
+			[li 
+				"Note that this does not happen on the first frame after landing. In order to charge a MT as fast as possible while turning as tight as possible, do not press outside to start the charging on the first frame possible; wait 1 frame so that pressing outside will turn you inside.
+				$LF
+			]li
+			[li 
+				"Also, this effect continues to apply beyond the point where pressing outside makes you turn less than pressing neutral. Meaning, you do not reach your maximum drifting radius until several frames later.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Drift turning in air: When you are in the air during a drift, pressing either left or right will slow your turn, eventually stopping the turn. Not pressing either will result in turning inside. The amount you turn is proportional to how much you would turn when pressing outside on the ground. So like "tight/wide drifting", this effect is strongest soon after landing from a hop. Also, the rate of turning does not change while in the air.
+		$LF
 	]li
 ]ul
 [ul 
@@ -335,13 +596,11 @@
 ]ul
 [ul 
 	[li 
-		"Exiting a drift: Turning Loss does not take effect when drifting, but is changed by pressing left/right. Press left/right just before exiting a drift to get it as low as possible. (When drifting tight, pressing 2 frames neutral, 2 frames outside, 1 frame inside to charge, 1 frame outside+release gets it very low. When drifting wide, 2 neutral, 1 inside to charge, 1 inside+release gets it very low.)
-		$LF
-	]li
-]ul
-[ul 
-	[li 
-		"Drift turning in air: When you are in the air during a drift, pressing either left or right will slow your turn, eventually stopping the turn. Not pressing either will result in turning inside.
+		"Exiting a drift: 
+		[code 
+			"Turning loss
+		]code
+		" does not take effect when drifting, but is changed by pressing left/right. Press left/right just before exiting a drift to get it as low as possible. (When drifting tight, pressing 2 frames neutral, 2 frames outside, 1 frame inside to charge, 1 frame outside+release gets it very low. When drifting wide, 2 neutral, 1 inside to charge, 1 inside+release gets it very low.)
 		$LF
 	]li
 ]ul
@@ -353,19 +612,72 @@
 ]ul
 [ul 
 	[li 
-		"Wall clip: When you hit a wall (or other wall-like obstacle), your Drift Angle is set to zero. If you hit the wall at the very end of the wall, your speed will not go down to zero and you can continue driving past the wall. This can be very useful for making sharp turns.
+		"Slippery slowdown: Because 
+		[code 
+			"Movement
+		]code
+		" vector's X and Z components change independently, a slippery surface can result in a decrease of the movement vector's magnitude. For example, say you are moving along the X axis and have zero movement on the Z axis and then quickly turn 90 degrees. The X component of the movement vector will move towards 0 and the Z component will move towards 1 (aka 4096) at the same rate. If they both get half way, you'll be moving at a 45 degree angle but significantly slower than you would normally since 0.5 is less than the sine of 45 degrees (or, 2 times square root of 2). As a result, it is generally best to move as straight as possible through the mud in Luigi's Mansion or SNES Choco Island 2.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Wall clip: When you hit a wall (or other wall-like obstacle), your drift angle is set to zero. If you hit the wall at the very end of the wall, you can move past it on the next frame and so go around a corner very tightly. This is somewhat easier on low-grip surfaces, since the slipperiness makes it easier to move past the end of the wall on the frame after hitting it.
 		$LF
 		[ul 
 			[li 
-				"Many walls are off-road, which doesn't provide as much Grip as road does. When clipping these walls you will have to wait extra frames to get your speed back up. (The low grip will affect your movement speed, not your Speed value.)
+				"The amount a wall slows you down depends on the relative angle between your 
+				[code 
+					"Target
+				]code
+				" movement vector and the wall. Moving near parallel to the wall will minimize speed loss, but increases the distance you must move in the one frame after hitting the wall. (This is because your hitbox is a sphere; if you are moving parallel to the wall and touching it you are necessarily at least 1 hitbox radius away from being fully past the end.) Boxes, pipes, and mission gates can be clipped with no speed loss.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Super bounce: If you bounce and hop at the same time, the vertical speed of the bounce and of the hop will stack and you will get much more height than either one alone.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		"Height from walls: When you touch a collision surface, either wall or floor, your 
+		[code 
+			"Movment
+		]code
+		" vector's Y component is immediately set to match the 
+		[code 
+			"Target
+		]code
+		" vector's Y component. While you are in the air, the target vector depends on kart orientation where slow falling increases the Y component. It also lags behind 
+		[code 
+			"Pitch
+		]code
+		", so if you slow fall and then bounce, then immediately touch a wall, you will get the increased Y component from slowfalling. This results in your 
+		[code 
+			"Speed
+		]code
+		" moving you upward as well as forward. Combine this with a boost and a super bounce to go incredibly high. This is how the Waluigi Pinball shortcut is done. Additionally, hopping increases 
+		[code 
+			"Target
+		]code
+		" vector's Y component with a maximum being two frames after the hop. So stopping touching the wall 2 frames after the hop will maximize height.
+		$LF
+		[ul 
+			[li 
+				"The X and Z components of 
+				[code 
+					"Movement
+				]code
+				" vector are also updated when touching a wall. They change the same as they would on the ground, and so this change depends on surface grip even when you are in the air.
 				$LF
 			]li
 			[li 
-				"Boxes, pipes and mission gates can be clipped with no Speed loss. I (Suuper) have yet to see such a clip on a regular wall, though.
+				"It is also possible to use the increased Y component from hopping alone to gain extra height on flat ground. When boosting this can be just enough to lead to a bounce.
 				$LF
-			]li
-			[li 
-				"Hopping on the same frame you hit the wall will allow you to go some extra distance with the direction you had before the clip.
 			]li
 		]ul
 	]li

@@ -1,10 +1,14 @@
-6
-[h2 id=MemoryAddressesandMaxSpeeds 
-	" Memory Addresses and Max Speeds
+15
+[h2 id=MemoryAddressesAndMaxSpeeds 
+	"Memory Addresses and Max Speeds
 	$LF
 ]h2
 [div class=p 
-	"Disclaimer: The following addresses change every time you enter a new area, die, or use certain abilites. As such, there are no definitive addresses for most of these values. However, all of these particular addresses that I put in the chart are found in the very first area of the game (Land of Chocolate) when you start a New File.
+	"To find the address for the player's base, scroll down to 
+	[b 
+		"How to Find the Player Pointer
+	]b
+	". Shoutouts to Really_Tall for helping me find these offsets.
 	$LF
 ]div
 [table 
@@ -17,34 +21,45 @@
 				"Size
 			]th
 			[th 
-				"Desription
+				"Description
 			]th
 		]tr
 		[tr 
 			[td 
-				"0x02302290
+				"base + 0x194
 			]td
 			[td 
 				"4 bytes, signed
 			]td
 			[td 
-				"X Speed; how fast your character is moving horizontally
+				"X Speed; how fast your character is moving along the X Axis
 			]td
 		]tr
 		[tr 
 			[td 
-				"0x02302294
+				"base + 0x198
 			]td
 			[td 
 				"4 bytes, signed
 			]td
 			[td 
-				"Y Speed; how fast your character is moving vertically
+				"Y Speed; how fast your character is moving along the Y Axis
 			]td
 		]tr
 		[tr 
 			[td 
-				"0x023003B8
+				"base + 0x2F0
+			]td
+			[td 
+				"1 byte, unsigned
+			]td
+			[td 
+				"Health; the numerical value of the character's health bar in the lower-left corner of the bottom screen
+			]td
+		]tr
+		[tr 
+			[td 
+				"base + 0x380
 			]td
 			[td 
 				"4 bytes, signed
@@ -55,7 +70,7 @@
 		]tr
 		[tr 
 			[td 
-				"0x023003BC
+				"base + 0x384
 			]td
 			[td 
 				"4 bytes, signed
@@ -64,8 +79,107 @@
 				"Y Position; where your character is located along the Y Axis
 			]td
 		]tr
+		[tr 
+			[td 
+				"base + 0x3C4
+			]td
+			[td 
+				"1 byte, unsigned
+			]td
+			[td 
+				"Character animation timer; what frame of the character's animation is currently playing
+			]td
+		]tr
+		[tr 
+			[td 
+				"base + 0x410
+			]td
+			[td 
+				"4 bytes, signed
+			]td
+			[td 
+				"Screen X; where your character is located on the screen along the X Axis
+			]td
+		]tr
+		[tr 
+			[td 
+				"base + 0x414
+			]td
+			[td 
+				"4 bytes, signed
+			]td
+			[td 
+				"Screen Y; where your character is located on the screen along the Y Axis
+			]td
+		]tr
 	]tbody
 ]table
+[h3 id=HowToFindThePlayerPointer 
+	" How to Find the Player Pointer
+	$LF
+]h3
+[div class=p 
+	"As previously mentioned, these addresses change every time you go through a loading zone or swap partners because the address for the player base changes each time you do one of these actions. However, there is a simple technique you can do to find this address.
+	$LF
+]div
+[ol 
+	[li 
+		"Make sure your character is standing on a floor and that DeSmuME is paused.
+		$LF
+	]li
+	[li 
+		"Hold B and advance four frames to make your character jump.
+		$LF
+	]li
+	[li 
+		"In DeSmuME's RAM Search (Tools > RAM Search...), set the 
+		[b 
+			"Data Size
+		]b
+		" to 
+		[b 
+			"4 bytes
+		]b
+		" and set the 
+		[b 
+			"Data Type / Display
+		]b
+		" to 
+		[b 
+			"Signed
+		]b
+		". Then, click 
+		[b 
+			"Equal To
+		]b
+		" in the Comparison Operator, click 
+		[b 
+			"Specific Value
+		]b
+		" in the 
+		[b 
+			"Compare To / By
+		]b
+		" section, type 
+		[b 
+			"-34816
+		]b
+		" in the 
+		[b 
+			"Specific Value
+		]b
+		" field, and click the 
+		[b 
+			"Search
+		]b
+		" button. There should only be one address after performing the search.
+		$LF
+	]li
+	[li 
+		"Subtract the Y speed address by 0x198 to get the base address. Now that you have the base address, you can add the offsets in the table of addresses to get the addresses you need.
+		$LF
+	]li
+]ol
 [h3 id=MaxSpeeds 
 	" Max Speeds
 	$LF
@@ -126,24 +240,16 @@
 	"Technically, there is no limit to how fast you can walk, because your speed increases when you walk down a slope. This is the only factor that changes your max walking speed.
 	$LF
 ]div
-[h4 id=HowtoEasilyFindAddressesafterDying,UsingCertainAbilities,orEnteringNewAreas 
-	" How to Easily Find Addresses after Dying, Using Certain Abilities, or Entering New Areas
-	$LF
-]h4
-[div class=p 
-	"As previously mentioned, these addresses change every time you enter a new area, die, or use certain abilites. However, there is one simple technique you can do to find these addresses if you do enter a new area, die, or use certain abilites. In DeSmuME, go to Tools > RAM Search... and set the data size accordingly to how big your address is. Pause the emulator, hold the B Button and advance the game four frames, and then go back into RAM Search. Using the comparison operator, find a value that is equal to -34816. -34816 is the first shown value for Y Speed, so finding a value that is equal to -34816 will find the address for Y Speed, and then, you can find X Speed by subtracting 0x04 from the address you just found for Y Speed.
-	$LF
-]div
-[h2 id=GlitchesandTricks 
+[h2 id=GlitchesAndTricks 
 	" Glitches and Tricks
 	$LF
 ]h2
-[h3 id=JumpingandPullingSwitches 
+[h3 id=JumpingAndPullingSwitches 
 	" Jumping and Pulling Switches
 	$LF
 ]h3
 [div class=p 
-	"In almost every level of the game, Bart and / or Lisa need to pull switches to advance to the next part of an area. When press X to pull a switch, Bart / Lisa will stop in place to pull it, which wastes some time. But if you press B and then X immediately afterwards, you can jump and pull the switch at the same time. This means you can move forward a little bit to pull the switch instead of stopping in place.
+	"In almost every level of the game, Bart and/or Lisa need to pull switches to advance to the next part of an area. When you press X to pull a switch, Bart/Lisa will stop in place to pull it, which wastes some time. But if you press B and then X immediately afterwards, you can jump and pull the switch at the same time. This means you can move forward a little bit to pull the switch instead of stopping in place.
 	$LF
 ]div
 [h3 id=BartmanSpeedConservation 
@@ -151,7 +257,7 @@
 	$LF
 ]h3
 [div class=p 
-	"As Bart, if you double jump and hold B, Bart will turn into Bartman and he will be able to glide with his cape. However, holding forwards while gliding will slow Bart's speed down to 10,240. But if you glide and hold no input, Bart's gliding speed will be conserved and he will fly much faster.
+	"As Bart, if you double jump and hold B, Bart will turn into Bartman and he will be able to glide with his cape. However, holding forwards while gliding will slow Bart's speed down to 10,240. But if you hold forwards and release the forwards input right when the glide starts (i.e. right when Bart holds out his cape behind him and the whooshing sound from the cape plays), Bart's speed will be conserved and he will glide much faster.
 	$LF
 ]div
 [h3 id=SlingshotSpeedConservation 
@@ -162,7 +268,7 @@
 	"As Bart, you can shoot enemies and targets by holding A and aiming with the D-pad. When Bart lands from a jump, his speed is slowed down to around 3097, but if you press A to fire the slingshot before landing, Bart will conserve his walking speed and he will not be slowed down.
 	$LF
 ]div
-[h3 id=WallClippingandClimbing 
+[h3 id=WallClippingAndClimbing 
 	" Wall Clipping and Climbing
 	$LF
 ]h3
@@ -178,36 +284,56 @@
 	"Bart has an ability that allows him to use grapple hooks by pressing X. This is used to reach high places and other areas. But if you press X and then jump as soon as Bart is about to move forward, the grapple ability will be cancelled and he will jump extremely far and fast. Combining this with his gliding ability allows him to glide at insane speeds. This only works with grapple hooks that launch Bart horizontally.
 	$LF
 ]div
-[h3 id=InfiniteJumpingviaGrappleHooks 
+[h3 id=InfiniteJumpingViaGrappleHooks 
 	" Infinite Jumping via Grapple Hooks
 	$LF
 ]h3
 [div class=p 
-	"If you use a grappling hook by pressing X, press B, press X, and press B again, you can jump infinitely as long you are close to the grapple hook. Here's a step-by-step process on how to do it:
+	"If you use a grappling hook by pressing X, press B to cancel the grapple, press X to use it again, and press B to jump again, you can jump infinitely as long you are close to the grapple hook. Here's a step-by-step process on how to do it:
 	$LF
 ]div
 [div class=p 
-	"Step 1: Jump
+	"Step 1: Stand close enough to a grappling hook so that you can use it
 	$LF
 ]div
 [div class=p 
-	"Step 2: Press X at the peak of your jump to use a grappling hook
+	"Step 2: Jump
 	$LF
 ]div
 [div class=p 
-	"Step 3: Jump again
+	"Step 3: Press X to use the grappling hook
 	$LF
 ]div
 [div class=p 
-	"Step 4: Press X at the peak of your jump to use a grappling hook
+	"Step 4: Jump again
 	$LF
 ]div
 [div class=p 
-	"Step 5: Jump again
+	"Step 5: Press X to use the grappling hook again
+	$LF
+]div
+[div class=p 
+	"Step 6: Jump again
 	$LF
 ]div
 [div class=p 
 	"These can be repeated for as long as you want as long as you are close to the grapple hook.
+	$LF
+]div
+[h4 id=QuickJump 
+	" Quick Jump
+	$LF
+]h4
+[div class=p 
+	"If you are moving towards the edge of a floor and press B when you land on the very edge, then your character will jump a few frames sooner than usual.
+	$LF
+]div
+[h4 id=DamageCancel 
+	" Damage Cancel
+	$LF
+]h4
+[div class=p 
+	"If you enter the landing animation on the same frame you take damage, then you won't take any damage. The only scenario I've done this in is by landing from a jump while getting hit by a logger's projectile, but I haven't tested if this works with other methods of taking damage.
 	$LF
 ]div
 [h3 id=BuddhaGlitches 
@@ -218,7 +344,7 @@
 	"Lisa's special ability is being able to move objects, enemies, and even herself if she is in front of a Buddha Hand and you press X. You can move objects by dragging them on the touch screen.
 	$LF
 ]div
-[h4 id=DraggingObjectsOutofBounds 
+[h4 id=DraggingObjectsOutOfBounds 
 	" Dragging Objects Out of Bounds
 	$LF
 ]h4
@@ -226,8 +352,8 @@
 	"If you pick up an object by dragging it with the stylus and then you pause the game while holding it, something interesting will happen. When you unpause, the game thinks you are still holding the object and it will quickly drag it to the bottom-right part of the screen by itself for some unknown reason. If you tap the screen at this point, the object will be dropped and will no longer be moved. This is very useful if you perform this glitch while dragging Lisa with the stylus, because it quickly moves Lisa forward and saves time in some areas.
 	$LF
 ]div
-[h4 id=FreeControl/FreeBuddha 
-	" Free Control / Free Buddha
+[h4 id=FreeBuddha 
+	" Free Buddha
 	$LF
 ]h4
 [div class=p 
@@ -243,7 +369,7 @@
 	$LF
 ]div
 [div class=p 
-	"When you beat certain levels, the screen will fade to black, play an ending cutscene, and then unlock the next level. These cutscenes cannot be skipped unless you have already beaten the level. However, if you reset the game at any point during one of these cutscenes, the game will reset and take you back to the file select screen, but the next level will be unlocked, meaning you've skipped the cutscene at the end of the previous level.
+	"When you beat certain levels, the screen will fade to black, play an ending cutscene, and then unlock the next level. These cutscenes cannot be skipped unless you have already beaten the level. However, if you reset the game at any point during one of these cutscenes, the game will reset and take you back to the file select screen, but the next level will be unlocked, meaning you've skipped the cutscene at the end of the previous level. This is very useful because some of these cutscenes take a long time to finish playing.
 	$LF
 ]div
 [div class=p 
@@ -365,7 +491,15 @@
 	]tbody
 ]table
 [div class=p 
-	"Using the following formula, I am able to calculate the amount of seconds saved: frames saved / frame rate = time saved (seconds) Since the game runs at 60 frames per second, I just divide the amount of saved frames by 60 every time.
+	"Using the following formula, I am able to calculate the number of seconds saved:
+	$LF
+]div
+[div class=p 
+	"frames saved / frame rate = time saved (seconds)
+	$LF
+]div
+[div class=p 
+	"Since the game runs at 60 frames per second, I just divide the number of saved frames by 60 every time to get the amount of seconds saved.
 	$LF
 ]div
 [div class=p 

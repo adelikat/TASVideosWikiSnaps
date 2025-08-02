@@ -1,0 +1,624 @@
+9
+[div class=p 
+	"The classic Bad Apple, this time on the Game Boy Color (in Game Boy compatibility mode) with Pokemon Red.
+	$LF
+]div
+[h4 id=PlatformChoice 
+	" Platform Choice
+	$LF
+]h4
+[div class=p 
+	"I've done a Bad Apple TAS on the 
+	(__wikiLink|displaytext=Game Boy Color before with Crystal|href=/9578S)
+	", and the Game Boy has 
+	(__wikiLink|displaytext=already been done with Japanese Yellow|href=/9565S)
+	". This run aims to use the Game Boy Color again, but this time in Game Boy compatibility mode. This mode is entered when the Game Boy Color bootrom detects that the game does not have Game Boy Color enhancements (indicated in the ROM header). As you'd expect, Game Boy Color enhancements (such as double speed mode and VRAM DMA) are locked out, however, various hardware quirks unique to the Game Boy Color are still present. Two (or arguably three) of these hardware quirks are abused in this TAS.
+	$LF
+]div
+[div class=p 
+	"Note that the emulator is not set to emulate a Game Boy Color within a Game Boy Advance, as one of the hardware quirks used in this run does not work on the Game Boy Advance.
+	$LF
+]div
+[h4 id=GameChoice 
+	" Game Choice
+	$LF
+]h4
+[div class=p 
+	"Red is used mainly as a Game Boy only game was needed, and for English Pokemon games, only Red and Blue fit the bill (English Yellow is GBC enhanced, unlike Japanese Yellow). Red saves a slight bit of time over Blue due to a smaller default player name and slight faster intro, and it's more thematically appropriate for Bad Apple (who's heard of a Blue apple?). Pokemon being used is the same sort of reasoning as my Crystal TAS, it's the kind of game you'd expect from an ACE TAS.
+	$LF
+]div
+[h4 id=VideoBasics 
+	" Video Basics
+	$LF
+]h4
+[div class=card-header-userinfo 
+	[div class=p 
+		"More detailed info can be found on the Pan Docs: 
+		[a href=https://gbdev.io/pandocs/Graphics.html rel=noopener external nofollow 
+			"https://gbdev.io/pandocs/Graphics.html
+		]a
+		$LF
+	]div
+]div
+[div class=p 
+	"The Game Boy operates under a tile system like other retro systems at the time. VRAM holds 384 8x8 pixel tiles at addresses $8000-$97FF. Each tile contains 16 bytes, with each pixel using 2 bits to encode a color ID for each pixel (i.e. 2BPP, 2 bits per pixel). For the background and window layers, these tiles are selected for rendering using one of two 32x32 tile maps stored in VRAM at addresses $9800-$9BFF and $9C00-$9FFF. These tile maps contains 1 byte indexes for the tile to be displayed. Which tile map is used, the origin point for fetching tiles from the tilemap, and how these 1 byte indexes address tile data depends on the LCDC register and scrolling registers.
+	$LF
+]div
+[h4 id=VideoRendering 
+	" Video Rendering
+	$LF
+]h4
+[div class=card-header-userinfo 
+	[div class=p 
+		"More detailed info can be found on the Pan Docs: 
+		[a href=https://gbdev.io/pandocs/Rendering.html rel=noopener external nofollow 
+			"https://gbdev.io/pandocs/Rendering.html
+		]a
+		$LF
+	]div
+]div
+[div class=p 
+	"The Game Boy does not render video at once, rather it rendered pixel by pixel by the PPU, directly to the screen. Each frame consists of 154 rows, or scanlines, the first 144 of which has the screen drawn, top to bottom, left to right. Each scanline consists of 456 "dots" of time. A dot is the smallest unit of time the PPU operates in, with 1 dot equaling 1 4MiHz tick. This means within 1 CPU m-cycle (assuming regular speed), there are 4 dots.
+	$LF
+]div
+[div class=p 
+	"For each scanline rendered, the Game Boy switches between different "modes", as reported in the 
+	[a href=https://gbdev.io/pandocs/STAT.html#ff41--stat-lcd-status rel=noopener external nofollow 
+		"rSTAT register
+	]a
+	":
+	$LF
+]div
+[div class=p 
+	"Mode 2, or OAM scan, is first mode within a scanline, lasting 80 dots. In this mode, OAM is scanned and objects which fall under the current scanline are inserted into a object buffer, which can fit up to 10 different objects. In this mode, VRAM can be freely accessed by the CPU, but not OAM.
+	$LF
+]div
+[div class=p 
+	"Mode 3, or rendering, is the next mode within a scanline, lasting between 172 and 289 dots. In this mode, the PPU actually renders the scanline, and thus VRAM and OAM are not accessible by the CPU. To keep a rather 
+	[a href=https://gbdev.io/pandocs/pixel_fifo.html rel=noopener external nofollow 
+		"complicated
+	]a
+	" topic short, this render process involves two FIFO pixel fetchers (one for the background, one for objects), constantly fetching tiles and pushing out pixels. Certain things may cause the render process the stall, extending Mode 3's length. The primary cause of such stalling is an object, which requires waiting for the background fetcher to finish and the object fetcher to fetch a tile before more pixels can be rendered.
+	$LF
+]div
+[div class=p 
+	"Mode 1, or HBlank, is the final mode within a scanline, lasting between 87 and 204 dots. Since the length of one scanline is fixed, Mode 1's length may be shortened if Mode 3's length is extended. In this mode, the PPU is inactive, so VRAM and OAM are freely accessible by the CPU.
+	$LF
+]div
+[div class=p 
+	"For the final 10 scanlines, none of these modes are used. Mode 0, or VBlank, is used entirely for these scanlines. Similar to HBlank, the PPU is inactive in this mode, so VRAM and OAM are freely accessible by the CPU.
+	$LF
+]div
+[h4 id=Palette 
+	" Palette
+	$LF
+]h4
+[div class=card-header-userinfo 
+	[div class=p 
+		"More detailed info can be found on the Pan Docs: 
+		[a href=https://gbdev.io/pandocs/Palettes.html rel=noopener external nofollow 
+			"https://gbdev.io/pandocs/Palettes.html
+		]a
+		$LF
+	]div
+]div
+[div class=p 
+	"When the background FIFO pushes a pixel, it reads the BGP register to determine which color to use. Each 2 bits of the BGP register correspond to a color ID, the value of these 2 bits determines which color maps to the specified color ID. Unlike VRAM, the BGP register is never locked, and may be freely modified during Mode 3. This means for any pixel (subject to timing constraints), the BGP register may contain a different value, and thus potentially change the render output.
+	$LF
+]div
+[div class=p 
+	"When the object FIFO pushes a pixel, it reads the OBP0 or OBP1 register, depending on the OAM palette attribute bit. This works like BGP, except for color ID 0, which is always transparent.
+	$LF
+]div
+[div class=p 
+	"Note that this behavior isn't necessarily straight forward on the Game Boy. Due to the exact timing of the write and how BGP is implemented for the LCD, writing to BGP during rendering may result in the old palette and new palette values being OR'd together for one pixel on some Game Boys, or it might result in the old value still being used for a pixel, or it might result in the new value just being used as you'd normally expect. This is dependent on the LCD revision used, and of course changes if you were to say replace the LCD with some backlit one. On the Game Boy Color luckily, this doesn't matter so much, as the new color LCD used does not have this quirky behavior (the same goes for the Super Game Boy and Game Boy Advance anyways).
+	$LF
+]div
+[h4 id=HowToRender64x144ArbitraryVideoOnTheGameBoy 
+	" How To Render 64x144 Arbitrary Video On The Game Boy
+	$LF
+]h4
+[div class=p 
+	"All this information is nice, but how does it result in Bad Apple?
+	$LF
+]div
+[div class=p 
+	"Since BGP can be changed at any point, in theory that could result in 160 pixels with different BGP values used. Except, it cannot in practice, as the CPU is not fast enough to do that. Additionally, with a "standard" unrolled write loop (i.e. 
+	[code 
+		"ld a,[hl+] / ldh [c],a
+	]code
+	"), you end up with 4 m-cycles per BGP write (i.e. 16 dots). Since BGP represents 4 different color IDs, this means you have 4 pixels per color ID (16 / 4), an effective 40 horizontal pixels (160 / 4). This is better than the 
+	(__wikiLink|displaytext=Japanese Yellow Bad Apple|href=/9565S)
+	" (with its effective 40x36 resolution) despite having the same horizontal resolution, as the vertical resolution is able to increased all the way to the maximum 144.
+	$LF
+]div
+[div class=p 
+	"However, the "standard" unrolled write loop is not the fastest way to copy data. A "popslide" technique can be used rather (i.e. 
+	[code 
+		"pop de / ld [hl],e / ld [hl],d
+	]code
+	"). This works as the 
+	[code 
+		"pop
+	]code
+	" opcode takes only 3 m-cycles, the theoretical fastest for reading 2 bytes in one opcode, as each memory access requires an m-cycle (1 memory access for the opcode, then 2 for the data read from the stack). This results in 1 byte written around every 3.5 m-cycles (i.e. 14 dots). However, this is an average rather, as the read and write times for each byte is not equal. The divide is rather a split between 5 m-cycles and 2 m-cycles (i.e. 20 and 8 dots).
+	$LF
+]div
+[div class=p 
+	"This brings up another trick: purposefully using objects to stall Mode 3. An object is able to stall between 6 to 11 dots. If the delay is 8 dots here for each "long" write within the popslide, it reduces the amount of pixels drawn from 20 to 12. With this, the "long" BGP write could represent 3 pixels per color ID (12 / 4), with the "short" BGP write representing 2 pixels per color ID (8 / 4), thus each 20 pixels has 8 different effective pixels possible. Over all 160 pixels, that means 64 different effective pixels, giving a horizontal resolution of 64.
+	$LF
+]div
+[div class=p 
+	"Of course, we wouldn't want objects to obscure Bad Apple here. Luckily, two options are available:
+	$LF
+]div
+[div class=p 
+	"1. On the Game Boy Color, objects can simply be disabled via the LCDC register. Even when objects are disabled, the Game Boy Color will still proceed to fetch objects, creating Mode 3 stalls. Only when the PPU mixing pixels does it check LCDC. On the Game Boy, this option is unavailable, as disabling objects will skip the object fetch process entirely.
+	$LF
+]div
+[div class=p 
+	"2. Color ID 0 is transparent. Therefore, if an object uses an all 0 tile, it will always be transparent.
+	$LF
+]div
+[div class=p 
+	"For this TAS, option 2 is used, to reduce unneeded reliance on Game Boy Color hardware quirks.  
+	$LF
+]div
+[div class=p 
+	"A nice benefit of abusing BGP writes here is the tile data is rather simple. Only 5 tiles are needed for the background here, using the pattern 
+	[code 
+		"00112233|00011122|23330011|22330001|11222333
+	]code
+	". The tilemap is just filled with these 5 tiles looping.
+	$LF
+]div
+[div class=p 
+	"As a note, using BGP writes as a raster effect isn't an entirely novel idea, it's actually a rather 
+	(__wikiLink|displaytext=Prehistorik|href=/4392M)
+	" idea.
+	$LF
+]div
+[h4 id=FrameDuplication 
+	" Frame Duplication
+	$LF
+]h4
+[div class=p 
+	"While rendering 64x144 arbitrary video is nice, it ends up taking up a ton of CPU time to do, and seemingly requires constant maintenance. There isn't sufficient free time to read the joypad, with the only free time given during VBlank. A single VBlank is not long enough to acquire all 2304 bytes needed to create a new 64x144 frame. In fact, multiple VBlanks aren't long enough to do so without severely cutting the framerate down to around 2 FPS.
+	$LF
+]div
+[div class=p 
+	"The Game Boy Color offers a hardware quirk to resolve this issue. On the Game Boy and Game Boy Color, the LCD can be disabled. After around a frame's worth of time, no VSync signal will be given to the LCD by the PPU (as expected without the PPU active). The LCD normally reacts by "whiting out" with a "whiter than white" color. After enabling the LCD, the first frame rendered by the PPU is not actually displayed, as the PPU does not give a VSync signal to the LCD (like if the LCD was still disabled). This ends up having different results depending on the console:
+	$LF
+]div
+[div class=p 
+	"On the Game Boy, the LCD will just proceed to white out if it hasn't already been whited out. There is no way to avoid the white out with the Game Boy.
+	$LF
+]div
+[div class=p 
+	"On the Super Game Boy, the LCD will not white out ever (as there is no actual LCD here). The previous image will just stick around. While this seems like a potentially ideal platform choice, it isn't really. Subframe input isn't possible on the SGB, unless you just outright hijack the SNES side of the code with the standard JUMP command (at which point, you can just proceed to Bad Apple SNES style without the Game Boy being involved at all, besides with the initial payload).
+	$LF
+]div
+[div class=p 
+	"On the Game Boy Color, if the LCD is enabled within the first 4 scanline's worth of time after the LCD is disabled, the previous frame will rather stick around. Any longer, and the white out will occur. Using this, the previous frame can be "duplicated." Abusing this quirk thus allows for free time to collect data from the joypad without maintaining BGP writes.
+	$LF
+]div
+[div class=p 
+	"The Game Boy Advance operates similarly to the Game Boy Color, except the timing is rather around ~6.5 scanlines worth of time (the exact pattern for this timing isn't known). This doesn't really matter so much however, since the audio method used cannot be done on the Game Boy Advance.
+	$LF
+]div
+[div class=p 
+	"Note that Gambatte currently emulates this case always as a Game Boy Color (except on the SGB, where no "blanking" happens at all like expected). As such, trying to do this trick with it set to Game Boy emulation can possibly result in frame duplication, which is not actually possible on real hardware, thus isn't valid to abuse while emulating a Game Boy.
+	$LF
+]div
+[div class=p 
+	"As a note, abusing this quirk on the GBC to duplicate frames isn't a novel idea. It's used in various retail GBC games, such as 
+	[em 
+		"A Bug's Life
+	]em
+	" in its intro.
+	$LF
+]div
+[h4 id=AudioBasics 
+	" Audio Basics
+	$LF
+]h4
+[div class=card-header-userinfo 
+	[div class=p 
+		"More detailed info can be found on the Pan Docs: 
+		[a href=https://gbdev.io/pandocs/Audio.html rel=noopener external nofollow 
+			"https://gbdev.io/pandocs/Audio.html
+		]a
+		$LF
+	]div
+]div
+[div class=p 
+	"The Game Boy, like other systems at the time, produces sounds using multiple sound generation units. These sound generation units are denoted as channels. The Game Boy has 4 different channels, each with specialized usage.
+	$LF
+]div
+[div class=p 
+	"This system allows for so called "8-bit" or "chiptune" music, but not easily for raw PCM playback that voices generally need. Luckily, one of the channels available, Channel 3, is a simple channel that allows for playing back arbitrary 4-bit PCM samples, with 32 total able to be stored at once (within "wave ram"), possibly set to forever loop.
+	$LF
+]div
+[div class=p 
+	"Channel 3 can be set at any 
+	[code 
+		"2097152 / (2048 - x)
+	]code
+	" frequency where 
+	[code 
+		"x
+	]code
+	" is 0-2047. In this case, 
+	[code 
+		"x
+	]code
+	" is set to 1934, making a frequency of 
+	[code 
+		"2097152 / (2048 - 1934)
+	]code
+	", i.e. 
+	[code 
+		"2097152 / 114
+	]code
+	", i.e. ~18396.07Hz. 114 here is used as that allows for exactly 2 samples to be played back every scanline.
+	$LF
+]div
+[div class=p 
+	"Only 4-bits of amplitude is fairly low quality. The quality however can be increased by changing the master volume for each sample. The master volume is a linear control that amplifies (i.e. multiplies) the mixed channel audio, with 8 different values per side (although, for this video, the music is kept mono regardless). This nearly provides roughly a 7-bit PCM quality playback (although not exactly, as multiple multiplications just result in the same value), just enough for fairly high quality PCM playback.
+	$LF
+]div
+[h4 id=AudioTransfer 
+	" Audio Transfer
+	$LF
+]h4
+[div class=p 
+	"Obviously, Bad Apple will take way more than just 32 samples to play back. This brings in another quirk available on the Game Boy Color: writing to wave ram while channel 3 is active. Normally, you are not supposed to write to wave ram while the channel is active. However, on the Game Boy Color, this ends up just writing to whichever byte the last sample was read from channel 3. Using this trick, wave ram can be continously written to, effectively perfectly streaming PCM audio (although the bytes written will end up being 32 samples "ahead" as the written sample won't be read until the channel loops back around).
+	$LF
+]div
+[div class=p 
+	"Note that writing to wave ram while the channel is active differs on the Game Boy, which prevents the write from going through, except on the exact cycle which wave ram is read by channel 3, which case the write does go through in the same manner as the Game Boy Color. However, this greatly increases the timing constraints for the payload, and would result in some minor audio artifacting as the volume write couldn't be aligned to wave sample changes. Certainly not an absolute deal breaker like frame duplication, but a notable improvement only available with the Game Boy Color.
+	$LF
+]div
+[div class=p 
+	"On the Game Boy Advance, writes to wave ram while the channel is active will 
+	[em 
+		"always
+	]em
+	" fail. As such, this trick would not work at all on the GBA and does not work with the emulator set to GBA mode as it accurately emulates such. Due to this, the run must be done with the console mode set to GBC rather than GBA.
+	$LF
+]div
+[div class=p 
+	"Note this audio quirk, along with the volume trick, is nothing new. It was already used anyways in 
+	(__wikiLink|displaytext=MrWint's Yellow TAS|href=/3358M)
+	" (and the general idea has likely been used even before that TAS).
+	$LF
+]div
+[h4 id=FirstPayload 
+	" The first payload
+	$LF
+]h4
+[div class=p 
+	"The first payload is somewhat similar to 
+	(__wikiLink|displaytext=MrWint's Yellow TAS|href=/3358M)
+	" and the 
+	(__wikiLink|displaytext=old Pi TAS|href=/2341M)
+	" it based that on. However, the differences with Red/Blue's memory layout against Yellow means rather massive deviations are required.
+	$LF
+]div
+[div class=p 
+	"In Yellow, 
+	[code 
+		"hJoyInput
+	]code
+	" (updated with joypad input at the VBlank interrupt) is located at $FFF5. This can be accessed with a 
+	[code 
+		"ldh a,[$FFF5]
+	]code
+	" opcode (i.e. 
+	[code 
+		"$F0 $F5
+	]code
+	"). While 
+	[code 
+		"$F0
+	]code
+	" is not available in the Rival name, 
+	[code 
+		"$F5
+	]code
+	" is (with the 
+	[code 
+		"♀
+	]code
+	" character), with 
+	[code 
+		"$F1
+	]code
+	" being available (with the 
+	[code 
+		"×
+	]code
+	" character) for 
+	[code 
+		"$F0
+	]code
+	", decreased by 1 using an item toss.
+	$LF
+]div
+[div class=p 
+	"In Red, 
+	[code 
+		"hJoyInput
+	]code
+	" is located at $FFF8 rather. This is rather bad, as 
+	[code 
+		"$F8
+	]code
+	" is not available in the Rival name, and neither is 
+	[code 
+		"$F0
+	]code
+	", and only 1 can abuse item tossing. As such, a different approach has to be used.
+	$LF
+]div
+[div class=p 
+	"The 
+	[code 
+		".
+	]code
+	" character corresponds to 
+	[code 
+		"$F2
+	]code
+	", which is the 
+	[code 
+		"ldh a,[c]
+	]code
+	" opcode. If the 
+	[code 
+		"c
+	]code
+	" register contains 
+	[code 
+		"$F8
+	]code
+	", then this will read 
+	[code 
+		"$FFF8
+	]code
+	". This thus gives a way to read 
+	[code 
+		"hJoyInput
+	]code
+	".
+	$LF
+]div
+[div class=p 
+	"In order to do this, I've ended up using the following payload:
+	$LF
+]div
+[pre 
+	"ld bc,$2E00
+	$LF
+	"nop
+	$LF
+	"ldh a,[$FFB4]
+	$LF
+	"ld c,a
+	$LF
+	"ldh a,[c]
+	$LF
+	"halt
+	$LF
+	"ld [hl+],a
+	$LF
+	"jp hl
+	$LF
+]pre
+[div class=p 
+	"$FFB4 contains 
+	[code 
+		"hJoyHeld
+	]code
+	". This is a joypad variable only updated in the overworld loop, not in the VBlank interrupt, thus for this payload it will stay the same, and is more or less fairly customization. The Rival name has the 
+	[code 
+		"u
+	]code
+	" character available for 
+	[code 
+		"$B4
+	]code
+	". This byte also ends up corresponding to the glitch JOHN item.
+	$LF
+]div
+[div class=p 
+	"For this payload, a 
+	[code 
+		"jp hl
+	]code
+	" is used as a loop point. At a glance, this seems fairly useless in the end, as with 
+	[code 
+		"hl
+	]code
+	" constantly increasing it will eventually just start eating into this meager payload and cause the ACE payload to just implode within itself. However, this is where the seemingly useless 
+	[code 
+		"ld bc,$2E00 / nop
+	]code
+	" comes in. These opcodes correspond to the bytes 
+	[code 
+		"$01 $00 $2E $00
+	]code
+	". After 
+	[code 
+		"$01
+	]code
+	" is eaten, you are left with 
+	[code 
+		"$00 $2E $00
+	]code
+	". This corresponds to the opcodes 
+	[code 
+		"nop / ld l,$00
+	]code
+	". This "resets" the 
+	[code 
+		"l
+	]code
+	" register back to 0, which will end up making the 
+	[code 
+		"jp hl
+	]code
+	" jump back to the next payload.
+	$LF
+]div
+[div class=p 
+	"In order to create this payload, the Rival is named 
+	[code 
+		"×. u
+	]code
+	", and the trainer ID is manipulated to 
+	[code 
+		"$F3E9
+	]code
+	". After such, these two party swaps are done:
+	$LF
+]div
+[pre 
+	"10 <-> 11
+	$LF
+	"10 <-> 9
+	$LF
+]pre
+[div class=p 
+	"This moves the rival name into items and places various $FFs beforehand into items. After these swaps, an item swap and various item tosses are done to further manipulate memory. Note the JOHN item is rather quirky in this regard. The game does not allow for tossing key items. The check for whether an item is a key item ends up being buggy if the item is some glitch item, as the game may read an out of bounds buffer address to determine if the item is a key item. For the JOHN item, this out of bounds buffer address happens to correspond to the same place where some text appears to be buffered. In this case, the last item toss amount character ends up going into this byte. Therefore, whether or not JOHN is a key item depends on the number of items last tossed.
+	$LF
+]div
+[div class=p 
+	"After this item manipulation is done, a few more party swaps are done:
+	$LF
+]div
+[pre 
+	"9 <-> 10
+	$LF
+	"15 <-> 17
+	$LF
+	"16 <-> 13
+	$LF
+]pre
+[div class=p 
+	"This ends up putting 
+	[code 
+		"$F301
+	]code
+	" into 
+	[code 
+		"wMapScriptPtr
+	]code
+	", thus making the game jump to 
+	[code 
+		"$F301
+	]code
+	" (with HL set to such on entry). This allows up to 15 bytes to be used for the second payload.
+	$LF
+]div
+[h4 id=SecondPayload 
+	" The second payload
+	$LF
+]h4
+[div class=p 
+	"The 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS/blob/b24903788bd20644c3aa67f5ee51dff6f156f122/asm/payload_gb.asm#L22-L35 rel=noopener external nofollow 
+		"second payload
+	]a
+	" isn't anything rather impressive per se. With only 15 bytes available, there isn't enough space to have a "fast" payload writing the final payload. As such, this payload simply ends up writing a slightly larger payload. However, it is upgraded still to be subframe capable, although rather slow comparably (since it is calling into the game's slow ReadJoypad routine). Less than a frame is needed for the second payload to write and jump to the third payload.
+	$LF
+]div
+[h4 id=ThirdPayload 
+	" The third payload
+	$LF
+]h4
+[div class=p 
+	"The 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS/blob/b24903788bd20644c3aa67f5ee51dff6f156f122/asm/payload_gb.asm#L37-L57 rel=noopener external nofollow 
+		"third payload
+	]a
+	" still isn't anything special. It simply writes the final payload over, using the fastest joypad routine possible. Bank 0 of SRAM is used to store this final payload, it is more or less free to plunder completely (only storing sprite buffers and Hall Of Fame data).
+	$LF
+]div
+[h4 id=FinalPayload 
+	" The final payload
+	$LF
+]h4
+[div class=p 
+	"The 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS/blob/b24903788bd20644c3aa67f5ee51dff6f156f122/asm/payload_gb.asm rel=noopener external nofollow 
+		"final payload
+	]a
+	" is where things get interesting. At the beginning, it simply sets up the console state appropriately for the video and audio playback, then falling into a tight "main loop," performing jobs (reading the joypad, spamming BGP writes, adjusting volume, writing to wave ram, moving objects downwards) needed for video and audio playback. The code was mostly carefully written to allow for everything to fall into place.
+	$LF
+]div
+[div class=p 
+	"After the video finishes, input ends, and the payload will setup RAM to allow completing the game, along with an extra surprise ;).
+	$LF
+]div
+[h4 id=SourceCode 
+	" Source Code
+	$LF
+]h4
+[div class=p 
+	"Code for stringing this run together can be found here: 
+	[a href=https://github.com/CasualPokePlayer/BadAppleTAS rel=noopener external nofollow 
+		"https://github.com/CasualPokePlayer/BadAppleTAS
+	]a
+	$LF
+]div
+[div class=p 
+	"Note that a lot of conversions were actually just done using ffmpeg, the commands for which aren't listed anywhere (but would be relatively easy to re-create if need be).
+	$LF
+]div
+[div class=p 
+	"The movie submitted isn't actually the full movie due to the full movie being too big, the full movie can be found here: 
+	[a href=https://mega.nz/file/8lFRHCrR#HN_Dm-4HexpJLjlmdN7r13psXUVy10T4b2veT_jwTj0 rel=noopener external nofollow 
+		"https://mega.nz/file/8lFRHCrR#HN_Dm-4HexpJLjlmdN7r13psXUVy10T4b2veT_jwTj0
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Replacing movie file with the actual complete version.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CoolHandMike 
+		"CoolHandMike
+	]a
+	": This is very similar to the other ACE tases that play Bad Apple!!, but this one is for GB Pokemon Red.  Pokemon Red is its own game and does not currently have any published ACE tases.  
+	$LF
+]div
+[div class=p 
+	"Accepting to goal "arbitrary code execution".
+	$LF
+]div
+[div class=p 
+	"Great job!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

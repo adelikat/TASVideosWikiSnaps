@@ -1,0 +1,241 @@
+28
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#Configuration 
+					" Configuration
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Controls 
+					" Controls
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Turning 
+							" Turning
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Movies 
+					" Movies
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#MemoryProblems 
+					" Memory problems
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[div class=p 
+	"Might as well stop being completely useless and finally 
+	[a href=https://doomwiki.org/wiki/Can_it_run_Doom%3F rel=noopener external nofollow 
+		"run Doom
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"The core ported for this is 
+	[a href=https://doomwiki.org/wiki/DSDA-Doom rel=noopener external nofollow 
+		"DSDA-Doom
+	]a
+	", which focuses on speedrunning and compatibility for vanilla and modern features.
+	$LF
+]div
+[h3 id=Configuration 
+	" Configuration
+	$LF
+]h3
+[div class=p 
+	"Bizhawk always run Doom in a demo recording mode, so you don't have access to startup screen or menu: it launches straight into the game. Initial level (and episode, among other things) can be specified in 
+	[em 
+		"Doom -> Settings -> Sync Settings
+	]em
+	" menu.
+	$LF
+]div
+[div class=p 
+	"Default settings are configured to be as close to vanilla Doom as possible, but useful modern features are also available: increased internal resolution, secret reveal notice, all sorts of heads-up-displays, etc.
+	$LF
+]div
+[div class=p 
+	"For maximum immersion you can capture mouse so its point is hidden and expand Bizhawk to fullscreen, using the corresponding hotkeys. Note that capturing mouse may glitch out if Bizhawk is covered by another window, and contents of the latter will become clickable. To avoid that, go to 
+	[em 
+		"Config -> Display -> Window
+	]em
+	" tab, and check 
+	[em 
+		"Mouse Capture Forces Stay on Top
+	]em
+	". That way whenever mouse is captured, Bizhawk window will be set to Topmost, which minimizes the risk of its window getting covered (however OS Start menu will still appear above it).
+	$LF
+]div
+[h3 id=Controls 
+	" Controls
+	$LF
+]h3
+[div class=p 
+	"Doom demo files store movement as analog axes (vertical movement, horizontal movement, turning), XDRE and DSDA-Doom's input display shows positive and negative speed (which defines direction) as 2 separate positive axes, but Bizhawk shows them both combined and signed.
+	$LF
+]div
+[div class=p 
+	"Relative (raw) mouse input has to be mapped to mouse controls: 
+	[em 
+		"RMouse Y
+	]em
+	" to mouse running and 
+	[em 
+		"RMouse X
+	]em
+	" to mouse turning. That allows us to manipulate mouse movement to make it feel authentic, because the original game did that (as well as source ports). Direct access to run and turn speeds is only for precise editing, like in TAStudio.
+	$LF
+]div
+[ul 
+	[li 
+		" Note that raw mouse inputs can be recorded to movies in real time, but they can't be recorded frame by frame.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Default binds for key-based turning look reversed: 
+	[code 
+		"Q
+	]code
+	" is Turn Right and 
+	[code 
+		"E
+	]code
+	" is Turn Left. But real-time players bind them that way to make "strafe50" feasible. Since "strafe50" requires pressing Forward, Directional Strafe, Turn, and Strafe Modifier keys all at once, the most practical way to press that combo is 
+	[code 
+		"Q
+	]code
+	"+
+	[code 
+		"W
+	]code
+	"+
+	[code 
+		"D
+	]code
+	" or 
+	[code 
+		"A
+	]code
+	"+
+	[code 
+		"W
+	]code
+	"+
+	[code 
+		"E
+	]code
+	" with the left hand and Strafe Modifier with the right hand. If turn direction keys weren't reversed, one would have to press 
+	[code 
+		"A
+	]code
+	"+
+	[code 
+		"Q
+	]code
+	"+
+	[code 
+		"W
+	]code
+	" for strafe50 to the left, which is too hard to do quickly and reliably.
+	$LF
+]div
+[h4 id=Turning 
+	" Turning
+	$LF
+]h4
+[div class=p 
+	"Normally Doom demos 
+	[a href=https://doomwiki.org/wiki/Turning_resolution_is_lowered_when_recording_demos rel=noopener external nofollow 
+		"reduce actual turning resolution
+	]a
+	" (2-byte signed) to just the higher byte. At some point, an option to use full turning resolution in demos was added to some source ports, so Bizhawk has that option too.
+	$LF
+]div
+[div class=p 
+	"Note that Doom counts 
+	[a href=https://doomwiki.org/wiki/Angle rel=noopener external nofollow 
+		"angle
+	]a
+	" values counterclockwise, so positive turn value turns you left, and negative turns you right. This can be tracked on the in-built coordinate display.
+	$LF
+]div
+[div class=p 
+	"Since editing a 2-byte value in TAStudio would be a nightmare, Bizhawk splits longtic turning value into 2 values: higher byte (whole angle values) and lower byte (fractional angle values). Higher byte equals the shorttic angle input, therefore its range is 
+	[code 
+		"[-128, 127]
+	]code
+	" (sign indicates turning direction).
+	$LF
+]div
+[div class=p 
+	"Lower byte has somewhat counter-intuitive range of 
+	[code 
+		"[-255, 255]
+	]code
+	". Of course when the final value is composed and sent to the core, lower byte is actually only a value between 0 and 255. However for movie editing purposes, negative range is allowed so that "sub-angle" turning could be done in both directions. Without this feature, it'd be impossible to turn by -0.1 or -0.255, because sign would only be available for the higher byte and you can't set it to -0.
+	$LF
+]div
+[div class=p 
+	"The ultimate value that's sent to the core is 
+	[code 
+		"high_byte * 256 + low_byte
+	]code
+	". If the 2 values have different signs, 
+	[code 
+		"low_byte
+	]code
+	" is subtracted from 
+	[code 
+		"high_byte
+	]code
+	", so the final turn value is reduced.
+	$LF
+]div
+[h3 id=Movies 
+	" Movies
+	$LF
+]h3
+[div class=p 
+	"The core aims to be fully compatible with Doom demo files (.LMP), and those that can run on vanilla Doom can be imported into Bizhawk and automatically converted into .bk2 format. Newer formats (Boom and above) will be supported in the near future, as well as .LMP export.
+	$LF
+]div
+[div class=p 
+	"Wipe/melt effect screen is automatically disabled for them, because Doom doesn't process inputs during it but does render frames. In Bizhawk those 2 concepts can't be separated: for some frame to be rendered it has to be an input frame too, but demo files don't have those extra blank frames in them.
+	$LF
+]div
+[h3 id=MemoryProblems 
+	" Memory problems
+	$LF
+]h3
+[div class=p 
+	"The core is ported using Waterbox, which means all the memory that the core changes after init will be serialized to savestates to guarantee determinism. But for big WADs with hundreds of enemies in the same room this can be a problem, because when enemies are fighting and shooting projectiles, extra memory is being changed, and serialized by Waterbox. Uncompressed savestate in nuts.wad can reach several hundred megabytes in size, in bigger slaughtermaps it would be even bigger. Some of them will even crash the core because they require several gigabytes of memory to function and Waterbox limit is 4GB. And even if they don't crash, savestates being that huge makes TASing a nightmare because it's very slow (especially with TAStudio).
+	$LF
+]div
+[div class=p 
+	"Internal savestates 
+	[em 
+		"might
+	]em
+	" be used at some point, but they have determinism problems.
+]div

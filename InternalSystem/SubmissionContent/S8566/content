@@ -1,0 +1,1665 @@
+9
+[div class=p 
+	"On the previous entry in the franchasie, 
+	(__wikiLink|displaytext=Castlevania: Aria of Sorrow (GBA)|href=/1478M)
+	", Soma Cruz had to fight the darkness within himself not to become Dark Lord. In this game, we can get a glimpse of what that would have entailed through the Julius Mode: An alternate story in which Soma's friends join forces to defeat Soma after he gives in to the darkness and becomes Dark Lord. In this movie, Soma decides to take matters into his own hands and defeat himself as Dark Lord once and for all.
+	$LF
+]div
+[div class=p 
+	"By means of memory corruption, one can change the final boss of the game to be Soma, allowing for a Soma vs Soma confrontation. This run aims to beat the final boss of Julius Mode, Soma (and Dracula), playing as Soma, as fast as possible. Luckily, this also triggers the good ending of the game; thus, this movie also completes the game as a byproduct of its main objective. The game is completed in 07:15.58.
+	$LF
+]div
+[ul 
+	[li 
+		" Emulator used: desmume-0.9.9, with Advanced Bus-Level Timing OFF
+		$LF
+	]li
+	[li 
+		" Custom objective
+		$LF
+	]li
+	[li 
+		" Uses zipping glitch and memory corruption
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+	[li 
+		" Takes damage to save time
+		$LF
+	]li
+]ul
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#AboutTheRun 
+					" About the run
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#AboutMemoryCorruptionAndZipping 
+					" About memory corruption and zipping
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#InDepthRouteDissection 
+					" In-depth route dissection
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#ProgressTheGameUntilTheFirstZipping 
+							" Progress the game until the first zipping
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#FirstMemoryCorruptionZipping 
+							" First memory corruption: zipping
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#SecondMemoryCorruptionControlledOob 
+							" Second memory corruption: controlled oob
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#FightAgainstSomaDracula 
+							" The fight against Soma/Dracula
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#MemoryAddressesOfInterest 
+					" Memory addresses of interest
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#AboutTheEmulatorUsed 
+					" About the emulator used
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#AboutTheRomUsedAndRomFilename 
+					" About the ROM used and ROM filename
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#AdditionalLuaScripts 
+					" Additional Lua scripts
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SubmitterSAdditionalCommentsAndThoughts 
+					" Submitter's additional comments and thoughts
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#EntertainmentValue 
+							" Entertainment value
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#AboutTheInceptionAndSubmissionOfThisMovie 
+							" About the inception and submission of this movie
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#ConsiderationsAboutTheMovieSObjectives 
+							" Considerations about the movie's objectives
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#CoAuthorship 
+							" Co-authorship
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#AcknowledgementsAndSpecialThanks 
+					" Acknowledgements and special thanks
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SuggestedScreenshot 
+					" Suggested screenshot
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=AboutTheRun 
+	" About the run
+	$LF
+]h3
+[div class=p 
+	"The famous zipping glitch has been featured in all published TAS movies of this game that aim at fastest completion time. Zipping out of bounds causes memory corruption, which can result in very extreme effects being applied to the game, such as the ones that allow for 
+	(__wikiLink|displaytext=completing the game in less than four minutes|href=/2528M)
+	". Another effect that can be applied to the game through memory corruption is turning on (or off) Julius Mode, without changing the playing character. When the game is in Julius Mode, the final boss of the game gets changed from Menace to a two-phase Soma/Dracula boss. This entire run revolves around memory corruption to turn on Julius Mode and finish the game as quickly as possible.
+	$LF
+]div
+[div class=p 
+	"From a general perspective, the run follows these steps:
+	$LF
+]div
+[ol 
+	[li 
+		" Progress the game until the first memory corruption (this step is the very same as in 
+		(__wikiLink|displaytext=the fastest published TAS|href=/2528M)
+		")
+		$LF
+	]li
+	[li 
+		" Perform first memory corruption, suspend to get back in bounds
+		$LF
+	]li
+	[li 
+		" Perform second memory corruption (on another location), turn on Julius Mode
+		$LF
+	]li
+	[li 
+		" Warp to The Abyss and defeat the final boss Soma.
+		$LF
+	]li
+]ol
+[h3 id=AboutMemoryCorruptionAndZipping 
+	" About memory corruption and zipping
+	$LF
+]h3
+[div class=p 
+	"Memory corruption occurs in this game when certain Soma's coordinates take unintended values. The castle map (viewable in the upper screen) is represented as a bitmap internally, in which each one of the squares is represented as a single bit: 0 means an invisible square, 1 means a colored square. On each frame, the game uses Soma's 
+	[em 
+		"square coordinates
+	]em
+	" to color/fill the corresponding square (i.e. set to 1 a specific bit in memory). Soma's square coordinates are 1 byte values, meaning they take values in the range 0-255, and overflow/underflow accordingly. By getting and moving out of bounds, Soma's square coordinates will compute to memory addresses corresponding to other significant game variables, instead of to the castle map. This is popularly used to get all the souls and equipment of the game (including those featured in Julius Mode but not in the regular mode), but it can be used for much more. For example, it can be used to activate unvisited Warp Rooms, and setting game flags (e.g. skipping the final boss), as demonstrated in 
+	(__wikiLink|displaytext=the fastest published TAS of this game|href=/2528M)
+	". Every [X, Y] square coordinate pair corresponds to a specific corruption [memory address, bit set] pair. Multiple square coordinate pairs can correspond to the same [memory address, bit set] pair (but not the other way around). There is no known way of corrupting the memory to clear bits, only to set them.
+	$LF
+]div
+[dl 
+	[dt 
+		"Square coordinates
+	]dt
+	[dd 
+		"Pair of values [X, Y], ranging from [0, 0] to [255, 255] computed from Soma's position that determine where he should be on the map, and are used to properly color/fill in the squares in the Castle's map. They are key for memory corruption in this game, as any feasible corruption corresponds to one or more pairs of square coordinates.
+		$LF
+	]dd
+]dl
+[div class=p 
+	"The most widely used form of memory corruption involves 
+	[em 
+		"zipping
+	]em
+	". Zipping is when Soma gets stuck into a wall (namely by means of special attack animation cancelation, such as the Succubus glitch, Level Up glitch, and Magic Seal glitch), and the game moves him upwards very fast, trying to get him back in bounds. When in this stuck state, the player might only move Soma to the right by sliding. Any other control of Soma is lost. The quick form of movement when zipping allows Soma to corrupt many addresses in little time. The main way of getting back in bounds involves sliding some distance to the right, waiting for the Y position of Soma to underflow (lower coordinates represent higher positions in the game space) and reach the Y position of the floor of the room again, and then walking left towards the room until the camera fixes itself. This is quite a slow process: It takes around 4 minutes and 30 seconds, plus the time it takes to walk to the room again (which is itself dependant on how much Soma has moved to the right). If one is careful not to (incorrectly) corrupt the addresses corresponding to the "position for resuming from suspend" and to "disable suspend", it is possible to get back in bounds much faster by suspending and resuming the game.
+	$LF
+]div
+[dl 
+	[dt 
+		"Zipping
+	]dt
+	[dd 
+		"State in which Soma gets out of bounds by getting inside a wall's collision. While in this state, Soma constantly moves upwards very fast, and can only move by sliding to the right. Zipping might result in memory corruption.
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Nevertheless, aside from the long wait to get back in bounds when suspending is not possible, zipping presents some additional problems. First, as the only form of horizontal movement is sliding, the player cannot precisely control the horizontal travel distance per movement. As a consequence, Soma can only visit certain X square coordinates for a very short period of time. Therefore, certain [X, Y] square coordinates might be inaccessible per zip. For other X square coordinates, Soma can stay indefinitely in them as long as he does not move horizontally. As the game automatically moves Soma in the Y square coordinate (and it underflows from 0 to 255), for those X square coordinates, all Y coordinates can be visited. I call the latter X square coordinates 
+	[em 
+		"stable coordinates
+	]em
+	" or 
+	[em 
+		"free coordinates
+	]em
+	", and the former 
+	[em 
+		"transient coordinates
+	]em
+	". Another problem with zipping is that, although all Y coordinates can be visited many times, the order (and speed) in which they are visited is out of the control of the player, which is inconvenient in certain situations.
+	$LF
+]div
+[dl 
+	[dt 
+		"Transient coordinates
+	]dt
+	[dd 
+		"When zipping, values for the X square coordinate that can only be traversed while sliding and for a short period of time.
+		$LF
+		[dt 
+			"Stable or free cordinates
+		]dt
+		[dd 
+			"When zipping, values for the X square coordinate that are not transient coordinates. Soma can stay in these for long periods of time.
+			$LF
+		]dd
+	]dd
+]dl
+[div class=p 
+	"For the record, when zipping, Soma moves -1 Y square coordinate per 3 frames. The sliding movement lasts for 41 frames (including input), and moves Soma an average of 2.5 X square coordinates; which  translates to 1 X square coordinate per 16.4 frames when sliding.
+	$LF
+]div
+[div class=p 
+	"Nevertheless, zipping is not required to perform memory corruption. Just getting out of bounds is. This is significant, since there are a few rooms in the game that do not present walls at the limits of the room area (i.e. collision that extends infinitely out of the room), but rather walls 
+	[b 
+		"before
+	]b
+	" the limits of the room area, and empty space in between (in which Soma is never supposed to get). By getting into this empty space with any of the special attack glitches, one can get out of bounds without losing control of Soma. This allows going directly into the square coordinates corresponding to the desired corruption, from any desired direction, and avoiding memory addresses with undesired effects (e.g. game crashes or soft locks). I call this out of bounds method 
+	[em 
+		"controlled oob
+	]em
+	", as opposed to zipping. Two examples of rooms that allow for controlled oob are shown in the screenshots below.
+	$LF
+]div
+[div class=p 
+	[img alt=Example 1 of "controlled OoB"-friendly room, in Lost Village. class=embed mw-100 src=https://i.imgur.com/VJWSFRp.png title=Controlled OoB-friendly room in Lost Village 
+	]img
+	$LF
+	[img alt=Example 2 of "controlled OoB"-friendly room, in The Pinnacle. class=embed mw-100 src=https://i.imgur.com/sHUqIeY.png title=Controlled OoB-friendly room in The Pinnacle 
+	]img
+	$LF
+]div
+[dl 
+	[dt 
+		"Controlled OoB/oob
+	]dt
+	[dd 
+		"Form of out-of-bounds traversal that, unlike zipping, does not cause the player to lose any control of Soma's movement.
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Controlled oob comes with its fair share of problems, too. For starters, most of the very few rooms that allow for controlled oob do not allow for getting back in bounds, aside from suspending and resuming the game. To the best of my knowledge, the only exception to this is the room in Demon Guest House 3 rooms to the right of the Warp Room; as Soma can get back in bounds by using the bat transformation and moving on the left side. That is demonstrated in 
+	[a href=https://youtu.be/7L1oS3CDfhk rel=noopener external nofollow 
+		"this video by romscout
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Another pretty inconvenient problem with controlled oob is that movement is considerably slower than with zipping. It takes Soma around 171 frames to change to a neighboring X coordinate, or around 53 frames if using the Black Panther ability. This is, respectively, more than 10 and 3 times as slow as sliding when zipping. Concerning the Y coordinates, Soma falls through a specific Y coordinate into the next one in around 49 frames; more than 16 times as slow as zipping. Therefore, moving from one interesting [X, Y] square coordinate to the next takes more time in controlled oob than with zipping (assuming the movement is feasible with zipping).
+	$LF
+]div
+[div class=p 
+	"While suspending and resuming the game seems like the fastest option to get back in bounds both for zipping and controlled oob, it is worth noting that this is not an option when Julius Mode is turned on, since the menu gets disabled. In the context of this run, routing how to get back in bounds requires special attention.
+	$LF
+]div
+[div class=p 
+	"Regardless of whether zipping or in controlled oob, the game sometimes makes Soma not visit certain square coordinate pairs. For example, the game might not change from [X, Y + 1] to [X, Y] when zipping over certain [X, Y] square coordinate. Instead, it will stay at [X, Y + 1] on the area corresponding to [X , Y], and move to [X, Y - 1] when it corresponds. This seems to be related to Soma's global position, as underflowing Y by decreasing its value by 256 would cause Soma to do visit [X, Y] as it regularly behaves. This is unfortunate, since it means that the only way to visit certain square coordinates is by traveling 256 square coordinates more in any direction. Let's call these kind of coordinates 
+	[em 
+		"ghost coordinates
+	]em
+	".
+	$LF
+]div
+[dl 
+	[dt 
+		"Ghost coordinates
+	]dt
+	[dd 
+		"Square coordinate pairs that, for some reason, are skipped over and cannot be reached directly by Soma while out of bounds. To reach a ghost coordinates, any of its X or Y coordinates should be increased or decreased by 256 (effectively over/underflowing it).
+		$LF
+	]dd
+]dl
+[div class=p 
+	"In 
+	(__wikiLink|href=/1364M|implicitdisplaytext=1364M)
+	", 
+	[a class=intlink href=/Users/Profile/gocha 
+		"gocha
+	]a
+	" provided the following Lua script to view what [memory address, bit set] pair is being written each frame:
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-11280-0 
+					"Minimize code
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-11280-1 
+					"Show code
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-11280-0 
+		]div
+		[div class=tab-pane fade id=tabs-11280-1 
+			[pre 
+				[code class=language-Lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[div class=p 
+	"For routing purposes, it is interesting to perform the opposite operation: Given a memory address to corrupt and a (set of) bits that produce the desired effect when set, to get the [X, Y] square coordinates that produce such corruption. I developed a Python function which does that. (gocha's function is also translated to Python for completeness):
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-12847-0 
+					"Minimize code
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-12847-1 
+					"Show code
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-12847-0 
+		]div
+		[div class=tab-pane fade id=tabs-12847-1 
+			[pre 
+				[code class=language-Python 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[h3 id=InDepthRouteDissection 
+	" In-depth route dissection
+	$LF
+]h3
+[div class=p 
+	"Now that we know how the tools to achieve our goal work, it is time to talk about how we achieve it. The chosen route performs memory corruption twice: The first time, by zipping, to acquire everything required to perform the second memory corruption, and to activate the warp to the Abyss. The second time, by controlled oob, to activate Julius Mode. Let's break the route down section by section:
+	$LF
+]div
+[h4 id=ProgressTheGameUntilTheFirstZipping 
+	" Progress the game until the first zipping
+	$LF
+]h4
+[div class=p 
+	"This section is exactly the same showcased in 
+	(__wikiLink|displaytext=the fastest published TAS of this game, by mtbRc|href=/2528M)
+	", up to the memory corruption section of that movie. The goal of that movie up to that specific point is getting to perform memory corruption as fast as possible; and, thus, it also fits perfectly for the first section of this run.
+	$LF
+]div
+[div class=p 
+	"To sum up, in this section, heavy luck manipulation is performed to obtain the Axe weapon (required to get out of bounds) and Axe Armor's soul (to defeat Flying Armor as quickly as possible). Also, the game is saved, which is required to suspend the game later on.
+	$LF
+]div
+[h4 id=FirstMemoryCorruptionZipping 
+	" First memory corruption: zipping
+	$LF
+]h4
+[div class=p 
+	"The objectives set for this first memory corruption are the following:
+	$LF
+]div
+[ol 
+	[li 
+		" Acquire everything needed for the second corruption
+		$LF
+	]li
+	[li 
+		" Acquire everything needed to go to the final boss
+		$LF
+	]li
+]ol
+[div class=p 
+	"The reason why in this corruption everything needed to go to the final boss is also acquired, instead of in the second corruption, is because, as explained earlier, movement while zipping is considerably faster than with controlled oob. Overall, it was concluded that performing that part of the corruption on this first corruption was faster.
+	$LF
+]div
+[div class=p 
+	"The specified objectives are translated into the following list of specific game elements to acquire:
+	$LF
+]div
+[ul 
+	[li 
+		" Bat Form bullet soul (i.e. Alucard's Bat Form ability)
+		$LF
+	]li
+	[li 
+		" Black Panther soul
+		$LF
+	]li
+	[li 
+		" Hippogryph ability
+		$LF
+	]li
+	[li 
+		" Demon Guest House warp
+		$LF
+	]li
+	[li 
+		" Cinquedea, Cutall, or Alucard's Sword, to get into controlled oob in Demon Guest House
+		$LF
+	]li
+	[li 
+		" Abyss warp
+		$LF
+	]li
+	[li 
+		" Optimal "position for resuming from suspend"
+		$LF
+	]li
+]ul
+[div class=p 
+	"Obtaining Bat Form instead of Bat Company is optimal since using Black Panther as guardian soul is desired for considerably faster movement during the rest of the run. Using Bat Company would require also obtaining, setting, and using the Doppelganger ability, which is overall slower.
+	$LF
+]div
+[div class=p 
+	"All Cinquedea, Cutall and Alucard's Sword work effectively the same for the purposes of the run: Using the Magic Seal glitch to get controlled oob. One might think that Alucard's Sword would be slower as it performs two hits during its special attack instead of one. Nevertheless, that is not the case, as performing the Magic Seal glitch with optimal timing cancels the special attack movement of all those weapons at the very same time (no hit is actually performed). At first, I intended to obtain Alucard's Sword for entertainment purposes. However, obtaining Cinquedea during the corruption is overall faster, and hence it ultimately became the chosen weapon.
+	$LF
+]div
+[div class=p 
+	"Obtaining the Malphas ability is not mandatory; nevertheless it makes the rest of the run a little more convenient and faster. As it is in the way of acquiring the other things on the list (i.e., it doesn't waste any time), it is also obtained. Hippogryph is (practically
+	[a id=r1 
+	]a
+	[sup 
+		"[
+		[a href=#1 
+			"1
+		]a
+		"]
+	]sup
+	") mandatory, as it is required for moving in controlled oob.
+	$LF
+]div
+[div class=p 
+	"The corruption of the "position for resuming from suspend" is similar to that performed in 
+	(__wikiLink|displaytext=mtbRc's movie|href=/2528M)
+	". It allows for resuming the game in the room next to Lost Village's Warp Room, instead of on a room higher on the map.
+	$LF
+]div
+[div class=p 
+	"To route this memory corruption, I developed a Python function that models how Soma moves while zipping, and estimates the distance between two different points (square coordinates). The distance is (ironically) measured in frames; therefore the function estimates how much time it would take to go from one point to the other. The function also takes into account that the sliding movement lasts for 41 frames and Soma cannot move again until the sliding movement is completed. Thus, it does not exactly compute 
+	[em 
+		"the distance between two points
+	]em
+	", but rather 
+	[em 
+		"the time it takes to move from one point in such a way that Soma passes through a second point, and is able to move again
+	]em
+	". The function also estimates the coordinates at which Soma will end such movement (i.e. the point from which Soma can begin moving again). I say 
+	[em 
+		"estimates
+	]em
+	" because modelling the exact way Soma moves while zipping is quite more complex, as there are some corner cases (such as ghost coordinates) that are rather difficult to account for. However and in my experience, I would say the function produces a good enough estimate. Here is the function(s):
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-18796-0 
+					"Minimize code
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-18796-1 
+					"Show code
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-18796-0 
+		]div
+		[div class=tab-pane fade id=tabs-18796-1 
+			[pre 
+				[code class=language-Python 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[div class=p 
+	"I also attempted to develop a function that would return the fastest order of elements for a given set of desired elements to acquire. (In other words, a function that found the fastest memory corruption route given the [memory address, bit set] pairs to corrupt). However, that is a non-trivial problem, and all my approaches only found local optimal solutions. Those approaches did not take into consideration that the fastest route is not the one in which the next element is the fastest of the remining, but rather the one that gets to the last element the fastest (it is not the same; for more insight read 
+	[a href=https://en.wikipedia.org/wiki/Greedy_algorithm#Specifics rel=noopener external nofollow 
+		"this Wikipedia page
+	]a
+	"). Modelling that other approach
+	[a id=r2 
+	]a
+	[sup 
+		"[
+		[a href=#2 
+			"2
+		]a
+		"]
+	]sup
+	" is considerably more difficult, and I am not sure if it would be computationally feasible in this specific scenario. All in all, I eventually concluded that developing a program that would return the theoretical global optimal route, if feasible at all, would require too much effort for the objective in mind; especially considering that the theoretical optimal route might not be the practical optimal route, due to the corner cases talked about in previous paragraphs. What I ended up doing was manually checking and considering the routes computed by my (non-optimal) program under different requirements, and chosing the one that, when tested, seemed fastest.
+	$LF
+]div
+[div class=p 
+	"The final route performed for this memory corruption is the following:
+	$LF
+]div
+[ol 
+	[li 
+		" Starting position [7, 228]
+		$LF
+	]li
+	[li 
+		" Bat Form [42, 253]
+		$LF
+	]li
+	[li 
+		" Hippogryph [50, 226]*
+		$LF
+	]li
+	[li 
+		" "Resume from suspend" position corruption [66, 61]
+		$LF
+	]li
+	[li 
+		" Demon Guest House warp [81, 212]*
+		$LF
+	]li
+	[li 
+		" Malphas [84, 133]
+		$LF
+	]li
+	[li 
+		" Cinquedea [84, 241]
+		$LF
+	]li
+	[li 
+		" Abyss warp [91, 212]*
+		$LF
+	]li
+	[li 
+		" Black Panther [92, 149]
+		$LF
+	]li
+]ol
+[div class=p 
+	"(An asterisk denotes the square coordinates are transient coordinates.)
+	$LF
+]div
+[div class=p 
+	"It is worth noting that the starting position is not the position at which Soma begins zipping; but a position in which Soma is located some frames later, after sliding once at a specific position. This delay and slide are required not to incorrectly corrupt the "Resume from suspend" position.
+	$LF
+]div
+[div class=p 
+	"Unfortunately, the most convenient square coordinates for activating the Abyss warp, [91, 212] and [107, 166], were both ghost coordinates when reached as fast as possible. On the other hand, the square coordinates reached in mtbRc's movie to activate the Abyss warp, [123, 120], couldn't be reached fast enough in this route, due to the increased number of requirements along the way. The only practical solution found is to wait until the Y square coordinate underflows back to the desired value; that is, wait for it to be decreased 256 more times, so that the target coordinates no longer are ghost coordinates. This wait should be done in an X square coordinate that does not additionally corrupt the "Resume from suspend" position, such as X=84. The wait takes around 13 additional seconds. No route was found that avoided this need for an additional underflow, did not additionally corrupt the "Resume from suspend" position, and reached all the other coordinates fast enough.
+	$LF
+]div
+[div class=p 
+	"Also, I deliberately chose not to perform any corruption that involved going to an X square coordinate greater or equal to 96. That's because the range of addresses corrupted by zipping up from that point includes "dangerous" addresses that could harm the integrity of the rest of the run (for example, permanently disabling Julius Mode, making the game unbeatable, or modifying the controls).
+	$LF
+]div
+[div class=p 
+	"Right after acquiring the last desired element (Black Panther soul), equipment changes are made, and the game is suspended and immediately resumed to get back in bounds. Then, Soma warps
+	[a id=r3 
+	]a
+	[sup 
+		"[
+		[a href=#3 
+			"3
+		]a
+		"]
+	]sup
+	" to the Demon Guest House to start the second memory corruption.
+	$LF
+]div
+[div class=p 
+	"This first memory corruption takes approximately 4578 frames (depending on how it is timed), which is 76.3 seconds / 1 minute, 16.3 seconds.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"[
+	[a id=1 
+	]a
+	[a href=#r1 
+		"1
+	]a
+	"]
+	" Hippogryph can be substituted by any bat transformation. Nevertheless, the bat form is considerably slower both in horizontal and vertical movement when compared to using Black Panther and Hippogryph; and it also consumes considerably more MP. Thus, controlled oob using only bat form is unfeasible without unlimtied MP (Chaos Ring), and impractical in any scenario.
+	$LF
+]div
+[div class=p 
+	"[
+	[a id=2 
+	]a
+	[a href=#r2 
+		"2
+	]a
+	"]
+	" The most general approach I thought of would consist of modelling the zip area as a directed graph in which the nodes would be each square coordinate pair, and the cost of traversing from one node to the other would be the amount of frames it takes to go from the first to the second coordinates. Then, find the lowest cost path that traverses a subset of nodes from a larger set of nodes. (As some different square coordinates correspond to the same or equivalent corruption effects on the game, the amount of nodes that produce the desired corruptions is larger than the minimum amount of nodes needed to be traversed for the desired effects to take place.) This approach seems very complex, both in development effort and computationally. Another, probably simpler, approach would be to design an optimization or dynamic programming model, in which the last corruption is decided first, and then the order of the rest of the corruptions is attempted to fit into the route. Nevertheless, I am not well-versed in designing that kind of models. It should go without saying, but brute-forcing the route is not feasible in a reasonable amount of time, due to the sheer number of possible combinations.
+	$LF
+]div
+[div class=p 
+	"[
+	[a id=3 
+	]a
+	[a href=#r3 
+		"3
+	]a
+	"]
+	" As it was the case in other TAS movies for this game that aimed for fastest completion, making room in the memory corruption route to corrupt the address that skips the Warp Room message would have taken more time than it would have saved.
+	$LF
+]div
+[h4 id=SecondMemoryCorruptionControlledOob 
+	" Second memory corruption: controlled oob
+	$LF
+]h4
+[div class=p 
+	"In this second memory corruption, performed in the Demon Guest House with controlled oob, the entire route is constructed around turning Julius Mode on as fast as possible. To that end, the closest square coordinates that turn on Julius Mode are determined. The distance between two points in controlled oob can be computed using the following Python function:
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-28387-0 
+					"Minimize code
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-28387-1 
+					"Show code
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-28387-0 
+		]div
+		[div class=tab-pane fade id=tabs-28387-1 
+			[pre 
+				[code class=language-Python 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[div class=p 
+	"The controlled oob is started at square coordinates [15, 12], which makes the closest coordinates to turn on Julius Mode [184, 23]. Unfortunately, those coordinates are ghost coordinates, and therefore the second closest coordinates are used, [168, 69].
+	$LF
+]div
+[div class=p 
+	"Moving towards those coordinates means Soma must travel left (eventually underflowing its X square coordinate from 0 to 255) instead of right, as it did while zipping. This has a curious consequence: Soma will start corrupting the latest corruptible addresses, instead of the first ones. To the best of my knowledge, corruption on these addresses has never been shown before, as zipping to those address ranges usually corrupts addresses that cause the game to crash (which are avoidable in controlled oob). While testing this route, it was found that Soma's stats' addresses were found along the way to the Julius Mode coordinate. That broadened the interest on this controlled oob route, since the run could now showcase more interesting memory corruption effects (as will be described in the following paragraphs).
+	$LF
+]div
+[div class=p 
+	"Three significant things are corrupted in this controlled oob section, in the following order:
+	$LF
+]div
+[ol 
+	[li 
+		" Soma's maximum MP and current MP
+		$LF
+	]li
+	[li 
+		" Julius Mode
+		$LF
+	]li
+	[li 
+		" Soma's attack (ATK) stat
+		$LF
+	]li
+]ol
+[div class=p 
+	"Without any MP-regeneration boosting equipment (i.e. Treant Soul, Rune Ring or Chaos Ring), Black Panther consumes more MP than Soma regenerates, resulting in a net loss of MP while moving. Since it is necessary to use a special attack to enter controlled oob, the MP Soma has after entering controlled oob would normally not be enough to get to the Julius Mode coordinates and go back in bounds without stopping using Black Panther. That could be solved by routing in the acquisition of any of the aforementioned MP-regeneration boosting equipment into the first memory corruption
+	[a id=r4 
+	]a
+	[sup 
+		"[
+		[a href=#4 
+			"4
+		]a
+		"]
+	]sup
+	". Nevertheless, that is not necessary, since Soma can just corrupt the memory addresses corresponding to its maximum MP and current MP, to get enough MP for the whole trip. Bear in mind that the game checks each frame if the current MP is greater than the maximum MP, and decreases it correspondingly if it is. Thus, if one desires to increase the amount of MP Soma has, it is first necessary to corrupt the maximum MP before the current MP. Luckily for the run, we can modify Soma's MP to a large enough quantity to satisfy everything we require to do while at the same time getting closer to the Julius Mode coordinates, without wasting any time.
+	$LF
+]div
+[div class=p 
+	"The Julius Mode corruption requires a bit of care: Writing any value other than 1 to the Julius Mode address will permanently disable Julius Mode. Thus, one must be careful while moving towards the desired coordinates, as other nearby coordinates permanently disable Julius Mode. As soon as Julius Mode is activated, Soma turns back and starts the trip back to bounds.
+	$LF
+]div
+[div class=p 
+	"While traveling back to bounds, Soma corrupts his attack stat so as to OHKO (one-hit KO) both Soma (1100 HP) and Dracula (5000 HP). All of Soma's stats are signed 2-byte values. An attack value of 0x7A00 is enough to OHKO Dracula with any weapon. Nevertheless, the square coordinates corresponding to the corruption of the bit 0x4000 of the attack stat are ghost coordinates; therefore, the maximum attack achievable is 0x6FFF. Luckily, that value is enough to OHKO Dracula with the Cinquedea.
+	$LF
+]div
+[div class=p 
+	"Since all of Soma's stats are signed values, corrupting the bit 0x8000 of any of them would result in a negative stat. For the attack stat, that would cause Soma to do insignificant amounts of damage with any weapon
+	[a id=r5 
+	]a
+	[sup 
+		"[
+		[a href=#5 
+			"5
+		]a
+		"]
+	]sup
+	".
+	$LF
+]div
+[div class=p 
+	"It is worth noting that, in the movie, I switch the upper screen from the map to Soma's stats for a few seconds, so that the viewer can see the memory corruption on the attack stat take effect in real time.
+	$LF
+]div
+[div class=p 
+	"After corrupting Soma's attack to the desired value, Soma moves directly towards the location to get back in bounds. Luckily, corrupting Soma's attack stat does not waste any time either, and Soma can get back in bounds without stopping its horizontal movement at any moment.
+	$LF
+]div
+[div class=p 
+	"This second memory corruption takes approximately 10806 frames (depending on how it is timed), which is 180.1 seconds / 3 minutes, 0.1 seconds. The main reason behind why this memory corruption is considerably slower than the first one despite performing less corruptions of interest is the slower movement in controlled oob when compared to zipping, as explained in a previous section.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"[
+	[a id=4 
+	]a
+	[a href=#r4 
+		"4
+	]a
+	"]
+	" My tests conclude that the fastest MP-regeneration boosting equipment to obtain during the zipping memory corruption would be Chaos Ring, which would have to be obtained after Black Panther.
+	$LF
+]div
+[div class=p 
+	"[
+	[a id=5 
+	]a
+	[a href=#r5 
+		"5
+	]a
+	"]
+	" As a fun fact, during this run, Soma's defense stat gets (non-intentionally) set to a negative value, and any enemy attack would kill Soma in one hit. As I didn't intend to get hit during the rest of the run, that is unnoticeable.
+	$LF
+]div
+[h4 id=FightAgainstSomaDracula 
+	" The fight against Soma/Dracula
+	$LF
+]h4
+[div class=p 
+	"Getting into the boss fight itself is somewhat trivial and lacks special interest, since the Abyss' Warp Room is pretty close to the final boss' room.
+	$LF
+]div
+[div class=p 
+	""Soma", "Dark Lord Soma", "Dracula", or "Somacula", is a two-phase boss intended as final boss for the Julius Mode of the game. As such, its attacks and patterns were designed to pose an interesting fight when playing as Julius, Yoko and Alucard. When fighting as Soma, some of the boss' magic is lost due to the wider range of attacks available. Soma is able to make more powerful and safer attacks than the other playable characters, thus making the fight considerably easier. Not that it matters for this run anyway; since, after corrupting Soma's attack to ridiculous levels of power, Soma just 2-hit KOs the boss, with one hit per phase. To put this in context, the first phase (Soma / Dark Lord Soma) has 1100 HP, while the second phase (Dracula) has 5000 HP.
+	$LF
+]div
+[div class=p 
+	"Unlike with the playable characters from Julius Mode, the player does not lose control of Soma when entering the boss' room until Soma gets close enough to the boss. This allows Soma to get closer to the boss than intended before its control is gained back, by jump-kicking from enough height and horizontal distance while using the Black Panther ability. By getting closer to the boss in this manner, one can hit him
+	[a id=r6 
+	]a
+	[sup 
+		"[
+		[a href=#6 
+			"6
+		]a
+		"]
+	]sup
+	" on the very first frame possible, even before it teleports, thus effectively 0-cycling the first phase.
+	$LF
+]div
+[div class=p 
+	"For the second phase, a single hit from the Cinquedea would also OHKO Dracula. To spice things up, and since there is a wait until Dracula can be hit in which the player does not lose control of Soma, I make Soma OHKO Dracula with the weakest ko-ing jump-kick possible.
+	$LF
+]div
+[div class=p 
+	"After Dracula is defeated, the Good Ending cutscene plays out, and the game ends. Ironically, this ending unlocks Julius Mode.
+	$LF
+]div
+[div class=p 
+	[b 
+		"NOTE
+	]b
+	": By having the Soma Status + Enemy Entry upper screen, an additional frame of lag is generated when transitioning from the boss fight to the ending cutscene. In other words, 
+	[b 
+		"this movie could be one frame faster
+	]b
+	", by not switching the upper screen earlier on Demon Guest House. Nevertheless, I consider that time loss admissible, since it enables showcasing Soma's and Dracula's enemy entries; which is in-game content not usually seen on a regular playthrough (not even on Julius Mode). Note that, after warping to the Abyss, the upper screen can no longer be switched, so the lag frame cannot be avoided by switching the screen after defeating the boss.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"[
+	[a id=6 
+	]a
+	[a href=#r6 
+		"6
+	]a
+	"]
+	" When hitting an enemy for more than 9999 damage, the damage number will not be displayed. Hence why no damage number appears when defeating Soma's first phase.
+	$LF
+]div
+[h3 id=MemoryAddressesOfInterest 
+	" Memory addresses of interest
+	$LF
+]h3
+[div class=p 
+	"Here are the memory addresses I watched while making this movie, which include the corrupted memory locations:
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-37121-0 
+					"Minimize table
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-37121-1 
+					"Show table
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-37121-0 
+		]div
+		[div class=tab-pane fade id=tabs-37121-1 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Address
+						]th
+						[th 
+							"Size
+						]th
+						[th 
+							"Description
+						]th
+					]tr
+					[tr 
+						[td 
+							"0x020F7257
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Julius Mode if == 1; Julius Mode permanently disabled if > 1
+						]td
+					]tr
+					[tr 
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7018
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"X position for resuming from suspend
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F701C
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"Y position for resuming from suspend
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F70E7
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Bat Form bullet soul (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F70EB
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Bat Company soul (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F70EB
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Black Panther soul (4 most significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7101
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Treant soul (4 most significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F710A
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Malphas ability (4 most significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F710B
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Doppelganger ability (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F710C
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Hippogryph ability (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F71A8
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Warp Rooms activated; 0x2 == Demon Guest House; 0x800 == Abyss
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F71E2
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Cutall (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F71E2
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Cinquedea (4 most significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F71EE
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Alucard's Sword (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7224
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Rune Ring (4 most significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7226
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Chaos Ring (4 least significant bits)
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7228
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Control config (2048 == default)
+						]td
+					]tr
+					[tr 
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7256
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Disables opening the menu
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7259
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Hard mode if different than 0
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7370
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"ATK stat
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7410
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Current HP
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7412
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Max HP
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7414
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Current MP
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F7416
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Max MP
+						]td
+					]tr
+					[tr 
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CAA40
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"X position
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CAA44
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"Y position
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CA95C
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"Next X position
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CA960
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"Next Y position
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CA968
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"X velocity
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CA96C
+						]td
+						[td 
+							"4 bytes
+						]td
+						[td 
+							"Y velocity
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020CA9F3
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Soma invulnerability
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F2A88
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Magic Seal step
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020F2A8C
+						]td
+						[td 
+							"1 byte
+						]td
+						[td 
+							"Magic Seal substep
+						]td
+					]tr
+					[tr 
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020D36A8
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Flying Armor HP
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020D2448
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Soma (boss) HP
+						]td
+					]tr
+					[tr 
+						[td 
+							"0x020D26E8
+						]td
+						[td 
+							"2 bytes
+						]td
+						[td 
+							"Dracula HP
+						]td
+					]tr
+				]tbody
+			]table
+			[div class=p 
+				[b 
+					"All bullet, guardian and enchantment souls can also be activated by corrupting the addresses 0x40 bytes greater than the ones shown in the table.
+				]b
+				" That is, there are two memory addresses per soul that manage the amount of souls of that kind Soma possesses. Corrupting any one of those two addresses gives Soma the corresponding soul. For example, Black Panther can be obtained from corrupting memory address 0x020F70EB or 0x020F70EB + 0x40 = 0x020F712B. These "duplicated" addresses are not shown in the table for brevity reasons.
+				$LF
+			]div
+		]div
+	]div
+]div
+[h3 id=AboutTheEmulatorUsed 
+	" About the emulator used
+	$LF
+]h3
+[div class=p 
+	"At first I began development of this movie using BizHawk (with MelonDS core), since it is the recommended emulator. Nevertheless, emulator differences between BizHawk and DeSmuME result in BizHawk presenting more lag, some minor message-related tricks not working, and overall different, unrelated RNG when first taking control of Soma. As stated previously, up to the first memory manipulation/zip, the route and objectives of this movie are the same as 
+	(__wikiLink|displaytext=the fastest published TAS of this game, by mtbRc|href=/2528M)
+	". I spent multiple days trying to replicate the efficiency of mtbRc's inputs up to that point on a BizHawk movie. But, no matter what, all efforts resulted in slower runs even when not counting lag frames (mainly because of behaviour derived from the different RNG). Not pleased with the slower run, knowing there would never be any significan differences between this run and mtbRc's up to that point, and doubting I would be able to make any improvements to mtbRc's inputs, I decided to restart the movie and use mtbRc's input file (thus why he is credited as co-author). Consequently, I had to also use the same emulator.
+	$LF
+]div
+[h3 id=AboutTheRomUsedAndRomFilename 
+	" About the ROM used and ROM filename
+	$LF
+]h3
+[div class=p 
+	"The ROM filename specified in the submission, 
+	[em 
+		"Castlevania - Dawn of Sorrow (USA).nds
+	]em
+	", has deliberatedly been kept the same as the one used in 
+	(__wikiLink|displaytext=mtbRc's movie|href=/2528M)
+	" for consistency reasons and to signify that a ROM compatible with the baseline movie has been used (since it is needed for that movie to sync in the first place, and thus this movie too). However, as far as I know, the ROM used is a perfect dump (
+	[code 
+		"[!]
+	]code
+	") of the game. If that is the case, to whoever it concerns: Feel free to change the ROM filename to clarify that it is indeed a perfect dump. The SHA-1 checksum of the ROM used is 
+	[code 
+		"47530ff87e608f88105a314fdf36dc385f8dec94
+	]code
+	".
+	$LF
+]div
+[h3 id=AdditionalLuaScripts 
+	" Additional Lua scripts
+	$LF
+]h3
+[div class=p 
+	"Here are some additional Lua scripts I developed for the run, that ultimately were unused for the final movie.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/gocha 
+		"gocha
+	]a
+	"'s cvdosPosToMapFlag script adapted to run on BizHawk:
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-41637-0 
+					"Minimize code
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-41637-1 
+					"Show code
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-41637-0 
+		]div
+		[div class=tab-pane fade id=tabs-41637-1 
+			[pre 
+				[code class=language-Lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/gocha 
+		"gocha
+	]a
+	"'s RNG simulator Lua script adapted to run on BizHawk:
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-42877-0 
+					"Minimize code
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-42877-1 
+					"Show code
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-42877-0 
+		]div
+		[div class=tab-pane fade id=tabs-42877-1 
+			[pre 
+				[code class=language-Lua 
+					$UNPRINTABLE TEXT!!!
+				]code
+			]pre
+		]div
+	]div
+]div
+[h3 id=SubmitterSAdditionalCommentsAndThoughts 
+	" Submitter's additional comments and thoughts
+	$LF
+]h3
+[div class=p 
+	"Here I would like to write some stuff not exactly related to the description of the movie itself, but that I consider relevant enough to mention.
+	$LF
+]div
+[h4 id=EntertainmentValue 
+	" Entertainment value
+	$LF
+]h4
+[div class=p 
+	"Let's begin by talking about the elephant in the room. I am fully aware that this is a 07:15.58 long movie in which 01:16.3 + 03:00.1 = 04:16.4 (58.86%) of the movie is spent performing memory corruption. And, unfortunately, Dawn of Sorrow's memory corruption is not quite exactly entertaining. It is not flashy like it might be 
+	(__wikiLink|displaytext=in some other games|href=/4329M)
+	". It is not as boring as watching paint dry, but it might be as close as it gets for a Castlevania game, considering 
+	(__wikiLink|displaytext=what has been previously done|href=/3216M)
+	": It involves long sections of apparent waiting in which the playable character is not even on screen. I tried reducing the length of the memory corruption sections as much as I could (thus why the double memory corruption route), and also to make the viewer understand what was happening at some specific moments (thus why I switched to the Soma status screen when corrupting his attack stat), but one can only go so far with a such a mechanic. The fact that the final battle, which is the main highlight of the movie, literally ends in just two hits may make matters worse in that regard.
+	$LF
+]div
+[div class=p 
+	"For that reason, even though I consider the concept explored in this movie to be quite interesting on paper, I would understand any judging decision made about the movie derived from its entertainment quality.
+	$LF
+]div
+[div class=p 
+	"Nevertheless, one thing that has to be considered is that, with everything that is known so far about this game (and that has been known for quite some years now), any run that aims for the same objective as this run will most likely require using this kind of memory corruption. It seems to be inevitable.
+	$LF
+]div
+[h4 id=AboutTheInceptionAndSubmissionOfThisMovie 
+	" About the inception and submission of this movie
+	$LF
+]h4
+[div class=p 
+	"I theorized the first version of this movie some years ago. I even 
+	[a href=https://youtu.be/DOyrtTknb50 rel=noopener external nofollow 
+		"uploaded a LOTAD (low-optimized Tool Assisted Demonstration) about it to YouTube
+	]a
+	". Back then, I discarded the idea of submitting a movie about it to tasvideos.org, mainly because of the memory corruption entertainment concerns discussed on the previous section, and because I did not consider a movie with such an objective would be published.
+	$LF
+]div
+[div class=p 
+	"However, earlier this year, the movie for 
+	(__wikiLink|displaytext=Aria of Sorrow "Julius mode, beat Chaos"|href=/5167M)
+	" was published, which aims for an objective similar to this movie's (beating a final boss with a character that is not supposed to be able to fight it). Even though that movie is considerably more entertaining than this one (that's the way I see it, at least), knowing that a movie similar in objective had been published encouraged me to rework the concept and develop a new movie to be submitted. And here we are.
+	$LF
+]div
+[div class=p 
+	"In comparison with my previously-developed LOTAD, this movie is an improvement of around 2 minutes and 47 seconds. The main improvement comes from the inclusion of the controlled oob second memory corruption, which both reduces the amount of time spent on memory corruption and significantly shortens the fight against Soma/Dracula. The LOTAD spans approximately 6 minutes and 22 seconds from beginning to end of its memory corruption section; this movie spans 4 minutes and 30 seconds from the beginning of its first memory corruption section to the end of its second memory corruption section. This clearly shows that the route that includes two corruption sections, one with zipping and one with controlled oob, is faster.
+	$LF
+]div
+[h4 id=ConsiderationsAboutTheMovieSObjectives 
+	" Considerations about the movie's objectives
+	$LF
+]h4
+[div class=p 
+	"I did not investigate whether the Soma/Dracula fight can be skipped, as it is the case for the Menace fight. I did not intend to skip it, nor consider it at any moment, since a movie with the objective of "beating Soma" that entirely skips the Soma fight is rather pointless in my opinion.
+	$LF
+]div
+[div class=p 
+	"After finding out that Soma's attack stat could be corrupted, I considered not corrupting it so as to feature a longer, more entertaining fight against Soma/Dracula. I eventually concluded that any restrictions I set on the fight would have been completely arbitrary, since I would have still used resources obtained from memory corruption (weapons and souls) to fight Soma anyway. The only difference from memory corrupting the strongest build into the inventory (highest DPS weapon + highest strength increasing souls and equipment) and memory corrupting Soma's attack stat to be higher is the extent to which you can make Soma stronger, which is way higher for the latter. I did not find any reasonable justification to limit the amount of increase of power/strength to any specific value. I ultimately decided that the most reasonable course of action was to go for speed, and to allow everything corruption-wise, as long as it did not interfere with the goal of the movie (as explained in the previous paragraph).
+	$LF
+]div
+[div class=p 
+	"Concerning the branch name for movies with this objective, I chose to use the one that most closely resembles Aria of Sorrow's "Julius mode, beat Chaos" branch name. However, I would consider any of the following valid:
+	$LF
+]div
+[ul 
+	[li 
+		" Soma mode, beat Soma/Dracula
+		$LF
+	]li
+	[li 
+		" Soma, beat Soma/Dracula
+		$LF
+	]li
+	[li 
+		" Soma vs Soma/Dracula
+		$LF
+	]li
+]ul
+[div class=p 
+	"Also (and I'll write this here because I don't know where else to put it), using the ideas showcased in this run, a "Julius mode, beat Menace" run could be developed. However, I don't think that would be as interesting; and it would require a much lengthier memory corruption section, since no character in Julius Mode has access to any ability similar to Black Panther.
+	$LF
+]div
+[h4 id=CoAuthorship 
+	" Co-authorship
+	$LF
+]h4
+[div class=p 
+	"The conceptual development of this movie was an independent effort made by me (
+	[a class=intlink href=/Users/Profile/Bolu 
+		"Bolu
+	]a
+	"); in the meaning that any decision made related to this movie from its conception to its submission was 
+	[em 
+		"thought
+	]em
+	"/
+	[em 
+		"decided
+	]em
+	" exclusively by me. The movie file itself is a modification of 
+	(__wikiLink|displaytext=mtbRc's movie|href=/2528M)
+	" and reuses many of its inputs, thus making mtbRc a co-author, as stated in the Movie Rules (which I consider very reasonable and appropriate).
+	$LF
+]div
+[div class=p 
+	"However, as far as I know, 
+	[a class=intlink href=/Users/Profile/mtbRc 
+		"mtbRc
+	]a
+	" has no knowledge of the existence or development of this movie so far (date of submission). Since the Movie Rules also state that 
+	[q 
+		"above all else, respect the wishes of authors
+	]q
+	", I wrote mtbRc via the site's PMs some days before submitting the movie to tell him about the movie, and to ask him about his opinion about it and its co-authorship attribution. He has not replied yet, and I cannot possibly know when he will, since it has been a long time since his last login (1/22/2022 at the time of writing).
+	$LF
+]div
+[div class=p 
+	"I have chosen to keep mtbRc as co-author "by default", until he expresses his opinion on the matter. I consider that to be the most appropriate course of action for the time being.
+	$LF
+]div
+[div class=p 
+	"Everything expressed in this submission text reflects my (Bolu's) and only my thoughts and opinions; and every time singular first-person pronouns (
+	[em 
+		"I/me/my/mine/myself
+	]em
+	") are used, they reference me (Bolu), and nobody else.
+	$LF
+]div
+[h3 id=AcknowledgementsAndSpecialThanks 
+	" Acknowledgements and special thanks
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/mtbRc 
+			"mtbRc
+		]a
+		": For his incredibly polished Dawn of Sorrow TAS, which was the baseline for this movie, and this movie reuses inputs from.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/gocha 
+			"gocha
+		]a
+		": For his initial insight on how memory corruption works, and the memory addresses and lua scripts he provided with 
+		(__wikiLink|displaytext=his submission|href=/2392S)
+		".
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/hellagels 
+			"hellagels
+		]a
+		": For developing his 
+		(__wikiLink|displaytext=Julius mode, beat Chaos|href=/5167M)
+		" Aria of Sorrow movie, which inspired and encouraged me to finally develop and submit this movie.
+		$LF
+	]li
+]ul
+[div class=p 
+	"If you've read this far, I would also like to thank you very much for your patience. This is some massive wall of text. I hope nobody finds its extension inappropriate; I just wanted to be thorough hahaha.
+	$LF
+]div
+[h3 id=SuggestedScreenshot 
+	" Suggested screenshot
+	$LF
+]h3
+[div class=p 
+	"Here's one final screenshot!
+	$LF
+]div
+[div class=p 
+	[img alt=Soma standing in front of Dark Lord Soma, who is sitting in his throne. class=embed mw-100 src=https://i.imgur.com/nC5wUwm.png title=Soma and Soma 
+	]img
+	$LF
+]div
+[div class=p 
+	"I suggest that screenshot to be used as thumbnail for the movie, since it shows both Somas staring at each other before the big conforntation. It is frame 23078 of the movie. Preceding and following frames might also be interesting candidates, as they are slight variations of that screenshot.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/arkiandruski 
+		"arkiandruski
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/arkiandruski 
+		"arkiandruski
+	]a
+	": First, I really like the idea behind the goal of this run. It's great to have fun with little goofy goals, and Soma fighting himself is a great example of one of those goals. Accepting to Playground. This kind of run fits great there.
+]div

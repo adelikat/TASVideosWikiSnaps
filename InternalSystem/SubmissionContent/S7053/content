@@ -1,0 +1,7887 @@
+18
+[div class=p 
+	"It turns out the infamous "Pokemon ripoff" has ACE as well, just like Pokemon.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.5, GB player 
+		$LF
+	]li
+	[li 
+		" <List the objectives of your movie here>
+		$LF
+	]li
+	[li 
+		" <Another objective>
+		$LF
+	]li
+	[li 
+		" <And so on>
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"I always knew this game could have a game end glitch, but wasn't able to figure out how it worked. After some guidance from CasualPokePlayer, I managed to discover that various NPC ID combinations jump to various parts of the game's memory, leading to crashes. The gameboy player was used, since the previous run relied on an emulator bug regarding STOP (opcode #10 10), so I wanted the run to have a chance to get console verified one day.
+	$LF
+]div
+[div class=p 
+	"While CasualPokePlayer and Mister Chess did not contribute to the input directly, I made them coauthors since they were very helpful in finding out how the NPCs glitched up, while CasualPokePlayer also gave a payload to jump to the controller directly (which unfortunately ended up unused) along with where to jump to.
+	$LF
+]div
+[h4 id=MapBug 
+	" Map bug
+	$LF
+]h4
+[div class=p 
+	"This is the main bug in all iterations of the any% Telefang TAS. When you do the following actions: 
+	$LF
+	"1. Open the map with Start
+	$LF
+	"2. Entering a building 
+	$LF
+	"3. Trigger a battle
+	$LF
+]div
+[div class=p 
+	"the game writes the bytes for you and the NPCs from WRAM to CartRAM, one byte at a time. Onc the battle is over, or when you close the map, the values are written back to WRAM. Given enough lag however, the game fails to write all the addresses. In the case for this run:
+	$LF
+]div
+[pre 
+	"5F47:  1A        LD   A,(DE)         A:a3 B:00 C:a3 D:c2 E:fd F:00 H:a2 L:5d LY:37 SP:dff3  Cy:1320480764
+	$LF
+	"5F48:  22        LD   (HL+),A        A:00 B:00 C:a3 D:c2 E:fd F:00 H:a2 L:5d LY:37 SP:dff3  Cy:1320480772
+	$LF
+	"5F49:  13        INC  DE             A:00 B:00 C:a3 D:c2 E:fd F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480780
+	$LF
+	"5F4A:  0B        DEC  BC             A:00 B:00 C:a3 D:c2 E:fe F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480788
+	$LF
+	"5F4B:  78        LD   A,B            A:00 B:00 C:a2 D:c2 E:fe F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480796
+	$LF
+	"5F4C:  B1        OR   C              A:00 B:00 C:a2 D:c2 E:fe F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480800
+	$LF
+	"5F4D:  20 F8     JR   NZ,5F47h       A:a2 B:00 C:a2 D:c2 E:fe F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480804
+	$LF
+	"5F47:  1A        LD   A,(DE)         A:a2 B:00 C:a2 D:c2 E:fe F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480816
+	$LF
+	"5F48:  22        LD   (HL+),A        A:db B:00 C:a2 D:c2 E:fe F:00 H:a2 L:5e LY:37 SP:dff3  Cy:1320480824
+	$LF
+	"5F49:  13        INC  DE             A:db B:00 C:a2 D:c2 E:fe F:00 H:a2 L:5f LY:37 SP:dff3  Cy:1320480832
+	$LF
+	"0040:  C3 E7 02  JP   #02E7h         A:db B:00 C:a2 D:c2 E:ff F:00 H:a2 L:5f LY:90 SP:dff1  Cy:1320480860
+	$LF
+]pre
+[div class=p 
+	"The process took too long, so it gets interrupted. The reason I call it map bug however, is because that's the only action you can use to trigger this. There's no area where you can trigger either a battle, or enter a room with tons of lag. 
+	$LF
+]div
+[div class=p 
+	"While this might seem to indicate you only need lag, I have never managed to trigger this bug without the phone ringing. The phone only rings once every 5 minutes when you have at least 2 Denjuu, so I'm forced to wait 5 minutes.
+	$LF
+]div
+[div class=p 
+	"The very first Telefang TAS took advantage of the game failing to copy my game position to get to the final dungeon. The subsequent TASes uses this bug to get glitched combinations of NPC values to jump to WRAM.
+	$LF
+]div
+[h4 id=Npcs 
+	" NPCs
+	$LF
+]h4
+[div class=p 
+	"The following NPCs are reachable within the first 5 minutes of the game, while also reachable to each other without triggering combat.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Map ID
+			]th
+			[th 
+				"Map Coord
+			]th
+			[th 
+				"NPC 1
+			]th
+			[th 
+				"NPC 2
+			]th
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"20
+			]td
+			[td 
+				"3
+			]td
+			[td 
+				"76
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"19
+			]td
+			[td 
+				"207
+			]td
+			[td 
+				"75
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"19
+			]td
+			[td 
+				"219
+			]td
+			[td 
+				"75
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"207
+			]td
+			[td 
+				"73
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"19
+			]td
+			[td 
+				"219
+			]td
+			[td 
+				"73
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"11
+			]td
+			[td 
+				"0
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"18
+			]td
+			[td 
+				"167
+			]td
+			[td 
+				"75
+			]td
+		]tr
+		[tr 
+			[td 
+				"4
+			]td
+			[td 
+				"4
+			]td
+			[td 
+				"104
+			]td
+			[td 
+				"72
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"60
+			]td
+			[td 
+				"210
+			]td
+			[td 
+				"70
+			]td
+		]tr
+		[tr 
+			[td 
+				"2
+			]td
+			[td 
+				"59
+			]td
+			[td 
+				"170
+			]td
+			[td 
+				"70
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"The addresses for their IDs are:
+	$LF
+	"0xC2BE, 0xC2BF
+	$LF
+	"0xC2DE, 0xC2DF
+	$LF
+	"0xC2FE, 0xC2FF
+	$LF
+	"0xC31E, 0xC31F
+	$LF
+	"0xC33E, 0xC33F
+	$LF
+]div
+[div class=p 
+	"There are more, but these are the ones the above uses. Not every one of them can be mixed together with the map bug. Moving around map coordinates change the address the NPC is on, but since the maps are connected, some only get written to specific addresses. For instance:
+	$LF
+	"You start at Map 4, Coord 19. You can only go north and east. The values right now are:
+	$LF
+]div
+[pre 
+	"0xC2BE, 0xC2BF = 207, 75
+	$LF
+	"0xC2DE, 0xC2DF = 219, 75
+	$LF
+	"0xC2FE, 0xC2FF = 0,0 
+	$LF
+	"0xC31E, 0xC31F = 0,0 
+	$LF
+	"0xC33E, 0xC33F = 0,0 
+	$LF
+]pre
+[div class=p 
+	"Going east gives 
+	$LF
+]div
+[pre 
+	"0xC2BE, 0xC2BF = 207, 75
+	$LF
+	"0xC2DE, 0xC2DF = 219, 75
+	$LF
+	"0xC2FE, 0xC2FF = 3,76 
+	$LF
+	"0xC31E, 0xC31F = 0,0 
+	$LF
+	"0xC33E, 0xC33F = 0,0 
+	$LF
+]pre
+[div class=p 
+	"Backtracking, then going north gives
+	$LF
+]div
+[pre 
+	"0xC2BE, 0xC2BF = 207, 75
+	$LF
+	"0xC2DE, 0xC2DF = 219, 75
+	$LF
+	"0xC2FE, 0xC2FF = 207, 73 
+	$LF
+	"0xC31E, 0xC31F = 219, 73 
+	$LF
+	"0xC33E, 0xC33F = 0,0 
+	$LF
+]pre
+[div class=p 
+	"As you can see, the IDs: 3, 76 got overwritten. Attempting to reload the NPC only places them to 0xC2BE, 0xC2BF.
+	$LF
+	"This means there's no way to get addresses 
+	$LF
+]div
+[pre 
+	"0xC2DE, 0xC2DF, 
+	$LF
+	"0xC31E, 0xC31F,
+	$LF
+	"0xC33E, 0xC33F
+	$LF
+]pre
+[div class=p 
+	"to have the values of 3, 76. 
+	$LF
+]div
+[div class=p 
+	"Similarrly, there's no way to get the values of 3, 76 to be at 0xC2BE, 0xC2BF. This restricts me to only 1 room possible for the bug.
+	$LF
+]div
+[div class=p 
+	"Possible values for 0xC2BE, 0xC2BF
+	$LF
+]div
+[pre 
+	"0, 0 (By resetting)
+	$LF
+	"3, 76
+	$LF
+	"104, 72
+	$LF
+	"167, 75
+	$LF
+	"170, 70
+	$LF
+	"207, 73
+	$LF
+	"207, 75
+	$LF
+]pre
+[div class=p 
+	"Possible values for 0xC2DE, 0xC2DF
+	$LF
+]div
+[pre 
+	"0, 0
+	$LF
+	"207, 75
+	$LF
+	"210, 70
+	$LF
+	"219, 73
+	$LF
+	"219, 75
+	$LF
+]pre
+[div class=p 
+	"Possible values for 0xC2FE, 0xC2FF
+	$LF
+]div
+[pre 
+	"0, 0
+	$LF
+	"3, 76
+	$LF
+	"207, 73
+	$LF
+	"219, 75
+	$LF
+]pre
+[div class=p 
+	"Possible values for 0xC31E, 0xC31F
+	$LF
+]div
+[pre 
+	"0, 0 (By resetting)
+	$LF
+	"207, 75
+	$LF
+	"219, 73
+	$LF
+]pre
+[h4 id=CollisionEffects 
+	" Collision effects
+	$LF
+]h4
+[div class=p 
+	"If 2 NPC IDs can exist at the same pair of addresses, it's possible to get a combination of them using the map bug. The following collisions are possible:
+	$LF
+]div
+[div class=p 
+	"3, 0 -> The NPC starts floating up and down. They cannot be talked to. 
+	[br 
+	]br
+	$LF
+	"3, 70 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 60 80 (JP NZ, #8060h). The game then crashes at 0x8061 via 0xFD 
+	[br 
+	]br
+	$LF
+	"3, 72 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 60 80 (JP NZ, #8060h). The game then crashes at 0x8061 via 0xFD 
+	[br 
+	]br
+	$LF
+	"3, 73 -> Jumps to 0xFF7F, then gets stuck in a loop of 0x0038, 0x0039, 0x003A, 0x003B, 0xFF7F 
+	[br 
+	]br
+	$LF
+	"3, 75 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"3, 76 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"104, 0 -> Glitches the graphics and lags the game badly. 
+	[br 
+	]br
+	$LF
+	"104, 70 -> They become a Denjuu trainer with a level 0 Tsunonasu 
+	[br 
+	]br
+	$LF
+	"104, 72 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"104, 73 -> Spins around in circles 
+	[br 
+	]br
+	$LF
+	"104, 75 -> Crashes at 0x47DA due to 0xE4 
+	[br 
+	]br
+	$LF
+	"104, 76 -> Jumps to 0xFF7F, then gets stuck in a loop of 0x0038, 0x0039, 0x003A, 0x003B, 0xFF7F 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"167, 0 -> Jumps to 0x8BFA via 0xE9 JP (HL) at 0x4D47. This is the graphics for the store's "money" interface. Eventually, the game crashes at 0x8C62 due to 0x10 10 STOP #10h at 0x8C62. 
+	[br 
+	]br
+	$LF
+	"167, 70 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 00 (JP NZ, #0000h). The game then resets with a blue tint. 
+	[br 
+	]br
+	$LF
+	"167, 72 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 00 (JP NZ, #0000h). The game then resets with a blue tint. 
+	[br 
+	]br
+	$LF
+	"167, 73 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 00 (JP NZ, #0000h). The game then resets with a blue tint. 
+	[br 
+	]br
+	$LF
+	"167, 75 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"167, 76 -> Jumps to 0x84FA via 0xE9 JP (HL) at 0x4EFB, then crashes 1 instruction later by 0xFC 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"170, 0 -> Jumps to 0x8AFA via 0xE9 JP (HL) at 0x4EFB, then crashes due to 0xF4 
+	[br 
+	]br
+	$LF
+	"170, 70 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"170, 72 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"170, 73 -> Makes the NPC run in place. Talkng to them triggers a fight with trainer with 3 Denjuu at level 10 
+	[br 
+	]br
+	$LF
+	"170, 75 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 80 (JP NZ, #8000h). The game then crashes at 0x8076 via 0xE3 
+	[br 
+	]br
+	$LF
+	"170, 76 -> Jumps to 0x8BFA via 0xE9 JP (HL) at 0x4D47. This is the graphics for the store's "money" interface. Eventually, the game crashes at 0x8C62 due to 0x10 10 STOP #10h at 0x8C62. While the values earlier can be slightly manipulated by having different amounts of money, the sequence 0x10 10 is from the character "ル", which is unavoidable. The currently published TAS emulates the instruction wrong by simply ignoring it. Therefore, the currently published route using this combination is impossible. 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"207, 0 -> Jumps to 0x8AFA via 0xE9 JP (HL) at 0x4EFB, then eventually jumps to 0xFAFA via 0xE9 JP (HL) at 0x049D before jumping to 0x0000 via 0xE9 JP (HL) at 0xFD12. It gets stuck in a loop at 0x0028 to 0x0030. 
+	[br 
+	]br
+	$LF
+	"207, 70 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 80 (JP NZ, #8000h). The game then crashes at 0x8076 via 0xE3 
+	[br 
+	]br
+	$LF
+	"207, 72 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"207, 73 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"207, 75 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"207, 76 -> Jumps to 0x8005 via 0xD9 RETI at 0x0323. It then crashes at 0x8059 via 0xFC. 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"210, 0 -> The NPC becomes untalkable 
+	[br 
+	]br
+	$LF
+	"210, 70 -> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"210, 73 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 80 (JP NZ, #8000h). The game then crashes at 0x8076 via 0xE3 
+	[br 
+	]br
+	$LF
+	"210, 75 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 60 80 (JP NZ, #8060h). The game then crashes at 0x8061 via 0xFD 
+	[br 
+	]br
+	$LF
+]div
+[div class=p 
+	"219, 0 -> Jumps to 0x0000 via 0xE9 JP (HL) at 0x049D, then gets stuck in a loop from 0x0028 to 0x0030. 
+	[br 
+	]br
+	$LF
+	"219, 70 -> Jumps to 0xC98B via 0xE9 JP (HL) at 0x4EFB, then immediately jumps to 0x0000 due to C2 00 00 (JP NZ, #0000h). It then gets stuck in a loop from 0x0028 to 0x0030. 
+	[br 
+	]br
+	$LF
+	"219, 73	-> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"219, 75	-> Nothing wrong; this is a valid NPC 
+	[br 
+	]br
+	$LF
+	"219, 76 -> Jumps to 0xC6C9 via 0xE9 JP (HL) at 0x4EFB, then NOP slides to player data at 0xC900
+	$LF
+]div
+[div class=p 
+	"Based on the above, the only useable combination is 219, 76. 
+	$LF
+]div
+[h4 id=PlayerData 
+	" Player data
+	$LF
+]h4
+[div class=p 
+	"Now that we have a way to jump into player data, we need to document what is possible. 0xC800 region gets set much much later in the game, so for the purpose of the run, everything from 0xC6C9 to 0xC8FF is 0.
+	$LF
+]div
+[div class=p 
+	"All values are in hex:
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-10210-0 
+					"C900
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-10210-1 
+					"C910
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-10210-2 
+					"C920
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-10210-3 
+					"C930
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-10210-4 
+					"C940
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-10210-5 
+					"Minimize tab
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-10210-0 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Address
+						]th
+						[th 
+							"Purpose
+						]th
+						[th 
+							"Values possible during run
+						]th
+						[th 
+							"Opcode
+						]th
+					]tr
+					[tr 
+						[td 
+							"C900
+						]td
+						[td 
+							"Defaults to 1. Setting to 0 takes me back to start of game human world. 2 makes me fall from sky. Changing from 1 disables menus.
+						]td
+						[td 
+							"1
+						]td
+						[td 
+							"LD BC, 5048		
+							$LF
+						]td
+					]tr
+					[tr 
+						[td 
+							"C901
+						]td
+						[td 
+							"Spawn X (where you appear on room load) + X pos on phone use
+						]td
+						[td 
+							"09-98
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C902
+						]td
+						[td 
+							"Spawn Y (where you appear on room load) + Y pos on phone use
+						]td
+						[td 
+							"10-80
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C903
+						]td
+						[td 
+							"Acre
+						]td
+						[td 
+							"93
+						]td
+						[td 
+							"SUB E
+						]td
+					]tr
+					[tr 
+						[td 
+							"C904
+						]td
+						[td 
+							"Map ID
+						]td
+						[td 
+							"04
+						]td
+						[td 
+							"INC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"C905
+						]td
+						[td 
+							"Map type
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C906
+						]td
+						[td 
+							"Map Coord
+						]td
+						[td 
+							"13
+						]td
+						[td 
+							"INC DE
+						]td
+					]tr
+					[tr 
+						[td 
+							"C907
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C908
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C909
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C90A
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C90B
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C90C
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C90D
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C90E
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C90F
+						]td
+						[td 
+							"Last visited map coord
+						]td
+						[td 
+							"0B, 14
+						]td
+						[td 
+							"DEC BC
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-10210-1 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Address
+						]th
+						[th 
+							"Purpose
+						]th
+						[th 
+							"Values possible during run
+						]th
+						[th 
+							"Opcode
+						]th
+					]tr
+					[tr 
+						[td 
+							"C910
+						]td
+						[td 
+							"Money
+						]td
+						[td 
+							"00-FF
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C911
+						]td
+						[td 
+							"Money
+						]td
+						[td 
+							"0-4*
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C912
+						]td
+						[td 
+							"Follower sprite ID
+						]td
+						[td 
+							"Varies*
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C913
+						]td
+						[td 
+							"Map Coord
+						]td
+						[td 
+							"13
+						]td
+						[td 
+							"INC DE
+						]td
+					]tr
+					[tr 
+						[td 
+							"C914
+						]td
+						[td 
+							"Map type
+						]td
+						[td 
+							"04
+						]td
+						[td 
+							"INC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"C915
+						]td
+						[td 
+							"Ranges from 0-9 as you go left to right screen
+						]td
+						[td 
+							"2-9
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C916
+						]td
+						[td 
+							"Ranges from 0-7 as you go up to down the screen
+						]td
+						[td 
+							"0-7
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C917
+						]td
+						[td 
+							"Music? Overworld is 3
+						]td
+						[td 
+							"03
+						]td
+						[td 
+							"INC (BC)
+						]td
+					]tr
+					[tr 
+						[td 
+							"C918
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C919
+						]td
+						[td 
+							"1 if walking. else 0
+						]td
+						[td 
+							"0
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C91A
+						]td
+						[td 
+							"Idle timer
+						]td
+						[td 
+							"0
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C91B
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C91C
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C91D
+						]td
+						[td 
+							"Change to 1 to trigger battle
+						]td
+						[td 
+							"0
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C91E
+						]td
+						[td 
+							"Set to E0 at start. Changes to F0 in battle
+						]td
+						[td 
+							"E0
+						]td
+						[td 
+							"LD (FF00 + C0), A
+						]td
+					]tr
+					[tr 
+						[td 
+							"C91F
+						]td
+						[td 
+							"Set to C0 at start. Changing it affects text
+						]td
+						[td 
+							"C0
+						]td
+						[td 
+							" 
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-10210-2 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Address
+						]th
+						[th 
+							"Purpose
+						]th
+						[th 
+							"Values possible during run
+						]th
+						[th 
+							"Opcode
+						]th
+					]tr
+					[tr 
+						[td 
+							"C920
+						]td
+						[td 
+							"Randomly assigned on start
+						]td
+						[td 
+							"Varies**
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C921
+						]td
+						[td 
+							"Randomly assigned on start
+						]td
+						[td 
+							"Varies**
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C922
+						]td
+						[td 
+							"Goes up on grass
+						]td
+						[td 
+							"00-3F
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C923
+						]td
+						[td 
+							"Randomly changes
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C924
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"05
+						]td
+						[td 
+							"DEC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"C925
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C926
+						]td
+						[td 
+							"Map ID
+						]td
+						[td 
+							"04
+						]td
+						[td 
+							"INC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"C927
+						]td
+						[td 
+							"Map Coord
+						]td
+						[td 
+							"13
+						]td
+						[td 
+							"INC DE
+						]td
+					]tr
+					[tr 
+						[td 
+							"C928
+						]td
+						[td 
+							"Spawn X (where you appear on room load) + X pos on phone use
+						]td
+						[td 
+							"09-98
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C929
+						]td
+						[td 
+							"Spawn Y (where you appear on room load) + Y pos on phone use
+						]td
+						[td 
+							"10-80
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C92A
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C92B
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C92C
+						]td
+						[td 
+							"Player Name Character 1
+						]td
+						[td 
+							"CD
+						]td
+						[td 
+							"Call 3D6A
+						]td
+					]tr
+					[tr 
+						[td 
+							"C92D
+						]td
+						[td 
+							"Player Name Character 2
+						]td
+						[td 
+							"6A
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C92E
+						]td
+						[td 
+							"Player Name Character 3
+						]td
+						[td 
+							"3D
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C92F
+						]td
+						[td 
+							"Player Name Character 4
+						]td
+						[td 
+							"21
+						]td
+						[td 
+							"LD HL, 5903
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-10210-3 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Address
+						]th
+						[th 
+							"Purpose
+						]th
+						[th 
+							"Values possible during run
+						]th
+						[th 
+							"Opcode
+						]th
+					]tr
+					[tr 
+						[td 
+							"C930
+						]td
+						[td 
+							"Player Name Character 5
+						]td
+						[td 
+							"03
+						]td
+						[td 
+							"LD HL, 5903
+						]td
+					]tr
+					[tr 
+						[td 
+							"C931
+						]td
+						[td 
+							"Player Name Character 6
+						]td
+						[td 
+							"59
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C932
+						]td
+						[td 
+							"Player Name Character 7
+						]td
+						[td 
+							"29
+						]td
+						[td 
+							"ADD HL, HL
+						]td
+					]tr
+					[tr 
+						[td 
+							"C933
+						]td
+						[td 
+							"Player Name Character 8
+						]td
+						[td 
+							"E0
+						]td
+						[td 
+							"LD (FF00 + E0), A
+						]td
+					]tr
+					[tr 
+						[td 
+							"C934
+						]td
+						[td 
+							"Player Name String Terminator
+						]td
+						[td 
+							"E0
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C935
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C936
+						]td
+						[td 
+							"Sets to 1 at game start
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"LD BC, 1101
+						]td
+					]tr
+					[tr 
+						[td 
+							"C937
+						]td
+						[td 
+							"Sets to 1 after intro cutscene
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C938
+						]td
+						[td 
+							"Frame
+						]td
+						[td 
+							"00-FF
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9C9
+						]td
+						[td 
+							"Seconds
+						]td
+						[td 
+							"04
+						]td
+						[td 
+							"INC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9CA
+						]td
+						[td 
+							"Minutes
+						]td
+						[td 
+							"05
+						]td
+						[td 
+							"DEC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9CB
+						]td
+						[td 
+							"Hours
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9CC
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9CD
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9CE
+						]td
+						[td 
+							"Sets to 1 at game start
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"LD BC, 0500
+						]td
+					]tr
+					[tr 
+						[td 
+							"C9CF
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							" 
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-10210-4 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"Address
+						]th
+						[th 
+							"Purpose
+						]th
+						[th 
+							"Values possible during run
+						]th
+						[th 
+							"Opcode
+						]th
+					]tr
+					[tr 
+						[td 
+							"C940
+						]td
+						[td 
+							"Decrements from 5?
+						]td
+						[td 
+							"05
+						]td
+						[td 
+							"LD BC, 0500
+						]td
+					]tr
+					[tr 
+						[td 
+							"C941
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C942
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C943
+						]td
+						[td 
+							"Randomly assigned on start
+						]td
+						[td 
+							"Varies**
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C944
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C945
+						]td
+						[td 
+							"??
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"LD BC, 0000
+						]td
+					]tr
+					[tr 
+						[td 
+							"C946
+						]td
+						[td 
+							"Shop item you picked up
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C947
+						]td
+						[td 
+							"Using phone bool
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							" 
+						]td
+					]tr
+					[tr 
+						[td 
+							"C948
+						]td
+						[td 
+							"Follower X pos on phone use
+						]td
+						[td 
+							"00-FF
+						]td
+						[th 
+							"Varies
+						]th
+					]tr
+					[tr 
+						[td 
+							"C949
+						]td
+						[td 
+							"Follower X pos on phone use
+						]td
+						[td 
+							"00-FF
+						]td
+						[th 
+							"Varies
+						]th
+					]tr
+					[tr 
+						[td 
+							"C94A
+						]td
+						[td 
+							"Follower Y pos on phone use
+						]td
+						[td 
+							"00-FF
+						]td
+						[th 
+							"Varies
+						]th
+					]tr
+					[tr 
+						[td 
+							"C94B
+						]td
+						[td 
+							"Follower Y pos on phone use
+						]td
+						[td 
+							"00-FF
+						]td
+						[th 
+							"Varies
+						]th
+					]tr
+					[tr 
+						[td 
+							"C94C
+						]td
+						[td 
+							"Turned to 1 at 1st screen of Denjuu World?
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"C94D
+						]td
+						[td 
+							"Calling Denjuu name
+						]td
+						[td 
+							"Varies
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C94E
+						]td
+						[td 
+							"Calling Denjuu name? Seems to be A0
+						]td
+						[td 
+							"Varies
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+					[tr 
+						[td 
+							"C94F
+						]td
+						[td 
+							"Phone timer
+						]td
+						[td 
+							"Varies
+						]td
+						[td 
+							"Varies
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-10210-5 
+		]div
+	]div
+]div
+[h4 id=ValuesForC912 
+	" *Values for C912
+	$LF
+]h4
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Value
+			]th
+			[th 
+				"Denjuu
+			]th
+			[th 
+				"Opcode
+			]th
+		]tr
+		[tr 
+			[td 
+				"00
+			]td
+			[td 
+				"Tsunonasu
+			]td
+			[td 
+				"NOP
+			]td
+		]tr
+		[tr 
+			[td 
+				"01
+			]td
+			[td 
+				"Kochia
+			]td
+			[td 
+				"LD BC,  _ _ _ _
+			]td
+		]tr
+		[tr 
+			[td 
+				"02
+			]td
+			[td 
+				"Oshe
+			]td
+			[td 
+				"LD (BC) A
+			]td
+		]tr
+		[tr 
+			[td 
+				"03
+			]td
+			[td 
+				"Keshi*
+			]td
+			[td 
+				"INC (BC)
+			]td
+		]tr
+		[tr 
+			[td 
+				"04
+			]td
+			[td 
+				"Crypto*
+			]td
+			[td 
+				"INC B
+			]td
+		]tr
+		[tr 
+			[td 
+				"05
+			]td
+			[td 
+				"Monstera
+			]td
+			[td 
+				"DEC B
+			]td
+		]tr
+		[tr 
+			[td 
+				"06
+			]td
+			[td 
+				"Fungus
+			]td
+			[td 
+				"LD B, _ _
+			]td
+		]tr
+		[tr 
+			[td 
+				"2F
+			]td
+			[td 
+				"Musa
+			]td
+			[td 
+				"CPL
+			]td
+		]tr
+		[tr 
+			[td 
+				"36
+			]td
+			[td 
+				"Hagumanoki
+			]td
+			[td 
+				"LD (HL), _ _
+			]td
+		]tr
+		[tr 
+			[td 
+				"64
+			]td
+			[td 
+				"Hiyu
+			]td
+			[td 
+				"LD H, H
+			]td
+		]tr
+		[tr 
+			[td 
+				"67
+			]td
+			[td 
+				"Gamuru
+			]td
+			[td 
+				"LD H, A
+			]td
+		]tr
+		[tr 
+			[td 
+				"69
+			]td
+			[td 
+				"Gaultheria
+			]td
+			[td 
+				"LD L, C
+			]td
+		]tr
+		[tr 
+			[td 
+				"6B
+			]td
+			[td 
+				"Kaya
+			]td
+			[td 
+				"LD L, E
+			]td
+		]tr
+		[tr 
+			[td 
+				"6C
+			]td
+			[td 
+				"Denfare
+			]td
+			[td 
+				"LD L, H
+			]td
+		]tr
+		[tr 
+			[td 
+				"82
+			]td
+			[td 
+				"Beebalm
+			]td
+			[td 
+				"ADD D
+			]td
+		]tr
+		[tr 
+			[td 
+				"83
+			]td
+			[td 
+				"Salal
+			]td
+			[td 
+				"ADD E
+			]td
+		]tr
+		[tr 
+			[td 
+				"84
+			]td
+			[td 
+				"Enishida
+			]td
+			[td 
+				"ADD H
+			]td
+		]tr
+		[tr 
+			[td 
+				"92
+			]td
+			[td 
+				"Ruscus
+			]td
+			[td 
+				"SUB D
+			]td
+		]tr
+		[tr 
+			[td 
+				"94
+			]td
+			[td 
+				"Zea
+			]td
+			[td 
+				"SUB H
+			]td
+		]tr
+		[tr 
+			[td 
+				"A5
+			]td
+			[td 
+				"Kanzou
+			]td
+			[td 
+				"AND L
+			]td
+		]tr
+		[tr 
+			[td 
+				"A6
+			]td
+			[td 
+				"Ornithogalum
+			]td
+			[td 
+				"AND (HL)
+			]td
+		]tr
+	]tbody
+]table
+[ul 
+	[li 
+		" Power version only
+		$LF
+	]li
+]ul
+[h4 id=ValuesForC920C921C943 
+	" **Values for C920, C921, C943
+	$LF
+]h4
+[div class=p 
+	"The following are all the 256 possible combinations of the values for C920, C921, C943
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-14256-0 
+					"Values
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-14256-1 
+					"Minimize tab
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-14256-0 
+			[table 
+				[tbody 
+					[tr 
+						[th 
+							"C920
+						]th
+						[th 
+							"Opcode
+						]th
+						[th 
+							"C921
+						]th
+						[th 
+							"Opcode
+						]th
+						[th 
+							"C943
+						]th
+						[th 
+							"Opcode
+							$LF
+						]th
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"E5
+						]td
+						[td 
+							"PUSH HL
+						]td
+						[td 
+							"A2
+						]td
+						[td 
+							"AND D
+						]td
+					]tr
+					[tr 
+						[td 
+							"A9
+						]td
+						[td 
+							"XOR C
+						]td
+						[td 
+							"98
+						]td
+						[td 
+							"SBC B
+						]td
+						[td 
+							"AD
+						]td
+						[td 
+							"XOR L
+						]td
+					]tr
+					[tr 
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+						[td 
+							"65
+						]td
+						[td 
+							"LD H, L
+						]td
+						[td 
+							"AC
+						]td
+						[td 
+							"XOR H
+						]td
+					]tr
+					[tr 
+						[td 
+							"E4
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"5D
+						]td
+						[td 
+							"LD E, L
+						]td
+						[td 
+							"35
+						]td
+						[td 
+							"DEC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"32
+						]td
+						[td 
+							"LDD (HL), A
+						]td
+						[td 
+							"8E
+						]td
+						[td 
+							"ADC (HL)
+						]td
+						[td 
+							"AB
+						]td
+						[td 
+							"XOR E
+						]td
+					]tr
+					[tr 
+						[td 
+							"BF
+						]td
+						[td 
+							"CP A
+						]td
+						[td 
+							"3F
+						]td
+						[td 
+							"CCF
+						]td
+						[td 
+							"5A
+						]td
+						[td 
+							"LD E, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"ED
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"25
+						]td
+						[td 
+							"DEC H
+						]td
+						[td 
+							"35
+						]td
+						[td 
+							"DEC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"78
+						]td
+						[td 
+							"LD A, B
+						]td
+						[td 
+							"B1
+						]td
+						[td 
+							"OR C
+						]td
+						[td 
+							"57
+						]td
+						[td 
+							"LD D, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"D9
+						]td
+						[td 
+							"RETI
+						]td
+						[td 
+							"3D
+						]td
+						[td 
+							"DEC A
+						]td
+						[td 
+							"AF
+						]td
+						[td 
+							"XOR A
+						]td
+					]tr
+					[tr 
+						[td 
+							"E0
+						]td
+						[td 
+							"LD (FF00 + 83), A
+						]td
+						[td 
+							"83
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"1E
+						]td
+						[td 
+							"LD E, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+						[td 
+							"09
+						]td
+						[td 
+							"ADD HL, BC
+						]td
+						[td 
+							"76
+						]td
+						[td 
+							"HALT
+						]td
+					]tr
+					[tr 
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+						[td 
+							"AC
+						]td
+						[td 
+							"XOR H
+						]td
+						[td 
+							"B0
+						]td
+						[td 
+							"OR B
+						]td
+					]tr
+					[tr 
+						[td 
+							"FD
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"07
+						]td
+						[td 
+							"RLCA
+						]td
+						[td 
+							"8F
+						]td
+						[td 
+							"ADC A
+						]td
+					]tr
+					[tr 
+						[td 
+							"B7
+						]td
+						[td 
+							"OR A
+						]td
+						[td 
+							"CD
+						]td
+						[td 
+							"CALL _ _ _ _
+						]td
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"40
+						]td
+						[td 
+							"LD B, B
+						]td
+						[td 
+							"8D
+						]td
+						[td 
+							"ADC L
+						]td
+						[td 
+							"19
+						]td
+						[td 
+							"ADD HL,DE
+						]td
+					]tr
+					[tr 
+						[td 
+							"FB
+						]td
+						[td 
+							"EI
+						]td
+						[td 
+							"F1
+						]td
+						[td 
+							"POP AF
+						]td
+						[td 
+							"32
+						]td
+						[td 
+							"LDD (HL), A
+						]td
+					]tr
+					[tr 
+						[td 
+							"C2
+						]td
+						[td 
+							"JP NZ, _ _ 8E
+						]td
+						[td 
+							"8E
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"28
+						]td
+						[td 
+							"JR Z, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"A7
+						]td
+						[td 
+							"AND A
+						]td
+						[td 
+							"B8
+						]td
+						[td 
+							"CP B
+						]td
+						[td 
+							"C6
+						]td
+						[td 
+							"ADD A, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"9B
+						]td
+						[td 
+							"SBC E
+						]td
+						[td 
+							"F7
+						]td
+						[td 
+							"RST 30
+						]td
+						[td 
+							"37
+						]td
+						[td 
+							"SCF
+						]td
+					]tr
+					[tr 
+						[td 
+							"66
+						]td
+						[td 
+							"LD H, (HL)
+						]td
+						[td 
+							"A5
+						]td
+						[td 
+							"AND L
+						]td
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"42
+						]td
+						[td 
+							"LD B, D
+						]td
+						[td 
+							"1D
+						]td
+						[td 
+							"DEC E
+						]td
+						[td 
+							"92
+						]td
+						[td 
+							"SUB D
+						]td
+					]tr
+					[tr 
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+						[td 
+							"F6
+						]td
+						[td 
+							"OR A, _ _
+						]td
+						[td 
+							"6E
+						]td
+						[td 
+							"LD L, (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"A3
+						]td
+						[td 
+							"AND E
+						]td
+						[td 
+							"FB
+						]td
+						[td 
+							"EI
+						]td
+						[td 
+							"A8
+						]td
+						[td 
+							"XOR B
+						]td
+					]tr
+					[tr 
+						[td 
+							"D2
+						]td
+						[td 
+							"JP NC, _ _ 99
+						]td
+						[td 
+							"99
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"28
+						]td
+						[td 
+							"JR Z, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"D7
+						]td
+						[td 
+							"RST 10
+						]td
+						[td 
+							"5D
+						]td
+						[td 
+							"LD E, L
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"LD (BC) A
+						]td
+					]tr
+					[tr 
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"CF
+						]td
+						[td 
+							"RST 08
+						]td
+						[td 
+							"97
+						]td
+						[td 
+							"SUB A
+						]td
+					]tr
+					[tr 
+						[td 
+							"91
+						]td
+						[td 
+							"SUB C
+						]td
+						[td 
+							"99
+						]td
+						[td 
+							"SBC C
+						]td
+						[td 
+							"65
+						]td
+						[td 
+							"LD H, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+						[td 
+							"0A
+						]td
+						[td 
+							"LD A, (BC)
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"67
+						]td
+						[td 
+							"LD H, A
+						]td
+						[td 
+							"87
+						]td
+						[td 
+							"ADD A
+						]td
+						[td 
+							"4B
+						]td
+						[td 
+							"LD C, E
+						]td
+					]tr
+					[tr 
+						[td 
+							"18
+						]td
+						[td 
+							"JR 2F
+						]td
+						[td 
+							"2F
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"2C
+						]td
+						[td 
+							"INC L
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"2F
+						]td
+						[td 
+							"CPL
+						]td
+						[td 
+							"55
+						]td
+						[td 
+							"LD D, L
+						]td
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+					]tr
+					[tr 
+						[td 
+							"D6
+						]td
+						[td 
+							"SUB A, 6D
+						]td
+						[td 
+							"6D
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"0E
+						]td
+						[td 
+							"LD C, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"E5
+						]td
+						[td 
+							"PUSH HL
+						]td
+						[td 
+							"7B
+						]td
+						[td 
+							"LD A, E
+						]td
+						[td 
+							"25
+						]td
+						[td 
+							"DEC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+						[td 
+							"FB
+						]td
+						[td 
+							"EI
+						]td
+						[td 
+							"95
+						]td
+						[td 
+							"SUB L
+						]td
+					]tr
+					[tr 
+						[td 
+							"A5
+						]td
+						[td 
+							"AND L
+						]td
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+						[td 
+							"28
+						]td
+						[td 
+							"JR Z, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"E1
+						]td
+						[td 
+							"POP HL
+						]td
+						[td 
+							"18
+						]td
+						[td 
+							"JR _ _
+						]td
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+					]tr
+					[tr 
+						[td 
+							"1A
+						]td
+						[td 
+							"LD A,(DE)
+						]td
+						[td 
+							"A3
+						]td
+						[td 
+							"AND E
+						]td
+						[td 
+							"97
+						]td
+						[td 
+							"SUB A
+						]td
+					]tr
+					[tr 
+						[td 
+							"F0
+						]td
+						[td 
+							"LD A, (FF00 + C0)
+						]td
+						[td 
+							"C0
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"1E
+						]td
+						[td 
+							"LD E, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"C3
+						]td
+						[td 
+							"JP _ _ 2E
+						]td
+						[td 
+							"2E
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"88
+						]td
+						[td 
+							"ADC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"DF
+						]td
+						[td 
+							"RST 18
+						]td
+						[td 
+							"B4
+						]td
+						[td 
+							"OR H
+						]td
+						[td 
+							"86
+						]td
+						[td 
+							"ADD (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"96
+						]td
+						[td 
+							"SUB (HL)
+						]td
+						[td 
+							"86
+						]td
+						[td 
+							"ADD (HL)
+						]td
+						[td 
+							"42
+						]td
+						[td 
+							"LD B, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"76
+						]td
+						[td 
+							"HALT
+						]td
+						[td 
+							"B8
+						]td
+						[td 
+							"CP B
+						]td
+						[td 
+							"9B
+						]td
+						[td 
+							"SBC E
+						]td
+					]tr
+					[tr 
+						[td 
+							"01
+						]td
+						[td 
+							"LD BC,  _ _ 16
+						]td
+						[td 
+							"16
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"B1
+						]td
+						[td 
+							"OR C
+						]td
+					]tr
+					[tr 
+						[td 
+							"29
+						]td
+						[td 
+							"ADD HL, HL
+						]td
+						[td 
+							"61
+						]td
+						[td 
+							"LD H, C
+						]td
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"16
+						]td
+						[td 
+							"LD D, BE
+						]td
+						[td 
+							"BE
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"A0
+						]td
+						[td 
+							"AND B
+						]td
+					]tr
+					[tr 
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+						[td 
+							"79
+						]td
+						[td 
+							"LD A, C
+						]td
+						[td 
+							"18
+						]td
+						[td 
+							"JR _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"E3
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"F4
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"2E
+						]td
+						[td 
+							"LD L, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"B8
+						]td
+						[td 
+							"CP B
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+					]tr
+					[tr 
+						[td 
+							"AE
+						]td
+						[td 
+							"XOR (HL)
+						]td
+						[td 
+							"CF
+						]td
+						[td 
+							"RST 08
+						]td
+						[td 
+							"5A
+						]td
+						[td 
+							"LD E, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+						[td 
+							"CE
+						]td
+						[td 
+							"ADC A, _ _
+						]td
+						[td 
+							"5D
+						]td
+						[td 
+							"LD E, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"3B
+						]td
+						[td 
+							"DEC SP
+						]td
+						[td 
+							"F3
+						]td
+						[td 
+							"DI
+						]td
+						[td 
+							"B3
+						]td
+						[td 
+							"OR E
+						]td
+					]tr
+					[tr 
+						[td 
+							"57
+						]td
+						[td 
+							"LD D, A
+						]td
+						[td 
+							"3C
+						]td
+						[td 
+							"INC A
+						]td
+						[td 
+							"6C
+						]td
+						[td 
+							"LD L, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"D8
+						]td
+						[td 
+							"RET C
+						]td
+						[td 
+							"59
+						]td
+						[td 
+							"LD E, C
+						]td
+						[td 
+							"08
+						]td
+						[td 
+							"LD (_ _ _ _), SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+						[td 
+							"56
+						]td
+						[td 
+							"LD D, (HL)
+						]td
+						[td 
+							"6C
+						]td
+						[td 
+							"LD L, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"DE
+						]td
+						[td 
+							"SBC A, D8
+						]td
+						[td 
+							"D8
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"58
+						]td
+						[td 
+							"LD E, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"D0
+						]td
+						[td 
+							"RET NC
+						]td
+						[td 
+							"AA
+						]td
+						[td 
+							"XOR D
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"18
+						]td
+						[td 
+							"JR 3F
+						]td
+						[td 
+							"3F
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"99
+						]td
+						[td 
+							"SBC C
+						]td
+					]tr
+					[tr 
+						[td 
+							"27
+						]td
+						[td 
+							"DAA
+						]td
+						[td 
+							"BB
+						]td
+						[td 
+							"CP E
+						]td
+						[td 
+							"4B
+						]td
+						[td 
+							"LD C, E
+						]td
+					]tr
+					[tr 
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"D0
+						]td
+						[td 
+							"RET NC
+						]td
+						[td 
+							"B0
+						]td
+						[td 
+							"OR B
+						]td
+					]tr
+					[tr 
+						[td 
+							"5C
+						]td
+						[td 
+							"LD E, H
+						]td
+						[td 
+							"86
+						]td
+						[td 
+							"ADD (HL)
+						]td
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+					]tr
+					[tr 
+						[td 
+							"A9
+						]td
+						[td 
+							"XOR C
+						]td
+						[td 
+							"26
+						]td
+						[td 
+							"LD H, _ _
+						]td
+						[td 
+							"3B
+						]td
+						[td 
+							"DEC SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"F6
+						]td
+						[td 
+							"OR A, 56
+						]td
+						[td 
+							"56
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"84
+						]td
+						[td 
+							"ADD H
+						]td
+					]tr
+					[tr 
+						[td 
+							"DA
+						]td
+						[td 
+							"JP N, _ _ 04
+						]td
+						[td 
+							"04
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"34
+						]td
+						[td 
+							"INC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"D1
+						]td
+						[td 
+							"POP DE
+						]td
+						[td 
+							"AB
+						]td
+						[td 
+							"XOR E
+						]td
+						[td 
+							"A0
+						]td
+						[td 
+							"AND B
+						]td
+					]tr
+					[tr 
+						[td 
+							"9A
+						]td
+						[td 
+							"SBC D
+						]td
+						[td 
+							"27
+						]td
+						[td 
+							"DAA
+						]td
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"F2
+						]td
+						[td 
+							"LD A, (FF00 + C)
+						]td
+						[td 
+							"D8
+						]td
+						[td 
+							"RET C
+						]td
+						[td 
+							"23
+						]td
+						[td 
+							"INC HL
+						]td
+					]tr
+					[tr 
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+						[td 
+							"54
+						]td
+						[td 
+							"LD D, H
+						]td
+						[td 
+							"4C
+						]td
+						[td 
+							"LD C, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+						[td 
+							"D1
+						]td
+						[td 
+							"POP DE
+						]td
+						[td 
+							"0A
+						]td
+						[td 
+							"LD A, (BC)
+						]td
+					]tr
+					[tr 
+						[td 
+							"95
+						]td
+						[td 
+							"SUB L
+						]td
+						[td 
+							"34
+						]td
+						[td 
+							"INC (HL)
+						]td
+						[td 
+							"52
+						]td
+						[td 
+							"LD D, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"A9
+						]td
+						[td 
+							"XOR C
+						]td
+						[td 
+							"93
+						]td
+						[td 
+							"SUB E
+						]td
+						[td 
+							"2C
+						]td
+						[td 
+							"INC L
+						]td
+					]tr
+					[tr 
+						[td 
+							"DD
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"D3
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"0D
+						]td
+						[td 
+							"DEC C
+						]td
+					]tr
+					[tr 
+						[td 
+							"40
+						]td
+						[td 
+							"LD B, B
+						]td
+						[td 
+							"97
+						]td
+						[td 
+							"SUB A
+						]td
+						[td 
+							"6F
+						]td
+						[td 
+							"LD L, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"6B
+						]td
+						[td 
+							"LD L, E
+						]td
+						[td 
+							"78
+						]td
+						[td 
+							"LD A, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"70
+						]td
+						[td 
+							"LD (HL), B
+						]td
+						[td 
+							"C8
+						]td
+						[td 
+							"RET Z
+						]td
+						[td 
+							"30
+						]td
+						[td 
+							"JR NC, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"59
+						]td
+						[td 
+							"LD E, C
+						]td
+						[td 
+							"3B
+						]td
+						[td 
+							"DEC SP
+						]td
+						[td 
+							"B7
+						]td
+						[td 
+							"OR A
+						]td
+					]tr
+					[tr 
+						[td 
+							"F3
+						]td
+						[td 
+							"DI
+						]td
+						[td 
+							"CD
+						]td
+						[td 
+							"CALL _ _ _ _
+						]td
+						[td 
+							"1E
+						]td
+						[td 
+							"LD E, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"1D
+						]td
+						[td 
+							"DEC E
+						]td
+						[td 
+							"DF
+						]td
+						[td 
+							"RST 18
+						]td
+						[td 
+							"23
+						]td
+						[td 
+							"INC HL
+						]td
+					]tr
+					[tr 
+						[td 
+							"E8
+						]td
+						[td 
+							"ADD SP, 75
+						]td
+						[td 
+							"75
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+					]tr
+					[tr 
+						[td 
+							"D5
+						]td
+						[td 
+							"PUSH DE
+						]td
+						[td 
+							"C2
+						]td
+						[td 
+							"JP NZ, _ _ _ _
+						]td
+						[td 
+							"96
+						]td
+						[td 
+							"SUB (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"11
+						]td
+						[td 
+							"LD DE,  _ _ 64
+						]td
+						[td 
+							"64
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"8F
+						]td
+						[td 
+							"ADC A
+						]td
+					]tr
+					[tr 
+						[td 
+							"98
+						]td
+						[td 
+							"SBC B
+						]td
+						[td 
+							"47
+						]td
+						[td 
+							"LD B, A
+						]td
+						[td 
+							"B4
+						]td
+						[td 
+							"OR H
+						]td
+					]tr
+					[tr 
+						[td 
+							"75
+						]td
+						[td 
+							"LD (HL), L
+						]td
+						[td 
+							"C8
+						]td
+						[td 
+							"RET Z
+						]td
+						[td 
+							"A7
+						]td
+						[td 
+							"AND A
+						]td
+					]tr
+					[tr 
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+						[td 
+							"37
+						]td
+						[td 
+							"SCF
+						]td
+					]tr
+					[tr 
+						[td 
+							"35
+						]td
+						[td 
+							"DEC (HL)
+						]td
+						[td 
+							"5D
+						]td
+						[td 
+							"LD E, L
+						]td
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"FA
+						]td
+						[td 
+							"LD A, (_ _ 08)
+						]td
+						[td 
+							"08
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"C3
+						]td
+						[td 
+							"JP _ _ _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"INC D
+						]td
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"23
+						]td
+						[td 
+							"INC HL
+						]td
+					]tr
+					[tr 
+						[td 
+							"C7
+						]td
+						[td 
+							"RST 00
+						]td
+						[td 
+							"87
+						]td
+						[td 
+							"ADD A
+						]td
+						[td 
+							"8E
+						]td
+						[td 
+							"ADC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"4E
+						]td
+						[td 
+							"LD C, (HL)
+						]td
+						[td 
+							"B6
+						]td
+						[td 
+							"OR (HL)
+						]td
+						[td 
+							"86
+						]td
+						[td 
+							"ADD (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"94
+						]td
+						[td 
+							"SUB H
+						]td
+						[td 
+							"D6
+						]td
+						[td 
+							"SUB A, _ _
+						]td
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+					]tr
+					[tr 
+						[td 
+							"4B
+						]td
+						[td 
+							"LD C, E
+						]td
+						[td 
+							"88
+						]td
+						[td 
+							"ADC B
+						]td
+						[td 
+							"1E
+						]td
+						[td 
+							"LD E, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"D0
+						]td
+						[td 
+							"RET NC
+						]td
+						[td 
+							"B0
+						]td
+						[td 
+							"OR B
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"LD (BC) A
+						]td
+						[td 
+							"30
+						]td
+						[td 
+							"JR NC, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+						[td 
+							"99
+						]td
+						[td 
+							"SBC C
+						]td
+						[td 
+							"97
+						]td
+						[td 
+							"SUB A
+						]td
+					]tr
+					[tr 
+						[td 
+							"FD
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"E6
+						]td
+						[td 
+							"AND A, _ _
+						]td
+						[td 
+							"63
+						]td
+						[td 
+							"LD H, E
+						]td
+					]tr
+					[tr 
+						[td 
+							"52
+						]td
+						[td 
+							"LD D, D
+						]td
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"4D
+						]td
+						[td 
+							"LD C, L
+						]td
+						[td 
+							"C6
+						]td
+						[td 
+							"ADD A, _ _
+						]td
+						[td 
+							"92
+						]td
+						[td 
+							"SUB D
+						]td
+					]tr
+					[tr 
+						[td 
+							"B6
+						]td
+						[td 
+							"OR (HL)
+						]td
+						[td 
+							"4C
+						]td
+						[td 
+							"LD C, H
+						]td
+						[td 
+							"85
+						]td
+						[td 
+							"ADD L
+						]td
+					]tr
+					[tr 
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+						[td 
+							"E1
+						]td
+						[td 
+							"POP HL
+						]td
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"63
+						]td
+						[td 
+							"LD H, E
+						]td
+						[td 
+							"9B
+						]td
+						[td 
+							"SBC E
+						]td
+						[td 
+							"2F
+						]td
+						[td 
+							"CPL
+						]td
+					]tr
+					[tr 
+						[td 
+							"52
+						]td
+						[td 
+							"LD D, D
+						]td
+						[td 
+							"A5
+						]td
+						[td 
+							"AND L
+						]td
+						[td 
+							"39
+						]td
+						[td 
+							"ADD HL, SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"B3
+						]td
+						[td 
+							"OR E
+						]td
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+						[td 
+							"18
+						]td
+						[td 
+							"JR _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"04
+						]td
+						[td 
+							"INC B
+						]td
+						[td 
+							"ED
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"43
+						]td
+						[td 
+							"LD B, E
+						]td
+					]tr
+					[tr 
+						[td 
+							"70
+						]td
+						[td 
+							"LD (HL), B
+						]td
+						[td 
+							"32
+						]td
+						[td 
+							"LDD (HL), A
+						]td
+						[td 
+							"BC
+						]td
+						[td 
+							"CP H
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"A4
+						]td
+						[td 
+							"AND H
+						]td
+						[td 
+							"34
+						]td
+						[td 
+							"INC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"9D
+						]td
+						[td 
+							"SBC L
+						]td
+						[td 
+							"F2
+						]td
+						[td 
+							"LD A, (FF00 + C)
+						]td
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+						[td 
+							"3B
+						]td
+						[td 
+							"DEC SP
+						]td
+						[td 
+							"76
+						]td
+						[td 
+							"HALT
+						]td
+					]tr
+					[tr 
+						[td 
+							"71
+						]td
+						[td 
+							"LD (HL), C
+						]td
+						[td 
+							"B3
+						]td
+						[td 
+							"OR E
+						]td
+						[td 
+							"44
+						]td
+						[td 
+							"LD B, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"E4
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"EF
+						]td
+						[td 
+							"RST 28
+						]td
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+					]tr
+					[tr 
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+						[td 
+							"F3
+						]td
+						[td 
+							"DI
+						]td
+						[td 
+							"0F
+						]td
+						[td 
+							"RRCA
+						]td
+					]tr
+					[tr 
+						[td 
+							"8B
+						]td
+						[td 
+							"ADC E
+						]td
+						[td 
+							"E2
+						]td
+						[td 
+							"LD (FF00 +  C), A
+						]td
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"D4
+						]td
+						[td 
+							"CALL NZ, _ _ 83
+						]td
+						[td 
+							"83
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"1C
+						]td
+						[td 
+							"INC E
+						]td
+					]tr
+					[tr 
+						[td 
+							"8F
+						]td
+						[td 
+							"ADC A
+						]td
+						[td 
+							"85
+						]td
+						[td 
+							"ADD L
+						]td
+						[td 
+							"58
+						]td
+						[td 
+							"LD E, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"FC
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"B5
+						]td
+						[td 
+							"OR L
+						]td
+						[td 
+							"08
+						]td
+						[td 
+							"LD (_ _ _ _), SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+						[td 
+							"57
+						]td
+						[td 
+							"LD D, A
+						]td
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"51
+						]td
+						[td 
+							"LD D, C
+						]td
+						[td 
+							"0B
+						]td
+						[td 
+							"DEC BC
+						]td
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+					]tr
+					[tr 
+						[td 
+							"5B
+						]td
+						[td 
+							"LD E, E
+						]td
+						[td 
+							"03
+						]td
+						[td 
+							"INC (BC)
+						]td
+						[td 
+							"1D
+						]td
+						[td 
+							"DEC E
+						]td
+					]tr
+					[tr 
+						[td 
+							"EE
+						]td
+						[td 
+							"XOR A, 9F
+						]td
+						[td 
+							"9F
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"6C
+						]td
+						[td 
+							"LD L, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"INC D
+						]td
+						[td 
+							"66
+						]td
+						[td 
+							"LD H, (HL)
+						]td
+						[td 
+							"99
+						]td
+						[td 
+							"SBC C
+						]td
+					]tr
+					[tr 
+						[td 
+							"C3
+						]td
+						[td 
+							"JP _ _ C7
+						]td
+						[td 
+							"C7
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"BF
+						]td
+						[td 
+							"CP A
+						]td
+					]tr
+					[tr 
+						[td 
+							"D9
+						]td
+						[td 
+							"RETI
+						]td
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+						[td 
+							"0A
+						]td
+						[td 
+							"LD A, (BC)
+						]td
+					]tr
+					[tr 
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+						[td 
+							"86
+						]td
+						[td 
+							"ADD (HL)
+						]td
+						[td 
+							"A5
+						]td
+						[td 
+							"AND L
+						]td
+					]tr
+					[tr 
+						[td 
+							"02
+						]td
+						[td 
+							"LD (BC) A
+						]td
+						[td 
+							"94
+						]td
+						[td 
+							"SUB H
+						]td
+						[td 
+							"5D
+						]td
+						[td 
+							"LD E, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"F2
+						]td
+						[td 
+							"LD A, (FF00 + C)
+						]td
+						[td 
+							"6D
+						]td
+						[td 
+							"LD L, L
+						]td
+						[td 
+							"A9
+						]td
+						[td 
+							"XOR C
+						]td
+					]tr
+					[tr 
+						[td 
+							"B6
+						]td
+						[td 
+							"OR (HL)
+						]td
+						[td 
+							"9A
+						]td
+						[td 
+							"SBC D
+						]td
+						[td 
+							"88
+						]td
+						[td 
+							"ADC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"2E
+						]td
+						[td 
+							"LD L, 20
+						]td
+						[td 
+							"20
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"37
+						]td
+						[td 
+							"SCF
+						]td
+					]tr
+					[tr 
+						[td 
+							"7B
+						]td
+						[td 
+							"LD A, E
+						]td
+						[td 
+							"40
+						]td
+						[td 
+							"LD B, B
+						]td
+						[td 
+							"74
+						]td
+						[td 
+							"LD (HL), H
+						]td
+					]tr
+					[tr 
+						[td 
+							"DF
+						]td
+						[td 
+							"RST 18
+						]td
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+						[td 
+							"14
+						]td
+						[td 
+							"INC D
+						]td
+					]tr
+					[tr 
+						[td 
+							"C1
+						]td
+						[td 
+							"POP BC
+						]td
+						[td 
+							"17
+						]td
+						[td 
+							"RLA
+						]td
+						[td 
+							"49
+						]td
+						[td 
+							"LD C, C
+						]td
+					]tr
+					[tr 
+						[td 
+							"61
+						]td
+						[td 
+							"LD H, C
+						]td
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+						[td 
+							"42
+						]td
+						[td 
+							"LD B, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+						[td 
+							"E8
+						]td
+						[td 
+							"ADD SP, _ _
+						]td
+						[td 
+							"A1
+						]td
+						[td 
+							"AND C
+						]td
+					]tr
+					[tr 
+						[td 
+							"0E
+						]td
+						[td 
+							"LD C, 45
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"0F
+						]td
+						[td 
+							"RRCA
+						]td
+					]tr
+					[tr 
+						[td 
+							"20
+						]td
+						[td 
+							"JR NZ, 58
+						]td
+						[td 
+							"58
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"B5
+						]td
+						[td 
+							"OR L
+						]td
+					]tr
+					[tr 
+						[td 
+							"36
+						]td
+						[td 
+							"LD (HL), 44
+						]td
+						[td 
+							"44
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"84
+						]td
+						[td 
+							"ADD H
+						]td
+						[td 
+							"7C
+						]td
+						[td 
+							"LD A, H
+						]td
+						[td 
+							"3E
+						]td
+						[td 
+							"LD A, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"28
+						]td
+						[td 
+							"JR Z, 18
+						]td
+						[td 
+							"18
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"34
+						]td
+						[td 
+							"INC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"BB
+						]td
+						[td 
+							"CP E
+						]td
+						[td 
+							"43
+						]td
+						[td 
+							"LD B, E
+						]td
+						[td 
+							"54
+						]td
+						[td 
+							"LD D, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+						[td 
+							"D9
+						]td
+						[td 
+							"RETI
+						]td
+						[td 
+							"6F
+						]td
+						[td 
+							"LD L, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+						[td 
+							"F5
+						]td
+						[td 
+							"PUSH AF
+						]td
+						[td 
+							"56
+						]td
+						[td 
+							"LD D, (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"20
+						]td
+						[td 
+							"JR NZ, 7C
+						]td
+						[td 
+							"7C
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"51
+						]td
+						[td 
+							"LD D, C
+						]td
+					]tr
+					[tr 
+						[td 
+							"96
+						]td
+						[td 
+							"SUB (HL)
+						]td
+						[td 
+							"3B
+						]td
+						[td 
+							"DEC SP
+						]td
+						[td 
+							"97
+						]td
+						[td 
+							"SUB A
+						]td
+					]tr
+					[tr 
+						[td 
+							"12
+						]td
+						[td 
+							"LD (DE), A 
+						]td
+						[td 
+							"8F
+						]td
+						[td 
+							"ADC A
+						]td
+						[td 
+							"B3
+						]td
+						[td 
+							"OR E
+						]td
+					]tr
+					[tr 
+						[td 
+							"A4
+						]td
+						[td 
+							"AND H
+						]td
+						[td 
+							"E3
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"6A
+						]td
+						[td 
+							"LD L, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"74
+						]td
+						[td 
+							"LD (HL), H
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"C1
+						]td
+						[td 
+							"POP BC
+						]td
+						[td 
+							"B5
+						]td
+						[td 
+							"OR L
+						]td
+						[td 
+							"43
+						]td
+						[td 
+							"LD B, E
+						]td
+					]tr
+					[tr 
+						[td 
+							"6F
+						]td
+						[td 
+							"LD L, A
+						]td
+						[td 
+							"87
+						]td
+						[td 
+							"ADD A
+						]td
+						[td 
+							"5A
+						]td
+						[td 
+							"LD E, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"INC D
+						]td
+						[td 
+							"4B
+						]td
+						[td 
+							"LD C, E
+						]td
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+					]tr
+					[tr 
+						[td 
+							"A8
+						]td
+						[td 
+							"XOR B
+						]td
+						[td 
+							"CD
+						]td
+						[td 
+							"CALL _ _ _ _
+						]td
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+					]tr
+					[tr 
+						[td 
+							"A9
+						]td
+						[td 
+							"XOR C
+						]td
+						[td 
+							"C7
+						]td
+						[td 
+							"RST 00
+						]td
+						[td 
+							"BB
+						]td
+						[td 
+							"CP E
+						]td
+					]tr
+					[tr 
+						[td 
+							"11
+						]td
+						[td 
+							"LD DE,  _ _ 0F
+						]td
+						[td 
+							"0F
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"0C
+						]td
+						[td 
+							"INC C
+						]td
+					]tr
+					[tr 
+						[td 
+							"8A
+						]td
+						[td 
+							"ADC D
+						]td
+						[td 
+							"F2
+						]td
+						[td 
+							"LD A, (FF00 + C)
+						]td
+						[td 
+							"A8
+						]td
+						[td 
+							"XOR B
+						]td
+					]tr
+					[tr 
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+						[td 
+							"F5
+						]td
+						[td 
+							"PUSH AF
+						]td
+						[td 
+							"78
+						]td
+						[td 
+							"LD A, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"B9
+						]td
+						[td 
+							"CP C
+						]td
+						[td 
+							"63
+						]td
+						[td 
+							"LD H, E
+						]td
+						[td 
+							"6D
+						]td
+						[td 
+							"LD L, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"33
+						]td
+						[td 
+							"INC SP
+						]td
+						[td 
+							"59
+						]td
+						[td 
+							"LD E, C
+						]td
+						[td 
+							"8E
+						]td
+						[td 
+							"ADC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"73
+						]td
+						[td 
+							"LD (HL), E
+						]td
+						[td 
+							"8E
+						]td
+						[td 
+							"ADC (HL)
+						]td
+						[td 
+							"A3
+						]td
+						[td 
+							"AND E
+						]td
+					]tr
+					[tr 
+						[td 
+							"F2
+						]td
+						[td 
+							"LD A, (FF00 + C)
+						]td
+						[td 
+							"6D
+						]td
+						[td 
+							"LD L, L
+						]td
+						[td 
+							"A9
+						]td
+						[td 
+							"XOR C
+						]td
+					]tr
+					[tr 
+						[td 
+							"2D
+						]td
+						[td 
+							"DEC L
+						]td
+						[td 
+							"87
+						]td
+						[td 
+							"ADD A
+						]td
+						[td 
+							"14
+						]td
+						[td 
+							"INC D
+						]td
+					]tr
+					[tr 
+						[td 
+							"BD
+						]td
+						[td 
+							"CP L
+						]td
+						[td 
+							"6D
+						]td
+						[td 
+							"LD L, L
+						]td
+						[td 
+							"2F
+						]td
+						[td 
+							"CPL
+						]td
+					]tr
+					[tr 
+						[td 
+							"F8
+						]td
+						[td 
+							"LD HL, SP + 7F
+						]td
+						[td 
+							"7F
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+					]tr
+					[tr 
+						[td 
+							"EC
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"4D
+						]td
+						[td 
+							"LD C, L
+						]td
+						[td 
+							"54
+						]td
+						[td 
+							"LD D, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"D7
+						]td
+						[td 
+							"RST 10
+						]td
+						[td 
+							"DE
+						]td
+						[td 
+							"SBC A, _ _
+						]td
+						[td 
+							"B6
+						]td
+						[td 
+							"OR (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+						[td 
+							"12
+						]td
+						[td 
+							"LD (DE), A 
+						]td
+						[td 
+							"0C
+						]td
+						[td 
+							"INC C
+						]td
+					]tr
+					[tr 
+						[td 
+							"CD
+						]td
+						[td 
+							"CALL _ _ FC
+						]td
+						[td 
+							"FC
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+					]tr
+					[tr 
+						[td 
+							"74
+						]td
+						[td 
+							"LD (HL), H
+						]td
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"34
+						]td
+						[td 
+							"INC (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"C8
+						]td
+						[td 
+							"RET Z
+						]td
+						[td 
+							"1F
+						]td
+						[td 
+							"RRA
+						]td
+						[td 
+							"05
+						]td
+						[td 
+							"DEC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"DC
+						]td
+						[td 
+							"CALL C, _ _ 3F
+						]td
+						[td 
+							"3F
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"76
+						]td
+						[td 
+							"HALT
+						]td
+					]tr
+					[tr 
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+						[td 
+							"50
+						]td
+						[td 
+							"LD D, B
+						]td
+						[td 
+							"81
+						]td
+						[td 
+							"ADD C
+						]td
+					]tr
+					[tr 
+						[td 
+							"D5
+						]td
+						[td 
+							"PUSH DE
+						]td
+						[td 
+							"54
+						]td
+						[td 
+							"LD D, H
+						]td
+						[td 
+							"72
+						]td
+						[td 
+							"LD (HL), D
+						]td
+					]tr
+					[tr 
+						[td 
+							"B1
+						]td
+						[td 
+							"OR C
+						]td
+						[td 
+							"AA
+						]td
+						[td 
+							"XOR D
+						]td
+						[td 
+							"C5
+						]td
+						[td 
+							"PUSH BC
+						]td
+					]tr
+					[tr 
+						[td 
+							"24
+						]td
+						[td 
+							"INC H
+						]td
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"1F
+						]td
+						[td 
+							"RRA
+						]td
+						[td 
+							"BC
+						]td
+						[td 
+							"CP H
+						]td
+						[td 
+							"50
+						]td
+						[td 
+							"LD D, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"58
+						]td
+						[td 
+							"LD E, B
+						]td
+						[td 
+							"31
+						]td
+						[td 
+							"LD SP, _ _ _ _
+						]td
+						[td 
+							"AA
+						]td
+						[td 
+							"XOR D
+						]td
+					]tr
+					[tr 
+						[td 
+							"CF
+						]td
+						[td 
+							"RST 08
+						]td
+						[td 
+							"C7
+						]td
+						[td 
+							"RST 00
+						]td
+						[td 
+							"84
+						]td
+						[td 
+							"ADD H
+						]td
+					]tr
+					[tr 
+						[td 
+							"BE
+						]td
+						[td 
+							"CP (HL)
+						]td
+						[td 
+							"C2
+						]td
+						[td 
+							"JP NZ, _ _ _ _
+						]td
+						[td 
+							"55
+						]td
+						[td 
+							"LD D, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"16
+						]td
+						[td 
+							"LD D, EA
+						]td
+						[td 
+							"EA
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"C0
+						]td
+						[td 
+							"RET NZ
+						]td
+					]tr
+					[tr 
+						[td 
+							"AB
+						]td
+						[td 
+							"XOR E
+						]td
+						[td 
+							"C3
+						]td
+						[td 
+							"JP _ _ _ _
+						]td
+						[td 
+							"7C
+						]td
+						[td 
+							"LD A, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"D7
+						]td
+						[td 
+							"RST 10
+						]td
+						[td 
+							"4B
+						]td
+						[td 
+							"LD C, E
+						]td
+						[td 
+							"55
+						]td
+						[td 
+							"LD D, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"AD
+						]td
+						[td 
+							"XOR L
+						]td
+						[td 
+							"F6
+						]td
+						[td 
+							"OR A, _ _
+						]td
+						[td 
+							"76
+						]td
+						[td 
+							"HALT
+						]td
+					]tr
+					[tr 
+						[td 
+							"20
+						]td
+						[td 
+							"JR NZ, 2C
+						]td
+						[td 
+							"2C
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"A3
+						]td
+						[td 
+							"AND E
+						]td
+					]tr
+					[tr 
+						[td 
+							"FF
+						]td
+						[td 
+							"RST 38
+						]td
+						[td 
+							"9C
+						]td
+						[td 
+							"SBC H
+						]td
+						[td 
+							"C1
+						]td
+						[td 
+							"POP BC
+						]td
+					]tr
+					[tr 
+						[td 
+							"4B
+						]td
+						[td 
+							"LD C, E
+						]td
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"8D
+						]td
+						[td 
+							"ADC L
+						]td
+					]tr
+					[tr 
+						[td 
+							"13
+						]td
+						[td 
+							"INC DE
+						]td
+						[td 
+							"79
+						]td
+						[td 
+							"LD A, C
+						]td
+						[td 
+							"18
+						]td
+						[td 
+							"JR _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"E0
+						]td
+						[td 
+							"LD (FF00 + 4C), A
+						]td
+						[td 
+							"4C
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"8F
+						]td
+						[td 
+							"ADC A
+						]td
+						[td 
+							"35
+						]td
+						[td 
+							"DEC (HL)
+						]td
+						[td 
+							"AA
+						]td
+						[td 
+							"XOR D
+						]td
+					]tr
+					[tr 
+						[td 
+							"83
+						]td
+						[td 
+							"ADD E
+						]td
+						[td 
+							"05
+						]td
+						[td 
+							"DEC B
+						]td
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"B6
+						]td
+						[td 
+							"OR (HL)
+						]td
+						[td 
+							"5D
+						]td
+						[td 
+							"LD E, L
+						]td
+						[td 
+							"57
+						]td
+						[td 
+							"LD D, A
+						]td
+					]tr
+					[tr 
+						[td 
+							"C2
+						]td
+						[td 
+							"JP NZ, _ _ 65
+						]td
+						[td 
+							"65
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"06
+						]td
+						[td 
+							"LD B, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"DF
+						]td
+						[td 
+							"RST 18
+						]td
+						[td 
+							"C2
+						]td
+						[td 
+							"JP NZ, _ _ _ _
+						]td
+						[td 
+							"39
+						]td
+						[td 
+							"ADD HL, SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"8C
+						]td
+						[td 
+							"ADC H
+						]td
+						[td 
+							"FE
+						]td
+						[td 
+							"CP A, _ _
+						]td
+						[td 
+							"84
+						]td
+						[td 
+							"ADD H
+						]td
+					]tr
+					[tr 
+						[td 
+							"6C
+						]td
+						[td 
+							"LD L, H
+						]td
+						[td 
+							"F0
+						]td
+						[td 
+							"LD A, (FF00 + _ _)
+						]td
+						[td 
+							"79
+						]td
+						[td 
+							"LD A, C
+						]td
+					]tr
+					[tr 
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+						[td 
+							"51
+						]td
+						[td 
+							"LD D, C
+						]td
+						[td 
+							"39
+						]td
+						[td 
+							"ADD HL, SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"44
+						]td
+						[td 
+							"LD B, H
+						]td
+						[td 
+							"1E
+						]td
+						[td 
+							"LD E, _ _
+						]td
+						[td 
+							"38
+						]td
+						[td 
+							"JR C, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+						[td 
+							"A5
+						]td
+						[td 
+							"AND L
+						]td
+						[td 
+							"37
+						]td
+						[td 
+							"SCF
+						]td
+					]tr
+					[tr 
+						[td 
+							"B9
+						]td
+						[td 
+							"CP C
+						]td
+						[td 
+							"2D
+						]td
+						[td 
+							"DEC L
+						]td
+						[td 
+							"31
+						]td
+						[td 
+							"LD SP, _ _ _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"46
+						]td
+						[td 
+							"LD B, (HL)
+						]td
+						[td 
+							"D8
+						]td
+						[td 
+							"RET C
+						]td
+						[td 
+							"5C
+						]td
+						[td 
+							"LD E, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"7E
+						]td
+						[td 
+							"LD A, (HL)
+						]td
+						[td 
+							"E2
+						]td
+						[td 
+							"LD (FF00 +  C), A
+						]td
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"DC
+						]td
+						[td 
+							"CALL C, _ _ 7B
+						]td
+						[td 
+							"7B
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"2D
+						]td
+						[td 
+							"DEC L
+						]td
+					]tr
+					[tr 
+						[td 
+							"03
+						]td
+						[td 
+							"INC (BC)
+						]td
+						[td 
+							"1A
+						]td
+						[td 
+							"LD A,(DE)
+						]td
+						[td 
+							"1F
+						]td
+						[td 
+							"RRA
+						]td
+					]tr
+					[tr 
+						[td 
+							"F8
+						]td
+						[td 
+							"LD HL, SP + 37
+						]td
+						[td 
+							"37
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"A2
+						]td
+						[td 
+							"AND D
+						]td
+					]tr
+					[tr 
+						[td 
+							"CB
+						]td
+						[td 
+							"RLC B
+						]td
+						[td 
+							"AD
+						]td
+						[td 
+							"XOR L
+						]td
+						[td 
+							"25
+						]td
+						[td 
+							"DEC H
+						]td
+					]tr
+					[tr 
+						[td 
+							"69
+						]td
+						[td 
+							"LD L, C
+						]td
+						[td 
+							"9F
+						]td
+						[td 
+							"SBC A
+						]td
+						[td 
+							"61
+						]td
+						[td 
+							"LD H, C
+						]td
+					]tr
+					[tr 
+						[td 
+							"20
+						]td
+						[td 
+							"JR NZ, B2
+						]td
+						[td 
+							"B2
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"74
+						]td
+						[td 
+							"LD (HL), H
+						]td
+					]tr
+					[tr 
+						[td 
+							"F9
+						]td
+						[td 
+							"LD, SP, HL
+						]td
+						[td 
+							"68
+						]td
+						[td 
+							"LD L, B
+						]td
+						[td 
+							"93
+						]td
+						[td 
+							"SUB E
+						]td
+					]tr
+					[tr 
+						[td 
+							"54
+						]td
+						[td 
+							"LD D, H
+						]td
+						[td 
+							"65
+						]td
+						[td 
+							"LD H, L
+						]td
+						[td 
+							"15
+						]td
+						[td 
+							"DEC D
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"3B
+						]td
+						[td 
+							"DEC SP
+						]td
+						[td 
+							"88
+						]td
+						[td 
+							"ADC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"86
+						]td
+						[td 
+							"ADD (HL)
+						]td
+						[td 
+							"F9
+						]td
+						[td 
+							"LD, SP, HL
+						]td
+						[td 
+							"1B
+						]td
+						[td 
+							"DEC DE
+						]td
+					]tr
+					[tr 
+						[td 
+							"FD
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"10
+						]td
+						[td 
+							"STOP _ _
+						]td
+						[td 
+							"B9
+						]td
+						[td 
+							"CP C
+						]td
+					]tr
+					[tr 
+						[td 
+							"51
+						]td
+						[td 
+							"LD D, C
+						]td
+						[td 
+							"AB
+						]td
+						[td 
+							"XOR E
+						]td
+						[td 
+							"27
+						]td
+						[td 
+							"DAA
+						]td
+					]tr
+					[tr 
+						[td 
+							"D2
+						]td
+						[td 
+							"JP NC, _ _ 98
+						]td
+						[td 
+							"98
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"54
+						]td
+						[td 
+							"LD D, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"B7
+						]td
+						[td 
+							"OR A
+						]td
+						[td 
+							"4D
+						]td
+						[td 
+							"LD C, L
+						]td
+						[td 
+							"4A
+						]td
+						[td 
+							"LD C, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"F0
+						]td
+						[td 
+							"LD A, (FF00 + B1)
+						]td
+						[td 
+							"B1
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"2C
+						]td
+						[td 
+							"INC L
+						]td
+					]tr
+					[tr 
+						[td 
+							"D3
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"38
+						]td
+						[td 
+							"JR C, _ _
+						]td
+						[td 
+							"02
+						]td
+						[td 
+							"LD (BC) A
+						]td
+					]tr
+					[tr 
+						[td 
+							"12
+						]td
+						[td 
+							"LD (DE), A 
+						]td
+						[td 
+							"A5
+						]td
+						[td 
+							"AND L
+						]td
+						[td 
+							"7C
+						]td
+						[td 
+							"LD A, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"BF
+						]td
+						[td 
+							"CP A
+						]td
+						[td 
+							"90
+						]td
+						[td 
+							"SUB B
+						]td
+						[td 
+							"C4
+						]td
+						[td 
+							"CALL NZ, _ _ _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"F5
+						]td
+						[td 
+							"PUSH AF
+						]td
+						[td 
+							"AF
+						]td
+						[td 
+							"XOR A
+						]td
+						[td 
+							"A7
+						]td
+						[td 
+							"AND A
+						]td
+					]tr
+					[tr 
+						[td 
+							"6E
+						]td
+						[td 
+							"LD L, (HL)
+						]td
+						[td 
+							"DD
+						]td
+						[td 
+							"INVALID
+						]td
+						[td 
+							"88
+						]td
+						[td 
+							"ADC B
+						]td
+					]tr
+					[tr 
+						[td 
+							"67
+						]td
+						[td 
+							"LD H, A
+						]td
+						[td 
+							"BF
+						]td
+						[td 
+							"CP A
+						]td
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+					]tr
+					[tr 
+						[td 
+							"3D
+						]td
+						[td 
+							"DEC A
+						]td
+						[td 
+							"DA
+						]td
+						[td 
+							"JP N, _ _ _ _
+						]td
+						[td 
+							"5B
+						]td
+						[td 
+							"LD E, E
+						]td
+					]tr
+					[tr 
+						[td 
+							"98
+						]td
+						[td 
+							"SBC B
+						]td
+						[td 
+							"2E
+						]td
+						[td 
+							"LD L, _ _
+						]td
+						[td 
+							"AB
+						]td
+						[td 
+							"XOR E
+						]td
+					]tr
+					[tr 
+						[td 
+							"DF
+						]td
+						[td 
+							"RST 18
+						]td
+						[td 
+							"C2
+						]td
+						[td 
+							"JP NZ, _ _ _ _
+						]td
+						[td 
+							"39
+						]td
+						[td 
+							"ADD HL, SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"58
+						]td
+						[td 
+							"LD E, B
+						]td
+						[td 
+							"22
+						]td
+						[td 
+							"LDI (HL), A
+						]td
+						[td 
+							"A1
+						]td
+						[td 
+							"AND C
+						]td
+					]tr
+					[tr 
+						[td 
+							"13
+						]td
+						[td 
+							"INC DE
+						]td
+						[td 
+							"70
+						]td
+						[td 
+							"LD (HL), B
+						]td
+						[td 
+							"93
+						]td
+						[td 
+							"SUB E
+						]td
+					]tr
+					[tr 
+						[td 
+							"A6
+						]td
+						[td 
+							"AND (HL)
+						]td
+						[td 
+							"CB
+						]td
+						[td 
+							"RLC B
+						]td
+						[td 
+							"84
+						]td
+						[td 
+							"ADD H
+						]td
+					]tr
+					[tr 
+						[td 
+							"EA
+						]td
+						[td 
+							"LD (_ _ 0C), A
+						]td
+						[td 
+							"0C
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"BA
+						]td
+						[td 
+							"CP D
+						]td
+					]tr
+					[tr 
+						[td 
+							"32
+						]td
+						[td 
+							"LDD (HL), A
+						]td
+						[td 
+							"D2
+						]td
+						[td 
+							"JP NC, _ _ _ _
+						]td
+						[td 
+							"B2
+						]td
+						[td 
+							"OR D
+						]td
+					]tr
+					[tr 
+						[td 
+							"30
+						]td
+						[td 
+							"JR NC, 28
+						]td
+						[td 
+							"28
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"48
+						]td
+						[td 
+							"LD C, B
+						]td
+					]tr
+					[tr 
+						[td 
+							"8B
+						]td
+						[td 
+							"ADC E
+						]td
+						[td 
+							"19
+						]td
+						[td 
+							"ADD HL,DE
+						]td
+						[td 
+							"91
+						]td
+						[td 
+							"SUB C
+						]td
+					]tr
+					[tr 
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+						[td 
+							"07
+						]td
+						[td 
+							"RLCA
+						]td
+					]tr
+					[tr 
+						[td 
+							"53
+						]td
+						[td 
+							"LD D, E
+						]td
+						[td 
+							"17
+						]td
+						[td 
+							"RLA
+						]td
+						[td 
+							"1C
+						]td
+						[td 
+							"INC E
+						]td
+					]tr
+					[tr 
+						[td 
+							"7F
+						]td
+						[td 
+							"LD A, A
+						]td
+						[td 
+							"AC
+						]td
+						[td 
+							"XOR H
+						]td
+						[td 
+							"28
+						]td
+						[td 
+							"JR Z, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"14
+						]td
+						[td 
+							"INC D
+						]td
+						[td 
+							"61
+						]td
+						[td 
+							"LD H, C
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"20
+						]td
+						[td 
+							"JR NZ, 98
+						]td
+						[td 
+							"98
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"97
+						]td
+						[td 
+							"SUB A
+						]td
+					]tr
+					[tr 
+						[td 
+							"D6
+						]td
+						[td 
+							"SUB A, 4A
+						]td
+						[td 
+							"4A
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"C0
+						]td
+						[td 
+							"RET NZ
+						]td
+					]tr
+					[tr 
+						[td 
+							"A8
+						]td
+						[td 
+							"XOR B
+						]td
+						[td 
+							"88
+						]td
+						[td 
+							"ADC B
+						]td
+						[td 
+							"93
+						]td
+						[td 
+							"SUB E
+						]td
+					]tr
+					[tr 
+						[td 
+							"50
+						]td
+						[td 
+							"LD D, B
+						]td
+						[td 
+							"A2
+						]td
+						[td 
+							"AND D
+						]td
+						[td 
+							"74
+						]td
+						[td 
+							"LD (HL), H
+						]td
+					]tr
+					[tr 
+						[td 
+							"53
+						]td
+						[td 
+							"LD D, E
+						]td
+						[td 
+							"C9
+						]td
+						[td 
+							"RET
+						]td
+						[td 
+							"BC
+						]td
+						[td 
+							"CP H
+						]td
+					]tr
+					[tr 
+						[td 
+							"80
+						]td
+						[td 
+							"ADD B
+						]td
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"22
+						]td
+						[td 
+							"LDI (HL), A
+						]td
+					]tr
+					[tr 
+						[td 
+							"FF
+						]td
+						[td 
+							"RST 38
+						]td
+						[td 
+							"B7
+						]td
+						[td 
+							"OR A
+						]td
+						[td 
+							"84
+						]td
+						[td 
+							"ADD H
+						]td
+					]tr
+					[tr 
+						[td 
+							"70
+						]td
+						[td 
+							"LD (HL), B
+						]td
+						[td 
+							"FE
+						]td
+						[td 
+							"CP A, _ _
+						]td
+						[td 
+							"0E
+						]td
+						[td 
+							"LD C, _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"F3
+						]td
+						[td 
+							"DI
+						]td
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"85
+						]td
+						[td 
+							"ADD L
+						]td
+					]tr
+					[tr 
+						[td 
+							"C7
+						]td
+						[td 
+							"RST 00
+						]td
+						[td 
+							"B6
+						]td
+						[td 
+							"OR (HL)
+						]td
+						[td 
+							"C4
+						]td
+						[td 
+							"CALL NZ, _ _ _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"BE
+						]td
+						[td 
+							"CP (HL)
+						]td
+						[td 
+							"D9
+						]td
+						[td 
+							"RETI
+						]td
+						[td 
+							"87
+						]td
+						[td 
+							"ADD A
+						]td
+					]tr
+					[tr 
+						[td 
+							"0B
+						]td
+						[td 
+							"DEC BC
+						]td
+						[td 
+							"04
+						]td
+						[td 
+							"INC B
+						]td
+						[td 
+							"B3
+						]td
+						[td 
+							"OR E
+						]td
+					]tr
+					[tr 
+						[td 
+							"DC
+						]td
+						[td 
+							"CALL C, _ _ F2
+						]td
+						[td 
+							"F2
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"5E
+						]td
+						[td 
+							"LD E, (HL)
+						]td
+					]tr
+					[tr 
+						[td 
+							"3C
+						]td
+						[td 
+							"INC A
+						]td
+						[td 
+							"0D
+						]td
+						[td 
+							"DEC C
+						]td
+						[td 
+							"94
+						]td
+						[td 
+							"SUB H
+						]td
+					]tr
+					[tr 
+						[td 
+							"64
+						]td
+						[td 
+							"LD H, H
+						]td
+						[td 
+							"8D
+						]td
+						[td 
+							"ADC L
+						]td
+						[td 
+							"01
+						]td
+						[td 
+							"LD BC,  _ _ _ _
+						]td
+					]tr
+					[tr 
+						[td 
+							"40
+						]td
+						[td 
+							"LD B, B
+						]td
+						[td 
+							"44
+						]td
+						[td 
+							"LD B, H
+						]td
+						[td 
+							"08
+						]td
+						[td 
+							"LD (_ _ _ _), SP
+						]td
+					]tr
+					[tr 
+						[td 
+							"6A
+						]td
+						[td 
+							"LD L, D
+						]td
+						[td 
+							"1E
+						]td
+						[td 
+							"LD E, _ _
+						]td
+						[td 
+							"BB
+						]td
+						[td 
+							"CP E
+						]td
+					]tr
+					[tr 
+						[td 
+							"BB
+						]td
+						[td 
+							"CP E
+						]td
+						[td 
+							"0A
+						]td
+						[td 
+							"LD A, (BC)
+						]td
+						[td 
+							"49
+						]td
+						[td 
+							"LD C, C
+						]td
+					]tr
+					[tr 
+						[td 
+							"A6
+						]td
+						[td 
+							"AND (HL)
+						]td
+						[td 
+							"C8
+						]td
+						[td 
+							"RET Z
+						]td
+						[td 
+							"00
+						]td
+						[td 
+							"NOP
+						]td
+					]tr
+					[tr 
+						[td 
+							"6B
+						]td
+						[td 
+							"LD L, E
+						]td
+						[td 
+							"4D
+						]td
+						[td 
+							"LD C, L
+						]td
+						[td 
+							"61
+						]td
+						[td 
+							"LD H, C
+						]td
+					]tr
+					[tr 
+						[td 
+							"7A
+						]td
+						[td 
+							"LD A, D
+						]td
+						[td 
+							"0A
+						]td
+						[td 
+							"LD A, (BC)
+						]td
+						[td 
+							"45
+						]td
+						[td 
+							"LD B, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"C1
+						]td
+						[td 
+							"POP BC
+						]td
+						[td 
+							"8F
+						]td
+						[td 
+							"ADC A
+						]td
+						[td 
+							"5C
+						]td
+						[td 
+							"LD E, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"13
+						]td
+						[td 
+							"INC DE
+						]td
+						[td 
+							"9B
+						]td
+						[td 
+							"SBC E
+						]td
+						[td 
+							"4C
+						]td
+						[td 
+							"LD C, H
+						]td
+					]tr
+					[tr 
+						[td 
+							"CE
+						]td
+						[td 
+							"ADC A, 50
+						]td
+						[td 
+							"50
+						]td
+						[td 
+							" 
+						]td
+						[td 
+							"C5
+						]td
+						[td 
+							"PUSH BC
+						]td
+					]tr
+					[tr 
+						[td 
+							"75
+						]td
+						[td 
+							"LD (HL), L
+						]td
+						[td 
+							"E1
+						]td
+						[td 
+							"POP HL
+						]td
+						[td 
+							"7D
+						]td
+						[td 
+							"LD A, L
+						]td
+					]tr
+					[tr 
+						[td 
+							"89
+						]td
+						[td 
+							"ADC C
+						]td
+						[td 
+							"E5
+						]td
+						[td 
+							"PUSH HL
+						]td
+						[td 
+							"A2
+						]td
+						[td 
+							"AND D
+						]td
+					]tr
+				]tbody
+			]table
+		]div
+		[div class=tab-pane fade id=tabs-14256-1 
+		]div
+	]div
+]div
+[h4 id=Ending 
+	" Ending
+	$LF
+]h4
+[div class=p 
+	"There are multiple ways to trigger the credits:
+	$LF
+	"1. Change game state to 48
+	$LF
+	"2. Warp to final area, then beat the boss
+	$LF
+	"3. Trigger the ending scene.
+	$LF
+	"4. Trigger the event right before the credits play
+	$LF
+]div
+[div class=p 
+	"Method 1 only triggers the credits, but has no effect on the game whatsoever; the final boss flag at C5A1 does not get set, nor does the post game content flags. I do not think this counts as beating the game.
+	$LF
+]div
+[div class=p 
+	"For method 2, this is the way the first 3 runs submitted uses method 2. Run 1 warps to the final area by taking advantage of the fact the map for the indoor areas and the antenna trees are all connected to each other. This means it's possible to run to the final antenna tree from the mountain one.
+	$LF
+]div
+[div class=p 
+	"The 2nd and 3rd TAS jumps to VRAM, then due to an emulator bug regarding the STOP opcode (10 10), it doesn't crash, and instead coincidentally changes the map id to the final, upper left quadrant of the map, which is the final antenna tree's location.
+	$LF
+]div
+[div class=p 
+	"This sets the final boss flag, along with post credits content, but is the slowest.
+	$LF
+]div
+[div class=p 
+	"Method 3 sets the final boss flag. This can be done by setting the following values:
+	$LF
+	"CD00 = 01
+	$LF
+	"CD02 = 0B
+	$LF
+	"CD03 = 01
+	$LF
+	"CD06 = 6A
+	$LF
+	"This sets up the script for the scene right before you get teleported to the beginning area. There's still a final scene afterwards however, so while it's faster than method 2, it's not ideal.
+	$LF
+]div
+[div class=p 
+	"This submission uses method 4. This can be done by setting the following values:
+	$LF
+	"CD00 = 01
+	$LF
+	"CD02 = 1A
+	$LF
+	"CD03 = 01
+	$LF
+	"CD06 = 6F
+	$LF
+	"This sets up the script for the very end part of the final dialogue, right before the post credits content flags are set. While this does not trigger the final boss flag, it does update the game into thinking you beat it. The reason why this even works is because the game does the following:
+	$LF
+	"1. Dialogue with boss -> Method 2
+	$LF
+	"2. Fight boss
+	$LF
+	"3. Dialogue with boss
+	$LF
+	"4. Update final boss flag -> Method 3
+	$LF
+	"5. Ending scene
+	$LF
+	"6. Update post credits content flags -> Method 4
+	$LF
+]div
+[h4 id=Payload 
+	" Payload
+	$LF
+]h4
+[div class=p 
+	"There's multiple ways to handle this. 
+	$LF
+]div
+[div class=p 
+	"I initially wanted to just call the function that sets the game state to 48. That function is located at ROM bank 0F however. So I tried to somehow swap to bank 0F to call the credits, then somehow jump back. This was basically method 1 however, so CasualPokePlayer suggested to skip manpulating all those values to get :
+	$LF
+]div
+[div class=p 
+	"ld bc,1d18
+	$LF
+	"add hl,bc ; hl = e3e1
+	$LF
+	"ld (hl),$30
+	$LF
+	"jp somewhereitdontcrash?
+	$LF
+]div
+[div class=p 
+	"After looking at the telefang translation github however, I found out the game's script function was partially documented:
+	$LF
+	[a href=https://github.com/telefang/telefang/blob/master/components/eventscript/interpreter.asm rel=noopener external nofollow 
+		"https://github.com/telefang/telefang/blob/master/components/eventscript/interpreter.asm
+	]a
+	$LF
+	"In this case:
+	$LF
+	"CD00 - trigger event
+	$LF
+	"CD02 - Event ID
+	$LF
+	"CD03 - something about jp pointer
+	$LF
+	"CD06 - Event's sequence (how far you're in to event)
+	$LF
+]div
+[div class=p 
+	"I initially had no idea how would I set multiple values up with the limited amount of addresses, until I found out recruited Telefang names are all stored side by side in CartRAM at 5200. To get to this to appear at System Bus however, I neded a way to swap SWRAM banks. Luckily, CasualPokePlayer found out there's a function located at 3D6A that does that:
+	$LF
+	[a href=https://github.com/telefang/telefang/blob/3ec7bf14bf4b6686cbd2067f7e3e204724dd3648/components/saveclock/sram_lock.asm#L3-L11 rel=noopener external nofollow 
+		"https://github.com/telefang/telefang/blob/3ec7bf14bf4b6686cbd2067f7e3e204724dd3648/components/saveclock/sram_lock.asm#L3-L11
+	]a
+	$LF
+]div
+[div class=p 
+	"This meant that rather that finding some combination of values to manpulate to somehow swap SWRAM banks, I could just call 3D6A. My name is long enough to do this:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Opcode
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"Function
+			]th
+		]tr
+		[tr 
+			[td 
+				"CD 6A 3D
+			]td
+			[td 
+				"ーゃか
+			]td
+			[td 
+				"Call 3D6A
+			]td
+		]tr
+		[tr 
+			[td 
+				"21 03 59
+			]td
+			[td 
+				"ムウも
+			]td
+			[td 
+				"LD HL, 5903
+			]td
+		]tr
+		[tr 
+			[td 
+				"29
+			]td
+			[td 
+				"ル
+			]td
+			[td 
+				"ADD HL, HL
+			]td
+		]tr
+		[tr 
+			[td 
+				"E0 E0
+			]td
+			[td 
+				"null
+			]td
+			[td 
+				"LD (FF00 + E0), A
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"To jump to HL, I initially wanted to use the frame counter at C938 to E9 (JP HL), but it turns out C937 is always 01, which makes C938 unuseable due to the opcode being 2 bytes. Instead, I used C948 (Follower X pos on phone use) to get to E9 for the jump. The 03 offset for 5903 is because the 1st Denjuu's name last character (E0) is a 2 byte opcode, so it would mess up the payload.
+	$LF
+]div
+[div class=p 
+	"Now that I could jump to the names, CasualPokePlayer suggested the following payload:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Opcode
+			]th
+			[th 
+				"Name
+			]th
+			[th 
+				"Function
+			]th
+		]tr
+		[tr 
+			[td 
+				"DENJUU
+			]td
+			[td 
+				"ONE
+			]td
+			[td 
+				"ム  ユュア
+			]td
+		]tr
+		[tr 
+			[td 
+				"21 00 00
+			]td
+			[td 
+				"ム  
+			]td
+			[td 
+				"LD HL,0000
+			]td
+		]tr
+		[tr 
+			[td 
+				"25
+			]td
+			[td 
+				"ユ
+			]td
+			[td 
+				"DEC HL ; HL = ffff
+			]td
+		]tr
+		[tr 
+			[td 
+				"36 01
+			]td
+			[td 
+				"ュア
+			]td
+			[td 
+				"LD [HL],$01 ; only enable vblank interrupts
+			]td
+		]tr
+		[tr 
+			[td 
+				"DENJUU
+			]td
+			[td 
+				"TWO
+			]td
+			[td 
+				"ンちルヤア5
+			]td
+		]tr
+		[tr 
+			[td 
+				"2E 48
+			]td
+			[td 
+				"ンち
+			]td
+			[td 
+				"LD l,$48 ; workaround no $90
+			]td
+		]tr
+		[tr 
+			[td 
+				"29
+			]td
+			[td 
+				"ル
+			]td
+			[td 
+				"add HL,HL
+			]td
+		]tr
+		[tr 
+			[td 
+				"24
+			]td
+			[td 
+				"ヤ
+			]td
+			[td 
+				"INC H ; HL = FF90
+			]td
+		]tr
+		[tr 
+			[td 
+				"01 C0
+			]td
+			[td 
+				"ア5
+			]td
+			[td 
+				"LD BC
+			]td
+		]tr
+		[tr 
+			[td 
+				"DENJUU
+			]td
+			[td 
+				"THREE
+			]td
+			[td 
+				"キコェあネェ
+			]td
+		]tr
+		[tr 
+			[td 
+				"07
+			]td
+			[td 
+				"キ
+			]td
+			[td 
+				"LD BC,$07C0
+			]td
+		]tr
+		[tr 
+			[td 
+				"0A
+			]td
+			[td 
+				"コ
+			]td
+			[td 
+				"LD A,[BC ; A = FC
+			]td
+		]tr
+		[tr 
+			[td 
+				"32
+			]td
+			[td 
+				"ェ
+			]td
+			[td 
+				"LDD (HL), A
+			]td
+		]tr
+		[tr 
+			[td 
+				"3E 18
+			]td
+			[td 
+				"あネ
+			]td
+			[td 
+				"LD A,$18
+			]td
+		]tr
+		[tr 
+			[td 
+				"32
+			]td
+			[td 
+				"ェ
+			]td
+			[td 
+				"LDD (HL), A
+			]td
+		]tr
+		[tr 
+			[td 
+				"DENJUU
+			]td
+			[td 
+				"FOUR
+			]td
+			[td 
+				"アけモコェ8
+			]td
+		]tr
+		[tr 
+			[td 
+				"01 40 23
+			]td
+			[td 
+				"アけモ
+			]td
+			[td 
+				"	LD BC,$2340
+			]td
+		]tr
+		[tr 
+			[td 
+				"0A
+			]td
+			[td 
+				"コ
+			]td
+			[th 
+				"LD A,[BC] ; load A with 76
+			]th
+		]tr
+		[tr 
+			[td 
+				"32
+			]td
+			[td 
+				"ェ
+			]td
+			[td 
+				"LDD (HL), A
+			]td
+		]tr
+		[tr 
+			[td 
+				"C3
+			]td
+			[td 
+				"8
+			]td
+			[td 
+				"JP
+			]td
+		]tr
+		[tr 
+			[td 
+				"DENJUU
+			]td
+			[td 
+				"FIVE
+			]td
+			[td 
+				"け ア
+			]td
+		]tr
+		[tr 
+			[td 
+				"40 00
+			]td
+			[td 
+				"け 
+			]td
+			[td 
+				"JP to HL
+			]td
+		]tr
+		[tr 
+			[td 
+				"01
+			]td
+			[td 
+				"ア
+			]td
+			[td 
+				"To get the 00 above
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"This didn't seem to work out however, so instead the payload was:
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=PutTheNameOfTheFirstStageHere 
+	" <Put the name of the first stage here>
+	$LF
+]h4
+[div class=p 
+	"<Explain the first stage here>
+	$LF
+]div
+[h4 id=PutTheNameOfTheSecondStageHere 
+	" <Put the name of the second stage here>
+	$LF
+]h4
+[div class=p 
+	"<Explain the second stage here>
+	$LF
+]div
+[div class=p 
+	"<And so on>
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"<Explain here things the audience would probably like to see>
+	$LF
+	"<Explain also things that could be improved in your movie>   
+	$LF
+	"<You may also suggest screenshots.>
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": wait i think this one's legit. anyway here's my number, so call me maybe (hands you a slip of paper with 69 written on it in crayon)
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Aw, here it goes.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Fixed code embed (by replacing with monospaced, since code embeds don't have linbreaks in the forum view).
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Adding GEG branch due to ACE usage.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": The ending thing hasn't quite been explained in the submission text yet I don't think, so I'll summarize it here: This run triggers the 
+	[em 
+		"very
+	]em
+	" end of the ending, just before the credits. This plays the credits, of course, but more importantly it sets the game completion state by unlocking postgame content. Triggering the credits directly would not have done this, and triggering anything before this would have lost time. I've verified that the postgame state was triggered in this run by locating and accessing a piece of postgame content, meaning that for our purposes, the game is considered complete. Note that other event flags are NOT triggered, most notably the flag for the final boss's defeat. Flags like these are not necessary for GEG runs: Since a majority of the game is skipped anyway, so are a majority of normally required event flags. As long as these flags do not adversely affect the ending by not being triggered, then triggering them is unnecessary. In this case, since the final boss flag does not directly trigger the postgame content, it is fine that it is skipped.
+	$LF
+]div
+[div class=p 
+	"That leaves the nature of the ACE itself: The currently published "map glitch" run has the same issue that the 
+	(__wikiLink|displaytext=Wario Land GEG|href=/2749M)
+	" has. To simplify the explanation: VBA bad. To expound on the simplifying of the explanation: The previous Telefang runs and that Wario Land GEG run were only possible because VBA did not crash where an actual (or properly emulated) GBA 
+	[em 
+		"would
+	]em
+	" crash. This run avoids that through different methodology while also being a couple minutes faster to boot. Given that the run was performed on BizHawk, I am 
+	[em 
+		"far
+	]em
+	" more confident that this is legit given the incredible dedication of the GB/C emulation community to accuracy for console verification purposes.
+	$LF
+]div
+[div class=p 
+	"I'm accepting this to obsolete the 
+	(__wikiLink|displaytext=map glitch|href=/2225M)
+	" run, as it serves the same purpose with actual legitimacy this time. Thanks, VBA!
+	$LF
+]div
+[div class=p 
+	"EDIT: Since this judgement, the TAS has been 
+	(__wikiLink|displaytext=console verified|href=/Forum/Posts/504715)
+	", so... I guess it's double accepted now. Hooray!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing. 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	" is handling the encodes for this one.
+]div

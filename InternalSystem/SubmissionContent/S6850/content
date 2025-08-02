@@ -1,0 +1,231 @@
+11
+[div class=p 
+	"This is a 10251 frame, or 2:51.63, improvement over the current movie. 
+	$LF
+]div
+[h3 id=Goal 
+	" Goal 
+	$LF
+]h3
+[ul 
+	[li 
+		"Aims for good ending
+		$LF
+	]li
+	[li 
+		"Abuses programming errors
+		$LF
+	]li
+	[li 
+		"Uses warps
+		$LF
+	]li
+	[li 
+		"Manipulates luck
+		$LF
+	]li
+]ul
+[div class=p 
+	[a href=https://www.nicovideo.jp/watch/sm37400049 rel=noopener external nofollow 
+		"Niconico
+	]a
+	$LF
+]div
+[div class=p 
+	[a href=https://www.bilibili.com/video/BV18C4y1t7Th rel=noopener external nofollow 
+		"Bilibili
+	]a
+	$LF
+]div
+[h3 id=Glitches 
+	" Glitches
+	$LF
+]h3
+[dl 
+	[dt 
+		"Talos Skip
+	]dt
+	[dd 
+		"Do a low jump, jump attack, and then get hit by Talos, Juste could dive into the floor and then wrong warp happens, skipping the whole section of being chased by Talos. There are several possible destinations of this wrong warp. Whether the glitch happens and the destination of wrong warp depend on sub-X and sub-Y. The side effect of the skip is that the camera stop moving. Objects, including candles, doors, and enemies, outside the camera do not get loaded. 
+		$LF
+	]dd
+]dl
+[dl 
+	[dt 
+		"In-event State
+	]dt
+	[dd 
+		"When an event is triggered, Juste get invincible and cannot freely move, and the game does not load other rooms even if Juste move outside the current room, except the case that the name of the region is showed on the screen. If a room is loaded while in event, taking advantage of region name display, the in-event flag would be still set, but Juste could do some move now. In such a state, the game will not load other rooms when being outside the current room, which make memory corruption possible, and you...
+		$LF
+	]dd
+]dl
+[ul 
+	[li 
+		"can slide and use the sub weapon of fist, but both these two will immediately suspend; 
+		$LF
+	]li
+	[li 
+		"cannot double jump, high jump, or float by using floating boots; 
+		$LF
+	]li
+	[li 
+		"can dive kick. 
+		$LF
+	]li
+]ul
+[dl 
+	[dt 
+		"Memory Corruption
+	]dt
+	[dd 
+		[b 
+			"Do not try this glitch on real cartridge, it will turn your cartridge into garbage if the demo version flag is set. 
+		]b
+		"0200008C-0200030B is a bitfield that records which rooms are visited. According to whether you are in Castle A or Castle B, the coordinate of the room to the map, the coordinate of Juste to the room, the game continually set the corresponding bit's value to 1. By moving extremely far outside the current room, which require in-event state, memory corruption happens if the corresponding bit is outside the bitfield interval. 
+		$LF
+	]dd
+]dl
+[h3 id=DetailsOfMinimapRamArea 
+	" Details of minimap RAM area
+	$LF
+]h3
+[div class=p 
+	"Please read this section after watching the embedded encode, it gives a good visualization to the RAM map. 
+	$LF
+]div
+[div class=p 
+	"The minimap is separated into left half and right half. Each chunk records a 32*40*2 (=2560 blocks/ bits) rectangle region, a double word is used for the whole horizontal line of Castle A in that rectangle region, the next double word is for the same line in Castle B, lines are records from top to bottom. 0200008C-020001CB is for left half and 020001CC-0200030B is for right half. RAM outside the minimap RAM area is also divided into chunks of same size. We can move to prior chunk by crossing the top and left border of the current chunk, and move to next chunk by crossing the bottom and right border. 
+	$LF
+]div
+[div class=p 
+	"Double words with address's last digit 4 or C can only be corrupted from Castle A, and those with address's last digit 0 or 8 can only be corrupted from Castle B. Luckily those flags need to be set in this run is in Castle A. 
+	$LF
+]div
+[h3 id=RouteComments 
+	" Route comments
+	$LF
+]h3
+[div class=p 
+	"We delay 21 frames at the dialog with Maxim, for manipulating luck. The rain animation calls up the RNG routine around 80 times per frame, much more frequent than other routines. We need two big heart drops and massive critical hits to reduce one round of multiple hit in Pike Master fight, and suitable RNG is very rare. 
+	$LF
+]div
+[div class=p 
+	"After skipping Talos, we pick axe. Axe is necessary for the whip launch which warp to Castle B, and it speeds up the Pike Master fight. 
+	$LF
+]div
+[div class=p 
+	"In the memory corruption section, we inevitably corrupt save room ID. Bit 0 of 0200030C, where save room ID is stored, is for whether the room is in Castle A or B, bits 1-7 are for X position of the room, bits 8-13 are for Y position of the room, bits 14-15 are unused. A illegal save room ID will cause the game freeze when loading the state. In the encode we only list one block (the game over trigger) not to visit, in fact there are lots of blocks need to avoid, those are mainly pointers. Corrupting those pointers can cause soft lock/freeze or reset. 0200043D's value is 0 in normal state and 1 underwater, we set this value to 3 so that the Y speed reduces to 1/8 of normal state, just low enough to set Maxim, Dracula, and Dracula Wraith fights' ending flags in a row. 
+	$LF
+]div
+[div class=p 
+	"After good ending's flag and the three bosses' flags are set, save and reset the game and head to final boss room. (Normally Maxim's Ring is required for good ending.) Since all three boss fights' flags are set, no boss fight happens there, and the movie ends after dialog. 
+	$LF
+]div
+[h3 id=LuaScripts 
+	" Lua Scripts
+	$LF
+]h3
+[h4 id=MapViewer 
+	" Map Viewer
+	$LF
+]h4
+[div class=p 
+	[a href=https://drive.google.com/file/d/1sTynqxAoef3Fjd8mXYyeESTSSXTKVGX_/view?usp=sharing rel=noopener external nofollow 
+		"https://drive.google.com/file/d/1sTynqxAoef3Fjd8mXYyeESTSSXTKVGX_/view?usp=sharing
+	]a
+	[br 
+	]br
+	$LF
+	"You need Lua-GD to run this script. Lua-GD can be download 
+	[a href=http://luaforge.net/projects/lua-gd/ rel=noopener external nofollow 
+		"here
+	]a
+	". Decompress it and you get some .dll files, place them at the same directory of VBA-rr.exe. 
+	$LF
+]div
+[h4 id=MemoryCorruptionVisualizer 
+	" Memory Corruption Visualizer
+	$LF
+]h4
+[div class=p 
+	(__wikiLink|href=/Userfiles/Info/65650966036547896|implicitdisplaytext=userfiles/info/65650966036547896)
+	[br 
+	]br
+	$LF
+	"Address display is very awkward because there is no enough room for that. 
+	$LF
+]div
+[h3 id=HistoryRuns 
+	" History Runs
+	$LF
+]h3
+[div class=p 
+	"There are two finished runs that we did not submit here. 
+	$LF
+]div
+[h4 id=AnyIn53038ByHellagelsKlmz 
+	" Any% in 5:30.38 by hellagels & klmz:
+	$LF
+]h4
+[div class=p 
+	[a href=https://www.nicovideo.jp/watch/sm33617227 rel=noopener external nofollow 
+		"Niconico
+	]a
+	[br 
+	]br
+	$LF
+	[a href=https://www.bilibili.com/video/BV1ws411N7Ts rel=noopener external nofollow 
+		"Bilibili
+	]a
+	$LF
+]div
+[div class=p 
+	"We did not know how to skip Talos until a week after this run is upload to Niconico and Bilibili. We did some multiple hits without sub weapon. Still worth watching. 
+	$LF
+]div
+[h4 id=AnyIn50016ByHellagelsKlmz 
+	" Any% in 5:00.16 by hellagels & klmz:
+	$LF
+]h4
+[div class=p 
+	[a href=https://www.nicovideo.jp/watch/sm35099504 rel=noopener external nofollow 
+		"Niconico
+	]a
+	[br 
+	]br
+	$LF
+	[a href=https://www.bilibili.com/video/BV1w4411Y7Uk rel=noopener external nofollow 
+		"Bilibili
+	]a
+	$LF
+]div
+[div class=p 
+	"Pretty much the same as this submission, the only difference is that we did not manipulated luck by taking advantage of the rain animation.  
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/GoddessMaria 
+		"GoddessMaria
+	]a
+	": Castlevania... Judgement? Nah, just judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/GoddessMaria 
+		"GoddessMaria
+	]a
+	": Quite an unexpected find, hellagels and klmz! This new improvement made the previous run, which was already impressive, even more impressive. The audience response, for the most part, was also positive to this. Good work, you two!
+	$LF
+]div
+[div class=p 
+	"Accepting as an improvement to the previous movie.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Pub.
+]div

@@ -1,0 +1,803 @@
+1
+[div class=p 
+	"(back to 
+	[a href=https://tasvideos.org/GameResources/SNES/MegamanX/RNG rel=noopener external nofollow 
+		"https://tasvideos.org/GameResources/SNES/MegamanX/RNG
+	]a
+	" ) 
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#VileMech 
+					" Vile Mech
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#VileWithoutMech 
+					" Vile (without mech)
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Bospider 
+					" Bospider
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#RangdaBangda 
+					" Rangda Bangda
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#DRex 
+					" D-Rex
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Velguader 
+					" Velguader
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Sigma 
+					" Sigma
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#WolfSigma 
+					" Wolf Sigma
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h4 id=VileMech 
+	" Vile Mech
+	$LF
+]h4
+[div class=p 
+	"Vile Mech has the following actions (note they do 
+	[em 
+		"not
+	]em
+	" correspond to address 0xE6A):
+	$LF
+]div
+[pre 
+	"0 (walk) - walk towards player
+	$LF
+	"1 (dash) - dash towards player
+	$LF
+	"2 (chargeUp) - charge up mech then dash along the ground with repeated punches (only when player has high HP)
+	$LF
+	"3 (stop) - stop and punch (only when player has high HP)
+	$LF
+	"4 (no-stop) - don't stop and punch through the player (only when player has high HP)
+	$LF
+	"5 (jump) - jump up or back, then shoot an energy ball (only when player has low HP)
+	$LF
+]pre
+[div class=p 
+	"Note: "Low HP" means 3 or less in intro stage, and 6 or less in Sigma 1 stage.
+	$LF
+]div
+[div class=p 
+	"The RNG determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) When far away, whether to do action 0 (walk), 1 (dash), or 2/5 (chargeUp/jump)
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When Vile Mech is far away (such as beginning of battle), an RNG value is called to determine whether or not to do action 0/1, or do action 2/3:
+	$LF
+]div
+[pre 
+	"0 (mod 2) - Do action 0/1 (walk/dash)
+	$LF
+	"1 (mod 2) - Do action 2/3 (chargeUp/jump)
+	$LF
+	$LF
+]pre
+[div class=p 
+	"If action 2/3 is selected, Vile Mech does action 5 (jump) if player is low on HP, otherwise does action 2 (chargeUp).
+	$LF
+]div
+[div class=p 
+	"If action 0/1 (walk/dash) is selected, another RNG value is called on the same frame to determine which action to do:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[dl 
+	[dt 
+		"2) When near, whether to do action 0 (walk) or 1 (dash)
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When Vile Mech is near (within 127px), an RNG value is called to determine whether or not to do action 0 (walk) or action 1 (dash):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Note: If Vile Mech is walking towards the player from far away, this RNG call is applied once Vile Mech is within 127px of the player.
+	$LF
+]div
+[dl 
+	[dt 
+		"3) When right in front of the player, whether to do action 3 (stop), action 4 (no-stop) or action 5 (jump)
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When Vile Mech is right in front of the player, an RNG value is called to determine whether to do action 3 (stop) or action 4 (no-stop). However, if the player is low on HP, Vile Mech will always do action 5 (jump), even though RNG is called anyway.
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[dl 
+	[dt 
+		"4) Action 5 (jump) - Whether to jump straight up, or jump back
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after action 5 is determined by RNG call, another RNG value is called to determine whether Vile Mech jumps straight up, or jumps back
+	$LF
+]div
+[pre 
+	"0 (mod 8) - Jump straight up
+	$LF
+	"Otherwise - Jump back
+	$LF
+	$LF
+]pre
+[dl 
+	[dt 
+		"5) Action 5 (jump) - Speed of energy ball that is shot
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"At the end of Vile Mech's jump, the speed of the energy ball is determined by:
+	$LF
+]div
+[pre 
+	"0 (mod 4) - Fast shot
+	$LF
+	"Otherwise - Slow shot
+	$LF
+]pre
+[div class=p 
+	"The RNG call for the next action is on the frame after this one.
+	$LF
+]div
+[hr 
+]hr
+[h4 id=VileWithoutMech 
+	" Vile (without mech)
+	$LF
+]h4
+[div class=p 
+	"Vile's next action only depends on RNG value called (and no other factors) as follows:
+	$LF
+]div
+[pre 
+	"0 (mod 8): Jump and shoot
+	$LF
+	"1 (mod 8): Jump without shooting
+	$LF
+	"2 to 4 (mod 8): Dash at player
+	$LF
+	"5 to 7 (mod 8): Shoot energy balls
+	$LF
+]pre
+[div class=p 
+	"Exception: If the player is trapped by an energy ball, Vile will always jump and shoot, with no RNG call involved.
+	$LF
+]div
+[hr 
+]hr
+[h4 id=Bospider 
+	" Bospider
+	$LF
+]h4
+[div class=p 
+	"There are three main Bospider actions determined by RNG:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Which wire Bospider appears on at the top of the screen (except at the very beginning where it appears on the far right wire)
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"The wire is determined by RNG value mod 4:
+	$LF
+]div
+[pre 
+	"0 (mod 4): Appear on far right wire 
+	$LF
+	"1 (mod 4): Appear on middle right wire
+	$LF
+	"2 (mod 4): Appear on middle left wire
+	$LF
+	"3 (mod 4): Appear on far left wire
+	$LF
+]pre
+[dl 
+	[dt 
+		"2) Whether Bospider throws spiders while at the top of the screen and then switches wire
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Determined by RNG value mod 4:
+	$LF
+]div
+[pre 
+	"0 (mod 4): Throw spiders
+	$LF
+	"Otherwise: Don't throw spiders
+	$LF
+]pre
+[div class=p 
+	"(Note: Bospider throwing spiders while partway down the wires isn't determined by RNG, but by your relative vertical position. Staying below Bospider will prevent this action.)
+	$LF
+]div
+[dl 
+	[dt 
+		"3) The wires that appear
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Determined by 8 RNG values (the game cycles 9 values, but the last value is not actually used). Wires are determined from bottom to top as follows:
+	$LF
+]div
+[div class=p 
+	"1st RNG value mod 4 determines the position of the bottom wire:
+	$LF
+]div
+[pre 
+	"0 or 3 (mod 4): Left 
+	$LF
+	"1 (mod 4): Middle
+	$LF
+	"2 (mod 4): Right
+	$LF
+]pre
+[div class=p 
+	"2nd-8th RNG values mod 2 determine the position of the next wire relative to the previous, in one of two directions (wires cannot repeat the previous position):
+	$LF
+]div
+[pre 
+	"0 (mod 2): Left->Middle->Right->Left
+	$LF
+	"1 (mod 2): Left->Right->Middle->Left
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=RangdaBangda 
+	" Rangda Bangda
+	$LF
+]h4
+[div class=p 
+	"There are three main parts to Rangda Bangda - the left eye (10HP), the right eye (10HP), and the nose (12HP).
+	$LF
+]div
+[div class=p 
+	"In general, whenever an eye attacks, there are four possible actions for each eye (however, if one is destroyed, the remaining eye will only do red eye actions):
+	$LF
+]div
+[pre 
+	"2 (green) - attack with green eye (shoot a single shot)
+	$LF
+	"4 (blue) - attack with blue eye (fly out towards player's position)
+	$LF
+	"6 (R-fly) - attack with red eye, flying out and shooting two shots in one of three particular formations
+	$LF
+	"8 (R-wave) - attack with red eye, firing anywhere from one to four waves of triple shots
+	$LF
+]pre
+[div class=p 
+	"The action is determined by the attacking eye as well as RNG value mod 32, based on a table at 0x86d507:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) The number of eye attacks to perform before switching to the nose (closing the walls)
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"This determination occurs both at the beginning of battle, and after the walls reopen after a nose attack. This is determined by RNG value mod 16 based on a table at address 0x86d4f7 (RMX-J):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The next eye action is determined one frame after this determination.
+	$LF
+]div
+[dl 
+	[dt 
+		"2) The particular eye that attacks, when both eyes are intact
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"If both eyes are intact, then right after the RNG value for the eye action is called, a 2nd RNG value on the same frame determines which of the two eyes attacks:
+	$LF
+]div
+[pre 
+	"0 (mod 2): Attack with left eye
+	$LF
+	"1 (mod 2): Attack with right eye
+	$LF
+]pre
+[dl 
+	[dt 
+		"3) Action 8 (R-wave) - The number of waves of triple shots
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"Regardless of which eye action is determined, another RNG value is called on the same frame, determining the number of waves to attack in action 8 (R-wave):
+	$LF
+]div
+[pre 
+	"# of waves = (RNG mod 4) + 1
+	$LF
+]pre
+[div class=p 
+	"This RNG value is called even if the eye action is not 8.
+	$LF
+]div
+[dl 
+	[dt 
+		"4) Action 6 (R-fly) - Formation
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"If the action is 6 (R-fly), there is an additional RNG call later (right before the eye flies out of the wall) determining its formation (note: left-hand side and right-hand side are from the point of view of the eye moving toward the player)
+	$LF
+]div
+[pre 
+	"M - eye flies along a line towards the player, two shots on each side
+	$LF
+	"L - eye flies along a line veering toward the left-hand side, two shots to its right-hand side
+	$LF
+	"R - eye flies along a line veering toward the right-hand side, two shots to its left-hand side
+	$LF
+]pre
+[div class=p 
+	"The formation is determined based on a table at 0x86d53e:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[dl 
+	[dt 
+		"5) Nose action
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"There are two directions for nose movement, either start going up and to the left, or start going up and to the right. This is determined by RNG value mod 2:
+	$LF
+]div
+[pre 
+	"0 (mod 2): Up and to the right
+	$LF
+	"1 (mod 2): Up and to the left
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=DRex 
+	" D-Rex
+	$LF
+]h4
+[div class=p 
+	"D-Rex has the following actions with respect to its head part:
+	$LF
+]div
+[pre 
+	"8 (horizontal) - head horizontal movement
+	$LF
+	"A (diagonal) - head diagonal movement
+	$LF
+	"C (charge up) - group together with bottom part and charge up energy ball
+	$LF
+]pre
+[div class=p 
+	"D-Rex can be in one of two states: either not charging up energy ball (this is the default at the beginning of battle), or charging up energy ball.
+	$LF
+]div
+[div class=p 
+	"When D-Rex is not charging an energy ball, the next action is determined by RNG value mod 16, as well as how many actions have taken place during this state without charging (based on table at 0x86d5b6):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Note: If 5 actions have been done without charging, D-Rex's next action will always be C (charge up)
+	$LF
+]div
+[div class=p 
+	"When D-Rex is charging its energy ball, whether it continues after the first attack, or repeats its energy ball attack, is determed by RNG value mod 16, as well as how many attacks have taken place during this state (based on table at 0x86d616):
+	$LF
+]div
+[div class=p 
+	"Note: 0 = stop energy ball attack, 1 = continue energy ball attack
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"Note: If 3 attacks have been done without stopping, D-Rex will always stop the energy ball attack.
+	$LF
+]div
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Bottom part speed
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"When D-Rex is not charging up an energy ball, the bottom part will move back and forth. Each time it moves, its base speed at the slowest level is determined by RNG:
+	$LF
+]div
+[pre 
+	"0 to 3 (mod 16): 512 (faster)
+	$LF
+	"4 to 15 (mod 16): 320 (slower)
+	$LF
+]pre
+[div class=p 
+	"The actual speed is influenced by how much HP D-Rex has remaining, with lower HP resulting in higher actual speeds.
+	$LF
+]div
+[hr 
+]hr
+[h4 id=Velguader 
+	" Velguader
+	$LF
+]h4
+[div class=p 
+	"Velguader has the following actions:
+	$LF
+]div
+[pre 
+	"0 (wall) - jump up the wall (Velguader starts with this)
+	$LF
+	"2 (shots) - shoot energy shots
+	$LF
+	"4 (flame) - shoot flames in an arcing pattern
+	$LF
+	"6 (walk) - walk along ground
+	$LF
+	"8 (short) - short jump
+	$LF
+]pre
+[div class=p 
+	"Velguader has an unusual distance-based determination (in both horizontal and vertical) for its next action. The distance-based factors involved in determination are:
+	$LF
+]div
+[pre 
+	"(diff in x-coordinate between player and Velguader) Near (0-127px), Far (>=128px)
+	$LF
+	"(diff in y-coordinate between player and Velguader) Low (0-127px), High (>=128px)
+	$LF
+]pre
+[div class=p 
+	"The next action is based on the following table, which summarizes the branching code in the relevant subroutine:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The RNG is also used to determine:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Action 4 (flame) - How many arcs of flame
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"One frame after action 4 (flame) is determined, another RNG-value is called to determine whether Velguader breathes 1 or 2 arcs of flame:
+	$LF
+]div
+[pre 
+	"0 or 1 (mod 8): 2 arcs of flame
+	$LF
+	"Otherwise: 1 arc of flame
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=Sigma 
+	" Sigma
+	$LF
+]h4
+[div class=p 
+	"Sigma has the following actions:
+	$LF
+]div
+[pre 
+	"0 (charge) - charge along ground (Sigma starts with this)
+	$LF
+	"2 (wall) - jump up the wall
+	$LF
+	"4 (shots) - shoot energy shots
+	$LF
+	"8 (guard) - take a guarding position after an attack
+	$LF
+	"E (stand) - stand after an attack without guarding
+	$LF
+]pre
+[div class=p 
+	"Sigma has an unusual determination when determining whether to attack with action 0 (charge), 2 (wall) or 4 (shots). First, if the player is within 0-63px of the left edge of the screen (this only applies to the left edge and not the right), Sigma will always do action 2 (wall) and no RNG is called. Otherwise, distance-based factors involved:
+	$LF
+]div
+[pre 
+	"(diff in x-coordinate between player and Sigma) Near (0-79px), Far (>=80px)
+	$LF
+	"(distance of player from top of screen) Low (>=168px), High (<168px)
+	$LF
+]pre
+[div class=p 
+	"Then the next action is based on the following table, based on address 0x86d7ac:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The RNG also determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) Whether to do action 8 (guard) or action E (stand) after an attack
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"After an attack, RNG value mod 16 is used to determine the next non-attacking action:
+	$LF
+]div
+[pre 
+	"0 to 5 (mod 16): Action E (stand)
+	$LF
+	"6 to 15 (mod 16): Action 8 (guard)
+	$LF
+]pre
+[hr 
+]hr
+[h4 id=WolfSigma 
+	" Wolf Sigma
+	$LF
+]h4
+[div class=p 
+	"There are three parts to Wolf Sigma - the head, and the two platforms that look like "hands"
+	$LF
+]div
+[div class=p 
+	"Wolf Sigma has three main actions. However, the hands can independently attack with electric blasts as described in bullet point "4)" below. Wolf Sigma's three main actions are:
+	$LF
+]div
+[pre 
+	"2 (hand) - attack by moving a hand towards the player (and end with a mandatory electric blast)
+	$LF
+	"4 (shots) - sweep the ground with several energy shots
+	$LF
+	"6 (flame) - sweep the ground with a continuous blast of flame
+	$LF
+]pre
+[div class=p 
+	"The RNG determines:
+	$LF
+]div
+[dl 
+	[dt 
+		"1) The delay between main actions
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"The delay timer is stored in address 0xE9B. It counts how many frames until the game selects a main action for Wolf Sigma to perform. At the start of battle, the delay timer is set to 16. However, after a main action is finished, the delay timer is set based on RNG mod 64 as follows:
+	$LF
+]div
+[pre 
+	"Delay timer value = (RNG mod 64) + 16
+	$LF
+]pre
+[div class=p 
+	"Note: When doing action 2 (hand), the delay timer is not set until the electric blast (which is part of the attack) is finished.
+	$LF
+]div
+[dl 
+	[dt 
+		"2) Whether Wolf Sigma attacks with action 2 (hand), and which hand to move
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"The game determines whether Wolf Sigma's main action is action 2 (hand) or not, based on RNG as follows:
+	$LF
+]div
+[pre 
+	"0 (mod 2): Do action 4 (shots) or 6 (flame) instead
+	$LF
+	"1 (mod 2): Do action 2 (hand)
+	$LF
+]pre
+[div class=p 
+	"If action 2 is selected, the game calls another RNG value on the same frame to determine the hand that moves towards the player:
+	$LF
+]div
+[pre 
+	"0 (mod 2): Attack with the hand on the right (i.e. on the right half of the screen)
+	$LF
+	"1 (mod 2): Attack with the hand on the left
+	$LF
+]pre
+[div class=p 
+	"Note: If the selected hand is in the middle of an independent electric blast, the game waits for that action to finish before moving that hand.
+	$LF
+]div
+[dl 
+	[dt 
+		"3) Whether Wolf Sigma attacks with action 4 (shots) or 6 (flame), and in which direction
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"If action 2 is not selected from the previous step, the game calls a second RNG value on the same frame to determine the direction which Wolf Sigma sweeps the ground with the attack (based on RNG value mod 128):
+	$LF
+]div
+[pre 
+	"0 to 63 (mod 128): Action 4 (shots) from right to left, or action 6 (flame) from left to right
+	$LF
+	"64 to 127 (mod 128): Action 4 (shots) from left to right, or action 6 (flame) from right to left
+	$LF
+]pre
+[div class=p 
+	"Then the game calls a third RNG value on the same frame to choose between the actions, using RNG value mod 256:
+	$LF
+]div
+[pre 
+	"0 to 127 (mod 256): Do action 4 (shots)
+	$LF
+	"128 to 255 (mod 256): Do action 6 (flame)
+	$LF
+]pre
+[dl 
+	[dt 
+		"4) Whether the hands attack with independently determined electric blasts
+	]dt
+	[dd 
+		$LF
+	]dd
+]dl
+[div class=p 
+	"For each frame that the hand(s) are not in the middle of an attack, the RNG value is called to determine whether the hand(s) releases an electric blast, as follows (based on RNG value mod 256):
+	$LF
+]div
+[pre 
+	"Either 58 
+	[em 
+		"or
+	]em
+	" 127 (mod 256): Use electric blast attack on this frame
+	$LF
+	"Otherwise: Don't use electric blast attack on this frame
+	$LF
+]pre
+[div class=p 
+	"If both hands are not in the middle of an attack, the RNG is called twice per frame (once for each hand). The first RNG call is for the hand on the right, the second RNG call for the hand on the left. Any of these RNG calls will always occur after all other RNG calls in that frame (such as those to determine Wolf Sigma's main action).
+]div

@@ -1,0 +1,208 @@
+9
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: lsnes rr2-beta23
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Final boss skip glitch
+		$LF
+	]li
+	[li 
+		" Executes arbitrary "code"
+		$LF
+	]li
+]ul
+[h3 id=LevelUpGlitch 
+	" Level-up glitch
+	$LF
+]h3
+[div class=p 
+	"In a recent video 
+	[a href=https://www.youtube.com/watch?v=TXJuc3myAz8 rel=noopener external nofollow 
+		"recent video
+	]a
+	" the japanese speedrunner わいなぎ (@Ynagi_akz) performs a glitch allowing to access the debug room of Seiken Densetsu 3. This glitch is triggered first leveling up and delaying the lvl-up screen by going forth and back between two rooms. Thereafter, calling Flamie allows to access a corrupted tile on the World Map leading to the debug room. This glitch was reported by わいなぎ on a 2014 video inside the Japanese community, but this video (and its author) do not seem to be available anymore. This alone saves about 1 hour in the speedrun, but we wanted to analyze this glitch to save even more time and ultimately reach the endgame without calling Flamie.
+	$LF
+]div
+[h4 id=ScriptEngine 
+	" Script engine
+	$LF
+]h4
+[div class=p 
+	"The game uses a script engine, with script code being able to be executed by 16 different threads. A description of this engine can be found on 
+	[a href=https://datacrystal.romhacking.net/wiki/Seiken_Densetsu_3:Notes rel=noopener external nofollow 
+		"Data Crystal website
+	]a
+	". Each thread has its own context and memory area, which includes a local stack to store values and addresses, and call stack to store return addresses when sub-routines are executed. Both stacks share the same memory region of 0x100 bytes. The local stack starts at the beginning of this region and grows upward while the call stack starts at the end of this region and grows downward.
+	$LF
+]div
+[h4 id=WhatHappens 
+	" What happens
+	$LF
+]h4
+[div class=p 
+	"There is very few information on this game's disassembly, so we only could gather partial information on what is going on. When transitioning with a buffered level-up window, the game executes a sub-routine that it doesn't normally. This subroutine is very short, but it has a major flaw: it pushes more data into the local stack than it pulls. So after a transition, the local stack grows by two bytes. After a certain number of transitions, the local stack will intersect with the call stack, and buggy behaviors will start to occur. However, it is extremely difficult to predict what will happen.
+	$LF
+]div
+[h4 id=Setup 
+	" The setup
+	$LF
+]h4
+[div class=p 
+	"From then, we tried different actions together with different number of screen transitions until we could have a useful behavior. Precisely, we wanted to alter the script pointer so we could execute arbitrary script code. The setup we ended up with was 82 screen transitions and selecting an item in the menu. This has the effect of polling the 24-bit value in $7F1002 as the new script pointer. $7F1002 is among temporary data, but often holds the value $200200 which is inside RAM ($0200). As a consequence, we start executing script code from RAM.
+	$LF
+]div
+[div class=p 
+	"This address is interesting, because there are a few values that we can control in this region. Here is a layout of this memory area:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/RMTBr0G.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"The area we are interested in is $340-$360 where we can control two bytes using the camera location and one byte by just pressing A at the right time (the fast counter increments by one unit each frame). Our goal is to jump to the controller registers located starting $004218. There are several jump opcodes in the scripting engine. The one we will use is 
+	[code 
+		"FC
+	]code
+	" which pulls a short address from the local stack and jumps to it. So we need to push the wanted address into the stack. We use the opcode 
+	[code 
+		"14
+	]code
+	" which pushes the following short into the local stack. We can push 0x4200 into the local stack which is just before the controller registers.
+	$LF
+]div
+[div class=p 
+	"The problem is that our setup sends us to address $200, and they are plenty of fixed values in between that would reroute the execution before getting to $340.
+	$LF
+]div
+[div class=p 
+	"The first problem is that there are two unused bytes at $20A and $20B. Default config of lsnes sets all RAM values at startup to 0x55, but it would alter the execution because 
+	[code 
+		"55
+	]code
+	" is a branch opcode. We chose here the default seeded RAM state which works fine (as a side note, Bizhawk's default state works fine too). We consider that the constraints on the values of these two bytes are low enough that it does not violate tasvideos rule about relying on initial ram state. About 7/8 of the opcodes are safe, including the particular values 0x00 and 0xFF.
+	$LF
+]div
+[div class=p 
+	"After a series of safe opcodes, we arrive to the opcode 
+	[code 
+		"50
+	]code
+	" in address $24E, which is a branch instruction. 
+	[code 
+		"50 xx
+	]code
+	" branches to current address + (signed) xx. We manipulate this byte so that we branch to $33B. At first look, we cannot independently set both the slow and fast counters to desirable values. However, the slow counter always restarts to 0x40 at the beginning of the room while the fast counter keeps running, so we leave and enter the room after the level-up screen again to sync the both counters to the way we want.
+	$LF
+]div
+[div class=p 
+	"After jumping to $33B, we chose the right camera and counter values as described above to jump to $4200, and after reading several safe openbus values, we arrive at the controller registers at $4218.
+	$LF
+]div
+[h4 id=EndingCode 
+	" The ending code
+	$LF
+]h4
+[div class=p 
+	"The credit sequence is started by executing function $FDA8B0. The problem is that the game's script engine does not allow us to execute arbitrary functions, only ones located in specific regions of the $Cx banks. However, we discovered that the game regularly executes a piece of code in RAM! Namely, it does this:
+	$LF
+]div
+[pre 
+	"...
+	$LF
+	"$C1/07AE 22 81 03 7F      JSL $7F0381
+	$LF
+	"$7F/0381 5C 1B 74 FD      JMP $FD741B
+	$LF
+	"$FD/741B AD 6E 03         LDA $036E
+	$LF
+	"...
+	$LF
+]pre
+[div class=p 
+	"Luckily, the function that we want to execute also lies in $FD bank, so we only have to modify two bytes $7F/0382 and $7F/0383. The script engine allows us to write arbitrary values to arbitrary addresses. The opcode we are interested in is 
+	[code 
+		"e0
+	]code
+	" which pulls a 16-bit value and a 16-bit address from the local stack, and write the value into the address (the bank for writing is set to $7F). So the script code that we are executing is the following, which is luckily 8 bytes long:
+	$LF
+]div
+[pre 
+	"14 82 03   push 0x0382 into local stack
+	$LF
+	"14 08 80   push 0x8008 into local stack
+	$LF
+	"e0         pulls aaaa then bbbb from local stack, write aaaa into $7Fbbbb
+	$LF
+	"0e         end script
+	$LF
+]pre
+[div class=p 
+	"After that, the game eventually executes the code at $7F/0381 which starts the credits.
+	$LF
+]div
+[h3 id=Route 
+	" Route
+	$LF
+]h3
+[div class=p 
+	"The chosen character was Kevin. Even if his scenario is not the fastest getting access to fights, he is better to farm exp points as encounters are by sets of two or three and gather quickly around him. We make fights to get 30 xp. We need to use the big room on the left because we need a room where the camera can move -another reason to choose Kevin. Our setup requires an item, this is why we manipulate a chest.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Masterjun 
+		"Masterjun
+	]a
+	": Judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Masterjun 
+		"Masterjun
+	]a
+	": Replaced the file with a movie that uses seed 0, which is the default one of BizHawk.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Masterjun 
+		"Masterjun
+	]a
+	": This run uses an lsnes setting of changing the initial memory from the default one. This is 
+	[em 
+		"generally
+	]em
+	" not allowed in our 
+	(__wikiLink|displaytext=Movie Rules|href=/MovieRules)
+	". However, for compatibility reasons we make an exception if the new initial memory state is the same as the default one of a different accepted emulator. This is the case here.
+	$LF
+]div
+[div class=p 
+	"The movie finishes the game and the viewer feedback was good. Accepted to Moons as a new branch.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Note for whoever publishes, 97 avi files. Have fun.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Dacicus 
+		"Dacicus
+	]a
+	": I'll try.
+]div

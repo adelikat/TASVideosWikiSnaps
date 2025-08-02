@@ -1,0 +1,737 @@
+4
+[h2 id=RevisitingThisProject 
+	"Revisiting this Project
+	$LF
+]h2
+[div class=p 
+	"Shortly after publishing my 2017 TAS, a shortcut in the Toy Stage was discovered where you can go through a fake wall. Since that discovery, redoing this TAS has been on my todo list. I attempted it a couple of years ago and got up to Tiny Cavern, but lost motivation. However, now I got through it and found a few more optimisations along the way.
+	$LF
+]div
+[div class=p 
+	"This TAS is a 3480 frame (58.07 second) Improvement over my published 2017 TAS. However, it will appear only as a 2859 frame (47.71 second) improvement as newer versions of Bizhawk include the 621 frame SMS BIOS screen.
+	$LF
+]div
+[div class=p 
+	"By revisiting this, I realized how much I have learnt about TASing since 2017. I used more strategies involving watching RAM values precisely rather than going by feel. When I did the 2017 TAS, I did have various RAM watches, but didn’t have a good understanding of subpixels or lua scripting. Probably the most embarrassing part is that I didn’t realise jumping loses you one subpixel per frame rather than walking. So this TAS minimises jumping as much as possible. This would only save a couple of frames per level but is something I definitely should have noticed back then if I had a better understanding of subpixels.
+	$LF
+]div
+[div class=p 
+	"The original TAS had 2 versions. My original submission, then the resync to match the newer version of Bizhawk before it was published. The resync lost a few frames here and there due to RNG, but it is the version I will be comparing all improvements to, as it is the published version. 
+	$LF
+]div
+[div class=p 
+	"While the biggest improvement came from the Toy Factory shortcut, I saved time in every level. The below table shows a summary of the timesaves compared to my old TAS, sometimes adjusted for end of level time countdown saves/losses.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Level
+			]th
+			[th 
+				"Frames Saved
+			]th
+		]tr
+		[tr 
+			[td 
+				"1. Forest
+			]td
+			[td 
+				"3
+			]td
+		]tr
+		[tr 
+			[td 
+				"2. Lake
+			]td
+			[td 
+				"20
+			]td
+		]tr
+		[tr 
+			[td 
+				"3. Blacksmith’s Castle
+			]td
+			[td 
+				"166
+			]td
+		]tr
+		[tr 
+			[td 
+				"Map to Lake 2
+			]td
+			[td 
+				"60
+			]td
+		]tr
+		[tr 
+			[td 
+				"4. Lake 2
+			]td
+			[td 
+				"8
+			]td
+		]tr
+		[tr 
+			[td 
+				"5. Castle Ruins
+			]td
+			[td 
+				"225
+			]td
+		]tr
+		[tr 
+			[td 
+				"6. Tiny Cavern
+			]td
+			[td 
+				"58
+			]td
+		]tr
+		[tr 
+			[td 
+				"7. Flower Field
+			]td
+			[td 
+				"23
+			]td
+		]tr
+		[tr 
+			[td 
+				"8. Toy Workshop
+			]td
+			[td 
+				"2581
+			]td
+		]tr
+		[tr 
+			[td 
+				"Map to Palace
+			]td
+			[td 
+				"50
+			]td
+		]tr
+		[tr 
+			[td 
+				"9. Palace Ruins
+			]td
+			[td 
+				"26
+			]td
+		]tr
+		[tr 
+			[td 
+				"Map to Craggy
+			]td
+			[td 
+				"30
+			]td
+		]tr
+		[tr 
+			[td 
+				"10. Craggy Cliff
+			]td
+			[td 
+				"2
+			]td
+		]tr
+		[tr 
+			[td 
+				"11. Desert
+			]td
+			[td 
+				"53
+			]td
+		]tr
+		[tr 
+			[td 
+				"12. Good Princess's Castle
+			]td
+			[td 
+				"0
+			]td
+		]tr
+		[tr 
+			[td 
+				"Map to sandcastle
+			]td
+			[td 
+				"95
+			]td
+		]tr
+		[tr 
+			[td 
+				"13. Sand Castle
+			]td
+			[td 
+				"42
+			]td
+		]tr
+		[tr 
+			[td 
+				"14. Island
+			]td
+			[td 
+				"7
+			]td
+		]tr
+		[tr 
+			[td 
+				"15. Phantom's Castle
+			]td
+			[td 
+				"4
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	"Luckily this game is somewhat sync friendly in very small level segments. I mainly used this to copy over the playaround from my old TAS but decided to re-optimise most gameplay segments.
+	$LF
+]div
+[h2 id=TricksAndTechniques 
+	"Tricks and Techniques
+	$LF
+]h2
+[h4 id=CornerBoosting 
+	" Corner Boosting
+	$LF
+]h4
+[div class=p 
+	"If you jump into a corner of a roof (shaped like _| if running right) the wall tries to eject you a little bit. In this process you are pushed further to the direction you’re going and also a bit further up. Naturally I try to do this as often as possible to get boosted in the direction I'm going. It can also be useful in gaining extra height when required.
+	$LF
+]div
+[div class=p 
+	"This actually causes you to go a little bit off center on the screen, further than you can normally reach. I try to do this in the inside part of Craggy cliff stage, but it’s not very noticeable. Unfortunately there is a limit to how far you can be pushed off center. Once you go further than that the screen scrolls even without you moving. There is a way to push yourself off center theoretically as much as you want to by repeatedly dropping a jar onto yourself and being ejected out, but eventually this limit stops you from going further. This is a shame because if there wasn’t a limit it would be possible to skip toy factory with a horizontal underflow (although the repeated jar dropping would take a long time anyway).	
+	$LF
+]div
+[div class=p 
+	"You can gain a lot of height if you get yourself in a thin vertical column, as you have several consecutive ejections. See the start of level 3 for an example of this.
+	$LF
+]div
+[h4 id=HorizontalUnderflowOverflow 
+	" Horizontal underflow/overflow
+	$LF
+]h4
+[div class=p 
+	"This appears in the boss fight for the sandcastle. Basically when you go off one side of the screen you come out of the other. If you could somehow get to the edge of the screen in scrolling levels you would still come out the other side. This is how a toy factory skip might work if there was no failsafe cap if you get too far off center.
+	$LF
+]div
+[h4 id=TimeBonusCountdowns 
+	" Time bonus countdowns
+	$LF
+]h4
+[div class=p 
+	"These are quite inconvenient because if you save x frames on a level you save <x frames overall because the time bonus takes longer. Luckily there is never a situation where waiting longer to finish the level would save net time.
+	$LF
+]div
+[h4 id=SpeedPreservationFromSlopes 
+	" Speed preservation from slopes
+	$LF
+]h4
+[div class=p 
+	"While the engine for Castle of Illusion works differently to Land of Illusion this glitch is present in both with slightly different inputs. I learnt how to do this glitch by adapting the Castle of Illusion glitch.
+	$LF
+	"If you slide down a slope your speed reaches higher than the normal speed. When you leave the slope and touch the ground, if you are holding left or right you hit the ground speed cap and return to normal speed. If you let go of right you will lose speed at some slow rate, rather than hitting the speed cap straight away. After a slope, you can travel along the ground without losing any speed by pressing down once every 4 frames (60fps). This keeps the full speed of whatever you had when you hit the ground and causes no deceleration.
+	$LF
+]div
+[div class=p 
+	"Theoretically, if you had a slope then flat ground you could continue moving at slope speed indefinitely. But unfortunately jumping causes you to lose some speed and falling off a ledge does similarly. This means that after a slope I try to do as few jumps as possible. The start of the desert stage is the best example of this technique in the run.
+	$LF
+]div
+[h4 id=SkinnyDipping 
+	" Skinny dipping
+	$LF
+]h4
+[div class=p 
+	"This is a glitch where if you are little mickey, then transform back while entering water from a ledge (the water has to be the same height as the ledge) then you go invisible and can pass through objects such as chests and jars. This glitch was found by KrazyRasmus.
+	$LF
+]div
+[div class=p 
+	"It is only used in the sandcastle level but it is extremely useful there skipping a whole puzzle. It’s important to note that Mickey is actually invisible during the glitch. Sometimes invisibility can look like an artifact of flashing in 30fps video.
+	$LF
+]div
+[div class=p 
+	"It’s possible to get the invisibility effect by starting as big mickey and transforming into little mickey but unfortunately you don’t get the passing through objects effect this way.
+	$LF
+]div
+[h4 id=KeyNotDespawningGlitch 
+	" Key not despawning glitch
+	$LF
+]h4
+[div class=p 
+	"There’s a glitch where you can open a door with a key, but not have the key despawn. This is just due to very precise positioning, but I’m not sure why it works. See Toy Factory and Phantom’s Castle for this glitch.
+	$LF
+]div
+[h4 id=WallClipping 
+	" Wall Clipping
+	$LF
+]h4
+[div class=p 
+	"There is a way to clip walls which wasn’t useful in the run. I won’t go into it here but I’ve uploaded a Youtube video with lots of information in the description: 
+	[a href=https://www.youtube.com/watch?v=AeDy-0GRV8I rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=AeDy-0GRV8I
+	]a
+	$LF
+]div
+[h4 id=TinyLagReduction 
+	" Tiny Lag reduction
+	$LF
+]h4
+[div class=p 
+	"Little mickey in general is less laggy. During boss fights I sometimes transform to reduce lag. It’s not very useful in normal levels since the transforming time takes so long but it’s good to keep in mind.
+	$LF
+]div
+[h4 id=TinyFallingSpeed 
+	" Tiny falling speed
+	$LF
+]h4
+[div class=p 
+	"Sometimes transforming into little Mickey off a ledge makes you fall a little bit faster. This was useful in Palace ruins. Sometimes it makes no difference like near the end of Phantom’s castle.
+	$LF
+]div
+[h4 id=DoorEnteringOptimally 
+	" Door entering optimally
+	$LF
+]h4
+[div class=p 
+	"To enter a door you have to have 0 velocity then press up. For the first few doors in the game I have to carefully optimize pulling backwards before a door to slow myself down as quickly as possible. Once I get the tiny potion I can use that at the doorway which instantly stops movement, then the nest frame I can press up to enter the door. This is a lot quicker than manually slowing down.
+	$LF
+]div
+[h4 id=MapScreenGlitchNew 
+	" Map screen Glitch (new)
+	$LF
+]h4
+[div class=p 
+	"When moving between levels, you have a frame where you can press the 2 button to enter the level after you’ve pressed a direction to move to a different one. This causes you to enter the level you were on, but makes the game think you’re in the level you’re moving to. When you finish or leave the level, you will already be at that level you were moving to. This saves time when backtracking to certain levels. For example I have to do level 1 - 2 - 3 - 2 at the start of the game since you revisit level 2 after level 3. When entering level 3, I press back to walk Mickey to level 2, but hit the enter level button just after the direction. This puts me in level 3, but when I finish level 3 I spawn straight at level 2 on the map, saving about 1 second of the walking animation.
+	$LF
+]div
+[div class=p 
+	"There are some pretty crazy glitch effects that can happen with this glitch, which are explored in this video: 
+	[a href=https://www.youtube.com/watch?v=AuWM0wp8CCQ rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=AuWM0wp8CCQ
+	]a
+	" 
+	$LF
+]div
+[h3 id=StarRouting 
+	"Star Routing
+	$LF
+]h3
+[div class=p 
+	"Each level in this game has a star which will add to the maximum health (unless you already have 5 stars). This category is any%, so they are not necessary although there’s also a 100% category which gets every star.
+	$LF
+	"These stars are usually out of the way, but are still relevant for any%. In the last level I grab the extra star. This is because I use a damage abuse near the end of the autoscroller but I need to use another damage abuse in the next room. Instead of skipping the first damage abuse it’s quicker to just grab the extra star after it. This means that I have one extra star for a third damage abuse later in the level, saving 12 frames.
+	$LF
+]div
+[div class=p 
+	"There’s a star in Tiny Cavern that I was very tempted to get. It takes 57 frames to get and saves time in Palace Ruins, Craggy Cliff and Phantom’s Castle. So basically there are 2 possible routes: star in tiny cavern or star in Phantom’s Castle (note getting none or both is slower and the rest of the stars are out of the way). Getting the star in Phantom’s Castle allows for an extra damage boost over starting the level with 3 stars. I carefully timed both of these routes and they are extremely close. Getting the star in Phantom’s Castle was faster, but if more damage abuses were found, Tiny Cavern star might be faster. However, having 3 stars for more of the run actually causes more lag (for example 11 frames in flower field), this is what caused the no tiny cavern star route to be faster. I timed 4 frames different between the routes, but there is most likely a bigger gap due to the extra lag from the extra star in the HUD with tiny cavern star route.
+	$LF
+]div
+[h2 id=UsefulRamAddresses 
+	"Useful RAM Addresses
+	$LF
+]h2
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Description
+			]th
+			[th 
+				"Address
+			]th
+		]tr
+		[tr 
+			[td 
+				"Health
+			]td
+			[td 
+				"0x0099
+			]td
+		]tr
+		[tr 
+			[td 
+				"Velocity 1
+			]td
+			[td 
+				"0x0211
+			]td
+		]tr
+		[tr 
+			[td 
+				"Velocity 2
+			]td
+			[td 
+				"0x0200
+			]td
+		]tr
+		[tr 
+			[td 
+				"X Position
+			]td
+			[td 
+				"0x0215
+			]td
+		]tr
+		[tr 
+			[td 
+				"Y Position
+			]td
+			[td 
+				"0x020B
+			]td
+		]tr
+		[tr 
+			[td 
+				"Tornados RNG (Level 2)
+			]td
+			[td 
+				"0x04BA
+			]td
+		]tr
+		[tr 
+			[td 
+				"Screen X Position
+			]td
+			[td 
+				"0x020D
+			]td
+		]tr
+		[tr 
+			[td 
+				"Boss Health
+			]td
+			[td 
+				"0x041F
+			]td
+		]tr
+		[tr 
+			[td 
+				"Boss Cycle and RNG
+			]td
+			[td 
+				"0x041A
+			]td
+		]tr
+	]tbody
+]table
+[h2 id=IndividualLevelComments 
+	"Individual level comments
+	$LF
+]h2
+[h3 id=Level1Forest 
+	"Level 1 – Forest
+	$LF
+]h3
+[div class=p 
+	"Most of this level is on a cycle with the tornado. I almost squeezed underneath and got past, but it didn’t work out. This means that level 1 didn’t save much time at all over my old TAS.
+	$LF
+]div
+[div class=p 
+	"There’s a shortcut to skip the tree climbing section if you get high enough on the wall next to the door for section 2. You need to bounce on the snake to do so, so I wait for that. I bounce off the back of the snake rather than the front to avoid waiting as much as possible.
+	$LF
+]div
+[div class=p 
+	"When climbing up onto the next screen, you just need to hit the top of the vine. You don’t actually need to grab it.
+	$LF
+]div
+[div class=p 
+	"I use some slide speed boosting to get down the snake quicker and grab the key.
+	$LF
+]div
+[h3 id=Level2Lake 
+	"Level 2 – Lake
+	$LF
+]h3
+[div class=p 
+	"The first part is on a water cycle which you can’t speed up. So rather than trying to get to the end as fast as possible, I instead reduce as much lag as possible, since lag slows down the water cycle.
+	$LF
+]div
+[div class=p 
+	"I then ground pound through the blocks. Just timing a ground pound isn’t that optimal, but if you manage your y position and velocity you can get Mickey to dunk pretty deep with a ground pound, letting you break the block early.
+	$LF
+]div
+[div class=p 
+	"In the tornado room, the tornados are based on RNG at 0x04BA. I can manipulate this by changing my movements leading into the door. The 2017 TAS gets “200” on this room entering, meaning you have to wait 200 frames for the first tornado to come, but this one gets “198” which is optimal as far as I can tell. After a lot of testing, I replicated several 198s and nothing lower. This saves 2 frames over the old TAS. I am pretty sure I got 198 when I did the TAS originally, but it went up to 200 on the actual publication, since the published version was resynced onto a newer Bizhawk, leading to different RNG.
+	$LF
+]div
+[div class=p 
+	"I also save some time in the tornado room by corner boosting. Something that the last TAS didn’t do.
+	$LF
+]div
+[h3 id=Level3BlacksmithSCastle 
+	"Level 3 – Blacksmith’s castle
+	$LF
+]h3
+[h4 id=MapScreen 
+	" Map Screen
+	$LF
+]h4
+[div class=p 
+	"Before entering this level I had to press right then 2 to do the map glitch. This means that when I finish this level, I’ll already be on the lake stage, which avoids spending the 60 frames walking back to it. I had to redo the level because I found this glitch after, but most of it except for the fireball RNG resynced.
+	$LF
+]div
+[h4 id=FirstScreen 
+	" First Screen
+	$LF
+]h4
+[div class=p 
+	"Early on in the level, I am able to jump up a ladder by clipping into the wall partially. I don’t fully understand this but I did pull it off in the old TAS too. I think because Mickey gets constantly ejected left, right, left, right it keeps giving you upboosts from the wall.
+	$LF
+]div
+[div class=p 
+	"The first big route change / timesave in this TAS is a damage boost through the green chest. This saves time over ground pounding it and waiting for mickey to come back down. This then loses time on the next screen, due to me needing to grab another cake for the lava boost. But the cake grab only loses 2-3 frames, whereas the damage boost saves about 50.
+	$LF
+]div
+[h4 id=SecondScreenRightMovement 
+	" Second screen (right movement)
+	$LF
+]h4
+[div class=p 
+	"As mentioned, I need to grab the cake to boost through the lava. Otherwise I would have to wait for the platform to come back up. When in the lava, I do some corner boosts from underneath, saving a bit of time.
+	$LF
+]div
+[h4 id=ThirdScreenLeftMovement 
+	" Third Screen (left movement)
+	$LF
+]h4
+[div class=p 
+	"This screen is really laggy. I manipulate some of the fireballs to hit the platforms rather than go up in the air, because they can get in my way if I don’t. I spend a lot of time jumping off the top of the screen. This is slower because I’m spending more time airborne, but saves a lot of lag, given that the game doesn’t have to render Mickey up there. It’s almost always worth it to do big jumps to avoid lag frames.
+	$LF
+]div
+[h4 id=DragonFight 
+	" Dragon Fight
+	$LF
+]h4
+[div class=p 
+	"I found a new strategy where you can hit the dragon earlier than intended. This is done by throwing the block to the left from the right and being in a precise position behind its head. This saves time on the second hit by about 70 frames.
+	$LF
+]div
+[div class=p 
+	"My original redo of this fight used all 3 blocks from the right, but then I tried again with grabbing the first block from the left and it saved 20 frames. This is because it leaves blocks free to the right that are closer to the dragon for the 2nd and third hit.
+	$LF
+]div
+[h3 id=Level4CastleRuins 
+	"Level 4 – Castle Ruins
+	$LF
+]h3
+[div class=p 
+	"The autoscroller room is one of the biggest improvements in this TAS. 
+	$LF
+]div
+[div class=p 
+	"In the autoscroller, by lifting the key off the button when the key just about to go off screen, but the button would be off screen, the button stays down. This means that from the first button I can keep the screen constantly scrolling left. If you pick up the key on the last possible frame it turns invisible in your hands and if you throw it, it completely goes away, if you move back to the key’s original location while holding the invisible key, a real key will appear in your hands. Unfortunately this isn’t useful. A video of this glitch can be found here: 
+	[a href=https://www.youtube.com/watch?v=gWp16mQrRNI rel=noopener external nofollow 
+		"https://www.youtube.com/watch?v=gWp16mQrRNI
+	]a
+	" This key glitch resembles srm from the Zelda N64 games and functions in a similar way. If another object loads into the key slot, you will pick up that object. Unfortunately there are no other objects in this room that load into the key slot. By hacking in this state to other levels I’ve been able to pick up usually non-pickupable objects, but nothing overly interesting happened.
+	$LF
+]div
+[div class=p 
+	"The autoscroller had some more optimisation in this revision of the TAS compared to my v1. This is thanks to my better understanding of lag reduction. I reduce a lot of lag by staying off the top of the screen where possible. This reduces lag as the game doesn’t have to render Mickey.
+	$LF
+]div
+[div class=p 
+	"The boss fight is quite complicated. Rather than hitting the boss as quickly as possible, I have to delay the second hit by 2 frames (60 fps). This makes the boss swoop right rather then left for the third hit. If the boss swoops left it’s impossible to hit it without losing time. I found a new strategy for picking up the last key to open the level door. By letting it fall on top of you, then running out from inside the key, you get one frame of the “able to pick up object” state so you can press 1 to pick up the key without wasting time running into it. This saves roughly 6 frames.
+	$LF
+]div
+[h3 id=Level5TinyCavern 
+	"Level 5 – Tiny Cavern
+	$LF
+]h3
+[div class=p 
+	"I start by manipulating the enemy to come into the range where I can hit it. This is as simple as pressing left for one frame. Then throwing the block is the fastest way to get through, even faster than damage abuse. The rest of this room is corner boosting and squeezing through very narrow gaps. In this v2 of the TAS, I found out that you can gain some speed by butt sliding down the slopes in this room. I didn’t realize this previously as you have to turn into big mickey again to get the slide, but even with this transformation time, the extra speed makes it worth it overall. Interestingly, this is the only way to see the full body of the centipede enemies.
+	$LF
+]div
+[div class=p 
+	"There’s an improvement at the start of the second room. Instead of running up to the part where you need small mickey, I turn small as soon as the room loads. This means that I only have to accelerate to full speed once (after transforming) instead of twice (once at the start of the room, then again when transforming). There were 2 possible places to damage abuse here (both from the enemies that come out of the floor. Both were similar in timing and both require big mickey after passing, so you can’t squeeze through as it’s going down as small mickey. Damage abuse where I used it was faster due to there not being room to run up to the enemy as big mickey, but in the spot later where I waited instead of damage abuse, I could keep full speed while running through.
+	$LF
+]div
+[h3 id=Level6FlowerFields 
+	"Level 6 – Flower Fields
+	$LF
+]h3
+[div class=p 
+	"I considered transforming into little mickey for this stage to reduce some lag, but after TASing both ways I found that it wasn’t worth it. There was a strat in this level, where instead of waiting to jump over the 6 flowers I use speed preservation from slopes to jump into the fourth one which spits me to the right (the first 3 spit left). This saves several seconds over waiting for the small flower platforms to spawn. At the end of this level I use the quick key grab from inside the key like in level 4.
+	$LF
+]div
+[h3 id=Level7ToyWorkshop 
+	"Level 7 – Toy Workshop
+	$LF
+]h3
+[div class=p 
+	"Shortly after the previous TAS was published, a developer intended shortcut through this stage was found, saving 43 seconds. This was the biggest improvement in this TAS. I still can't believe I didn't know this for my 2017 TAS, so before making this one I made sure to use scripthawk to find every shortcut and secret in the game: 
+	[a href=https://youtu.be/BYk2TcuyVHM rel=noopener external nofollow 
+		"https://youtu.be/BYk2TcuyVHM
+	]a
+	" 
+	$LF
+]div
+[div class=p 
+	"The boss has some RNG to it with the amount of time that it spins around for without stopping. This is very similar to the tornados in level 2, where it is easy to manipulate. The shortest time that I got it to spin for was 128 frames (30fps). As far as I’m aware this is the shortest possible time as similarly to level 2, I attempted over 1000 times to improve this and got a lot of 128’s in the process.
+	$LF
+]div
+[div class=p 
+	"Before entering Toy Workshop, I turned around to get a map glitch to save backtracking.
+	$LF
+]div
+[h3 id=Level9PalaceRuins 
+	"Level 9 (Palace Ruins)
+	$LF
+]h3
+[div class=p 
+	"By manipulating the second bat to fly lower I can avoid slowing down for it. In the second room there is a lot of RNG with the exploding rocks. For the first one I do some RNG manipulation to have the leftmost block destroyed as soon as possible. The rocks fly out at different heights so the block destroying can differ by up to 20 frames. Then I use small mickey to get through without taking damage, saving some more time. The strategy on the second exploding rock is to bounce on it on the earliest frame where it can destroy both blocks with a single little rock. Then I manipulated this to happen as soon as possible. I considered breaking only one rock and using little mickey to get through but this was slower since I would need to detransform. The strategy with big mickey is to get between the two little exploding rocks. It’s impossible to run straight through so ducking under the last rock at the cost of a frame or 2 is necessary. I also had to make sure not to load the shooting enemy too soon otherwise I couldn’t avoid the projectile. Some very minor time could be saved here if I had an extra star, since I could use little mickey, saving 3-4 frames, then damage abuse from one of the rocks to transform into big mickey before the ladder.
+	$LF
+]div
+[div class=p 
+	"In the upwards section I skip grabbing the jar by using a damage abuse at the end. I would like to transform into little mickey to get past the exploding rock section but unfortunately little mickey can’t reach high enough to do the damage abuse so it would have been slower.
+	$LF
+	"In the room leading to the boss I jump before falling to make sure I hit a high falling speed, rather than building it up as I leave the ground. 
+	$LF
+	"The cycle mentioned above is actually the position of the boss which rolls around on the screen before the boss fight. Usually you pick up the blocks and it chases you into the arena, but with little mickey you can jump past the blocks. It’s actually possible to create a progress block in the game (until the timer runs out). This happens if you wait a few frames later than this TAS to enter the arena and the effect is that the boss simply doesn’t spawn 
+	[a href=https://youtu.be/i-6fARr-1hw rel=noopener external nofollow 
+		"https://youtu.be/i-6fARr-1hw
+	]a
+	$LF
+]div
+[div class=p 
+	"Before entering Palace Ruins, I turned around to get a map glitch to save backtracking.
+	$LF
+]div
+[h3 id=Level10CraggyCliff 
+	"Level 10 (Craggy Cliff)
+	$LF
+]h3
+[div class=p 
+	"I use the block to kill the troublesome bird on the first part of the level which is faster than jumping on it. While it looks like I could sneak past the bird, if I do it hits me while climbing the wall.
+	$LF
+	"The middle part of the level is essentially an autoscroller. I decided to use this time to show off a glitch where Mickey gets pushed to the right of the screen (similar to a SMB glitch). This is the same process as the corner boosting, but to maintain my position right I have to be sure to never press left.
+	$LF
+]div
+[div class=p 
+	"There were 2 potential areas to use a damage abuse. One was in the middle area of the level on the spikes near the exit, and one in the last area which was used in this TAS. The one used in the TAS saves 4 frames over the one used in the middle area. If I had an extra star in this level, I could save 28 frames with an extra damage abuse.
+	$LF
+]div
+[h3 id=Level11Desert 
+	"Level 11 (Desert)
+	$LF
+]h3
+[div class=p 
+	"The start of this level features a lot of slope speed tech. I manage to keep some speed from the last slope all the way to the right side of the pyramid. When I get to the right of the pyramid it looks like I should jump to avoid bonking the ledge while falling. But jumping reduces some speed so after timing both I concluded that not jumping was faster.
+	$LF
+]div
+[div class=p 
+	"The last room before the boss has a developer intended shortcut, saving about 30 seconds. It would have been quite difficult to find since you have to be small mickey and do quite a precise jump into the wall.
+	$LF
+]div
+[h3 id=Level12GoodPrincessSCastle 
+	"Level 12 (Good Princess’s Castle)
+	$LF
+]h3
+[div class=p 
+	"I used the skip found by Mephistus to skip the entire level. While on the spring I use the time to transform back into big mickey (for grabbing the key). It’s possible to transform automatically by being pressed up against the roof but I couldn’t get it in a way that was quicker than doing it manually. I was able to clip in one bounce that was pressed as soon as I detransformed so this should be the quickest way to do the level. You could get through as small mickey but then you just have to transform back into big mickey after anyway, losing time.
+	$LF
+]div
+[h3 id=Level13SandCastle 
+	"Level 13 (Sand Castle)
+	$LF
+]h3
+[div class=p 
+	"Every time you jump in the sinking sand you lose 1 unit of distance (about 2/3 of a frame lost 60fps). As a result I try to minimize jumping in it while still getting as many corner boosts as possible.
+	$LF
+]div
+[div class=p 
+	"By using the same inputs for speed preservation on slopes, I can keep walking speed while travelling up the first sand hill. This saves me from trying to awkwardly space my jumps and is actually a bit faster than jumping up in some cases. The rest of the room is all speed preservation from slopes. I saved a bit of time here over my old TAS by reducing unnecessary jumping in this section.
+	$LF
+]div
+[div class=p 
+	"The second room is the only application of skinny dipping. I use the invisible state to pass through a chest, completely skipping the coloured block puzzle. Usually RTA runners get hit by something to make mickey visible, but there was no reason to in the TAS. I want to stress that the entire section is done while actually invisible since watching encodes at 30fps sometimes makes flashing appear invisible. I thought it was entertaining but it did get annoying after a bit, either way turning visible would have been slower so I chose to stay invisible. At the end of the room I skip the water fountain puzzle by just doing short hops across rather than using the jar.
+	$LF
+]div
+[div class=p 
+	"The boss fight had a lot of RNG and a lot of lag, but landing the hits optimally was quite easy. The amount that the crab moves left and right is RNG (similar to the card boss in Toy Factory). The lowest time is either 18 or 30 frames (in hex, 30fps) depending on which part of the cycle the boss is up to. I use this playaround time to demonstrate wall clipping with the jar. Due to the crab hitting the jar back at you, you can actually get really far into the wall. If you get far enough into the wall a horizontal underflow happens and you come out the side (this also works as an overflow on the right side of the screen). Another thing that can happen is the wall is that you are no longer considered in water and you get air back, I use this to do the whole fight without surfacing. I was glad I could slow off the glitches in the fight, because it was very difficult to throw the jar without causing any extra lag.
+	$LF
+]div
+[h3 id=Level14Island 
+	"Level 14 (Island)
+	$LF
+]h3
+[div class=p 
+	"At the start of the level I throw the bean directly into the hole rather than letting it bounce in. The main strat in this level was avoiding waiting for the wind to grab a vine. 
+	$LF
+]div
+[h3 id=Level15PhantomSCastle 
+	"Level 15 (Phantom’s Castle)
+	$LF
+]h3
+[div class=p 
+	"There are 3 doors to choose from at the start of the castle. All 3 are autoscrollers. I use a damage abuse at the end of the autoscroller, it’s actually quicker to use the damage abuse and get the star than to do the whole thing damageless (note you need at least 1 spare star for a very important damage abuse later).
+	$LF
+]div
+[div class=p 
+	"In the second room I do a damage abuse to get into the door much quicker. Without this I’d have to wait for the ball to come back up.
+	$LF
+	"There’s a “key doesn’t despawn” glitch to avoid some backtracking back in the central room.
+	$LF
+	"Since I got the star in the autoscroller I’m able to do another damage abuse. The first candidate was the last ball (before the evil door room) but this saved almost no time. I was able to save 6 frames by using damage abuse when entering the evil door. This is because I could kill it earlier and use the invincibility frames to enter it without dying from the spikes.
+	$LF
+]div
+[div class=p 
+	"Unlike most other bosses, the phantom fight isn’t based on RNG. Instead, it can be manipulated by standing either side of the phantom, resulting in shorter travel distance for the phantom. The optimal pattern is L,R,R,L,R,R,R. Each of these manipulations can save over a second, the last 2 are only a few frames and probably not worth it RTA.
+	$LF
+	"I experimented with trying to ground pound the phantom instead of throwing a block in the second phase. It is theoretically possible if you could get the height, but there’s no way to. Not even if you bounce off a block.
+	$LF
+]div
+[h2 id=Thanks 
+	"Thanks
+	$LF
+]h2
+[div class=p 
+	"Mephistus: for making a great TAS of this game and finding out lots of tech and strats.
+	$LF
+]div
+[div class=p 
+	"KrazyRasmus, Btrim and Jungon: who personally helped me out with figuring out stuff for the TAS.
+	$LF
+]div
+[div class=p 
+	"Tee-N-Tee: who had a great reference for optimizing Mickey Mouse games with the Castle of Illusion TAS.
+	$LF
+]div
+[div class=p 
+	"The SMS speedrunning community: for finding awesome new strats for this game
+	$LF
+]div
+[div class=p 
+	"Isotarge for making scripthawk with the collision viewer, which helped me make sure I didn’t miss any dev intended shortcuts this time.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Accepting as improvement over the 
+	(__wikiLink|displaytext=current publication|href=/3488M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

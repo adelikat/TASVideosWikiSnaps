@@ -1,0 +1,393 @@
+20
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#CoveredPlatforms 
+					" Covered platforms
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#LoadingRoms 
+					" Loading ROMs
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#MissingFiles 
+							" Missing files
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#RomSetTypes 
+							" ROM set types
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Naming 
+							" Naming
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MultiPackageGames 
+							" Multi-package games
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#RomInfo 
+							" ROM info
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MachineSettings 
+							" Machine settings
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Troubleshooting 
+					" Troubleshooting
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#SystemBusMemoryRegionIsUnsafe 
+							" System Bus memory region is unsafe
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#UnmappedInputs 
+							" Unmapped inputs
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#IssueTracker 
+							" Issue tracker
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MameVideoTutorial 
+							" MAME Video Tutorial
+							$LF
+						]a
+					]li
+				]ul
+			]li
+		]ul
+	]div
+]div
+[h3 id=CoveredPlatforms 
+	" Covered platforms
+	$LF
+]h3
+[div class=p 
+	"The MAME core in BizHawk is currently Arcade-only, however we may add other MAME systems in the future.
+	$LF
+]div
+[h3 id=LoadingRoms 
+	" Loading ROMs
+	$LF
+]h3
+[div class=p 
+	"MAME ROMs don't come as singular game image files, but as 
+	[code 
+		".zip
+	]code
+	" packages, and you 
+	[b 
+		"do not need to unpack them
+	]b
+	". Just run them directly in BizHawk. However, there are some nuances.
+	$LF
+]div
+[h4 id=MissingFiles 
+	" Missing files
+	$LF
+]h4
+[div class=p 
+	"If the ROM set you're trying to run doesn't contain all the necessary files, MAME will throw an exception telling which files are missing, but before that BizHawk will try to load it as a regular archive. Currently there's no way to distinguish MAME ROM archives from user archives if their names clash, so if you want to see which files are missing, you will need to close the 
+	[em 
+		"Choose File From Archive
+	]em
+	" digalog (or to 
+	[em 
+		"Cancel
+	]em
+	" it).
+	$LF
+]div
+[h4 id=RomSetTypes 
+	" ROM set types
+	$LF
+]h4
+[div class=p 
+	"MAME ROM sets are usually organized in 2 different ways: merged and split. Merged sets contain base (parent) game files in the main 
+	[code 
+		".zip
+	]code
+	", and version (clone) game files inside that 
+	[code 
+		".zip
+	]code
+	" in additional folders. Split sets have every game packaged individually, parent or clone, in separate 
+	[code 
+		".zip
+	]code
+	" files.
+	$LF
+]div
+[h4 id=Naming 
+	" Naming
+	$LF
+]h4
+[div class=p 
+	"MAME determines which game you want to run by the game's short name you provide as an argument. Even inside its graphical user interface it will only recognize ROMs that come in individual 
+	[code 
+		".zip
+	]code
+	" (or 
+	[code 
+		".7z
+	]code
+	") files or folders inside it's 
+	[code 
+		"roms
+	]code
+	" directory, and those packages and folders must also be named after their respective games.
+	$LF
+]div
+[div class=p 
+	"As a result, 
+	[b 
+		"we have to inform BizHawk's MAME core which game to run by the name of the 
+		[code 
+			".zip
+		]code
+		" package we're launching
+	]b
+	".
+	$LF
+]div
+[div class=p 
+	"So if you want to run a parent machine, you just launch it as a normal ROM in BizHawk. But for anything more complicated, there are 2 main ways.
+	$LF
+]div
+[h4 id=MultiPackageGames 
+	" Multi-package games
+	$LF
+]h4
+[div class=p 
+	"Some games require more than one 
+	[code 
+		".zip
+	]code
+	" package. For clone machines or games requiring extra files (Neo-Geo BIOS, or games using 
+	[code 
+		".chd
+	]code
+	" disks or layout files), you will need to combine them in some way. There are two main options, pick whichever feels easier for you:
+	$LF
+]div
+[ol 
+	[li 
+		" Rename the package after the clone game you need to run and put all the needed files inside (base game files, BIOS files).
+		$LF
+		[ul 
+			[li 
+				" You can't put other 
+				[code 
+					".zip
+				]code
+				" files inside, you have to unpack them into folders with the same names, or directly into the main 
+				[code 
+					".zip
+				]code
+				".
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Go to 
+		[em 
+			"Tools -> Multi-disk Bundler
+		]em
+		", create a 
+		[code 
+			".xml
+		]code
+		" named after your clone game, and add all the required 
+		[code 
+			".zip
+		]code
+		" packages to the list (
+		[code 
+			".chd
+		]code
+		" files too, if needed), and launch that 
+		[code 
+			".xml
+		]code
+		" file in BizHawk.
+		$LF
+	]li
+]ol
+[div class=p 
+	"If you've managed to run a game, you can check which files are mandatory by clicking the icon in the bottom right corner of the BizHawk window (dump status report).
+	$LF
+]div
+[h4 id=RomInfo 
+	" ROM info
+	$LF
+]h4
+[div class=p 
+	"ROM info is available in the 
+	[em 
+		"Dump Status Report
+	]em
+	" dialog that can be accessed by pressing the icon in the bottom left corner of the BizHawk window.
+	$LF
+]div
+[div class=p 
+	"The icon itself (along with its tooltip) also indicates whether there is something to worry about with your ROM.
+	$LF
+]div
+[ul 
+	[li 
+		" Red exclamation mark is displayed when there are severe problems (original MAME indicates them via the red background in game selection menus):
+		$LF
+		[ul 
+			[li 
+				" If the machine is considered "NOT WORKING" according to MAME
+				$LF
+			]li
+			[li 
+				" If there are any unimplemented features
+				$LF
+			]li
+			[li 
+				" If some of the ROMs in the set is known to be a bad dump (unless a newer set has a good dump, there's nothing a user can do to fix this)
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Orange question mark is displayed  
+		$LF
+		[ul 
+			[li 
+				" When there are imperfectly emulated features (original MAME indicates them via the orange background in game selection menus)
+				$LF
+			]li
+			[li 
+				" If a multidisk bundle was loaded and no issues were found with the ROMs
+				$LF
+			]li
+			[li 
+				" If some of the ROMs doesn't have a known good dump
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Green checkmark is shown if there are no issues.
+		$LF
+	]li
+]ul
+[h4 id=MachineSettings 
+	" Machine settings
+	$LF
+]h4
+[div class=p 
+	"BIOS can be selected in the 
+	[em 
+		"Arcade -> Settings
+	]em
+	" menu, but if BIOS files come as a separate ROM set, you need to use the above method to load them alongside the main game.
+	$LF
+]div
+[div class=p 
+	"DIP switches and other settings are in the same menu.
+	$LF
+]div
+[h3 id=Troubleshooting 
+	" Troubleshooting
+	$LF
+]h3
+[h4 id=SystemBusMemoryRegionIsUnsafe 
+	" System Bus memory region is unsafe
+	$LF
+]h4
+[div class=p 
+	"Using the System Bus memory region for any memory activity (reading or writing, memory searching or watching) can be unsafe and may even cause memory values to change unpredictably while emulation is paused! You have several options to work around this issue:
+	$LF
+]div
+[ul 
+	[li 
+		" Use other regions if they exist (
+		[code 
+			"ram
+		]code
+		" regions are usually safe)
+		$LF
+	]li
+	[li 
+		" Only use addresses you know are safe
+		$LF
+	]li
+	[li 
+		" Don't experiment with System Bus while recording a movie, because it may desync
+		$LF
+	]li
+]ul
+[h4 id=UnmappedInputs 
+	" Unmapped inputs
+	$LF
+]h4
+[div class=p 
+	"If you find a game with buttons not mapped (
+	[code 
+		"!
+	]code
+	" in input display), 
+	(__wikiLink|displaytext=tell us the game|href=/Forum/Topics/21778)
+	".
+	$LF
+]div
+[h4 id=IssueTracker 
+	" Issue tracker
+	$LF
+]h4
+[div class=p 
+	"For crashes and other bugs, please 
+	[a href=https://github.com/TASEmulators/BizHawk/issues rel=noopener external nofollow 
+		"report them on our GitHub
+	]a
+	".
+	$LF
+]div
+[h4 id=MameVideoTutorial 
+	" MAME Video Tutorial
+	$LF
+]h4
+[div class=p 
+	"Here is an article for a video tutorial for running various MAME games with text subtitles alongside additional information : 
+	(__wikiLink|displaytext=MAME Video Tutorial|href=/Bizhawk/MAME/VideoTutorial)
+	".
+]div

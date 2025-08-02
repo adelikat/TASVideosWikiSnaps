@@ -1,0 +1,339 @@
+29
+[div class=p 
+	"Using file names on the title screen, along with a specific glitch, we encode code written in the save files using the Japanese text. The American version of the game does not contain the values to make this glitch possible, so the Japanese version (besides being preferable anyways due to shorter text) must be used.
+	$LF
+]div
+[div class=p 
+	"There is a more detailed explanation below.
+	$LF
+]div
+[div class=p 
+	"Note, there is a counter within the game that counts up in hexadecimal by 1, about every second. This glitch only works on certain values. 
+	[b 
+		"My TAS was optimized without bearing this in mind, meaning the goal was to reach the chest fastest regardless of wait time/available stalling, as I wanted a fast result to the chest rather than utilizing this wait time to be slow.
+	]b
+	" I land on value 6A, and wait until 6D, which is literally the best value to land on, as the previous value 64 is impossible to reach under the current circumstances, let alone any of the prior values.
+	$LF
+]div
+[div class=p 
+	"Addresses on which my ACE will work (I end up on 6A and wait until 6D, giving us a nice margin for error without possible improvement of the TAS):
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/4FQ4ygZ.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"More detailed explanation written by a LADXRTA runner:
+	$LF
+]div
+[div class=p 
+	"= Filenames =
+	$LF
+]div
+[div class=p 
+	"In LADX, there are 3 possible files the player can use with each one allowing for 5 characters to create a name. This gives a total of 15
+	$LF
+	"characters which can be used for arbitrary code execution. Each character used has a specific value associated with it, so the game knows
+	$LF
+	"what characters consistute a filename. This is why the glitch does not work on the English versions of the game, as the associated values 
+	$LF
+	"you need for ACE are not all present in the English character set. The Japanese version has 75 characters to choose from, not including 
+	$LF
+	"the value for the blank space. The English version only has 52. The numerical values for the filenames are as follows:
+	$LF
+]div
+[pre 
+	"1: 39 11 29 18 2C
+	$LF
+	"2: 09 3E 01 32 32 
+	$LF
+	"3: 3E 3C 2F 32 32
+	$LF
+]pre
+[div class=p 
+	"These are all typeable in the Japanese version, but the English version only allows for lower and uppercase alpha characters. When
+	$LF
+	"the values are manually entered onto the English version (via hacking), they read:
+	$LF
+]div
+[pre 
+	"1. 8A(A*
+	$LF
+	"2. AAA11
+	$LF
+	"3. A;.11
+	$LF
+]pre
+[ul 
+	[li 
+		"the value here is not alphanumeric, and I can't show it to you.
+		$LF
+	]li
+]ul
+[div class=p 
+	"= Ingame Counter =
+	$LF
+]div
+[div class=p 
+	"At the memory address FB47, a counter increments from 00 by 01 every second. It eventually reaches FF and stops. This counter is vital
+	$LF
+	"to the success of ACE. Certain values will not work, regardless of the prior setup.
+	$LF
+]div
+[div class=p 
+	"= The Chest =
+	$LF
+]div
+[div class=p 
+	"Upon opening the chest in the Doghouse, the return address F4FF is called to retrieve the value for whatever should happen when the chest
+	$LF
+	"opens. This isn't where it should check however, and the game then executes all instructions in order starting from F4FF. Eventually, the game 
+	$LF
+	"reaches the value FB47. Depending on what value from 00 to FF that is, the game will either harmlessly execute an instruction or crash. This is why
+	$LF
+	"ACE seems inconsistent, however in reality is perfectly consistent assuming you always get a harmless value. After FB47, the game progresses to FB4E.
+	$LF
+]div
+[div class=p 
+	"= ACE: Setting up the value=
+	$LF
+]div
+[pre 
+	"  ECH1:FB4E  01 39 11      ld   bc,1139 <= loads 1139 into BC
+	$LF
+	"  ECH1:FB51  29               add  hl,hl    <= adds HL to HL
+	$LF
+	"  ECH1:FB52  18 2C          jr   FB80     <= jumps to FB80
+	$LF
+]pre
+[div class=p 
+	"Let's break this down, line by line.
+	$LF
+]div
+[pre 
+	"  ECH1:FB4E  01 39 11      ld   bc,1139
+	$LF
+]pre
+[div class=p 
+	"This loads the value of 1139 into the register BC. Memory address FB4E correlates to Link's sword level, which is 01 when you first obtain the sword.
+	$LF
+	"01 is the opcode for loading in the GB system, so it prepares a load instruction. The next values, are the first 2 values of filename 1. But why are they
+	$LF
+	"here? When starting a game, the name of save 1 (39 11 29 18 2C) is copied to FB4F from FB80, as we can see here. This only happens on save 1, which 
+	$LF
+	"explains why ACE only works on the first file.
+	$LF
+]div
+[pre 
+	"  ECH1:FB51  29               add  hl,hl   
+	$LF
+]pre
+[div class=p 
+	"This instruction, "add hl,hl" adds the HL register to itself, doubling it. This will be relevant later
+	$LF
+]div
+[pre 
+	"  ECH1:FB52  18 2C          jr   FB80
+	$LF
+]pre
+[div class=p 
+	"This instruction "jr FB80" jumps the game to memory address FB80, where the first filename was copied from. This means the first file is executed
+	$LF
+	"twice in ACE, however the values are shifted slightly as the value for Link's sword is no longer present. Here is the game now:
+	$LF
+]div
+[pre 
+	"  ECH1:FB80  39                   add  hl,sp    <= adds the register SP to HL
+	$LF
+	"  ECH1:FB81  11 29 18          ld   de,1829 <=loads 1829 into DE
+	$LF
+	"  ECH1:FB84  2C                  inc  l           <= increments register L by 1
+	$LF
+	"  ECH1:FB85  09                   add  hl,bc   <= adds BC to HL.
+	$LF
+]pre
+[div class=p 
+	"Again, let's make this easier and break it down.
+	$LF
+]div
+[pre 
+	"  ECH1:FB80  39                   add  hl,sp    
+	$LF
+]pre
+[div class=p 
+	"This adds the register SP to HL, which is all to prepare HL at the end.
+	$LF
+]div
+[pre 
+	"  ECH1:FB81  11 29 18          ld   de,1829 
+	$LF
+]pre
+[div class=p 
+	"This line is largely ignored, as it is only used to setup the copied version of the file 1. This line loads 1829 into the register DE.
+	$LF
+]div
+[pre 
+	"  ECH1:FB84  2C                  inc  l 
+	$LF
+]pre
+[div class=p 
+	"This line INCrements the register "L" by 1. 
+	$LF
+]div
+[pre 
+	"  ECH1:FB85  09                   add  hl,bc 
+	$LF
+]pre
+[div class=p 
+	"Finally, we add BC to HL. The register now has a value of FB96, which is the byte where the end cutscene is stored. All this section was dedicated
+	$LF
+	"to changing the value of one register.
+	$LF
+]div
+[div class=p 
+	"= ACE: Writing bytes =
+	$LF
+]div
+[div class=p 
+	"Before, we only used values from the first file and the first character of file 2. Now, we are going to be using the files from every file.
+	$LF
+]div
+[pre 
+	"  ECH1:FB86     3E 01              ld   a,01 <= load 01 into register A
+	$LF
+	"  ECH1:FB88     32                   ldd  (hl),a <= load A into HL, decrement H1 by A
+	$LF
+	"  ECH1:FB89     32                   ldd  (hl),a <= load A into HL, decrement H1 by A
+	$LF
+	"  ECH1:FB8A    3E 3C             ld   a,3C <= loads 3C into register A
+	$LF
+	"  ECH1:FB8C    2F                     cpl  <= flips the bits of A, turning the value of 3C into C3
+	$LF
+	"  ECH1:FB8D   32                      ldd  (hl),a <= loads the value of register A into register HL, decrement HL by 1
+	$LF
+	"  ECH1:FB8E    32                      ldd  (hl),a <= loads the value of register A into register HL, decrement HL by 1
+	$LF
+	"  ECH1:FB93    C3 C3 01            jp 01c3     <= jumps to 01c3, returning us to the main loop
+	$LF
+]pre
+[div class=p 
+	"To make this infinitely more easy to understand, we'll again break it down. Our goal here is to modify the bytes of FB95 and FB96.
+	$LF
+	"FB95 is the address of which cutscene, and FB96 is what part of the cutscene. We want to play cutscene 01, part 01
+	$LF
+]div
+[pre 
+	"  ECH1:FB86     3E 01              ld   a,01 
+	$LF
+]pre
+[div class=p 
+	"This loads the value of 01 into the register A, this will help us to change the value of the bytes.
+	$LF
+]div
+[pre 
+	"  ECH1:FB88     32                   ldd  (hl),a 
+	$LF
+	"  ECH1:FB89     32                   ldd  (hl),a 
+	$LF
+]pre
+[div class=p 
+	"This line is repeated twice. ldd is the LoaD Decrease instruction. This line loads A (01) into HL (FB96), then HL is decremented by A, so 01. 
+	$LF
+	"FB96 now has a value of 01. This is repeated, so FB96 is decremented by 01, and now both FB95 and FB96 have the values of 01. We are ready to
+	$LF
+	"warp to the credits. However, there is a slight issue. Currently, we are not in the main loop of the game, so none of this will occur until we do this.
+	$LF
+]div
+[pre 
+	"  ECH1:FB8A    3E 3C             ld   a,3C
+	$LF
+]pre
+[div class=p 
+	"This line loads the value of 3C into the register A. The instruction to jump to another address (jp) is C3. We need to execute an instruction with that
+	$LF
+	"value. Luckily, the next line sorts this out for us.
+	$LF
+]div
+[pre 
+	"  ECH1:FB8C    2F                  cpl  
+	$LF
+]pre
+[div class=p 
+	"This instruction, ComPLement, flips the bits of the register A. It flips the bits of A, so it flips 3C, which happens to equal C3. Now A is C3
+	$LF
+]div
+[pre 
+	"  ECH1:FB8D   32                      ldd  (hl),a
+	$LF
+	"  ECH1:FB8E   32                      ldd  (hl),a
+	$LF
+]pre
+[div class=p 
+	"Another double line. We load A into HL, and decrement HL by 1. This means FB94 contains the value C3, this repeats and FB93 contains another 
+	$LF
+	"C3. 
+	$LF
+]div
+[pre 
+	"  ECH1:FB93    C3 C3 01            jp 01c3     
+	$LF
+]pre
+[div class=p 
+	"Now, the game contains exactly what we need. The value of C3 correlates to a jump instruction, which will return us to the main loop. We needed
+	$LF
+	"to set the second C3 as otherwise we would have returned to 0101, which is not in the main loop. We jump to 01C3 and the game warps us to the credits.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Replaced movie with one with the correct cycle count; corrected branch label ("Arbitrary Code Execution" -> "game end glitch")
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/OtakuTAS 
+		"OtakuTAS
+	]a
+	": Adjusted game name to match other publications.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Un-claiming.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/CasualPokePlayer 
+		"CasualPokePlayer
+	]a
+	": Rejecting as the author has been banned.
+]div

@@ -1,0 +1,533 @@
+4
+[div class=p 
+	"This tool-assisted speedrun improves dragonxyk's 
+	(__wikiLink|displaytext=2008 TAS|href=/1128M)
+	" by 2513 frames (41.88 seconds), by using 1+1 new glitches.
+	$LF
+	"The games offers 11 different levels, but the TAS uses the shortest route of 8 levels. The object is simple: go from point A to point B while avoiding enemies and hazards.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" 2 players
+		$LF
+	]li
+	[li 
+		" Uses death to save time
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation (subpixel values, boss' actions)
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[h4 id=GeneralGameMechanics 
+	" General game mechanics
+	$LF
+]h4
+[ul 
+	[li 
+		" The game runs at 60 fps, but the lagging occurs when there are too many moving objects on the screen, let it be enemies or projectiles. When a lag frame occurs, the movement logic is not executed, which means, all creatures and projectile freeze and no compensation is applied.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The TAS uses a glitch which moves the players faster then usual, and that causes a lot of situations when new enemies spawn in and early ones haven't left the screen yet.
+	$LF
+]div
+[ul 
+	[li 
+		" When you take damage, you:
+		$LF
+		[ul 
+			[li 
+				" become invincible for 60 frames, 
+				$LF
+			]li
+			[li 
+				" enter a pain state, which blocks your movement for 20 frames,
+				$LF
+			]li
+			[li 
+				" are pushed back. 
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[div class=p 
+	"The TAS always turns around before taking damage and tries to keep the chipmunks (players) in the air, so they cover more distance when they can't move.
+	$LF
+]div
+[ul 
+	[li 
+		" In a 2-players mode, when a chipmunk runs out of lives or falls in a pit, it respawns on a balloon after 145 frames of idle. During this period the chipmunk technically stays on the screen and it cannot be moved by X axis past the point when the chipmunk is left behind. Also, if the other chipmunk dies while its partner isn't respawned yet, the level starts from the beginning.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The TAS tries to maximize the traveled distance while the screen is idle.
+	$LF
+]div
+[ul 
+	[li 
+		" When a boss is hit, it becomes invincible by 59 frames. Each boss has 5 HP, so that takes 4 seconds from the frame when it takes the first hit to end the battle.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" Level design follows a 16-pixel grid. Each box is 16x16 pixels. Each platform, not matter transparent or solid, is also placed according to this grid. It's impossible to have a platform or a box that's above or below any other platform (box) by a height other than multiple of 16.
+		$LF
+	]li
+]ul
+[h4 id=XAndYAxisSubpixels 
+	" X and Y axis subpixels
+	$LF
+]h4
+[div class=p 
+	"Each chipmunk (player) has its own vertical and horizontal positions (X and Y pixels) which determine where on the level it is currently placed. However, there are also X and Y subpixel values, which provide an element of randomness of how chipmunks move. Suppose you move right by holding Right button. If your X subpixel is low, on the next frame you move right by 1 pixel. Then your X subpixel turns high, then on the frame you move right by 2 pixels. The same principle concerns vertical movement.
+	$LF
+]div
+[ul 
+	[li 
+		" X subpixel changes only when your X pixel changes.
+		$LF
+	]li
+	[li 
+		" Y subpixel changes on every frame and it depends on your current X and Y pixels. The only case when it stays constant is when a chipmunk is being carried by the other one. 
+		$LF
+	]li
+]ul
+[div class=p 
+	"As Dacicus described the mechanic of calculation of Y-subpixels: 
+	$LF
+]div
+[blockquote 
+	" $0460 is changed by the value at $0550 and $0510 is changed by the value at $0560. The value at $0550 is itself modified by the value at $0099, which seems to be fixed at $0055. Same thing for Dale, but with addresses $0551 and $0561.
+	$LF
+]blockquote
+[ul 
+	[li 
+		" Subpixel values are never reset, which makes Bonus sections not equal to those found in dragonxyk's TAS. Somewhere X and Y positions are different, at other moments I had to make changes to manipulate appropriate Y subpixels to perform glitches described below. 
+		$LF
+	]li
+]ul
+[h4 id=GlitchesFor2PlayerMode 
+	" Glitches for 2-player mode
+	$LF
+]h4
+[div class=p 
+	[b 
+		"Zipping
+	]b
+	" 
+	$LF
+	[br 
+	]br
+	"The game features a special mechanic of collision between the chipmunks. When one player walks or jumps into the other player, it tries to separate them by applying a movement force to one of the chipmunks (or both of them). However, it's possible to trick this mechanic to apply the same exact force to both chipmunks, making them slide at the faster speed than their normal walking. It's possible to do so by jumping inside the other player. There are 4 ways to do so:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[b 
+			"Throw your partner 1-2 frames before you land
+		]b
+		". Aglar described it in details 
+		(__wikiLink|displaytext=here|href=/Forum/Posts/429269)
+		". However, the conditions of Y subpixels described there are more like a reference point. You can find several cases in my TAS when Y subpixels don't match it. It was discovered by manual input bruteforcing. I can summarize it like that: when you do all like the guide says and it doesn't work, try doing it with opposite Y subpixels (high Y subpixel for carried chipmunk and low Y subpixel for carrying chipmunk).
+		$LF
+		[ul 
+			[li 
+				" When a jump after a throw is performed, you jump up by 43 pixels which is enough to jump over 2 stacked boxes or a small enemy.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" 
+		[b 
+			"Be inside your partner when it drops its balloon
+		]b
+		". When the chipmunk on the balloon touches its partner that's not holding its balloon, the "balloonless" chipmunk is pushed away. However, if he moves the opposite direction, he can keep himself close to the "ballooning" chipmunk and gain some boost. To enter the zipping state, both chipmunks must have (nearly) the same position to stay collided. Sometimes, it requires jumping to achieve this.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Jump inside your partner
+		]b
+		". This is done at the beginning of Zone F and J. Like the way of throwing your partner, it requires its own conditions to be satisfied, including the distance between chipmunks (22 pixels).
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Stun your partner with a box
+		]b
+		". It's not used in the TAS because you need to wait for the stun state to pass.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Three 
+	[em 
+		"input patterns
+	]em
+	" are used in the TAS to make zipping chipmunks jump over obstacles while preserving the collided state. Two most common ones let you jump on a platform that's 32 pixels above you. The third one is used for a 64-pixels higher platform and to perform big jumps while gaining some collision boost for one of the chipmunks.
+	$LF
+	"However, the pixels condition still has to be satisfied for the jump or drop down to succeed, or else at some spot the chipmunks get separated in mid-air.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Box ascension
+	]b
+	" 
+	$LF
+	[br 
+	]br
+	"The point of this trick is to utilize the quirks in the mechanic of chipmunk states. When the animation of throwing is initiated, a chipmunk cannot be stunned by a box flying at his front perspective. However, the flying box still collides with his hitbox, making him ascend by a small distance.
+	$LF
+]div
+[div class=p 
+	"In order to perform it, you need to have equal Y subpixels for both players and keep a certain distance between them. Under these conditions, the ascension power is much higher than under normal circumstances, and this lets you move up even faster than by rapid jumping.
+	$LF
+]div
+[div class=p 
+	"The only problem is to get equal Y subpixels. Unfortunately, they are recalculated on each frame (except the case when a chipmunk is being carried by the other one), making it very hard to get continuous equality of subpixel values. Even if you achieve it, you cannot do any kind of platforming or else you lose that equality. 
+	$LF
+	"For this reason, Zone F, section 2 looks the only time-saving spot where that's effectively useful.
+	$LF
+]div
+[h4 id=SpeedOfMovement 
+	" The speed of movement
+	$LF
+]h4
+[ul 
+	[li 
+		" While moving right, you speed is 1-2 pixels per a frame.
+		$LF
+	]li
+	[li 
+		" The speed of moving left is 1 pixel higher. That is 2-3 pixels.
+		$LF
+	]li
+	[li 
+		" You cover 2 extra pixels while zipping on the ground, and 1 extra pixel while collided chipmunks are in mid-air.
+		$LF
+	]li
+]ul
+[h4 id=Authorship 
+	" Authorship
+	$LF
+]h4
+[ul 
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/Dimon12321 
+			"Dimon12321
+		]a
+		" - the main author of this TAS. I passed 7 levels out of 8.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/Aglar 
+			"Aglar
+		]a
+		" - he passed the first level (Zone O). I 
+		(__wikiLink|displaytext=tried|href=/Forum/Posts/529556)
+		" to find improvements in his TAS, but nothing was found, so I decided to build my TAS upon his movie. He also 
+		(__wikiLink|displaytext=made|href=/Forum/Posts/429269)
+		" a nearly finished test TAS which I was using for reference.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/dragonxyk 
+			"dragonxyk
+		]a
+		" - since I'm not very skilled at making entertaining sequences, I borrowed input of some Bonus stages and those one-screen sections when a big mouse steels your cheese. However, the difference between subpixels and the RNG made me adjust the input or redo the sequences completely.
+		$LF
+	]li
+]ul
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[div class=p 
+	"For simplicity, "Zone B, section 1" means Zone B1.
+	$LF
+]div
+[h4 id=ZoneO 
+	" Zone O
+	$LF
+]h4
+[div class=p 
+	"This is the most variable section in terms of platforming. Aglar is doing everything possible with chipmunk collision mechanic to win maximum time. Here, the only zipping-preserving 64-pixels jump was performed. I assume, such a jump can only be performed when you scroll left. 
+	$LF
+	"I 
+	(__wikiLink|displaytext=couldn't find any|href=/Forum/Posts/529556)
+	" improvements there, so I build the rest of the TAS on top of his movie.
+	$LF
+]div
+[h4 id=ZoneO2 
+	" Zone O2
+	$LF
+]h4
+[div class=p 
+	"There is a moment where chipmunks fall between test tubes. It lacks 1 pixel for Chip to have both chipmunks successfully lend on the floor by doing one long fall.
+	$LF
+]div
+[h4 id=ZoneB1 
+	" Zone B1
+	$LF
+]h4
+[div class=p 
+	"The top route of the section is slower. The second mouse on your way does an big jump if you zip on the boxes near it.
+	$LF
+]div
+[h4 id=ZoneB2 
+	" Zone B2
+	$LF
+]h4
+[div class=p 
+	"I had to do a zipping glitch with Chip and not move too far because otherwise you land on the glass and not collide with the thrown chipmunk.
+	$LF
+]div
+[div class=p 
+	"The part when you need to turn off 5 faucets is done manually instead of flying them over on balloons. Each faucet takes 21 frames to be turned off, which is 105 frames of the screen not moving forward. However, the same amount of time is lost using the balloon strategy because of respawning periods. Since a lot of time was previously saved by zipping, there was no point in taking damage to perform the balloon strategy.
+	$LF
+]div
+[h4 id=ZoneBBoss 
+	" Zone B Boss
+	$LF
+]h4
+[div class=p 
+	"The spaceship is the most RNG-dependant boss in the game. There are 5 different altitudes it can come from. You can manipulate the needed one by losing time, either by entering the boss section sooner or by pausing the game. So, I spent 4 frames (1 frame on later entering, and 3 frames on pausing) to get the lowest altitude of the spaceship. This let me throw the ball as soon as I grab it.
+	$LF
+]div
+[h4 id=ZoneD2 
+	" Zone D2
+	$LF
+]h4
+[div class=p 
+	"Here, the part with 5 levels of ascending long platforms and rag-pulling rabbits is extremely laggy because zipping glitch makes it hard for rabbits to run away.
+	$LF
+]div
+[h4 id=ZoneF1 
+	" Zone F1
+	$LF
+]h4
+[div class=p 
+	"The ending of the section is done slower by 40 frames because I needed to get equal Y subpixel values for both chipmunks in order to perform Box ascension glitch in Zone F2.
+	$LF
+]div
+[h4 id=ZoneF2 
+	" Zone F2
+	$LF
+]h4
+[div class=p 
+	"I love it! Box ascension glitch save several seconds here. I even managed to have the chipmunks on the very top of the screen by the time I reach the platforms. Since some time is required to load the boxes, I clipped through them and saved some more time.
+	$LF
+]div
+[h4 id=ZoneG2 
+	" Zone G2
+	$LF
+]h4
+[div class=p 
+	"It requires 2 stacked boxes to be able to jump over a rhino while preserving the collision state.
+	$LF
+]div
+[h4 id=ZoneH2 
+	" Zone H2
+	$LF
+]h4
+[div class=p 
+	"The last part with a 3-level platforming, you cannot perform a throw while you are on the top platform. So, I had to jump down to a lower platform.
+	$LF
+]div
+[h4 id=ZoneI1 
+	" Zone I1
+	$LF
+]h4
+[div class=p 
+	"This is the only section in the game where I didn't find any improvements. The stacks of mugs have tightly placed boxes and performing a zipping glitch is not reasonable there.
+	$LF
+	"The blowing fans makes you move really slow, so the only good option is bypass it all on balloons.
+	$LF
+]div
+[h4 id=ZoneI2 
+	" Zone I2
+	$LF
+]h4
+[div class=p 
+	"The pushpin lines work in a weird way. You don't take damage on the frame you lend on them, but on the next frame. Anyway, despite one chipmunk being invincible (thanks to Zipper), I didn't manage to pass the pushpin lines while using Zipping glitch.
+	$LF
+]div
+[h4 id=ZoneJ1 
+	" Zone J1
+	$LF
+]h4
+[div class=p 
+	"Moving platforms boost your movement by 1 extra pixel. If one moves in the direction of the exit, you need to run against it in order to preserve Zipping glitch.
+	$LF
+]div
+[h4 id=ZoneJ2 
+	" Zone J2
+	$LF
+]h4
+[div class=p 
+	"I don't like the sequence from the end of the swinging axes on the 1st floor, up to the last area with a load of boxes on the top. I tried various routes, including the one used in dragonxyk's 2008 TAS, but I didn't find any improvements.
+	$LF
+	"But, at least, I got lucky with despawning the weasel near the exit.
+	$LF
+]div
+[h4 id=ZoneJBoss 
+	" Zone J Boss
+	$LF
+]h4
+[div class=p 
+	"1 frame was spent to get a lucky RNG. If Fat Cat spams ashes from his cigar too often, it causes a lot of lag frames.
+	$LF
+]div
+[h4 id=BonusLevels 
+	" Bonus levels
+	$LF
+]h4
+[div class=p 
+	"When a zone is finished, you have to play through a time-based bonus level to collect bonuses. I copied some input from drakonxyk's 2008 TAS.
+	$LF
+]div
+[ol 
+	[li 
+		" Zone O - Zone O from 2008 TAS, but with mirrored input to let Chip take a 1UP.
+		$LF
+	]li
+	[li 
+		" Zone B - Zone F from 2008.
+		$LF
+	]li
+	[li 
+		" Zone D - Zone B from 2008.
+		$LF
+	]li
+	[li 
+		" Zone F - Zone D from 2008.
+		$LF
+	]li
+	[li 
+		" Zone G - It's my own improvisation showing the intrigue who of chipmunk will get a 1UP. 
+		$LF
+	]li
+	[li 
+		" Zone H - from 2008, but I accidentally edited the ending while trying to match subpixels.
+		$LF
+	]li
+	[li 
+		" Zone I - from 2008, but due to the wrong RNG, the final box doesn't have a 1UP, which doesn't make the sequence that adorable.
+		$LF
+	]li
+]ol
+[h3 id=PossibleImprovements 
+	" Possible improvements
+	$LF
+]h3
+[ul 
+	[li 
+		" In Zone D1, it's possible to save time by doing a throw for a zipping glitch when landing on the stacked boxes right next to two clown boxes. I tried switching characters and meshing the input in every way possible, but the glitch didn't work, so I had to do a much longer jump in order to pull it off.
+		$LF
+	]li
+	[li 
+		" Well, I mentioned D1, then I'd say, this TAS lacks luck. I've spent a lot of time meshing input in various places to get proper subpixel values for zipping glitch. I think, 60% of them is when I had to lose 1+ frames. For example, by delaying my jump.
+		$LF
+	]li
+	[li 
+		" Find more input patterns for safe jumping while preserving the collided state. This especially concerns 48-pixels higher platforms.
+		$LF
+	]li
+	[li 
+		" Lag optimization. I did my best, but I doubt it's perfect.
+		$LF
+	]li
+	[li 
+		" Complete Zone F1 faster. As I mentioned before, 40 frames were spent on input bruteforcing to have equal Y subpixels for F2. I'm sure it's possible to save more time here.
+		$LF
+	]li
+	[li 
+		" Complete Zone I2 faster, if it's possible to pass pushpin lines while using zipping glitch.
+		$LF
+	]li
+]ul
+[h3 id=SpecialThanksTo 
+	" Special thanks to:
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/junkyard_dave 
+			"junkyard_dave
+		]a
+		" - he 
+		(__wikiLink|displaytext=discovered|href=/Forum/Posts/525847)
+		" Box ascension glitch and shared the input file with me.
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/sinister1 
+			"sinister1
+		]a
+		" - he was giving me various useful suggestions and sharing interesting ideas on my way to have this TAS finished.
+		$LF
+	]li
+]ul
+[h3 id=SuggestedScreenshot 
+	" Suggested screenshot
+	$LF
+]h3
+[div class=p 
+	"13537
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Wow...what a difference that zip makes. Seems to be the mindset of those who responded, in the disucssion. When I first read about the zip, I thought I was going to see something different. This was quite unique, as opposed to the previous run carrying around each other. Well, everything looks good here. Congratulations on the improvements.
+	$LF
+]div
+[div class=p 
+	"Accepting over 
+	(__wikiLink|href=/1128M|implicitdisplaytext=1128M)
+	".
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

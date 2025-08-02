@@ -1,0 +1,251 @@
+3
+[div class=p 
+	"A compilation of FFmpeg commands that I have found helpful. Leaving it here for my reference (as well as for anyone it may be of help).
+	$LF
+]div
+[div class=p 
+	"Note: I specified common formats like avi, mp4 for the sake of clarity, but ffmpeg works a lot of formats, so don't hesistate to try any video/audio format you find desirable.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#BasicStructureOfACommand 
+					" The basic structure of a command
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#StreamCopyFlag 
+					" Stream copy flag
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ChangingTheDimensionsOfTheVideo 
+					" Changing the dimensions of the video
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ConcatenatingABunchOfFiles 
+					" Concatenating a bunch of files
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#BatchConvertingFilesInAFolder 
+					" Batch converting files in a folder
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#BasicFadeEffects 
+					"Basic Fade effects
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#HorizontallyStacking2Videos 
+					" Horizontally stacking 2 videos
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=BasicStructureOfACommand 
+	" The basic structure of a command
+	$LF
+]h3
+[ul 
+	[li 
+		" All ffmpeg commands include a call to the ffmpeg execuatable an input file and an output file. The call to the executable can look just like 
+		[code 
+			"ffmpeg
+		]code
+		" if the ffmpeg binary is added to the system environment variables correctly, otherwise it may look like 
+		[code 
+			"path/to/ffmpeg.exe
+		]code
+		".
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" The input file is specified after the flag 
+		[code 
+			"-i
+		]code
+		". In case of multiple input files, this flag must be specified each time.
+		$LF
+	]li
+]ul
+[ul 
+	[li 
+		" The output file is specified without any flags after the input file(s). If nothing is specified, default encoding parameters will be used, but they can be customized by specifying it between the input and output files.
+		$LF
+	]li
+]ul
+[h3 id=StreamCopyFlag 
+	" Stream copy flag
+	$LF
+]h3
+[div class=p 
+	"Knowing about this flag and where to use it can save a lot of conversion time. If you are sure that the video stream doesn't need to be re-encoded, you can apply the 
+	[code 
+		"-c copy
+	]code
+	" flag to skip it. An example of where this applies is when you concat some files in the same format. An example where this doesn't apply is when you change the dimensions of the video. You can still use 
+	[code 
+		"-c:a copy
+	]code
+	" which copies the audio stream when you are doing operations only on the video, and 
+	[code 
+		"-c:v copy
+	]code
+	" when you operate only on the audio.
+	$LF
+]div
+[h3 id=ChangingTheDimensionsOfTheVideo 
+	" Changing the dimensions of the video
+	$LF
+]h3
+[div class=p 
+	[code 
+		"ffmpeg -i input.avi -vf scale=$w:$h output.avi
+	]code
+	$LF
+]div
+[div class=p 
+	"Where 
+	[code 
+		"$w
+	]code
+	" and 
+	[code 
+		"$h
+	]code
+	" are to be replaced with the desired height and width respectively. If you want to specify one of the parameters, you can set the other to -1 to maintain fixed aspect ratio. For example, you can convert to 1080p like so:
+	$LF
+	[br 
+	]br
+	[code 
+		"ffmpeg -i input.avi -vf scale=-1:1080 output.avi
+	]code
+	$LF
+]div
+[h3 id=ConcatenatingABunchOfFiles 
+	" Concatenating a bunch of files
+	$LF
+]h3
+[div class=p 
+	"First you need to make a list.txt file which lists all the files that need to be concatenated. Here is an example of how that file can look like (assuming all the files are in the same folder):
+	$LF
+]div
+[pre 
+	"file 'start.avi'
+	$LF
+	"file 'middle.avi'
+	$LF
+	"file 'end.avi'
+	$LF
+]pre
+[div class=p 
+	"Then run the following command in the same folder:
+	$LF
+	[br 
+	]br
+	[code 
+		"ffmpeg -f concat -safe 0 -i list.txt merge.mp4
+	]code
+	$LF
+]div
+[div class=p 
+	"This will concat the specified files into a single mp4 file. You can use other video filters along with this command as well and it will be applied to each input file.
+	$LF
+]div
+[h3 id=BatchConvertingFilesInAFolder 
+	" Batch converting files in a folder
+	$LF
+]h3
+[ul 
+	[li 
+		" Windows - 
+		[code 
+			"for %i in (*.avi) do ffmpeg -i "%i" "%~ni.mp4"
+		]code
+		$LF
+	]li
+	[li 
+		" Linux, Mac - 
+		[code 
+			"for i in *.avi; do ffmpeg -i "$i" "${i%.*}.mp4"; done
+		]code
+		$LF
+	]li
+]ul
+[div class=p 
+	"This will convert all the avi files in the current folder to mp4 files. You can change to work with other formats. If you are converting to the same format make sure to store the output files in a different folder else it may get stuck in an infinite loop.
+	$LF
+]div
+[h3 id=BasicFadeEffects 
+	"Basic Fade effects
+	$LF
+]h3
+[div class=p 
+	[code 
+		"ffmpeg -i input.avi -vf "fade=t=in:st=$s:d=$d" output.avi
+	]code
+	$LF
+]div
+[ul 
+	[li 
+		" This will add a fade in effect to the video. 
+		[code 
+			"$s
+		]code
+		" is the starting timestamp in seconds, and 
+		[code 
+			"$d
+		]code
+		" is the desired duration of the fade in seconds.
+		$LF
+	]li
+	[li 
+		" Replace 
+		[code 
+			"fade=t=in
+		]code
+		" with 
+		[code 
+			"fade=t=out
+		]code
+		" for fade out.
+		$LF
+	]li
+	[li 
+		" Add a similar 
+		[code 
+			"-af "afade=t=in:st=$s:d=$d"
+		]code
+		" flag for audio fade.
+		$LF
+	]li
+]ul
+[h3 id=HorizontallyStacking2Videos 
+	" Horizontally stacking 2 videos
+	$LF
+]h3
+[div class=p 
+	[code 
+		"ffmpeg -i left.mp4 -i right.mp4 -filter_complex hstack output.mp4
+	]code
+]div

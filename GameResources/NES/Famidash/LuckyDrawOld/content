@@ -1,0 +1,111 @@
+1
+[div class=p 
+	[b 
+		"Note: This is outdated information only applying to Famidash v1.2. It does not apply to versions v1.2.1 and later.
+	]b
+	$LF
+]div
+[div class=p 
+	"Known source code files implementing random functions:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[a href=https://github.com/tfdsoft/famidash/blob/main/LIB/asm/neslib.s rel=noopener external nofollow 
+			"https://github.com/tfdsoft/famidash/blob/main/LIB/asm/neslib.s
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://github.com/tfdsoft/famidash/blob/main/SAUCE/functions/sprite_loading.h rel=noopener external nofollow 
+			"https://github.com/tfdsoft/famidash/blob/main/SAUCE/functions/sprite_loading.h
+		]a
+		$LF
+	]li
+]ul
+[h4 id=LuaScript 
+	" Lua script
+	$LF
+]h4
+[div class=p 
+	"This Lua script determines, based on an RNG value, whether Lucky Draw will eventually be successful or end in an infinite loop, or alternatively whether the first attempt is successful or fails a particular check, depending on the mode:
+	$LF
+]div
+[div class=p 
+	[a href=https://tasvideos.org/UserFiles/Info/638789011495453224 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/638789011495453224
+	]a
+	$LF
+]div
+[div class=p 
+	"(See information below on how randomness works in Lucky Draw.)
+	$LF
+]div
+[h4 id=Newrand 
+	" _newrand
+	$LF
+]h4
+[div class=p 
+	"Based on the source code's _newrand function, the main pseudo-random number generator (PRNG) is a simple period 2^32-1 
+	[a href=https://en.wikipedia.org/wiki/Linear-feedback_shift_register rel=noopener external nofollow 
+		"linear feedback shift register
+	]a
+	" (LFSR) that is equivalent to the following Lua code:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The above PRNG auto-runs once per frame in most cases, without the expectation of using this value (since, obviously, most levels in Famidash have no randomness). In rare instances, Famidash runs this function to get a random value.
+	$LF
+]div
+[h4 id=Rand1 
+	" rand1
+	$LF
+]h4
+[div class=p 
+	"In other rare instances, Famidash can also use the following function (called rand1 in the source code) to alter 
+	[b 
+		"only
+	]b
+	" the least-significant byte of the RNG (an 8-bit LFSR that only affects the least-significant byte):
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"The above function can run multiple times per frame (as well as running _newrand during the same frame), and determines the flashing effects on some objects. However, the majority of levels do not use this function.
+	$LF
+]div
+[div class=p 
+	"It turns out the level Lucky Draw uses both of these functions.
+	$LF
+]div
+[h4 id=HowLuckyDrawDeterminesWhetherAnAttemptIsSuccessful 
+	" How Lucky Draw determines whether an attempt is successful
+	$LF
+]h4
+[div class=p 
+	"When first selecting Lucky Draw, as well as after any death, the RNG address (0x1B, four byte little endian) will freeze on a particular value. As far as is known, this value is the only thing that determines whether the first/following attempt is a successful attempt. No player input that changes RNG has been found.
+	$LF
+]div
+[div class=p 
+	"The following procedure determines whether an attempt is successful:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"If the attempt is unsuccessful, the RNG value when the player was killed will be the new RNG value for the next attempt.
+]div

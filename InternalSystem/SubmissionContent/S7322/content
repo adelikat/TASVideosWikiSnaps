@@ -1,0 +1,317 @@
+13
+[h3 id=GeneralComments 
+	" General Comments
+	$LF
+]h3
+[div class=p 
+	"Holy cow, this TAS is finally complete after nearly 7 years in the making, sort of. I started this in 2015, mainly as a crazy idea that I wasn't sure if I wanted to follow through on, so I TASed the first few rounds to experiment. Then I got into SGDQ 2015 so I put down this project to pour my spare time into practicing my run, then after that Super Mario Maker happened and I completely forgot about this TAS.
+	$LF
+]div
+[div class=p 
+	"5 years later I picked it back up as a pandemic project in 2020, when lockdown first hit and I wanted stuff to do to stave off cabin fever while keeping myself locked inside. I put it down again in 2021, then finally I got a flash of inspiration in January and came back again to finish it. So overall I'd estimate this was a little under a year of work, but scattered across a period of 7 years.
+	$LF
+]div
+[h3 id=InputMechanics 
+	" Input Mechanics
+	$LF
+]h3
+[div class=p 
+	"Holding Down causes bombs to fall faster and reduces the delay between spawns. However, it only has an effect after you've been holding it for about half a second, it does not affect bombs that have not yet fully spawned, and you can't do anything else except kick or fall as long as you hold it. Any bombs in midair when you release it will fall one more cell before reverting to normal fall speed. This can be exploited to make bombs sync up in a manner such that they land on stacks of different height on the same frame and explode simultaneously, saving frames on the clear animations. This is first seen in Round 30.
+	$LF
+]div
+[div class=p 
+	"A and B inputs can be buffered. Pressing either one for a single frame while Toad is walking or falling will cause the input to be processed on the next viable frame. In a few places, I use this to buffer one input on the first frame possible, hold Down, then make the next input on the first frame where it wouldn't be buffered, maximizing the amount of time I'm holding Down.
+	$LF
+]div
+[div class=p 
+	"Turning around is faster in midair since you can move immediately afterwards, whereas turning around on the ground incurs about a 10 frame delay before you can do anything else except kick.
+	$LF
+]div
+[div class=p 
+	"Holding Right during the victory animation at the end of each round makes Toad shrink back down earlier, effectively skipping the middle part of the sequence.
+	$LF
+]div
+[div class=p 
+	"The game tries to prevent you from influencing a chain once it's started to explode -- if you try to perform any action that would cause an object (other than Toad) to move, Toad freezes in place and blinks, and the action doesn't resolve until the chain has resolved. However, if Toad isn't carrying anything, he can still move around freely. In the case of explosions that spawn a diamond, the hitboxes for the exploded objects are cleared when the diamond spawns, *but* the diamond spawn makes everything hover in mid-air a la Wile E. Coyote for 19 frames, making it possible to influence the resolution of the chain by moving underneath an object during Coyote Time to catch it.
+	$LF
+]div
+[h3 id=LuckManipulation 
+	" Luck Manipulation
+	$LF
+]h3
+[div class=p 
+	"Which column a bomb spawns in depends on the frame and some inputs, and it can be manipulated by pausing. The first bomb roll happens when the fairy's circling animation finishes. However, at the start of each subsequent level, the roll occurs either on the first frame after the monsters spawning animation finishes or roughly 1 second after the music starts to play. One row of monsters spawn every 9 frames, therefore if there are 4 or more rows, the first frame you can pause on is the frame after the roll happens. Thus later on in the run I start waiting extra frames for luck manipulation at the end of a level before hitting right to move to the next level.
+	$LF
+]div
+[div class=p 
+	"Additionally, some levels have 2 possible patterns, and which one you get appears to depend on some hidden state that can't be affected between levels (between when the final monster is cleared until Toad moves to the next level). Spawning a bomb usually seems to flip the pattern for the next level, although sometimes the flip seems to occur a few frames before or after the bomb spawns.
+	$LF
+]div
+[div class=p 
+	"However, the column is not purely random. The fairy seems to be biased towards columns with fewer things in them, and heavily biased away from columns where the bomb it's about to spawn would create a match upon landing if nothing else is moved. This means it's sometimes faster to pick up a column of monsters and put them under the bomb after it starts to spawn, rather than wasting half a second or more on luck manipulation.
+	$LF
+]div
+[div class=p 
+	"The color of a bomb, on the other hand, cannot be manipulated. At least, everything I tried wouldn't change the color of the next bomb. It appears to use a separate seed that's only incremented with each bomb color roll. In a few places I get around this by intentionally losing frames on one level to spawn an extra bomb and advance the seed for the next level. Round 27 is the first example of this.
+	$LF
+]div
+[div class=p 
+	"Diamonds can be manipulated, both for color and position, by pausing during the clearing animation they're spawned by. From what I could tell, sometimes every frame spent paused cycles both the position and color, while sometimes every frame cycles the position but every Nth frame cycles the color where N is the length of the line that's spawning the diamond. I've yet to figure out what causes the change in behavior. Note that not every position/color combination is possible, since the diamond RNG appears to cycle every 16 frames.
+	$LF
+]div
+[h3 id=LevelByLevelComments 
+	" Level-by-Level Comments
+	$LF
+]h3
+[div class=p 
+	"Most early levels and some later ones are fairly straightforward, so I'll only write comments for levels that were particularly cool, fun, or frustrating to optimize behind the scenes, or levels that have some non-obvious things going on.
+	$LF
+]div
+[h3 id=Round8 
+	" Round 8
+	$LF
+]h3
+[div class=p 
+	"This was the first time the diamond frame rule got in my way. There's 2 colors and I spawn a diamond with a 6-in-a-row clear, which meant a blue diamond could only appear in odd positions and a white diamond could only appear in even positions. This prevented me from manipulating a blue diamond to spawn in the second row from the top, which might have been a few frames quicker. However, the second (white) diamond spawns in a position where it doesn't produce a third diamond and waste time, without any frames wasted on luck manipulation.
+	$LF
+]div
+[h3 id=Round12 
+	" Round 12
+	$LF
+]h3
+[div class=p 
+	"This one was pretty fun to come up with the strat for. At the end I pause one extra time to avoid spawning a 4th diamond and save a couple frames.
+	$LF
+]div
+[h3 id=Round23 
+	" Round 23
+	$LF
+]h3
+[div class=p 
+	"This marks the first appearance of the monsters that have to be bombed twice, changing color after the first one. In this case they're pink and turn red. On later levels they can be gray -> blue, white -> green, or cyan -> yellow. But a diamond takes them out in one hit. However, if you bomb some pink monsters and they turn red, then get a pink diamond, it won't hit the red ones.
+	$LF
+]div
+[h3 id=Round24 
+	" Round 24
+	$LF
+]h3
+[div class=p 
+	"And here we have the first appearance of the other two-hit monsters. These guys (yellow in this stage) need to be bombed twice with the same color. After the first bomb they blink for a while, but if you don't hit them a second time within a few seconds, they revert to non-blinking and take another 2 bombs. But again, a diamond takes them out in one hit.
+	$LF
+]div
+[h3 id=Round27 
+	" Round 27
+	$LF
+]h3
+[div class=p 
+	"At the end of this level, I intentionally release Down one frame too early to stall so that the roll for the next bomb's color happens. This loses 13 frames but allows me save significantly more by getting a blue bomb immediately on the next round.
+	$LF
+]div
+[h3 id=Round30 
+	" Round 30
+	$LF
+]h3
+[div class=p 
+	"Oh, boy. This round was a massive pain to optimize. I tried two completely separate strategies and this was the faster one. The other strategy was to spawn diamonds, but the setup took so long that the time saved by the diamonds didn't make up for it.
+	$LF
+]div
+[div class=p 
+	"Here I also use a well-timed Down release to make the yellow and cyan bombs sync up and explode simultaneously, saving about 2 seconds of clear animation on the yellows.
+	$LF
+]div
+[h3 id=Round36 
+	" Round 36
+	$LF
+]h3
+[div class=p 
+	"This was the most frustrating luck manipulation up to this point, mostly due to the lack of any way to influence bomb colors. I think I tried about 3 different routes through this level before settling on one that still spends a couple seconds advancing the bomb color sequence but uses that time to set things up for later, while manipulating bomb spawn positions to minimize the number of frames I need to move around and therefore maximize the amount of time I hold Down to speed up bomb spawns.
+	$LF
+]div
+[div class=p 
+	"Much, much later I realized I had forgotten to do the victory animation skip on R34 and R35, which would've saved about 3 or 4 seconds total. The first time I went back and fixed those, it completely desynced the RNG in this round to the point where I could no longer get the diamonds to spawn in the positions and colors I wanted, so I left things as-is. Then after finishing all the way through to R99, this was still bugging me so I gave it a second shot using the better understanding of the RNG and its 16-frame cycles that I learned from doing the later levels, and finally got the RNG to sync back up.
+	$LF
+]div
+[h3 id=Round41 
+	" Round 41
+	$LF
+]h3
+[div class=p 
+	"At the end, I wait an extra 32 frames to spawn one more bomb so that I get the better of the two patterns for Round 42.
+	$LF
+]div
+[h3 id=Round47 
+	" Round 47
+	$LF
+]h3
+[div class=p 
+	"The two patterns for this round were roughly equally complex. I tried both of them and this one turned out to be 76 frames faster.
+	$LF
+]div
+[h3 id=Round51 
+	" Round 51
+	$LF
+]h3
+[div class=p 
+	"At the end it's about a second faster to hold Down and use the blue bomb that's about to fall in the perfect spot anyway, but somehow doing so affects the RNG state in weird way that it completely changes the bomb color sequence in Round 52 to an absolutely horrid sequence that loses a lot more time. So instead I move Toad left and use the blue enemy to fill the gap instead.
+	$LF
+]div
+[h3 id=Round53 
+	" Round 53
+	$LF
+]h3
+[div class=p 
+	"This is an unusual example of a round where you clearly want one of the two patterns for non-tool-assisted runs but the other is better for TAS. The other pattern is actually significantly less complex of a layout, giving you much more flexibility to deal with RNG. But in a TAS, luck manipulation makes this pattern faster.
+	$LF
+]div
+[div class=p 
+	"I intentionally manipulate luck by delaying before making clears a couple times instead of pausing in order to spend enough non-paused frames for one more bomb to spawn, which puts the RNG in a state to give me the better pattern for the Round 54.
+	$LF
+]div
+[h3 id=Round59 
+	" Round 59
+	$LF
+]h3
+[div class=p 
+	"Luck manipulation for this round was, to use the technical term, a massive pain in the tuchus. I mapped out and tried 2 different strategies that both got aborted halfway through because there weren't any frames that could get a diamond to spawn in the right position with the right color. Then I couldn't manipulate the green bomb to spawn in the center column and lost a couple dozen frames, until I came back to this round after finishing the whole TAS, and figuring out that I could change Toad's movements in a way that manipulates the fairy into the center column. But then I had to resync the RNG state, which took through R61.
+	$LF
+]div
+[h3 id=Round62 
+	" Round 62
+	$LF
+]h3
+[div class=p 
+	"Dropping something so it lands on the exact frame as a falling bomb allows both clear at once, potentially linking them into one longer clear. I use this to form a 5-in-a-row with the yellows.
+	$LF
+]div
+[div class=p 
+	"Then once again, losing some time at the end to get the better pattern for Round 63. Somehow in this case I didn't need to wait for the bomb to fully spawn to advance the state for the part of the RNG that decides which pattern to use for each round. I do the same thing in the next two rounds, but there it seems to require the bomb to fully spawn.
+	$LF
+]div
+[div class=p 
+	"Fun fact: I got to the end of this round before realizing that I had been forgetting to do victory animation skips since Round 34, so I went back to add them as much as possible. It turned out adding them in R34 and R35 desynced the RNG state so horribly that it became unrecoverable in R36, but from R36 onwards I added the victory animation skip and painstakingly redid every RNG manipulation in R37 through R62 by hand. I even had to redo R56 entirely, but I managed to resync the RNG state for R57. And finally after finishing R99 I managed to figure out how to resync R36.
+	$LF
+]div
+[h3 id=Round66 
+	" Round 66
+	$LF
+]h3
+[div class=p 
+	"Another round where luck manipulation was a massive pain. I had to redo the setup twice before I got one that could lead to both diamonds spawning with the right position and color. I'm quite happy with the end result though.
+	$LF
+]div
+[h3 id=Round68 
+	" Round 68
+	$LF
+]h3
+[div class=p 
+	"I got all the way to the end of Round 69 before noticing a small movement error, so I came back, re-optimized this round, then resynced the luck manipulations through the end of Round 69. Turned out all that work saved 49 frames.
+	$LF
+]div
+[h3 id=Round70 
+	" Round 70
+	$LF
+]h3
+[div class=p 
+	"Another massive pain in the tuchus, but for completely different reasons -- there's 5 monsters of each color, so to make a diamond you need to either make a 6-in-a-row clear or leave a single monster behind, the latter of which would take two more bombs of the same color to finish off.
+	$LF
+]div
+[div class=p 
+	"Making matters worse, after clearing the pink diamond, no frame makes a green diamond spawn in column 3, so I had to settle for a column 5 green diamond which requires a bit more setup time.
+	$LF
+]div
+[h3 id=Round75 
+	" Round 75
+	$LF
+]h3
+[div class=p 
+	"The first round where every monster requires 2 bombs. I was actually pretty lucky to have the RNG in a state that makes it even possible to execute a solution this efficient.
+	$LF
+]div
+[h3 id=Round86 
+	" Round 86
+	$LF
+]h3
+[div class=p 
+	"This shows what appears to be an audio glitch in the game. If you kick an object just as something clears below it, the kick sound plays twice -- when you press the button, the game seems to erroneously register a valid kick on the midair object and plays the kick sound, then it detects that the object is in midair and cancels the kick effect, then once the stack lands, the kick takes effect on the object that lands in front of Toad and the game plays the kick sound again.
+	$LF
+]div
+[h3 id=Round96 
+	" Round 96
+	$LF
+]h3
+[div class=p 
+	"This is one of my favorite chains in this whole run.
+	$LF
+]div
+[div class=p 
+	"Incidentally, bombing color-changing monsters with a 5-in-a-row still spawns a diamond if another diamond is used to clear all monsters of that color on the same frame.
+	$LF
+]div
+[h3 id=Round98 
+	" Round 98
+	$LF
+]h3
+[div class=p 
+	"This was a massive pain to optimize, since it's the only round where *all* the monsters are diagonal-only. But I'm very happy with the solution.
+	$LF
+]div
+[h3 id=Round99 
+	" Round 99
+	$LF
+]h3
+[div class=p 
+	"Here I ran into a weird issue (probably a bug) where Toad can't pick up a single object while falling if it's in the second row from the top.
+	$LF
+]div
+[div class=p 
+	"There's a special fanfare that plays upon clearing Round 99, so I let it play out before I proceed to the ending cutscene. This costs 291 frames and is the only entertainment/speed tradeoff in the run, although the time loss would be after the point when the timer would stop in an RTA speedrun.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Judging!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": The submission file has been replaced with a 230 frame improvement that also adds a speed/entertainment tradeoff by letting the special fanfare play after the final round.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Apologies for not getting to this earlier! The file has been replaced with a further 320 frame improvement.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I'm not gonna lie, this was insanely hype.
+	$LF
+]div
+[div class=p 
+	"What struck me the most while watching it was just how evident the luck manipulation is. Maybe it's just my familiarity with the game speaking, but nearly every level looked almost too good to be real. The exact color of bomb you need dropping right where you need it, gems appearing in exactly the right place to wipe the field, combos appearing out of thin air with nothing more than a small pause, entire fields of enemies just getting decimated within seconds... Pretty much as soon as the levels started getting a little more complicated, the TAS turned into its own highlight reel.
+	$LF
+]div
+[div class=p 
+	"Given that this is a distinctly different mode from 
+	(__wikiLink|displaytext=what the published run uses|href=/1294M)
+	", I'm accepting this as a new branch!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Zinfidel 
+		"Zinfidel
+	]a
+	": Processing...
+]div

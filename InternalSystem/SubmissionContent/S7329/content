@@ -1,0 +1,227 @@
+10
+[div class=p 
+	"VVVVVV is a game where absolutely nothing bad happens. One day, Viridian decides to take a leisurely stroll around the ship but accidentally trips on a terminal and blacks out.
+	$LF
+	"Fortunately, all of the crew members were already nearby so Viridian is quickly rescued and fully recovers.
+	$LF
+]div
+[pre 
+	"Emulator used: libTAS v1.4.2        Game Version: VVVVVV 2.3.6
+	$LF
+]pre
+[div class=p 
+	(youtube|v=Mi8grnH0w-o)
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" The goal is to complete the game and reach the credits as quickly as possible
+		$LF
+	]li
+	[li 
+		" Abuses death in order to save time.
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"This TAS improves the current record of 00:45.33 by about 12 seconds. 
+	(__wikiLink|href=/2611M|implicitdisplaytext=2611M)
+	" 
+	$LF
+]div
+[div class=p 
+	"This TAS is played on version 2.3.6 of the game whereas the original was played on version 2.0. About 4 seconds is saved due to running in v2.3 by allowing you to skip the fake loading screen (Slightly less due to navigating the menus to enable glitchrunner). All of the rest of the time saved comes from better routing and not having to re-enter the game again in order to perform credits warp.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=TakingAdvantageOfSavingAndQuitting 
+	" Taking advantage of saving and quitting
+	$LF
+]h3
+[div class=p 
+	"This trick has no name as far as I'm aware, but by quicksaving and re-entering the game, you can skip any cutscene you want, including the introduction cutscene or even intermissions such as the Gravitron. This works on all versions of the game including v2.3. This has been rightfully banned in most categories due to it being mostly uninteresting and potentially extremely game-breaking. As such, it is only allowed in the v2.0 credits warp branch where there are almost no restrictions. In this TAS, we take advantage of this bug to skip the introductory cutscene and gain access to the ship much faster than normal.
+	$LF
+]div
+[h3 id=WhatIsGlitchrunner20 
+	" What is Glitchrunner 2.0?
+	$LF
+]h3
+[div class=p 
+	"Glitchrunner 2.0 is a setting that can be enabled by going into OPTIONS > GAMEPLAY > SPEEDRUN OPTIONS > GLITCHRUNNER MODE > 2.0
+	$LF
+	"This setting is designed to re-enable the bugs and glitches found in v2.0 of the game. Nothing shown in this TAS is exclusive to 2.3 (except skipping the fake loading screen).
+	$LF
+]div
+[div class=p 
+	"Interestingly, glitchrunner 2.0 will also re-introduce a bug that prevents you from being able to save or quit the game during a fade-in. To prevent losing time, we only enable glitchrunner 2.0 from the in-game settings once we need it.
+	$LF
+]div
+[div class=p 
+	[b 
+		"Some of these bugs and glitches include...
+	]b
+	$LF
+]div
+[h3 id=GlitchyFadeOut 
+	" Glitchy Fade Out
+	$LF
+]h3
+[div class=p 
+	"When exiting the game in older versions of VVVVVV, the game doesn't do a very good job of resetting the game. Strangely, the game won't let you actually quit until Viridian is alive. Additionally, if the game is in an unintended state, most of the time the game just won't correct it lol. This also makes it surprisingly easy to achieve an incredibly broken glitched state known as...
+	$LF
+]div
+[h3 id=TextStorage 
+	" Text Storage
+	$LF
+]h3
+[div class=p 
+	"Text Storage is the bread and butter of this run and revolves around one simple concept. All this involves is keeping the 
+	[code 
+		"- Press ACTION to advance text -
+	]code
+	" dialogue on the screen while no other textbox is active. This doesn't seem that broken in concept, but allows you to interact with the game's code on a level that completely breaks the game apart. To talk about how and why this works, we need to talk about...
+	$LF
+]div
+[h3 id=TerrySGamestateWorldOfFunTm 
+	" Terry's Gamestate World of Fun(TM)
+	$LF
+]h3
+[div class=p 
+	[em 
+		"Introducing: The 
+		[b 
+			"gamestate
+		]b
+		" variable
+	]em
+	$LF
+]div
+[div class=p 
+	"The simplest way to explain the gamestate variable is how it acts similar to a pointer. The gamestate is responsible for running the game properly by pointing at the piece of code that the game should be running at any given moment. The majority of the time this variable is set to 0 which handles normal gameplay but by setting the gamestate to specific values you can trigger the code that it points to and run it. The game does this all the time for events such as cutscenes, special events like the Gravitron, or even the movement of Viridian after exiting a teleporter. Although you aren't changing the code itself, manipulating the gamestate allows you to reach gamestates you aren't intended to reach until much later in the game. As you might have been able to guess, Text storage allows us to manipulate this gamestate variable by incrementing the value by 1 every time we press ACTION.
+	$LF
+]div
+[div class=p 
+	[small 
+		"Side note: In the patched version of credits warp, you can only increment the gamestate once every single time 
+		[code 
+			"updatestate()
+		]code
+		" is called. This means that you can only increment the gamestate once until the game changes to another gamestate. However, v2.0 can increment the gamestate freely which allows you to perform credits warp much faster.
+	]small
+	$LF
+]div
+[div class=p 
+	"By incrementing the gamestate at the end of a teleporter's animation, you trick the gamestate variable into thinking that you're actually at the beginning of the next teleporter animation! As long as you keep incrementing the gamestate, this will continue until you eventually go through all the teleporter animations. Once you've done that, you can then increment the gamestate again to start the cutscene to Final Level and then once more to start the final cutscene of Viridian being saved.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=Routing 
+	" Routing
+	$LF
+]h3
+[div class=p 
+	"With all that explained, the fastest route boils down to this:
+	$LF
+]div
+[div class=p 
+	"1. Find a pair of teleporters (You must have 2 visible on your map in order to teleport)
+	$LF
+]div
+[div class=p 
+	"2. Get Text Storage as quickly as possible
+	$LF
+]div
+[div class=p 
+	"3. Use the teleporter and increment the gamestate until you reach the credits.
+	$LF
+]div
+[h3 id=Recap 
+	" Recap
+	$LF
+]h3
+[div class=p 
+	"I start off by immediately saving and exiting the game, skipping the intro cutscene. I then touch the SS1 teleporter in order to set the teleporter as my respawn location and unlock it on the map. From there, I walk out of the ship until I reach the 2nd teleporter just off to the right. I interact with the terminal and immediately press R to start the respawn timer. Once the textbox from the terminal is on-screen, I go into the options menu and enable glitchrunner v2.0. I then quit out of the game so the textbox disappears but the game hasn't actually fully quit because I'm still waiting to respawn. Once I do respawn, I immediately touch the teleporter and my gamestate gets set to 2000. This gamestate is responsible for saving the game which ends up canceling the fadeout animation and resuming "normal" gameplay. I use the teleporter and come out the other side to set my gamestate to 4050. From there, I use text storage to increment my gamestate until I reach 4089 and trigger the ending cutscene.
+	$LF
+]div
+[h3 id=SpecialThanks 
+	" Special Thanks!
+	$LF
+]h3
+[div class=p 
+	"I originally discovered this route but OlivierMoreau03 has been a huge help in improving the route and teaching me what I know about Credits warp.
+	$LF
+]div
+[div class=p 
+	"Shoutouts also go out to Info Teddy for developing 2.3 and being an amazing figure and TASer in the VVVVVV community.
+	$LF
+]div
+[h4 id=Edit 
+	" EDIT:
+	$LF
+]h4
+[div class=p 
+	"Input file was updated to 60 FPS and improved to a final time of 33.27s - 
+	[a href=https://tasvideos.org/UserFiles/Info/637805978671157147 rel=noopener external nofollow 
+		"https://tasvideos.org/UserFiles/Info/637805978671157147
+	]a
+	$LF
+]div
+[div class=p 
+	"Almost all of the time save was due to better menuing... 🙃
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Updated movie file with a 60 FPS version with some menuing improvements.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/slamo 
+		"slamo
+	]a
+	": Great movie and well optimized, as usual.
+	$LF
+]div
+[div class=p 
+	"It's difficult to compare the gameplay between this and the previous 2.0 game end glitch movie. Here is my understanding: 2.3 introduced a new mechanic where you can open the menu during cutscenes, which allows you to save + quit to skip the entire opening cutscene. This keeps you from using text storage + game state manipulation to warp to the starting point of the Space Station 2 time trial, but it is overall faster to skip the opening cutscene and just start from inside the ship. I would consider this a non-trivial gameplay improvement due to the different routing it requires, and this combined with reaching the ending dialogue faster after the last save + quit (an improvement also applicable to the real 2.0) overall constitutes a valid gameplay improvement. Glitchrunner mode is also an interesting twist, as it lets you pick and choose which bugs you want to be active, and this run would not have been possible on 2.3 without it.
+	$LF
+]div
+[div class=p 
+	"This movie has the same goal (fastest completion) as the 2.0 game end glitch run and is too similar, so it will have to obsolete it. The problem is that we 
+	(__wikiLink|displaytext=already have a "game end glitch" branch for 2.3|href=/4588M)
+	" (with the constraint that they don't use Glitchrunner mode), so this is going to have to look at least a little weird. Calling the branch "Glitchrunner Mode" seems like a decent enough option that explains the difference between this and other branches, and would be at least some attempt to future-proof the branch if multiple Glitchrunner versions are used in the same run. If another version is released and a faster run is made, we can probably switch back to "game end glitch" under that version.
+	$LF
+]div
+[div class=p 
+	"Accepting as an improvement to the 
+	(__wikiLink|displaytext=previous movie|href=/2611M)
+	" under the Fastest Completion goal.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

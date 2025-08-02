@@ -1,0 +1,545 @@
+4
+[div class=p 
+	"At long last, I've returned to my roots as the Pictionary guy. This time, I aim to show you everything my favorite piece of shovelware has to offer.
+	$LF
+]div
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Show a full clear of all minigames
+		$LF
+	]li
+	[li 
+		" Show off the drawing mode
+		$LF
+	]li
+]ul
+[div class=p 
+	"My main goal for this movie is to make up for the shortcomings of 
+	(__wikiLink|displaytext=my last submission|href=/5939S)
+	" by actually engaging with all the minigames and doing some random drawings. Make sure to close your eyes when you see a red space or you'll see the clue for 2 frames!
+	$LF
+]div
+[div class=p 
+	"This has been a WIP sitting on my hard drive for several years now. I was originally going to hold off until April Fool's of some year in this decade, but when I saw 
+	(__wikiLink|href=/6342M|implicitdisplaytext=6342M)
+	" got published unironically, I knew it was time to dust this thing off and share it with the world.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#GameObjectives 
+					" Game objectives
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#CategoryDetails 
+					" Category Details
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Tech 
+					" Tech
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#BoardRng 
+							" Board RNG
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MinigameRng 
+							" Minigame RNG
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Framerules 
+							" Framerules
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#GuessingShoes 
+							" 
+							"The Guessing Shoes
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#CursorOptimization 
+							" Cursor Optimization
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#EndingTheGameEarly 
+							" Ending the game early
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#GuessingMinigames 
+					" The Guessing Minigames
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#AttackOfThePaintZombies 
+							" Attack of the Paint Zombies
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#WarehouseShuffle 
+							" The Warehouse Shuffle
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#FourAlarmRescue 
+							" Four-Alarm Rescue
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#LeapinEnergyCapsules 
+							" Leapin' Energy Capsules!
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#Drawings 
+					" The Drawings
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Bonus 
+					" Bonus
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h2 id=CategoryDetails 
+	" Category Details
+	$LF
+]h2
+[div class=p 
+	"Let me walk you through some of the finer details of this game so I can explain some of the decisions I made.
+	$LF
+]div
+[div class=p 
+	"Regular mode is actually an easy mode that they added in the international release. To get the authentic Pictionary experience, I recommend playing on hard mode, which is equivalent to the original Japanese release.
+	$LF
+]div
+[div class=p 
+	"...Nah, but for real. Regular mode gives you a mix of drawings to do and guessing minigames to play, depending on what color space you land on.
+	$LF
+]div
+[div class=p 
+	"There are four guessing minigames, each of which is a dinky little challenge that unveils a pre-drawn picture one square at a time as you score points. If you think you know it, you can press start to end the game early; as such, these games are 
+	[b 
+		"completely unnecessary
+	]b
+	" to a TAS, since we can just use a 
+	(__wikiLink|displaytext=tool|href=/UserFiles/Info/638740451358732477)
+	" to peak inside RAM and assist our speedguessing; that's what  
+	(__wikiLink|displaytext=DrD2k9's run|href=/6342M)
+	" does. As such, I've added a 
+	[b 
+		"full clear
+	]b
+	" restriction: I must score 40 points in each game and fully clear the picture. In my old submission, I made the questionable decision to just ban the start button and end each minigame dead or alive, usually dead... which isn't all that different from just skipping the minigames. I initially made that decision because I was a purist about saving 
+	[em 
+		"all
+	]em
+	" of the citizens in the fireman game, so I gave up and saved 
+	[em 
+		"none
+	]em
+	" of them. This time around, I have no problem losing health as long as I can clear all 40 squares.
+	$LF
+]div
+[div class=p 
+	"The drawing mode gives one player a prompt (everyone else must close their eyes!) and has either all players or just their teammate(s) guess it. The controls are inspired by the Logo turtle: you can use left and right to rotate the cursor, A to draw a line, and B to move without drawing. You can also make 1x1 or 2x2 circles with down and up, respectively. Unlike the Logo turtle, the Pictionary turtle is stuck to an 8x8 pixel grid and can only move at 0x1, 1x1, and 2x1 slopes (i.e. 0, +/-1, +/-1/2, +/-2, 1/0. Or... All vectors (x, y) such that x, y ∈ {-2, -1, 0, 1, 2}). These limitations make it difficult to convey just about anything.
+	$LF
+]div
+[div class=p 
+	"Now, drawing minigames are only available for two or more teams of two or more players (you need a teammate to guess your drawings). Otherwise, they're replaced with a random roll of the four guessing minigames. In my old movie, I chose to play singleplayer and omit any drawing minigames, manipulating two extra copies of the fastest guessing minigame. That doesn't sit right with me either, so this time, I told the game I am four people so I could show you two drawings. The Potato Brains are just a vessel; these drawings are for YOU to guess!
+	$LF
+]div
+[h2 id=Tech 
+	" Tech
+	$LF
+]h2
+[h3 id=BoardRng 
+	" Board RNG
+	$LF
+]h3
+[div class=p 
+	"When you press start to confirm your team names, two things are determined immediately:
+	$LF
+]div
+[ol 
+	[li 
+		" The sequence of words that will appear in the guessing minigames
+		$LF
+	]li
+	[li 
+		" The meaning of each colored space
+		$LF
+	]li
+]ol
+[div class=p 
+	"Regardless of color, the first and last squares are always drawing minigames, and therefore always random in singleplayer, so you can imagine it took me a while to notice this.
+	$LF
+]div
+[div class=p 
+	"For the purposes of this movie, I needed red = drawing so I could show off one of each guessing minigame. And lucky me, the RNG for the TWINS, SWAN, COMEDY... sequence from last time meets that condition!
+	$LF
+]div
+[h3 id=MinigameRng 
+	" Minigame RNG
+	$LF
+]h3
+[div class=p 
+	"All other random elements are on a frame timer, including, oddly enough, the word choice for drawing minigames. So within the TWINS, SWAN, COMEDY... sequence, I have a lot of freedom to pick what to draw.
+	$LF
+]div
+[div class=p 
+	"The dice uses RNG continuously to animate its tumble, but as far as I can tell, it always takes the same amount of time to settle down.
+	$LF
+]div
+[h3 id=Framerules 
+	" Framerules
+	$LF
+]h3
+[div class=p 
+	"There is a 64-frame rule (!) when loading into the board. If you waste time and hit the same rule, RNG is completely scrambled. And I don't mean the sequence is shifted by that many frames, it is truly 
+	[em 
+		"scrambled.
+	]em
+	" You can usually roll a 6 sooner by taking advantage of this.
+	$LF
+]div
+[div class=p 
+	"There is a minor 8-frame rule when picking up and delivering boxes in the Warehouse Shuffle, and probably a few others I haven't noticed.
+	$LF
+]div
+[h3 id=GuessingShoes 
+	" 
+	[a href=https://www.amazon.com/Converse-Unisex-High-Sneakers-M9621/dp/B003V0R1K8 rel=noopener external nofollow 
+		"The Guessing Shoes
+	]a
+	$LF
+]h3
+[div class=p 
+	"I'm not sure what they were thinking with these, but you have to admit they have some flair.
+	$LF
+]div
+[div class=p 
+	"You actually have momentum here. When you're at full speed, you have a 2-frame window to input each letter. Stopping and turning around is extremely slow, so it's usually better to wrap around the alphabet. My little Lua script for testing this movement turned out to be completely wrong (like it somehow didn't weight turning around properly), so I'm officially disavowing it.
+	$LF
+]div
+[div class=p 
+	"I had fun typing some swaggy things along the way, but rest assured I didn't waste any time except for dice manip. Well... I was also adamant to show LEFT: "Nice going! That's right!", but other than 
+	[em 
+		"that.
+	]em
+	$LF
+]div
+[h3 id=CursorOptimization 
+	" Cursor Optimization
+	$LF
+]h3
+[div class=p 
+	"Every time you press A to draw a line, the game lags for exactly 17 frames as it makes an undo copy of your drawing. As such, we want to make each single stroke as long as possible. You can turn the pen as it moves, but only by one angle unit at a time. This makes certain smooth curves very quick to draw.
+	$LF
+]div
+[div class=p 
+	"There are two more things to keep in mind when optimizing a drawing: turn mashing, and edge crashing
+	$LF
+]div
+[dl 
+	[dt 
+		" Turn mashing
+		$LF
+	]dt
+]dl
+[div class=p 
+	(youtube|v=v6NOKNiccR8|w=850)
+	$LF
+]div
+[div class=p 
+	"Every time you see the cursor turn, 
+	[em 
+		"I TASed it manually.
+	]em
+	" It doesn't suffice to just hold the arrow, you have to mash it. But not at 30 Hz, oh no. It's only on certain frames, and it's different every time. Which frames, and why? Who knows! If you try to copy/paste, or add delay, too bad! The frames are different now. As such, it's best to TAS your drawings naively, which makes your inputs salvageable as you correct any mistakes, then apply the cursor optimizations after the fact.
+	$LF
+]div
+[dl 
+	[dt 
+		" Edge crashing
+		$LF
+	]dt
+]dl
+[div class=p 
+	"When you crash into the edge of the canvas at any angle, you get stuck in place. No quarter steps or wall hitboxes here. For whatever reason, you can turn 
+	[em 
+		"really
+	]em
+	" fast in this state by holding B, or better yet by mashing it at 20 Hz (B, B, wait, B, B, wait...). It gives you a speed unmatched by even the luckiest cursor mashing. If you're holding A instead, you can even continue a line along the edge without an extra A press.
+	$LF
+]div
+[h3 id=EndingTheGameEarly 
+	" Ending the game early
+	$LF
+]h3
+[div class=p 
+	"The game will skip the little bounce/reveal animation if you score another point in the middle of it, so you can end the round early by scoring one more point as the 40th point is animating. As far as I can tell, these bounces always take the same amount of time regardless of the position of the target square.
+	$LF
+]div
+[h2 id=GuessingMinigames 
+	" The Guessing Minigames
+	$LF
+]h2
+[h3 id=AttackOfThePaintZombies 
+	" Attack of the Paint Zombies
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/SuFz9gd.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"A fun little Space Invaders clone. Canonically, these little gremlins are aliens from another dimension that want to paint everything green, and my paint bucket is a giant space ship shooting... paint. This was a clear inspiration for Splatoon, if you ask me. But why is it called "Paint Zombies??"
+	$LF
+]div
+[div class=p 
+	"There's little rhyme or reason to my killing pattern; I just kept pressing A as soon as it would let me. The most important thing is to be prepared for the final guy that no one can ever get.
+	$LF
+]div
+[h3 id=WarehouseShuffle 
+	" The Warehouse Shuffle
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/wgusK16.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"A game about moving stacks of boxes while dodging little gremlins. The Sokoban guy's got nothing on this guy!
+	$LF
+]div
+[div class=p 
+	"The greminlins' starting positions are determined randomly when the minigame loads. In this 
+	[a href=https://youtu.be/_Xba9J4rTyY?t=84 rel=noopener external nofollow 
+		"old WIP
+	]a
+	" (I told you this has been a long time coming!), you can see I got the gremlins almost exactly on top of each other. I wasn't able to replicate that RNG within 2 seconds or so, so I went with the best outcome I could find. I doubt it would save much time, but it's out there somewhere.
+	$LF
+]div
+[div class=p 
+	"You can carry up to 6 boxes, but at 5 and 6, you are encumbered, and it's near impossible to dodge the gremlins. So your best best is to grab 4 and go back and forth at full speed. Whenever that didn't work, I tried to scrape by with 2 or 3.
+	$LF
+]div
+[h3 id=FourAlarmRescue 
+	" Four-Alarm Rescue
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/ia8dnon.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"A game about saving people jumping from a burning building. If you miss, they actually hit the concrete and die... Canonically, these guys are clones, and this place is called Cloneville Condos. I'm really starting to feel like the manual writer was taking the piss out of the designers...
+	$LF
+]div
+[div class=p 
+	"I recently learned that four-alarm means four trucks were sent to this fire, so I'm not sure where the hell those guys are. Lord knows I could use them. It is almost always impossible to score a full 40 points in this game. The sequence of jumpers is predetermined as soon as the minigame loads, so there's  no opportunity for manipulation. I'd like to say I did some clever shit to manipulate this, but the fact is I just tried different start frames until I got lucky.
+	$LF
+]div
+[div class=p 
+	"Random tidbit: The way the firefighters bob up and down actually affects their hitboxes. So I could end this game 1 frame earlier by saving the last citizen on an up frame. This would desync all the delicate RNG for the rest of the run, so unfortunately I wasn't able to show it off.
+	$LF
+]div
+[h3 id=LeapinEnergyCapsules 
+	" Leapin' Energy Capsules!
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/V5QV7Cw.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"A game about getting blue balls and going home. Canonically, this is some sort of factory that produces energy capsules that our spaceman needs to power his ship.
+	$LF
+]div
+[div class=p 
+	"Unlike the fireman game, the blue ball RNG is determined frame by frame, so it's a breeze to manipulate whatever I want. You may notice that I don't always get the same pattern, though. Naturally, A must be followed by B, but from B, both A and C are viable, so I went with the one I could touch first each time. Just went with the flent, as they say.
+	$LF
+]div
+[h2 id=Drawings 
+	" The Drawings
+	$LF
+]h2
+[div class=p 
+	"Come on, try to guess them. You know you want to.
+	$LF
+]div
+[div class= 
+	[div class= 
+		[ul class=nav nav-tabs role=tablist 
+			[li class=nav-item 
+				[a class=active nav-link data-bs-toggle=tab href=#tabs-10724-0 
+					"---
+				]a
+			]li
+			[li class=nav-item 
+				[a class=nav-link data-bs-toggle=tab href=#tabs-10724-1 
+					"Reveal
+				]a
+			]li
+		]ul
+	]div
+	[div class=tab-content 
+		[div class=tab-pane fade active show id=tabs-10724-0 
+		]div
+		[div class=tab-pane fade id=tabs-10724-1 
+			[div class=p 
+				"Last chance!
+				$LF
+			]div
+			[div class= 
+				[div class= 
+					[ul class=nav nav-tabs role=tablist 
+						[li class=nav-item 
+							[a class=active nav-link data-bs-toggle=tab href=#tabs-10786-0 
+								"---
+							]a
+						]li
+						[li class=nav-item 
+							[a class=nav-link data-bs-toggle=tab href=#tabs-10786-1 
+								"Reveal
+							]a
+						]li
+					]ul
+				]div
+				[div class=tab-content 
+					[div class=tab-pane fade active show id=tabs-10786-0 
+					]div
+					[div class=tab-pane fade id=tabs-10786-1 
+						[h3 
+							" Drawing 1
+							$LF
+						]h3
+						[div class=p 
+							[b 
+								"Massachusetts
+							]b
+							" 
+							[br 
+							]br
+							$LF
+							[img class=embed mw-100 src=https://i.imgur.com/9FyxgT6.png 
+							]img
+							$LF
+						]div
+						[div class=p 
+							"Massachusetts happens to be one of the first couple clues I got randomly, and it's just perfect. Lacking any artistic talent, trying to trace a state map within these limitations and have it be recognizable is the most impressive thing I can manage. Although, not a single person I showed this to has figured it out, not even my friends in Boston. They all thought it was a dinosaur or something...
+							$LF
+						]div
+						[h3 
+							" Drawing 2
+							$LF
+						]h3
+						[div class=p 
+							[b 
+								"Texas
+							]b
+							" 
+							[br 
+							]br
+							$LF
+							[img class=embed mw-100 src=https://i.imgur.com/m4H9vEb.png 
+							]img
+							$LF
+						]div
+						[div class=p 
+							"This one is a bit of a softball, especially now that you've been primed to expect U.S. states. There were some other quick-to-get geography clues, but they just weren't as punchy as Texas. We're talking Nebraska, the British Isles, West Germany, and Idaho (with apologies to anyone who lives in Nebraska, the UK, Ireland, Germany, or Idaho). Maybe someday I'll do a Pictionary geography bee :)
+							$LF
+						]div
+					]div
+				]div
+			]div
+		]div
+	]div
+]div
+[h2 id=Bonus 
+	" Bonus
+	$LF
+]h2
+[div class=p 
+	"Please enjoy 
+	[a href=https://github.com/warmCabin/pictionary-turtle rel=noopener external nofollow 
+		"pictionary_turtle.lua
+	]a
+	", an API to control the cursor through Lua! I used it to generate the basic movement for my drawings before hand-optimizing them.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/eien86 
+		"eien86
+	]a
+	": A rather entertaining movie that showcases all mini-games in NES Pictionary. Luck is manipulated to advance as fast as possible while visiting all activities, including some drawing activities. The execution looks flawless and you can tell (by watching and by the notes) that a huge amount of work has been put in it. Calling the goal "100%", as all of the diverse parts of the game are visited. I don't think any other approach (e.g., visiting all squares) would better qualify for this.
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard, 100%
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

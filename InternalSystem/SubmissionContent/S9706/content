@@ -1,0 +1,574 @@
+10
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#PreliminaryInformation 
+					"Preliminary Information
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#GameObjectives 
+					"Game Objectives
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Introduction 
+					"Introduction
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#ThingsToConsider 
+					"Things To Consider
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#AimingShots 
+							"Aiming Shots
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#OptimizingAimTime 
+							"Optimizing Aim Time
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#PowerLevel 
+							"Power Level
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#OptimizingStrokeTime 
+							"Optimizing Stroke Time
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Nondeterminism 
+							"Nondeterminism
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#ReplaySystem 
+							"Replay System
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#LevelByLevelComments 
+					"Level-by-Level Comments
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#RamValues 
+					"RAM Values
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Improvements 
+					"Improvements
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=PreliminaryInformation 
+	"Preliminary Information
+	$LF
+]h3
+[ul 
+	[li 
+		"Emulator used: BizHawk v2.10 (Core: Nymashock)
+		$LF
+	]li
+	[li 
+		"BIOS: ps-30a.bin
+		$LF
+		[ul 
+			[li 
+				"sha1:0555C6FAE8906F3F09BAF5988F00E55F88E9F30B
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"ROM: Putter Golf (USA).cue
+		$LF
+		[ul 
+			[li 
+				"sha1:D7589DEA
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=GameObjectives 
+	"Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		"Aims for best possible score
+		$LF
+	]li
+	[li 
+		"Secondary goal: fastest completion
+		$LF
+	]li
+]ul
+[h3 id=Introduction 
+	"Introduction
+	$LF
+]h3
+[div class=p 
+	"I never thought I'd be TASing PSX games, but the start of the first 
+	(__wikiLink|displaytext=TAS Jam|href=/Forum/Topics/26260)
+	" had me interested, and this one turned out to be at least somewhat interesting so there's that. Putter Golf is the American release of Simple 1500 Series Vol. 69: The Putter Golf. The game has two courses: normal and trick. This movie opts to complete the normal course with the minimum amount of strokes in as little time as possible. The branch is labeled as "minimum strokes" rather than simply fastest completion, as my testing proves that it is faster on some holes to land in the water in order to avoid the ball slowly coming to a stop, which allows us to reset faster for the next stroke. As such, I will also be making a fastest completion movie. I plan to eventually tackle the trick course as well.
+	$LF
+]div
+[h3 id=ThingsToConsider 
+	"Things To Consider
+	$LF
+]h3
+[div class=p 
+	"This section will detail certain points of consideration when trying to optimize each level. It is worth noting that while the game runs at ~60 FPS, while we are playing the course it only functions at ~30 FPS, ignoring input and presumably running calculations every other frame. Therefore, when I refer to how the game updates in one frame in the following documentation, it can be interpreted as two frames at ~60 FPS.
+	$LF
+]div
+[h4 id=AimingShots 
+	"Aiming Shots
+	$LF
+]h4
+[div class=p 
+	"The shot angle is stored as 2 bytes at address: 0x0C6CBE. We will analyze this address as hexadecimal for ease of explanation. For example, the angle could have a value of 0x0048. We can, however, ignore the leftmost digit, as it will only increment when we have turned the character a full 360 degrees, which will result in repeating angles. I will simply refer to the value by the remaining three digits to avoid confusion. Since there are three meaningful digits with 16 possible values each, 16x16x16=4096 which is where we get our 4096 possible angles. However, they are never all accessible on any given stroke, due to how the angle adjustment works. Let me explain:
+	$LF
+]div
+[div class=p 
+	"When we press the D-pad left or right for one frame to adjust the aim, the game adds or subtracts 0x4 from the current angle, which is the finest angle adjustment possible. This means that a quarter of all possible angles are cut out of contention for every stroke, leaving only 1024 remaining. However, there is a small trick we can do to "unlock" another quarter of the angles on certain strokes.
+	$LF
+]div
+[div class=p 
+	"The game has a mechanic where if you press the circle button, it will find the angle that points closest to the hole and snap to it. We can use this to our advantage to shift the rotational cycle. For example, we may be on a cycle where the rightmost digit loops through 0,4,8,C, but when we press circle, it adjusts the angle to 0x052. This will put us on a cycle that loops through 2,6,A,E. However, this only works on opening shots, as follow-up shots already start with the aim pointed at the hole, while the opening shot's angle is hard-coded. With this trick, we can expand our possible angles on certain opening shots to 2048, though on some holes, snapping the angle will still result in the same cycle.
+	$LF
+]div
+[h4 id=OptimizingAimTime 
+	"Optimizing Aim Time
+	$LF
+]h4
+[div class=p 
+	"Since simply holding down the D-pad buttons to adjust the aim is very slow, there are a few things we can do to minimize time spent aiming.
+	$LF
+]div
+[div class=p 
+	"The first strategy is to use the circle button to snap to the hole. This only helps in certain scenarios where the angle will pass by the hole while aiming or when the target angle is closer to the hole than the starting point, and of course if you needed an angle from the initial cycle this won't help.
+	$LF
+]div
+[div class=p 
+	"The second strategy is to start with coarse adjustment, then fine tune. The game allows us to hold down R1 while aiming to adjust the angle quicker. This results in the game adjusting the angle by 0x10 every frame, rather than 0x4, which is four times faster. Then, once we are close to the desired angle, we can perform fine adjustments to the angle by letting go of R1.
+	$LF
+]div
+[h4 id=PowerLevel 
+	"Power Level
+	$LF
+]h4
+[div class=p 
+	"Each stroke consists of two X button presses, one to initiate the stroke, and one to determine the power. There are 64 possible power levels for each stroke, ranging from 0x4 to 0x100. On every frame following the initial button press, the power level increments by 0x4 until it reaches 0x100 and then decrements back down to 0 in the same manner. Not much to talk about here.
+	$LF
+]div
+[h4 id=OptimizingStrokeTime 
+	"Optimizing Stroke Time
+	$LF
+]h4
+[div class=p 
+	"...ayo
+	$LF
+]div
+[div class=p 
+	"This section is kind of irrelevant I just wanted to put that heading. I will say that it is always fastest to just switch to the orange putter on every shot, even if you're shooting less than the 15 yd mark. It doesn't even take any time to switch cause you can do it while you're aiming. Though I guess using the blue putter would technically give you 32 more power levels that the orange one doesn't have but why would you be hitting soft enough for that to matter anyway? More power = faster ball. Also triangle button to switch putters for anyone who doesn't have the brains to figure that one out.
+	$LF
+]div
+[div class=p 
+	"So that's all good and well. You may be thinking, "Gee fella8, you're starting to get a little rude, but no matter. It's probably just because you're writing this at 3am. But anyways I was just gonna say that with so many possibilities for how to strike the ball, it must be trivial to find one that puts the ball in the hole, righ-" 
+	[b 
+		"WRONG
+	]b
+	$LF
+]div
+[div class=p 
+	"Introducing:
+	$LF
+]div
+[h4 id=Nondeterminism 
+	"Nondeterminism
+	$LF
+]h4
+[div class=p 
+	"Otherwise known as RNG.
+	$LF
+]div
+[div class=p 
+	"Hmm yes indubitably. My findings suggest that there is an RNG running every frame that will affect the physics of the ball immediately after it is struck hmm yes. I seriously have no idea what the purpose of this is other than to piss me off.
+	$LF
+]div
+[div class=p 
+	"Basically, from what I can tell, there is an RNG that calculates a new number every frame that will alter some aspect of the ball's movement when a stroke is performed. What this means is that you could have a shot that puts the ball in the hole perfectly, but if you delay it by one measly frame, the ball could end up somewhere completely different, even though the power and angle are the same. My guess is that the game uses the RNG to calculate the ball's initial speed, however I haven't yet found the speed address in RAM, so it's hard to say. I should probably get on that.
+	$LF
+]div
+[div class=p 
+	"This mechanic causes some headache when improvements are found early in the run, as it's basically guaranteed not to sync on the next hole or any recurring holes. Even two shots taken on the same frame will not sync if there were any differences in the previous shot. Luckily it's a short run, so it isn't a crazy amount of extra work to deal with. I will admit that it led me to finding big improvements after my draft TAS solely based on randomness, since I improved hole 3 and had to redo all the following holes.
+	$LF
+]div
+[div class=p 
+	"The RNG is semi-helpful for finding shots that put the ball in the hole. Sometimes it seems like there is no combination of power and angle that will work, so you can delay the shot more and more until you find an RNG value that does work. I'm guessing this is why the RNG exists—to exponentially increase the number of possible outcomes—though I fail to see why they couldn't have just used the extra digit and given us more choices of angle, but don't mind me I'm just salty.
+	$LF
+]div
+[div class=p 
+	"Even if you do find a delay that works, it is worth trying even longer delays, as sometimes this will result in the ball dropping into the hole faster (we try to avoid having the ball bounce around a lot).
+	$LF
+]div
+[h4 id=ReplaySystem 
+	"Replay System
+	$LF
+]h4
+[div class=p 
+	"Disclaimer: I am not sure exactly how this works, but I believe it to be timer-based.
+	$LF
+]div
+[div class=p 
+	"When a shot is taken, the camera stays behind the player for a certain amount of time. After a certain amount of time, the camera angle will switch to follow the ball. However, it will not continue from the ball's current position, but rather go back to just after the shot was taken, hence why I call it a replay system.
+	$LF
+]div
+[div class=p 
+	"This replay can be avoided if one of two things happens before the replay triggers: the ball comes to a stop, in which case the camera stays fixed behind the player, or the ball reaches a close proximity to the hole, in which case the camera will cut to the hole.
+	$LF
+]div
+[div class=p 
+	"The replay can also be forced to start sooner in the case that the ball bounces off of a wall. This is useful in levels 3 and 4, where we can get a wall bounce almost instantly and avoid the time spent waiting for the replays to start.
+	$LF
+]div
+[h3 id=LevelByLevelComments 
+	"Level-by-Level Comments
+	$LF
+]h3
+[ul 
+	[li 
+		"Menuing
+		$LF
+		[ul 
+			[li 
+				"The course start is delayed by 1 frame to select the robot player, because I felt it was fitting for the TAS. All the players have equivalent stats, however. I also delayed 2 additional frames for better RNG on the first hole.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 1
+		$LF
+		[ul 
+			[li 
+				"Due to the 3 frame delay from menuing, the ball drops into the hole faster.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 2
+		$LF
+		[ul 
+			[li 
+				"We go through the rough so that the ball comes to a stop sooner, saving a significant amount of time.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 3
+		$LF
+		[ul 
+			[li 
+				"This is by far the most technical hole.
+				$LF
+			]li
+			[li 
+				"At the beginning of the shot, we snap to the hole which turns us 180 degrees to face the wall, which sets us up to bounce off of the wall quickly. We land in the bunker for the same reason as hole 2, but try to make sure the ball lands close enough to the edge and the fence to set us up for the next shot.
+				$LF
+			]li
+			[li 
+				"On the second shot, we pass by the hole to avoid the replay and the wall bounce gives us the line to direct the ball into the hole. I could not get the ball to go into the hole on the first pass, because it is moving too quickly, and slowing the shot down causes the replay to start before the ball gets close enough to the hole.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 4
+		$LF
+		[ul 
+			[li 
+				"We snap to the hole to set up another wall bounce which starts the replay.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 5
+		$LF
+		[ul 
+			[li 
+				"N/A
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 6
+		$LF
+		[ul 
+			[li 
+				"Delay the shot 11 times, which seems like a lot but it's the fastest one I could find.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 7
+		$LF
+		[ul 
+			[li 
+				"Go through the out of bounds to slow down the ball again.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 8
+		$LF
+		[ul 
+			[li 
+				"I was surprised by how high I was able to get the power level and still keep the ball from bouncing away from the hole.
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[ul 
+	[li 
+		"Hole 9
+		$LF
+		[ul 
+			[li 
+				"N/A
+				$LF
+			]li
+		]ul
+	]li
+]ul
+[h3 id=RamValues 
+	"RAM Values
+	$LF
+]h3
+[div class=p 
+	"These are the memory values I was able to find. The first three define the ball's position in space. Before anyone says anything about how I ordered them, it's the same order they are in RAM so hush.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Address
+			]th
+			[th 
+				"Size
+			]th
+			[th 
+				"Note
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"0x0F4866
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"X-Pos
+			]td
+			[td 
+				"Lateral Position
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0F486A
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"Y-Pos
+			]td
+			[td 
+				"Height
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0F486E
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"Z-Pos
+			]td
+			[td 
+				"Lateral Position
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0C6D7C
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"Club
+			]td
+			[td 
+				"Which club is selected
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0C6CBE
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"Angle
+			]td
+			[td 
+				"See above
+			]td
+		]tr
+		[tr 
+			[td 
+				"0x0C6CC4
+			]td
+			[td 
+				"2 bytes
+			]td
+			[td 
+				"Power
+			]td
+			[td 
+				"See above
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=Improvements 
+	"Improvements
+	$LF
+]h3
+[div class=p 
+	"Hole 3 could be significantly improved if the ball goes into the hole without the last bounce off of the wall. Hole 4 could potentially be improved with a bounce off of the left wall, which I was not able to get working, though I don't think this would save very much time if any.
+	$LF
+]div
+[div class=p 
+	"Although I believe I did a good job optimizing the movie for a first ever submission, (it's nearly 30 seconds faster than the only other TAS I could find), there are surely some improvements to be made. I did my own manual "brute forcing" by hand, but the next step is to run a brute forcing script on the game.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Lee Carvallo
+	]a
+	": Ball is in... judging lot.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Branch updated to "Normal course, maximum score" to match how other golf score TASes are labelled.
+	$LF
+]div
+[div class=p 
+	"The analysis on how shot aiming works is pretty helpful and the luck management seems well done. Nice work!
+	$LF
+]div
+[div class=p 
+	"Accepting to Standard.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Setting the submission to Delayed as the author has found and is working on potential improvements.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Darkman425 
+		"Darkman425
+	]a
+	": Input file replaced with a 288 frame improvement by the author, and setting this back to accepted.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

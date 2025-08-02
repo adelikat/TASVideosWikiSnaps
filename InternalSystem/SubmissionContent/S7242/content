@@ -1,0 +1,740 @@
+13
+[div class=p 
+	"Undertale is a 2D role-playing video game created by indie developer Toby Fox. Undertale has three main endings: Neutral, True Pacifist, and Genocide. This TAS achieves the Genocide ending, which can be considered the "bad ending" to the game. In this ending, the player must complete the kill requirements in each area and then kill each area's boss. The TAS is optimized for Z/Enter presses and then time.
+	$LF
+]div
+[div class=p 
+	"For the TAS to sync, you must check 
+	[em 
+		"Runtime > Time tracking > clock_gettime()
+	]em
+	". You may also need to install extra dependencies by entering this command into a terminal:
+	$LF
+]div
+[pre 
+	"sudo apt-get install libopenal1:i386 libssl1.0.0:i386 libglu1-mesa:i386
+	$LF
+]pre
+[div class=p 
+	"In addition, libTAS 1.4.1 has an audio bug where music files may not play at the correct speed. 
+	[a href=https://github.com/clementgallet/libTAS/commit/818b78dad5f335c85cd4011247609d8865117f51 rel=noopener external nofollow 
+		"This commit
+	]a
+	" fixes the issue and is what I used to encode the TAS.
+	$LF
+]div
+[div class=p 
+	"The TAS was made on version 1.0 of Undertale, which doesn't have a Linux release, meaning it can't be TASed in libTAS by default. Fortunately, Undertale is a GameMaker game, which can relatively easily be ported to Linux with the following steps:
+	$LF
+]div
+[ul 
+	[li 
+		"Download Windows Undertale v1.0 on a Windows machine in Steam by right-clicking on Undertale in your games library -> Properties -> Betas, then selecting old_version_100 in the list. 
+		$LF
+	]li
+	[li 
+		"Once downloaded, the game can be found in C:\Program Files (x86)\Steam\steamapps\common\UNDERTALE. It comes as a packed .exe file, so unpack it using 7zip, WinRAR, or similar programs. You should get the .ogg music files, UNDERTALE.exe, data.win, and a few other files.
+		$LF
+	]li
+	[li 
+		"From the extracted files, rename data.win to game.unx
+		$LF
+	]li
+	[li 
+		"Create a folder to put the game files into. You can call it whatever you want, for example "Undertale v1.0 Linux". Inside this folder, create a folder named "assets" (without the quotes) and move all the extracted files into this folder.
+		$LF
+	]li
+	[li 
+		"Copy 
+		[a href=https://cdn.discordapp.com/attachments/273954449721131028/837024631776739409/runner rel=noopener external nofollow 
+			"this file
+		]a
+		" (
+		[a href=https://files.tasvideos.org/emulatordownloads/linux/runner-linux-GameMakerStudio-1.4.1567.7z rel=noopener external nofollow 
+			"TASVideos mirror
+		]a
+		") into the "Undertale v1.0 Linux" folder. This file is the "runner" file, essentially the Linux version of the UNDERTALE.exe file found on the Windows version. It executes the code found in the data.win (or game.unx) file.
+		$LF
+	]li
+	[li 
+		"You should now have the following folder structure: the "Undertale v1.0 Linux" folder, which contains the runner file and the assets folder, which contains all the extracted files (most importantly game.unx and the .ogg files). Copy the "Undertale v1.0 Linux" folder to your Linux machine and start the game by executing the "runner" file via the command "/path/to/runner" (no quotes, and use the actual path). You may need to make it executable first via the command "sudo chmod +x /path/to/runner" (no quotes, and use the actual path).
+		$LF
+	]li
+	[li 
+		"If you've run this movie once and got to the black screen, you may get the same black screen when you run it again, even with 
+		[em 
+			"Prevent writing to disk
+		]em
+		" checked. Go to 
+		[code 
+			"/home/<Your Username>/.config/UNDERTALE
+		]code
+		" and empty it.
+		$LF
+	]li
+]ul
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#GameObjectives 
+					"Game objectives
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Comments 
+					"Comments
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#TricksUsed 
+					"Tricks Used
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#WallHumping 
+							" Wall Humping
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#MenuBuffering 
+							" Menu Buffering
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#PunchCardExploitPce 
+							" Punch Card Exploit (PCE)
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#WrongWarp 
+							" Wrong Warp
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#TextCorruption 
+							" Text Corruption
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#ChoicerOverflow 
+							" Choicer Overflow
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#PersistenceGlitch 
+							" Persistence Glitch
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#TextStorageOverflow 
+							" Text Storage/Overflow
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#PhasingStorage 
+							" Phasing Storage
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#RngManipulation 
+							" RNG Manipulation
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#AreaComments 
+					"Area comments
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#Ruins 
+							" Ruins
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Snowdin 
+							" Snowdin
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Waterfall 
+							" Waterfall
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#BackInSnowdin 
+							" Back in Snowdin
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#RestOfWatefall 
+							" The rest of Watefall
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#HotlandAndCore 
+							" Hotland and Core
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#NewHome 
+							" New Home
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#CoreGrind 
+							" Core grind
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#NewHomeAgain 
+							" New Home (again)
+							$LF
+						]a
+					]li
+				]ul
+			]li
+			[li 
+				[a href=#OtherComments 
+					"Other comments
+					$LF
+				]a
+				[ul 
+					[li 
+						[a href=#UnoptimalParts 
+							" Unoptimal parts
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#SpecialThanks 
+							" Special thanks
+							$LF
+						]a
+					]li
+					[li 
+						[a href=#Screenshots 
+							" Screenshots
+							$LF
+						]a
+					]li
+				]ul
+			]li
+		]ul
+	]div
+]div
+[h3 id=GameObjectives 
+	"Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		"Emulator used: libTAS v1.4.1 (32-bit)
+		$LF
+	]li
+	[li 
+		"Plays on version v1.0
+		$LF
+	]li
+	[li 
+		"Reaches the Genocide ending
+		$LF
+	]li
+	[li 
+		"Avoids taking damage, unless it saves Z/Enter presses or time
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	"Comments
+	$LF
+]h3
+[div class=p 
+	"The idea behind the Z Button Challenge may be familiar to many due to Super Mario 64's infamous "A Button Challenge". These kinds of challenges simply involve completing the game while avoiding using a certain controller element as much as possible. In the case of this TAS, said controller element is the Z/Enter buttons. These 2 buttons have the same function, which is moving forwards in menus and advancing textboxes. Because the 2 buttons do the same thing, they will henceforth be referred to as just the Z button or Z press. The Z button is the most important button in the game, along with the arrow keys.
+	$LF
+]div
+[div class=p 
+	"First, it's important to accurately define a Z press and the concept of half Z presses. A Z press has three parts to it: when Z is pressed, when Z is held, and when Z is released, and together, this forms one complete Z press. Usually, it's the pressing that's useful, because that's the only part that advances textboxes and menus. However, sometimes it's sufficient to just use the holding part (the "half Z press"), which allows us to close the "You Won" or "But nobody came" text at the end of battles. Now if we map out the required Z presses to kill a one-hit enemy, it would look like this: We need to press Z to advance to the monster select menu, we need to press Z again to start the attack, we need to press Z again to attack, and we merely need to hold Z to close the "You Won" text. So, how many Z presses is that total? The naïve answer would be four, three to kill the enemy and one to close the "You Won" text. However, we can do better. We can actually do it in three by simply holding out the third Z press to be used for the half Z press, because the half Z press only requires Z to be held, not actually pressed. In this fashion, closing the "You Won" text doesn't add any additional Z presses to the run, since the final Z press just leeches off of a previous Z press. So in conclusion, since that last Z press counts in some contexts but adds no additional Z presses in other contexts, we refer to it as a half Z press.
+	$LF
+]div
+[div class=p 
+	"This TAS features complex and unintuitive routing, and heavy usage of RNG manipulation and complex glitches. The run involves following the Genocide Route normally in Ruins, followed by doing a complex series of glitches to obtain the Punch Card, an extremely glitchy item which is normally unobtainable in Genocide. Afterwards we complete the Genocide requirements in Snowdin, Waterfall, and Hotland/Core, the latter of which has some more amusing routing involving a detour to New Home. Finally, the Sans battle (a major source of Z presses) can be completely skipped with the Punch Card Exploit (explained below, this is the main reason we obtain the Punch Card earlier) and the run can be completed, with the Fallen Human destroying the world. This TAS is special because it's the first real use of Genocide Punch Card (GPC), the latest major glitch discovery in Undertale speedrunning as of the time of writing. For a TAS optimized for time, GPC is currently not worth it, mainly because it's 1.0-exclusive and thus can't take advantage of the shorter Japanese text in newer versions of the game.
+	$LF
+]div
+[h3 id=TricksUsed 
+	"Tricks Used
+	$LF
+]h3
+[h4 id=WallHumping 
+	" Wall Humping
+	$LF
+]h4
+[div class=p 
+	"Wall humping is a movement technique where the player oscillates between facing up and facing down each frame. This technique is performed by holding Up and Down simultaneously while against the bottom side of a wall. This can be useful in certain circumstances such as when you are moving left or right but need to be facing up or down. In rooms where the player is in contact with and between two horizontal walls, this technique will cause the player to move at double speed, as the two walls both move the player simultaneously.
+	$LF
+]div
+[h4 id=MenuBuffering 
+	" Menu Buffering
+	$LF
+]h4
+[div class=p 
+	"Menu buffering is a movement technique where the player opens the menu and presses an arrow key on the same frame. This type of movement does not count as a step for random encounters and is not considered movement by blue lasers. Although menu buffering causes the player to move at half speed (alternating between the menu buffer and closing the menu), this technique can save time in certain circumstances where additional steps are not desirable.
+	$LF
+]div
+[h4 id=PunchCardExploitPce 
+	" Punch Card Exploit (PCE)
+	$LF
+]h4
+[div class=p 
+	"Although the punch card can be used to trigger many different exploits, PCE refers specifically to a glitch where the player menu buffers onto a cutscene trigger, uses the punch card from the item menu, then closes the punch card to regain movement in the cutscene. The reason this glitch happens is because there is one frame between using the punch card from the item menu and the punch card opening where the player has full control, and it is during this one frame that the cutscene trigger is activated. Because most cutscenes only lock movement at the very start of the cutscene, the punch card's own ability to unlock movement after being closed is enough to skip the entire cutscene.
+	$LF
+	"There is a variation of PCE called PCE slide where instead of menu buffering onto the cutscene trigger, the player uses the one frame of full control to walk onto the cutscene trigger, which also triggers the cutscene.
+	$LF
+]div
+[h4 id=WrongWarp 
+	" Wrong Warp
+	$LF
+]h4
+[div class=p 
+	"In Undertale speedrunning, wrong warping refers to entering a room and being placed at the default location in that room rather than the door the player entered from. When the player touches a room transition, the variable global.interact is normally set to 3. Then once the player reaches the next room, the game checks if global.interact is set to 3 and if it is, the game runs the code that places the player at the appropriate door marker. However, if global.interact is not 3, the player is not moved from the default location in the room. This default location is manually assigned per room by the game developer and is often closer to the middle of the room than the door marker is. There are several methods of triggering a wrong warp, all of which achieve the same result: setting global.interact to 0 (the value for full player control) while transitioning to the next room.
+	$LF
+]div
+[h4 id=TextCorruption 
+	" Text Corruption
+	$LF
+]h4
+[div class=p 
+	"Text corruption is a glitch which allows changing cutscene text in some, but not all cutscenes that have multiple sets of textboxes. Certain text boxes, such as dropping an item, use a variable called global.msc. When a textbox is created, the object creating the textbox assigns a value to global.msc, which is then used to lookup which set of text to display. By creating such a textbox between the cutscene's sets of textboxes, global.msc is changed to something unexpected, and so the following sets of textboxes will display the textbox that corresponds to the current global.msc value instead of the cutscene text that is meant to play. 
+	$LF
+]div
+[h4 id=ChoicerOverflow 
+	" Choicer Overflow
+	$LF
+]h4
+[div class=p 
+	"Choicer overflow in the context of Undertale speedrunning refers to a glitch that involves using multiple choicers at once to advance text beyond its normal limits. Choicers are types of textboxes that give the player a choice between two different options. These choicers also use the variable global.msc. If the set of text that is playing includes a choicer, global.msc is incremented by 1, which normally contains the post-choicer text, if any, as well as potentially other code that accompanies the selected choice. If another choicer is then activated, the value global.msc is incremented a second time and the corresponding set of text is displayed. This can be done repeatedly to advance global.msc to a particular value, as long as there are enough choicers available.
+	$LF
+]div
+[h4 id=PersistenceGlitch 
+	" Persistence Glitch
+	$LF
+]h4
+[div class=p 
+	"The persistence glitch is the newest type of glitch in Undertale speedrunning. Rooms have a property called persistence, which saves the state of each object in the room. This property is set when entering a battle and then unset once the player returns. However, by leaving the room on the frame before a battle starts, the room persistence is never unset. This glitch is used to store choicers in persistent rooms, which can then be used for choicer overflow to obtain the Punch Card.
+	$LF
+]div
+[h4 id=TextStorageOverflow 
+	" Text Storage/Overflow
+	$LF
+]h4
+[div class=p 
+	"Text storage (also called overflow) is a type of glitch where the player regains movement while text is on the screen, often by using the Punch Card's 1 frame of full control to interact with a sign or NPC. This can be useful in different ways, as some text can be used to set global.interact to 0 upon closing the textbox. Text storage is necessary to regain movement during the exclamation mark that appears above the player's head as part of the transition to a random encounter, as using the Punch Card to do this doesn't work. Text storage can also be used to store the text in a persistent room for later.
+	$LF
+]div
+[h4 id=PhasingStorage 
+	" Phasing Storage
+	$LF
+]h4
+[div class=p 
+	"Phasing storage is a glitch where the player enters a persistent room and has disabled collision, meaning you can walk through walls and completely avoid cutscene triggers and other objects. It can be triggered by entering a persistent room while also having phasing (disabled collision) enabled. In normal rooms this does nothing because there's a line of code that runs at the start of each room to disable phasing, but in persistent rooms this code never runs.
+	$LF
+]div
+[h4 id=RngManipulation 
+	" RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"Undertale's RNG is determined by a seed that advances each time RNG is called. By calling RNG a different number of times, different outcomes can be achieved. Text calls RNG twice per character per frame and so changing how many frames text is displayed is the most common method of RNG manipulation. RNG is manipulated for various reasons such as getting particular monsters in random encounters and determining which step count random encounters will occur on. One thing to note is that the function randomize() is called upon loading into the game and this function sets the RNG seed based on the system time. However, after this initial seed, RNG is no longer affected by system time until the save file is reloaded or the game is restarted. RNG manipulation is used throughout the run and for the most part this is accomplished by delaying clearing text by anywhere between 1 and about 25 frames. Usually, the unlikelier an event is, the more frames it costs to manipulate RNG. While this does lose a small amount of time each time it's done, the various timesaves afforded by manipulating RNG more than make up for the few frames lost in the process. 
+	$LF
+]div
+[h3 id=AreaComments 
+	"Area comments
+	$LF
+]h3
+[div class=p 
+	"We start the game by sitting through the entire intro, because it automatically progresses to the Undertale logo screen afterwards. This saves 1 Z press over skipping the intro with Z. We also do some RNG manipulation in the name selection screen to get a certain "fun value". This value is randomly assigned at the start of every run, and determines what special events can occur during the run, such as special phone calls, NPCs, or other secrets. We want a fun value in the range 40-45, as this corresponds to the phone call from Sans in Snowdin asking if your refrigerator is running. This phone call is useful because it has a choicer, and will be used later to aid in getting the Punch Card.
+	$LF
+]div
+[h4 id=Ruins 
+	" Ruins
+	$LF
+]h4
+[div class=p 
+	"Ruins is the first section of the game. We begin with the first Flowey encounter where the speed of the friendliness pellet is RNG manipulated to be as fast as possible. A few rooms later, the first glitch in the run is performed. By interacting with the sign next to the door and entering the door at the same time, global.interact is set to 3 by the door, then to 1 by the sign, causing a wrongwarp. Doing so allows hitting the second switch without hitting the first switch, saving a Z press. Additionally, doing the room in the wrong order this way messes with the cutscene since Toriel is still waiting for you to hit the first switch, meaning you're unable to progress. Fortunately, hitting the switch updates the game's plot value, which tracks how far you've progressed through the game. Most cutscenes destroy themselves upon entering the room if the plot value is too high, so leaving and reentering the room will cause the cutscene to despawn. This also skips the extra dialogue at the end of the room, saving more Z presses. A few more rooms later, we run into First Froggit. It allows you to get LV 2 and increase your ATK/HP/EXP stats, but there is an issue. The game doesn't consider this a kill for the purpose of the Ruins kill counter, which means that you can choose to flee instead. Killing costs 1 extra Z press over fleeing, so we flee. The extra EXP we could gain by killing him is not useful later.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for the Ruins is 20, so we kill 20 Whimsuns, as it is the only 1-shot enemy in the Ruins. 1-shot enemies are good because they can be killed in 3 Z presses each, which is the minimum. Switching rooms after every kill causes the step count required to get an encounter to be much lower. Reading a sign in the room with the 20th kill skips the third phone call event. After 20 kills, we advance through the rest of the Ruins, holding Z for long periods of time to avoid additional Z presses exiting "But nobody came" encounters. 
+	$LF
+]div
+[div class=p 
+	"In the Three Rocks Room, we execute a glitch known as TAS RTA Rock Skip. By interacting with the rock on the same frame the step count to get a random encounter is reached, the battle transition will start once we close the text, which also starts the rock moving cutscene. Once the rock stops moving, we regain movement again (still during the battle transition) and walk into the rock again, which starts the second part of the rock cutscene. Then after exiting the "But nobody came" encounter, we regain movement and thus have text storage. We use this text storage to get persistence glitch off of a second "But nobody came" encounter. Then, in the pitfall maze room we fall into a pit and interact with the sign on the same frame. The pits work by enabling phasing, locking movement, and moving you manually, but by closing the sign text, we regain movement. Thus, we can go back into the persistent room while having phasing enabled, which triggers phasing storage, allowing us to completely bypass the rest of the rock cutscene and saving 1 Z press.
+	$LF
+]div
+[div class=p 
+	"Napstablook disappears after 20 kills. For some of the "But nobody came" encounters, skipping it via menu-buffering is slightly faster than sitting through it.
+	$LF
+]div
+[div class=p 
+	"Near the end we pick up the Toy Knife, a stronger weapon used during a large chunk of the run. The toy knife is barely seen during normal speedruns due to it being quite out of the way, but it is very good in the context of the Z button challenge due to it being a single-hit weapon, meaning it requires only 1 Z press to perform the attack.
+	$LF
+]div
+[div class=p 
+	"Sleeping in the bed reduces the number of textboxes to mash during Toriel's chair dialogue. Toriel is a 1-shot. 
+	$LF
+]div
+[h4 id=Snowdin 
+	" Snowdin
+	$LF
+]h4
+[div class=p 
+	"Near the start of Snowdin, there's a movement optimization known as "gamer pixel" where you slide across the wall collision on the top or bottom side of the small bridge to stop a pixel further to the left than normal. This causes Sans to stop his walking animation earlier, saving 4 frames. 
+	$LF
+]div
+[div class=p 
+	"The kill requirement for Snowdin is 16, but there are also 4 enemies that are required to keep Genocide mode active even though the game doesn’t track them for the kill count; Doggo, Greater Dog and Dogi (Dogamy + Dogaressa). Snowdrake is also a required kill, but the game counts him. It's worth noting that most monster dialogue that appears before the monster's turn starts will automatically close after a certain period of time. This can be seen during Snowdrake's attack and later during the Papyrus battle and the Waterfall grind.
+	$LF
+]div
+[div class=p 
+	"In Box Road we do a glitch called Box Storage, which works similarly to TAS RTA Rock Skip. By interacting with the box on the same frame the step count to get a random encounter is reached, the battle transition will start once we close the text, which also opens the box. By closing the box, we regain movement during the battle transition. As the soul starts flashing, the game locks movement a second time for some reason, but equipping the Toy Knife just beforehand bypasses the issue. We can then use this encounter to get persistence glitch. Technically it's possible to get persistence in fewer Z presses, but this requires getting a second random encounter here. We need that second random encounter for the next glitch, and we also need the Lesser Dog encounter (always the third Snowdin encounter) for later, so we have to get persistence using just one encounter.
+	$LF
+]div
+[div class=p 
+	"Directly afterwards, we trigger the second Sans/Papyrus cutscene on the same frame as an encounter, causing both to start at the same time. Doing this allows the player to skip some text and retain movement during the cutscene after killing Ice Cap. An invisible wall blocks you from getting close to Sans and Papyrus, so we can't just skip the cutscene. By using the stick (which is automatically in your inventory after equipping the Toy Knife) before the second set of text starts, you can regain movement afterwards again, since that set of text usually locks movement. We use the Z presses used to mash the first set of text to also use the stick. It's possible to grind out encounters during this cutscene, but as mentioned we need the Lesser Dog encounter for later. At the end of the cutscene, we use the last few Z presses mashing text to use the stick again, which gives us text storage. This allows us to skip the fun-value dependent Sans phone call at the end of the room. This allows us to keep it active for later, as its trigger only disappears once you've completely mashed through it.
+	$LF
+]div
+[div class=p 
+	"We go through the rest of Snowdin, making sure to keep Genocide active by killing all the scripted dog enemies. It’s faster to take intentional damage on Doggo in order to make his turn faster. Killing Dogaressa first saves a turn due to reducing Dogamy’s defense, this does not occur if you kill Dogamy first. For Greater Dog we can manipulate an attack that can be cancelled early. 
+	$LF
+]div
+[div class=p 
+	"The next sections revolve around a flag known as the "redemption flag", which when set aborts Genocide. This flag is set if you exit certain battles without having killed the enemies in it, which (normally) means you spared or fled from the enemy.
+	$LF
+]div
+[div class=p 
+	"Due to not having exhausted the Snowdin kill count, the Papyrus fight occurs in its Neutral form instead of its Genocide form. The Genocide requirements only require that Papyrus is killed, not that he is killed in his Genocide form, so we just kill Papyrus in his Neutral form. This technicality is only present on version 1.0 and is the only reason we are playing on this version; on all other versions, triggering the Neutral Papyrus battle will set redemption flag (even if you kill him). 
+	$LF
+]div
+[div class=p 
+	"At the beginning of the Papyrus battle, Papyrus throws his blue attack at you. This attack spawns blue bones at random intervalls of 5-25 frames, and the faster the bones spawn, the fewer bones will spawn, making the attack even faster. With RNG manipulation, using the stick text during the second Sans/Papyrus cutscene to not lose time, I spawned 11 bones, at 6, 6, 11, 7, 5, 6, 10, 8, 11, 7, and 9 frames (all out of 25). The probability of that is 1 in 133000.
+	$LF
+]div
+[div class=p 
+	"Since most battle text before the enemy's turn automatically closes after a certain period of time, we also get to take our sweet time reading Papyrus's text.
+	$LF
+]div
+[h4 id=Waterfall 
+	" Waterfall
+	$LF
+]h4
+[div class=p 
+	"Near the beginning of Waterfall, we execute a glitch called Sea-Grass Skip (SGS). This skip is performed by using an item after triggering the cutscene where Undyne sees the player moving in the grass. Then by closing this text, we regain movement. This saves Z presses because it also skips Monster Kid's dialogue at the end of the cutscene.
+	$LF
+]div
+[div class=p 
+	"The kill requirement for Waterfall is 18, with the only required enemies being Shyren and Glad Dummy (both count for the kill counter).
+	$LF
+]div
+[div class=p 
+	"The base steps counter is extremely high in the first possible room (340), but is only 20 upon entering for the first time (This changes after the first encounter, Aaron). Since Aaron requires at least two turns to kill, we skip this fight by triggering a room transition on the same frame as the encounter. The same is done with Woshua for the same reason in the next room. Afterwards, we kill 12 Moldsmals due to Moldsmal being a 1-shot. Temmie is also a 1-shot, but due to only appearing randomly after several scripted encounters later (which would need to be skipped) and due to Moldsmal appearing as a double encounter, killing Moldsmals is fastest.
+	$LF
+]div
+[div class=p 
+	"Right before the first spears chase with Undyne, we walk on the plank across the water, which triggers an autosave. Autosaves are created at certain points throughout the game, but don't actually affect the save file you load from the main menu. Rather, they are more a safety save in case you die and didn't have a recent save file, in which case you'll reload to the autosave. It's important to note that at the point of this autosave, we're still on the Genocide route, with the redemption flag not being set.
+	$LF
+]div
+[div class=p 
+	"Directly after completing Spears 1, we turn around and take the Purple Dude to before the plank on the water, go to Snowdin, and flee from Lesser Dog. This sets redemption flag and aborts Genocide, which causes the Nice Cream Guy in Waterfall to respawn. Here are the conditions for Nice Cream Guy to despawn and/or respawn, in this order:
+	$LF
+]div
+[ul 
+	[li 
+		"If Doggo has been killed while on the Genocide route, Nice Cream Guy despawns.
+		$LF
+	]li
+	[li 
+		"If redemption flag is set, Nice Cream Guy respawns.
+		$LF
+	]li
+	[li 
+		"If the Snowdin kill count is exhausted, Nice Cream Guy despawns.
+		$LF
+	]li
+]ul
+[div class=p 
+	"Since we never exhausted the Snowdin kill count, Nice Cream Guy is back. Buying a Nice Cream from him allows us to get a Punch Card from the box. 
+	$LF
+]div
+[h4 id=BackInSnowdin 
+	" Back in Snowdin
+	$LF
+]h4
+[div class=p 
+	"We now head all the way back to the beginning of Snowdin, wrongwarping past the plank on the water instead of taking the purple dude and wrongwarping past the Sans phone call to keep it active. We then enter the persistent Box Road, where we overflow the box and leave with the choicer up. This choicer storage in a persistent room will allow us to do choicer overflow with it later. At the same time, we leave the room on the same frame we get an encounter, which also stores the exclamation mark in the persistent room. This will also be useful later.
+	$LF
+]div
+[div class=p 
+	"The next trick is the most difficult trick ever done in Undertale, and as the time of writing it's one of two tricks that has been pulled off in a TAS, but not RTA (the other being 4-cycle Mad Dummy). In the next room, we PCE the Sans phone call and leave the room on the right and re-enter it. The reason is that the trigger is several pixels wide, and if we PCE it from the right we can PCE it multiple precious pixels closer to the sentry station. Next we overflow the camera behind the sentry station and use the text to regain movement during a random encounter. Then we PCE the Sans call trigger and close the punch card on the frame the soul starts flashing, since that locks movement. We walk to the sentry station and overflow it, then interact with the camera as soon as we can reach it, which happens be on the last frame before the battle starts. Everything I just described from the Sans call PCE is frame- and pixel-perfect. After fleeing the battle, we have movement and 3 different textboxes (the Sans phone call, the sentry station text, and the camera text). We then grind out another random encounter. We use the camera text to regain movement during the transition, open the punch card, and use the Z presses from opening the punch card to close the sentry station text. Doing so allows us to regain movement for 1 frame while the punch card is up, which we use to move into the room transition and get persistence glitch while the punch card and the Sans call is up. Because the Sans call has a choicer, we've just set up a second choicer storage. We then die to the encounter. This reloads the autosave made before the first Undyne spears chase, where the redemption flag wasn't set and Genocide was not yet aborted. However, since persistent rooms stay persistent so long as the game is not closed, the 2 choicers stored in the Sans call room and in Box Road are both still there.
+	$LF
+]div
+[div class=p 
+	"We now head all the way back to the beginning of Snowdin (again), grinding out a Moldsmal encounter first. On the way, we interact with the Old Tutu, which sets global.msc to a certain value corresponding to the tutu. It just so happens that the global.msc values directly after the Old Tutu correspond to the punch card box next to Nice Cream Guy. The first global.msc value checks if there are punch cards in the box. If there are, it prompts a choier which can be used to get a punch card from the next global.msc value. Otherwise, it just shows text that there are no punch cards in the box, without a choicer. The second global.msc value simply shows text that you got the punch card and puts a punch card in your inventory, without checking if there are actually punch cards in the box.
+	$LF
+]div
+[div class=p 
+	"Once at the Sans call room, we close the stored punch card sprite to regain movement and activate the choicer, which increments global.msc to the value corresponding to punch card box. Because the box is empty, it doesn't prompt its own choicer. It's important that we regain movement and exit the room while the Sans call is still playing and without mashing all the way to the "Click" text at the end of the phone call. The reason is that the Sans call is technically divided up into 3 sets of textboxes: the "Ring..." text, the Sans dialogue including the choicer, and the "Click" text. All three textboxes set global.msc to a different value, and only the last textbox gives us movement. This means that if we were to completely mash through the phone call to regain movement instead of using the stored punch card sprite, global.msc would be set to the punch card box by the choicer and then to a different value by the "Click" text, ruining the trick.
+	$LF
+]div
+[div class=p 
+	"In Box Road, we use the choicer stored there to increment global.msc again, from the value corresponding to the punch card box to the next value after it. As explained above, this value simply shows the "You got the Punch Card" text and gives us a punch card. This is what the entire setup ever since Box Storage has been leading up to.
+	$LF
+]div
+[div class=p 
+	"At the same time, we enter a battle with Moldsmal. Recall that when we exited the room last time, we got an encounter on the same frame, meaning the exclamation mark was stored in the persistent room. When we reenter the room, it's still there and thus starts a battle. Normally, the battle to start is determined as soon as the exclamation mark appears, but since the exclamation mark is already there, the code to determine the battle doesn't run. Instead it just starts whatever the previous battle was, which was Moldsmal back in Waterfall.
+	$LF
+]div
+[div class=p 
+	"After exiting the battle, we instantly get another random encounter. This time, it's because the step count to get an encounter only gets reset to 0 upon entering an unpersistent room that can spawn encounters. Because our step count is high enough from walking all the way through the Sans call room and parts of the Doggo and ice rooms, we get an encounter as soon as we regain movement after the Moldsmal battle. This is also the reason we menu-buffered through parts of the Doggo and ice rooms; we would have otherwise gotten an encounter in the Sans call room. The battle text would have also reset global.msc, which would have ruined getting the punch card.
+	$LF
+]div
+[div class=p 
+	"Next, we complete the Snowdin kill requirements. Since Ice Caps die in 1 hit, we grind out all Ice Caps in the ice room. With best-case RNG, switching rooms is slower than staying in the same room. In addition, by getting an encounter at the same time as going onto the ice, we can regain movement during the battle transition. This allows us to already start grinding out the next encounter during the battle transition. For the 16th kill, exiting and reentering the room is faster again. After completing the kill count, we can finally leave Snowdin.
+	$LF
+]div
+[h4 id=RestOfWatefall 
+	" The rest of Watefall
+	$LF
+]h4
+[div class=p 
+	"Since the autosave was made before the first Undyne spears chase, we have to do it again. This time, we can PCE slide the Monster Kid cutscene at the end to skip it.
+	$LF
+]div
+[div class=p 
+	"After walking through all of Waterfall and killing Shyren and Glad Dummy in the process, we get to Undyne the Undying. Fighting her with the Toy Knife takes multiple extra turns over fighting her with the Ballet Shoes, but since the Toy Knife is a single hit weapon and the Ballet Shoes a triple-hit weapon and picking up and equipping the Ballet Shoes also costs 7 extra Z presses, the Toy Knife is still better. 
+	$LF
+]div
+[h4 id=HotlandAndCore 
+	" Hotland and Core
+	$LF
+]h4
+[div class=p 
+	"Alphys’s Lab features a glitch known as dogfood storage. By using the bag of dog food and the north wall, it is possible to stand on top of the trigger for the Mettaton cutscene without triggering it until the movement keys are released. By opening and closing the menu and then interacting with the dog bag, closing the dogfood text gives movement during the cutscene. We use the Z presses used to progress Mettaton's first textbox to close the dogfood text, interact with the fridge, and mash through to the last textbox, which triggers text corruption, shortening Mettaton's second set of text to the last line of the fridge text. This saves Z presses overall by reducing the number of textboxes to mash away. Watching the entire cutscene is required as this sets flags to enable the Genocide version of Hotland and Core, with disabled puzzles and no phone calls from Alphys.
+	$LF
+]div
+[div class=p 
+	"We skip Tsundereplane in the vent room by entering the transition on the same frame we get an encounter, as Plane takes 2 turns to kill with the Toy Knife. Killing the Royal Guards and Muffet is required to keep Genocide active (they count towards the kill count). Walking all the way through Core saves the Z press used to go through the Core elevator. Fleeing Astigmatism instead of skipping him avoids a 1.0-exclusive crash later in New Home. Finally, we PCE the Mettaton NEO fight and the Alphys cutscene in the following room to get to New Home. Skipping these cutscenes allows us to complete the Hotland/Core kill requirement later instead of now.
+	$LF
+]div
+[h4 id=NewHome 
+	" New Home
+	$LF
+]h4
+[div class=p 
+	"In New Home, our goal is to run into as many Monstertale encounters as possible. The reason is that Monstertale (shown during the Neutral/Pacifist route) and Floweytale (shown during the Genocide route) share the same triggers, meaning that once a Monstertale encounter is cleared, the corresponding Floweytale encounter is too. The difference between the two (aside from a different story) is that most Monstertale encounters can be cleared in 1 Z press, while Floweytale encounters have about 5-20 lines of dialogue each, all of which need to be cleared using Z presses. Unfortunately, we can't get past the encounters in the long room, because the first one has Shyren in it. Shyren is a redemption flag monster, and sets the redemption flag if a battle with her is exited without having killed her. Since it's impossible to kill Shyren in her Monstertale encounter, it will unavoidably set redemption flag, aborting Genocide. This means we'll have to get through all the Floweytale encounters in the long room later.
+	$LF
+]div
+[div class=p 
+	"In addition, we get the Worn Dagger, which is a much stronger single-hit weapon than the Toy Knife and allows us to kill some Core enemies in one hit.
+	$LF
+]div
+[h4 id=CoreGrind 
+	" Core grind
+	$LF
+]h4
+[div class=p 
+	"We head back to Core, wrongwarping into Mettaton's room to avoid triggering the Mettaton battle cutscene.
+	$LF
+]div
+[div class=p 
+	"The kill requirement in Hotland/Core is 40, 4 of which have already been killed in Hotland. First we equip the Worn Dagger in battle, as it only takes 3 Z presses to do so as opposed to the 4 it does in the overworld. Initially, the only enemies we're able to kill in one hit are Whimsalot and Final Froggit, so we manipulate the RNG to only get those encounters. The first 5 Core encounters are scripted, and encounters 3, 4, and 5 have enemies other than Whimsalot and Final Froggit in them, so we skip them by entering the room transition on the same frame as the encounter. Once we get to LV 14, we're also able to kill Astigmatism in 1 hit. Near the end of the grind, we visit Warrior's Path to kill the first encounter there, as it's a scripted Whimsalot + Final Froggit.
+	$LF
+]div
+[div class=p 
+	"We PCE Mettaton's trigger and drop the Toy Knife, triggering text corruption. The menuing during the battle transition is purely for show. Mettaton NEO dies in 1 hit.
+	$LF
+]div
+[h4 id=NewHomeAgain 
+	" New Home (again)
+	$LF
+]h4
+[div class=p 
+	"We go through New Home, with most of the Floweytale encounters being gone as explained earlier. The encounters in the long room are all still there though, and you can really see how many extra Z presses the Floweytale encounters take. In total, Shyren setting redemption flag costs us 66 Z presses in this section.
+	$LF
+]div
+[div class=p 
+	"Sans is not a requirement to get the Genocide ending, and can be completely skipped via a PCE. His battle takes hundreds of Z presses to complete, and he is the main reason we went to such lengths to get the Punch Card. The rest of the run involves mashing through dialogue as the player kills Asgore and Flowey, and finally the Fallen Human destroys the world.
+	$LF
+]div
+[h3 id=OtherComments 
+	"Other comments
+	$LF
+]h3
+[h4 id=UnoptimalParts 
+	" Unoptimal parts
+	$LF
+]h4
+[div class=p 
+	"As of the time of writing, the TAS is still optimal in terms of Z press count. In terms of time, about 10 seconds can be saved by equipping the Worn Dagger in the overworld during the wrongwarp into Mettaton's room instead of in battle. The last Z press to use items in the overworld is to close the equip text, but by equipping it during the wrongwarp the room transition will close the text for us.
+	$LF
+]div
+[h4 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h4
+[div class=p 
+	"Special thanks goes to RichConnerGMN, who inspired me to make the TAS and helped with routing.
+	$LF
+]div
+[h4 id=Screenshots 
+	" Screenshots
+	$LF
+]h4
+[div class=p 
+	[a href=https://i.imgur.com/XSx11FR.png  rel=noopener external nofollow 
+		"https://i.imgur.com/XSx11FR.png 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/ymsDOVK.png  rel=noopener external nofollow 
+		"https://i.imgur.com/ymsDOVK.png 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/SEzRg1R.png  rel=noopener external nofollow 
+		"https://i.imgur.com/SEzRg1R.png 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/RpKxdwC.png  rel=noopener external nofollow 
+		"https://i.imgur.com/RpKxdwC.png 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/JIdBLXk.png  rel=noopener external nofollow 
+		"https://i.imgur.com/JIdBLXk.png 
+	]a
+	$LF
+	[br 
+	]br
+	[a href=https://i.imgur.com/GwMgSXF.png  rel=noopener external nofollow 
+		"https://i.imgur.com/GwMgSXF.png 
+	]a
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Added 
+	[a href=https://tasvideos.org/Forum/Posts/511867 rel=noopener external nofollow 
+		"annotations
+	]a
+	" to the file, with steps to recreate the runner which we 
+	[a href=https://files.tasvideos.org/emulatordownloads/linux/runner-linux-GameMakerStudio-1.4.1567.7z rel=noopener external nofollow 
+		"reuploaded on tasvideos for posterity
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Replacing with the movie with proper time.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Normally I don't claim submissions this fast, but I just had to after seeing this!!!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Gosh, this took a while, huh?
+	$LF
+]div
+[div class=p 
+	"After a nightmarish process to legitimize this run, including 
+	[a href=https://tasvideos.org/Forum/Posts/514291 rel=noopener external nofollow 
+		"retroactively releasing a libTAS build specifically to be able to sync this run
+	]a
+	", I think it's safe to say that we can finally do something with it. 
+	[del 
+		"Rejected.
+	]del
+	$LF
+]div
+[div class=p 
+	"Okay, jokes aside, let's actually talk about the run. The feedback, now that there actually is some, looks to be pretty good! Definitely better received than the 
+	(__wikiLink|displaytext=Neutral submission|href=/7240S)
+	", and consistently so over the (checks watch... oh god they don't make watches for months) severals of months this has been on the workbench. For me, the amount of "oh my god what's happening" was more than enough to keep me interested all the way through, so I can only echo the positive feedback here. It's very technical, very clearly showing through pure "oh my god what's happening" that every step is taken, no matter how long, even if it only saves a single press in the end. We love technical here, we love that kind of insane dedication just to make one number tick ever so slightly downward.
+	$LF
+]div
+[div class=p 
+	"I'm going to be accepting this to Moons as a new category. Note that, at this time, I'm not entirely sure whether or not we'll be accepting and publishing a secondary "minimum Z press" branch alongside this one, assuming one even comes along (TPE, perhaps?). "Worst" case (which is still far better than what worst case used to be!), we have a single branch for minimum Z press runs that can be freely obsoleted by another route if it's determined to be more entertaining by the audience, while the others remain showcased in Playground. Also, remind me to put the Neutral submission in Playground.
+	$LF
+]div
+[div class=p 
+	"Quick reminder to potential improvements given the category: Since the primary goal of the run is to minimize Z/Enter presses, time-based obsoletion will only come into play if the number of Z/Enter presses remains the same. We prioritize better completion of the category over time, meaning a longer run with less Z/Enter presses will obsolete this. That's probably straightforward enough to not need explanation, but hey, sometimes I just like talking about TASes.
+	$LF
+]div
+[div class=p 
+	"Excellent work, and sorry it took so long for this to be processed!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Discussed the branch label with Samsara, we agreed that telling what the button does provides more helpful info to the user seeing this for the first time, also allows to avoid listing buttons that do the same thing. The purpose of the keys Z and Enter is to work as a generic "action" button, so you have to avoid having to hit it, hence unique route decisions.
+	$LF
+]div
+[div class=p 
+	"Also put the in-game goal first.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Let's pub!
+]div

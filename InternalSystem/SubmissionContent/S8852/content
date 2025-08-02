@@ -1,0 +1,616 @@
+6
+[h2 id=GameObjectives 
+	" Game objectives
+	$LF
+]h2
+[ul 
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Takes intentional damage
+		$LF
+	]li
+	[li 
+		" Uses a game restart sequence
+		$LF
+	]li
+	[li 
+		" Forgoes save data corruption
+		$LF
+	]li
+]ul
+[div class=p 
+	"The last one refers to the 
+	(__wikiLink|displaytext=save glitch|href=/8301S)
+	". It can be used in Seasons as well, although it's a bit slower to set up. I didn't use it here because it kind of skips the whole game.
+	$LF
+]div
+[h2 id=VersionChoice 
+	" Version Choice
+	$LF
+]h2
+[div class=p 
+	"The Japanese version has faster savewarps and faster text. The only other advantage is that your items are automatically reequipped after the Blaino fight, saving one menu.
+	$LF
+]div
+[div class=p 
+	"This run is done in GBA mode. This is known to cause a bit more lag. Usually this just means we get the odd extra lag frame here and there but the last loading zone before Onox's Castle lags for an extra half second. I used it anyway because of console-verification.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	"Anyway, since this run already has subtitles I guess I just put the B-side comments here that didn't make the cut. You can safely skip all of this unless you really care to know about every last frame that was saved in this run. Maybe the section on Major Tricks just below or the explanation of Rooster Adventure towards the end of the run are worth reading.
+	$LF
+]div
+[h2 id=CommonlyUsedTechniques 
+	" Commonly used techniques
+	$LF
+]h2
+[h3 id=MajorTricks 
+	" Major Tricks
+	$LF
+]h3
+[h4 id=PitWalking 
+	" Pit Walking
+	$LF
+]h4
+[div class=p 
+	"When Link is over a pit, he doesn't fall down immediately. Rather, he is pulled towards the middle of the tile and then falls down. This can be exploited by constantly changing which tile you fall into, in which case you will never fall down. You can get away with only switching between the tiles every other frame, so if you wanted to pit walk to the right for example, your inputs would be right, up-right, right, down-right and then repeat.
+	$LF
+]div
+[div class=p 
+	"Link carries a bit of momentum into the pit, which means you don't have to start alternating between the pits immediately. It's actually a bit difficult to know when to stop holding one direction and start pit walking, so I just made a lua script that does it perfectly.
+	$LF
+]div
+[div class=p 
+	"Pit Walking comes with some limitations: You need to have two pits next to each other, if there is only one it won't work. It also only works for pits, not water or lava. Finally, you can't transition to the next screen and you can't use any items without falling down.
+	$LF
+]div
+[h4 id=RngManipulation 
+	" RNG Manipulation
+	$LF
+]h4
+[div class=p 
+	"In general, the RNG in this game only changes when something random happens, which makes manipulating it very difficult in a TAS setting. There are however some situations when the RNG is quite volatile:
+	$LF
+]div
+[ul 
+	[li 
+		" It advances 256 times for every screen transition. This isn't really helpful to us because the only way to exploit this would be to take extra screen transitions, which would be very slow
+		$LF
+	]li
+	[li 
+		" It advances once per frame on the title screen
+		$LF
+	]li
+	[li 
+		" Whenever an object on screen or the whole screen shakes, it advances once per frame
+		$LF
+	]li
+	[li 
+		" Some enemies call the RNG a lot. Notably Mini Moldorms call it every 8 frames, Keese call it every other frame and Leevers call it every frame
+		$LF
+	]li
+	[li 
+		" Slashing the Sword advances the RNG once because the sound the Sword makes is random. You can slash the Sword once every 4 frames
+		$LF
+	]li
+]ul
+[div class=p 
+	"The above give us some means of manipulating the RNG but only if we're willing to plan far ahead. In practice this looks like this:
+	$LF
+]div
+[div class=p 
+	"Let's say we're in Room A, where we can manipulate the RNG a lot. Maybe we have time to slash the Sword, maybe there's a Keese in the room we could kill to make the RNG advance less, maybe Room A is just the title screen (not really a room but you get it). We now have to find a Room B later in the run that really wants to be manipulated. Usually this will be a room where we have to kill all the enemies, whose spawn positions are random. Now we play through the game until we reach Room B. This will give us an idea of where the RNG will be at when we get to that room. Next we figure out how much we can change the RNG in Room A. This will give us a range of all possible RNG values in Room B. Out of all of these we find the one that gives us the best result. This can mean checking hundreds of seeds, so we better use a script for this rather than doing it by hand.
+	$LF
+]div
+[div class=p 
+	"Now that we know what the RNG should be in Room B, you would be forgiven to think that the hard part is over. Just look at how many ticks the RNG needs to be advanced in Room B, then advance that many ticks in Room A. The problem with that is that there will probably be rooms with enemies between rooms A and B and how much these enemies advance the RNG depends on what the RNG is, going into those rooms. This means that the only way to know what the RNG should be after Room A is to start at Room B and go back through every single room that has enemies in it, writing down what the RNG has to be at at the start of the room, so you end up with the right value at the end of it. Sometimes you get unlucky and there won't be any such start RNG that will lead to the correct end RNG. In that case, you have to go all the way back to Room B and find a second best RNG value, then try again and see if that one works. Sometimes there will be several start RNGs that all lead to the correct end RNG. In that case you better write down all of them because some of them might lead to a dead end. The longer the distance between rooms A and B the more ridiculous this becomes, leading to an entire tree of RNG values that starts in one value in Room B and leads back through several branching points and you just have to hope that one of the branches makes it all the way back to Room A.
+	$LF
+]div
+[div class=p 
+	"Anyway, not only is this extremely time-consuming to the point where I easily spent more time on this aspect of the run than all the other aspects combined. It also leaves us at the mercy of the game giving us enough opportunities to manipulate the RNG. In the beginning of the run, the game is generous and gives us two very good opportunities to do so (the mine cart ride in D1 and the Rosa hide and seek part). Towards the end of the run, not only are such opportunities few and far between but we also have to manipulate more random events (namely random Pegasus Seed drops). All this combined leads to the run looking noticably worse in the later half of the run, with us having to wait around for the RNG to advance much more than during the first half. Rest assured this is not because I got lazy halfway through, it's just kind of how this game works.
+	$LF
+]div
+[div class=p 
+	"The one silver lining here is that this type of RNG makes it pretty easy to edit the inputs after the fact because saving time in one room will probably not affect the RNG at all. This means that whenever I made a mistake and found it later, I was able to fix it.
+	$LF
+]div
+[h4 id=WallClipping 
+	" Wall Clipping
+	$LF
+]h4
+[div class=p 
+	"The walls in this game are not symmetrical (wall just means most types of collision here): When you're directly above a wall tile, you're only two pixels away from being considered inside the wall whereas the distance is much greater if you're on the right, left, or bottom of it. Using a Damage Boost, you can move at speeds of more than 2 pixels/frame. This means that if you're one pixel above the wall on one frame and then move three pixels down on the next one, you can effectively stand inside the wall, even if the tile above is a pit.
+	$LF
+]div
+[h3 id=MinorOptimisations 
+	" Minor Optimisations
+	$LF
+]h3
+[h4 id=32WayMovement 
+	" 32-Way Movement
+	$LF
+]h4
+[div class=p 
+	"Usually your movement is limited to 8 directions. However, there are two exceptions where 32-way movement is possible: ice and mid-air movement. This saves a bit of time because you can move in a straighter line towards your goal.
+	$LF
+]div
+[div class=p 
+	"On ice D-pad input is only considered every 6th frame. Pressing a direction other than the one you are currently travelling in will change your direction by 1. If you don't hold any direction, you will slow down. This means that if you want to go in a direction that is not one of the 8 normal ones, you have to oscillate between two neighbouring directions every 6 frames.
+	$LF
+]div
+[div class=p 
+	"When you jump with the feather, you will always travel in the initial direction for the first 14 frames of the jump. For the remaining 16 frames, your direction will change by 1 if you're holding a direction other than the one you're currently travelling in. In this case, you will not slow down if you don't hold any direction, so once you've reached the desired direction, it's best to just let go of the D-pad.
+	$LF
+]div
+[div class=p 
+	"It should be noted that whenever you're in mid-air on any screen, you have to push against the edge of the screen for 4 frames before you can trigger the screen transition. Seems like the devs really wanted to prevent mid-air screen transitions like in Link's Awakening. This means that's it's not worth it to jump in order to optimise your movement unless you either have to jump on the current screen anyway (since the 4 frames don't stack) or you don't leave the screen through a normal transition (for example if you have to enter a building, enter a stairway, or savewarp).
+	$LF
+]div
+[h4 id=AnimationCancelling 
+	" Animation Cancelling
+	$LF
+]h4
+[div class=p 
+	"Some of Link's animations can be cancelled:
+	$LF
+]div
+[ul 
+	[li 
+		" The Shovel animation takes 23 frames but it can be cancelled after 5 frames with the Power Bracelet, which is essential for Rooster Adventure. It can also be cancelled with the Sword, which saves one frame and changes the RNG, which may or may not be good. Cancelling it with the Rod of Seasons is break-even.
+		$LF
+	]li
+	[li 
+		" The throwing animation takes 9 frames and can be cancelled after one frame by throwing with the button that the Power Bracelet/Bombs are not on and then using the button they are on on the next frame.
+		$LF
+	]li
+	[li 
+		" Throwing an Ember Seed also takes 9 frames but can't be cancelled the same way. It can however be cancelled with the Sword, which usually loses time but can be faster if you have to turn around and immediately throw another seed.
+		$LF
+	]li
+	[li 
+		" The Sword's poking animation can be skipped by releasing the Sword button the same frame you hit an enemy. This does not work when poking a bush.
+		$LF
+	]li
+]ul
+[h4 id=CameraManipulation 
+	" Camera Manipulation
+	$LF
+]h4
+[div class=p 
+	"Whenever a small key drops from the ceiling, it drops from directly above the camera. By scrolling the camera down before the key drops, the key will drop earlier.
+	$LF
+]div
+[h4 id=CornerBoostingAndCornerClipping 
+	" Corner Boosting and Corner Clipping
+	$LF
+]h4
+[div class=p 
+	"There are two types of objects in this game; one allows for Corner Boosting and the other allows for Corner Clipping.
+	$LF
+]div
+[div class=p 
+	"The type that allows for Corner Boosting consists of NPCs, mine carts, and pushable objects while they are moving. If you try to move into the corner of these objects, you will be pushed out one pixel. This doesn't work in every direction unless you're using Pegasus Seeds, in which case you can also get pushed two pixels sometimes.
+	$LF
+]div
+[div class=p 
+	"The type that allows for Corner Clipping consists of all the other objects in the game, including walls, blocks, chests, and pushable objects while they are standing still. If you try to move into the corner of these objects, you will just clip one pixel into the object. This just saves one or two frames of movement and doesn't have any notable effects.
+	$LF
+]div
+[h4 id=DamageBoosting 
+	" Damage Boosting
+	$LF
+]h4
+[div class=p 
+	"Normal walking speed is 1 pixel/frame. Getting hit by an enemy will move you at 1.25 pixels/frame for 14 frames and on the 15th frame both speeds are combined for a speed of 2.25 pixels/frame. This means you gain 4.75 pixels of distance and can expect to save 4 or 5 frames. In practice the boost can even save a bit more because damage boost are 32-way but it can also save less because you usually have to walk a bit out of your way to get the boost.
+	$LF
+]div
+[div class=p 
+	"Walking through grass gives you a speed of 0.75 pixels/frame and walking over stairs is only 0.5 pixels/frame but damage boosts are still 1.25 pixels/frame. This means that if you get a perfect boost over stairs, you gain 10.75 pixels and save 21 or 22 frames.
+	$LF
+]div
+[div class=p 
+	"Damage boosts also save more time if you get hit while Link is stuck in an animation because now you're moving at 1.25 pixels/frame instead of not moving at all.
+	$LF
+]div
+[div class=p 
+	"Jumping out of a damage boost will combine the two speeds, so you will go at 2.25 pixels/frame for 15 frames.
+	$LF
+]div
+[div class=p 
+	"Pegasus running speed is 1.5 pixels/frame, which means that damage boosting is now slower unless one of the cases outlined above applies. Notably, jumping out of a boost now gives you a speed of 2.75 pixels/frame, which is fast enough to Wall Clip.
+	$LF
+]div
+[div class=p 
+	"Taking damage from your own Bombs is similar but you only get 11 frames of a boost instead of 14.
+	$LF
+]div
+[h4 id=Essences 
+	" Essences
+	$LF
+]h4
+[div class=p 
+	"Picking up the Essence at the end of a dungeon is surprisingly hard to do as fast as possible. You want to be as close to it as possible because it slowly floats down towards Link in the cutscene. To this end, you can avoid the cutscene trigger by Corner Clipping into the block to the left or right of the stairs and only trigger the cutscene once you are close. This is however complicated by the fact that the Essence itself moves up and down before you reach it. It will move one pixel whenever the in-game clock is a multiple of 4. This means that Essences essentially act like mini-framerules.
+	$LF
+]div
+[div class=p 
+	"This also applies when picking up the Rod of Seasons.
+	$LF
+]div
+[h4 id=LagReduction 
+	" Lag Reduction
+	$LF
+]h4
+[div class=p 
+	"This game doesn't have much lag so there isn't much to say here.
+	$LF
+]div
+[div class=p 
+	"Some screen transitions will lag a bit more than others. This seems to happen quite often on screens where a cutscene plays, even if you've already watched the cutscene. For example, when going through Horon Village after D1, we avoid the screen just south of the Maku Tree and instead go through the screen with the ring shop.
+	$LF
+]div
+[div class=p 
+	"The same screen transition can also lag a bit more depending on when you take it. I tried to pay attention to this but there isn't always a choice on when to take the transition.
+	$LF
+]div
+[div class=p 
+	"Enemies shooting projectiles can also lag the game for a frame or two, so they are manipulated to not shoot them whenever possible.
+	$LF
+]div
+[div class=p 
+	"Finally, the portals connecting Holodrum to Subrosia can lag the game for 6 frames depending on the parity of the in-game clock. Sometimes a frame has to be sacrificed to avoid this.
+	$LF
+]div
+[h4 id=Menuing 
+	" Menuing
+	$LF
+]h4
+[div class=p 
+	"Ideally, you would switch items as infrequently as possible to avoid menu time. This can sometimes mean using an item that is slower just because you happen to have it equipped, like picking up a bush with the Power Bracelet instead of slashing it with the Sword.
+	$LF
+]div
+[div class=p 
+	"Whenever you do have to equip an item, it's best to do it during one of the fade-in transitions because the menu skips the fade-in, saving about 30 frames.
+	$LF
+]div
+[div class=p 
+	"Whenever that is not possible, you should try to combine a menu with a savewarp because you can savewarp from the item menu, which is about 15 frames faster than closing it and then opening the S&Q menu.
+	$LF
+]div
+[div class=p 
+	"The menu lag also varies slightly depending on what screen you're on, so if the above two are not available, you should check every screen to find the one with the least amount of lag.
+	$LF
+]div
+[div class=p 
+	"Finally, I made an attempt to put the items in the menu in such a way that minimizes travel time between the items. However, this is a pretty hard optimisation problem to solve definitively, so I can't make any guarantee that there isn't some slightly better way to arrange the items.
+	$LF
+]div
+[h4 id=PushingObjects 
+	" Pushing Objects
+	$LF
+]h4
+[div class=p 
+	"When you push a block or a pot, you have to push against it for 20 frames; for example, if you want to push it up, you should have to push straight up for 20 frames. However, on the first frame, the game only checks if you're holding up, so you could be holding up-left or up-right on this frame. On the next 19 frames you do have to just hold up. Then on the 21st frame you have to hold any cardinal direction, so left, right or down also work. Keeping this in mind can often save a frame when pushing objects.
+	$LF
+]div
+[div class=p 
+	"This also applies to key doors, except here it's 10 frames instead of 20.
+	$LF
+]div
+[div class=p 
+	"Interestingly, this does not apply to the blue barrel-like things you find in D2 and D3, which seem to be coded correctly.
+	$LF
+]div
+[h4 id=RickyMovement 
+	" Ricky Movement
+	$LF
+]h4
+[div class=p 
+	"Ricky usually stops at the edge of a pit and waits a bit before jumping over it. However, if you punch in mid-air, she will just keep moving. Most of the time this just leads to her falling down the pit but if you're jumping downwards and you're very close to the pit before jumping, she can make it across.
+	$LF
+]div
+[h4 id=Subpixels 
+	" Subpixels
+	$LF
+]h4
+[div class=p 
+	"The game keeps track of Link's position down to the 256th of a pixel in both directions. This means that whenever we have to wait, we can set up his subpixel position to be a bit closer to where we want to go. Also if you have to walk next to a wall, then turn a corner and go in the opposite direction, it might be faster to push diagonally into the wall for just a frame or two, as long as you don't lose a frame.
+	$LF
+]div
+[div class=p 
+	"When using Pegasus Seeds, you have to pay special attention to screen transitions because you can overshoot the edge of the screen by a pixel. In that case it's usually also faster to move a frame diagonally to avoid that.
+	$LF
+]div
+[h2 id=Run 
+	" The run
+	$LF
+]h2
+[h4 id=D1 
+	" --> D1
+	$LF
+]h4
+[div class=p 
+	"Right after creating the file, we set the text speed to 5. This doesn't matter for most textboxes in the game but it will make yes/no prompts appear faster.
+	$LF
+]div
+[div class=p 
+	"It might seem obvious to talk to the tambourine player right after talking to Impa but if we talk to her last, we can take a more direct line from Impa to the top of the fire, which turns out to be just slightly faster.
+	$LF
+]div
+[div class=p 
+	"Other than that there's not really much to talk about until we get to D1.
+	$LF
+]div
+[h4 id=D1_2 
+	" D1
+	$LF
+]h4
+[div class=p 
+	"If you compare this run to 
+	(__wikiLink|displaytext=the old TAS by SwordlessLink and Tompa|href=/1963M)
+	", you will notice that the RNG in the two Stalfos rooms is the exact same in this run. This is partly because the old TAS is good and partly because up until this point, there wasn't much of an opportunity to manipulate the RNG. That's about to change though because we're coming up on the mine cart ride.
+	$LF
+]div
+[div class=p 
+	"The mine cart ride is actually a pretty intricate piece of RNG manipulation. We want to get perfect luck in the Boss Key room later but we also want to get a damage boost over the stairs in the small key room. Usually, the RNG would advance too much between the two rooms. However, we can make it advance less by killing 4 of the 5 Keese in the room with the Bomb chest because we have to pass through that room on the way from the small key to the Miniboss. But that means that the RNG will also advance less when we get the Bombs so we have to advance it more before that point. This means that we have to do more Sword slashes on the mine cart but it also means that we have to kill all the 4 Keese at the end of that room and not before. Where the Keese spawn and how they move is of course itself random, meaning that also needs to be manipulated. On top of that we then also have to get 5 Rupees and a Heart drop and to top it off one more damage boost in the room with the Goriyas.
+	$LF
+]div
+[div class=p 
+	"For the Miniboss, it's actually slightly faster to kill the red Goriya since we're entering the room on the right side of the door because we have to dodge the Blade Trap in the previous room. Doing this however would mean that we end the fight on the right side of the room and then we don't have enough time to manipulate the RNG. Killing the blue one also means we can get the fairy, which in itself more than makes up for the small time loss.
+	$LF
+]div
+[div class=p 
+	"This Miniboss is also a bit unique in that their I-frames depend on how you damage them. They get:
+	$LF
+]div
+[ul 
+	[li 
+		" 16 I-frames when hit with a Sword slash
+		$LF
+	]li
+	[li 
+		" 21 I-frames when hit with a Bomb
+		$LF
+	]li
+	[li 
+		" 26 I-frames when hit with a spin attack
+		$LF
+	]li
+]ul
+[div class=p 
+	"For this reason, a spin attack is only used on the final hit.
+	$LF
+]div
+[div class=p 
+	"When lighting the torches it's slightly faster to light the one that's further away first because the Ember Seed will take longer to hit that torch.
+	$LF
+]div
+[div class=p 
+	"We waste one frame after picking up the Boss Key. For some reason that makes the savewarp one frame faster. It seems like we gained nothing there but this means that the in-game clock is one frame higher which will save one frame when picking up the Essence.
+	$LF
+]div
+[div class=p 
+	"The Boss is much more standard because it gets 32 I-frames no matter what. Doing a spin attack deals 4 damage (a normal slash deals 2) but it takes 60 frames to charge it and then another 24 frames for the animation. This means that doing only spin attacks would not be fast but by alternating spin attacks and normal slashes we can do 6 damage every 92 frames, which is slightly faster than just doing slashes. It is however faster to start with two spin attacks because the first one only hits on the last frame of the animation.
+	$LF
+]div
+[h4 id=D1D2 
+	" D1 --> D2
+	$LF
+]h4
+[div class=p 
+	"In Subrosia we don't have enough Bombs or health so we have to cut out one boost. We skip the one closest to the Temple of Seasons because that screen lags one frame more if you enter it with a Bomb. We cut out the boost on the way back because it means we're losing no time to the "framerule" when picking up the Rod of Seasons.
+	$LF
+]div
+[div class=p 
+	"The part between Subrosia and D2 is a bit rough when it comes to RNG with us losing a tiny amount of time on almost every screen. We are rewarded with two Bomb drops for our troubles though while still hitting the right seed when entering D2.
+	$LF
+]div
+[h4 id=D2 
+	" D2
+	$LF
+]h4
+[div class=p 
+	"We can light the torches before or after getting the key. Since dark rooms take longer to load it's faster to light them immediately so we don't lose time after the savewarp.
+	$LF
+]div
+[div class=p 
+	"After that we get three rooms back to back where we have to kill all the enemies. This is what we were manipulating during the Rosa section.
+	$LF
+]div
+[div class=p 
+	"When damage boosting through the Thwomp, we're actually inside it and then snap to the top of it. This would be a cool time save if we didn't have to give the frames right back because of RNG. Oh well...
+	$LF
+]div
+[div class=p 
+	"On the Japanese version you can beat Facade without spawning it. However, this isn't faster and we were a Bomb short anyway. This also advances the RNG a lot which happens to give us better luck for the later part of this run.
+	$LF
+]div
+[h4 id=D2D3 
+	" D2 --> D3
+	$LF
+]h4
+[div class=p 
+	"When we get the first Pegasus Seed drop by killing one of the Spiny Beetles, we kill the other one as well because the RNG would be even more awful for the Tektites if we didn't do that. It doesn't cost any time because we have to wait for the Pegasus Seed to drop anyway.
+	$LF
+]div
+[div class=p 
+	"There is one pixel at the top of the bridge outside the MARKET where you can walk across. This let's us bypass the horizontal collision at the end of the bridge.
+	$LF
+]div
+[div class=p 
+	"Going from Subrosia to D3, the Tektites decide to be even more awful. What can you do? They're sandwiched between getting two Pegasus Seed drops and manipulating the second room in D3 so they're expected to be a bit bad.
+	$LF
+]div
+[h4 id=D3 
+	" D3
+	$LF
+]h4
+[div class=p 
+	"We could go through the dungeon normally until we get the key but going through it backwards ends up being just under a second faster. We have to go through more rooms but we skip a very slow room where you have to push a pot a long way.
+	$LF
+]div
+[h4 id=D3Roosters 
+	" D3 --> Roosters
+	$LF
+]h4
+[div class=p 
+	"The Tektites decide to not get in the way for once and even provide us with a nice damage boost. Not like it makes up for the earlier time loss but hey.
+	$LF
+]div
+[div class=p 
+	"When picking up the Gale Seeds, we use a spin attack because it has a bigger hitbox compared to a normal slash.
+	$LF
+]div
+[div class=p 
+	"After reentering Subrosia, we leave the screen with the Volcano at just the right time to manipulate the RNG for Onox's Castle.
+	$LF
+]div
+[h4 id=RoosterAdventure 
+	" Rooster Adventure
+	$LF
+]h4
+[div class=p 
+	"There are 4 types of objects in this game: Items, Interactions, Enemies, and Parts. We don't need to go over every one of them, it's only important to know that a Rooster is an Interaction as is the cutscene trigger that prevents us from entering Onox's Castle. Some other Interactions are: the little dirt piles that appear when you use the shovel, the debris that appears when a sign is destroyed, the leaves that appear when a flower is destroyed, the icon in the top-left corner of the screen that indicates which season it is, and the musical notes that appear when you play the Flute.
+	$LF
+]div
+[div class=p 
+	"The game's memory has room for 14 Interactions. During a screen transition the objects of both screens are loaded at the same time. This means that if there are 14 Interactions on one screen and we go to another screen, no Interactions on that screen can load. We can spawn 4 Interactions on the screen south of the cutscene in question: one musical note and three dirt piles (the dirt piles disappear quickly so we don't have time to spawn a fourth before the first one disappears). This means we need to bring 10 Roosters to that screen. We need to use one Rooster to get to Onox's Castle, which means we need to have 11 initially.
+	$LF
+]div
+[div class=p 
+	"When you grab a Rooster, a flag is set that makes it so the Rooster doesn't disappear during screen transitions. When you let go of the Rooster, this flag is unset. This behaviour isn't unique to Roosters, it's true for any object that Link can grab. What is unique to Roosters however is that you can interrupt the grabbing animation with a Gale Seed. This causes the flag to stay set and the Rooster can travel between screens.
+	$LF
+]div
+[div class=p 
+	"Now if you go back to the screen with the Rooster, the game will load a new Rooster in the exact same location as your permanent Rooster. When two objects are in the same position, Link will grab the one that is loaded first in memory. This means that if we want to clone several Roosters, we have to load the first one we clone in the highest memory slot. We can do this by spawning a lot of Interactions on the screen next to the Rooster. Then after cloning that first Rooster we spawn one less Interaction on that screen and so on.
+	$LF
+]div
+[div class=p 
+	"If this all still seems mysterious to you, here's a 
+	[a href=https://www.youtube.com/watch?v=ukA3O3wlM8E rel=noopener external nofollow 
+		"video by the person who found the glitch
+	]a
+	" explaining it in great detail.
+	$LF
+]div
+[div class=p 
+	"OK, now that we know how to clone Roosters we need to decide where to clone them because there are two screens that have a Rooster, one at the bottom of the mountain and one at the top. The screen at the bottom is better for cloning Roosters because you can spawn more Interactions on the screen next to it, so much so that we can actually clone all 11 Roosters on that screen. However, the one Rooster we need to use to get to Onox's Castle needs to come from the top spot. That spot only allows us to clone up to 5 Roosters reasonably fast, which means we have to use both spots. You can get from the top spot to the bottom one without entering a building but not vice versa, which means we have to start with the top spot.
+	$LF
+]div
+[div class=p 
+	"The last thing to decide is how many Roosters to clone in each spot. In general, it's best to spread them out evenly because spawning the first few Interactions is faster than spawning additional ones. This would suggest a 5/6 split. However, cloning 5 Roosters at the top spot is a bit bothersome because we would have to pause the game after leaving the cave so we have enough time to destroy the sign while the season icon is still on screen. Instead, we will clone only 4 Roosters at the top and then 7 at the bottom.
+	$LF
+]div
+[div class=p 
+	"We start at the top by spawning 4 Interactions: 3 digs and the seasons icon. After that we just do the 3 digs. After that 2 digs. For the final Interaction it's faster to use the sign because it skips two menus. After that we reload the screen with no Interactions on the left screen. At this point there is no point cloning the Rooster in the very first slot because it would disappear anyway when we use it to get down the mountain, so we just grab it and go on to the bottom spot.
+	$LF
+]div
+[div class=p 
+	"Here we start by spawning 5 Interactions: 2 flowers and 3 digs. After that the sign and 3 digs. Then just the 3 digs. Then 2 digs. Now we use the sign again to skip Menu time. After that we spawn one Interaction again. This works because Moosh's Interaction used to be loaded before the Roosters but now it's loaded after, sort of giving us a free Rooster. After that we spawn no Interactions on the bottom screen and clone our final Rooster.
+	$LF
+]div
+[div class=p 
+	"From there we make our way to the screen south of the cutscene, spawn 4 more Interactions as outlined above and we're in Onox's Castle.
+	$LF
+]div
+[h4 id=OnoxSCastle 
+	" Onox's Castle
+	$LF
+]h4
+[div class=p 
+	"The first screen is the hardest one because the Blue Wizzrobes love to teleport, which makes them invincible. However, we manipulated this room all the way back in Subrosia so we get a decent pattern.
+	$LF
+]div
+[div class=p 
+	"The next room is kind of on a timer because the final Floormaster won't spawn until a certain point, which means we have time to get one final Pegasus Seed drop.
+	$LF
+]div
+[div class=p 
+	"Facade is pretty unremarkable.
+	$LF
+]div
+[div class=p 
+	"Onox can only be hit with spin attacks during the first two phases. This means that the bottleneck is charging the spin attack as soon as possible. Hitting Onox on the first frame is only important on the final hit of phase 2.
+	$LF
+]div
+[div class=p 
+	"Getting double hits on the second phase doesn't save that much time because the animation is quite long. If it was shorter it would have been worth it to get extra Heart Containers so we could have done more double hits.
+	$LF
+]div
+[div class=p 
+	"At the beginning of the dragon phase Onox can move towards the bottom left or the top right. We make him go towards the bottom left because this means his hand will hit the ground sooner. After that he takes a random amount of time to attack and we of course make him attack as soon as possible.
+	$LF
+]div
+[div class=p 
+	"Onox gets 60 I-frames, which means it's very slightly faster to alternate spin attacks and normal slashes compared to just doing spin attacks. However, doing this would stun-lock him, which would be bad because we need him to move to the bottom of the screen so his death animation will be shorter. This means that we will mostly do spin attacks and only mix in two normal slashes. If we hit him with any more slashes, he wouldn't have time to move all the way to the bottom. When we do hit him with a normal slash, we have to hit him on the first possible frame (again, this isn't true for the spin attacks, except for the final one). This means we have to jump on his left hand because the ruby on his head is shifted to the left during the damage animation.
+	$LF
+]div
+[h2 id=SpecialThanks 
+	" Special Thanks
+	$LF
+]h2
+[div class=p 
+	"A special thank-you goes to the Oracles speedrunning community. In particular I want to shout out 
+	[b 
+		"Stewmath
+	]b
+	" for finding Rooster Adventure and 
+	[b 
+		"Sagaz
+	]b
+	" for finding Wall Clipping.
+	$LF
+]div
+[div class=p 
+	"I also want to give thanks to the TASVideos community, in particular 
+	[b 
+		"Tompa
+	]b
+	" and 
+	[b 
+		"SwordlessLink
+	]b
+	" for creating the old TAS.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": Not having followed the speedrunning scene for this game, at first I was confused about what was going on in this movie. I later understood that most of the game is skipped thanks to abusing a glitch in particular, that is available only upon reaching a certain point in the story progression. For cases like this, we want to indicate the major glitch in question in the branch label, so that any clueless user like me could instantly distinguish it from a non-major skipping movie, as the 
+	(__wikiLink|displaytext=existing|href=/1963M)
+	" TAS, which will remain published as its independent branch. For this reason, I'm adding the label "Rooster Adventure glitch" for the branch naming. Please feel free to say if anyone has issues with that.
+	$LF
+]div
+[div class=p 
+	"I was very impressed and delighted to see the amount of route planning and optimization for TASing this game from my childhood! Thank you, and accepting as a new branch.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ThunderAxe31 
+		"ThunderAxe31
+	]a
+	": File replaced with a 125 frames improvement and including subtitle commentary.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

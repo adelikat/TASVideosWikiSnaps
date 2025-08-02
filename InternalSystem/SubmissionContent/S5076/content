@@ -1,8 +1,6 @@
-3
+5
 [div class=p 
-	[a class=intlink href=/JudgeGuidelines 
-		"Judge Guidelines
-	]a
+	(__wikiLink|displaytext=Judge Guidelines|href=/JudgeGuidelines)
 	":
 	$LF
 ]div
@@ -21,15 +19,11 @@
 	$LF
 ]blockquote
 [div class=p 
-	[img class=embed src=http://i.imgur.com/HzeDlIr.png 
+	[img class=embed mw-100 src=http://i.imgur.com/HzeDlIr.png 
 	]img
 	$LF
 ]div
-[div class=p 
-	(youtube|v=n_PylKovg5k)
-	$LF
-]div
-[h3 id=TheGameObjectives 
+[h3 id=GameObjectives 
 	" The Game Objectives
 	$LF
 ]h3
@@ -62,7 +56,7 @@
 		$LF
 	]li
 ]ul
-[h3 id=TheComments 
+[h3 id=Comments 
 	" The Comments
 	$LF
 ]h3
@@ -119,7 +113,7 @@
 	": ...alright.
 	$LF
 ]div
-[h3 id=TheCode 
+[h3 id=Code 
 	" The Code
 	$LF
 ]h3
@@ -135,7 +129,7 @@
 	" take a long time anymore). The code accounts for deaths and will continue the procedure anyways, and it also checks for completion, where it will then start rolling the credits and end the game in the usual manner.
 	$LF
 ]div
-[h3 id=TheSetup 
+[h3 id=Setup 
 	" The Setup
 	$LF
 ]h3
@@ -185,7 +179,7 @@
 	", which happens to be one controller register and stores it to the stack. This is how total control is gained.
 	$LF
 ]div
-[h3 id=TheSetupPlanning 
+[h3 id=SetupPlanning 
 	" The Setup Planning
 	$LF
 ]h3
@@ -201,9 +195,9 @@
 	]br
 	$LF
 	"First I tested the mole glitch (stunning a mole to spawn an invalid sprite to make the game crash (execute opcode 00 (
-	[tt 
+	[code 
 		"BRK
-	]tt
+	]code
 	")
 	[b 
 	]b
@@ -215,29 +209,27 @@
 ]div
 [div class=p 
 	"Eating a chuck with Yoshi can be done in different ways. The 
-	[a class=intlink href=/2926M 
-		"game end glitch
-	]a
+	(__wikiLink|displaytext=game end glitch|href=/2926M)
 	" run uses a coin which is collected while simultaneously licked by Yoshi creating a replacable sprite on Yoshi's tongue which results in the chuck spawning on said tongue. However, this creates coin sparkles which overwrite important data to manipulate where the glitch is going. Another way of eating a chuck is by using a mushroom instead of a coin, but that takes too long to set up (eating a bunch of berries and collecting the midway point). I decided on using two Yoshi's to perform the glitch. This works because when you lick a sprite with Yoshi and then overwrite that Yoshi with another Yoshi, the fact that the now invisible Yoshi has a specific sprite slot on his tongue remains. This means despawning the visible Yoshi (for example by killing) reactivates the old Yoshi and the tongue.
 	$LF
 ]div
 [div class=p 
 	"The code jump to open bus when you eat a chuck and it will execute 
-	[a class=extlink href=http://pastebin.com/1jKvFdvP rel=nofollow 
+	[a href=http://pastebin.com/1jKvFdvP rel=noopener external nofollow 
 		"shenanigans
 	]a
 	", but most importantly it needs to execute the opcode 0xFC (
-	[tt 
+	[code 
 		"JSR
-	]tt
+	]code
 	"). Executing 0xFC requires the value at the address at address $01+chuckslot to be 0xFC. I found out that if the chuck is in slot #8, I need the sprite with the lowest slot to have the xposition low byte to be 0x81, which will turn into 0x8F (because it adds an offset of 14 apparently) which then turns into $8F01 (0x01 because of $09) and that turns into $018F01 (because DB is 0x01) and luckily that holds 0xFC.
 	$LF
 ]div
 [div class=p 
 	"So far so good, the code now jumps to whatever address $1804 points to. $1804 are the ypositions of minor extended sprites which are being used for coin sparkles for example. The only problem with coin sparkles is the fact that they spawn in bundles of 4, the 3rd takes up $1805 and the fourth uses $1804. You can avoid spawning the fourth by collecting the coin close to the edge of the screen, meaning you can manipulate the low and the high byte seperately. Now where do we jump to? Of course we simply jump to the start of yposition data of normal sprites which is followed by xposition data meaning we have a bunch of values we can manipulate right!? No, we have two problems here. The first problem is the fact that it would be address $00D8 which is impossible to get with coin sparkles at the start of the level. So we instead jump to some other location that can be manipulated more easily to jump to $00D8. Which location you ask? Controller registers of course. By holding B, Y, select, down and L the values at $4218 read 20 E4 00 (the 00 because we don't have a second controller... or at least it isn't pressing anything) which translates to 
-	[tt 
+	[code 
 		"JSR $00E4
-	]tt
+	]code
 	"... but wait a minute, that isn't $00D8 at all! Well yeah, you can also change it to $00D8 if you want but we still have problem number 2 to discuss.
 	$LF
 ]div
@@ -270,75 +262,75 @@
 	$LF
 ]pre
 [div class=p 
-	[tt 
+	[code 
 		"LDA ($13)
-	]tt
+	]code
 	": Let's explain from the start. $13 is the framecounter of SMW and $14 is the game-framecounter. You can offset them from each other by pausing the game because $14 also stops when pausing whereas $13 continues (they are the reasons why I jumped around strangely after placing the green shell and also why I pause the game just before the glitch). The timers also stop when this glitch happens. I made them read $4219 so I could use B, Y, select, Start, up, down, left and right to manipulate what's loaded into the accumulator there.
 	[br 
 	]br
 	$LF
-	[tt 
+	[code 
 		"BNE $00E5
-	]tt
+	]code
 	": Hold on a second that doesn't even line up with the second block, are you stupid? No, the reason I did that is because I need two 
-	[tt 
+	[code 
 		"WAI
-	]tt
+	]code
 	"'s to advance one frame, but unfortunately I start at the wrong offset meaning that I have to advance a single 
-	[tt 
+	[code 
 		"WAI
-	]tt
+	]code
 	" before starting the loop. But I only have to execute it once so I jump to $00E4 to start off the code and to $00E5 when in the loop. Also you might notice the 
-	[tt 
+	[code 
 		"BNE
-	]tt
+	]code
 	" opcode (branch if not equal to zero), which only branches if the previous result wasn't 0, meaning I can stop the loop if I just input 00 for one frame (this also means my written code can't include a single 00).
 	[br 
 	]br
 	$LF
-	[tt 
+	[code 
 		"BEQ $013E
-	]tt
+	]code
 	": Since this is the exact opposite of 
-	[tt 
+	[code 
 		"BNE
-	]tt
+	]code
 	" this will always jump. $013E lies within the stack. (Why the stack? Continue reading.)
 	[br 
 	]br
 	$LF
-	[tt 
+	[code 
 		"WAI
-	]tt
+	]code
 	": This instructions waits for an interrupt (like NMI or IRQ). This first 
-	[tt 
+	[code 
 		"WAI
-	]tt
+	]code
 	" was for the offset so I don't read the controller registers while they're being updated (because it puts me after IRQ instead of after NMI).
 	[br 
 	]br
 	$LF
-	[tt 
+	[code 
 		"PHA
-	]tt
+	]code
 	": Remember that the accumulator still holds controller data, meaning that byte is pushed into the stack with this instruction. This is the reason why I can simply jump into the stack once I'm done writing code (because it's exactly where I write my code in the first place).
 	[br 
 	]br
 	$LF
-	[tt 
+	[code 
 		"WAI : WAI
-	]tt
+	]code
 	": This effectively waits a frame.
 	[br 
 	]br
 	$LF
-	[tt 
+	[code 
 		"BNE $00D8
-	]tt
+	]code
 	": Complete the loop. (Oh, and yes, this always jumps even if it is a 
-	[tt 
+	[code 
 		"BNE
-	]tt
+	]code
 	".)
 	$LF
 ]div
@@ -350,7 +342,7 @@
 	" is where I put my code which simulates the main game loop with some additional hooks like overwriting parsed input or resetting the bowser fight when the end of the current input is reached or simply when you die.
 	$LF
 ]div
-[h3 id=TheLength 
+[h3 id=Length 
 	" The Length
 	$LF
 ]h3
@@ -359,7 +351,7 @@
 	$LF
 ]div
 [pre 
-	[a class=extlink href=http://www.wolframalpha.com/input/?i=1%2F60+*+sum+(i%3D1+to+n-1)+of+(+(512%5Ei)+*+(37%2Bi)+)+seconds rel=nofollow 
+	[a href=http://www.wolframalpha.com/input/?i=1%2F60+*+sum+(i%3D1+to+n-1)+of+(+(512%5Ei)+*+(37%2Bi)+)+seconds rel=noopener external nofollow 
 		"1/60 * sum (i=1 to n-1) of ( (512^i) * (37+i) )
 	]a
 	$LF
@@ -512,12 +504,12 @@
 		]tr
 	]tbody
 ]table
-[h3 id=TheSuggestedScreenshot 
+[h3 id=SuggestedScreenshot 
 	" The Suggested Screenshot
 	$LF
 ]h3
 [div class=p 
-	[img class=embed src=http://i.imgur.com/M2oYLCw.png 
+	[img class=embed mw-100 src=http://i.imgur.com/M2oYLCw.png 
 	]img
 	[br 
 	]br
@@ -525,7 +517,7 @@
 	"It's right about when the earth dies.
 	$LF
 ]div
-[h3 id=TheJudge 
+[h3 id=Judge 
 	" The Judge
 	$LF
 ]h3
@@ -535,7 +527,7 @@
 	]a
 	$LF
 ]div
-[h3 id=TheJudge'sComment 
+[h3 id=JudgeSComment 
 	" The Judge's Comment
 	$LF
 ]h3
@@ -543,7 +535,7 @@
 	"Also ends earl
 	$LF
 ]div
-[h3 id=TheJudge'sVerdict 
+[h3 id=JudgeSVerdict 
 	" The Judge's Verdict
 	$LF
 ]h3
@@ -551,7 +543,7 @@
 	"The Judge (hereafter referred to as Sexy Queen Samsara (hereafter referred to as Samsara)) has verified that this run does achieve its goal of ending input early. Samsara (hereafter referred to as The Judge (hereafter referred to as Pablo (hereafter referred to as Samsara))) is still in the process of verifying that the run does in fact complete. Once Samsara (hereafter referred to as Samsara) verifies that the run does indeed come to a state of completion, the run (hereafter referred to as Samsara) will be rightfully placed in the "decision: accepted" (hereafter referred to as "samsara: samsara" category of the site. Until then, Samsara cannot place Samsara within the "samsara:samsara" catesara, sosara Samsara shallsara rejectsara thisara Samsarasara.
 	$LF
 ]div
-[h3 id=TheJudge'sObligatoryJokeComment 
+[h3 id=JudgeSObligatoryJokeComment 
 	" The Judge's Obligatory Joke Comment
 	$LF
 ]h3
@@ -559,10 +551,18 @@
 	"ill end ur moms input early
 	$LF
 ]div
-[h3 id=TheJudge'sRetraction 
+[h3 id=JudgeSRetraction 
 	" The Judge's Retraction
 	$LF
 ]h3
 [div class=p 
 	"nvm that sounds weird lmao
+	$LF
+]div
+[h3 id=JudgeSProgress 
+	" The Judge's Progress
+	$LF
+]h3
+[div class=p 
+	"FRAME 4 WAS MINDBLOWING!!! CAN'T WAIT FOR FRAME 5!!!!!!
 ]div

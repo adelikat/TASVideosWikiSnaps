@@ -1,0 +1,440 @@
+15
+[h2 id=SyncSettings 
+	" Sync Settings
+	$LF
+]h2
+[ul 
+	[li 
+		" Version: PICO-8 version 0.2.0I, CELESTE Linux Standalone
+		$LF
+	]li
+	[li 
+		" LibTAS version 1.4.2
+		$LF
+	]li
+]ul
+[h2 id=Objectives 
+	" Objectives
+	$LF
+]h2
+[ul 
+	[li 
+		"Complete game as fast as possible
+		$LF
+	]li
+	[li 
+		"Optimizes for in-game timer
+		$LF
+	]li
+	[li 
+		"Genre: Platform
+		$LF
+	]li
+]ul
+[h2 id=GameOverview 
+	" Game Overview
+	$LF
+]h2
+[div class=p 
+	"CELESTE (Currently known as CELESTE Classic, but will be referred to as Celeste from now on) is a platforming game developed by Maddy Thorson and Noel Berry in 2015. The game, created in the span of four days for a game jam on the PICO-8 fantasy console, has the player control a red haired girl as she climbs Mount Celeste. It received a good amount of attention for its solid gameplay and has had an active speedrunning scene since then. Its success would eventually inspire both creators to expand upon this concept, which led to the creation of 
+	(__wikiLink|displaytext=Celeste 2018|href=/4089M)
+	".
+	$LF
+]div
+[div class=p 
+	"This movie makes it through the 30 screens in the game as fast as possible and beats the game with an IGT of 1:34.933. IGT starts on the first visible frame in 100m and ends on exiting 3000m. The game keeps track of IGT to the frame but displays only to the second.
+	$LF
+]div
+[div class=p 
+	"This movie runs on the original PICO-8 release of Celeste, using PICO-8 0.2.0I. There is a version of this game unlockable within Celeste 2018, but we’ve opted to use the standalone Linux version to make setup easier.
+	$LF
+]div
+[div class=p 
+	"The Celeste community has developed its own TAS tool, UniversalCelesteTAS, to handle input for Celeste and its mods. This submission has been developed by taking the current best movies for each individual level, stitching them together, and parsing their community format into libTAS-ready input. Once this was done, all that was left was TASing the title screen and ensuring sync via RNG manipulations. The re-record count is therefore not accurate, and a real re-record count is probably impossible.
+	$LF
+]div
+[h2 id=Mechanics 
+	" Mechanics
+	$LF
+]h2
+[div class=p 
+	"Similarly to Celeste 2018, this game allows the girl (retroactively named Madeline) to dash, jump and wallump. Unlike the newer game, however, there is no wall climbing and therefore no stamina. Similarly, many mechanics used in Celeste 2018 such as hyper dashing, wavedashing and wall bounces do not exist in this game. 
+	$LF
+]div
+[div class=p 
+	"An important difference is that collecting strawberries only requires touching them, and collecting strawberries refills Madeline’s dashes. Additionally, balloons are placed around levels and they refill Madeline’s dashes when touched. They then pop and respawn some time after.
+	$LF
+]div
+[div class=p 
+	"Importantly for this run, each balloon’s y position oscillates slightly along its center and the starting position in this cycle is determined at random when the balloon is loaded. As such, some of the strats in the game are RNG dependent on balloon cycles. Thankfully, we can easily manipulate RNG by pressing the dash button while Madeline’s hair is blue. Since she cannot dash, there’s no change to her movement, but doing this spawns smoke, which calls the RNG function.
+	$LF
+]div
+[h2 id=RoomByRoomBreakdown 
+	" Room-by-room breakdown
+	$LF
+]h2
+[div class=p 
+	"Here we include a detailed explanation of the strats used in each of the 30 rooms that count towards in-game timer, pointing out all noteworthy decisions and mechanics. 
+	$LF
+]div
+[h3 id=100m 
+	" 100m 
+	$LF
+]h3
+[div class=p 
+	"Although there are other fast ways to walljump at the wall on the right, this downright dash then right dash movement is done because the right dash lands exactly on the platform, instead of falling onto it. When Madeline lands on the ground exactly, instead of being in a position where she would’ve been inside it if the ground didn’t push her up, she keeps her vertical speed and subpixels. In this case, speed doesn’t matter, because her vertical speed is 0 right after dashing horizontally, but her subpixels are very high up, which is important for later. After she reaches the wall she dashes to land on the ground in the top right while moving up, which conserves subpixels in a similar way as before, and is used here to simply land faster. Landing while moving upwards like this is called a “boost”, because in certain situations it can be used to get extra height, as we’ll see later.
+	$LF
+]div
+[div class=p 
+	"This movement doesn’t save any time compared to simpler movement until reaching the top right platform, but it does have Madeline do an upright dash to the platform, which brushes against the wall before landing. Due to how Celeste’s engine works, you cannot usually move exactly one pixel in a frame, and the maximum regular movement speed is two pixels per frame, so usually if you have an odd x position you keep an odd x position, and if you have an even x position you keep an even x position. This is called “parity”. Brushing against the wall makes Madeline's x position odd, which makes her land on the top platform one pixel farther to the right than if we had done different movements. This, combined with very specific subpixels on the top clip, makes the jump and updash exit barely save 1 frame over any other known strategy.
+	$LF
+]div
+[h3 id=200m 
+	" 200m
+	$LF
+]h3
+[div class=p 
+	"Instead of dashing right at the beginning, which can still reach the first low wall, this movie does a downright dash. This is because Madeline jumps at the same time, but is far enough left to walljump 1 frame later, which is 1 frame faster when reaching the clip in the middle. 
+	$LF
+]div
+[div class=p 
+	"To spikeclip the top platform, Madeline lands while on it while moving upwards. Because spikes in this game don’t kill you if you’re moving away from them, this allows Madeline to stand in the spikes. In addition, the game considers Madeline on ground even if she’s moving upwards (as long as she’s in the correct position), and thus she gains back her dash, and gravity isn’t applied (so she keeps her upwards speed). because the TAS waits to clip until she has a very low y speed, she can stay in the spikes for a while before she would move up above the ground, fall back down, and die.
+	$LF
+]div
+[div class=p 
+	"During this time, the TAS does a downright dash at the edge of the platform. After leaving the ground, the game gives a 6 frame grace window where Madeline can still jump (this is sometimes also called coyote time). Using this mechanic, Madeline is able to jump in midair to walljump at the right half of the level. This spikeclip saves 1 frame compared to keeping your dash and going over the spikes.
+	$LF
+]div
+[h3 id=300m 
+	" 300m
+	$LF
+]h3
+[div class=p 
+	"The TAS goes to the left for one frame to manipulate subpixels, before dashing back twice and clipping the spikes. This saves 1 frame on reaching the right side compared to just taking the spring, because it lets you dash one more time and the spring slows Madeline down slightly.
+	$LF
+]div
+[h3 id=400m 
+	" 400m
+	$LF
+]h3
+[div class=p 
+	"The TAS could walljump or do the upright dash at the beginning significantly faster, but the berry bobs up and down on a cycle as soon as you enter the level, and since it starts to leave as soon as you dash you have to dash at the correct time so it’s at the low part of its cycle. The movement done here reaches it on the first frame known to be possible. Because berries give Madeline back her dash in this game, she can use a dash after grabbing the berry, to exit the level. This strategy saves 3 frames over going up the right side.
+	$LF
+]div
+[h3 id=500m 
+	" 500m
+	$LF
+]h3
+[div class=p 
+	"This spikeclip uses the same mechanics as the one in 200m, and the updash after it is done slightly late to clip the platform and land faster.
+	$LF
+]div
+[h3 id=600m 
+	" 600m
+	$LF
+]h3
+[div class=p 
+	"The TAS delays the first right dash by one frame, which allows Madeline to barely walljump off the corner left wall at the top. We also manipulate balloon RNG in the previous levels to get the highest possible balloon position which is required for this strat.
+	$LF
+]div
+[h3 id=700m 
+	" 700m
+	$LF
+]h3
+[div class=p 
+	"Similarly to spike clips and other boosts, you can land on clouds while moving up. Because the game moves Madeline sideways before it moves her upwards, you have to be at the same y position for two consecutive frames to move sideways into a clip. However, clouds don’t have a ceiling under them, and so Madeline can get back her dash on each cloud while moving several pixels every frame. This level adds the least total time to the run due to how quickly you move upwards.
+	$LF
+]div
+[h3 id=800m 
+	" 800m
+	$LF
+]h3
+[div class=p 
+	"You can do the first updash earlier and jump off the left walls much faster, but it would either be too low to reach the balloon or it would bonk the ceiling. Because the TAS waits to do the updash until it is falling and walljumps at the exact highest point, it is able to reach the lowest balloon position with exactly 0 subpixels to spare vertically, which saves time over using the spring on the right.
+	$LF
+]div
+[h3 id=900m 
+	" 900m
+	$LF
+]h3
+[div class=p 
+	"Springs keep Madeline’s subpixels after you hit them, so while you could do a different right dash timing that hits the spring at the same time, this right dash gets a better subpixel position that allows Madeline to reach the balloon 1 frame faster when it’s at the bottom of its cycle. The TAS also must manipulate x position before doing the dash at the balloon, so it doesn’t go too far left and hit the bottom of the left wall. After grabbing the balloon, the TAS dashes in a way that allows it to walljump off the bottom corner of the right wall.
+	$LF
+]div
+[h3 id=1000m 
+	" 1000m
+	$LF
+]h3
+[div class=p 
+	"If you just jump and updash from the crumbles, you normally don’t get enough height to reach the spikes at the top. However, the TAS here lands on the bottom crumble while still moving upwards, and while Madeline is moving upwards, she uses the game’s grace period to jump in the air above the crumble blocks, which gives enough height to clip the top spikes, skipping going all the way around. From there, we actually release left for a frame to make Madeline do the first walljump farther to the right, so she walljumps on the right wall 1 frame faster, which saves 1 frame.
+	$LF
+]div
+[h3 id=1100m 
+	" 1100m
+	$LF
+]h3
+[div class=p 
+	"Due to how objects are handled in Celeste, sometimes Madeline will spawn 1 frame faster or slower than other objects in the level, depending on the number of objects in the previous level. Because the cloud spawns 1 frame before Madeline does, it is 1 pixel farther to the left than it would be if you tried to do this strat after dying and respawning, and you could not do this exact strategy without that 1 pixel of movement.
+	$LF
+]div
+[div class=p 
+	"Madeline starts by walljumping off the corner of both of the walls at the beginning, which boosts off the cloud with some extra speed. She delays jumping until slightly after she leaves the cloud with that speed, then also delays the walljump off of the spikes to get more height. The walljump here is possible because there is a bug in the hitbox of left facing spikes that makes them 1 pixel smaller than right facing spikes. Because you can walljump even if you’re a few pixels away from a wall, there is 1 pixel where you’re close enough to the wall to walljump, but not close enough to die to the spikes, and Madeline is able to walljump without dying (this is sometimes referred to as a spikejump). Because this is pixel perfect, it requires odd parity, which we have in this level because the cloud moves Madeline 1 pixel left on the frame she lands on it. Right before this walljump, we press right to get as close to the spikes as possible without touching them, and this combined with releasing right for 1 frame after the updash lets Madeline walljump as far right as possible on the left wall at the top, so she can walljump on the right wall earlier to save 1 frame with very few subpixels of leeway.
+	$LF
+]div
+[h3 id=1200mOldSite 
+	" 1200m (Old Site)
+	$LF
+]h3
+[div class=p 
+	"Madeline walljumps off the ice at the beginning for extra height, which allows her to boost quickly on the next platform. We also delay the walljump after this, which gives more height than jumping right away.
+	$LF
+]div
+[h3 id=1300m 
+	" 1300m
+	$LF
+]h3
+[div class=p 
+	"Right before the walljump, the TAS presses against the wall to change parity then moves away, which allows Madeline to walljump 1 pixel farther right than she otherwise could. This lets her do the ending movement slightly earlier, saving 1 frame. This is also the level that relies most heavily on RNG manipulation, as all 3 balloons need to be in specific positions.
+	$LF
+]div
+[h3 id=1400m 
+	" 1400m
+	$LF
+]h3
+[div class=p 
+	"The grace window for jumping after leaving the ground applies even if Madeline leaves the ground because she hit a spring. Because of this, the TAS can fit two dashes at the beginning that hit the ground under the spring, then use the delayed jump to get more height, since dashing into a spring doesn’t go as high as hitting it regularly. At the end, the TAS walljumps one frame before doing the upleft dash, because it gains a little bit of height, while still allowing Madeline walljump off the wall on the right at the exit. This saves 1 frame.
+	$LF
+]div
+[h3 id=1500m 
+	" 1500m
+	$LF
+]h3
+[div class=p 
+	"Because the game moves Madeline sideways before it moves her upwards, you can do the upright dash at the beginning very early without dying. Because the game doesn’t apply gravity while Madeline is on the ground, and Madeline can’t bounce on springs unless she is moving downwards, the TAS avoids going over the crumble block until it is moving downwards and can bounce on the spring without falling slower. The TAS then manipulates x speed to hit the ground as soon as possible while still having an odd x position, which lets Madeline walljump off the spikes at the end.
+	$LF
+]div
+[h3 id=1600m 
+	" 1600m
+	$LF
+]h3
+[div class=p 
+	"While you can easily spikejump off the left wall, unless you keep your dash you can’t leave the left side of the screen to exit. To keep the dash, the TAS clips the spikes at the bottom left to get a boost, then jumps while above the platform to get enough height to walljump while keeping the dash. After the walljump, Madeline can clip the top platform using this dash.
+	$LF
+]div
+[div class=p 
+	"Even though left facing spike hitboxes are small enough to let Madeline walljump off them when far enough away, the TAS actually doesn’t use this here, and instead avoids the spikes by walljumping while moving away from the wall. This lets Madeline walljump farther to the right, which allows her to land faster at the top, saving a few frames over a regular spike walljump.
+	$LF
+]div
+[h3 id=1700m 
+	" 1700m
+	$LF
+]h3
+[div class=p 
+	"If you dash into a berry block (a breakable block that hides a berry behind it), the block will launch Madeline slightly upwards. Using the jump grace window, Madeline can jump from above the ground, and this lets her clip the spike on the left side. With good subpixels from the jump and the updash, you can barely exit with a diagonal dash, which saves time over drifting left and using an updash.
+	$LF
+]div
+[h3 id=1800m 
+	" 1800m
+	$LF
+]h3
+[div class=p 
+	"The TAS does a downright dash at the beginning to manipulate y subpixels, and also manipulates x position in a specific way to allow it to clip the platform at the farthest left position it can. This later lets it reach the final balloon 1 frame earlier. After the clip, it dashes up and left to quickly change directions, and then because Madeline has just left the ground and hasn’t jumped yet, she can jump in midair using the jump grace windows, which barely lets her get enough height to reach the end. 
+	$LF
+]div
+[h3 id=1900m 
+	" 1900m
+	$LF
+]h3
+[div class=p 
+	"The TAS clips the spikes by upright dashing and walljumping three times, which allows it to skip the entire right side of the level and just updash to the top.
+	$LF
+]div
+[h3 id=2000m 
+	" 2000m
+	$LF
+]h3
+[div class=p 
+	"By downright dashing on the crumble, Madeline touches the crumble just enough to keep her dash, but she still keeps downward and horizontal momentum from the dash, and Madeline can also grace jump directly after she leaves the crumble. The movement after the downright dash and jump was brute forced using Searcheline to allow Madeline to quickly boost on the top ice and get her dash back, and exit. While there are some other approaches to the exit (for example grabbing the top right balloon), they have been found to be slower.
+	$LF
+]div
+[h3 id=2100m 
+	" 2100m
+	$LF
+]h3
+[div class=p 
+	"While there are a couple of different ways to do 2100 fast, such as directly upright dashing to the spring, the TAS decides to walk off the block, then fall for 4 frames, then jump and updash. By falling, Madeline gets good subpixels so that when she jumps and updashes she clips the spikes above her, and by doing this she can updash a second time to exit the level. While this is tied for speed with quickly dashing to the spring, it is significantly more swag. This level is the shortest level in the game when considering only actionable frames, after loading into the level.
+	$LF
+]div
+[h3 id=2200m 
+	" 2200m
+	$LF
+]h3
+[div class=p 
+	"After touching the chest, the TAS jumps and does an updash to grab the gem. Grabbing the gem grants Madeline two dashes for the rest of the game, and also restores dashes, which means we can then immediately do an updash and an upright dash to exit the level. This movement lets Madeline walljump on the corner of the ice, which saves 1 frame.
+	$LF
+]div
+[h3 id=2300m 
+	" 2300m
+	$LF
+]h3
+[div class=p 
+	"Instead of updashing, the TAS upleft dashes so that it can get closer to the wall to walljump again. After this, it does an upright dash to clip the spikes near the top.
+	$LF
+]div
+[h3 id=2400m 
+	" 2400m
+	$LF
+]h3
+[div class=p 
+	"The TAS does the updash as soon as possible, then delays the walljump to get additional height quickly. Doing the upright dash on this specific frame gives Madeline good parity to walljump off the spiked wall and clip the spikes at the top.
+	$LF
+]div
+[h3 id=2500m 
+	" 2500m
+	$LF
+]h3
+[div class=p 
+	"The TAS gets a precise x position to do two upleft dashes to the second spring without dying to the spike under the spring. It then performs a specific type of clip at the top of the level, which is unique to this exact spot. In the early frames of a dash, Madeline moves enough pixels per frame to completely jump over the hitbox of a spike, so during one frame she is on one side and in the next frame she is on the other side, without ever being inside the spike’s hitbox. This does not work if there is a wall behind the spikes, but at the top of 2500 there isn’t anything behind the spikes to stop you, and so you can just exit the level earlier then intended.
+	$LF
+]div
+[h3 id=2600m 
+	" 2600m
+	$LF
+]h3
+[div class=p 
+	"The inputs for the beginning of this level until the first boost were brute forced using Searchline, and the TAS lands with the most upwards speed you can have from a dash while still being at the same position for two consecutive frames. From there, it clips the spike at the top of the level, and uses both dashes to reach the top right quickly. Because dashing freezes the game for 2 frames, it’s faster to jump to exit the level because you’re covering such a short distance that the dash freeze isn’t worth it.
+	$LF
+]div
+[h3 id=2700m 
+	" 2700m
+	$LF
+]h3
+[div class=p 
+	"The TAS has to stop holding right for one frame at the beginning to make it under the middle pillar, and then walljumps off of it’s corner. From there, the level was brute forced with Searchline to find inputs that can walljump off of the spike block at the top of the level. Because there are spikes at the bottom of the block, you have to go from low enough to not die to the spikes, high enough to walljump on the wall, while still being close enough to the wall so that you can walljump off it while still moving to the right to avoid the spikes on the right side of the block. This requires very precise subpixels, but it saves 2 frames.
+	$LF
+]div
+[h3 id=2800m 
+	" 2800m
+	$LF
+]h3
+[div class=p 
+	"By downright dashing at the beginning Madeline drops down faster while keeping both of her dashes, then walljumps to reach the left side while keeping both dashes to reach the crumble block faster. Because Madeline lands exactly on the ground, she keeps her subpixels and her speed. This results in her getting her dash back but falling as if she didn’t touch the crumble block.
+	$LF
+]div
+[div class=p 
+	"After leaving the crumble block, Madeline does a grace jump to set up y subpixels. Then she dashes at specific times that cause Madeline to walljump as far left as possible on the spiked wall, while moving away from the wall so she doesn’t die to the spike. This movement lets Madeline updash at the same time as many other strats, but she is farther left so she is able to reach the spike clip 1 frame sooner. After she clips the spikes, she does a jump and 2 updashes to exit the level.
+	$LF
+]div
+[h3 id=2900m 
+	" 2900m
+	$LF
+]h3
+[div class=p 
+	"After downright dashing 1 frame after spawning to avoid hitting the bottom spike and dying, the TAS does a grace jump and then immediately walljumps off the corner of the block. After doing two upright dashes, Madeline is lined up to clip the top right most spikes, where she does an upright dash and jumps 
+	$LF
+]div
+[h3 id=3000m 
+	" 3000m
+	$LF
+]h3
+[div class=p 
+	"After the upright dash to fit through the gap, the TAS upleft dashes 1 frame before touching the balloon, so instead of grabbing it when Madeline has red hair, which would waste a dash, it uses the last dash and then grabs the balloon right after. The two dashes from the balloon are used to updash twice to walljump and exit the level.
+	$LF
+]div
+[h2 id=BruteForceAndSearcheline 
+	" Brute Force and Searcheline
+	$LF
+]h2
+[div class=p 
+	"Pyleste (
+	[a href=https://github.com/CelesteClassic/Pyleste/ rel=noopener external nofollow 
+		"https://github.com/CelesteClassic/Pyleste/
+	]a
+	" ) is a python reimplementation of Celeste by Meep, which includes a library of functions that allow manipulating the game in different ways, in order to test out strats and ideas. One of the Modules it includes is Searcheline. Searchline allows you to define a starting State, a goal, allowable inputs for every state, and a Heuristic function for when a state will finish. It then uses an Iterative Deepening Depth First Search (IDDFS) algorithm to go over the states, and find an optimal solution to the defined problem. Because of the exponential nature of Brute Forcing like this, no level can be Brute Forced completely. However, by using smart problem restrictions, and dividing into subproblems, many levels have been Partially brute forced, or Brute forced in multiple parts. This has been used to save numerous frames off the TAS, or verify optimality/efficiency. Searcheline has also been ported to C++ by gonengazit in Cppleste (
+	[a href=https://github.com/CelesteClassic/Cppleste rel=noopener external nofollow 
+		"https://github.com/CelesteClassic/Cppleste
+	]a
+	" ), which allows it to run an order of magnitude faster (although this doesn’t that help much, because of the exponential growth).
+	$LF
+]div
+[h2 id=SpecialThanks 
+	"Special Thanks
+	$LF
+]h2
+[ul 
+	[li 
+		" ikuyo, for converting input to libTAS and syncing RNG
+		$LF
+	]li
+	[li 
+		" Akliant, for creating the original CelesteTAS tool. Gonengazit, for developing UniversalCelesteTAS.
+		$LF
+	]li
+	[li 
+		" Meep, for coding Searcheline, a brute-force-searching tool used in some levels
+		$LF
+	]li
+	[li 
+		" ikuyo, Lord Snek and eYan for writing this submission text. Gonengazit and Meep for proofreading this submission.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Judging!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Annotations were added to the file explaining how to generate the required executable, so I've replaced the submission file to include the annotations. No changes were made to input.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I've once again replaced the file, this time with a version that wipes the rerecord count. Once again, no changes were made to input.
+	$LF
+]div
+[div class=p 
+	"Well, this is quite a lovely little run! It's a seriously impressive feat to make PICO-8 Celeste look just as slick and fast as 2018 Celeste! It's clear just from watching that insane amounts of passion and effort was put into every single millimeter of this run from start to finish by every author, not just in optimizing each individual level by hand, but also in developing the tools to TAS and optimize the game in the first place, eking out every last frame through Searcheline, and of course putting everything together and converting it to libTAS so it can be submitted here. I do feel I need take a moment to address that last point in particular, though, since there's something important regarding it that I'd like to clarify.
+	$LF
+]div
+[div class=p 
+	"For those of you unfamiliar with the submission process, TASvideos only accepts input files, which the site parses automatically to generate the submission info. Whenever we start accepting new emulators, and therefore new input files, we have to build a new parser for them in order for the site to be able to understand what they are. What this means is that, by nature, 
+	[em 
+		"we cannot receive submissions from tools and emulators that we don't currently know about
+	]em
+	". I feel like this technical limitation has often been seen by people outside TASvideos as us saying "No, we won't accept your game at all", and I just want to clarify that this is not the case at all. In a perfect world, we would have been able to receive and accept files directly from UniversalCelesteTAS instead of needing to put the time in to convert them into libTAS input files, but until we get there, we have to make do with the best we have. To help get there, though, 
+	(__wikiLink|displaytext=we recently started a thread calling for tool creators to reach out to us about having their tools accepted on the site|href=/Forum/Topics/22894)
+	", in hopes that we can greatly widen the amount of games and submissions we're able to receive. Not everything can be converted to libTAS like this, there's a ton of TASes out there being made that we don't have the means to support, and I'd aboslutely love to see them supported.
+	$LF
+]div
+[div class=p 
+	"Apologies for taking away from the TAS by talking site tech, I just had to get that particular point on record given that this TAS kinda fell victim to it a little bit. Naturally, I'm accepting this! Publication may be a bit delayed, as staff needs a bit further discussion on how to categorize PICO-8 TASes, but hopefully it won't take too long.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+	$LF
+]div
+[div class=p 
+	"Also changed the game title to 
+	[em 
+		"CELESTE Classic
+	]em
+	", to better differentiate from the game that was released in 2018 (and it was officially renamed to append Classic in the URL of the 
+	[a href=https://mattmakesgames.itch.io/celesteclassic rel=noopener external nofollow 
+		"official game page
+	]a
+	" as well as the tab/browser title).
+]div

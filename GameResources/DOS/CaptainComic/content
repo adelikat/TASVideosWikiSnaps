@@ -1,18 +1,52 @@
-4
+13
+[h2 id=Movies 
+	" Movies
+	$LF
+]h2
 [div class=p 
-	"This game will probably end up in the vault due to its rather slow pace. Nonetheless there are a few interesting tricks and glitches, maybe someone wants to give it a try nonetheless. 
+	(PublicationHistory|publicationid=4345)
+	$LF
+]div
+[h2 id=Versions 
+	" Versions
+	$LF
+]h2
+[div class=p 
+	[em 
+		(__wikiLink|displaytext=The Adventures of Captain Comic|href=/Forum/Topics/21916)
+	]em
+	$LF
+	"is one of the earliest arcade-style platform games for DOS.
+	$LF
+	"There are 
+	[a href=https://tcrf.net/The_Adventures_of_Captain_Comic_(DOS)#Revisional_Differences rel=noopener external nofollow 
+		"five revisions
+	]a
+	" of this game.
+	$LF
+	"Later revisions fix bugs that are useful for TAS, so it's best to stick with Revision 1.
 	$LF
 ]div
 [div class=p 
-	"There are multiple versions of this game and later versions fix bugs that are useful for TAS so it's best to stick with version 1.0.
+	"The DOS version is the original version of the game.
+	$LF
+	"There is also an
+	$LF
+	(__wikiLink|displaytext=NES port|href=/Forum/Topics/190)
+	",
+	$LF
+	"which is completely different from the DOS one.
+	$LF
+	"It uses a completely different engine and even the levels look like they were completely remade.
 	$LF
 ]div
 [div class=p 
-	"The DOS version is the original version of the game, it runs at about 9.1 frames per second and all player and enemy movement is done in steps of half a tile's size. There are 8 levels, each one consisting of 3 segments, each one of those being 128 tiles (= 256 steps) wide. Thus it takes 28 seconds to traverse a single segment, hence the slow pace.
+	"There is a sequel for DOS,
 	$LF
-]div
-[div class=p 
-	"The NES version is completely different from this one, it uses a completely different engine and even the levels look like they were completely remade.
+	[em 
+		"Captain Comic II: Fractured Reality
+	]em
+	".
 	$LF
 ]div
 [h2 id=Objectives 
@@ -20,121 +54,585 @@
 	$LF
 ]h2
 [div class=p 
-	"To win the player must collect gems, crown and gold. These are the only items the game checks for.
+	"To win, the player must collect the three treasures: Gems, Crown, and Gold.
+	$LF
+	"These are the only items the game checks for.
+	$LF
+	"Once all three are collected, the game starts a countdown timer for 20 game ticks,
+	$LF
+	"after which the game-end sequence begins.
 	$LF
 ]div
-[h2 id=Collisiondetectionoddities 
-	" Collision detection oddities
+[h2 id=Mechanics 
+	" Mechanics
 	$LF
 ]h2
 [div class=p 
-	"The game engine only separates between solid and non-solid tiles. It makes sure that you cant enter any solid tiles moving vertically, however when moving horizontally only the foot level is checked for collisions. You can see this for example right at the start of the game can just walk into the 1st platform and then jump up onto it whereas you can't jump through the 2nd platform, even though they are technically identical.
+	"Unlike many DOS games, 
+	[em 
+		"Captain Comic
+	]em
+	" is not synchronised to the VGA refresh.
+	$LF
+	"Instead, it runs at a fixed "tick rate" of about 9.1 ticks per second,
+	$LF
+	"controlled by the 
+	[a href=https://wiki.osdev.org/Programmable_Interval_Timer rel=noopener external nofollow 
+		"programmable interval timer
+	]a
+	" (IRQ 0).
+	$LF
+	"The precise tick rate is 14318180 / 12 / 65536 / 2 ≈ 9.103 Hz,
+	$LF
+	"with each tick therefore having a duration of 1 / 9.103 ≈ 110 ms.
+	$LF
+	"14318180 is the frequency of the CPU's base oscillator;
+	$LF
+	"dividing by 12 gives the frequency of the base oscillator of the programmable interval timer chip;
+	$LF
+	"65536 is the 
+	[a href=https://wiki.osdev.org/Programmable_Interval_Timer#Frequency_Dividers rel=noopener external nofollow 
+		"frequency divider
+	]a
+	" used
+	$LF
+	"(the game doesn't touch this, but leaves it at its default);
+	$LF
+	"and dividing by 2 accounts for the fact that the game only updates
+	$LF
+	"on every other cycle of the interval timer
+	$LF
+	"(see the variables 
+	[code 
+		"irq0_parity
+	]code
+	" and 
+	[code 
+		"game_tick_flag
+	]code
+	" in the disassembly).
 	$LF
 ]div
-[h2 id=Enemylogic 
+[div class=p 
+	"Long ticks and a lack of complicated processing
+	$LF
+	"mean that lag is not a consideration in this game.
+	$LF
+]div
+[div class=p 
+	"The basic unit of distance in the game is 8 pixels, or ½ of a tile.
+	$LF
+	"Captain Comic is 2 units wide and 4 units tall.
+	$LF
+	"All enemies and items are 2 units wide and 2 units tall.
+	$LF
+]div
+[div class=p 
+	"There are 8 levels in the game, each consisting of 3 stages.
+	$LF
+	"Every stage has a fixed size of 256×20 units.
+	$LF
+	"Comic moves at a speed of 1 unit / tick when walking.
+	$LF
+	"It takes 254 / 9.103 ≈ 27.9 s to walk from one extreme
+	$LF
+	"of a stage to the other.
+	$LF
+]div
+[div class=p 
+	"The game sets a checkpoint whenever Comic crosses
+	$LF
+	"a horizontal stage boundary or goes through a door.
+	$LF
+	"When you die with lives remaining, you respawn at the most recent checkpoint.
+	$LF
+]div
+[h2 id=Tricks 
+	" Tricks 
+	$LF
+]h2
+[h3 id=EnemyLogic 
 	" Enemy logic
 	$LF
-]h2
+]h3
 [div class=p 
-	"Each level segment has up to 4 enemies, each one having one out of 5 behaviours (zigzag across the screen, bounce towards the player, roll towards the player, fly towards the player, zigzag horizontally and home player vertically respectively fly upward when being looked at) and one out of 2 speeds (player speed or half player speed).
-	$LF
-]div
-[div class=p 
-	"When entering a level segment or respawning after death all enemies are scheduled for spawning after 20 frames. When an enemy is destroyed (shot, hit the player, outran by more than 30 steps, bouncing/rolling enemy fell into a pit) it is rescheduled for spawning using a "PRNG" that counts through 20, 40, 60, 80, 100 in a cycle and is never reset. 
-	$LF
-]div
-[div class=p 
-	"Algorithm for spawning enemies (useful for knowing how to manipulate them):
+	"Each stage has up to four enemies, each one having one of five behaviours:
 	$LF
 ]div
 [ul 
 	[li 
-		" has another enemy already been successfully spawned this frame? If yes: skip this enemy
+		" "Bounce": Move diagonally, bouncing off solid map tiles and the edges of the screen.
 		$LF
 	]li
 	[li 
-		" compute its horizontal position using another "PRNG" that counts through 1, 2, 3, 4 tiles beyond the screen area in the direction the player is facing
+		" "Leap": Jump towards Comic, under gravity. Bounce off solid tiles and the left, right, and top edges of the screen, and fall off the bottom edge.
 		$LF
 	]li
 	[li 
-		" if the player is facing left and the computed horizontal position would have been below 0 then this enemy is skipped
+		" "Roll": Roll towards Comic when there is ground, fall when there is no ground.
 		$LF
 	]li
 	[li 
-		" if the player is facing right and its horizontal position is below 128 but the computed enemy position is above or equal 128 then this enemy is skipped (this is a bug obviously), however if the enemy's position would be 256 or above it wraps around to 0 (and despawned the next frame when the game finds out that it is totally out of range). 
+		" "Seek": First move horizontally to match Comic's 
+		[em 
+			"x
+		]em
+		"-coordinate, then move vertically to match his 
+		[em 
+			"y
+		]em
+		"-coordinate.
 		$LF
 	]li
 	[li 
-		" The game then looks for an empty tile on top of a solid tile at the computed horizontal coordinate, starting at the player's foot level and searching upward, skipping that enemy if no such tile is found. This makes sure that enemies mostly spawn on the same level as the player but never below and not in mid-air either. 
-		$LF
-	]li
-	[li 
-		" If the game finds out that it just tried to spawn an undefined enemy it skips that one and reschedules it for spawning 100 frames later
-		$LF
-	]li
-	[li 
-		" the game has now successfully spawned an enemy and will not try to spawn another enemy the same frame.
+		" "Shy": Move diagonally, bouncing off the left and right edges of the screen. Vertical movement depends on which way Comic is facing: if facing towards, fly up; if facing away, fly toward Comic (up or down).
 		$LF
 	]li
 ]ul
 [div class=p 
-	"The game will normally try to spawn enemies that got skipped again the next frame.
+	"Besides its behavior, an enemy may be "slow" or "fast". Slow enemies move every other tick. Fast enemies move every tick, like Comic does.
 	$LF
 ]div
 [div class=p 
-	"The enemies themselves have small bugs too, for example some fast enemies become slow after 28 seconds and bouncing enemies sometimes bounce out of the level horizontally and get despawned.
+	"Each enemy has its own respawn timer.
+	$LF
+	"When entering a stage or respawning after dying,
+	$LF
+	"the respawn timer of all enemies is set to 20.
+	$LF
+	"(The enemy spawns when its timer would go 
+	[em 
+		"below
+	]em
+	" zero, so a timer initialised to 20 means the enemy will actually spawn 21 ticks later.)
+	$LF
+	"There are two global variables that govern enemy spawns:
+	$LF
+	[code 
+		"enemy_respawn_counter_cycle
+	]code
+	" and 
+	[code 
+		"enemy_respawn_position_cycle
+	]code
+	".
+	$LF
+	"These two variables are never reinitialised and their values carry across stages and levels.
+	$LF
+	"When an enemy is destroyed, its respawn timer is set to the current value of
+	$LF
+	[code 
+		"enemy_respawn_counter_cycle
+	]code
+	", and 
+	[code 
+		"enemy_respawn_counter_cycle
+	]code
+	" is advanced
+	$LF
+	"in the cycle 20, 40, 60, 80, 100.
+	$LF
+	[code 
+		"enemy_respawn_position_cycle
+	]code
+	" goes in a cycle 0, 2, 4, 8.
+	$LF
+	"When an enemy is scheduled to respawn, it first advances
+	$LF
+	[code 
+		"enemy_respawn_position_cycle
+	]code
+	", then
+	$LF
+	"tries to place itself
+	$LF
+	"at a distance of 
+	[code 
+		"enemy_respawn_position_cycle
+	]code
+	" units offscreen, in the direction Comic is facing.
+	$LF
+	"If it turns out that the enemy cannot be spawned, 
+	[code 
+		"enemy_respawn_position_cycle
+	]code
+	" is advanced nonetheless.
 	$LF
 ]div
-[h2 id=Hoverglitch 
+[div class=p 
+	"Manipulating 
+	[code 
+		"enemy_respawn_position_cycle
+	]code
+	" is pretty easy because
+	$LF
+	"you can make it advance rapidly just by spawn-blocking enemies.
+	$LF
+	"Manipulating 
+	[code 
+		"enemy_respawn_counter_cycle
+	]code
+	" requires more advance planning because
+	$LF
+	"it advances only once per despawn.
+	$LF
+	"Enemies despawn when they are shot, when they collide with Comic, when they fall in a pit ("leap" and "roll" enemies only), or when they get 30 or more horizontal units away from Comic.
+	$LF
+]div
+[div class=p 
+	"Rules for spawning enemies (useful for knowing how to manipulate them):
+	$LF
+]div
+[ul 
+	[li 
+		" Only one enemy may be spawned per tick. If another enemy has already been spawned this tick, skip this enemy.
+		$LF
+	]li
+	[li 
+		" Compute the enemy's horizontal position by going 
+		[code 
+			"enemy_respawn_position_cycle
+		]code
+		" units past the edge of the screen, in the direction Comic is facing.
+		$LF
+		[ul 
+			[li 
+				" If the horizontal position would be below 0 (i.e., past the left edge of the stage), skip the enemy.
+				$LF
+			]li
+			[li 
+				" There is logic that is trying to do the same thing for the right edge of the stage, but it has a bug. Instead of skipping when the position would be 256 or greater, it skips when the position of the left edge of the screen is below 128, and the enemy's position would be greater than or equal to 128. This creates a "dead zone" near the middle of every stage, where enemies never spawn, as long as Comic is facing to the right. Enemies may still spawn off the right edge of the stage: they actually end up spawning near the extreme left edge of the stage, then despawn one tick later, because they are too far away from Comic.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Look for a non-solid tile directly above a solid tile, starting at the level of Comic's feet and searching upward. If no such tile is found, skip the enemy. Enemies never spawn below the level of Comic's feet or in mid-air.
+		$LF
+	]li
+	[li 
+		" All four enemy slots are considered in order on each tick. If an earlier enemy is already spawned or skips spawning this tick for some reason, it gives later enemies a chance to spawn.
+		$LF
+	]li
+]ul
+[div class=p 
+	"The enemies themselves have 
+	[a href=https://tcrf.net/Bugs:The_Adventures_of_Captain_Comic_(DOS) rel=noopener external nofollow 
+		"small bugs
+	]a
+	" too,
+	$LF
+	"for example some fast enemies become slow after 254 ticks, and bouncing enemies sometimes bounce out of the level horizontally and get despawned.
+	$LF
+]div
+[h3 id=CollisionDetectionOddities 
+	" Collision detection oddities
+	$LF
+]h3
+[div class=p 
+	"The game engine only distinguishes solid and non-solid tiles.
+	$LF
+	"It makes sure that you can't enter any solid tiles moving vertically;
+	$LF
+	"however when moving horizontally only the foot level is checked for collisions.
+	$LF
+	"You can see this, for example, right at the start of the game:
+	$LF
+	"you can just walk into the first platform and then jump up onto it,
+	$LF
+	"whereas you can't jump through the second platform, even though they are identical
+	$LF
+	"in terms of solidity.
+	$LF
+]div
+[h3 id=HoverGlitch 
 	" Hover glitch
 	$LF
-]h2
+]h3
 [div class=p 
-	"Holding space when starting the game or respawning after death allows the player to jump very far; the jump counter that normally restricts upward acceleration to a few frames for a normal-sized jump is in these cases initialised incorrectly and allows accelerating upward for 255 frames, that is as long as it takes to traverse one segment of a level. You can even let go of space for a while, as long as the ground isn't touched the counter isn't reset (but it still keeps on counting down). Touching the ceiling resets your vertical velocity, however touching the top of the level doesn't and holding space there for too long will lead to your vertical velocity underflowing, sending you downward so quickly that the next frame you will be almost at the bottom of the screen and if you don't land on anything there you will be below the screen and dead the following frame.
+	"Holding the jump key when starting the game, or respawning after dying, allows the player to jump very far:
+	$LF
+	"the jump counter that normally restricts upward acceleration to a few frames for a normal-sized jump is in these cases
+	$LF
+	"initialised incorrectly and allows accelerating upward for 255 frames, which is long enough to traverse an entire stage.
+	$LF
+	"You can even let go of the jump key for a while:
+	$LF
+	"as long as the ground isn't touched for more than 1 tick, the counter isn't reset
+	$LF
+	"(but it still keeps on counting down).
+	$LF
+	"Touching the ceiling resets your vertical velocity, but touching the top of the level does not,
+	$LF
+	"and holding the jump key there for too long will lead to your vertical velocity underflowing
+	$LF
+	"from a large negative number to a large positive number,
+	$LF
+	"sending you downward so quickly that on the next tick you will be almost at the bottom of the screen—and if you don't land on anything there,
+	$LF
+	"you will be below the bottom screen and dead in the following frame.
 	$LF
 ]div
 [div class=p 
-	"This glitched state can be carried across level segments but not across doors since you can only enter the door when on ground.
+	"The hover state can be carried across stages but not through doors, since you can only enter the door when on ground.
 	$LF
 ]div
 [div class=p 
-	"This glitch can be abused for collecting the Crown early. It is located right at the start of the castle level where you enter it, just protected by an L-shaped wall that normally prevents you from grabbing it without traversing the level first. You can however suicide after entering the level, then use this glitch to hover next to it with your head at the height of the horizontal piece of the wall and your feet below it, then hover to the right so your head will glitch into the wall (since only your feet are checked for collisions at this point), and once you have hovered beyond the vertical piece of the wall you can just fly up because only the tiles above your head are checked for collisions when trying to fly upward. But once you are in this area you can't easily get out again, you would have to either use the door and traverse the whole level, use the wand to teleport out (if you have it) or make sure you have spawned some enemies in this area so you can just death-warp back to the castle entrance.
+	"The hover glitch works in Revisions 1 and 2. It doesn't work in Revisions 3, 4, and 5.
 	$LF
 ]div
-[h2 id=Teleport-run-lefttrick 
-	" Teleport-run-left trick
-	$LF
-]h2
 [div class=p 
-	"Teleporting when standing between blocks teleports by 3.5 blocks to the left but also takes you 0.5 blocks closer to the left edge of the screen. This can be used for moving a bit faster to the left until you touch the left edge of the screen at which point you can no longer use this trick. This trick also allows for obtaining the lantern early (apart from the hover glitch) because it allows for teleporting across the gap that wasn't supposed to be crossable that way.
+	"This glitch, along with exploiting collision detection, can be abused to collect the Crown
+	$LF
+	"without playing the entire castle level.
+	$LF
+	"The Crown is located right at the start of the castle, protected by an L-shaped wall.
+	$LF
+	"You can, however, suicide after entering the level, then hover to the corner of the L,
+	$LF
+	"with your head at the height of the horizontal piece of the wall and your feet below it.
+	$LF
+	"You may then hover to the right and your head will glitch into the wall (since only your feet are checked for collisions at this point),
+	$LF
+	"and once you have hovered beyond the vertical part of the wall you can just fly upward,
+	$LF
+	"because only the tiles above your head are checked for collision when moving upward.
 	$LF
 ]div
-[h2 id=Proposedroute 
-	" Proposed route
+[div class=p 
+	[img alt=An animation showing Comic dying in CASTLE0, hovering up and clipping to collect the Crown, then dying to escape class=embed mw-100 src=https://www.bamsoftware.com/computers/tasvideos/comic-crown-deathwarp-20201120.gif 
+	]img
 	$LF
-]h2
+]div
+[div class=p 
+	"But once you are in this area you cannot easily escape. You can do one of these options, ordered by increasing time:
+	$LF
+]div
 [ul 
 	[li 
-		" walk right, pick up the key, immediately enemy suicide warp back to the last segment start, walk back to Castle, enemy suicide glitch hover into the Crown room, enemy suicide warp back to the entrance, take door to forest, walk right, take door to seaside, walk to the left, when passing the 2nd transition immediately turn right and gap suicide, after re-spawning glitch hover left and fly all the way to the cave entrance, enter cave, suicide, then: 
+		" Make the Crown the third and final treasure, so the game ends and there is no need to escape.
 		$LF
 	]li
 	[li 
-		" either glitch hover to the 1st door and enemy suicide hover out of the cave, walk to the right and pick up the wand, suicide warp back to last transition, walk left and pick up gold
+		" Use the Teleport Wand to teleport downward.
 		$LF
 	]li
 	[li 
-		" or glitch hover to the 2nd door, walk left and pick up the wand, walk/teleport left and pick up gold
+		" Continue hovering against the top of the screen until your vertical velocity underflows and you fall off the bottom of the screen, to respawn at the entrance door.
 		$LF
 	]li
 	[li 
-		" drop down into pit, take door, teleport to level entrance, take door to seaside, walk towards spaceship door, take it, walk right and teleport to the basement door, take it, maybe take a single step to the left or right, teleport left, walk towards moon door, enter it, pick up jewels.
+		" Spawn enemies in the upper area in order to take damage from them and respawn at the entrance door (testing shows this to be slower than velocity underflow).
+		$LF
+	]li
+	[li 
+		" Take the door and traverse the whole level.
+		$LF
+	]li
+]ul
+[h3 id=TeleportRunLeftTrick 
+	" Teleport-run-left trick
+	$LF
+]h3
+[div class=p 
+	"The Teleport Wand is meant to move Comic 6 units in the direction he is facing. The teleport animation takes 6 ticks,
+	$LF
+	"so teleporting is nominally no faster than Comic's walking speed of 1 unit per tick.
+	$LF
+	"But the destination of the teleport is always rounded (leftward) to an multiple of 2 units.
+	$LF
+	"This means that if you start a teleport while standing between tiles (i.e., at an odd 
+	[em 
+		"x
+	]em
+	"-coordinate),
+	$LF
+	"a teleport actually moves you 7 units over 6 ticks, which is slightly faster than walking.
+	$LF
+	"Each time you do this, it saves 1 tick, but also Comic moves 1 unit closer to the left edge of the screen,
+	$LF
+	"and when you get too close, you can no longer use the trick.
+	$LF
+	"Teleporting to the right can never save time,
+	$LF
+	"but can lose time if you do it at an odd coordinate.
+	$LF
+]div
+[div class=p 
+	"In Revision 1, this trick also allows for obtaining the Lantern early (apart from the hover glitch),
+	$LF
+	"because it allows for teleporting across a 6-unit-wide gap that wasn't supposed to be crossable that way.
+	$LF
+]div
+[h2 id=Route 
+	" Route
+	$LF
+]h2
+[div class=p 
+	"This is the 
+	[a href=https://archive.org/download/comic-livetas-20201118/route.txt rel=noopener external nofollow 
+		"route
+	]a
+	" used in 
+	(__wikiLink|href=/4345M|implicitdisplaytext=4345M)
+	".
+	$LF
+	"It's quite likely that this is the fastest route possible
+	$LF
+	"in Revisions 1 and 2;
+	$LF
+	"see the discussion of algorithmic route optimization in 
+	(__wikiLink|href=/6944S|implicitdisplaytext=6944S)
+	".
+	$LF
+]div
+[div class=p 
+	[a href=https://www.bamsoftware.com/computers/tasvideos/comic-route-20201120.svg rel=noopener external nofollow 
+		[img alt=A diagram showing the route class=embed mw-100 src=https://www.bamsoftware.com/computers/tasvideos/comic-route-20201120.png 
+		]img
+	]a
+	$LF
+]div
+[ul 
+	[li 
+		" Walk right, collect the Door Key, then immediately enemy suicide warp back to the last stage start. Return to the castle.
+		$LF
+	]li
+	[li 
+		" In the castle, enemy suicide and hover into the Crown room, velocity underflow suicide warp back to the entrance, then exit and take the door to the lake.
+		$LF
+	]li
+	[li 
+		" Walk to the left past one stage transition. At the next stage transition, cross, cross back, then fall in a hole to initiate hover. Hover leftward and fly all the way to the door leading to the cave.
+		$LF
+	]li
+	[li 
+		" In the cave, jump in a hole then hover up to the first door. On the other side of the door, enemy suicide hover out of the pit, collect the Gold, and go to the right to collect the Teleport Wand. Suicide warp back to the left edge of the stage and retrace your steps back the cave entrance, doing left-teleports as much as possible. It is equally fast to collect the Gold before or after the Teleport Wand.
+		$LF
+	]li
+	[li 
+		" Walk to the base door, enter the base, walk right and teleport to the basement door. On the other side of the door, teleport up to the top level and walk to the space door.
+		$LF
+	]li
+	[li 
+		" Move left and collect the Gems. You can end input early by finding the 
+		[em 
+			"x
+		]em
+		"-coordinate at which you need to jump, then buffering a jump input through a left-teleport that leaves you at that coordinate.
 		$LF
 	]li
 ]ul
 [div class=p 
-	"There are more than enough extra lives on the way: shields collected with full energy as well as reaching certain score levels.
+	"The route requires seven intentional deaths,
+	$LF
+	"but there are more than enough extra lives on the way.
+	$LF
+	"Each treasure is a 1-up, as are Shields collected while at full HP.
+	$LF
+	"Certain score levels also aware an extra life.
 	$LF
 ]div
 [div class=p 
-	"The major difficulty here is manipulating enemies for those suicide warps/hover glitches. Manipulating enemies to just get out of our way is rather trivial.
+	"The major difficulty is manipulating enemies for suicide warps/hover glitches.
+	$LF
+	"Manipulating enemies to just get out of our way is rather trivial.
+	$LF
+]div
+[div class=p 
+	"Ideas for improvement:
+	$LF
+]div
+[ul 
+	[li 
+		" In the absence of new discoveries, the segment most likely to be improvable is the beginning part of the cave. The damage manipulation there is tricky because of the HP refill right in front of the door. Finding a way to take even one additional point of damage before entering the door would save time.
+		$LF
+	]li
+]ul
+[h2 id=Resources 
+	" Resources
+	$LF
+]h2
+[ul 
+	[li 
+		" 
+		(__wikiLink|displaytext=TASVideos forum thread|href=/Forum/Topics/21916)
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://archive.org/details/TheAdventuresOfCaptainComic rel=noopener external nofollow 
+			"Internet Archive download of game files
+		]a
+		" (the 
+		[a href=https://archive.org/download/TheAdventuresOfCaptainComic rel=noopener external nofollow 
+			"download page
+		]a
+		" shows all the zip files available)
+		$LF
+	]li
+	[li 
+		" 
+		[a href=http://www.shikadi.net/moddingwiki/Captain_Comic rel=noopener external nofollow 
+			"ModdingWiki pages
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://tcrf.net/Notes:The_Adventures_of_Captain_Comic_(DOS) rel=noopener external nofollow 
+			"The Cutting Room Floor notes page
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://www.bamsoftware.com/comicrando/comicrando-logic-map.svg rel=noopener external nofollow 
+			"Game map
+		]a
+		" (for Revision 5)
+		$LF
+	]li
+	[li 
+		" 
+		[a href=https://archive.org/details/@david_fifield/lists/2/captain-comic-live-tas-videos?sort=date rel=noopener external nofollow 
+			"Live coding videos
+		]a
+		" documenting the creation of 
+		(__wikiLink|href=/4345M|implicitdisplaytext=4345M)
+		$LF
+	]li
+]ul
+[div class=p 
+	"Various programs, Lua scripts, disassemblies of all five revisions, and other resources are in a Git repository:
+	$LF
+]div
+[pre 
+	" git clone https://www.bamsoftware.com/git/comic.git
+	$LF
+	" cd comic/tas/
+	$LF
+]pre
+[div class=p 
+	"Some large or static files are not cloned by default. To download them, you need 
+	[a href=https://git-annex.branchable.com/ rel=noopener external nofollow 
+		"git-annex
+	]a
+	":
+	$LF
+]div
+[pre 
+	" git annex get
+	$LF
+]pre
+[div class=p 
+	"Among the files is a hud.lua script that permits you to advance time tick by tick,
+	$LF
+	"and see the values of hidden game variables.
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://www.bamsoftware.com/computers/tasvideos/comic-hud-20201217.png 
+	]img
+	$LF
 ]div

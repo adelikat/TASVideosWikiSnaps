@@ -1,0 +1,293 @@
+11
+[div class=p 
+	[b 
+		"This run is marked as Cancelled. 
+		[del 
+			"So far it has failed verification on console, and it appears to only work through inaccurate Open Bus behavior. See: 
+			[a href=https://tasvideos.org/Forum/Topics/24269?CurrentPage=1&Highlight=521619#521619 rel=noopener external nofollow 
+				"the discussion
+			]a
+			" for more info.
+		]del
+	]b
+	$LF
+]div
+[div class=p 
+	[b 
+		"Update: After some research, the reason Bizhawk behaved differently from the console has been confirmed, and with a slight modification to the TAS, the run has been verified on console with help from Alyosha. In the meantime, I will leave this run marked as "Cancelled". With some help from Mizumaririn and SeraphmIII, the SMB1 portion of the TAS has been optimized, so I plan to write author comments that explain the run better and submit again in the future. There still lies the issue of the cartridge swapping during the TAS, and the unofficial emulator fork, though that's an issue to figure out at a later date. Cheers!
+	]b
+	$LF
+]div
+[div class=p 
+	"With the introduction of ACEVideos, it should stand that executing arbitrary code is, above all else, the primary objective. Silly little roadblocks such as "Website rules" and "Unofficial releases of the Bizhawk emulator" shouldn't hold back innovation in the world of executing arbitrary code!
+	$LF
+]div
+[div class=p 
+	"With my custom fork of the Bizhawk emulator that allows for swapping ROMs mid-TAS, I'm able to write a payload using subframe inputs in Super Mario Bros. 3, then hot swap to Super Mario Bros to execute it.
+	$LF
+]div
+[div class=p 
+	(youtube|v=p7h9ZRtml7o)
+	$LF
+]div
+[h2 id=Objectives 
+	" Objectives:
+	$LF
+]h2
+[ol 
+	[li 
+		" Executing Arbitrary Code in Super Mario Bros.
+		$LF
+	]li
+	[li 
+		" Complete the game in 8-4
+		$LF
+	]li
+]ol
+[div class=p 
+	"It would seem logical that the ideal code to execute would set the game to 8-4. Though it begs the question, how can you run ACE in Super Mario Bros?
+	$LF
+]div
+[div class=p 
+	"Unlike Super Mario Bros. 3, you can't press buttons at 4 kilohertz and expect anything cool to happen, you need to actually play the game. Though it may be a sacrifice, it seems like advancing past the title screen is a necessary step towards executing arbitrary code and completing the game.
+	$LF
+]div
+[div class=p 
+	"This method of executing arbitrary code relies on a funny prank bowser pulls on one of his minions. You see, Super Mario Bros. has a series of castle levels in which one of Bowser's loyal subjects dress up in disguise as a feeble attempt for Bowser to steal all the credit. Mario is a plumber, so naturally shooting fireballs (which is the enemy of water) is a talent he possesses. By burning Bowser's disguised subject, their true form is revealed! Each world throughout the game has a new enemy hidden within a bowser costume, but if Mario does some warm up by playing a round of NES Tennis, Mario can achieve a head start and begin his adventure beyond world 8. In some of these worlds, it would seem Bowser's minions have pulled a fast one, by shoving a tear in the fabric of reality inside a Bowser-costume. In most cases, burning away the disguise will reveal nothing at all, a spring, a firebar, or even one of Bowser's loyal subjects. However, there are a few cases where Bowser's subjects reality-bomb the universe as a gesture of tomfoolery, and these are the worlds we want to investigate.
+	$LF
+]div
+[div class=p 
+	"I’ll cut to the chase and say, world ‘N’. That’s the world where the magic happens.
+	$LF
+]div
+[h2 id=SettingUpTheCode 
+	" Setting up the code
+	$LF
+]h2
+[div class=p 
+	"While it would be cool to use the gameplay of Super Mario Bros. to set up the code, there’s nothing to work with in terms of manipulable RAM. This brings up the notion of setting up the payload inside another game, then swapping to Super Mario Bros. without turning off the console’s power. There’s a small issue though… When Super Mario Bros. boots up, it clears almost everything in RAM. The bytes that remain are address $160 through $1FF, and $7D7 through $7FF. To make it even trickier, address $7D7 through $7FF will be wiped if the game determines the state as a “cold start”. This could be prevented by writing a value of “5A” to address $7FF, and making sure all the bytes corresponding to Marios score on the title screen ($7D7 through $7DC) are all a value of 9 or less. There’s a well known exploit where you boot up SMB, swap to Tennis and take a few steps, then swap back to SMB. This works because the byte tracking what world you should start the game on (if you hold down the A button when you start) is the same byte as the number of footsteps taken in Tennis, and none of the bytes Mario uses to determine if it’s a “cold start” are affected through Tennis’s gameplay. Since some of those bytes are used by Tennis, let’s write the payload in the $160 through $1FF region of RAM.
+	$LF
+]div
+[div class=p 
+	"This is where playing Tennis brings along a terrible ancient curse. You see, Tennis clears the region of RAM at $160 through $1FF. This means, we’ll have to play Tennis before writing the payload.
+	$LF
+]div
+[div class=p 
+	"I decided to use Super Mario Bros. 3 to write the payload, as that game seems to have the fastest method of Arbitrary Code Execution, clocking in at a little over one fifth of a second. Unfortunately, booting up SMB3 will clear the bytes used by SMB1 to determine if it’s a “cold start”. Oh well, instead of playing Tennis at all, we can just use SMB3 to fix all that since we already have total control.
+	$LF
+]div
+[div class=p 
+	"By pressing buttons really fast, you can beat SMB3 really fast. Though, we’re trying to beat SMB1 really fast, so instead of jumping to SMB3’s credits, I write a bunch of code that lets me write code in the stack and fix the “cold start” issue as well as setting the world to start SMB1 in.
+	$LF
+]div
+[div class=p 
+	"With that taken care of, we swap out SMB3 for SMB1.
+	$LF
+]div
+[h2 id=Gameplay 
+	" Gameplay
+	$LF
+]h2
+[div class=p 
+	"A bit of a foreign concept for my TASes, but I gave it a shot. We begin the game in world ‘N’, which looks a lot like 8-3. This level is ideal, as it lets us obtain a fire flower, which we will need when we encounter Bowser’s secret weapon. Using cutting edge tricks, like ignoring the part where 8-4 loops and you need to enter pipes, we can make it to the end of the stage in record time! We burn away the disguise to reveal… a bus?
+	$LF
+]div
+[h2 id=ImagineABus 
+	" Imagine A Bus
+	$LF
+]h2
+[div class=p 
+	"An open bus! This merry prankster transforms into an object that stores the number 4 at address $772. This address is used to determine if we’re initializing a level or running the regular gameplay loop. With a value of 4, it tells the PC to jump to address $53AE, which isn’t mapped to anything. This leads to a fun phenomenon known as “Open Bus” where whatever the CPU did most recently will dictate what it’s about to do. Let’s walk through what just happened:
+	$LF
+]div
+[div class=p 
+	"We encountered a JMP Indirect instruction, which tells the PC to jump to wherever some pointer is pointing. This is a 5 step process, and I’m somehow simplifying the final steps.
+	$LF
+]div
+[ol 
+	[li 
+		" Fetch the opcode. (increment PC)
+		$LF
+	]li
+	[li 
+		" Fetch the low byte of the pointer (Increment PC)
+		$LF
+	]li
+	[li 
+		" Fetch the high byte of the pointer (Increment PC)
+		$LF
+	]li
+	[li 
+		" Fetch the new low address for the PC
+		$LF
+	]li
+	[li 
+		" Fetch the new high address of the PC
+		$LF
+	]li
+]ol
+[div class=p 
+	"According to this, the most recent step was to fetch the high byte of the new address, which in this case was “53”. Since we are now executing open bus, when the CPU attempts to fetch an opcode, there’s nothing to fetch! Since “53” is currently on the bus, “53” is interpreted as the opcode, as well as all the operands! “53” corresponds to an undocumented opcode, commonly referred to as 
+	[code 
+		"SRE Indirect, Y
+	]code
+	", which of course, stands for “Logical Shift Right then Bitwise Exclusive-OR with Accumulator (Indirect, Y)” It would also help to know what “Indirect, Y” means, but this explanation is getting a little off the rails.
+	$LF
+]div
+[div class=p 
+	"The end result is, address $0A is on the receiving end of this instruction, and we need to perform a bitwise XOR with that address and the A Register. The PC Fetches this byte, and now whatever value it holds will be the next instruction to execute. Luckily for us, this byte is easy to manipulate. By simply holding down the B Button and nothing else, we fetch a value of “40” which becomes an 
+	[code 
+		"RTI
+	]code
+	" instruction. We’re departing the open bus, and setting foot into the stack. Address $181 is our destination, and the local time is whatever you want it to be, because SMB never clears this portion of the stack when the game boots up, and we can use SMB3 to write anything we want.
+	$LF
+]div
+[h2 id=CreativeExercise 
+	" Creative Exercise
+	$LF
+]h2
+[div class=p 
+	"Like a blank canvas in the hit game “Color-A-Dinosaur”, we could fill this space with anything we want! Remember, the objective is to win the game in 8-4, so let’s start by setting the game to world 8. World 8 is actually world 7, since world 1 is actually world 0, so the code I write is:
+	$LF
+]div
+[div class=p 
+	[code 
+		"LDA #07
+	]code
+	$LF
+	[code 
+		"STA $075F
+	]code
+	$LF
+]div
+[div class=p 
+	"Now when we encounter the princess, she will give the proper “Your quest is over” speech. Our magical open bus ride did a number to the stack pointer, so let’s correct that real quick.
+	$LF
+]div
+[div class=p 
+	[code 
+		"LDA #$57
+	]code
+	$LF
+	[code 
+		"PHA
+	]code
+	$LF
+]div
+[div class=p 
+	"We need to make sure the proper gameplay loop happens next frame, so we’ll decrement $772 from a value of 4 (what lead us to the open bus) to a value of 3 (regular gameplay loop)
+	$LF
+]div
+[div class=p 
+	[code 
+		"DEC $0772
+	]code
+	$LF
+]div
+[div class=p 
+	"Now, we may be in world 8, but the HUD still says “N-2”. I decided to correct this by writing
+	$LF
+]div
+[div class=p 
+	[code 
+		"LDA #03
+	]code
+	$LF
+	[code 
+		"STA $075C
+	]code
+	$LF
+	[code 
+		"JSR $865A
+	]code
+	$LF
+]div
+[div class=p 
+	"Which sets the level to 3, which is actually level 4, and jumps to a subroutine that updates the HUD. Finally, we need to jump to stable gameplay, so I write:
+	$LF
+]div
+[div class=p 
+	[code 
+		"JMP $8178
+	]code
+	$LF
+]div
+[div class=p 
+	"Which safely leads to the end of the frame.
+	$LF
+]div
+[div class=p 
+	"When this executes, we leave N-2 and enter 8-4 while already falling to grab the axe with a final time of 1:17.06 (at the time of the final input)
+	$LF
+]div
+[h2 id=VerifyingThisTas 
+	" Verifying This TAS
+	$LF
+]h2
+[div class=p 
+	"As mentioned, this is not an official release of Bizhawk. I had to modify the .bk2 file format in order to make this run work, by adding a file path to hot swap with whenever the reset button is pressed. To obtain my fork of Bizhawk, you’ll need to download the source code and compile it yourself: 
+	[a href=https://github.com/100thCoin/BizHawk-HotSwap rel=noopener external nofollow 
+		"https://github.com/100thCoin/BizHawk-HotSwap
+	]a
+	$LF
+]div
+[div class=p 
+	"In order to make the hot swap file paths consistent between computers, the file path is relative to folder containing the .exe
+	$LF
+]div
+[div class=p 
+	"Your ROM of Super Mario Bros.3  can be anywhere, but the ROM of Super Mario Bros must be placed in the bizhawk “output” folder that is generated when you compile the code. 
+	$LF
+]div
+[div class=p 
+	"The rom must be named “Super Mario Bros.nes”, and the version I used had a SHA1 of “EA343F4E445A9050D4B4FBAC2C77D0693B1D0922”
+	$LF
+]div
+[div class=p 
+	"I created this TAS with the PRG1 release of SMB3, though it also runs on the PRG0 release just fine.
+	$LF
+]div
+[div class=p 
+	"The TAS begins inside Super Mario Bros. 3 using the SubNesHawk Core
+	$LF
+]div
+[h2 id=VerifyingThisTasWithoutDoingThat 
+	" Verifying This TAS Without Doing That
+	$LF
+]h2
+[div class=p 
+	"If compiling a fork of the Bizhawk emulator is not something you care to do, then you can imagine this TAS as a movie starting with some preset RAM. Just know that the RAM is supposed to be obtained through playing SMB3, and some super rad cutting edge stop n’ swop technology
+	$LF
+]div
+[div class=p 
+	"A user file of just the SMB1 portion of this TAS can be found here: 
+	[a href=https://tasvideos.org/UserFiles/Info/638160458975160308 rel=noopener external nofollow 
+		"The User File.
+	]a
+	$LF
+]div
+[div class=p 
+	"That User File runs on Bizhawk 2.8, though starts with the Preset RAM that SMB3 sets up.
+	$LF
+]div
+[div class=p 
+	"You should start that TAS in SMB1 instead of SMB3.
+	$LF
+]div
+[h2 id=WhereDoWeGoFromHere 
+	" Where do we go from here?
+	$LF
+]h2
+[div class=p 
+	"Well, It may be bold of me to say this, but my ACE was so powerful, we might need to close ACEVideos for good and return to TASVideos. I plan to keep working on my hot-swapping fork of Bizhawk, and eventually get a pull request going, but for now it’s not an official feature. I was planning on getting total control in SMB1, which honestly wouldn’t be all that difficult since I already have total control in SMB3, but I ran out of time. Perhaps at a later date I could showcase total control in SMB1. Maybe if ACEVideos returns at some point in the future. Until then!
+	$LF
+]div
+[h2 id=SuggestedScreenshot 
+	" Suggested Screenshot:
+	$LF
+]h2
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/KRU3VMH.png 
+	]img
+	$LF
+]div

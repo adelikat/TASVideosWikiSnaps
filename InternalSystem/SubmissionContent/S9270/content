@@ -1,0 +1,415 @@
+11
+[div class=p 
+	"SHA1 of the swf: 4690deacf09b9a86e6c028c61800bdb38134d2b1
+	$LF
+]div
+[div class=p 
+	"Created on Ubuntu 22.04.3
+	$LF
+]div
+[div class=p 
+	[b 
+		"NOTE:
+	]b
+	" In order for this movie file to sync, the user’s internet connection must be disabled. Additionally, 
+	[code 
+		"--no-gui
+	]code
+	" must be entered in Ruffle's launch parameters.
+	$LF
+]div
+[div class=card mb-2 
+	[div class=card-header 
+		[strong 
+			"Table of contents
+		]strong
+	]div
+	[div class=card-body 
+		[ul 
+			[li 
+				[a href=#GameObjectives 
+					" Game Objectives
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#GameAndCategoryOverview 
+					" Game and Category Overview
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#Strategy 
+					" The Strategy
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#RngManipulation 
+					" The RNG Manipulation
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#TricksUsedThroughoutTheRun 
+					" Tricks used throughout the run
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#PotentialImprovementsOtherNotes 
+					" Potential Improvements + Other Notes
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SuggestedScreenshots 
+					" Suggested Screenshots
+					$LF
+				]a
+			]li
+			[li 
+				[a href=#SpecialThanks 
+					" Special thanks
+					$LF
+				]a
+			]li
+		]ul
+	]div
+]div
+[h3 id=GameObjectives 
+	" Game Objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Levels up to Rank 5 as fast as possible
+		$LF
+	]li
+	[li 
+		" Heavy luck manipulation
+		$LF
+	]li
+	[li 
+		" Contains speed/entertainment tradeoff
+		$LF
+	]li
+	[li 
+		" Does not utilise out of bounds mouse movement
+		$LF
+	]li
+	[li 
+		" Genre: Simulation
+		$LF
+	]li
+	[li 
+		" Genre: Strategy
+		$LF
+	]li
+]ul
+[h3 id=GameAndCategoryOverview 
+	" Game and Category Overview
+	$LF
+]h3
+[div class=p 
+	[em 
+		"Papa's Donuteria
+	]em
+	" is an Adobe Flash game created by Flipline Studios and released on the 16th of June, 2014. It is the 10th entry in the series of Papa Louie restaurant management games (14th if you include the remakes for mobile devices). This TAS aims to level up to Rank 5 as quickly as possible - the most popular category to speedrun among the RTA community.
+	$LF
+]div
+[div class=p 
+	"Originally, I hadn’t planned on submitting this to TASVideos - after all, this doesn’t actually finish the game (that happens upon reaching Rank 61), so I assumed that it wouldn’t be acceptable. However, amongst discussions about the merging of Playground and Alternative runs today, Samsara said this:
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/L4FuKXl.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"And so here we are.
+	$LF
+]div
+[h3 id=Strategy 
+	" The Strategy
+	$LF
+]h3
+[div class=p 
+	"Getting to Rank 5 in this game requires the player to get 1680 points. Points are earned by serving orders to customers, where they’ll receive a certain number of points ranging from 0 to 100 per customer depending on how well the order was made. The number of customers the player receives a day varies depending on their current rank: Days 1 and 2 will only have 2 and 3 customers respectively, but Ranks 2 through 5 will give the player 4 customers. This makes it barely possible to reach Rank 5 after 5 days, with only 20 points of wiggle room. However, there’s another mechanic to help us here: customer medals.
+	$LF
+]div
+[div class=p 
+	"If the player gives a customer an order with 80 points or more, they’ll earn a star for that customer. Upon earning 5 stars, they’ll receive a customer medal, allowing them to earn more points per order. Notably, the number of points they receive upon earning that 5th star will be tripled, allowing for a maximum of 300 points to be earned from a single order. Hence, by manipulating one of the Day 1 tutorial customers (in this case, James) to come in every single day, we can earn a customer medal on Day 5, allowing us to sacrifice 220 points for speed throughout the TAS instead.
+	$LF
+]div
+[div class=p 
+	"The first and last customers on each day are fixed, so it’s not possible to get a medal on any other customers after 5 days. For the other customer I was able to manipulate on Days 3 through 5, I chose customers whose orders could be prepared fastest: Maggie on Days 3 and 4, and Prudence on Day 5. I also sacrificed 2 frames at the start of the run to choose Scooter as the worker rather than Tony, because I like playing as female characters and it was such a negligible time difference as to not bother me.
+	$LF
+]div
+[h3 id=RngManipulation 
+	" The RNG Manipulation
+	$LF
+]h3
+[div class=p 
+	"The vast majority of RNG events in this game are decided via the same stock ActionScript function: Math.random(). This makes getting different outcomes reasonably simple: All we need to do is make extra calls to the RNG, which can be very easily done here by swapping which order ticket is on the side hook. Additionally, in ruffle, we can change the starting system date and time to get different seeds for the RNG. Despite this, it would still be very time consuming to do this RNG manipulation manually, adding in another RNG call and waiting for the TAS to play out until the next day so that we could see what the result was (which was how I did this when I made a Rank 5 TAS of Papa’s Pizzeria)! Fortunately, I was able to automate the process a bit.
+	$LF
+]div
+[div class=p 
+	"First of all, Randomno built a modified version of Ruffle for me that outputs the value of the RNG into the console whenever it gets called. This was useful for tracking when, how many times and how frequently Math.random() was getting called throughout the TAS, which wasn't transparent before. Using this information, and referring against the decompiled code of the game, I created a custom swf that simulated the game’s RNG as it unfolded throughout the TAS, making adjustments as necessary as I finished each day. This outputted the first 300 outcomes for which customers would appear, allowing me to quickly know how many extra RNG calls I needed to insert on the previous day. Thanks to this, I was easily able to deal with what threatened to be the most tedious and annoying part of the run.
+	$LF
+]div
+[h3 id=TricksUsedThroughoutTheRun 
+	" Tricks used throughout the run
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[b 
+			"Customer glitch:
+		]b
+		" Technically not a glitch, this refers to a technique that allows the player to spawn subsequent customers very quickly. If the Order Station button is clicked twice while in another station, no-one is currently waiting to give their order, and the line of customers waiting to receive orders is 2 or less, the game will spawn the next customer after a few seconds. By doing this while the game is in the middle of a screen transition, we can spawn the new customer without actually going back to the Order Station, letting us spend more time on food prep.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Dough Station cutter order:
+		]b
+		" For some reason, cutting out the donut shapes from right to left can sometimes save a frame over cutting them out from left to right. I don’t really understand why this happens, but where it does I take advantage of it.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Delayed donut fillings:
+		]b
+		" The player is normally expected to put the fillings in the necessary donuts before dipping them in icing. By dipping the donuts in icing and waiting until the last few possible frames to insert the last filling, we can transition to the next area of the Build Station faster while still getting the desired points. This causes the toppings to look a bit strange, appearing slightly higher above the donut than they should after landing.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Absent donut fillings:
+		]b
+		" If all 3 donuts are currently being iced, the filling nozzle will still attach to one of them at the bottom despite it not being there. This can save a bit of time in cases where we need to fill 2 donuts.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Equalised frying:
+		]b
+		" When judging how well the player fried their donuts, the game prioritises having both sides of the donut cooked to an equal colour, and will deduct points if they aren't. To achieve this, sometimes I flip a set of donuts twice to avoid one side getting cooked enough to change colour. This loses about 11 frames of cooking time, but the score payoff is worth it.
+		$LF
+	]li
+	[li 
+		" 
+		[b 
+			"Inbounds mouse:
+		]b
+		" Going into this TAS, I chose not to make usage of out-of-bounds clicking, instead working within the bounds of what could be done with a normal-sized Flash Player window. This gets slightly more complicated in some instances - for example, I let my cursor drag donuts in the Fry Station to out of bounds location because normal-sized Flash allows it, but I don't pour the drizzle out of bounds because normal-sized Flash doesn't allow it.
+		$LF
+	]li
+]ul
+[h3 id=PotentialImprovementsOtherNotes 
+	" Potential Improvements + Other Notes
+	$LF
+]h3
+[div class=p 
+	"The distribution of points is a little bit uneven throughout the run, with more points being allocated to customers on Days 2 and 3 than on Days 1, 4 and 5. It’s possible that a slightly more uniform point distribution might have resulted in a faster run. Overall though, I’m very happy with the end result after almost a year of working on it on and off.
+	$LF
+]div
+[div class=p 
+	"Additionally, there are a number of graphical glitches throughout the TAS. Most notable are the jerky playback of the Papa Louie Arcade splash screen at the start, the slightly shaky Flipline Studios logo at the start, and the misaligned text in menus and the end-of-day cutscenes. As far as I know, there are no glitches affecting gameplay in this movie that can’t be done on the regular Flash Player.
+	$LF
+]div
+[h3 id=SuggestedScreenshots 
+	" Suggested Screenshots
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/MkHum7c.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"(VI 11580)
+	$LF
+]div
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/Fyo59GK.png 
+	]img
+	$LF
+]div
+[div class=p 
+	"(VI 17693)
+	$LF
+]div
+[h3 id=SpecialThanks 
+	" Special thanks
+	$LF
+]h3
+[div class=p 
+	"Thanks to: 
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/Randomno 
+			"Randomno
+		]a
+		" for making the modified version of Ruffle for me
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Users/Profile/Samsara 
+			"Samsara
+		]a
+		" for encouraging me to submit this
+		$LF
+	]li
+	[li 
+		" dolphindrewgames for his RTA world record of this category and general encouragement
+		$LF
+	]li
+	[li 
+		" Ruffle developers for getting more Papa’s games working in the emulator
+		$LF
+	]li
+	[li 
+		" TASVideos staff for always working to make the site a better place
+		$LF
+	]li
+	[li 
+		" AusSpeedruns and 
+		[a class=intlink href=/Users/Profile/the8bitbeast 
+			"the8bitbeast
+		]a
+		" for helping me showcase this to a wider audience earlier this year, and giving me the push I needed to actually finish this project
+		$LF
+	]li
+	[li 
+		" My high school IT Teacher for teaching us how to code in ActionScript 3. If I’d known it would prove useful for my TASing, I would have appreciated it more at the time.
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Given the heat wave that delayed me being able to judge this, I'm a little glad this isn't one of the frozen dessert based games. My jealousy would know no bounds.
+	$LF
+]div
+[div class=p 
+	"Speaking as someone who's never really interacted with this series before, this was an incredibly satisfying run to sit down and watch. The very meticulous, yet extremely fast donut decorating was mesmerizing, and the occasional very much not meticulous donut decorating almost always had perfect comedic timing. I might need to find some 
+	[a href=https://www.youtube.com/watch?v=0vmhgotEByc rel=noopener external nofollow 
+		"Time
+	]a
+	" to play a couple of these games, now, since this run did a wonderful job selling them to me. Excellent work!
+	$LF
+]div
+[div class=p 
+	"Regarding the goal, this submission is a bit of a unique case, and as I said I'm not familiar with this game or this series at all, so bear with me here while I try to explain my thoughts and hopefully not get too much wrong.
+	$LF
+]div
+[div class=p 
+	""Rank 5" is, by a wide margin, the most popular category for Papa Louie games, with even the lesser-run games regularly getting 50+ Rank 5 runners, occasionally even reaching 100, while other categories rarely ever break into the double digits. This is most likely because other categories of these games, including any%, clock in at several hours each. The 
+	[em 
+		"shortest
+	]em
+	" any% run of a Papa Louie game I found on SRC is Pizzeria, clocking in at 
+	[a href=https://www.speedrun.com/papas_pizzeria/runs/z1qvwe7y rel=noopener external nofollow 
+		"just over 4 hours
+	]a
+	", with the next shortest 
+	[a href=https://www.speedrun.com/papas_hot_doggeria/runs/yd9kee0z rel=noopener external nofollow 
+		"nearly doubling that
+	]a
+	". For this game in particular, there's no any% run on SRC, but there is 
+	[a href=https://www.speedrun.com/papas_donuteria/runs/yo984w5y rel=noopener external nofollow 
+		"an "all ingredients" run clocking in at 9 hours and 46 minutes
+	]a
+	" that also achieves what would be considered any%... 9 hours and 22 minutes into the run.
+	$LF
+]div
+[div class=p 
+	"Of course, the fact that there's any% runs at all implies that Rank 5 isn't considered a "complete" run, especially given the differences between the two are always several hours at minimum. In that sense, rank 5 runs should be rejected by our 
+	(__wikiLink|displaytext=completion metric|href=/MovieRules#MovieMustBeComplete)
+	", but I'm not comfortable doing that given the overwhelming popularity of the category. At 
+	[b 
+		"best,
+	]b
+	" doing that would be implying that anyone interested in TASing these games would be required to make several hour long TASes in order for them to be accepted at all, despite the fact that it's rare for RTA runners to approach those categories in the first place. The last thing I want to do is alienate an entire community like that. The way I currently see it, 100% of the Papa Louie TASes I know of, and likely 100% of the Papa Louie TASes that exist at all, are rank 5 TASes. These will be the most common submissions for this series. It's only natural to allow them on the site, though we do have to figure out 
+	[em 
+		"how
+	]em
+	" given their lack of completion.
+	$LF
+]div
+[div class=p 
+	"While I initially zeroed in on trying to make this a 
+	(__wikiLink|href=/Standard|implicitdisplaytext=standard)
+	" category for the series, ultimately the easier and safer way is to treat it as 
+	(__wikiLink|href=/Alternative|implicitdisplaytext=Alternative)
+	", especially with the recent changes we've made to that class. While this implies that we see the most popular category as "non-standard", there's actually two huge benefits to doing it this way that make it preferable.
+	$LF
+]div
+[div class=p 
+	"First, there's the major benefit for TASVideos itself, which is that we don't have to worry about accidentally setting a new precedent. I often think about the first time viewer/submitter experience on TASVideos: In my eyes, a first time visitor should be able to easily understand everything about us without needing to do research. If we were to standardize rank 5, someone unfamiliar with the site could come across it and mistakenly think that runs don't have to be complete in order to be standardized, since they'd need to research our submission standards in order to learn otherwise. Even if we were to outright specify this only applies to Papa Louie games, that doesn't mean that message is going to be heard, since it's far easier to assume that if X is okay for one game series, then X is similarly okay for all games. Given that we openly present Alternative as anything goes, it's far less likely to cause misunderstandings here.
+	$LF
+]div
+[div class=p 
+	"Second and more importantly is the major benefit for the community, which is that it bypasses our usual rules on endless games. If this were to be standard, then our rules on endless games would cause it to be obsoleted by a theoretical any% run, and that theoretical any% run would be obsoleted by a run that aims for all ingredients, which would be obsoleted by a run that aims for all unlocks, which may even be obsoleted by a run that aims to max out something beyond that. This, once again, leads to the most popular category not being properly showcased, since it would just be superseded by one of the much longer runs that are objectively more standard. Alternative means that Rank 5 will always exist as a category by itself due to its popularity, and only other Rank 5 runs would be able to compete.
+	$LF
+]div
+[div class=p 
+	"Again, the only downside is that there's an accidental implication we don't see the category as "standard" when the community clearly does. Seeing as how I'm once again thinking about the first timer experience, let me briefly explain what this means to anyone who might not be familiar with the site: To us, 
+	(__wikiLink|href=/Standard|implicitdisplaytext=standard)
+	" is just an internal name that governs a certain set of objective criteria meant to be applied to every game we accept. It's a categorization system that isn't meant to govern how a game is played, i.e we're not saying that "non-standard" is "you're doing it weird" but instead saying that "non-standard" is "there's a subjective quality that differentiates it from the most common categories across the entirety of speedrunning", which in this case is Rank 5 not reaching an objective endpoint.
+	$LF
+]div
+[div class=p 
+	"...As usual, I'm overexplaining. It's almost like I'm an endless cycle of mediocrity or something. Hopefully by now I've explained everything sufficiently, so I'll just end the judgement by saying if people think standard is a better fit for this, I'd be happy to move it over.
+	$LF
+]div
+[div class=p 
+	"tl;dr game good, run good, category good, we want more. Accepting as an Alternative branch!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Unfortunately my computer really hates me and suddenly won’t let libTAS open under my WSL2 environment.  I’m going to unclaim this just in case someone else wants to take it.  I’m going to need some time to figure out what went wrong on my end, I am very sorry about the inconvenience.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

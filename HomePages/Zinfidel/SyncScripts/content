@@ -1,0 +1,496 @@
+3
+[h2 id=Summary 
+	" Summary
+	$LF
+]h2
+[div class=p 
+	"On this page is presented a set of scripts and a technique for automatically "force syncing" movies in BizHawk. This was designed for and is mainly useful for syncing N64 movies at a higher resolution or with different graphics settings than the movie calls for so you can get those sweet 4K video dumps. 
+	[b 
+		"You must be able to sync a movie at native settings for these scripts to work.
+	]b
+	" The basis of how these scripts and technique works is as follows:
+	$LF
+]div
+[ol 
+	[li 
+		" Collect "sync data" from each frame of the movie at native resolution.
+		$LF
+	]li
+	[li 
+		" Replay the movie at a higher resolution and compare its sync data to the collected data on each frame.
+		$LF
+	]li
+	[li 
+		" Any time the movie being played at a higher resolution has different sync data than that of the native run, create a savestate at that point in the 
+		[b 
+			"native
+		]b
+		" movie, then load it in the 
+		[b 
+			"upscaled
+		]b
+		" movie. This "realigns" the upscaled movie so that it can continue.
+		$LF
+	]li
+	[li 
+		" Using all of the savestates created in the previous step, dump the movie, but with these interruptions:
+		$LF
+		[ol 
+			[li 
+				" When a frame is encountered that has an associated savestate, advance past the frame some number of frames. This is to account later for the fact that the emulator usually needs some amount of frames for the graphics to catch up and become upscaled again.
+				$LF
+			]li
+			[li 
+				" Turn off video dumping.
+				$LF
+			]li
+			[li 
+				" Load the savestate.
+				$LF
+			]li
+			[li 
+				" Advance the number of frames that were passed earlier, then turn dumping back on.
+				$LF
+			]li
+		]ol
+	]li
+]ol
+[div class=p 
+	"The scripts on this page largely automate this process, though a user will still need to intervene at three key times to move the process along.
+	$LF
+]div
+[h2 id=Credits 
+	" Credits
+	$LF
+]h2
+[div class=p 
+	"This code was based on and uses directly some code by 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	" and 
+	[a class=intlink href=/Users/Profile/TheCoreyBurton 
+		"TheCoreyBurton
+	]a
+	" for syncing N64 runs.
+	$LF
+]div
+[h2 id=Scripts 
+	" The Scripts
+	$LF
+]h2
+[div class=p 
+	"Copy all of these scripts into one location. You will need 
+	[a href=http://files.luaforge.net/releases/luasocket/luasocket/luasocket-2.0.2/luasocket-2.0.2-lua-5.1.2-Win32-vc8.zip rel=noopener external nofollow 
+		"luasocket
+	]a
+	" for these scripts. Extract the contents into a folder called 
+	[code 
+		"luasocket
+	]code
+	". This folder should be in the same directory as the rest of the syncing scripts.
+	$LF
+]div
+[ol 
+	[li 
+		" 
+		[a class=intlink href=/Userfiles/Info/73827145381295515 
+			"sync-collect.lua
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Userfiles/Info/73827136159372984 
+			"sync-savestates.lua
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Userfiles/Info/73827119493636426 
+			"sync-dump.lua
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a class=intlink href=/Userfiles/Info/73827041987802579 
+			"net-receive.lua
+		]a
+		$LF
+	]li
+]ol
+[div class=p 
+	"The scripts can also be viewed on GitHub: 
+	[a href=https://gist.github.com/Zinfidel/047a31b5fb0e3d86854e0cf8e7b00c80 rel=noopener external nofollow 
+		"https://gist.github.com/Zinfidel/047a31b5fb0e3d86854e0cf8e7b00c80
+	]a
+	$LF
+]div
+[h2 id=Instructions 
+	" Instructions
+	$LF
+]h2
+[h3 id=Step0FindSyncData 
+	" Step 0 - Find Sync Data
+	$LF
+]h3
+[div class=p 
+	"This step is included as step 0 because it isn't actually part of the instructions for these scripts but nonetheless a necessary pre-requisite to any of this working. The crux of this technique working at all is the ability to detect a desync occurring as early and precisely as possible. There are probably a thousand ways to do this, but for the purpose of these scripts and in general a good way to do it is to find memory locations in the game that are likely to act as a canary for desyncs. This means data tied to things in games that tend to go out of sync if a movie is going to desync at all. For almost any 3D game, player model transformation matrices are an excellent candidate since the player's character being very slightly out of position is a common cause of desyncs.
+	$LF
+]div
+[div class=p 
+	"Something else to consider when choosing your sync data is how accurate you want to be. For N64, transformation matrices and just plain position data (for example) will probably be stored in floating point format. If you dump your syncing data at full accuracy, you may find that your sync data is actually 
+	[em 
+		"too
+	]em
+	" accurate and causes problems later. This happens because the higher resolution run of the movie will almost certainly differ a little bit from the native resolution run most of the time but not desync until it falls more seriously out of range. If your data is too accurate, later on in the process, you will find that you are creating and loading savestates at very short intervals because of this which is bad because it will cause hiccups in the resulting video and will massively slow down this process. Conversely, if your position data is not accurate enough because you only collected, say, 1 decimal place, the data may not be robust enough to prevent a desync.
+	$LF
+]div
+[div class=p 
+	"You will have to search for and test sync data of your own to determine what works and how much accuracy is needed to find the right balance. Teaching you how to search for this kind of data is outside of the scope of this tutorial.
+	$LF
+]div
+[h3 id=Step1CollectSyncData 
+	" Step 1 - Collect Sync Data
+	$LF
+]h3
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/teMPc1Z.png 
+	]img
+	$LF
+]div
+[ol 
+	[li 
+		" Modify 
+		[code 
+			"sync-collect.lua
+		]code
+		" to collect sync data of your choice and write the data to a log file, line-by-line. See the example code in the file for an idea of how to do this.
+		$LF
+	]li
+	[li 
+		" Open BizHawk, load your ROM, pause emulation, then load your movie. Make sure that you are paused at frame 0 of your movie.
+		$LF
+	]li
+	[li 
+		" Open the Lua Console and load 
+		[code 
+			"sync-collect.lua
+		]code
+		". You will see the text "Flushing to file ..." appear in the Lua Console.
+		$LF
+	]li
+	[li 
+		" Unpause the movie and let it run all the way to the end of the movie, and then some for safety.
+		$LF
+	]li
+	[li 
+		" Stop the 
+		[code 
+			"sync-collect.lua
+		]code
+		" script in the Lua Console. You should see the text "Script stopping. Closing log file." appear in the Lua Console.
+		$LF
+	]li
+]ol
+[div class=p 
+	"You should now have a 
+	[code 
+		"log.txt
+	]code
+	" file (or something named similar to that) in the same directory as the 
+	[code 
+		"sync-collect.lua
+	]code
+	" script that contains your sync data. You can close BizHawk at this point and re-open it for the next step, or just close the Lua Console and reload the movie so that you are paused at frame 0 again.
+	[br 
+	]br
+	$LF
+]div
+[h3 id=Step2GenerateSyncingSavestates 
+	" Step 2 - Generate Syncing Savestates
+	$LF
+]h3
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/8tTkK1k.png 
+	]img
+	$LF
+]div
+[ol 
+	[li 
+		" Modify the 
+		[code 
+			"GetData()
+		]code
+		" function in 
+		[code 
+			"sync-savestates.lua
+		]code
+		" to retrieve the same data that was read in step 1, and then return that data as a string that can be compared to the entries in 
+		[code 
+			"log.txt
+		]code
+		". There is example code in the 
+		[code 
+			"GetData()
+		]code
+		" function already that shows how to do this.
+		$LF
+	]li
+	[li 
+		" 
+		[em 
+			"Optional
+		]em
+		": If you need to change graphical settings that are also considered sync settings by BizHawk, create a copy of your movie file without sync settings:
+		$LF
+		[ol 
+			[li 
+				" Copy your 
+				[code 
+					"bk2
+				]code
+				" file
+				$LF
+			]li
+			[li 
+				" Open the file up with an archive tool like 7Zip
+				$LF
+			]li
+			[li 
+				" Delete the 
+				[code 
+					"SyncSettings.json
+				]code
+				" file from the archive
+				$LF
+			]li
+		]ol
+	]li
+	[li 
+		" Open BizHawk, 
+		[b 
+			"make sure your graphics settings are set to the native settings of your movie
+		]b
+		", load your ROM, pause emulation, then load your movie. Make sure that you are paused at frame 0 of your movie.  This step corresponds to the window labeled '1' in the screenshot.
+		$LF
+	]li
+	[li 
+		" Open the Lua Console for this instance of BizHawk. Place the BizHawk and Lua Console windows where you want on your desktop because this step will make them both mostly unresponsive. Load the 
+		[code 
+			"net-receive.lua
+		]code
+		" script. This will turn this instance of BizHawk into a 
+		[em 
+			"server
+		]em
+		" of syncing savestates for a 
+		[em 
+			"client
+		]em
+		" to connect to via sockets. You should see the text "Waiting on a connection..." appear in the Lua console. This step corresponds to the window labeled '2' in the screenshot.
+		$LF
+	]li
+	[li 
+		" Start another instance (the 
+		[em 
+			"client
+		]em
+		" instance) of BizHawk. This instance will later be connecting to the 
+		[em 
+			"server
+		]em
+		" instance you have open already.
+		$LF
+	]li
+	[li 
+		" Modify this instance of BizHawk's graphical settings to have your upscaled settings. So for instance, change the resolution to 4K. You can also change other plugin settings here if necessary, but you will need to have created a syncless movie file as in step 2.
+		$LF
+	]li
+	[li 
+		" Load your ROM, pause emulation, then load your movie (syncless movie if necessary). 
+		[b 
+			"Set the movie to pause on the last frame
+		]b
+		". Your client instance of BizHawk should be paused at frame 0 of your movie. This step corresponds to the window labeled '3' in the screenshot.
+		$LF
+	]li
+	[li 
+		" Open the Lua Console for the 
+		[em 
+			"client
+		]em
+		" instance of BizHawk. Load 
+		[code 
+			"sync-savesates.lua
+		]code
+		". In the Lua console for the 
+		[em 
+			"server
+		]em
+		" instance, you should see "Connected! Awaiting a message..." appear. In the Lua console for the 
+		[em 
+			"client
+		]em
+		" instance, you should see "Parsing File... File parsed! Line count: ###" appear. This means your 
+		[code 
+			"log.txt
+		]code
+		" data was successfully parsed. This step corresponds to the window labeled '4' in the screenshot.
+		$LF
+	]li
+	[li 
+		" You are now ready to let the script handle the brunt of the work in syncing the movie. Unpause emulation on the 
+		[b 
+			"client
+		]b
+		" (window 3) instance of BizHawk.
+		$LF
+		[ul 
+			[li 
+				" The client will now play the movie, reading data from the upscaled client and comparing it against the recorded good values in 
+				[code 
+					"log.txt
+				]code
+				$LF
+			]li
+			[li 
+				" When a mismatch occurs, the client BizHawk will send a request to the server BizHawk for a savestate at the frame that the mismatch ocurred.
+				$LF
+			]li
+			[li 
+				" You will see "desync at frame ###" followed by the desynced data in the client's Lua Console when this happens.
+				$LF
+			]li
+			[li 
+				" The server should show the message, "Received request for a savestate at frame ###" when this happens, then begin seeking to that frame. You will not see the game emulate as seek does so without updating video.
+				$LF
+			]li
+			[li 
+				" When the server finds the frame, it will create the savestate in the same directory as your syncing scripts, then let the client know that the savestate is available.
+				$LF
+			]li
+			[li 
+				" The client will then load the savestate, then continue to emulate.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" When you reach the end of your movie, stop the 
+		[code 
+			"pod-syncparse.lua
+		]code
+		" script on your client. You should see the text "Script exiting. Sending quit command to server." appear in your client Lua Console. You should see the text "Received exit message. Exiting now. Client closed." appear in your server Lua Console. The server instance should become responsive again. You can now close both instances of BizHawk.
+		$LF
+	]li
+	[li 
+		" You will find the generated savestates in the same directory as your sync scripts.
+		[br 
+		]br
+		$LF
+	]li
+]ol
+[h3 id=Step3DumpTheMovie 
+	" Step 3 - Dump the Movie
+	$LF
+]h3
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/YjNVxfx.png 
+	]img
+	$LF
+]div
+[ol 
+	[li 
+		" Modify the 
+		[code 
+			"offset
+		]code
+		" value in 
+		[code 
+			"sync-dump.lua
+		]code
+		" if necessary (see the optional "Find Your Offset" section below). You can ignore this step and use the scripts' pre-configured default of 10 frames at first and come back to change it if the resulting encode is broken.
+		$LF
+	]li
+	[li 
+		" Start an instance of BizHawk using graphical settings matching what you want for your encode. These should match exactly the settings you used for your client BizHawk in Step 2.
+		$LF
+	]li
+	[li 
+		" Load your ROM, pause emulation, then load (syncless if necessary) movie. You should now have your BizHawk instance paused at frame 0 of your movie.
+		$LF
+	]li
+	[li 
+		" Open the Lua Console and open 
+		[code 
+			"sync-dump.lua
+		]code
+		". You should see the text "States found: ###" in the Lua Console.
+		$LF
+	]li
+	[li 
+		" Start video dumping with settings of your choice. 
+		[b 
+			"The video dumping syncing method can break this script badly.
+		]b
+		" Turning on the "Alt. Sync" option in the video dumping dialog of BizHawk 
+		[em 
+			"may
+		]em
+		" cause the resulting video to be horribly mangled. Rather than smooth transitions at desync points, you would see evidence of the emulator jumping back in time and returning to the syncing point. If you see this happening in your video, you may be required to dump using normal sync.
+		$LF
+	]li
+	[li 
+		" As the video dumps, you will see it occasionally rewind and note in the Lua Console that a savestate was loaded.
+		$LF
+	]li
+	[li 
+		" Dump as much video as you want. When you are done, pause the emulation, stop the script, then stop dumping.
+		$LF
+	]li
+	[li 
+		" You now have your synced video!
+		[br 
+		]br
+		$LF
+	]li
+]ol
+[hr 
+]hr
+[h3 id=OptionalFindYourOffset 
+	" 
+	[em 
+		"Optional
+	]em
+	": Find Your Offset
+	$LF
+]h3
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/rOXVolG.png 
+	]img
+	$LF
+]div
+[blockquote 
+	"Right: An example of what N64 graphics can look like right after loading a savestate made at another resolution.
+	$LF
+]blockquote
+[div class=p 
+	"The offset value for this step affects how far back BizHawk will rewind the movie to fix a desync and give the graphics plugin time to re-initialize. When a savestate created by an instance of BizHawk running at a different resolution is loaded in an instance of BizHawk with a higher resolution (such as will be the case with your syncing savestates), the graphics will not immediately be rendered at the upscaled value. Instead, there is an "initialization" time where the emulator will emulate at the original resolution before suddenly snapping into the higher resolution. If the dumping script simply loads a syncing savestate any time it hits a frame where a desync will occur, the output video would suddenly drop to native resolution every time a desync happens. Not good!
+	$LF
+]div
+[div class=p 
+	"The offset value can help alleviate this problem as follows: for some offset value, the emulator will find a syncing frame, and advance offset frames ahead of that frame, recording video along the way. It will then stop video dumping temporarily, and load the syncing savestate offset frames back. Then, the emulation is allowed to run for offset frames again. What will (ideally) happen after this series of steps is that video will be dumped offset frames into a desynchronized state, then video dumping resumes after the emulator has backed up to a sync state and advanced frames long enough to get the graphics to reinitialize. For good syncing data, the transition where these two streams are connected is invisible and it's as if nothing occurred.
+	$LF
+]div
+[div class=p 
+	"To find a good offset value for your movie, start an instance of BizHawk at your modified dumping resolution, and load a syncing savestate created during step 2. Advance frames one-by-one until you see the graphics resolve to your higher resolution. Note that just because it took some number of frames for the graphics to resolve here doesn't mean this will work everywhere in the movie! Try this with a few other sync savestates and see what you come up with. Setting your offset value to the number of frames you find here + 1 is generally pretty safe. Troubleshooting this value works as follows: In the resulting dump of the movie, if you see the resolution flicker in and out of native and your upscaled resolution where desyncs occur, then you need to increase your offset. If you see the dump showing the movie desyncing briefly and then suddenly "snapping" to a good state in the movie (for instance, the player crashes their racer, then an instant later is on the track again), then you need to reduce your offset value.
+	$LF
+]div
+[div class=p 
+	"You can just try this script with the default value of 10 and see if it works and skip this step. If it doesn't, find an offset value.
+	[br 
+	]br
+]div

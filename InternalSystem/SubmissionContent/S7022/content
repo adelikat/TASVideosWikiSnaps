@@ -1,0 +1,142 @@
+10
+[h3 id=AboutTheGame 
+	" About the Game
+	$LF
+]h3
+[div class=p 
+	"Fushigi no Dungeon: Fuurai no Shiren GB: Tsukikage Mura no Kaibutsu, translated as Mystery Dungeon: Shiren the Wanderer: The Monsters of Moonlight Village, is a roguelike game developed by Aquamarine and published by Chunsoft, apparently released back in 11/22/1996. The game follows Shiren the Wanderer, and his talking weasel Koppa. The game has also gotten some ports/re-releases on Windows and Android. And there really isn't anything I can say past that, the game was only released in Japan, and there's really not much info about this game. The 
+	[a href=https://www.speedrun.com/shiren_moonlightvillage rel=noopener external nofollow 
+		"RTA leaderboards
+	]a
+	" don't even have any runs on the Gameboy version. Luckily, this game is buggy so it won't matter for me.
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[h4 id=EmulatorUsedBizhawk26 
+	" Emulator used: Bizhawk 2.6
+	$LF
+]h4
+[ul 
+	[li 
+		" CGB in GBA mode is enabled for console verification.
+		$LF
+	]li
+]ul
+[h4 id=Categories 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		"Aims for fastest completion of the game
+		$LF
+	]li
+	[li 
+		"Executes arbitrary code
+		$LF
+	]li
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Some luck manipulation
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"The run is fairly short, so there isn't too much to comment on. The key exploit used is simply the L/R|U/D glitch. Essentially, the game doesn't handle L/R and U/D inputs correctly; often they will freeze the game, but sometimes they will cause ACE. This movie specifically uses the combination L/R/D to cause ACE at EDF0 (echo RAM for CDF0). I use my player name to store most of the payload, however, I simply don't have any bytes that can cause any jumps. That's where luck manipulation comes into play. The game stores 4 bytes for RNG at D601-D604. The game uses rTIMA (somewhat similar to rDIV, but much more restrictive for manipulation) for seeding the RNG, and uses a fairly complicated 
+	[a href=https://en.wikipedia.org/wiki/Linear-feedback_shift_register rel=noopener external nofollow 
+		"LFSR
+	]a
+	" to cycle through RNG.
+	$LF
+]div
+[h3 id=StageByStageComments 
+	" Stage by stage comments
+	$LF
+]h3
+[h4 id=SaveFileCreation 
+	" Save file creation
+	$LF
+]h4
+[div class=p 
+	"I need to create a save file to really do anything, which can be quickly done. It also needs to be the 3rd save file, the 1st one won't work. I hard reset once the main save file is actually made (although before the backup is made; this causes the game to create the backup save after the hard reset is done, which changes RNG). As a note, the game doesn't seem to have any soft reset, and going back through the main menu without resetting is much slower, and will simply not work for my purposes anyways (due to the game splashing FFs in a huge chunk of RAM I need to slide past). As a note, this reset is why I need to use the 3rd save file, as the game will load the 3rd save file's data by default, and will only load the other save files if they actually go into the game (which I don't want to do).
+	$LF
+]div
+[h4 id=RngManipNameAce 
+	" RNG Manip/Name/ACE
+	$LF
+]h4
+[div class=p 
+	"This is where the main improvement from the previous comes in. After the reset, I manipulate for a fairly specific RNG combination. From my RNG log of all possible initial seeds:
+	$LF
+]div
+[pre 
+	"Tima0: 01 | Tima1: C8 | Tima2: E9 | RNG: 02 D5 87 C9
+	$LF
+]pre
+[div class=p 
+	"The main prize in this particular seed is $02 right before a $D5 -> $C9 combination. I then proceed to rename myself, which will write the following code into memory:
+	$LF
+]div
+[pre 
+	"ld de,$7C1C ; credits location
+	$LF
+	"ld a,e ; a = $1C
+	$LF
+]pre
+[div class=p 
+	"Afterwards, I need to flash the rename screen again. This will clear out a troublesome buffer of my name, leaving in some $88 bytes. I then just have to wait for a counter to tick down to $00. This ends up changing it to $01 (and stays that way), and also places a $28 byte two bytes away. This results in the following opcode.
+	$LF
+]div
+[pre 
+	"ld bc,$2800
+	$LF
+]pre
+[div class=p 
+	"bc is now $2800, which is perfect since this is around the general area where I need to write to trigger a bankswitch. I can press L/R/D now, which now executes the payload.
+	$LF
+]div
+[div class=p 
+	"Now remember that RNG seed? This is at the end of a payload, which ends up being the following in assembly:
+	$LF
+]div
+[pre 
+	"ld (bc),a ; bankswitch to bank 1C
+	$LF
+	"push de ; (sp) = $7C1C
+	$LF
+	"add a
+	$LF
+	"ret ;  pc = 1C:7C1C, credits are located here
+	$LF
+]pre
+[div class=p 
+	"No inputs are needed for the cutscene, so input is ended once ACE is executed.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": Since I've already confirmed sync and legitimacy when I encoded this over a month ago, and since nobody else seems to want to even look at this run, I'm just going to go ahead and rescind my encode claim and accept it to Vault as an improvement to the 
+	(__wikiLink|displaytext=published run|href=/4274M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/fsvgm777 
+		"fsvgm777
+	]a
+	": Processing.
+]div

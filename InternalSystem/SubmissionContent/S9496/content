@@ -1,0 +1,592 @@
+4
+[div class=p 
+	"This is a TAS of Cave Story 3D for the Nintendo 3DS. It uses glitches to skip basically everything, reaching the credits in just three and a half minutes.
+	$LF
+]div
+[h3 id=GeneralInfo 
+	" General Info
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: Bizhawk 2.10
+		$LF
+	]li
+	[li 
+		" Game version: USA. The Japanese version does not have the glitch that makes this run possible
+		$LF
+	]li
+	[li 
+		" This run starts from a state where the Time Attack mode is unlocked. To unlock it from a clean state, you can run this movie: 
+		(__wikiLink|href=/UserFiles/Info/638726632528766715|implicitdisplaytext=UserFiles/Info/638726632528766715)
+		$LF
+	]li
+	[li 
+		" Aims to reach any version of the credits as fast as possible by any means
+		$LF
+		[ul 
+			[li 
+				" In this case, the run ends up achieving the "Normal Ending".
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		" Played on Normal difficulty (it doesn't make any difference aside from the time it takes to menu to the other difficulty options)
+		$LF
+	]li
+	[li 
+		" Major skip glitch
+		$LF
+	]li
+	[li 
+		" Rerecord count: The count in the movie file seems quite low; I wonder how Bizhawk/TAStudio counts rerecords?
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"Ever since 3DS TASing became possible on Bizhawk, I knew that this game was due to have a TAS of this. So I took it upon myself to make it!
+	$LF
+]div
+[div class=p 
+	"I've included some subtitles in the movie file; they're pretty lazily placed so feel free to adjust the timings or otherwise edit them however you like.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=InventoryGlitchExplanation 
+	" Inventory Glitch Explanation
+	$LF
+]h3
+[div class=p 
+	"This is the main glitch that is used to break the game and skip everything.
+	$LF
+	"Depending on who you talk to, you may also hear this referred to as the "item quit glitch" or "Beast Fang glitch".
+	$LF
+	"The latter name likely arises from early forum discussions following the discovery of the glitch; at the time, the most interesting application that was known was using it to obtain the "Beast Fang" item, which exists in all versions of Cave Story but is buried inside the floor of Yamashita Farm making it normally unobtainable.
+	$LF
+	"In this game, inspecting the description of this item reads "You're not supposed to find this. How'd you do it?".
+	$LF
+]div
+[h4 id=Background 
+	" Background
+	$LF
+]h4
+[div class=p 
+	"Level data in Cave Story is divided into multiple files. For simplicity, I'll break it down into three main parts:
+	$LF
+]div
+[ul 
+	[li 
+		" Map data—defines the level geometry
+		$LF
+	]li
+	[li 
+		" NPC data—specifies the type and placement of objects and enemies inside the level, along with any special properties they may have (such as being interactable)
+		$LF
+	]li
+	[li 
+		" TSC (Text SCript)—contains scripting for cutscenes and interactable entities.
+		$LF
+	]li
+]ul
+[div class=p 
+	"For our purposes, we'll be mainly concerning ourselves with the interaction between these last two parts.
+	$LF
+]div
+[div class=p 
+	"As an example, consider the exit door in Start Point. The NPC data for the map contains the following information about this door:
+	$LF
+]div
+[ul 
+	[li 
+		" NPC type: 18 (Door)
+		$LF
+	]li
+	[li 
+		" Location: (10, 3)
+		$LF
+	]li
+	[li 
+		" NPC flag: 0 (irrelevant for our purposes)
+		$LF
+	]li
+	[li 
+		" Event ID: 100
+		$LF
+	]li
+	[li 
+		" Properties: Is interactable
+		$LF
+	]li
+]ul
+[div class=p 
+	"When the player pushes down in front of the door to interact with it, the game executes the TSC event according to the event ID of the door (100, in this case).
+	$LF
+	"This is what that looks like in the Start Point script:
+	$LF
+]div
+[pre 
+	"#0100
+	$LF
+	"<PRI<CNP0100:0000:0000
+	$LF
+	"<SOU0011<FAO0001
+	$LF
+	"<TRA0012:0091:0037:0011
+	$LF
+]pre
+[div class=p 
+	"You don't have to understand this completely, but basically, what this event does is:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[code 
+			"<PRI
+		]code
+		": Lock the player controls and freeze the game
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<CNP0100:0000:0000
+		]code
+		": Change the NPC with event ID 100 into type 0 (this simulates the door opening by turning it into an NPC with no sprite, although with the 3D layer on top of everything, you don't get to see that in this version of the game)
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<SOU0011
+		]code
+		": Play sound 11 (door opening sound)
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<FAO0001
+		]code
+		": Fade the screen out with direction 1
+		$LF
+	]li
+	[li 
+		" 
+		[code 
+			"<TRA0012:0091:0037:0011
+		]code
+		": Transport the player to map 12 (First Cave) at coordinates (37, 11), and then run event 91 in that map (which handles the rest of the transition into the level).
+		$LF
+	]li
+]ul
+[div class=p 
+	"The important point here is that the entire link between the door object in the map and the behavior of the door when interacted with is through its event ID.
+	$LF
+	"If one were to edit the event ID of the door, or what event #0100 in the script does (
+	[em 
+		"hint
+	]em
+	"), then the door would do something different.
+	$LF
+]div
+[h4 id=InventoryGlitch 
+	" The Inventory Glitch
+	$LF
+]h4
+[div class=p 
+	"The inventory screen also uses a script, which is where all of the weapon/item names and descriptions are written.
+	$LF
+	"This script isn't loaded separately when using the inventory; rather, there is a single buffer in memory for "the current script".
+	$LF
+	"During normal gameplay, this buffer would contain the script for the current map, but when opening the inventory, the buffer is overwritten with the inventory script.
+	$LF
+	"In order to ensure that the map script is restored properly afterwards, the game does the following (simplified slightly):
+	$LF
+]div
+[ol 
+	[li 
+		" When opening the inventory, the game remembers the name of the current map script
+		$LF
+	]li
+	[li 
+		" The game then loads the inventory script into the script buffer
+		$LF
+	]li
+	[li 
+		" When the inventory is closed, the game reloads the script that it remembered from step (1).
+		$LF
+	]li
+]ol
+[div class=p 
+	"There is a bug with the inventory: If you quit to the main menu while the inventory is open, and then load back into the game (via any save file or Time Attack), the inventory will still be open upon entering the game. Closing the inventory then potentially reloads the wrong script!
+	$LF
+]div
+[div class=p 
+	"Here's how that works (see the run breakdown below for concrete examples):
+	$LF
+]div
+[ol 
+	[li 
+		" Suppose the player is in map A, and opens the inventory. As explained above, the game now remembers that map A was the current script, so it can reload that when the inventory is closed.
+		$LF
+	]li
+	[li 
+		" With the inventory open, the player then quits to the title screen menu. (In shorthand, these first two steps are referred to as an "Item Quit" (IQ) from map A.)
+		$LF
+	]li
+	[li 
+		" The player then loads a save file in map B. At this point, the game loads with the inventory still open, but map B's script as the current script. (Note, this means that interacting with the inventory will run events from map B instead of displaying the inventory items correctly. This isn't used in this run, but it does have applications in other contexts.)
+		$LF
+	]li
+	[li 
+		" When the inventory is closed, the game reloads map A's script, which is the script that it remembered from step (1). Now the player is in map B, but with map A's script! That means that interactable NPCs in map B will run whatever event in map A's script happens to match their event ID. With the right combinations, this can be used to bypass door locks and item checks, trigger progression events early, obtain extra health or items...really, the sky is the limit here. This run really is only scratching the surface of what's possible with the inventory glitch!
+		$LF
+	]li
+]ol
+[hr 
+]hr
+[h3 id=RunBreakdown 
+	" Run Breakdown
+	$LF
+]h3
+[h4 id=GeneralTechniques 
+	" General Techniques
+	$LF
+]h4
+[div class=p 
+	"This game is quite similar to the original Cave Story in terms of mechanics, but also different in one very important way: Although the game physics runs 60 times per second, the game renders frames 
+	[b 
+		"and polls inputs
+	]b
+	" only 30 times per second.
+	$LF
+	"Effectively, this means that I can only change inputs every other "frame", and any input I do can only be held for an even number of "frames".
+	$LF
+	"This limitation makes TASing this game much more annoying compared to the original—there were many instances throughout the TAS where I really wanted to jump on a particular frame, but that frame was an "in-between" frame so I couldn't jump there; also, not being able to do one-frame left/right adjustments has ramifications for the kinds of speed manipulation setups that are possible.
+	$LF
+]div
+[div class=p 
+	"Besides that, all of the physics, mechanics, and techniques are the same as the original Cave Story, so please give nitsuja's TAS of the 
+	(__wikiLink|displaytext=original game|href=/1917M)
+	" a watch if you want to learn more about that.
+	$LF
+	"Even the fact that this game is in 3D doesn't affect anything aside from making it visually harder to see where the edges of the platforms are; the underlying map data format and collision physics are still the same as the original, and in fact the data files can even be copy/pasted into the original game to make "Cave Story 3D but in 2D".
+	$LF
+]div
+[h4 id=StartPoint 
+	" Start Point
+	$LF
+]h4
+[div class=p 
+	"Jumping to the door might look unoptimal since I land well past the leftmost point that's possible to interact with, but I'm actually jumping to avoid a tutorial trigger that was added to this version of the game.
+	$LF
+]div
+[div class=p 
+	"Fun fact, that trigger was supposed to extend one block higher, which would have made it impossible(?) to avoid, but the developers mistakenly set an NPC property that makes it spawn one block lower than its placement in the map editor.
+	$LF
+	"So actually, half of that trigger ends up inside the ground and the other half only covers one block next to the door.
+	$LF
+]div
+[h4 id=FirstCave 
+	" First Cave
+	$LF
+]h4
+[div class=p 
+	"The 30 Hz input polling restriction made optimizing this stage quite annoying, because I would have loved to borrow inputs from TASes of the original game, but I can't replicate all of their setups because of 1-frame button presses that I can't do, or inputs that would need to occur on a "skipped" frame that would not work if I did them on either of the neighboring frames.
+	$LF
+	"I ultimately had to make several concessions and forgo a number of optimizations that I simply could not find a way to pull off under the constraints.
+	$LF
+	"Nevertheless, when considering the section from entering First Cave to emerging out of the tunnel before Hermit Gunsmith, the movement in this run is about 3 frames faster than 
+	(__wikiLink|displaytext=nitsuja's Best Ending TAS|href=/1917M)
+	", after normalizing for framerate.
+	$LF
+	"The way back isn't as comparable since I don't need the Life Capsule for this run, but for the parts that are the same, I think I more-or-less broke even compared to nitsuja's TAS.
+	$LF
+]div
+[div class=p 
+	"Also, the evil eye door at the end is one block to the right compared to the original, which makes it harder to get early shots on it. At the same time, the extra distance meant that I had time to shoot a bunch while landing onto that platform and walking towards the door. In the end, the door died right as I reached the doorway, so I think it more-or-less balanced out.
+	$LF
+]div
+[div class=p 
+	"You may wonder if it's possible to skip any of the gameplay here. Indeed, if we could run event #0103 or #0104 from the First Cave script, then the Polar Star would not be needed at all. Unfortunately, in this early stage of the game, there are really only two maps that we can readily load into after an item quit (Start Point and Time Attack), and neither of those maps contains an interactable NPC with either of those event IDs.
+	$LF
+	"(Technically, it's also possible to enter the Shelter by letting the opening cutscene play out a bit before closing the inventory. However, this cutscene places the player above the ceiling of the level, so we can't actually get inside. Also, that room doesn't have any NPCs with event ID 103 or 104 anyways.)
+	$LF
+]div
+[div class=p 
+	"There are other more advanced methods for manipulating TSC (which I won't get into here); I looked into the possibilities for that as well but couldn't come up with anything useful on that front.
+	$LF
+]div
+[h4 id=InventoryQuitSetup1BreakingIntoArthurSHouse 
+	" Inventory Quit Setup #1: Breaking Into Arthur's House
+	$LF
+]h4
+[div class=p 
+	"Upon entering Mimiga Village, the first step is to get into Arthur's House, which has connections to many other areas of the game. The door to Arthur's House is locked, so the intended sequence here is to go into the Reservoir to get the Silver Locket, then go into the Shack to watch a cutscene that grants access to the Cemetery where the key is located.
+	$LF
+	"However, with the inventory glitch and the help of the Time Attack mode, we can skip all of this.
+	$LF
+]div
+[div class=p 
+	"Here is the part of the Mimiga Village script relating to Arthur's door:
+	$LF
+]div
+[pre 
+	"#0100
+	$LF
+	"<PRI<FLJ0324:0102
+	$LF
+	"<ITJ0001:0101
+	$LF
+	"<MSG
+	$LF
+	"It's locked.<NOD<END
+	$LF
+	"#0101
+	$LF
+	"<SOU0022<GIT1001<FL+0324<FL+0441
+	$LF
+	"<MSG
+	$LF
+	"Used Arthur's Key.<NOD<GIT0000<CLO<EVE0102
+	$LF
+	"#0102
+	$LF
+	"<SOU0011<CNP0100:0000:0000<FAO0004<TRA0001:0094:0017:0008
+	$LF
+]pre
+[div class=p 
+	"The door itself has event ID 100, and we can see that event #0100 in the script does the following:
+	$LF
+]div
+[ol 
+	[li 
+		" If we've already unlocked the door (
+		[code 
+			"<FLJ0324:0102
+		]code
+		"), then jump to event #0102, which is the event that transports the player to Arthur's House (
+		[code 
+			"<TRA0001:0094:0017:0008
+		]code
+		")
+		$LF
+	]li
+	[li 
+		" Otherwise, if we have Arthur's Key (
+		[code 
+			"<ITJ0001:0101
+		]code
+		"), then jump to event #0101 which unlocks the door and then jumps to event #0102 (
+		[code 
+			"<EVE0102
+		]code
+		") to take the player to Arthur's House
+		$LF
+	]li
+	[li 
+		" Otherwise, display a message saying that the door is locked.
+		$LF
+	]li
+]ol
+[div class=p 
+	"Thus, to bypass the key check, we simply need to directly run either event #0101 or #0102 with Mimiga Village's script loaded. This is where Time Attack comes into play: By IQing from Mimiga Village and loading Time Attack, this loads the Mimiga Village script in the starting Time Attack room. The Fireball chest in this room conveniently has an event ID of 101, matching the event number that unlocks Arthur's door. Presto! Now we're inside Arthur's House.
+	$LF
+]div
+[div class=p 
+	"By the way, saving here would have no effect, since we're technically still in the Time Attack mode, which has no associated save file slot.
+	$LF
+]div
+[h4 id=InventoryQuitSetup2EnteringSandZone 
+	" Inventory Quit Setup #2: Entering Sand Zone
+	$LF
+]h4
+[div class=p 
+	"From Arthur's House, we IQ and start a new game (after all, we never even saved the first game to begin with). The opening cutscene tries to play here, but closing the inventory also cancels this event, so we don't have to watch that again. Once again, it's important here that I jump over the tutorial trigger—stepping on it in this state would run an event from Arthur's House, which we really don't want! (It's Jack's dialogue after returning from Egg Corridor, if you're wondering.)
+	$LF
+]div
+[div class=p 
+	"We interact with the door, which as mentioned earlier has event ID 100. Now, by convention most maps have event ID 100 assigned to their "main exit", and if this was the case for Arthur's House as well, then this event would have probably taken us back out into Mimiga Village. However, curiously enough, Arthur's House is one of the few maps that 
+	[em 
+		"doesn't
+	]em
+	" follow this convention—the door in that map actually has event ID 102.
+	$LF
+	"(Annotations surrounded by 
+	[code 
+		"/* */
+	]code
+	" were added by me):
+	$LF
+]div
+[pre 
+	"#0100
+	$LF
+	"<PRI<FAO0004<TRA0010:0094:0018:0032 /* Transport to map 10: Sand Zone */
+	$LF
+	"#0101
+	$LF
+	"<PRI<FAO0004<TRA0012:0094:0037:0011 /* Transport to map 12: First Cave */
+	$LF
+	"#0102
+	$LF
+	"/* Transport to map 11: Mimiga Village */
+	$LF
+	"<FLJ0155:0103<PRI<SOU0011<DNP0102<FAO0004<TRA0011:0094:0016:0053
+	$LF
+	"#0103
+	$LF
+	"/* Transport to map 11: Mimiga Village (cutscene after Egg Corridor) */
+	$LF
+	"<PRI<SOU0011<CMU0000<DNP0102<FAO0004<TRA0011:0400:0016:0053
+	$LF
+]pre
+[div class=p 
+	"All of this is to say, even though Arthur's House has an event #0100, it's actually an unused event that warps to Sand Zone at some rather odd coordinates. But this ends up being quite useful for us!
+	$LF
+]div
+[div class=p 
+	"(If you're wondering, event #0101 is also unused and leads to First Cave, at the coordinates of the Start Point door.)
+	$LF
+]div
+[h4 id=InventoryQuitSetup3WarpingToTheEndingSequence 
+	" Inventory Quit Setup #3: Warping to the Ending Sequence
+	$LF
+]h4
+[div class=p 
+	"We IQ from Sand Zone and start a new game (we still never saved). In addition to the tutorial trigger next to the exit door, there is also another trigger that runs the same tutorial event, located next to the health refill and save point. This is what I jump into since it's closer than the one next to the door.
+	$LF
+]div
+[div class=p 
+	"The tutorial trigger has event ID 527. For those who haven't played this game, this is what it says (from the Start Point script):
+	$LF
+]div
+[pre 
+	"#0527
+	$LF
+	"<DNP0527<SKJ0022:0000<SK+0022
+	$LF
+	"<0CS<PRI<MS3
+	$LF
+	"Press Down on the +Control Pad
+	$LF
+	"to activate Save Points, collect
+	$LF
+	"items and enter doors.<NOD<END
+	$LF
+]pre
+[div class=p 
+	"However, we don't have the Start Point script loaded anymore, so this is not the event that runs. With Sand Zone's script now loaded, this is what the script looks like:
+	$LF
+]div
+[pre 
+	"#0501
+	$LF
+	"<PRI<DNP0501<SOU0022<CMU0016
+	$LF
+	"<MSG<GIT1006
+	$LF
+	"Obtained a Life Capsule.<WAI0160<NOD<RMU<ML+0005
+	$LF
+	"Max life increased by 5.<NOD<END
+	$LF
+	$LF
+	$LF
+	"#1200
+	$LF
+	"<KEY<ANP1200:0020:0001
+	$LF
+	"<FON1200:0016<FAI0001
+	$LF
+	"<WAI0100<FAO0001<TRA0039:1200:0061:0012
+	$LF
+]pre
+[div class=p 
+	"You'll notice that Sand Zone doesn't have an event labeled #0527. What happens in this case? Well, TSC events are always written in order, so when looking for event 527, the TSC parser stops once it sees event #1200, since 527 should have come before 1200. The TSC parser then returns that it failed to find event 527...and then proceeds to completely ignore this error condition and start executing TSC anyways, starting from the last position that it reached during its search (which would be at the 
+	[code 
+		"1
+	]code
+	" in 
+	[code 
+		"#1200
+	]code
+	").
+	$LF
+]div
+[div class=p 
+	"This results in the text "1200" being printed to an invisible textbox (which explains the text typing sounds that you hear), and then the TSC of event #1200 executes. This event in Sand Zone is part of the normal ending "break down" cutscene, where the game pans across the maps you've traveled through during your quest while the island is falling. This cutscene is supposed to start from jumping off the edge of the Balcony, so jumping into the middle of it like this messes up the camera and some other things. Nevertheless, the cutscene plays out to the end and ultimately leads into the credits. Congrats, the game has now been beaten(?)!
+	$LF
+]div
+[hr 
+]hr
+[h3 id=PossibleImprovements 
+	" Possible Improvements
+	$LF
+]h3
+[div class=p 
+	"Really the only nontrivial gameplay in this run is in First Cave.
+	$LF
+	"If it weren't for the 30 Hz input restriction, the movement from Start Point to Hermit Gunsmith would be improvable by at least 4 frames. I wonder how many of those frames could still be squeezed out in spite of the restriction?
+	$LF
+]div
+[div class=p 
+	"The movement in the Time Attack room would also be improvable if there was a way to pause-buffer a lower jump, which would allow for landing earlier after each boost. (Note, due to the 30 Hz input polling, the lowest jump I can do before starting a boost is effectively 2 frames of jump followed by 2 frames of releasing jump before starting the boost.)
+	$LF
+	"I tried pausing with the Start menu and with the inventory, but in both cases it seemed to have no effect on the jump height, so I guess either it doesn't work or there's a particular timing or method that I didn't consider.
+	$LF
+]div
+[div class=p 
+	"Also in the Time Attack room, I tried boosting down to land earlier to refuel the Booster, boosting down onto the chest instead of releasing the boost early and falling down naturally, boosting down into the side of the starting platform to get a rightward push from it, and various other ideas along those lines, but none of those ideas seemed to save any time.
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other Comments
+	$LF
+]h3
+[div class=p 
+	"Special acknowledgments go to the Cave Story modding community; it is thanks to their work in advancing our knowledge of the game over the past 20 years that putting together this run was simply a matter of recording the inputs for it.
+	$LF
+]div
+[div class=p 
+	"I leave the screenshot to community suggestion and/or publisher's discretion.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/ikuyo 
+		"ikuyo
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/ikuyo 
+		"ikuyo
+	]a
+	": Hello periwinkle and welcome to TASVideos!
+	$LF
+]div
+[div class=p 
+	"I look away for a couple days after 2.10 releases and you beat me to the punch for a CS3D movie! Movement looks clean and well thought out, and the usage of the Item Quit glitch is technically sound and quite entertaining. Beautiful work.
+	$LF
+]div
+[div class=p 
+	"Accepting!
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/EZGames69 
+		"EZGames69
+	]a
+	": Processing...
+]div

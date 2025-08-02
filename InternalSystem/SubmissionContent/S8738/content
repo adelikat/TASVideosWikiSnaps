@@ -1,0 +1,265 @@
+4
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: BizHawk 2.9.1 (NesHawk core)
+		$LF
+	]li
+	[li 
+		" Aims for fastest time
+		$LF
+	]li
+	[li 
+		" Uses hardest difficulty
+		$LF
+	]li
+	[li 
+		" Manipulates luck
+		$LF
+	]li
+]ul
+[div class=p 
+	"This run beats NES Cadillac in about 2m15s.
+	$LF
+]div
+[div class=p 
+	"This game allows you to select a starting level, so I started from level 9 in this run. (In casual plays, it is somewhat difficult to earn money in this setting, so I used "hardest difficulty" tag.)
+	$LF
+]div
+[h3 id=AboutTheGame 
+	" About the game
+	$LF
+]h3
+[div class=p 
+	""Cadillac" is a poker-style block falling game. This game was never released outside Japan.
+	$LF
+]div
+[div class=p 
+	"To briefly explain the rules:
+	$LF
+]div
+[ul 
+	[li 
+		" If you make a poker hand horizontally/vertically, the cards are erased and you get some prize. Flush/Straight is accepted with 3 cards or more. The prize is multiplied if you erase many cards at once.
+		$LF
+	]li
+	[li 
+		" To beat a level, you have to erase all the cards on the board with a certain amount of money. (Level 9 requires 2000 dollars, and level 10 requires 2500 dollars. But anyway, money is not a major issue for TAS.)
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"Unfortunately, it is beyond my ability to get a theoretically optimal solution for this game. The reasons:
+	$LF
+]div
+[ul 
+	[li 
+		" The search space is quite large.
+		$LF
+	]li
+	[li 
+		" The RNG depends on CPU cycles. (This game processes almost all logics in the NMI thread, and the main thread continues to update the RNG in an infinite loop.)
+		$LF
+	]li
+]ul
+[div class=p 
+	"So, I bruteforced only for endgame. Until the end of midgame, I used a quick-and-dirty beam search to enumerate good positions.
+	$LF
+	"My solver code is 
+	[a href=https://github.com/taotao54321/CadillacSolverDraft rel=noopener external nofollow 
+		"here
+	]a
+	".
+	$LF
+]div
+[div class=p 
+	"Here is a memory map:
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"addr
+			]th
+			[th 
+				"type
+			]th
+			[th 
+				"description
+			]th
+		]tr
+		[tr 
+			[td 
+				"$38
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"RNG state
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0504
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"current index in card pile
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0505-$0538
+			]td
+			[td 
+				"u8[52]
+			]td
+			[td 
+				"card pile
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0539-$0556
+			]td
+			[td 
+				"u8[30]
+			]td
+			[td 
+				"board
+			]td
+		]tr
+		[tr 
+			[td 
+				"$0561-$057E
+			]td
+			[td 
+				"u8[30]
+			]td
+			[td 
+				"board for judging hands
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05AB
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"current card
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05AC
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"current card pixel y
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05AD
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"current card column
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05B6
+			]td
+			[td 
+				"u16le
+			]td
+			[td 
+				"player1 money
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05C0
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"current level
+			]td
+		]tr
+		[tr 
+			[td 
+				"$05C1
+			]td
+			[td 
+				"u8
+			]td
+			[td 
+				"starting level
+			]td
+		]tr
+	]tbody
+]table
+[h3 id=Trivia 
+	" Trivia
+	$LF
+]h3
+[div class=p 
+	"This game has 
+	[a href=https://cah4e3.shedevr.org.ru/cheatsbase.php#237 rel=noopener external nofollow 
+		"a cheat
+	]a
+	" which changes the card pile to the pre-defined one, but I didn't use it.
+	$LF
+]div
+[div class=p 
+	"If the money overflows (exceeds 655350 dollars), immediately the ending starts. But this will take so long time even for TAS.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Claiming for judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/nymx 
+		"nymx
+	]a
+	": Thanks for the description of this game. I have played poker for many, many years. The idea of having 3 cards for straights or flushes caught me off guard when I first saw it, but your notes cleared that up. I imagine the game would be much harder to have 5 cards in those suits. Looking at your drop pattern, you have planned the final clearing of each round very well. Since I don't know how I would approach the optimization of this game, I had to yield to human runs for comparison here. This movie smashes any human effort, as if it were normal play. I also have an affinity to your BOTing, since I try to do some of my games in a brute force manner as well. This is high quality work and I congratulate you on your work.
+	$LF
+]div
+[div class=p 
+	"Accepting.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/despoa 
+		"despoa
+	]a
+	": Processing...
+]div

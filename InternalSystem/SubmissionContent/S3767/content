@@ -1,13 +1,522 @@
-10
-[h1 
-	"Syntax Error
-]h1
-[pre class=error-code 
-	$UNPRINTABLE TEXT!!!
-	[span class=error-marker 
-		[span 
-			"Unexpected EOL parsing text in []
-		]span
-	]span
-	$UNPRINTABLE TEXT!!!
+13
+[div class=p 
+	"Pokemon Yellow Total Control Hack. Reprogramming the game from the inside!
+	$LF
+]div
+[h3 id=GameObjectives 
+	" Game objectives
+	$LF
+]h3
+[ul 
+	[li 
+		" Emulator used: vba-rerecording 23.5
+		$LF
+	]li
+	[li 
+		" Reprogram the Game from the inside
+		$LF
+	]li
+]ul
+[h3 id=Comments 
+	" Comments
+	$LF
+]h3
+[div class=p 
+	"I've included a detailed writeup here:
+	$LF
+	[a href=http://aurellem.org/vba-clojure/html/total-control.html rel=noopener external nofollow 
+		"http://aurellem.org/vba-clojure/html/total-control.html
+	]a
+	$LF
+]div
+[div class=p 
+	"The following are the highlights:
+	$LF
+]div
+[h4 id=Introduction 
+	" Introduction
+	$LF
+]h4
+[div class=p 
+	"Think of pokemon yellow as creating a little universe with certain
+	$LF
+	"rules. Inside that universe, you can buy items, defeat rival trainers,
+	$LF
+	"and raise your pokemon. But within that universe, you are bound by the
+	$LF
+	"rules of pokemon. You can't build new buildings, or change the music,
+	$LF
+	"or change your clothes.. There are some games (like chess), where it
+	$LF
+	"is not possible to alter the rules of the game from within the
+	$LF
+	"game. No matter what moves you make in chess, you can never change the
+	$LF
+	"rules of the game so that it becomes checkers or basketball. The point
+	$LF
+	"of this run is to show that you CAN change the rules in pokemon
+	$LF
+	"yellow. There is a certain sequence of valid actions (like walking
+	$LF
+	"from one place to another or buying items) that will allow you to
+	$LF
+	"transform pokemon yellow into Pacman, or Tetris, or Pong, or a MIDI
+	$LF
+	"player, or anything else you can imagine.
+	$LF
+]div
+[h4 id=Background 
+	" Background
+	$LF
+]h4
+[div class=p 
+	"The speedrun (
+	(__wikiLink|href=/2913S|implicitdisplaytext=2913S)
+	") by Felipe Lopes de
+	$LF
+	"Freitas (p4wn3r), beats pokemon yellow in only 1 minute and 36
+	$LF
+	"seconds. It does it by corrupting the in-game item list so that he can
+	$LF
+	"advance the list past its normal limit of 20 items. The memory
+	$LF
+	"immediately after the item list includes the warp points for the
+	$LF
+	"current map, and by treating that data as items and switching and
+	$LF
+	"dropping them, he can make the door from his house take him directly
+	$LF
+	"to the end of the game.
+	$LF
+]div
+[div class=p 
+	"When I first saw that speedrun, I was amazed at how fast pokemon
+	$LF
+	"yellow could be beaten, and that it was possible to manipulate the
+	$LF
+	"game from the inside, using only the item list. I wondered how far I
+	$LF
+	"could extend the techniques found in p4wn3r's run.
+	$LF
+]div
+[div class=p 
+	"The gameboy is an 8 bit computer. That means that ultimately, anything
+	$LF
+	"that happens in pokemon is a result of the gameboy's CPU reading a
+	$LF
+	"stream of 8 bit numbers and doing whatever those numbers mean. For
+	$LF
+	"example, in the gameboy, the numbers: 
+	$LF
+]div
+[div class=p 
+	"62 16 37 224 47 240 37 230 15 55
+	$LF
+]div
+[div class=p 
+	"mean to check which buttons are currently pressed and copy that result
+	$LF
+	"into the "A" register. With enough numbers, you can spell out an
+	$LF
+	"interactive program that reads input from the buttons and allows you
+	$LF
+	"to write any program you want to the gameboy. Once you have assembled
+	$LF
+	"such a program and forced the game to run it, you have won, since you
+	$LF
+	"can use that program to write any other program (like Tetris or
+	$LF
+	"Pacman) over pokemon yellow's code. I call a program that allows you
+	$LF
+	"to write any other program a "bootstrapping program". So, the goal is
+	$LF
+	"to somehow get a bootstrapping program into pokemon yellow and then
+	$LF
+	"force yellow to run that program instead of its own.
+	$LF
+]div
+[div class=p 
+	"How can we spell out such a program? Everything in the game is
+	$LF
+	"ultimately numbers, including all items, pokemon, levels, etc. In
+	$LF
+	"particular, the item list looks like:
+	$LF
+]div
+[pre 
+	"item-one-id         (0-255)
+	$LF
+	"item-one-quantity   (0-255)
+	$LF
+	"item-two-id         (0-255)
+	$LF
+	"item-two-quantity   (0-255)
+	$LF
+	".
+	$LF
+	".
+	$LF
+	".
+	$LF
+	$LF
 ]pre
+[div class=p 
+	"Let's consider the button measuring program  [37 62 16 37 224 37 240
+	$LF
+	"37 230 15 55] from before. Interpreted as items and item quantities, it is 
+	$LF
+]div
+[pre 
+	"lemonade     x16
+	$LF
+	"guard spec.  x224
+	$LF
+	"leaf stone   x240
+	$LF
+	"guard spec.  x230
+	$LF
+	"parlyz heal  x55
+	$LF
+]pre
+[div class=p 
+	"So, if we can get the right items in the right quantities, we can
+	$LF
+	"spell out a bootstrapping program. Likewise, when writing the
+	$LF
+	"bootstrapping program, we must be careful to only use numbers that are
+	$LF
+	"also valid items and quantities. This is hard because there aren't
+	$LF
+	"many different items to work with, and many machine instructions
+	$LF
+	"actually take 2 or even 3 numbers in a row, which severely restricts
+	$LF
+	"the types of items you can use. I ended up needing about 92 numbers to
+	$LF
+	"implement a bootstrap program. Half of those numbers were elaborate
+	$LF
+	"ways of doing nothing and were just there so that the entire program
+	$LF
+	"was also a valid item list.
+	$LF
+]div
+[div class=p 
+	"The final part of the hack is getting pokemon yellow to execute the
+	$LF
+	"new program after it has been assembled with items. Fortunately,
+	$LF
+	"pokemon keeps a number called a function pointer within easy reach of
+	$LF
+	"the corrupted item list. This function pointer is the starting point
+	$LF
+	"(address) of a program which the game runs every so often to check for
+	$LF
+	"poison and do general maintenance. By shifting an item over this
+	$LF
+	"function pointer, I can rewrite that address to point to the
+	$LF
+	"bootstrapping program, and make the game execute it. Without this
+	$LF
+	"function pointer, it would not be possible to take over the game.
+	$LF
+]div
+[h3 id=Run 
+	" The Run
+	$LF
+]h3
+[h4 id=Pallet 
+	" Pallet
+	$LF
+]h4
+[div class=p 
+	"I start off and name my rival Lp/k. These characters will eventually be
+	$LF
+	"treated as items and shifted over the function pointer, causing it to
+	$LF
+	"execute the bootstrapping program that will soon be constructed. I
+	$LF
+	"start the run the same as p4wn3r's and restart the game while saving,
+	$LF
+	"so that the pokemon list is corrupted. By switching the 8th and 10th
+	$LF
+	"pokemon, I corrupt the item list and can now scroll down past the 20th
+	$LF
+	"item. I shift items around to increase the text speed to maximum and
+	$LF
+	"rewrite the warp point of my house to Celadon Dept. Store. (p4wn3r
+	$LF
+	"used this to go directly to the hall of fame and win the game in his
+	$LF
+	"run.) I deposit many 0x00 glitch items into the PC from my corrupted
+	$LF
+	"inventory for later use. Then, I withdraw the potion from the
+	$LF
+	"PC. This repairs my item list by overflowing the item counter from
+	$LF
+	"0xFF back to 0x00, though the potion is obliterated in the process. I
+	$LF
+	"then take 255 glitch items with ID 0x00 from the computer into my
+	$LF
+	"personal items.
+	$LF
+]div
+[h4 id=CeladonDeptStore 
+	" Celadon Dept. Store
+	$LF
+]h4
+[div class=p 
+	"Leaving my house takes me directly to Celadon Dept. store, where I
+	$LF
+	"sell two 0x00 items for 414925 each, giving myself essentially max
+	$LF
+	"money. I hit every floor of the department store, gathering the
+	$LF
+	"following items:
+	$LF
+]div
+[pre 
+	[code 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"After gathering these items, I deposit them in the appropriate order
+	$LF
+	"into the item PC to spell out my bootstrapping program. Writing a full
+	$LF
+	"bootstrap program in one go using only items turned out to be too
+	$LF
+	"hard, so I split the process up into three parts. The program that I
+	$LF
+	"actually construct using items is very limited. It reads only from the
+	$LF
+	"A, B, start, and select buttons, and writes 4 bits each frame starting
+	$LF
+	"at a fixed point in memory. After it writes 200 or so bytes, it jumps
+	$LF
+	"directly to what it just wrote. In my run, I use this program to write
+	$LF
+	"another bootstrapping program that can write any number of bytes to
+	$LF
+	"any location in memory, and then jump to any location in memory. This
+	$LF
+	"new program can also write 8 bits per frame by using all the
+	$LF
+	"buttons. Using this new bootstrap program, I write a final
+	$LF
+	"bootstrapping program that does everything the previous bootstrapping
+	$LF
+	"program does except it also displays the bytes it is writing to memory
+	$LF
+	"on the screen.
+	$LF
+]div
+[h4 id=Finale 
+	" Finale
+	$LF
+]h4
+[div class=p 
+	"After completing this bootstrapping program, I go to the Celadon
+	$LF
+	"mansion, because I find the metaness of that building to be
+	$LF
+	"sufficiently high to serve as an exit point for the pokemon
+	$LF
+	"universe. I corrupt my item list again by switching corrupted pokemon,
+	$LF
+	"scroll down to my rival's name and discard until it is equal to the
+	$LF
+	"address of my bootstrapping program, and then swap it with the
+	$LF
+	"function pointer. Once the menu is closed, the bootstrapping program
+	$LF
+	"takes over, and I write the payload....
+	$LF
+]div
+[h3 id=OtherComments 
+	" Other comments
+	$LF
+]h3
+[div class=p 
+	"The entire video was played by the computer using bots. I used
+	$LF
+	"functional programming to write search programs over different
+	$LF
+	"possible game states to find the most efficient way of performing
+	$LF
+	"general actions.  Some interesting things I developed but didn't use
+	$LF
+	"were pretty printing functions to display the game's internal data
+	$LF
+	"structures, and an "improbability drive" that forces improbable events
+	$LF
+	"to happen automatically using search.
+	$LF
+]div
+[div class=p 
+	"Here are a few example scripts:
+	$LF
+]div
+[pre 
+	[code class=language-lisp 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[pre 
+	$LF
+]pre
+[div class=p 
+	"This script walks from the Viridian City pokemon store to Oak's
+	$LF
+	"Lab in the most efficient way possible. The walk-thru-grass function
+	$LF
+	"guarantees that no wild battles will happen by manipulating the game's
+	$LF
+	"random number generator.
+	$LF
+]div
+[pre 
+	[code class=language-lisp 
+		$UNPRINTABLE TEXT!!!
+	]code
+]pre
+[div class=p 
+	"This script calculates the fastest sequence of key presses to deposit
+	$LF
+	"the requested items into a PC, assuming that the character starts out
+	$LF
+	"in front of a computer.
+	$LF
+]div
+[h3 id=OtherComments_2 
+	" Other Comments
+	$LF
+]h3
+[div class=p 
+	"The final payload program is multiple programs. I created a reduced
+	$LF
+	"form of MIDI and implemented it in gameboy machine language. Then I
+	$LF
+	"translated a midi file from [dead link removed] into this
+	$LF
+	"reduced MIDI language. The payload program contains both the music
+	$LF
+	"data and the MIDI interpreter to play that data. The picture works in
+	$LF
+	"a similar way. There is code to translate a png file into a form that
+	$LF
+	"can be displayed on a gameboy, and other code to actually display that
+	$LF
+	"image. Both the image and the display code are also written by the
+	$LF
+	"final bootstrapping program.  Even though my final payload is rather
+	$LF
+	"simple, you can write any program at all as the payload. The source
+	$LF
+	"for the sound and image displaying code is at
+	$LF
+	[a href=http://hg.bortreb.com/vba-clojure rel=noopener external nofollow 
+		"http://hg.bortreb.com/vba-clojure
+	]a
+	$LF
+]div
+[div class=p 
+	"This entire project is open source and I encourage anyone who wants to
+	$LF
+	"take the code and play around!
+	$LF
+]div
+[h3 id=SuggestedScreenshots 
+	" Suggested Screenshots
+	$LF
+]h3
+[ul 
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/code.png rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/code.png
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/code2.png rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/code2.png
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/matrix.png rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/matrix.png
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/matrix2.png rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/matrix2.png
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/pinkie-pie.png rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/pinkie-pie.png
+		]a
+		$LF
+	]li
+]ul
+[div class=p 
+	"Or whatever you all think would be best.
+	$LF
+]div
+[div class=p 
+	"I encoded the video with/without button visualization here:
+	$LF
+]div
+[ul 
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/rlm-yellow-hack.avi rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/rlm-yellow-hack.avi
+		]a
+		$LF
+	]li
+	[li 
+		" 
+		[a href=http://aurellem.org/pokemon-hack/rlm-yellow-hack-no-buttons.avi rel=noopener external nofollow 
+			"http://aurellem.org/pokemon-hack/rlm-yellow-hack-no-buttons.avi
+		]a
+		$LF
+	]li
+]ul
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/FractalFusion 
+		"FractalFusion
+	]a
+	": Replaced movie file to fix time (note that the parser works in such a way so that the time listed for a VBM can easily be faked).
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/FractalFusion 
+		"FractalFusion
+	]a
+	": Response is well-received for the new concept. Accepting for publication.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/natt 
+		"natt
+	]a
+	": Processing...
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/FractalFusion 
+		"FractalFusion
+	]a
+	": Changed branch to "Executes Arbitrary Code".
+]div

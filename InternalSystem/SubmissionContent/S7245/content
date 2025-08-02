@@ -1,0 +1,629 @@
+10
+[div class=p 
+	"TLDR; By pressing buttons really fast, we can write and execute our own code and win the game. The code we can write is very limited, but we have more than enough tools at our disposal to make some magic happen.
+	$LF
+]div
+[div class=p 
+	"You can use the comma and period keys to frame advance inside the youtube video, if you want to see it frame by frame.
+	[br 
+	]br
+	$LF
+]div
+[h3 id=Goals 
+	"Goals
+	$LF
+]h3
+[ul 
+	[li 
+		"Complete the game as fast as possible.
+		$LF
+	]li
+	[li 
+		"Load the credits without any visual bugs.
+		$LF
+	]li
+]ul
+[h3 id=AdditionalComments 
+	"Additional Comments
+	$LF
+]h3
+[div class=p 
+	"This run is 28 frames faster than the previous run of 47 frames, and has been 
+	[a href=https://www.youtube.com/watch?v=R2Zzw4ahQVQ rel=noopener external nofollow 
+		"console verified
+	]a
+	" by Bigbass.
+	$LF
+]div
+[div class=p 
+	"The huge time save was achieved by setting up the various requirements without jumping to address $8FE3, which took up the majority of the previous TAS.
+	$LF
+]div
+[div class=p 
+	"I created this run with the SubNesHawk core of Bizhawk 2.6.3, using the Trace Logger to know exactly where the program counter was at the end of each frame.
+	$LF
+]div
+[h3 id=DpcmBug 
+	"The DPCM Bug
+	$LF
+]h3
+[div class=p 
+	"The NES had a hardware issue called the DPCM Bug. You can read more about the bug 
+	[a href=https://wiki.nesdev.org/w/index.php/Controller_reading#DPCM_conflict rel=noopener external nofollow 
+		"here
+	]a
+	", but in summary, a hardware error existed that could drop a single bit when reading the button inputs. 
+	$LF
+]div
+[div class=p 
+	"To work around this bug, the game reads button inputs in a loop until two consecutive inputs are the same. Normally inputs are read twice in a frame, but should the DPCM Bug happen, the inputs would be read 3 times.
+	$LF
+]div
+[div class=p 
+	"To exploit the workaround, we could press different buttons every time the inputs are polled. This would cause the input loop to happen as many times as we want! But “what good does that do us?” you might ask. Let's take a look at how my run exploits this, and the technical details behind it that allow for such a run to exist.
+	$LF
+]div
+[hr 
+]hr
+[h3 id=HowTheRunWorks 
+	"How the run works
+	$LF
+]h3
+[div class=p 
+	"(Heads up, there’s a decent amount of jargon in the rest of the author’s comments. This assumes you’re already familiar with a decent amount of 6502 Assembly) 
+	$LF
+]div
+[div class=p 
+	"The Non Maskable Interrupt (NMI) happens at the start of V-Blank, and the programmable interrupt (IRQ) is set to fire just a few scanlines above that. If we’re still executing code inside the NMI when the IRQ fires, the wrong PRG banks are currently loaded for the IRQ code. Address $101 is used as an “IRQ Mode” to determine which branches to take inside the IRQ code. In this case, the IRQ Mode is 0x20, which expects Bank 0x18 to be loaded in, but the NMI was using bank 0x1A to make some various graphical updates so the IRQ jumps us to the wrong place! This leads to an RTS instruction, except we jumped here using an interrupt, which should use RTI to properly return. Because of this, the wrong bytes are pulled off the stack as a return address, which leads the program counter to address $0001.
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/4IbTpV4.png 
+	]img
+	$LF
+	"This part of RAM is filled with BRK instructions, which jumps to the programmable interrupt code. Every time this happens, since the IRQ Mode is still 0x20, the same problems occur. We enter the code as an interrupt, but exit the code with RTS, sending us back to $0001. This might sound like it’s an infinite loop, but luckily for us, the IRQ Mode is at address $101, which happens to be inside the stack! With each BRK leading to an RTS, the stack pointer is moving downwards 6 bytes. This will eventually reach the IRQ Mode, overwriting it with 0xB4. Now when the programmable interrupt is executed, it properly reaches an RTI instruction, so the stack pointer stops shifting around with every BRK, and we can continue to execute bytes after address $0001.
+	$LF
+]div
+[div class=p 
+	"The NMI continues to happen every frame, and the buttons we press during the NMI are stored at addresses $17, $18, $F5, $F6, $F7, and $F8. Through careful planning, these bytes are all we need to win the game.
+	$LF
+]div
+[h3 id=Limitations 
+	"The limitations
+	$LF
+]h3
+[div class=p 
+	"Every frame we can choose what buttons to hold down on both controllers, and these fill in the bytes listed above in a specific manner. Let's look at addresses $17 and $18 first.
+	$LF
+]div
+[div class=p 
+	"$17 is the total held buttons on controller 1
+	[br 
+	]br
+	$LF
+	"$18 is the newly pressed buttons on controller 1 for this frame.
+	$LF
+]div
+[div class=p 
+	"For instance, suppose I wish to use these addresses to write A9 20. Let’s understand how button presses are used to write these hexadecimal numbers. Each button corresponds to a single binary bit of this number: (Button names have been shortened to a single character. Start is represented by a capital S; Select with a lowercase s)
+	$LF
+]div
+[pre 
+	[br 
+	]br
+	"A: 0x80
+	[br 
+	]br
+	"B: 0x40
+	[br 
+	]br
+	"s: 0x20
+	[br 
+	]br
+	"S: 0x10
+	[br 
+	]br
+	"U: 0x08
+	[br 
+	]br
+	"D: 0x04
+	[br 
+	]br
+	"L: 0x02
+	[br 
+	]br
+	"R: 0x01
+	$LF
+]pre
+[div class=p 
+	"So if I wish to hold down 0xA9, I need 0x80 + 0x20 + 0x08 + 0x01. (A + Select + Up + Right)
+	$LF
+]div
+[div class=p 
+	"To write A9 20, I need to take two frames. For the first frame, I’ll push all the buttons except the ones required for address $18. That will allow me to press the new buttons on the next frame, and write out the full desired operation. So for the first frame, I would only press 0x80 + 0x08 + 0x01. That makes the following:
+	$LF
+]div
+[div class=p 
+	"$17: 89 (Total held)
+	[br 
+	]br
+	$LF
+	"$18: 89 (New buttons)
+	$LF
+]div
+[div class=p 
+	"And by continuing to hold down all of those previous buttons, and pressing 0x20 on the next frame, I can write:
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/el20Jih.png 
+	]img
+	$LF
+	"$17: A9 (Total Held)
+	[br 
+	]br
+	$LF
+	"$18: 20 (New buttons)
+	$LF
+]div
+[div class=p 
+	"You might see the problem already. Suppose I want to write A9 10. It’s not possible to hold down 0xA9 when the newly pressed buttons write 0x10, as that would make the total buttons 0x80 + 0x20 + 0x10 + 0x08 + 0x01 which adds up to 0xB9. 
+	[b 
+		"The bits that compose address $18 are required to fit within the bits composing address $17.
+	]b
+	$LF
+]div
+[div class=p 
+	"Now let’s say I want to write BD BD 00. Since the third byte is 00 I don’t need to change that byte, so this could be written with just the two addresses, right? Well, let’s see. To write this, I need to press A, Select, Start, Up, Down, and Right. 
+	[b 
+		"Super Mario Bros. 3 masks away Up + Down, as well as Left + Right
+	]b
+	", so the result would actually be 0xB1, as the Up and Down presses get removed. This limits what bytes we can create, as 
+	[b 
+		"any bytes ending in 3, 7, B, C, D, E, or F are impossible to write with button presses.
+	]b
+	$LF
+]div
+[div class=p 
+	"Moving on to addresses $F5 through $F8
+	$LF
+]div
+[div class=p 
+	"$F5: New buttons pressed for controller 1
+	[br 
+	]br
+	$LF
+	"$F6: New buttons pressed for controller 2
+	[br 
+	]br
+	$LF
+	"$F7: Total held buttons for controller 1
+	[br 
+	]br
+	$LF
+	"$F8: Total held buttons for controller 2
+	$LF
+]div
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/jIxnncN.png 
+	]img
+	$LF
+	"Just like the previous addresses, the bits that compose $F5 need to be contained within the bits composing $F7. The same applies for $F6 and $F8. This allows us to write much more than what can be written with addresses $17 and $18, though it too has its restrictions. Suppose I want to write 0A 20 5A B8. Like before, this takes two frames.
+	$LF
+]div
+[div class=p 
+	"Frame 1:
+	[br 
+	]br
+	$LF
+	"$F5: 50 (New 1)
+	[br 
+	]br
+	$LF
+	"$F6: 98 (New 2)
+	[br 
+	]br
+	$LF
+	"$F7: 50 (Total 1)
+	[br 
+	]br
+	$LF
+	"$F8: 98 (Total 2)
+	$LF
+]div
+[div class=p 
+	"Frame 2:
+	[br 
+	]br
+	$LF
+	"$F5: 0A (New 1)
+	[br 
+	]br
+	$LF
+	"$F6: 20 (New 2)
+	[br 
+	]br
+	$LF
+	"$F7: 5A (Total 1)
+	[br 
+	]br
+	$LF
+	"$F8: B8 (Total 2)
+	$LF
+]div
+[div class=p 
+	"However, suppose I want to write A2 20 86 F9. This cannot be done, as A2 contains bits that 86 does not, when both need to be written with controller 1.
+	$LF
+]div
+[h3 id=WinCondition 
+	"The win condition
+	$LF
+]h3
+[div class=p 
+	"The goal is to reach the princess cutscene and then the credits. Jumping to the princess cutscene is surprisingly easy, though the credits are where the issues come in. Like the IRQ, the NMI has a byte that determines which branches the code should take. If the NMI Mode isn’t set to 0x20, the credits fail to load properly, resulting in a black screen. This has been demonstrated by Masterjun, 
+	[a class=intlink href=/Userfiles/Info/52430841117850526 
+		"who was able to load the princess cutscene in 13 frames
+	]a
+	". That run doesn’t meet the win condition unfortunately, as the credits fail to load.
+	$LF
+]div
+[div class=p 
+	"In order to win the game with the proper credits sequence, we need to meet 6 requirements.
+	$LF
+]div
+[ol 
+	[li 
+		"The $C000 bank needs to be 0x19
+		$LF
+	]li
+	[li 
+		"The $A000 bank needs to be 0x18
+		$LF
+	]li
+	[li 
+		"The PPU Control Register Copy (Address 0xFF) must be 0xA8
+		$LF
+	]li
+	[li 
+		"The Stack Pointer must be greater than 0x30
+		$LF
+	]li
+	[li 
+		"The NMI Mode (Address $100) must be 0x20
+		$LF
+	]li
+	[li 
+		"Jump to $B85A
+		$LF
+	]li
+]ol
+[div class=p 
+	"It’s worth mentioning that by the first frame we gain control, the first 3 requirements are met and will remain that way so long as we don’t change the PRG banks or affect the PPU Control Register. Let’s focus on the other 3 requirements. After the first frame with inputs, the stack pointer is at 0x03, and the NMI mode is 0xB4. As Masterjun and ais523 pointed out in their submission, there exists a location in ROM that sets requirements 5 and 6 for us! Address $8FE3, which is where the game prepares the princess cutscene under normal gameplay.
+	$LF
+]div
+[div class=p 
+	"This leaves us with two options:
+	$LF
+]div
+[ol 
+	[li 
+		"Correct the stack pointer and jump to $8FE3
+		$LF
+	]li
+	[li 
+		"Correct the stack pointer and set up requirements 5 and 6 manually.
+		$LF
+	]li
+]ol
+[div class=p 
+	"While it may be trivial to jump to $B85A, jumping to $8FE3 is complicated. Let’s take a look at why we can’t simply jump to $8FE3.
+	$LF
+]div
+[div class=p 
+	"Recall from the limitations, the game will mask away conflicting left + right, or up + down inputs. To write JSR $8FE3, we need to be holding down 0x8F on one controller, and 0xE3 on another. 0x8F requires holding down all direction buttons, and 0xE3 requires left + right. We could substitute 0xE3 for 0xE1, as $8FE1 would read the same code (only if the zero flag is not set), which fulfills requirement 5 and 6, but that still leaves us with the problem of 0x8F. On top of that, we need to consider the opcode, JSR, which if written using the new inputs would conflict with 0x8F, as holding down 0x20 would change the value to 0xAF. Comparing that with the much easier $B85A, with no conflicting inputs, it might take more time setting up a jump to $8FE3 than it would to meet the requirements ourselves.
+	$LF
+]div
+[h3 id=Problems 
+	"The problems
+	$LF
+]h3
+[ol 
+	[li 
+		"We need to be able to run through the button inputs in RAM more than once, so we’re going to need to write a jump to $0000. That would take up one of the bytes we could use from $F5 through $F8.
+		$LF
+	]li
+	[li 
+		"Address $16 holds a value of 0x1E, which is a 3 byte opcode. Executing that address will skip right over $17 and $18, so our button presses won't be usable.
+		$LF
+	]li
+	[li 
+		"Most of the space here is filled with 0x00, which writes BRK, a 2 byte long opcode. That makes us execute on either even or odd addresses. When executing around $16, we need to make sure we’re executing odd addresses to avoid skipping our button presses. This also assumes $15 is a 2 byte opcode. We don’t need to worry about that for our button presses at $F5, as the 0xFF opcode sitting at address $F0 will always align us with odd bytes.
+		$LF
+	]li
+	[li 
+		"Addresses $10 and $15 are both used as timers, and change every frame. $10 counts down, while $15 counts up. Different values create opcodes of varying lengths, which could offset our code. On top of that, some opcodes crash the NES, so we need to avoid executing these addresses when they hold a problematic value.
+		$LF
+	]li
+	[li 
+		"We’re unable to control the A register. Multiple bytes that execute between our stored button inputs can change A in unhelpful ways, or simply in a manner we can’t manipulate.
+		$LF
+	]li
+	[li 
+		"We’re unable to control the Y register. Addresses $8D and $8E both hold 0xA0, which corresponds to LDY Immediate. This will guarantee that between the bytes we can control at address $18 and $F5, the Y register will get reset to either 0xA0 or 0x00.
+		$LF
+	]li
+	[li 
+		"We still have to work with the limitations, which prevents us from writing any 3 byte long opcodes with our button presses. 
+		$LF
+	]li
+	[li 
+		"Any instructions that work on the zero page with offsets, such as STA $FF,X, are truncated to always remain within the zero page, so we can’t simply store our desired value into $100 by offsetting it past address $FF.
+		$LF
+	]li
+]ol
+[h3 id=Solutions 
+	"The solutions
+	$LF
+]h3
+[div class=p 
+	"We may not be able to use the A or Y registers, but we have full control over X. We could load 0x20 into X and store it to create a jump to $0000, so we no longer need to worry about the jump every time we reach $F5.
+	$LF
+]div
+[div class=p 
+	"If we’re about to execute $15 when it’s going to crash the NES, we could simply stall inside the input loop for so long that we don’t execute address $15 until the following frame, where it will hold a different value.
+	$LF
+]div
+[div class=p 
+	"Problem 2 wasn’t relevant due to the short length of the run, as address $15 only ever created 2 byte long instructions when I needed to use the button presses on $17 and $18.
+	$LF
+]div
+[div class=p 
+	"I can utilize the stack to push 0x20 into $100 instead of writing there directly.
+	$LF
+]div
+[h3 id=Execution 
+	"The execution
+	$LF
+]h3
+[div class=p 
+	"Instead of jumping to $8FE3 to fix the NMI mode, I simply push the number 0x20 on the stack when the stack pointer is in the right place. I can also adjust the stack pointer by executing JSR, or PHA, so I can easily manipulate the stack pointer to line this up right.
+	$LF
+]div
+[table 
+	[tbody 
+		[tr 
+			[th 
+				"Bytes 
+			]th
+			[th 
+				"Instruction 
+			]th
+			[th 
+				"Description
+			]th
+		]tr
+		[tr 
+			[td 
+				"A2 20           
+			]td
+			[td 
+				" LDX #20 
+			]td
+			[td 
+				" X now holds a value of 0x20, which is used to write JSR
+			]td
+		]tr
+		[tr 
+			[td 
+				"(06 10) 86 F9 
+			]td
+			[td 
+				" (ASL $10) STX $F9 
+			]td
+			[td 
+				" This stores 0x20 right after the button presses at address $F9. When executed, this will bring the program counter back to $0000, while also pushing two bytes on the stack. The stack pointer is now 0x01.
+			]td
+		]tr
+		[tr 
+			[td 
+				"(0A) 48 8A 48 
+			]td
+			[td 
+				" (ASL A) PHA TXA PHA 
+			]td
+			[td 
+				" This pushes 2 bytes to the stack. First it pushes 0x00 at $101, transfers X (0x20) to A, and then pushes 0x20 at $100, which completes requirements 4 and 5, as the stack pointer is now 0xFF. The JSR back to $0000 happens again, pushing the stack pointer to 0xFD.
+			]td
+		]tr
+		[tr 
+			[td 
+				"20 5A B8 
+			]td
+			[td 
+				" JSR $B85A 
+			]td
+			[td 
+				" This jumps to the credits, completing requirement 6 and winning the game.
+			]td
+		]tr
+	]tbody
+]table
+[div class=p 
+	[img class=embedright mw-100 src=https://i.imgur.com/9bPX47f.png 
+	]img
+	$LF
+	"To reiterate, when I’m “stalling” inside the input loop, I’m switching between pressing the A button and no inputs between every instance where the controllers are polled.
+	$LF
+]div
+[div class=p 
+	"The first frame of input is spent stalling inside the NMI, and can’t be used to set controller 1’s button presses.
+	$LF
+]div
+[div class=p 
+	"A frame by frame explanation is as follows:
+	$LF
+]div
+[ul 
+	[li 
+		"The game takes 10 frames to set up the title screen.
+		$LF
+	]li
+]ul
+[ol 
+	[li 
+		"Stall inside the NMI until the IRQ fires
+		$LF
+	]li
+	[li 
+		"Stall to write the first half of LDX 0x20
+		$LF
+	]li
+	[li 
+		"Stall to avoid a game crash at address $15
+		$LF
+	]li
+	[li 
+		"LDX 0x20
+		$LF
+	]li
+	[li 
+		"STX $F9
+		$LF
+	]li
+	[li 
+		"Stall to write the first half of the next frame.
+		$LF
+	]li
+	[li 
+		"PHA TXA PHA
+		$LF
+	]li
+	[li 
+		"Stall to write the first half of the next frame.
+		$LF
+	]li
+	[li 
+		"JSR $B85A to win the game.
+		$LF
+	]li
+]ol
+[h3 id=SpecialThanksTo 
+	"Special thanks to
+	$LF
+]h3
+[ul 
+	[li 
+		"Bigbass, who 
+		[a href=https://www.youtube.com/watch?v=R2Zzw4ahQVQ rel=noopener external nofollow 
+			"verified the run on console.
+		]a
+		" 
+		$LF
+	]li
+	[li 
+		"DwangoAC, who helped out with any TASVideos related questions I had.
+		$LF
+	]li
+	[li 
+		"Masterjun and ais523, who created the 
+		(__wikiLink|displaytext=TAS in 00:00:00.78|href=/6466S)
+		", which was an incredibly useful resource for learning about runs utilizing the SubNesHawk core.
+		$LF
+	]li
+	[li 
+		"My friend Tony, who listened to my ramblings in a discord call for several hours over multiple days as I pieced this run together.
+		$LF
+	]li
+]ul
+[h3 id=SuggestedScreenshot 
+	"Suggested Screenshot
+	$LF
+]h3
+[div class=p 
+	[img class=embed mw-100 src=https://i.imgur.com/UjF7vtU.png 
+	]img
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": File replaced, fixing the VBlankCount to provide an accurate time. Oh, and judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/feos 
+		"feos
+	]a
+	": Fixed game hashsum in the movie.
+	$LF
+]div
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": I'm stunned at the fact that you were able to improve the published run 
+	[em 
+		"at all
+	]em
+	", let alone by 
+	[em 
+		"this much
+	]em
+	" from where it already was. This is the absolute pinnacle of technical TASing in my mind, the idea of having so much power over a single game that it's over literally before your hand even moves from the NES's power button. The current publication was more than 
+	[em 
+		"halved
+	]em
+	". We've gone from "less than one second" to "less than a third of a second", now. According to a quick Google search, a human blink can last up to 400 milliseconds, meaning you have quite literally beaten Super Mario Bros. 3 in the blink of an eye. Someone can literally blink and miss all of the input in this TAS. There is a 5.263% chance that someone could guess my favorite frame in this run on their first try. This isn't just breaking the limit of what's possible with TASing, this is 
+	[em 
+		"breaking
+	]em
+	" breaking the limit... 
+	[em 
+		"And
+	]em
+	" you did this with your very first submission to the site, too (please please please let it be the first of many). I could come up with more ridiculous statistics, but I don't want to match the 
+	(__wikiLink|displaytext=previous submission's|href=/6466S)
+	" judgement length. Excellent, excellent, excellent work!
+	$LF
+]div
+[div class=p 
+	"On that note... I apologize for taking away from the submission by doing this, but I'd like to briefly address the previous judgement in order to clear something up. I'm admittedly not a very technical Judge - hell, whenever someone asks me about ASM, I give them a blank stare before responding with "31/f/cali" - but even if I was, I'd still think the previous submission's judgement was unnecessarily long and complicated. I'd like to think the audience reading these judgements is the same way, ideally down to also being 31/f/cali, 
+	[em 
+		"ladies.
+	]em
+	" It uses over 20000 characters to come to the conclusion that DPCM glitch TASes are only barely acceptable, and what I want to clear up is that 
+	[em 
+		"barely
+	]em
+	" is not the case. They are 
+	[em 
+		"completely
+	]em
+	" acceptable. I don't want the previous judgement to make TASers afraid of submitting DPCM glitch runs for fear of breaking some arcane rule etched in stone by a wizard. These runs are no different than any other "game end glitch". They'll be processed normally and fairly as they come in, and they're definitely something TASvideos wants to see more of.
+	$LF
+]div
+[div class=p 
+	"With all that said, I'm happily accepting this technical masterpiece as an improvement to the 
+	(__wikiLink|displaytext=published run|href=/4032M)
+	"!
+	$LF
+]div
+[div class=p 
+	"Reminder to Publishers: This run has been 
+	[a href=https://www.youtube.com/watch?v=R2Zzw4ahQVQ rel=noopener external nofollow 
+		"console verified
+	]a
+	". Don't forget to flag it!
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Imagine if they go 25/any/vic and all I can say to that is Publishing.
+]div

@@ -1,0 +1,237 @@
+13
+[div class=p 
+	"See 
+	(__wikiLink|href=/7090S|implicitdisplaytext=7090S)
+	" for the branch name change; this movie, while doing save corruption, ultimately just does a game end glitch, so I'm marking the branch as such.
+	$LF
+]div
+[h4 id=EmulatorUsedBizhawk252 
+	" Emulator used: Bizhawk 2.5.2
+	$LF
+]h4
+[ul 
+	[li 
+		" SubGBHawk is used due to the use of a sub-frame reset.
+		$LF
+	]li
+	[li 
+		" CGB in GBA is enabled for potential console verification which I mean no chance in heck this thing is getting console verified anyways lmao.
+		$LF
+	]li
+]ul
+[h4 id=Categories 
+	" Categories
+	$LF
+]h4
+[ul 
+	[li 
+		"Corrupts save data
+		$LF
+	]li
+	[li 
+		"Executes arbitrary code
+		$LF
+	]li
+	[li 
+		"No luck manipulation (lmao)
+		$LF
+	]li
+]ul
+[h3 id=AboutTheRun 
+	" About the run
+	$LF
+]h3
+[h4 id=VersionChoice 
+	" Version Choice
+	$LF
+]h4
+[div class=p 
+	"Gold is used over Silver due to better default names.
+	$LF
+]div
+[h4 id=Route 
+	" Route
+	$LF
+]h4
+[ul 
+	[li 
+		"Save data is cleared this time due to the ACE payload requiring cleared save data.
+		$LF
+	]li
+	[li 
+		"A default name (GOLD) is chosen as the name doesn't appear enough to warrant a custom name.
+		$LF
+	]li
+	[li 
+		"Cyndaquil's Berry is taken off, then the game is saved.
+		$LF
+	]li
+	[li 
+		"The Berry is tossed, then a checksum collision is done to save the 0 items count while keeping the berry in my pack.
+		$LF
+	]li
+	[li 
+		"The Berry is tossed again, but this time since there was "0 items" in the pack, the item pocket underflows to 255 items.
+		$LF
+	]li
+	[li 
+		"Items are created in the Balls pocket to setup ACE.
+		$LF
+		[ul 
+			[li 
+				"Mail is created first to create a payload. The payload is largely identical to the previous submission's, just accounting for it using Mail instead of box names, along with storing a bootstrap to jump from the mail buffer to the actual mail data in SRAM.
+				$LF
+			]li
+			[li 
+				"TM22 is created, then swapped down to slot 0x25, then 0xE9 is put into the tossed buffer by faking a toss, then TM22 is used. This executes a small bootstrap, which jumps to the actual bootstrap in the mail buffer, which unlocks SRAM then jumps to a little before the Mail data in SRAM. Note this SRAM area jumped to is never initialized by the game, so it will be filled with 0xFF (crashes) unless save data is explicitly cleared as was done in the beginning of the movie.
+				$LF
+			]li
+		]ul
+	]li
+	[li 
+		"Auto-input takes over once the payload is finished, then Red is "defeated".
+		$LF
+	]li
+]ul
+[h4 id=BootstrapPayload 
+	" Bootstrap & Payload
+	$LF
+]h4
+[div class=p 
+	"Here is a tracelog of the relevant parts of the bootstrap and payload:
+	$LF
+]div
+[pre 
+	"D002:  D5        push de                 AF:0200 BC:0007 DE:CF70 HL:D002 SP:DFC9 ; TM22 jumps here
+	$LF
+	"D003:  25        dec h                   AF:0200 BC:0007 DE:CF70 HL:D002 SP:DFC7 ; D003 holds the current item slot, this is why TM22 is swapped
+	$LF
+	"D004:  9B        sbc a, e                AF:0260 BC:0007 DE:CF70 HL:CF02 SP:DFC7 ; D004 holds the last Pokemon species interacted with (Cyndaquil)
+	$LF
+	"D009:  E9        jp hl                   AF:9250 BC:0007 DE:CF70 HL:CF02 SP:DFC7 ; D009 holds the tossed item buffer, this is why a fake toss is done
+	$LF
+	"CF02:  D6 88     sub a, $88              AF:9250 BC:0007 DE:CF70 HL:CF02 SP:DFC7 ; CF02 is in the middle of the mail buffer, a bit after the actual payload
+	$LF
+	"CF04:  F5        push af                 AF:0A60 BC:0007 DE:CF70 HL:CF02 SP:DFC7
+	$LF
+	"CF05:  F5        push af                 AF:0A60 BC:0007 DE:CF70 HL:CF02 SP:DFC5
+	$LF
+	"CF06:  E1        pop hl                  AF:0A60 BC:0007 DE:CF70 HL:CF02 SP:DFC3 ; address $0000-$1FFF needs to be written to to unlock SRAM
+	$LF
+	"CF07:  D1        pop de                  AF:0A60 BC:0007 DE:CF70 HL:0A60 SP:DFC5 ; value $xA needs to be written to unlock SRAM 
+	$LF
+	"CF08:  72        ld [hl], d              AF:0A60 BC:0007 DE:0A60 HL:0A60 SP:DFC7 ; unlock SRAM
+	$LF
+	"CF09:  D2 FB A5  jp nc, $A5FB            AF:0A60 BC:0007 DE:0A60 HL:0A60 SP:DFC7 ; jump a little before Mail data in SRAM, also where Joypad->Opcode byte is written
+	$LF
+	"A5FB:  27        daa                     AF:0A00 BC:0007 DE:2D00 HL:0A60 SP:DFC7
+	$LF
+	"A5FB:  BD        cp a, l                 AF:1000 BC:0007 DE:9000 HL:0A60 SP:DFC7
+	$LF
+	"A5FB:  62        ld h, d                 AF:1000 BC:0007 DE:F200 HL:0A60 SP:DFC7
+	$LF
+	"A5FB:  6F        ld l, a                 AF:1000 BC:0007 DE:9D00 HL:F260 SP:DFC7
+	$LF
+	"A5FB:  3D        dec a                   AF:1000 BC:0007 DE:A000 HL:F210 SP:DFC7
+	$LF
+	"A5FB:  32        ld [hl-], a             AF:0F00 BC:0007 DE:9200 HL:F210 SP:DFC7 ; wPlayerLastMapY = $0F
+	$LF
+	"A5FB:  7E        ld a, [hl]              AF:0F00 BC:0007 DE:EC00 HL:F20F SP:DFC7
+	$LF
+	"A5FB:  25        dec h                   AF:0900 BC:0007 DE:C900 HL:F20F SP:DFC7
+	$LF
+	"A5FB:  6A        ld l, d                 AF:0900 BC:0007 DE:A300 HL:F10F SP:DFC7
+	$LF
+	"A5FB:  19        add hl, de              AF:0900 BC:0007 DE:BA00 HL:F1A3 SP:DFC7
+	$LF
+	"A5FB:  62        ld h, d                 AF:0900 BC:0007 DE:D800 HL:ABA3 SP:DFC7
+	$LF
+	"A5FB:  22        ld [hl+], a             AF:0900 BC:0007 DE:FA00 HL:D8A3 SP:DFC7 ; EVENT_RED_IN_MT_SILVER = clear bit 2
+	$LF
+	"A5FB:  66        ld h, [hl]              AF:0900 BC:0007 DE:9C00 HL:D8A4 SP:DFC7
+	$LF
+	"A5FB:  50        ld d, b                 AF:0900 BC:0007 DE:CC00 HL:F0A4 SP:DFC7
+	$LF
+	"A5FB:  CC 00 00  call z, $0000           AF:0900 BC:0007 DE:CC00 HL:F0A4 SP:DFC7
+	$LF
+	"A5FB:  6A        ld l, d                 AF:0900 BC:0007 DE:A600 HL:F0A4 SP:DFC7
+	$LF
+	"A5FB:  22        ld 
+	"[hl+]
+	", a             AF:0900 BC:0007 DE:8400 HL:F0A6 SP:DFC7 ; wSouthConnectionStripYOffset = $09
+	$LF
+	"A5FB:  1F        rra                     AF:0900 BC:0007 DE:9B00 HL:F0A7 SP:DFC7
+	$LF
+	"A5FB:  77        ld [hl], a              AF:0400 BC:0007 DE:EC00 HL:F0A7 SP:DFC7 ; wSouthConnectionStripXOffset = $04
+	$LF
+	"A5FB:  18 00     jr $A5FD                AF:0400 BC:0007 DE:F400 HL:F0A7 SP:DFC7
+	$LF
+	"A5FB:  6A        ld l, d                 AF:0400 BC:0007 DE:9E00 HL:F0A7 SP:DFC7
+	$LF
+	"A5FB:  3D        dec a                   AF:0400 BC:0007 DE:A300 HL:F09E SP:DFC7
+	$LF
+	"A5FB:  22        ld [hl+], a             AF:0300 BC:0007 DE:8100 HL:F09E SP:DFC7 ; wSouthConnectedMapGroup = $03
+	$LF
+	"A5FB:  BF        cp a, a                 AF:0300 BC:0007 DE:3E00 HL:F09F SP:DFC7
+	$LF
+	"A5FB:  7A        ld a, d                 AF:0300 BC:0007 DE:4400 HL:F09F SP:DFC7
+	$LF
+	"A5FB:  77        ld [hl], a              AF:4400 BC:0007 DE:3300 HL:F09F SP:DFC7 ; wSouthConnectedMapNumber = $44
+	$LF
+	"A5FB:  29        add hl, hl              AF:4400 BC:0007 DE:1A00 HL:F09F SP:DFC7
+	$LF
+	"A5FB:  44        ld b, h                 AF:4400 BC:0007 DE:5E00 HL:E13E SP:DFC7
+	$LF
+	"A5FB:  0F        rrca                    AF:4400 BC:E107 DE:5100 HL:E13E SP:DFC7
+	$LF
+	"A5FB:  F8 00     ld hl, sp + $00         AF:2200 BC:E107 DE:A900 HL:E13E SP:DFC7
+	$LF
+	"A5FB:  60        ld h, b                 AF:2200 BC:E107 DE:C900 HL:DFC7 SP:DFC7
+	$LF
+	"A5FB:  2D        dec l                   AF:2200 BC:E107 DE:E400 HL:E1C7 SP:DFC7
+	$LF
+	"A5FB:  35        dec [hl]                AF:2200 BC:E107 DE:D100 HL:E1C6 SP:DFC7 ; wInputType = $FF
+	$LF
+	"A5FB:  49        ld c, c                 AF:2200 BC:E107 DE:9800 HL:E1C6 SP:DFC7
+	$LF
+	"A5FB:  62        ld h, d                 AF:2200 BC:E107 DE:FA00 HL:E1C6 SP:DFC7
+	$LF
+	"A5FB:  6F        ld l, a                 AF:2200 BC:E107 DE:9500 HL:FAC6 SP:DFC7
+	$LF
+	"A5FB:  35        dec [hl]                AF:2200 BC:E107 DE:A000 HL:FA22 SP:DFC7 ; wPartyCount = $00
+	$LF
+	"A5FB:  F8 00     ld hl, sp + $00         AF:2200 BC:E107 DE:5800 HL:FA22 SP:DFC7
+	$LF
+	"A5FB:  68        ld l, b                 AF:2200 BC:E107 DE:3000 HL:DFC7 SP:DFC7
+	$LF
+	"A5FB:  F9        ld sp, hl               AF:2200 BC:E107 DE:C900 HL:DFE1 SP:DFC7 ; SP = $DFE1 (return to overworld)
+	$LF
+	"A5FB:  C9        ret                     AF:2200 BC:E107 DE:0080 HL:DFE1 SP:DFE1
+	$LF
+]pre
+[hr 
+]hr
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": File replaced with a 13 second improvement on Gold, and judging.
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Samsara 
+		"Samsara
+	]a
+	": The palindrome of Gen2 glitched is finally complete. Gold is obsoleted by Silver is obsoleted by Crystal is obsoleted by Crystal is obsoleted by 
+	(__wikiLink|displaytext=Silver|href=/4326M)
+	" and is now obsoleted by Gold once more. I do hope that future TASes will continue to uphold this tradition. Accepting as an improvement to the 
+	(__wikiLink|displaytext=published run|href=/4326M)
+	".
+	$LF
+]div
+[div class=p 
+	[a class=intlink href=/Users/Profile/Spikestuff 
+		"Spikestuff
+	]a
+	": Agumon is my favourite Pokémon.
+]div
